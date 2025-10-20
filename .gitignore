@@ -1,0 +1,207 @@
+# Django
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+*.mo
+*.pot
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+uploads/
+instance/
+.webassets-cache
+.scrapy
+.DS_Store
+docs/_build/
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
+.ipynb_checkpoints
+*.orig
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Next.js
+.next/
+out/
+.next/*
+.next/**
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Testing
+/coverage
+/.nyc_output
+
+# Production
+/build
+/.next/static/chunks/*.js.nft.json
+/.next/static/*/*.nft.json
+/.next/cache/next-babel-loader/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.env.production
+.env.development
+.env.test
+
+# vercel
+.vercel
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# PyCharm
+.idea/
+
+# Virtual environment
+myenv/
+env/
+venv/
+
+# Build artifacts
+staticfiles/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Pyenv
+.python-version
+
+# Celery
+celerybeat-schedule.*
+
+# Email
+email/
+
+# SASS
+.sass-cache/
+
+# Environments
+.env/
+.venv/
+
+# Mac
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+[Tt]humbs.db
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+#Plans
+todo.md
+DEVELOPMENT_PLAN.md
+# Linux
+*~
+.directory
+.Trash-*
+.nano
+.next
+./frontend/node_modules/@next/swc-darwin-x64/next-swc.darwin-x64.node
+./frontend/.next/cache/webpack/client-production/index.pack
+./frontend/.next/cache/webpack/client-production/index.pack.old
+./frontend/.next/cache/webpack/client-production/0.pack
+./frontend/.next/cache/webpack/client-development/15.pack.gz
+./frontend/.next/cache/webpack/client-development/19.pack.gz
+./frontend/.next/cache/webpack/client-development/11.pack.gz
+./frontend/.next/cache/webpack/client-development/18.pack.gz
+./frontend/.next/cache/webpack/client-development/0.pack.gz
+./frontend/.next/cache/webpack/client-development/13.pack.gz
+./frontend/.next/cache/webpack/client-development/8.pack.gz
+./frontend/.next/cache/webpack/client-development-fallback/0.pack.gz
+./frontend/.next/cache/webpack/server-production/0.pack
+./frontend/public/landing_main_oko_znanii.svg
+./venv/lib/python3.12/site-packages/cryptography/hazmat/bindings/_rust.abi3.so

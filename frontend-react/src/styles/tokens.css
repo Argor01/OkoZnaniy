@@ -1,0 +1,35 @@
+:root {
+  /* Brand colors */
+  --color-brand-blue-500: #2c98f0;
+  --color-brand-blue-600: #238ce2;
+  --color-brand-blue-700: #0f7fda;
+  --color-brand-blue-200: #a5d5fc;
+  --color-brand-blue-100: #d6ecfe;
+  --color-brand-purple-500: #9b4aff;
+  --color-brand-purple-700: #431b73;
+  --color-brand-orange-500: #ffb34a;
+  --color-brand-orange-600: #ffa831;
+  --color-brand-orange-400: #ffc87d;
+
+  /* Greys */
+  --color-grey-900: #181d42;
+  --color-grey-800: #151b32;
+  --color-grey-700: #282828;
+  --color-grey-600: #464646;
+  --color-grey-300: #ededed;
+  --color-grey-100: #edf7ff;
+
+  /* Typography */
+  --font-family-sans: 'Jost', sans-serif;
+  --font-family-display: 'Alegreya', sans-serif;
+
+  /* Radii */
+  --radius-xl: 64px;
+  --radius-lg: 20px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+}
+

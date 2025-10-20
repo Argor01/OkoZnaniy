@@ -1,0 +1,27 @@
+Здравствуйте, {{ user.get_full_name }}!
+
+У нас есть отличные новости - для вас доступны следующие скидки:
+
+{% for discount in discounts %}
+{{ discount.name }}
+{{ discount.get_discount_display }}
+{{ discount.description }}
+
+{% if discount.valid_until %}Действует до: {{ discount.valid_until|date:"d.m.Y" }}{% endif %}
+
+{% if discount.work_types.exists %}
+Применяется к работам:
+{% for work_type in discount.work_types.all %}
+- {{ work_type.name }}
+{% endfor %}
+{% else %}
+Применяется ко всем типам работ
+{% endif %}
+
+{% endfor %}
+
+Чтобы сделать заказ, перейдите по ссылке: {{ site_url }}
+
+--
+Это автоматическое уведомление. Пожалуйста, не отвечайте на него.
+Если вы хотите отписаться от уведомлений о скидках, перейдите в настройки вашего профиля. 

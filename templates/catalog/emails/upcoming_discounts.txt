@@ -1,0 +1,23 @@
+Здравствуйте, {{ user.get_full_name }}!
+
+Вы почти достигли условий для получения следующих скидок:
+
+{% for item in upcoming_discounts %}
+{{ item.discount.name }}
+{{ item.discount.get_discount_display }}
+
+До получения скидки осталось:
+{% if item.orders_remaining > 0 %}
+- {{ item.orders_remaining }} заказ(ов)
+{% endif %}
+{% if item.spent_remaining > 0 %}
+- {{ item.spent_remaining }} ₽
+{% endif %}
+
+{% if item.discount.valid_until %}Успейте до: {{ item.discount.valid_until|date:"d.m.Y" }}{% endif %}
+
+{% endfor %}
+
+--
+Это автоматическое уведомление. Пожалуйста, не отвечайте на него.
+Если вы хотите отписаться от уведомлений о скидках, перейдите в настройки вашего профиля. 
