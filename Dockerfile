@@ -25,5 +25,5 @@ ENV DJANGO_SETTINGS_MODULE=config.settings.production
 # Порт
 EXPOSE 8000
 
-# Запуск приложения
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Запуск миграций и приложения
+CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8000

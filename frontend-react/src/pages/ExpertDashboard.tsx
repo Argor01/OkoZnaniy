@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, List, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber } from 'antd';
-import { UploadOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Card, List, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Alert } from 'antd';
+import { UploadOutlined, UserOutlined, WarningOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
 import { useNavigate } from 'react-router-dom';
@@ -102,11 +102,28 @@ const ExpertDashboard: React.FC = () => {
 
   const orders: Order[] = data || [];
 
+  // Проверка статуса анкеты
+  const hasApplied = userProfile?.has_submitted_application;
+  const isApproved = userProfile?.application_approved;
+
   return (
     <div style={{ maxWidth: 900, margin: '24px auto' }}>
+      {/* Предупреждение, если анкета не одобрена */}
+      {hasApplied && !isApproved && (
+        <Alert
+          message="Ваша анкета на рассмотрении"
+          description="Мы рассматриваем вашу анкету. Как только она будет одобрена, вы сможете начать работу."
+          type="warning"
+          showIcon
+          icon={<WarningOutlined />}
+          style={{ marginBottom: 24 }}
+        />
+      )}
+
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={2} style={{ margin: 0 }}>Кабинет эксперта</Title>
         <Space>
+          <Button onClick={() => navigate('/expert-application')}>Анкета</Button>
           <Button onClick={() => setProfileModalVisible(true)}>Редактировать профиль</Button>
           <Button onClick={() => navigate(-1)}>Назад</Button>
           <Button

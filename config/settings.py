@@ -100,19 +100,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = "config.asgi.application"
 
-# Channels
+# Redis URL из переменных окружения
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
+
+# Channels - парсим URL для правильного формата hosts
+redis_url_parts = REDIS_URL.replace('redis://', '').split('/')[0].split(':')
+redis_host_tuple = (redis_url_parts[0], int(redis_url_parts[1]) if len(redis_url_parts) > 1 else 6379)
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
+        "CONFIG": {"hosts": [redis_host_tuple]},
     },
 }
 
 # Настройки кэширования
+redis_base_url = REDIS_URL.split('/')[0]
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': f'{redis_base_url}/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
@@ -132,25 +139,28 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
 # Настройки Redis для Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = REDIS_URL
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 # Database (пример для PostgreSQL через dj-database-url)
-# DATABASE_URL = os.getenv('DATABASE_URL')
-# DATABASES = {
-#     'default': dj_database_url.config(),
-# }
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 AUTH_USER_MODEL = "users.User"
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Используем PostgreSQL если указан DATABASE_URL, иначе SQLite для локальной разработки
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config()
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -261,7 +271,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 # Celery Configuration
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

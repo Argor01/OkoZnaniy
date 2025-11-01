@@ -48,6 +48,8 @@ const Login: React.FC = () => {
       const auth = await authApi.login(values);
       message.success('Успешный вход!');
       const role = auth?.user?.role;
+      const user = auth?.user;
+      
       if (role === 'client') {
         await redirectClient();
       } else if (role === 'expert') {
@@ -95,10 +97,12 @@ const Login: React.FC = () => {
         const auth = await authApi.login(loginData);
         message.success('Добро пожаловать!');
         const role = auth?.user?.role;
+        const user = auth?.user;
         if (role === 'client') {
           await redirectClient();
         } else if (role === 'expert') {
-          navigate('/expert');
+          // При регистрации эксперт сразу отправляется на заполнение анкеты
+          navigate('/expert-application');
         } else if (role === 'partner') {
           navigate('/partner');
         } else {
@@ -241,16 +245,58 @@ const Login: React.FC = () => {
 
   return (
     <div style={{ 
+      position: 'relative',
       minHeight: '100vh', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      background: 'linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%)',
+      padding: '40px 20px'
     }}>
-      <Card style={{ width: '400px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <Title level={2}>Око Знаний</Title>
-          <Text type="secondary">Войдите в систему или зарегистрируйтесь</Text>
+      {/* Декоративные элементы */}
+      <div style={{
+        position: 'absolute',
+        top: 100,
+        left: '15%',
+        width: 80,
+        height: 80,
+        borderRadius: '50%',
+        background: 'rgba(255, 255, 255, 0.1)',
+        zIndex: 0
+      }}></div>
+      <div style={{
+        position: 'absolute',
+        bottom: 150,
+        right: '20%',
+        width: 120,
+        height: 120,
+        borderRadius: '50%',
+        background: 'rgba(155, 74, 255, 0.15)',
+        zIndex: 0
+      }}></div>
+
+      <Card style={{ 
+        width: '100%',
+        maxWidth: '480px',
+        borderRadius: '20px',
+        boxShadow: 'var(--shadow-card)',
+        border: 'none',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{
+            fontSize: 48,
+            fontWeight: 800,
+            fontFamily: 'var(--font-family-display)',
+            color: 'var(--color-brand-blue-600)',
+            marginBottom: 8
+          }}>
+            Око Знаний
+          </div>
+          <Text style={{ fontSize: 16, color: '#666' }}>
+            Войдите в систему или зарегистрируйтесь
+          </Text>
         </div>
         
         <Tabs
@@ -258,15 +304,16 @@ const Login: React.FC = () => {
           items={[
             {
               key: 'login',
-              label: 'Вход',
+              label: <span style={{ fontWeight: 600 }}>Вход</span>,
               children: loginForm,
             },
             {
               key: 'register',
-              label: 'Регистрация',
+              label: <span style={{ fontWeight: 600 }}>Регистрация</span>,
               children: registerFormComponent,
             },
           ]}
+          style={{ fontFamily: 'var(--font-family-sans)' }}
         />
       </Card>
     </div>

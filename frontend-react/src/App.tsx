@@ -22,6 +22,7 @@ import CreateOrder from './pages/CreateOrder';
 import ClientDashboard from './pages/ClientDashboard';
 import ExpertDashboard from './pages/ExpertDashboard';
 import ExpertProfile from './pages/ExpertProfile';
+import ExpertApplication from './pages/ExpertApplication';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ArbitratorDashboard from './pages/ArbitratorDashboard';
@@ -70,6 +71,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <ExpertDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/expert-application" 
+                element={
+                  <ProtectedRoute>
+                    <ExpertApplication />
                   </ProtectedRoute>
                 } 
               />

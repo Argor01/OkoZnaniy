@@ -17,9 +17,11 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar', 'bio', 'experience_years', 'hourly_rate', 'education', 
             'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate', 'total_referrals', 
-            'active_referrals', 'total_earnings'
+            'active_referrals', 'total_earnings',
+            'has_submitted_application', 'application_approved',
+            'application_submitted_at', 'application_reviewed_at'
         ]
-        read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified']
+        read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified', 'has_submitted_application', 'application_approved', 'application_submitted_at', 'application_reviewed_at']
     
     def get_specializations(self, obj):
         """Возвращает специализации только для экспертов"""
@@ -111,6 +113,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'bio', 'experience_years', 'hourly_rate', 
             'education', 'skills', 'portfolio_url'
         ]
+
+class ExpertApplicationSerializer(serializers.Serializer):
+    """Сериализатор для подачи анкеты эксперта"""
+    first_name = serializers.CharField(max_length=150, required=True)
+    last_name = serializers.CharField(max_length=150, required=True)
+    bio = serializers.CharField(required=True, help_text="О себе")
+    experience_years = serializers.IntegerField(required=True, min_value=0, help_text="Опыт работы в годах")
+    education = serializers.CharField(required=True, help_text="Образование: вуз, специальность, годы обучения")
+    skills = serializers.CharField(required=False, allow_blank=True, help_text="Навыки")
+    portfolio_url = serializers.URLField(required=False, allow_blank=True, help_text="Ссылка на портфолио")
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
