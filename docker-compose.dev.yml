@@ -13,29 +13,29 @@ services:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-      - DJANGO_ENV=${DJANGO_ENV:-production}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
+      - DEBUG=True
+      - DJANGO_ENV=development
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
     volumes:
+      - .:/app
       - static_files:/app/static
       - media_files:/app/media
-      - .:/app
     ports:
       - "8000:8000"
     networks:
       - app_network
 
   frontend:
-    build:
-      context: ./frontend-react
-      dockerfile: Dockerfile
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
     restart: always
     environment:
       - VITE_API_URL=http://localhost:8000
-    depends_on:
-      - backend
+    volumes:
+      - ./frontend-react:/app
     ports:
-      - "3000:80"
+      - "5173:5173"
     networks:
       - app_network
 
@@ -76,26 +76,9 @@ services:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
+      - DEBUG=True
     volumes:
       - .:/app
-    networks:
-      - app_network
-
-  nginx:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-      - ./docker/nginx/ssl:/etc/nginx/ssl
-      - static_files:/var/www/static
-      - media_files:/var/www/media
-    depends_on:
-      - backend
-      - frontend
     networks:
       - app_network
 
