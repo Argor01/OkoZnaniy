@@ -27,10 +27,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <style jsx>{`
         .content-container {
           min-height: calc(100vh - ${user ? '64px' : '0px'});
-          padding: 24px;
-          background: #f0f2f5;
+          padding: ${user ? '24px' : '0'};
+          background: ${user ? '#f0f2f5' : 'transparent'};
         }
       `}</style>
     </Layout>
   );
-}; 
+};

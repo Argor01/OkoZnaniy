@@ -1,29 +1,17 @@
 import React from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
-import { Typography } from 'antd';
-
-const { Title } = Typography;
 
 const LoginPage: React.FC = () => {
   return (
-    <div className="login-page">
-      <Title level={1} style={{ textAlign: 'center', marginBottom: 48 }}>
-        Биржа студенческих работ
-      </Title>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-smartcourse-auth relative">
+      <div className="absolute inset-0 bg-grid pointer-events-none" />
+      <div className="mb-6">
+        <h1 className="text-slate-200 text-center font-display text-4xl md:text-5xl">SmartCourse</h1>
+        <div className="text-slate-300 -mt-2 text-center">Войдите в свой аккаунт</div>
+      </div>
       <LoginForm />
-
-      <style jsx>{`
-        .login-page {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 24px;
-          background: #f0f2f5;
-        }
-      `}</style>
     </div>
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

@@ -1,12 +1,14 @@
 import React from 'react';
-import { Form, Button, Typography } from 'antd';
+import { Formik, Form as FormikForm } from 'formik';
+import * as Yup from 'yup';
+import { TypographyH2 } from '@/components/shared/Typography';
 import { useDispatch } from 'react-redux';
 import { FormField } from '../shared/Form/FormField';
 import { useApi } from '@/hooks/useApi';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useRouter } from 'next/router';
 
-const { Title } = Typography;
+ 
 
 interface LoginFormData {
   email: string;
@@ -41,51 +43,57 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="login-form">
-      <Title level={2}>Вход в систему</Title>
-      <Form
-        name="login"
-        layout="vertical"
-        onFinish={handleSubmit}
-        autoComplete="off"
+    <div className="auth-card w-full max-w-[420px] mx-auto p-6 rounded-2xl bg-slate-900/90 shadow-auth text-white backdrop-blur">
+      <TypographyH2 className="text-center mb-6 text-slate-200">Вход в систему</TypographyH2>
+      <Formik
+        initialValues={{ email: '', password: '' }}
+        validationSchema={Yup.object({
+          email: Yup.string().email('Пожалуйста, введите корректный email').required('Введите email'),
+          password: Yup.string().required('Введите пароль'),
+        })}
+        onSubmit={handleSubmit}
       >
-        <FormField
-          name="email"
-          label="Email"
-          type="email"
-          required
-          rules={[
-            {
-              type: 'email',
-              message: 'Пожалуйста, введите корректный email',
-            },
-          ]}
-        />
+        <FormikForm autoComplete="off">
+          <FormField
+            name="email"
+            label="Email"
+            type="email"
+            required
+          />
 
-        <FormField
-          name="password"
-          label="Пароль"
-          type="password"
-          required
-        />
+          <FormField
+            name="password"
+            label="Пароль"
+            type="password"
+            required
+          />
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            Войти
-          </Button>
-        </Form.Item>
-      </Form>
+          <div>
+            <button
+              type="submit"
+              className="w-full px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500"
+            >
+              Войти
+            </button>
+          </div>
 
-      <style jsx>{`
-        .login-form {
-          max-width: 400px;
-          margin: 40px auto;
-          padding: 24px;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          background: white;
-        }
-      `}</style>
+          <div className="w-full space-y-2">
+            <a
+              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-200 no-underline"
+              href={process.env.NEXT_PUBLIC_TELEGRAM_OAUTH_URL || '#'}
+            >
+              <img src="/icons/telegram.svg" alt="Telegram" className="w-5 h-5" />
+              Войти через Telegram
+            </a>
+            <div className="flex justify-between mt-3 text-slate-400">
+              <a href="/reset-password" className="hover:text-slate-200">Забыли пароль?</a>
+              <a href="/register" className="hover:text-slate-200">Нет аккаунта? Зарегистрироваться</a>
+            </div>
+          </div>
+        </FormikForm>
+      </Formik>
+
+      <style jsx>{``}</style>
     </div>
   );
-}; 
+};

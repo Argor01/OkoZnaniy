@@ -1,16 +1,10 @@
 import React from 'react';
-import { Typography, Card, Row, Col, Button } from 'antd';
+import { Card, Row, Col, Button } from 'antd';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import {
-  FileTextOutlined,
-  TeamOutlined,
-  SafetyOutlined,
-  DollarOutlined,
-} from '@ant-design/icons';
-
-const { Title, Paragraph } = Typography;
+import { FileTextOutlined, TeamOutlined, SafetyOutlined, DollarOutlined } from '@ant-design/icons';
+ 
 
 const features = [
   {
@@ -42,10 +36,10 @@ const HomePage: React.FC = () => {
   return (
     <div className="home-page">
       <div className="hero-section">
-        <Title>Биржа студенческих работ</Title>
-        <Paragraph>
+        <h1 className="font-display text-3xl md:text-4xl">Биржа студенческих работ</h1>
+        <p className="text-gray-700">
           Помогаем студентам получить качественную помощь в выполнении учебных работ
-        </Paragraph>
+        </p>
         {!user && (
           <Button type="primary" size="large" onClick={() => router.push('/login')}>
             Начать работу
@@ -58,8 +52,8 @@ const HomePage: React.FC = () => {
           <Col xs={24} sm={12} md={6} key={index}>
             <Card className="feature-card">
               <div className="feature-icon">{feature.icon}</div>
-              <Title level={4}>{feature.title}</Title>
-              <Paragraph>{feature.description}</Paragraph>
+              <h4 className="text-lg font-medium">{feature.title}</h4>
+              <p className="text-gray-700">{feature.description}</p>
             </Card>
           </Col>
         ))}
@@ -91,4 +85,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage; 
+export default HomePage;
