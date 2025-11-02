@@ -1,14 +1,15 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg, Count, Q
-from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating
+from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
 from .serializers import (
     SpecializationSerializer, ExpertDocumentSerializer,
     ExpertReviewSerializer, ExpertStatisticsSerializer,
-    ExpertRatingSerializer, ExpertMatchSerializer
+    ExpertRatingSerializer, ExpertMatchSerializer,
+    ExpertApplicationSerializer, ExpertApplicationCreateSerializer
 )
 from apps.notifications.services import NotificationService
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -636,3 +637,123 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
             'detail': 'Заказ успешно взят в работу',
             'order_id': order.id
         })
+
+
+class ExpertApplicationViewSet(viewsets.ModelViewSet):
+    """API для работы с анкетами экспертов"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return ExpertApplication.objects.select_related('expert', 'reviewed_by').prefetch_related('educations').all()
+        if self.request.user.role == 'expert':
+            return ExpertApplication.objects.filter(expert=self.request.user).select_related('expert', 'reviewed_by').prefetch_related('educations')
+        return ExpertApplication.objects.none()
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ExpertApplicationCreateSerializer
+        return ExpertApplicationSerializer
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'expert':
+            raise permissions.PermissionDenied(
+                'Только эксперты могут создавать анкеты'
+            )
+        
+        # Проверяем, есть ли уже анкета
+        if ExpertApplication.objects.filter(expert=self.request.user).exists():
+            raise serializers.ValidationError(
+                'У вас уже есть анкета. Вы можете изменить существующую.'
+            )
+        
+        # Создаем анкету
+        if isinstance(serializer, ExpertApplicationCreateSerializer):
+            educations_data = serializer.validated_data.pop('educations', [])
+            
+            application = ExpertApplication.objects.create(
+                expert=self.request.user,
+                **serializer.validated_data
+            )
+            
+            # Создаем записи об образовании
+            for education_data in educations_data:
+                Education.objects.create(application=application, **education_data)
+            
+            # Возвращаем созданную анкету
+            return application
+        else:
+            serializer.save(expert=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        application = self.perform_create(serializer)
+        
+        # Возвращаем сериализованную анкету
+        output_serializer = ExpertApplicationSerializer(application)
+        headers = self.get_success_headers(output_serializer.data)
+        return Response(output_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Одобрить анкету (только для админов)"""
+        if not request.user.is_staff:
+            return Response(
+                {'detail': 'Только администраторы могут одобрять анкеты'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        application = self.get_object()
+        application.status = 'approved'
+        application.reviewed_by = request.user
+        application.reviewed_at = timezone.now()
+        application.save()
+        
+        # Уведомляем эксперта
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_application_approved(application)
+        
+        return Response(ExpertApplicationSerializer(application).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Отклонить анкету (только для админов)"""
+        if not request.user.is_staff:
+            return Response(
+                {'detail': 'Только администраторы могут отклонять анкеты'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        application = self.get_object()
+        rejection_reason = request.data.get('rejection_reason', '')
+        
+        application.status = 'rejected'
+        application.rejection_reason = rejection_reason
+        application.reviewed_by = request.user
+        application.reviewed_at = timezone.now()
+        application.save()
+        
+        # Уведомляем эксперта
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_application_rejected(application)
+        
+        return Response(ExpertApplicationSerializer(application).data)
+
+    @action(detail=False, methods=['get'])
+    def my_application(self, request):
+        """Получить свою анкету"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут просматривать свои анкеты'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            application = ExpertApplication.objects.get(expert=request.user)
+            return Response(ExpertApplicationSerializer(application).data)
+        except ExpertApplication.DoesNotExist:
+            return Response(
+                {'detail': 'Анкета не найдена'},
+                status=status.HTTP_404_NOT_FOUND
+            )

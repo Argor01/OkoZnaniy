@@ -18,6 +18,37 @@ export interface ExpertStatistics {
   last_updated: string;
 }
 
+export interface Education {
+  id?: number;
+  university: string;
+  start_year: number;
+  end_year?: number | null;
+  degree?: string;
+}
+
+export interface ExpertApplication {
+  id: number;
+  expert: number;
+  full_name: string;
+  work_experience_years: number;
+  specializations: string;
+  educations: Education[];
+  status: 'pending' | 'approved' | 'rejected';
+  status_display: string;
+  rejection_reason?: string;
+  reviewed_by?: number;
+  reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateExpertApplicationRequest {
+  full_name: string;
+  work_experience_years: number;
+  specializations: string;
+  educations: Education[];
+}
+
 export const expertsApi = {
   async rateExpert(payload: CreateExpertRatingRequest) {
     const { data } = await apiClient.post('/experts/ratings/', payload);
@@ -27,6 +58,24 @@ export const expertsApi = {
   async getExpertStatistics(expertId: number): Promise<ExpertStatistics> {
     const { data } = await apiClient.get(`/experts/statistics/?expert=${expertId}`);
     return data.results?.[0] || data;
+  },
+
+  async getMyApplication(): Promise<ExpertApplication | null> {
+    try {
+      const { data } = await apiClient.get('/experts/applications/my_application/');
+      return data;
+    } catch (error: any) {
+      // Если анкета не найдена (404), это нормально - значит её ещё нет
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  async createApplication(payload: CreateExpertApplicationRequest): Promise<ExpertApplication> {
+    const { data } = await apiClient.post('/experts/applications/', payload);
+    return data;
   },
 };
 

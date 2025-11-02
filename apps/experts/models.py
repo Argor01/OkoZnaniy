@@ -315,3 +315,116 @@ class ExpertStatistics(models.Model):
         self.total_earnings = earnings
         
         self.save()
+
+
+class ExpertApplication(models.Model):
+    """Анкета эксперта для регистрации"""
+    STATUS_CHOICES = [
+        ('pending', 'В рассмотрении'),
+        ('approved', 'Одобрено'),
+        ('rejected', 'Отклонено'),
+    ]
+    
+    expert = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='expert_application',
+        verbose_name="Эксперт"
+    )
+    full_name = models.CharField(
+        max_length=255,
+        verbose_name="ФИО"
+    )
+    work_experience_years = models.PositiveIntegerField(
+        verbose_name="Опыт работы (лет)",
+        validators=[MinValueValidator(0)]
+    )
+    specializations = models.TextField(
+        verbose_name="Специальности",
+        help_text="Укажите специальности, которые вы пишете (можно через запятую или каждую на новой строке)",
+        blank=True,
+        default=''
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="Статус"
+    )
+    rejection_reason = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Причина отклонения"
+    )
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_expert_applications',
+        verbose_name="Кто рассмотрел"
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата рассмотрения"
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Создан"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Обновлен"
+    )
+
+    class Meta:
+        verbose_name = "Анкета эксперта"
+        verbose_name_plural = "Анкеты экспертов"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Анкета {self.expert.username} - {self.get_status_display()}"
+
+
+class Education(models.Model):
+    """Образование эксперта"""
+    application = models.ForeignKey(
+        ExpertApplication,
+        on_delete=models.CASCADE,
+        related_name='educations',
+        verbose_name="Анкета"
+    )
+    university = models.CharField(
+        max_length=255,
+        verbose_name="ВУЗ"
+    )
+    start_year = models.IntegerField(
+        verbose_name="Год начала обучения",
+        validators=[MinValueValidator(1950), MaxValueValidator(2100)]
+    )
+    end_year = models.IntegerField(
+        verbose_name="Год окончания обучения",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1950), MaxValueValidator(2100)]
+    )
+    degree = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Степень/Квалификация"
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Создан"
+    )
+
+    class Meta:
+        verbose_name = "Образование"
+        verbose_name_plural = "Образования"
+        ordering = ['-end_year', '-start_year']
+
+    def __str__(self):
+        if self.end_year:
+            return f"{self.university} ({self.start_year}-{self.end_year})"
+        return f"{self.university} ({self.start_year}-н.в.)"
