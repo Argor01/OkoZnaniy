@@ -10,7 +10,7 @@ html {
 body {
   position: relative;
   margin: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
   color: var(--color-grey-900);
   background-color: #ffffff;
 }

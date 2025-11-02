@@ -195,7 +195,7 @@ const ArbitratorDashboard: React.FC = () => {
 
   // Статистика
   const totalDisputes = disputes.length;
-  const resolvedDisputes = disputes.filter(d => d.resolved).length;
+  const resolvedDisputes = disputes.filter((d: Dispute) => d.resolved).length;
   const pendingDisputes = totalDisputes - resolvedDisputes;
 
   return (

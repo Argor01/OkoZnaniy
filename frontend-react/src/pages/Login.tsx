@@ -1,16 +1,87 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Tabs, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
 import { ordersApi } from '../api/orders';
+import '../styles/login.css';
 
-const { Title, Text } = Typography;
+// Typography helpers не используются в текущей верстке
+
+// Хук анимации печатания для плейсхолдера
+function useTypewriter(fullText: string, speed = 35, startDelay = 0) {
+  const [text, setText] = useState('');
+  React.useEffect(() => {
+    let i = 0;
+    let intervalId: any = null;
+    const startTimer = setTimeout(() => {
+      intervalId = setInterval(() => {
+        i += 1;
+        setText(fullText.slice(0, i));
+        if (i >= fullText.length) {
+          clearInterval(intervalId);
+        }
+      }, speed);
+    }, startDelay);
+    return () => {
+      clearTimeout(startTimer);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [fullText, speed, startDelay]);
+  return text;
+}
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [registerForm] = Form.useForm();
+  const [loginForm] = Form.useForm();
+  const [selectedRole, setSelectedRole] = useState<'client' | 'expert'>('client');
+  const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
+
+  // Плейсхолдеры с анимацией
+  const loginUsernamePh = useTypewriter('Email', 35, 100);
+  const loginPasswordPh = useTypewriter('Пароль', 35, 250);
+  const regEmailPh = useTypewriter('Email', 35, 120);
+  const regPhonePh = useTypewriter('Телефон', 35, 280);
+  const regPasswordPh = useTypewriter('Пароль', 35, 420);
+  const regPassword2Ph = useTypewriter('Подтвердите пароль', 35, 560);
+  const regReferralPh = useTypewriter('Реферальный код', 35, 700);
+  
+  // Тексты для анимации диалога на левой панели
+  const bubbleQuestionText = 'Можете сделать курсовую за час?';
+  const bubbleAnswerText = 'Без проблем!';
+  // Параметры печати для синхронизации анимаций
+  const leftDelay = 600;
+  const leftSpeed = 65;
+  const leftLen = bubbleQuestionText.length;
+  // Анимация отправки троеточием: появляется после завершения печати слева
+  const sendDuration = 1200;
+  const sendDelay = leftDelay + leftSpeed * leftLen + 150;
+  // Ответ справа стартует после завершения анимации отправки
+  const rightDelay = sendDelay + sendDuration + 100;
+  const answerLen = bubbleAnswerText.length;
+  const answerSpeed = 65;
+  // Пауза с троеточием внутри правого пузыря перед печатью
+  const answerDotsDuration = 1200;
+  const answerStartDelay = rightDelay + answerDotsDuration;
+  const thumbDotsDelay = answerStartDelay + answerSpeed * answerLen + 150; // троеточие в третьем блоке после ответа
+  const thumbDotsDuration = 1200; // длительность показа троеточия
+
+  const [thumbStage, setThumbStage] = useState<'idle' | 'dots' | 'emoji'>('idle');
+  useEffect(() => {
+    const dotsTimer = setTimeout(() => setThumbStage('dots'), thumbDotsDelay);
+    const emojiTimer = setTimeout(() => setThumbStage('emoji'), thumbDotsDelay + thumbDotsDuration);
+    return () => {
+      clearTimeout(dotsTimer);
+      clearTimeout(emojiTimer);
+    };
+  }, [thumbDotsDelay, thumbDotsDuration]);
+
+  const bubbleQuestion = useTypewriter(bubbleQuestionText, leftSpeed, leftDelay);
+  const isQuestionLoading = bubbleQuestion.length === 0;
+  const bubbleAnswer = useTypewriter(bubbleAnswerText, answerSpeed, answerStartDelay);
+  const isAnswerLoading = bubbleAnswer.length === 0;
   
   // Автоматически подставляем реферальный код при загрузке
   React.useEffect(() => {
@@ -133,31 +204,71 @@ const Login: React.FC = () => {
     }
   };
 
-  const loginForm = (
-    <Form onFinish={onLogin} layout="vertical">
+  const onForgotPassword = async () => {
+    const email = loginForm.getFieldValue('username');
+    if (!email) {
+      message.warning('Введите email в поле Email');
+      return;
+    }
+    try {
+      const res = await authApi.resetPassword(email);
+      const detail = res?.detail || 'Инструкции по сбросу пароля отправлены на email.';
+      message.success(detail);
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail || 'Не удалось отправить инструкции для сброса пароля';
+      message.error(detail);
+    }
+  };
+
+  const loginFormComponent = (
+    <Form form={loginForm} onFinish={onLogin} layout="vertical">
       <Form.Item
+        label="Email"
         name="username"
-        rules={[{ required: true, message: 'Введите email или телефон ' }]}
+        rules={[{ required: true, message: 'Введите email' }]}
       >
-        <Input prefix={<UserOutlined />} placeholder="Email или телефон" />
+        <Input prefix={<UserOutlined />} placeholder={loginUsernamePh || ' '} />
       </Form.Item>
       <Form.Item
+        label="Пароль"
         name="password"
         rules={[{ required: true, message: 'Введите пароль' }]}
+        extra={
+          <Button
+            type="link"
+            htmlType="button"
+            className="forgot-password-link"
+            onClick={onForgotPassword}
+          >
+            Забыли пароль?
+          </Button>
+        }
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
+        <Input.Password prefix={<LockOutlined />} placeholder={loginPasswordPh || ' '} />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
           Войти
         </Button>
       </Form.Item>
+      <Form.Item>
+        <div className="panel-footer">
+          <div className="telegram-auth">
+            <a className="telegram-login" href="#" aria-label="Telegram">
+              <img src="/assets/telegram.png" alt="telegram-bot" />
+            </a>
+            <span className="telegram-login-text">Вход через Telegram</span>
+          </div>
+        </div>
+      </Form.Item>
+      
     </Form>
   );
 
   const registerFormComponent = (
     <Form form={registerForm} onFinish={onRegister} layout="vertical">
       <Form.Item 
+        label="Email"
         name="email" 
         rules={[
           { type: 'email', message: 'Некорректный email' },
@@ -165,38 +276,25 @@ const Login: React.FC = () => {
             validator(_, value) {
               const phone = getFieldValue('phone');
               if (!value && !phone) {
-                return Promise.reject(new Error('Укажите email или телефон'));
+                return Promise.reject(new Error('Укажите email'));
               }
               return Promise.resolve();
             },
           }),
         ]}
       > 
-        <Input prefix={<MailOutlined />} placeholder="Email (или оставьте пустым)" />
+        <Input prefix={<MailOutlined />} placeholder={regEmailPh || ' '} />
       </Form.Item>
-      <Form.Item 
-        name="phone"
-        rules={[
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              const email = getFieldValue('email');
-              if (!value && !email) {
-                return Promise.reject(new Error('Укажите email или телефон'));
-              }
-              return Promise.resolve();
-            },
-          }),
-        ]}
-      >
-        <Input prefix={<PhoneOutlined />} placeholder="Телефон (или оставьте пустым)" />
-      </Form.Item>
+     
       <Form.Item
+        label="Пароль"
         name="password"
         rules={[{ required: true, message: 'Введите пароль' }]}
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
+        <Input.Password prefix={<LockOutlined />} placeholder={regPasswordPh || ' '} />
       </Form.Item>
       <Form.Item
+        label="Подтвердите пароль"
         name="password2"
         rules={[
           { required: true, message: 'Подтвердите пароль' },
@@ -210,65 +308,140 @@ const Login: React.FC = () => {
           }),
         ]}
       >
-        <Input.Password prefix={<LockOutlined />} placeholder="Подтвердите пароль" />
+        <Input.Password prefix={<LockOutlined />} placeholder={regPassword2Ph || ' '} />
       </Form.Item>
-      <Form.Item
-        name="role"
-        rules={[{ required: true, message: 'Выберите роль' }]}
-        initialValue="client"
-      >
-        <Select placeholder="Выберите роль">
-          <Select.Option value="client">Клиент</Select.Option>
-          <Select.Option value="expert">Эксперт</Select.Option>
-          <Select.Option value="partner">Партнер</Select.Option>
-          <Select.Option value="arbitrator">Арбитр</Select.Option>
-          <Select.Option value="admin">Администратор</Select.Option>
-        </Select>
+      <Form.Item name="role" initialValue="client" rules={[{ required: true, message: 'Выберите роль' }]} hidden>
+        <Input type="hidden" />
+      </Form.Item>
+
+      <Form.Item label="Роль">
+        <div className="role-switch" role="group" aria-label="Выбор роли">
+          <div className={`role-indicator ${selectedRole === 'expert' ? 'expert' : 'client'}`} />
+          <button
+            type="button"
+            className={`role-option ${selectedRole === 'client' ? 'active' : ''}`}
+            onClick={() => { setSelectedRole('client'); registerForm.setFieldsValue({ role: 'client' }); }}
+          >
+            Клиент
+          </button>
+          <button
+            type="button"
+            className={`role-option ${selectedRole === 'expert' ? 'active' : ''}`}
+            onClick={() => { setSelectedRole('expert'); registerForm.setFieldsValue({ role: 'expert' }); }}
+          >
+            Исполнитель
+          </button>
+        </div>
       </Form.Item>
       <Form.Item
         name="referral_code"
         label="Реферальный код (необязательно)"
       >
-        <Input placeholder="Введите реферальный код, если есть" />
+        <Input placeholder={regReferralPh || ' '} />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
           Зарегистрироваться
         </Button>
       </Form.Item>
+      <Form.Item>
+        <div className="panel-footer">
+          <div className="telegram-auth">
+            <a className="telegram-login" href="#" aria-label="Telegram">
+              <img src="/assets/telegram.png" alt="telegram-bot" />
+            </a>
+            <span className="telegram-login-text">Вход через Telegram</span>
+          </div>
+        </div>
+      </Form.Item>
     </Form>
   );
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-    }}>
-      <Card style={{ width: '400px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <Title level={2}>Око Знаний</Title>
-          <Text type="secondary">Войдите в систему или зарегистрируйтесь</Text>
+    <div className="login-page">
+      <div className="auth-card">
+        <div className="auth-left">
+          <div className="hero">
+            {activeTab === 'register' && (
+            <div className="chat-bubbles">
+              <div className="bubble bubble-left">
+                <span className="bubble-text">{bubbleQuestion}</span>
+                {isQuestionLoading && (
+                  <span className="typing" aria-live="polite">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </span>
+                )}
+              </div>
+              {/* Троеточие отправки: появляется между левым и правым блоками */}
+              <div className="send-ellipsis" style={{ animationDelay: `${sendDelay}ms` }} aria-hidden="true">
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+              </div>
+              <div className="bubble bubble-right" style={{ animationDelay: `${rightDelay}ms` }}>
+                <span className="bubble-text">{bubbleAnswer}</span>
+                {isAnswerLoading && (
+                  <span className="typing" aria-live="polite">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </span>
+                )}
+              </div>
+              <div className="bubble bubble-left bubble-left-2" style={{ animationDelay: `${thumbDotsDelay}ms` }}>
+                {thumbStage !== 'emoji' && (
+                  <span className="typing" aria-live="polite">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </span>
+                )}
+                {thumbStage === 'emoji' && (
+                  <img
+                    className="bubble-thumb-img"
+                    src="https://smileysplanet.ru/smileys/apple/thumbs-up-1328.png"
+                    alt="thumb up"
+                    width={22}
+                    height={22}
+                    loading="eager"
+                  />
+                )}
+              </div>
+            </div>
+            )}
+            <img className="hero-image" src="/assets/first-screen/first-screen-students.png" alt="hero" />
+          </div>
+          <svg
+            className="bottom-wave"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 140"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M0,64 C240,120 480,8 720,64 C960,120 1200,8 1440,64 L1440,140 L0,140 Z"
+              fill="#ffffff"
+            />
+          </svg>
         </div>
-        
-        <Tabs
-          defaultActiveKey="login"
-          items={[
-            {
-              key: 'login',
-              label: 'Вход',
-              children: loginForm,
-            },
-            {
-              key: 'register',
-              label: 'Регистрация',
-              children: registerFormComponent,
-            },
-          ]}
-        />
-      </Card>
+        <div className="auth-right">
+          <div className="auth-panel">
+            <div className="panel-body">
+              <Tabs
+                className="antd-tabs-clean"
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key)}
+                items={[
+                  { key: 'register', label: 'Зарегистрироваться', children: registerFormComponent },
+                  { key: 'login', label: 'Войти', children: loginFormComponent },
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
