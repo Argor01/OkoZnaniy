@@ -29,6 +29,7 @@ import ArbitratorDashboard from './pages/ArbitratorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
+import PurchasedWorks from './pages/PurchasedWorks';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Configure dayjs
@@ -134,6 +135,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <MyWorks />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/shop/purchased"
+                element={
+                  <ProtectedRoute>
+                    <PurchasedWorks />
                   </ProtectedRoute>
                 } 
               />

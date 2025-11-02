@@ -92,6 +92,7 @@ const ShopReadyWorks: React.FC = () => {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
+  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
 
   // Пример данных работ (заглушка)
   const works = [
@@ -131,10 +132,17 @@ const ShopReadyWorks: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
         {/* Sidebar */}
-        <div className={styles.sidebar}>
+        <div className={`${styles.sidebar} ${styles.collapsed}`}>
           {/* User Profile Section */}
           <div className={styles.sidebarProfile}>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
+            <div 
+              style={{ 
+                position: 'relative', 
+                display: 'inline-block',
+                cursor: 'pointer'
+              }}
+              onClick={() => navigate('/expert')}
+            >
               <Badge 
                 count={<CheckCircleOutlined style={{ color: '#10b981', fontSize: 12 }} />} 
                 offset={[-2, 2]}
@@ -163,7 +171,14 @@ const ShopReadyWorks: React.FC = () => {
                 </Badge>
               </Badge>
             </div>
-            <div style={{ flex: 1, marginLeft: 12 }}>
+            <div 
+              style={{ 
+                flex: 1, 
+                marginLeft: 12,
+                cursor: 'pointer'
+              }}
+              onClick={() => navigate('/expert')}
+            >
               <Text strong style={{ fontSize: 15, color: '#1f2937', display: 'block' }}>
                 {profile?.username || profile?.email || 'Эксперт'}
               </Text>
@@ -193,6 +208,10 @@ const ShopReadyWorks: React.FC = () => {
                 setFaqModalVisible(true);
                 return;
               }
+              if (key === 'friends') {
+                setFriendsModalVisible(true);
+                return;
+              }
               if (key === 'notifications') {
                 setNotificationsModalVisible(true);
                 return;
@@ -209,7 +228,7 @@ const ShopReadyWorks: React.FC = () => {
                 navigate('/expert');
                 return;
               }
-              if (key.startsWith('works-')) {
+              if (key === 'works') {
                 navigate('/works');
                 return;
               }
@@ -219,6 +238,14 @@ const ShopReadyWorks: React.FC = () => {
               }
               if (key === 'shop-add-work') {
                 navigate('/shop/add-work');
+                return;
+              }
+              if (key === 'shop-my-works') {
+                navigate('/works');
+                return;
+              }
+              if (key === 'shop-purchased') {
+                navigate('/shop/purchased');
                 return;
               }
               if (key === 'logout') {
@@ -237,23 +264,12 @@ const ShopReadyWorks: React.FC = () => {
             <Menu.Item key="notifications" icon={<BellOutlined />}>
               У вас нет уведомлений
             </Menu.Item>
-            <Menu.Item key="calendar" icon={<CalendarOutlined />}>
-              {dayjs().format('DD MMMM YYYY')}
-            </Menu.Item>
             <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
               Арбитраж
             </Menu.Item>
-            <Menu.SubMenu key="balance" icon={<WalletOutlined />} title="На счету: 0.00 ₽">
-              <Menu.Item key="balance-available" style={{ color: '#10b981' }}>
-                Доступно к выводу: 0.00 ₽
-              </Menu.Item>
-              <Menu.Item key="balance-blocked" style={{ color: '#ef4444' }}>
-                Заблокировано: 0.00 ₽
-              </Menu.Item>
-              <Menu.Item key="balance-held" style={{ color: '#6b7280' }}>
-                Удержано: 0.00 ₽
-              </Menu.Item>
-            </Menu.SubMenu>
+            <Menu.Item key="balance" icon={<WalletOutlined />}>
+              Счет: 0.00 ₽
+            </Menu.Item>
             <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
               <Menu.Item key="orders-all">Все (0)</Menu.Item>
               <Menu.Item key="orders-open">Открыт ()</Menu.Item>
@@ -266,18 +282,9 @@ const ShopReadyWorks: React.FC = () => {
               <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
               <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
             </Menu.SubMenu>
-            <Menu.SubMenu key="works" icon={<FileDoneOutlined />} title="Мои работы">
-              <Menu.Item key="works-all">Все (0)</Menu.Item>
-              <Menu.Item key="works-open">Открыт (0)</Menu.Item>
-              <Menu.Item key="works-confirming">На подтверждении (0)</Menu.Item>
-              <Menu.Item key="works-progress">На выполнении (0)</Menu.Item>
-              <Menu.Item key="works-payment">Ожидает оплаты (0)</Menu.Item>
-              <Menu.Item key="works-review">На проверке (0)</Menu.Item>
-              <Menu.Item key="works-completed">Выполнен (0)</Menu.Item>
-              <Menu.Item key="works-revision">На доработке (0)</Menu.Item>
-              <Menu.Item key="works-download">Ожидает скачивания (0)</Menu.Item>
-              <Menu.Item key="works-closed">Закрыт (0)</Menu.Item>
-            </Menu.SubMenu>
+            <Menu.Item key="works" icon={<FileDoneOutlined />}>
+              Мои работы
+            </Menu.Item>
             <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
               <Menu.Item key="shop-ready-works">Магазин готовых работ</Menu.Item>
               <Menu.Item key="shop-add-work">Добавить работу в магазин</Menu.Item>
@@ -1007,8 +1014,341 @@ const ShopReadyWorks: React.FC = () => {
                     border: '1px solid #e5e7eb'
                   }
                 },
+                {
+                  key: '8',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Что делать если заказ выполнен не качественно?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Если работа не соответствует требованиям, вы можете отправить её на доработку без дополнительной оплаты. 
+                      Специалист обязан доработать работу в течение указанного срока. 
+                      В случае, если специалист отказывается дорабатывать или качество работы не улучшается, 
+                      вы можете обратиться в арбитраж для возврата средств.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '9',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>В течении какого срока может быть выполнен заказ?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Сроки выполнения заказа определяются при размещении задания. 
+                      Минимальный срок зависит от сложности и объема работы. 
+                      Стандартные сроки: от 1 до 7 дней для простых работ, от 7 до 30 дней для сложных. 
+                      За срочные задания (менее 24 часов) может взиматься дополнительная плата.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '10',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как регулируются отношения между специалистом и заказчиком?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Отношения регулируются Публичной офертой, правилами использования сервиса и договором оказания услуг. 
+                      Все условия работы фиксируются в чате внутри заказа. 
+                      В случае споров работает система арбитража, где независимые эксперты рассматривают спорные ситуации и принимают решение.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
               ]}
             />
+          </div>
+
+          {/* Раздел Финансы */}
+          <div style={{ marginBottom: 16 }}>
+            <Text strong style={{ fontSize: 18, color: '#1f2937', display: 'block', marginBottom: 16 }}>
+              Финансы
+            </Text>
+            
+            <Collapse
+              expandIcon={({ isActive }) => (
+                <PlusOutlined 
+                  style={{ 
+                    fontSize: 16, 
+                    color: '#667eea',
+                    transform: isActive ? 'rotate(45deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s'
+                  }} 
+                />
+              )}
+              expandIconPosition="end"
+              style={{ 
+                background: 'transparent',
+                border: 'none'
+              }}
+              items={[
+                {
+                  key: '11',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как пополнить баланс пользователя?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Для пополнения баланса перейдите в раздел "На счету" в боковом меню и нажмите кнопку "Пополнить баланс". 
+                      Вы можете пополнить баланс банковской картой, через систему быстрых платежей (СБП) или электронными кошельками. 
+                      Минимальная сумма пополнения - 100 рублей.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '12',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как вывести денежные средства?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Для вывода средств перейдите в раздел "На счету" и выберите "История операций". 
+                      Нажмите кнопку "Вывести средства" и выберите способ вывода: на банковскую карту или электронный кошелек. 
+                      Минимальная сумма вывода - 500 рублей. 
+                      Средства поступят на ваш счет в течение 1-3 рабочих дней.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '13',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Схема оплаты на сервисе SHELP ("Безопасная сделка")</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Система "Безопасная сделка" обеспечивает защиту интересов обеих сторон. 
+                      Средства заказчика блокируются на время выполнения заказа. 
+                      После принятия работы заказчиком средства автоматически переводятся специалисту. 
+                      При возникновении споров средства остаются заблокированными до решения арбитража.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+              ]}
+            />
+          </div>
+
+          {/* Раздел Профиль */}
+          <div style={{ marginBottom: 16 }}>
+            <Text strong style={{ fontSize: 18, color: '#1f2937', display: 'block', marginBottom: 16 }}>
+              Профиль
+            </Text>
+            
+            <Collapse
+              expandIcon={({ isActive }) => (
+                <PlusOutlined 
+                  style={{ 
+                    fontSize: 16, 
+                    color: '#667eea',
+                    transform: isActive ? 'rotate(45deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s'
+                  }} 
+                />
+              )}
+              expandIconPosition="end"
+              style={{ 
+                background: 'transparent',
+                border: 'none'
+              }}
+              items={[
+                {
+                  key: '14',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Какие пользователи существуют на сервисе?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      На сервисе SHELP существует несколько типов пользователей: заказчик - размещает задания и оплачивает работы; 
+                      специалист - выполняет заказы за вознаграждение; менеджер SHELP - персональный помощник по работе с сервисом; 
+                      независимый эксперт - арбитр для решения споров; администратор и модераторы - обеспечивают работу сервиса.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '15',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Кто такой специалист?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Специалист - это пользователь, который выполняет учебные задания за вознаграждение. 
+                      Чтобы стать специалистом, нужно зарегистрироваться, заполнить анкету и пройти проверку администрацией. 
+                      Специалисты имеют специализации, рейтинг, отзывы от заказчиков и могут зарабатывать, выполняя заказы.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '16',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Кто такой заказчик?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Заказчик - это пользователь, который размещает задания для выполнения специалистами и оплачивает выполненные работы. 
+                      Заказчик может выбирать специалистов, общаться с ними, отслеживать выполнение заказа и принимать или отклонять работу.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '17',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Кто такой менеджер SHELP (персональный менеджер)?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Персональный менеджер SHELP - это сотрудник сервиса, который помогает пользователям в работе с платформой. 
+                      Менеджер консультирует по вопросам размещения заказов, выбора специалистов, решения споров и использования сервиса.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '18',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Кто такой независимый эксперт?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Независимый эксперт - это опытный пользователь, который помогает решать споры между заказчиками и специалистами в системе арбитража. 
+                      Эксперты объективно оценивают качество выполненных работ и принимают решения о возврате средств, доработке или закрытии заказа.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '19',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Чем занимается администрация и модераторы сервиса?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Администрация сервиса управляет платформой, обеспечивает её работу, обрабатывает заявки на регистрацию специалистов, 
+                      решает технические вопросы. Модераторы следят за соблюдением правил пользователями, проверяют контент, 
+                      блокируют нарушителей и поддерживают порядок на платформе.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Модальное окно Мои друзья */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: 8
+          }}>
+            Мои друзья
+          </div>
+        }
+        open={friendsModalVisible}
+        onCancel={() => setFriendsModalVisible(false)}
+        footer={null}
+        width={800}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            padding: '0'
+          }
+        }}
+      >
+        <div style={{ paddingTop: 16 }}>
+          <Input.Search
+            placeholder="Поиск друзей..."
+            allowClear
+            style={{ marginBottom: 24 }}
+            onSearch={(value) => {
+              console.log('Поиск:', value);
+            }}
+          />
+          <div style={{ 
+            minHeight: '400px',
+            background: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <TeamOutlined style={{ 
+              fontSize: 64, 
+              color: '#d1d5db',
+              marginBottom: 16 
+            }} />
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              У вас пока нет друзей
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
+              Пригласите друзей, чтобы начать общение
+            </Text>
           </div>
         </div>
       </Modal>

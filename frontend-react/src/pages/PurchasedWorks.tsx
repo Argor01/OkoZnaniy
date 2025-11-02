@@ -3,24 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Button, 
-  Input, 
-  Select, 
   Card, 
   Space, 
   Typography, 
-  Switch, 
   Avatar,
   Badge,
   Menu,
   Modal,
+  Input as AntdInput,
   Collapse,
   message,
-  DatePicker
+  DatePicker,
+  Select
 } from 'antd';
 import { 
-  SearchOutlined, 
-  PlusOutlined, 
-  DownOutlined,
   UserOutlined,
   SettingOutlined,
   MessageOutlined,
@@ -38,21 +34,25 @@ import {
   PoweroffOutlined,
   QuestionCircleOutlined,
   CheckCircleOutlined,
+  DownloadOutlined,
+  PlusOutlined,
   StarOutlined,
   StarFilled,
   SendOutlined,
   SmileOutlined,
   PaperClipOutlined,
   MobileOutlined,
-  CommentOutlined
+  SearchOutlined,
+  CommentOutlined,
+  DownOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { authApi } from '../api/auth';
 import styles from './ExpertDashboard.module.css';
 
 const { Text, Title } = Typography;
-const { Option } = Select;
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 interface UserProfile {
   id: number;
@@ -65,13 +65,12 @@ interface UserProfile {
   avatar?: string;
 }
 
-const MyWorks: React.FC = () => {
+const PurchasedWorks: React.FC = () => {
   const navigate = useNavigate();
-  const [sortBy, setSortBy] = useState<string>('newness');
-  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('works-all');
+  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('shop-purchased');
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   
-  // Состояния для модальных окон (заглушки для полноты функциональности)
+  // Состояния для модальных окон
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
@@ -87,8 +86,8 @@ const MyWorks: React.FC = () => {
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  // Пример данных работ (заглушка)
-  const works: any[] = [];
+  // Пример данных купленных работ (заглушка)
+  const purchasedWorks: any[] = [];
 
   return (
     <div className={styles.container}>
@@ -191,7 +190,7 @@ const MyWorks: React.FC = () => {
                 return;
               }
               if (key === 'works') {
-                // Уже на этой странице
+                navigate('/works');
                 return;
               }
               if (key === 'shop-ready-works') {
@@ -203,11 +202,11 @@ const MyWorks: React.FC = () => {
                 return;
               }
               if (key === 'shop-my-works') {
-                // Уже на этой странице
+                navigate('/works');
                 return;
               }
               if (key === 'shop-purchased') {
-                navigate('/shop/purchased');
+                // Уже на этой странице
                 return;
               }
               if (key === 'logout') {
@@ -231,7 +230,7 @@ const MyWorks: React.FC = () => {
             </Menu.Item>
             <Menu.Item key="balance" icon={<WalletOutlined />}>
               Счет: 0.00 ₽
-              </Menu.Item>
+            </Menu.Item>
             <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
               <Menu.Item key="orders-all">Все (0)</Menu.Item>
               <Menu.Item key="orders-open">Открыт ()</Menu.Item>
@@ -286,215 +285,74 @@ const MyWorks: React.FC = () => {
 
         {/* Main Content */}
         <div className={styles.mainContent}>
-          <div style={{ 
-            display: 'flex',
-            gap: '24px'
-          }}>
-            {/* Левая боковая панель для поиска */}
-            <div style={{ width: '320px', flexShrink: 0 }}>
-              {/* Поиск работ */}
-              <Card 
-                style={{ 
-                  borderRadius: 16, 
-                  marginBottom: 16,
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                }}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+            <Title level={2} style={{ margin: 0 }}>
+              Купленные работы
+            </Title>
+            <Space>
+              <Button 
+                className={styles.buttonSecondary}
+                onClick={() => navigate('/shop/ready-works')}
               >
-                <Title level={5} style={{ marginBottom: 16 }}>
-                  Поиск работ
-                </Title>
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                  <Input 
-                    placeholder="Текст поиска"
-                    style={{ borderRadius: 8 }}
-                  />
-                  <Select 
-                    defaultValue="all" 
-                    style={{ width: '100%' }}
-                    suffixIcon={<DownOutlined />}
-                  >
-                    <Option value="all">Все разделы</Option>
-                  </Select>
-                  <Select 
-                    placeholder="Выбрать предмет"
-                    style={{ width: '100%' }}
-                    suffixIcon={<DownOutlined />}
-                  >
-                    <Option value="math">Математика</Option>
-                    <Option value="physics">Физика</Option>
-                  </Select>
-                  <Select 
-                    placeholder="Тип работы"
-                    style={{ width: '100%' }}
-                    suffixIcon={<DownOutlined />}
-                  >
-                    <Option value="practical">Практическая работа</Option>
-                    <Option value="control">Контрольная работа</Option>
-                  </Select>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 14 }}>Только без покупок</Text>
-                    <Switch size="small" />
-                  </div>
-                  <Button 
-                    type="primary"
-                    icon={<SearchOutlined />}
-                    block
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                      border: 'none',
-                      borderRadius: 8,
-                      height: 40
-                    }}
-                  >
-                    Поиск
-                  </Button>
-                </Space>
-              </Card>
-
-              {/* Призыв к действию */}
-              <Card 
-                style={{ 
-                  borderRadius: 16,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                  border: 'none',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <Title level={5} style={{ color: '#ffffff', marginBottom: 8 }}>
-                  Здесь вам помогут написать учебную работу.
-                </Title>
-                <Text style={{ color: '#ffffff', display: 'block', marginBottom: 16, fontSize: 14 }}>
-                  Размести задание и выбери лучшего специалиста!
-                </Text>
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                  <Input 
-                    placeholder="Название работы"
-                    style={{ borderRadius: 8 }}
-                  />
-                  <Select 
-                    placeholder="Тип работы"
-                    style={{ width: '100%' }}
-                    suffixIcon={<DownOutlined />}
-                  >
-                    <Option value="practical">Практическая работа</Option>
-                    <Option value="control">Контрольная работа</Option>
-                  </Select>
-                  <Button 
-                    type="default"
-                    block
-                    style={{
-                      background: '#ffffff',
-                      border: 'none',
-                      borderRadius: 8,
-                      height: 40,
-                      color: '#667eea',
-                      fontWeight: 500
-                    }}
-                    onClick={() => navigate('/create-order')}
-                  >
-                    Разместить заказ
-                  </Button>
-                </Space>
-              </Card>
-            </div>
-
-            {/* Основной контент */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Заголовок */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: 24
-              }}>
-                <Title level={2} style={{ margin: 0, color: '#1f2937' }}>
-                  Мои работы
-                </Title>
-                <Space>
-                  <Text style={{ fontSize: 14, color: '#6b7280' }}>
-                    Всего <Text strong style={{ color: '#3b82f6' }}>{works.length}</Text> работ
-                  </Text>
-                  <Button 
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                      border: 'none',
-                      borderRadius: 8,
-                      height: 40
-                    }}
-                    onClick={() => navigate('/shop/add-work')}
-                  >
-                    Добавить работу
-                  </Button>
-                </Space>
-              </div>
-
-              {/* Сортировка */}
-              <div style={{ 
-                marginBottom: 16,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12
-              }}>
-                <Text style={{ fontSize: 14, color: '#6b7280' }}>Сортировать по:</Text>
-                <Button 
-                  type={sortBy === 'price' ? 'primary' : 'text'}
-                  onClick={() => setSortBy('price')}
-                  style={{ 
-                    color: sortBy === 'price' ? '#ffffff' : '#6b7280',
-                    background: sortBy === 'price' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
-                    border: 'none'
-                  }}
-                >
-                  Цена
-                </Button>
-                <Button 
-                  type={sortBy === 'popularity' ? 'primary' : 'text'}
-                  onClick={() => setSortBy('popularity')}
-                  style={{ 
-                    color: sortBy === 'popularity' ? '#ffffff' : '#6b7280',
-                    background: sortBy === 'popularity' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
-                    border: 'none'
-                  }}
-                >
-                  Популярности
-                </Button>
-                <Button 
-                  type={sortBy === 'newness' ? 'primary' : 'text'}
-                  onClick={() => setSortBy('newness')}
-                  icon={sortBy === 'newness' && <DownOutlined />}
-                  style={{ 
-                    color: sortBy === 'newness' ? '#ffffff' : '#6b7280',
-                    background: sortBy === 'newness' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
-                    border: 'none'
-                  }}
-                >
-                  Новизне
-                </Button>
-              </div>
-
-              {/* Список работ */}
-              <div style={{ 
-                background: '#ffffff',
-                borderRadius: 12,
-                border: '1px solid #e5e7eb',
-                padding: '48px 24px',
-                minHeight: '400px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Text type="secondary" style={{ fontSize: 14 }}>
-                  {works.length === 0 ? 'Нет работ' : 'Список работ будет отображаться здесь'}
-                </Text>
-              </div>
-            </div>
+                Перейти к магазину
+              </Button>
+            </Space>
           </div>
+
+          {/* Content Area */}
+          {purchasedWorks.length === 0 ? (
+            <div className={styles.card} style={{ textAlign: 'center', padding: '60px 24px' }}>
+              <ShoppingOutlined style={{ fontSize: 64, color: '#d1d5db', marginBottom: 16 }} />
+              <Text style={{ fontSize: 18, color: '#6b7280', display: 'block', marginBottom: 8 }}>
+                У вас пока нет купленных работ
+              </Text>
+              <Text type="secondary" style={{ fontSize: 14, display: 'block', marginBottom: 24 }}>
+                Купленные работы появятся здесь после покупки в магазине
+              </Text>
+              <Button 
+                type="primary" 
+                size="large"
+                onClick={() => navigate('/shop/ready-works')}
+                icon={<ShoppingOutlined />}
+                className={styles.buttonPrimary}
+              >
+                Перейти к магазину
+              </Button>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 16 }}>
+              {purchasedWorks.map((work: any) => (
+                <Card key={work.id} className={styles.orderCard} hoverable>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24 }}>
+                    <div style={{ flex: 1 }}>
+                      <Title level={5} style={{ margin: '0 0 8px 0', fontSize: 16 }}>
+                        {work.title}
+                      </Title>
+                      <Text type="secondary" style={{ fontSize: 13 }}>
+                        Автор: {work.author}
+                      </Text>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+                      <Text strong style={{ fontSize: 20, color: '#10b981' }}>
+                        {work.price} ₽
+                      </Text>
+                      <Button 
+                        type="primary"
+                        icon={<DownloadOutlined />}
+                        className={styles.buttonPrimary}
+                      >
+                        Скачать
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Модальные окна - минимальные заглушки для полноты функциональности */}
+      {/* Модальные окна */}
       {/* Модальное окно мессенджера */}
       <Modal
         open={messageModalVisible}
@@ -610,7 +468,7 @@ const MyWorks: React.FC = () => {
 
             {/* Search */}
             <div style={{ padding: '12px', background: '#ffffff' }}>
-              <Input
+              <AntdInput
                 prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
                 placeholder="Поиск пользователя"
                 style={{ borderRadius: 8 }}
@@ -711,7 +569,7 @@ const MyWorks: React.FC = () => {
               gap: 8,
               alignItems: 'flex-end'
             }}>
-              <Input.TextArea
+              <AntdInput.TextArea
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Введите сообщение..."
@@ -1279,7 +1137,7 @@ const MyWorks: React.FC = () => {
                 style={{ width: 280 }}
               />
 
-              <Input
+              <AntdInput
                 placeholder="Поиск по операциям"
                 prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
                 style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
@@ -1731,7 +1589,7 @@ const MyWorks: React.FC = () => {
         title="Мои друзья"
       >
         <div style={{ paddingTop: 16 }}>
-          <Input.Search
+          <AntdInput.Search
             placeholder="Поиск друзей..."
             allowClear
             style={{ marginBottom: 24 }}
@@ -1768,5 +1626,5 @@ const MyWorks: React.FC = () => {
   );
 };
 
-export default MyWorks;
+export default PurchasedWorks;
 
