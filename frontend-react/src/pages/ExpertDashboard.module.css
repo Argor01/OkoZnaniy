@@ -1,13 +1,64 @@
 /* Container and layout */
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: #f3f4f6;
   padding: 32px;
 }
 
 .contentWrapper {
-  max-width: 1200px;
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: fit-content;
+  position: sticky;
+  top: 32px;
+}
+
+.sidebarMenu {
+  background: transparent;
+  border: none;
+}
+
+.sidebarMenu .ant-menu-item {
+  border-radius: 12px;
+  margin-bottom: 8px;
+  height: 48px;
+  line-height: 48px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sidebarMenu .ant-menu-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.sidebarMenu .ant-menu-item-selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  color: white;
+}
+
+.sidebarMenu .ant-menu-item-selected .anticon {
+  color: white;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Header */
@@ -15,7 +66,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 0;
   padding: 24px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -317,31 +368,17 @@
 /* Profile Block */
 .profileBlock {
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%) padding-box,
-              linear-gradient(135deg, rgba(102, 126, 234, 0.35), rgba(240, 147, 251, 0.35)) border-box;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 28px 32px;
+  margin-top: 0;
   margin-bottom: 32px;
   box-shadow: 0 10px 40px rgba(17, 24, 39, 0.12);
-  border: 1px solid transparent;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.profileBlock:hover {
-  box-shadow: 0 16px 48px rgba(17, 24, 39, 0.16);
-  transform: translateY(-2px);
-}
 
-.profileBlock::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(1200px 300px at -10% -20%, rgba(102, 126, 234, 0.15) 0%, transparent 60%),
-              radial-gradient(900px 250px at 110% 0%, rgba(240, 147, 251, 0.12) 0%, transparent 60%);
-}
 
 .profileBlockContent {
   display: flex;
@@ -447,6 +484,16 @@
 }
 
 @media (max-width: 840px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: relative;
+    top: 0;
+  }
+
   .profileBlockContent {
     flex-direction: column;
     align-items: center;

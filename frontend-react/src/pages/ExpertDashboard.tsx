@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select } from 'antd';
-import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined } from '@ant-design/icons';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu } from 'antd';
+import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
 import { useNavigate } from 'react-router-dom';
@@ -40,9 +40,9 @@ const ExpertDashboard: React.FC = () => {
   const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
   const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
   const [activeTab, setActiveTab] = useState<string>('about');
-  const [statusText, setStatusText] = useState<string>('');
-  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('orders');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
   const [applicationForm] = Form.useForm();
   const [specializationForm] = Form.useForm();
@@ -232,10 +232,56 @@ const ExpertDashboard: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
-        {/* Header */}
+        {/* Sidebar */}
+        <div className={styles.sidebar}>
+          <Menu
+            mode="vertical"
+            selectedKeys={[selectedMenuKey]}
+            onSelect={({ key }) => {
+              setSelectedMenuKey(key);
+              const tabKey = key === 'orders' ? 'orders' : key === 'works' ? 'works' : 'orders';
+              setActiveTab(tabKey);
+              
+              // Плавная прокрутка к вкладкам
+              setTimeout(() => {
+                if (tabsRef.current) {
+                  tabsRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }
+              }, 100);
+            }}
+            className={styles.sidebarMenu}
+          >
+            <Menu.Item 
+              key="orders" 
+              icon={<ShoppingOutlined />}
+            >
+              Мои заказы
+            </Menu.Item>
+            <Menu.Item 
+              key="works" 
+              icon={<FileDoneOutlined />}
+            >
+              Мои работы
+            </Menu.Item>
+          </Menu>
+        </div>
+
+        {/* Main Content */}
+        <div className={styles.mainContent}>
+          {/* Header */}
         <div className={styles.header}>
           <h1 className={styles.headerTitle}>Личный кабинет эксперта</h1>
           <Space>
+            <Button 
+              type="primary"
+              className={styles.buttonPrimary}
+              onClick={() => navigate('/create-order')}
+            >
+              Разместить задание
+            </Button>
             <Button 
               icon={<EditOutlined />}
               className={styles.buttonSecondary}
@@ -310,56 +356,45 @@ const ExpertDashboard: React.FC = () => {
                 <Button
                   icon={<MessageOutlined />}
                   className={styles.buttonSecondary}
-                  style={{ marginBottom: 12, width: 'fit-content' }}
+                  style={{ width: 'fit-content', marginBottom: 16 }}
                 >
                   Сообщение
                 </Button>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {isEditingStatus ? (
-                    <>
-                      <Input
-                        value={statusText}
-                        onChange={(e) => setStatusText(e.target.value)}
-                        placeholder="Введите статус (70 символов)"
-                        maxLength={70}
-                        className={styles.statusInput}
-                        style={{ flex: 1, minWidth: 300 }}
+                <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <LikeOutlined style={{ color: '#10b981', fontSize: 16 }} />
+                        <Text style={{ fontSize: 14, color: '#1f2937', marginRight: 8 }}>Рейтинг исполнителя:</Text>
+                      </div>
+                      <Rate
+                        disabled
+                        value={typeof expertStats?.average_rating === 'number' ? expertStats.average_rating : 0}
+                        allowHalf
+                        style={{ fontSize: 16 }}
                       />
-                      <Button 
-                        type="text"
-                        onClick={() => {
-                          setIsEditingStatus(false);
-                          // Здесь можно сохранить статус через API
-                        }}
-                        className={styles.saveButtonText}
-                      >
-                        Сохранить
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Input
-                        value={statusText || 'Нажмите редактировать, чтобы ввести статус. (70 символов)'}
-                        placeholder="Нажмите редактировать, чтобы ввести статус. (70 символов)"
-                        readOnly
-                        onClick={() => setIsEditingStatus(true)}
-                        className={styles.statusInput}
-                        style={{ 
-                          flex: 1, 
-                          minWidth: 300,
-                          cursor: 'pointer',
-                          color: !statusText ? '#9ca3af' : '#1f2937'
-                        }}
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {typeof expertStats?.average_rating === 'number' ? expertStats.average_rating.toFixed(1) : '0.0'} / 5.0
+                      </Text>
+                    </Space>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <DislikeOutlined style={{ color: '#ef4444', fontSize: 16 }} />
+                        <Text style={{ fontSize: 14, color: '#1f2937', marginRight: 8 }}>Рейтинг заказчика:</Text>
+                      </div>
+                      <Rate
+                        disabled
+                        value={0}
+                        allowHalf
+                        style={{ fontSize: 16 }}
                       />
-                      <span 
-                        onClick={() => setIsEditingStatus(true)}
-                        className={styles.saveButtonText}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        Сохранить
-                      </span>
-                    </>
-                  )}
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        0.0 / 5.0
+                      </Text>
+                    </Space>
+                  </div>
                 </div>
               </div>
             </div>
@@ -368,22 +403,6 @@ const ExpertDashboard: React.FC = () => {
                 <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
                   На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
                 </Text>
-                <div style={{ marginBottom: 12 }}>
-                  <Space>
-                    <LikeOutlined style={{ color: '#10b981', fontSize: 16 }} />
-                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
-                      Рейтинг исполнителя: <span className={styles.statsNumber}>{typeof expertStats?.average_rating === 'number' ? expertStats.average_rating.toFixed(1) : '0'}</span>
-                    </Text>
-                  </Space>
-                </div>
-                <div style={{ marginBottom: 12 }}>
-                  <Space>
-                    <DislikeOutlined style={{ color: '#ef4444', fontSize: 16 }} />
-                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
-                      Рейтинг заказчика: <span className={styles.statsNumber}>0</span>
-                    </Text>
-                  </Space>
-                </div>
                 <div>
                   <Space>
                     <TrophyOutlined style={{ color: '#667eea', fontSize: 16 }} />
@@ -455,6 +474,7 @@ const ExpertDashboard: React.FC = () => {
         )}
 
         {/* Navigation Tabs */}
+        <div ref={tabsRef}>
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -743,115 +763,7 @@ const ExpertDashboard: React.FC = () => {
             border: '1px solid rgba(255, 255, 255, 0.2)',
           }}
         />
-
-        {/* In Progress Orders Section - Always visible */}
-        <div className={styles.sectionCard}>
-          <div className={styles.sectionCardHeader}>
-            <h2 className={styles.sectionTitle}>Мои заказы (в работе)</h2>
-          </div>
-          {(myInProgress as Order[] | undefined)?.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Text>Нет заказов в работе</Text>
-            </div>
-          ) : (
-            <div>
-              {((myInProgress as Order[] | undefined) || []).map((order) => (
-              <div key={order.id} className={styles.orderCard}>
-                <div className={styles.orderHeader}>
-                  <div style={{ flex: 1 }}>
-                    <h4 className={styles.orderTitle}>{order.title}</h4>
-                    <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
-                    <div className={styles.orderTags} style={{ marginTop: 12 }}>
-                      {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
-                      {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
-                      <span className={styles.tagGreen}>до {dayjs(order.deadline).format('DD.MM.YYYY')}</span>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p className={styles.orderBudget}>{order.budget} ₽</p>
-                  </div>
-                </div>
-                <div style={{ marginTop: 16, marginBottom: 16 }}>
-                  <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
-                </div>
-                <div className={styles.actionButtons}>
-                  <Button
-                    type="primary"
-                    className={styles.buttonPrimary}
-                    onClick={async () => {
-                      try {
-                        await ordersApi.submitOrder(order.id);
-                        message.success('Отправлено на проверку');
-                        queryClient.invalidateQueries({ queryKey: ['my-orders-in-progress'] });
-                      } catch (e: any) {
-                        message.error(e?.response?.data?.detail || 'Не удалось отправить на проверку');
-                      }
-                    }}
-                  >
-                    Отправить на проверку
-                  </Button>
-                  <Upload
-                    beforeUpload={async (file) => {
-                      try {
-                        await ordersApi.uploadOrderFile(order.id, file, { file_type: 'solution' });
-                        message.success('Файл загружен');
-                        queryClient.invalidateQueries({ queryKey: ['my-orders-in-progress'] });
-                      } catch (e: any) {
-                        message.error(e?.response?.data?.detail || 'Ошибка загрузки файла');
-                      }
-                      return false;
-                    }}
-                    showUploadList={false}
-                  >
-                    <Button className={styles.buttonSecondary} icon={<UploadOutlined />}>
-                      Загрузить файл
-                    </Button>
-                  </Upload>
-                </div>
-                <div style={{ marginTop: 20, padding: 16, background: '#f9fafb', borderRadius: 12 }}>
-                  <strong style={{ display: 'block', marginBottom: 8, fontSize: 14 }}>Чат по заказу</strong>
-                  <OrderChat orderId={order.id} />
-                </div>
-              </div>
-              ))}
-            </div>
-          )}
         </div>
-
-        {/* Completed Orders Section */}
-        <div className={styles.sectionCard}>
-          <div className={styles.sectionCardHeader}>
-            <h2 className={styles.sectionTitle}>Мои заказы (завершенные)</h2>
-          </div>
-          {(myCompleted as Order[] | undefined)?.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Text>Нет завершенных заказов</Text>
-            </div>
-          ) : (
-            <div>
-              {((myCompleted as Order[] | undefined) || []).map((order) => (
-              <div key={order.id} className={styles.orderCard}>
-                <div className={styles.orderHeader}>
-                  <div style={{ flex: 1 }}>
-                    <h4 className={styles.orderTitle}>{order.title}</h4>
-                    <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
-                    <div className={styles.orderTags} style={{ marginTop: 12 }}>
-                      {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
-                      {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
-                      <span className={styles.tagGreen}>до {dayjs(order.deadline).format('DD.MM.YYYY')}</span>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p className={styles.orderBudget}>{order.budget} ₽</p>
-                  </div>
-                </div>
-                <div style={{ marginTop: 16 }}>
-                  <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
-                </div>
-              </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
