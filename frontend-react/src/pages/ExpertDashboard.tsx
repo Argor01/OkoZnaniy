@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse } from 'antd';
-import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker } from 'antd';
+import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+const { RangePicker } = DatePicker;
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
@@ -41,11 +42,16 @@ const ExpertDashboard: React.FC = () => {
   const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
   const [activeTab, setActiveTab] = useState<string>('about');
   const [selectedMenuKey, setSelectedMenuKey] = useState<string>('orders');
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
   const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [financeModalVisible, setFinanceModalVisible] = useState(false);
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<string>('all');
+  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
   const [applicationForm] = Form.useForm();
@@ -287,8 +293,11 @@ const ExpertDashboard: React.FC = () => {
 
           {/* Navigation Menu */}
             <Menu
-              mode="vertical"
+              mode="inline"
               selectedKeys={[selectedMenuKey]}
+              openKeys={openKeys}
+              onOpenChange={setOpenKeys}
+              triggerSubMenuAction="hover"
               onSelect={({ key }) => {
                 if (key === 'messages') {
                   setMessageModalVisible(true);
@@ -298,19 +307,66 @@ const ExpertDashboard: React.FC = () => {
                   setFaqModalVisible(true);
                   return;
                 }
+                if (key === 'notifications') {
+                  setNotificationsModalVisible(true);
+                  return;
+                }
+                if (key === 'arbitration') {
+                  setArbitrationModalVisible(true);
+                  return;
+                }
+                // Обработка подпунктов "На счету"
+                if (key === 'balance' || key.startsWith('balance-')) {
+                  setFinanceModalVisible(true);
+                  return;
+                }
+                // Обработка подпунктов "Мои заказы"
+                if (key.startsWith('orders-')) {
+                  setSelectedMenuKey('orders');
+                  setActiveTab('orders');
+                  setTimeout(() => {
+                    if (tabsRef.current) {
+                      tabsRef.current.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                      });
+                    }
+                  }, 100);
+                  return;
+                }
+                // Обработка подпунктов "Мои работы"
+                if (key.startsWith('works-')) {
+                  navigate('/works');
+                  return;
+                }
+                // Обработка подпунктов "Авторский магазин"
+                if (key === 'shop-ready-works') {
+                  navigate('/shop/ready-works');
+                  return;
+                }
+                if (key === 'shop-add-work') {
+                  navigate('/shop/add-work');
+                  return;
+                }
+                // Обработка клика на основное меню "Мои заказы" или "Мои работы"
+                if (key === 'orders') {
+                  setSelectedMenuKey(key);
+                  setActiveTab(key);
+                  setTimeout(() => {
+                    if (tabsRef.current) {
+                      tabsRef.current.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                      });
+                    }
+                  }, 100);
+                  return;
+                }
+                if (key === 'works') {
+                  navigate('/works');
+                  return;
+                }
                 setSelectedMenuKey(key);
-                const tabKey = key === 'orders' ? 'orders' : key === 'works' ? 'works' : 'orders';
-                setActiveTab(tabKey);
-                
-                // Плавная прокрутка к вкладкам
-                setTimeout(() => {
-                  if (tabsRef.current) {
-                    tabsRef.current.scrollIntoView({ 
-                      behavior: 'smooth', 
-                      block: 'start' 
-                    });
-                  }
-                }, 100);
               }}
               className={styles.sidebarMenu}
             >
@@ -326,24 +382,55 @@ const ExpertDashboard: React.FC = () => {
             <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
               Арбитраж
             </Menu.Item>
-            <Menu.Item key="balance" icon={<WalletOutlined />}>
-              На счету: 0.00 ₽
-            </Menu.Item>
-            <Menu.Item 
-              key="orders" 
-              icon={<ShoppingOutlined />}
-            >
-              Мои заказы
-            </Menu.Item>
-            <Menu.Item 
-              key="works" 
-              icon={<FileDoneOutlined />}
-            >
-              Мои работы
-            </Menu.Item>
-            <Menu.Item key="shop" icon={<ShopOutlined />}>
-              Авторский магазин
-            </Menu.Item>
+            <Menu.SubMenu key="balance" icon={<WalletOutlined />} title="На счету: 0.00 ₽">
+              <Menu.Item key="balance-available" style={{ color: '#10b981' }}>
+                Доступно к выводу: 0.00 ₽
+              </Menu.Item>
+              <Menu.Item key="balance-blocked" style={{ color: '#ef4444' }}>
+                Заблокировано: 0.00 ₽
+              </Menu.Item>
+              <Menu.Item key="balance-held" style={{ color: '#6b7280' }}>
+                Удержано: 0.00 ₽
+              </Menu.Item>
+            </Menu.SubMenu>
+            <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
+              <Menu.Item key="orders-all">Все (0)</Menu.Item>
+              <Menu.Item key="orders-open">Открыт ()</Menu.Item>
+              <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
+              <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
+              <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
+              <Menu.Item key="orders-review">На проверке ()</Menu.Item>
+              <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
+              <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
+              <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
+              <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
+            </Menu.SubMenu>
+            <Menu.SubMenu key="works" icon={<FileDoneOutlined />} title="Мои работы">
+              <Menu.Item key="works-all">Все (0)</Menu.Item>
+              <Menu.Item key="works-open">Открыт (0)</Menu.Item>
+              <Menu.Item key="works-confirming">На подтверждении (0)</Menu.Item>
+              <Menu.Item key="works-progress">На выполнении (0)</Menu.Item>
+              <Menu.Item key="works-payment">Ожидает оплаты (0)</Menu.Item>
+              <Menu.Item key="works-review">На проверке (0)</Menu.Item>
+              <Menu.Item key="works-completed">Выполнен (0)</Menu.Item>
+              <Menu.Item key="works-revision">На доработке (0)</Menu.Item>
+              <Menu.Item key="works-download">Ожидает скачивания (0)</Menu.Item>
+              <Menu.Item key="works-closed">Закрыт (0)</Menu.Item>
+            </Menu.SubMenu>
+            <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
+              <Menu.Item key="shop-ready-works">
+                Магазин готовых работ
+              </Menu.Item>
+              <Menu.Item key="shop-add-work">
+                Добавить работу в магазин
+              </Menu.Item>
+              <Menu.Item key="shop-my-works">
+                Мои работы
+              </Menu.Item>
+              <Menu.Item key="shop-purchased">
+                Купленные работы
+              </Menu.Item>
+            </Menu.SubMenu>
             <Menu.Item key="friends" icon={<TeamOutlined />}>
               Мои друзья
             </Menu.Item>
@@ -1880,6 +1967,518 @@ const ExpertDashboard: React.FC = () => {
                 },
               ]}
             />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Модальное окно Финансы */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: 8
+          }}>
+            Финансы
+          </div>
+        }
+        open={financeModalVisible}
+        onCancel={() => setFinanceModalVisible(false)}
+        footer={null}
+        width={1200}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            padding: '0',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }
+        }}
+      >
+        <div style={{ display: 'flex', gap: 24, minHeight: '600px' }}>
+          {/* Левая часть - История операций */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Text strong style={{ fontSize: 20, color: '#1f2937', display: 'block', marginBottom: 20 }}>
+              История операций
+            </Text>
+
+            {/* Фильтры */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+              <Select
+                defaultValue="all"
+                style={{ width: 180 }}
+                suffixIcon={<DownOutlined />}
+              >
+                <Select.Option value="all">Все операции</Select.Option>
+                <Select.Option value="income">Поступления</Select.Option>
+                <Select.Option value="expense">Списания</Select.Option>
+              </Select>
+              
+              <RangePicker
+                defaultValue={[dayjs().startOf('month'), dayjs().endOf('month')]}
+                format="DD.MM.YYYY"
+                style={{ width: 280 }}
+              />
+
+              <Input
+                placeholder="Поиск по операциям"
+                prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+                style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
+              />
+            </div>
+
+            {/* Статистика за период */}
+            <div style={{ 
+              background: '#f9fafb', 
+              borderRadius: 12, 
+              padding: '16px', 
+              marginBottom: 24,
+              border: '1px solid #e5e7eb'
+            }}>
+              <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block', marginBottom: 12 }}>
+                Операции за данный период:
+              </Text>
+              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                  Всего заказов: <Text strong style={{ color: '#1f2937' }}>0</Text>
+                </Text>
+                <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                  Выполнено заказов: <Text strong style={{ color: '#1f2937' }}>0</Text>
+                </Text>
+                <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                  Поступлений: <Text strong style={{ color: '#10b981' }}>0</Text>
+                </Text>
+                <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                  Списаний: <Text strong style={{ color: '#ef4444' }}>0</Text>
+                </Text>
+              </div>
+            </div>
+
+            {/* Область для списка операций */}
+            <div style={{ 
+              minHeight: '400px',
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Text type="secondary" style={{ fontSize: 14 }}>
+                Нет операций за выбранный период
+              </Text>
+            </div>
+          </div>
+
+          {/* Правая часть - Боковая панель */}
+          <div style={{ width: 300, flexShrink: 0 }}>
+            <div style={{ 
+              background: '#f9fafb', 
+              borderRadius: 16, 
+              padding: '24px',
+              border: '1px solid #e5e7eb'
+            }}>
+              {/* Текущий баланс */}
+              <div style={{ marginBottom: 24 }}>
+                <Text style={{ fontSize: 14, color: '#6b7280', display: 'block', marginBottom: 8 }}>
+                  Текущий баланс:
+                </Text>
+                <Text strong style={{ fontSize: 32, color: '#1f2937', display: 'block', marginBottom: 16 }}>
+                  0.00 ₽
+                </Text>
+                <Button 
+                  type="primary"
+                  block
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                    border: 'none',
+                    borderRadius: 8,
+                    height: 40
+                  }}
+                >
+                  Пополнить баланс
+                </Button>
+              </div>
+
+              {/* Детализация баланса */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ 
+                    width: 12, 
+                    height: 12, 
+                    background: '#10b981', 
+                    borderRadius: 2, 
+                    marginRight: 8 
+                  }} />
+                  <Text style={{ fontSize: 13, color: '#6b7280' }}>Доступно к выводу:</Text>
+                </div>
+                <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+                  0.00 ₽
+                </Text>
+
+                <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
+                  <div style={{ 
+                    width: 12, 
+                    height: 12, 
+                    background: '#ef4444', 
+                    borderRadius: 2, 
+                    marginRight: 8 
+                  }} />
+                  <Text style={{ fontSize: 13, color: '#6b7280' }}>Заблокировано:</Text>
+                </div>
+                <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+                  0.00 ₽
+                </Text>
+
+                <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
+                  <div style={{ 
+                    width: 12, 
+                    height: 12, 
+                    background: '#6b7280', 
+                    borderRadius: 2, 
+                    marginRight: 8 
+                  }} />
+                  <Text style={{ fontSize: 13, color: '#6b7280' }}>Удерживается:</Text>
+                </div>
+                <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+                  0.00 ₽
+                </Text>
+              </div>
+
+              {/* Быстрые ссылки */}
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+                <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block', marginBottom: 12 }}>
+                  Быстрые ссылки:
+                </Text>
+                <Space direction="vertical" style={{ width: '100%' }} size={8}>
+                  <Button 
+                    type="text" 
+                    block 
+                    style={{ textAlign: 'left', height: 36 }}
+                    onClick={() => {
+                      // Переход к истории операций
+                    }}
+                  >
+                    История операций
+                  </Button>
+                  <Button 
+                    type="text" 
+                    block 
+                    style={{ textAlign: 'left', height: 36 }}
+                    onClick={() => {
+                      // Переход к заблокированным
+                    }}
+                  >
+                    Заблокировано
+                  </Button>
+                  <Button 
+                    type="text" 
+                    block 
+                    style={{ textAlign: 'left', height: 36 }}
+                    onClick={() => {
+                      // Переход к удерживаемым
+                    }}
+                  >
+                    Удерживается
+                  </Button>
+                  <Button 
+                    type="text" 
+                    block 
+                    style={{ textAlign: 'left', height: 36 }}
+                    onClick={() => {
+                      // Переход к платным услугам
+                    }}
+                  >
+                    Платные услуги
+                  </Button>
+                </Space>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Модальное окно Уведомления */}
+      <Modal
+        title={null}
+        open={notificationsModalVisible}
+        onCancel={() => setNotificationsModalVisible(false)}
+        footer={null}
+        width={900}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            padding: '0',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          },
+          header: {
+            display: 'none'
+          }
+        }}
+      >
+        <div style={{ padding: '0' }}>
+          {/* Заголовок */}
+          <Text strong style={{ fontSize: 24, color: '#1f2937', display: 'block', marginBottom: 24 }}>
+            Уведомления
+          </Text>
+
+          {/* Навигационные вкладки */}
+          <div style={{ 
+            display: 'flex', 
+            gap: 0,
+            marginBottom: 24,
+            background: '#f9fafb',
+            borderRadius: 12,
+            padding: '4px',
+            border: '1px solid #e5e7eb'
+          }}>
+            <div
+              onClick={() => setNotificationTab('all')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: notificationTab === 'all' ? '#ffffff' : 'transparent',
+                borderBottom: notificationTab === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <BellOutlined style={{ 
+                fontSize: 18, 
+                color: notificationTab === 'all' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 14, 
+                color: notificationTab === 'all' ? '#1f2937' : '#6b7280',
+                fontWeight: notificationTab === 'all' ? 500 : 400
+              }}>
+                Все
+              </Text>
+            </div>
+            <div
+              onClick={() => setNotificationTab('orders')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: notificationTab === 'orders' ? '#ffffff' : 'transparent',
+                borderBottom: notificationTab === 'orders' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileDoneOutlined style={{ 
+                fontSize: 18, 
+                color: notificationTab === 'orders' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 14, 
+                color: notificationTab === 'orders' ? '#1f2937' : '#6b7280',
+                fontWeight: notificationTab === 'orders' ? 500 : 400
+              }}>
+                Заказы
+              </Text>
+            </div>
+            <div
+              onClick={() => setNotificationTab('claims')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: notificationTab === 'claims' ? '#ffffff' : 'transparent',
+                borderBottom: notificationTab === 'claims' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <TrophyOutlined style={{ 
+                fontSize: 18, 
+                color: notificationTab === 'claims' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 14, 
+                color: notificationTab === 'claims' ? '#1f2937' : '#6b7280',
+                fontWeight: notificationTab === 'claims' ? 500 : 400
+              }}>
+                Претензии
+              </Text>
+            </div>
+            <div
+              onClick={() => setNotificationTab('forum')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: notificationTab === 'forum' ? '#ffffff' : 'transparent',
+                borderBottom: notificationTab === 'forum' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <CommentOutlined style={{ 
+                fontSize: 18, 
+                color: notificationTab === 'forum' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 14, 
+                color: notificationTab === 'forum' ? '#1f2937' : '#6b7280',
+                fontWeight: notificationTab === 'forum' ? 500 : 400
+              }}>
+                Форум
+              </Text>
+            </div>
+            <div
+              onClick={() => setNotificationTab('questions')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: notificationTab === 'questions' ? '#ffffff' : 'transparent',
+                borderBottom: notificationTab === 'questions' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <QuestionCircleOutlined style={{ 
+                fontSize: 18, 
+                color: notificationTab === 'questions' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 14, 
+                color: notificationTab === 'questions' ? '#1f2937' : '#6b7280',
+                fontWeight: notificationTab === 'questions' ? 500 : 400
+              }}>
+                Вопросы
+              </Text>
+            </div>
+          </div>
+
+          {/* Область контента */}
+          <div style={{ 
+            minHeight: '500px',
+            background: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            padding: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              Нет уведомлений
+            </Text>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Модальное окно Арбитраж */}
+      <Modal
+        title={null}
+        open={arbitrationModalVisible}
+        onCancel={() => setArbitrationModalVisible(false)}
+        footer={null}
+        width={900}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            padding: '0',
+            minHeight: '400px',
+            background: '#f3f4f6'
+          },
+          header: {
+            display: 'none'
+          }
+        }}
+      >
+        <div style={{ 
+          background: '#f3f4f6',
+          minHeight: '400px',
+          padding: '0'
+        }}>
+          {/* Заголовок */}
+          <Text strong style={{ 
+            fontSize: 24, 
+            color: '#1f2937', 
+            display: 'block', 
+            marginBottom: 24 
+          }}>
+            Арбитраж
+          </Text>
+
+          {/* Область контента */}
+          <div style={{ 
+            background: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            padding: '48px 24px',
+            minHeight: '350px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
+              У вас нет арбитражей
+            </Text>
           </div>
         </div>
       </Modal>

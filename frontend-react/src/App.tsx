@@ -26,6 +26,9 @@ import ExpertApplication from './pages/ExpertApplication';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ArbitratorDashboard from './pages/ArbitratorDashboard';
+import ShopReadyWorks from './pages/ShopReadyWorks';
+import AddWorkToShop from './pages/AddWorkToShop';
+import MyWorks from './pages/MyWorks';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Configure dayjs
@@ -103,10 +106,34 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/arbitrator" 
+                path="/arbitrator"
                 element={
                   <ProtectedRoute>
                     <ArbitratorDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/shop/ready-works"
+                element={
+                  <ProtectedRoute>
+                    <ShopReadyWorks />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/shop/add-work"
+                element={
+                  <ProtectedRoute>
+                    <AddWorkToShop />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/works"
+                element={
+                  <ProtectedRoute>
+                    <MyWorks />
                   </ProtectedRoute>
                 } 
               />
