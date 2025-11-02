@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu } from 'antd';
-import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined } from '@ant-design/icons';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse } from 'antd';
+import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
 import { useNavigate } from 'react-router-dom';
@@ -42,6 +42,10 @@ const ExpertDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('about');
   const [selectedMenuKey, setSelectedMenuKey] = useState<string>('orders');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [messageTab, setMessageTab] = useState<string>('all');
+  const [messageText, setMessageText] = useState<string>('');
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
   const [applicationForm] = Form.useForm();
@@ -72,13 +76,15 @@ const ExpertDashboard: React.FC = () => {
   const { data: application, isLoading: applicationLoading } = useQuery({
     queryKey: ['expert-application'],
     queryFn: async () => {
-      const app = await expertsApi.getMyApplication();
-      return app;
+      try {
+        const app = await expertsApi.getMyApplication();
+        return app;
+      } catch {
+        // Анкета не найдена - это нормально, значит её ещё нет
+        return null;
+      }
     },
-    retry: false,
-    onError: () => {
-      // Анкета не найдена - это нормально, значит её ещё нет
-    }
+    retry: false
   });
 
   // Загружаем специализации
@@ -234,26 +240,95 @@ const ExpertDashboard: React.FC = () => {
       <div className={styles.contentWrapper}>
         {/* Sidebar */}
         <div className={styles.sidebar}>
-          <Menu
-            mode="vertical"
-            selectedKeys={[selectedMenuKey]}
-            onSelect={({ key }) => {
-              setSelectedMenuKey(key);
-              const tabKey = key === 'orders' ? 'orders' : key === 'works' ? 'works' : 'orders';
-              setActiveTab(tabKey);
-              
-              // Плавная прокрутка к вкладкам
-              setTimeout(() => {
-                if (tabsRef.current) {
-                  tabsRef.current.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                  });
+          {/* User Profile Section */}
+          <div className={styles.sidebarProfile}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Badge 
+                count={<CheckCircleOutlined style={{ color: '#10b981', fontSize: 12 }} />} 
+                offset={[-2, 2]}
+              >
+                <Badge 
+                  count={<span style={{ 
+                    background: '#f97316', 
+                    color: 'white', 
+                    fontSize: 10, 
+                    padding: '2px 6px', 
+                    borderRadius: 10,
+                    fontWeight: 600
+                  }}>pro</span>} 
+                  offset={[10, -5]}
+                >
+                  <Avatar
+                    size={56}
+                    src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
+                    icon={!profile?.avatar && <UserOutlined />}
+                    style={{ 
+                      backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
+                      border: '2px solid #fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                </Badge>
+              </Badge>
+            </div>
+            <div style={{ flex: 1, marginLeft: 12 }}>
+              <Text strong style={{ fontSize: 15, color: '#1f2937', display: 'block' }}>
+                {profile?.username || profile?.email || 'Эксперт'}
+              </Text>
+            </div>
+            <Button
+              type="text"
+              icon={<SettingOutlined />}
+              size="small"
+              style={{ color: '#6b7280' }}
+              onClick={() => setProfileModalVisible(true)}
+            />
+          </div>
+
+          {/* Navigation Menu */}
+            <Menu
+              mode="vertical"
+              selectedKeys={[selectedMenuKey]}
+              onSelect={({ key }) => {
+                if (key === 'messages') {
+                  setMessageModalVisible(true);
+                  return;
                 }
-              }, 100);
-            }}
-            className={styles.sidebarMenu}
-          >
+                if (key === 'faq') {
+                  setFaqModalVisible(true);
+                  return;
+                }
+                setSelectedMenuKey(key);
+                const tabKey = key === 'orders' ? 'orders' : key === 'works' ? 'works' : 'orders';
+                setActiveTab(tabKey);
+                
+                // Плавная прокрутка к вкладкам
+                setTimeout(() => {
+                  if (tabsRef.current) {
+                    tabsRef.current.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'start' 
+                    });
+                  }
+                }, 100);
+              }}
+              className={styles.sidebarMenu}
+            >
+              <Menu.Item key="messages" icon={<MessageOutlined />}>
+                Сообщения
+              </Menu.Item>
+            <Menu.Item key="notifications" icon={<BellOutlined />}>
+              У вас нет уведомлений
+            </Menu.Item>
+            <Menu.Item key="calendar" icon={<CalendarOutlined />}>
+              {dayjs().format('DD MMMM YYYY')}
+            </Menu.Item>
+            <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
+              Арбитраж
+            </Menu.Item>
+            <Menu.Item key="balance" icon={<WalletOutlined />}>
+              На счету: 0.00 ₽
+            </Menu.Item>
             <Menu.Item 
               key="orders" 
               icon={<ShoppingOutlined />}
@@ -266,11 +341,44 @@ const ExpertDashboard: React.FC = () => {
             >
               Мои работы
             </Menu.Item>
+            <Menu.Item key="shop" icon={<ShopOutlined />}>
+              Авторский магазин
+            </Menu.Item>
+            <Menu.Item key="friends" icon={<TeamOutlined />}>
+              Мои друзья
+            </Menu.Item>
+            <Menu.Item key="favorites" icon={<HeartOutlined />}>
+              Избранное
+            </Menu.Item>
+            <Menu.Item key="bonuses" icon={<GiftOutlined />}>
+              Бонусы
+            </Menu.Item>
+            <Menu.Item key="paid-services" icon={<DollarOutlined />}>
+              Платные услуги
+            </Menu.Item>
+            <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
+              FAQ
+            </Menu.Item>
+            <Menu.Item 
+              key="logout" 
+              icon={<PoweroffOutlined />}
+              danger
+              onClick={() => {
+                authApi.logout();
+                navigate('/');
+                window.location.reload();
+              }}
+              className={styles.logoutMenuItem}
+            >
+              Выход
+            </Menu.Item>
           </Menu>
         </div>
 
         {/* Main Content */}
         <div className={styles.mainContent}>
+          {/* Header and Profile Block Container */}
+          <div className={styles.headerProfileContainer}>
           {/* Header */}
         <div className={styles.header}>
           <h1 className={styles.headerTitle}>Личный кабинет эксперта</h1>
@@ -295,17 +403,6 @@ const ExpertDashboard: React.FC = () => {
               onClick={() => navigate(-1)}
             >
               Назад
-            </Button>
-            <Button
-              icon={<LogoutOutlined />}
-              className={styles.buttonDanger}
-              onClick={() => {
-                authApi.logout();
-                navigate('/');
-                window.location.reload();
-              }}
-            >
-              Выйти
             </Button>
           </Space>
         </div>
@@ -353,13 +450,6 @@ const ExpertDashboard: React.FC = () => {
                 <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
                   Онлайн
                 </Text>
-                <Button
-                  icon={<MessageOutlined />}
-                  className={styles.buttonSecondary}
-                  style={{ width: 'fit-content', marginBottom: 16 }}
-                >
-                  Сообщение
-                </Button>
                 <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
@@ -422,13 +512,14 @@ const ExpertDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Application Status Display */}
         {applicationLoading ? (
           <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
             <Spin size="large" />
           </div>
-        ) : application ? (
+        ) : application && typeof application === 'object' && 'status' in application ? (
           <div className={styles.applicationCard}>
             <div className={styles.applicationHeader}>
               <div>
@@ -437,19 +528,19 @@ const ExpertDashboard: React.FC = () => {
               </div>
               <div 
                 className={`${styles.statusBadge} ${
-                  application.status === 'pending' ? styles.statusPending :
-                  application.status === 'approved' ? styles.statusApproved :
+                  (application as ExpertApplication).status === 'pending' ? styles.statusPending :
+                  (application as ExpertApplication).status === 'approved' ? styles.statusApproved :
                   styles.statusRejected
                 }`}
               >
-                {getApplicationStatusIcon(application.status)}
-                <span>{application.status_display}</span>
+                {getApplicationStatusIcon((application as ExpertApplication).status)}
+                <span>{(application as ExpertApplication).status_display}</span>
               </div>
             </div>
-            {application.status === 'rejected' && application.rejection_reason && (
+            {(application as ExpertApplication).status === 'rejected' && (application as ExpertApplication).rejection_reason && (
               <div style={{ marginTop: 16, padding: 12, background: 'rgba(239, 68, 68, 0.1)', borderRadius: 12 }}>
                 <Text type="danger" style={{ fontSize: 14 }}>
-                  <strong>Причина отклонения:</strong> {application.rejection_reason}
+                  <strong>Причина отклонения:</strong> {(application as ExpertApplication).rejection_reason}
                 </Text>
               </div>
             )}
@@ -1327,6 +1418,470 @@ const ExpertDashboard: React.FC = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Модальное окно мессенджера */}
+      <Modal
+        open={messageModalVisible}
+        onCancel={() => setMessageModalVisible(false)}
+        footer={null}
+        width={900}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            display: 'none'
+          },
+          body: {
+            padding: 0,
+            background: 'rgba(255, 255, 255, 0.95)',
+            height: '600px',
+            display: 'flex'
+          }
+        }}
+      >
+        <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+          {/* Left Sidebar */}
+          <div style={{ 
+            width: '300px', 
+            background: '#f3f4f6', 
+            borderRight: '1px solid #e5e7eb',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Tabs */}
+            <div style={{ 
+              display: 'flex', 
+              borderBottom: '1px solid #e5e7eb',
+              background: '#ffffff',
+              padding: '0 8px'
+            }}>
+              <div
+                onClick={() => setMessageTab('all')}
+                style={{
+                  flex: 1,
+                  padding: '12px 8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  borderBottom: messageTab === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: messageTab === 'all' ? '#3b82f6' : '#6b7280',
+                  fontWeight: messageTab === 'all' ? 600 : 400,
+                  fontSize: 14
+                }}
+              >
+                <MessageOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                Все
+              </div>
+              <div
+                onClick={() => setMessageTab('unread')}
+                style={{
+                  flex: 1,
+                  padding: '12px 8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  borderBottom: messageTab === 'unread' ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: messageTab === 'unread' ? '#3b82f6' : '#6b7280',
+                  fontWeight: messageTab === 'unread' ? 600 : 400,
+                  fontSize: 14
+                }}
+              >
+                <BellOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                Непрочитанные
+              </div>
+              <div
+                onClick={() => setMessageTab('favorites')}
+                style={{
+                  flex: 1,
+                  padding: '12px 8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  borderBottom: messageTab === 'favorites' ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: messageTab === 'favorites' ? '#3b82f6' : '#6b7280',
+                  fontWeight: messageTab === 'favorites' ? 600 : 400,
+                  fontSize: 14
+                }}
+              >
+                <StarOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                Избранные
+              </div>
+              <div
+                onClick={() => setMessageTab('sms')}
+                style={{
+                  flex: 1,
+                  padding: '12px 8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  borderBottom: messageTab === 'sms' ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: messageTab === 'sms' ? '#3b82f6' : '#6b7280',
+                  fontWeight: messageTab === 'sms' ? 600 : 400,
+                  fontSize: 14
+                }}
+              >
+                <MobileOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                SMS
+              </div>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: '12px', background: '#ffffff' }}>
+              <Input
+                prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+                placeholder="Поиск пользователя"
+                style={{ borderRadius: 8 }}
+              />
+            </div>
+
+            {/* Contact List */}
+            <div style={{ 
+              flex: 1, 
+              overflowY: 'auto',
+              background: '#ffffff'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                padding: '12px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #f3f4f6'
+              }}>
+                <Avatar
+                  size={40}
+                  src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
+                  icon={!profile?.avatar && <UserOutlined />}
+                  style={{ backgroundColor: '#667eea' }}
+                />
+                <div style={{ flex: 1, marginLeft: 12 }}>
+                  <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block' }}>
+                    {profile?.username || profile?.email || 'Пользователь'}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 12, color: '#6b7280' }}>
+                    Онлайн
+                  </Text>
+                </div>
+                <Space style={{ marginLeft: 8 }}>
+                  <CheckCircleOutlined style={{ color: '#9ca3af', fontSize: 14 }} />
+                  <StarOutlined style={{ color: '#9ca3af', fontSize: 14 }} />
+                </Space>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Content Area */}
+          <div style={{ 
+            flex: 1, 
+            display: 'flex', 
+            flexDirection: 'column',
+            background: '#ffffff'
+          }}>
+            {/* Header */}
+            <div style={{
+              background: '#e0f2fe',
+              padding: '12px 16px',
+              paddingRight: '48px', // Отступ справа для крестика закрытия
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: '1px solid #bae6fd'
+            }}>
+              <Space>
+                <StarFilled style={{ color: '#0ea5e9', fontSize: 16 }} />
+                <Text style={{ fontSize: 14, color: '#0369a1', fontWeight: 500 }}>
+                  Важные сообщения
+                </Text>
+              </Space>
+              <Button 
+                type="text" 
+                size="small"
+                icon={<MobileOutlined />}
+                style={{ color: '#0369a1', fontSize: 14, marginRight: 0 }}
+              >
+                Отправить SMS
+              </Button>
+            </div>
+
+            {/* Messages Area */}
+            <div style={{ 
+              flex: 1, 
+              overflowY: 'auto',
+              padding: '20px',
+              background: '#ffffff'
+            }}>
+              <div style={{ 
+                textAlign: 'center', 
+                color: '#9ca3af', 
+                paddingTop: '100px',
+                fontSize: 14
+              }}>
+                Нет сообщений
+              </div>
+            </div>
+
+            {/* Input Area */}
+            <div style={{ 
+              padding: '16px',
+              borderTop: '1px solid #e5e7eb',
+              background: '#ffffff',
+              display: 'flex',
+              gap: 8,
+              alignItems: 'flex-end'
+            }}>
+              <Input.TextArea
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="Введите сообщение..."
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                style={{ 
+                  flex: 1,
+                  borderRadius: 8,
+                  border: '1px solid #d1d5db'
+                }}
+              />
+              <Button
+                type="default"
+                shape="circle"
+                icon={<PaperClipOutlined />}
+                style={{ 
+                  width: 40, 
+                  height: 40,
+                  border: '1px solid #d1d5db',
+                  background: '#ffffff'
+                }}
+              />
+              <Button
+                type="default"
+                shape="circle"
+                icon={<SmileOutlined />}
+                style={{ 
+                  width: 40, 
+                  height: 40,
+                  border: '1px solid #d1d5db',
+                  background: '#ffffff'
+                }}
+              />
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<SendOutlined />}
+                style={{ 
+                  width: 40, 
+                  height: 40,
+                  background: '#3b82f6',
+                  border: 'none'
+                }}
+                onClick={() => {
+                  if (messageText.trim()) {
+                    // Здесь будет логика отправки сообщения
+                    setMessageText('');
+                    message.success('Сообщение отправлено');
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Модальное окно FAQ */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: 8
+          }}>
+            Часто задаваемые вопросы
+          </div>
+        }
+        open={faqModalVisible}
+        onCancel={() => setFaqModalVisible(false)}
+        footer={null}
+        width={800}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            padding: '0'
+          }
+        }}
+      >
+        <div style={{ paddingTop: 16 }}>
+          <Text style={{ fontSize: 15, color: '#6b7280', display: 'block', marginBottom: 24 }}>
+            Мы постарались собрать самые распространенные вопросы и дать на них ответы. Чтобы вам было легче разобраться с нашим сервисом.
+          </Text>
+          
+          <div style={{ marginBottom: 16 }}>
+            <Text strong style={{ fontSize: 18, color: '#1f2937', display: 'block', marginBottom: 16 }}>
+              Заказы
+            </Text>
+            
+            <Collapse
+              expandIcon={({ isActive }) => (
+                <PlusOutlined 
+                  style={{ 
+                    fontSize: 16, 
+                    color: '#667eea',
+                    transform: isActive ? 'rotate(45deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s'
+                  }} 
+                />
+              )}
+              expandIconPosition="end"
+              style={{ 
+                background: 'transparent',
+                border: 'none'
+              }}
+              items={[
+                {
+                  key: '1',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как пользоваться сервисом SHELP?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Сервис SHELP предназначен для помощи студентам в выполнении различных учебных заданий. 
+                      Заказчики размещают задания, а эксперты выполняют их за определенную плату. 
+                      После регистрации вы можете создать заказ или стать экспертом и начать выполнять задания.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '2',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как разместить заказ на сервисе SHELP?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Чтобы разместить заказ, перейдите в раздел "Разместить задание" в верхней части страницы. 
+                      Заполните форму с описанием задания, укажите тему, предмет, сроки выполнения и желаемую цену. 
+                      После публикации заказа эксперты смогут предложить свою цену или вы сможете выбрать подходящего исполнителя.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '3',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как взять заказ на выполнение на сервисе SHELP?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Если вы зарегистрированы как эксперт, просматривайте доступные заказы в разделе "Заказы". 
+                      Выберите подходящий заказ и нажмите кнопку "Предложить цену". 
+                      После согласования цены с заказчиком заказ будет назначен вам на выполнение.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '4',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как пользоваться меню?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Боковое меню содержит все основные разделы личного кабинета. 
+                      Через меню вы можете перейти к сообщениям, уведомлениям, календарю, балансу, 
+                      вашим заказам и работам, а также другим разделам сервиса.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '5',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как выбрать специалиста?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      При просмотре заказов вы увидите список предложений от разных экспертов с их ценами. 
+                      Изучите профили экспертов: рейтинг, отзывы, специализации и примеры работ. 
+                      Это поможет вам выбрать наиболее подходящего специалиста для вашего задания.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '6',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Как оплатить заказ?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Оплата заказа происходит безопасно через внутреннюю систему сервиса. 
+                      Средства резервируются на вашем балансе и переводятся исполнителю только после принятия работы. 
+                      Вы можете пополнить баланс через банковскую карту или электронные кошельки.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+                {
+                  key: '7',
+                  label: <Text style={{ fontSize: 15, color: '#1f2937' }}>Какие гарантии предоставляет сервис SHELP для своих пользователей?</Text>,
+                  children: (
+                    <Text style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
+                      Сервис SHELP гарантирует безопасность сделок через систему гарантий. 
+                      Деньги находятся в резерве до принятия работы заказчиком. 
+                      При возникновении споров работает система арбитража. 
+                      Мы проверяем работы на уникальность и обеспечиваем возврат средств в случае несоответствия требованиям.
+                    </Text>
+                  ),
+                  style: { 
+                    background: '#f9fafb',
+                    borderRadius: 12,
+                    marginBottom: 8,
+                    border: '1px solid #e5e7eb'
+                  }
+                },
+              ]}
+            />
+          </div>
+        </div>
       </Modal>
 
       {/* Модальное окно приветствия после создания анкеты */}
