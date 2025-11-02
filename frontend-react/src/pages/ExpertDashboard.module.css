@@ -313,3 +313,149 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Profile Block */
+.profileBlock {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%) padding-box,
+              linear-gradient(135deg, rgba(102, 126, 234, 0.35), rgba(240, 147, 251, 0.35)) border-box;
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 10px 40px rgba(17, 24, 39, 0.12);
+  border: 1px solid transparent;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.profileBlock:hover {
+  box-shadow: 0 16px 48px rgba(17, 24, 39, 0.16);
+  transform: translateY(-2px);
+}
+
+.profileBlock::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(1200px 300px at -10% -20%, rgba(102, 126, 234, 0.15) 0%, transparent 60%),
+              radial-gradient(900px 250px at 110% 0%, rgba(240, 147, 251, 0.12) 0%, transparent 60%);
+}
+
+.profileBlockContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.profileLeft {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.profileRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.profileStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Status Input */
+.statusInput {
+  border: 2px solid #fbbf24 !important;
+  border-radius: 8px !important;
+  background-color: #fffbeb !important;
+  font-size: 14px !important;
+  padding: 8px 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.statusInput:hover {
+  border-color: #f59e0b !important;
+  background-color: #fef3c7 !important;
+}
+
+.statusInput:focus,
+.statusInput:focus-within {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+}
+
+/* Save Button Text */
+.saveButtonText {
+  color: #9ca3af;
+  font-size: 14px;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.saveButtonText:hover {
+  color: #667eea;
+  text-decoration-color: #667eea;
+}
+
+/* Stats Numbers with colored underlines */
+.statsNumber {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #d1d5db;
+  text-underline-offset: 3px;
+}
+
+.statsNumberCompleted {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #f97316;
+  text-underline-offset: 3px;
+}
+
+.statsNumberSuccess {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #fbbf24;
+  text-underline-offset: 3px;
+}
+
+.statsNumberEarnings {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #ef4444;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 840px) {
+  .profileBlockContent {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .profileRight {
+    align-items: center;
+    text-align: center;
+  }
+}

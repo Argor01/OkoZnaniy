@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col } from 'antd';
-import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select } from 'antd';
+import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
-import { expertsApi, type ExpertApplication, type Education } from '../api/experts';
+import { expertsApi, type ExpertApplication, type Education, type Specialization } from '../api/experts';
+import { catalogApi } from '../api/catalog';
 import styles from './ExpertDashboard.module.css';
 
 interface UserProfile {
@@ -27,7 +28,7 @@ interface UserProfile {
   is_verified?: boolean;
 }
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
@@ -35,9 +36,16 @@ const ExpertDashboard: React.FC = () => {
   const [bidLoading, setBidLoading] = useState<Record<number, boolean>>({});
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
+  const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
+  const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
+  const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('about');
+  const [statusText, setStatusText] = useState<string>('');
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [form] = Form.useForm();
   const [applicationForm] = Form.useForm();
+  const [specializationForm] = Form.useForm();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['available-orders'],
@@ -73,16 +81,40 @@ const ExpertDashboard: React.FC = () => {
     }
   });
 
+  // Загружаем специализации
+  const { data: specializations = [], isLoading: specializationsLoading } = useQuery({
+    queryKey: ['expert-specializations'],
+    queryFn: () => expertsApi.getSpecializations(),
+  });
+
+  // Загружаем статистику эксперта
+  const { data: expertStats } = useQuery({
+    queryKey: ['expert-statistics', userProfile?.id],
+    queryFn: () => expertsApi.getExpertStatistics(userProfile!.id),
+    enabled: !!userProfile?.id,
+  });
+
+  // Загружаем предметы для выбора специализаций
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
   React.useEffect(() => {
     if (userProfile) {
       setProfile(userProfile);
     }
   }, [userProfile]);
 
-  // Автоматически открываем форму анкеты, если её нет
+  // Автоматически открываем форму анкеты, если её нет и пользователь только что зарегистрировался
   React.useEffect(() => {
     if (!applicationLoading && !application && userProfile?.role === 'expert') {
-      // Можно открыть форму автоматически или показать призыв к действию
+      // Проверяем, был ли эксперт только что зарегистрирован
+      const isNewExpert = localStorage.getItem('expert_just_registered');
+      if (isNewExpert === 'true') {
+        setApplicationModalVisible(true);
+        localStorage.removeItem('expert_just_registered');
+      }
     }
   }, [application, applicationLoading, userProfile]);
 
@@ -127,9 +159,50 @@ const ExpertDashboard: React.FC = () => {
       message.success('Анкета успешно создана');
       setApplicationModalVisible(false);
       queryClient.invalidateQueries({ queryKey: ['expert-application'] });
+      // Показываем модальное окно приветствия
+      setWelcomeModalVisible(true);
     },
     onError: (err: any) => {
       message.error(err?.response?.data?.detail || 'Не удалось создать анкету');
+    },
+  });
+
+  const createSpecializationMutation = useMutation({
+    mutationFn: (data: any) => expertsApi.createSpecialization(data),
+    onSuccess: () => {
+      message.success('Специализация добавлена');
+      setSpecializationModalVisible(false);
+      specializationForm.resetFields();
+      setEditingSpecialization(null);
+      queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
+    },
+    onError: (err: any) => {
+      message.error(err?.response?.data?.detail || 'Не удалось добавить специализацию');
+    },
+  });
+
+  const updateSpecializationMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => expertsApi.updateSpecialization(id, data),
+    onSuccess: () => {
+      message.success('Специализация обновлена');
+      setSpecializationModalVisible(false);
+      specializationForm.resetFields();
+      setEditingSpecialization(null);
+      queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
+    },
+    onError: (err: any) => {
+      message.error(err?.response?.data?.detail || 'Не удалось обновить специализацию');
+    },
+  });
+
+  const deleteSpecializationMutation = useMutation({
+    mutationFn: (id: number) => expertsApi.deleteSpecialization(id),
+    onSuccess: () => {
+      message.success('Специализация удалена');
+      queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
+    },
+    onError: (err: any) => {
+      message.error(err?.response?.data?.detail || 'Не удалось удалить специализацию');
     },
   });
 
@@ -191,6 +264,146 @@ const ExpertDashboard: React.FC = () => {
           </Space>
         </div>
 
+        {/* Profile Header Block */}
+        <div className={styles.profileBlock}>
+          <div className={styles.profileBlockContent}>
+            <div className={styles.profileLeft}>
+              <Badge 
+                count={<TrophyOutlined style={{ color: '#f97316', fontSize: 16 }} />} 
+                offset={[-5, 5]}
+              >
+                <Avatar
+                  size={80}
+                  src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
+                  icon={!profile?.avatar && <UserOutlined />}
+                  style={{ 
+                    backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
+                    border: '3px solid #fff',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                  }}
+                />
+              </Badge>
+              <div className={styles.profileInfo}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                  <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: 20 }}>
+                    {profile?.username || profile?.email || 'Эксперт'}
+                  </Title>
+                  <Button 
+                    type="primary" 
+                    size="small"
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      border: 'none',
+                      borderRadius: 8,
+                      height: 28,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      padding: '0 12px'
+                    }}
+                  >
+                    Готов к работе
+                  </Button>
+                </div>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
+                  Онлайн
+                </Text>
+                <Button
+                  icon={<MessageOutlined />}
+                  className={styles.buttonSecondary}
+                  style={{ marginBottom: 12, width: 'fit-content' }}
+                >
+                  Сообщение
+                </Button>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {isEditingStatus ? (
+                    <>
+                      <Input
+                        value={statusText}
+                        onChange={(e) => setStatusText(e.target.value)}
+                        placeholder="Введите статус (70 символов)"
+                        maxLength={70}
+                        className={styles.statusInput}
+                        style={{ flex: 1, minWidth: 300 }}
+                      />
+                      <Button 
+                        type="text"
+                        onClick={() => {
+                          setIsEditingStatus(false);
+                          // Здесь можно сохранить статус через API
+                        }}
+                        className={styles.saveButtonText}
+                      >
+                        Сохранить
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        value={statusText || 'Нажмите редактировать, чтобы ввести статус. (70 символов)'}
+                        placeholder="Нажмите редактировать, чтобы ввести статус. (70 символов)"
+                        readOnly
+                        onClick={() => setIsEditingStatus(true)}
+                        className={styles.statusInput}
+                        style={{ 
+                          flex: 1, 
+                          minWidth: 300,
+                          cursor: 'pointer',
+                          color: !statusText ? '#9ca3af' : '#1f2937'
+                        }}
+                      />
+                      <span 
+                        onClick={() => setIsEditingStatus(true)}
+                        className={styles.saveButtonText}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        Сохранить
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className={styles.profileRight}>
+              <div className={styles.profileStats}>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
+                  На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
+                </Text>
+                <div style={{ marginBottom: 12 }}>
+                  <Space>
+                    <LikeOutlined style={{ color: '#10b981', fontSize: 16 }} />
+                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
+                      Рейтинг исполнителя: <span className={styles.statsNumber}>{typeof expertStats?.average_rating === 'number' ? expertStats.average_rating.toFixed(1) : '0'}</span>
+                    </Text>
+                  </Space>
+                </div>
+                <div style={{ marginBottom: 12 }}>
+                  <Space>
+                    <DislikeOutlined style={{ color: '#ef4444', fontSize: 16 }} />
+                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
+                      Рейтинг заказчика: <span className={styles.statsNumber}>0</span>
+                    </Text>
+                  </Space>
+                </div>
+                <div>
+                  <Space>
+                    <TrophyOutlined style={{ color: '#667eea', fontSize: 16 }} />
+                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
+                      Статистика работ:{' '}
+                      <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
+                      {' | '}
+                      <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
+                      {' | '}
+                      <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
+                      {' | '}
+                      <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
+                    </Text>
+                  </Space>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Application Status Display */}
         {applicationLoading ? (
           <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
@@ -241,102 +454,297 @@ const ExpertDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Available Orders Section */}
-        <div className={styles.sectionCard}>
-          <div className={styles.sectionCardHeader}>
-            <h2 className={styles.sectionTitle}>Доступные заказы</h2>
-          </div>
-          {orders.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Text>Нет доступных заказов</Text>
-            </div>
-          ) : (
-            <div>
-              {orders.map((order) => (
-              <div key={order.id} className={styles.orderCard}>
-                <div className={styles.orderHeader}>
-                  <div style={{ flex: 1 }}>
-                    <h4 className={styles.orderTitle}>{order.title}</h4>
-                    <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
-                    <div className={styles.orderTags} style={{ marginTop: 12 }}>
-                      {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
-                      {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
-                      <span className={styles.tagGreen}>до {dayjs(order.deadline).format('DD.MM.YYYY')}</span>
-                      <span className={styles.tag} style={{ 
-                        background: `rgba(${getStatusColor(order.status) === 'blue' ? '59, 130, 246' : 
-                          getStatusColor(order.status) === 'green' ? '16, 185, 129' : 
-                          getStatusColor(order.status) === 'orange' ? '249, 115, 22' : '107, 114, 128'}, 0.1)`,
-                        color: getStatusColor(order.status) === 'blue' ? '#3b82f6' :
-                          getStatusColor(order.status) === 'green' ? '#10b981' :
-                          getStatusColor(order.status) === 'orange' ? '#f97316' : '#6b7280'
-                      }}>
-                        {getStatusText(order.status)}
-                      </span>
+        {/* Navigation Tabs */}
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'about',
+              label: `О себе`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader}>
+                    <h2 className={styles.sectionTitle}>О себе</h2>
+                  </div>
+                  <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
+                    {profile?.bio || 'Расскажите о себе, своем опыте и специализации...'}
+                  </Paragraph>
+                  {profile?.education && (
+                    <div style={{ marginTop: 24 }}>
+                      <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
+                      <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
+                        {profile.education}
+                      </Paragraph>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p className={styles.orderBudget}>{order.budget} ₽</p>
-                  </div>
+                  )}
+                  {profile?.skills && (
+                    <div style={{ marginTop: 24 }}>
+                      <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {profile.skills.split(',').map((skill: string, index: number) => (
+                          <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 14 }}>
+                            {skill.trim()}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div style={{ marginTop: 16, marginBottom: 16 }}>
-                  <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
-                </div>
-                <div className={styles.actionButtons}>
-                  <Button
-                    type="primary"
-                    className={styles.buttonPrimary}
-                    onClick={() => takeMutation.mutate(order.id)}
-                    loading={takeMutation.isPending}
-                  >
-                    Взять в работу
-                  </Button>
-                  <Space>
-                    <InputNumber
-                      min={1}
-                      step={1}
-                      precision={0}
-                      placeholder="Ваша цена"
-                      onChange={(value) => (order as any)._bidAmount = value}
-                      style={{ width: 140, borderRadius: 12 }}
-                      className={styles.inputField}
-                    />
-                    <Button
-                      className={styles.buttonSecondary}
-                      loading={bidLoading[order.id]}
-                      onClick={async () => {
-                        try {
-                          const amount = (order as any)._bidAmount;
-                          if (!amount || amount <= 0) {
-                            message.error('Укажите корректную сумму');
-                            return;
-                          }
-                          setBidLoading(prev => ({ ...prev, [order.id]: true }));
-                          await ordersApi.placeBid(order.id, { amount });
-                          message.success('Ставка отправлена');
-                          queryClient.invalidateQueries({ queryKey: ['available-orders'] });
-                          queryClient.invalidateQueries({ queryKey: ['clientOrders'] });
-                        } catch (e: any) {
-                          message.error(e?.response?.data?.detail || e?.response?.data?.amount || 'Не удалось отправить ставку');
-                        } finally {
-                          setBidLoading(prev => ({ ...prev, [order.id]: false }));
-                        }
+              ),
+            },
+            {
+              key: 'specializations',
+              label: `Специализации ${specializations.length || 0}`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 className={styles.sectionTitle}>Мои специализации</h2>
+                    <Button 
+                      type="primary"
+                      className={styles.buttonPrimary}
+                      onClick={() => {
+                        setEditingSpecialization(null);
+                        specializationForm.resetFields();
+                        setSpecializationModalVisible(true);
                       }}
                     >
-                      Предложить
+                      Редактировать
                     </Button>
-                  </Space>
+                  </div>
+                  {specializationsLoading ? (
+                    <div className={styles.emptyState}>
+                      <Spin size="large" />
+                    </div>
+                  ) : specializations.length === 0 ? (
+                    <div className={styles.emptyState}>
+                      <Text>У вас пока нет специализаций. Добавьте первую специализацию, чтобы начать получать заказы.</Text>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gap: 16 }}>
+                      {specializations.map((spec) => (
+                        <div key={spec.id} className={styles.orderCard}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
+                                {spec.subject.name}
+                                {spec.is_verified && (
+                                  <CheckCircleOutlined style={{ color: '#10b981', marginLeft: 8 }} />
+                                )}
+                              </Title>
+                              <Text type="secondary" style={{ fontSize: 14 }}>
+                                Опыт: {spec.experience_years} лет | Ставка: {spec.hourly_rate} ₽/час
+                              </Text>
+                              {spec.description && (
+                                <Paragraph style={{ marginTop: 8, color: '#6b7280' }}>
+                                  {spec.description}
+                                </Paragraph>
+                              )}
+                            </div>
+                            <Space>
+                              <Button
+                                size="small"
+                                onClick={() => {
+                                  setEditingSpecialization(spec);
+                                  specializationForm.setFieldsValue({
+                                    subject_id: spec.subject.id,
+                                    experience_years: spec.experience_years,
+                                    hourly_rate: spec.hourly_rate,
+                                    description: spec.description,
+                                  });
+                                  setSpecializationModalVisible(true);
+                                }}
+                              >
+                                Изменить
+                              </Button>
+                              <Button
+                                size="small"
+                                danger
+                                onClick={() => {
+                                  if (window.confirm('Вы уверены, что хотите удалить эту специализацию?')) {
+                                    deleteSpecializationMutation.mutate(spec.id);
+                                  }
+                                }}
+                              >
+                                Удалить
+                              </Button>
+                            </Space>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div style={{ marginTop: 20, padding: 16, background: '#f9fafb', borderRadius: 12 }}>
-                  <strong style={{ display: 'block', marginBottom: 8, fontSize: 14 }}>Чат по заказу</strong>
-                  <OrderChat orderId={order.id} />
+              ),
+            },
+            {
+              key: 'reviews',
+              label: `Отзывы 0`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader}>
+                    <h2 className={styles.sectionTitle}>Отзывы</h2>
+                  </div>
+                  <div className={styles.emptyState}>
+                    <Text>Отзывов пока нет</Text>
+                  </div>
                 </div>
-              </div>
-              ))}
-            </div>
-          )}
-        </div>
+              ),
+            },
+            {
+              key: 'orders',
+              label: `Заказы ${orders.length || 0}`,
+              children: (
+                <div>
+                  {/* Available Orders Section */}
+                  <div className={styles.sectionCard}>
+                    <div className={styles.sectionCardHeader}>
+                      <h2 className={styles.sectionTitle}>Доступные заказы</h2>
+                    </div>
+                    {orders.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        <Text>Нет доступных заказов</Text>
+                      </div>
+                    ) : (
+                      <div>
+                        {orders.map((order) => (
+                          <div key={order.id} className={styles.orderCard}>
+                            <div className={styles.orderHeader}>
+                              <div style={{ flex: 1 }}>
+                                <h4 className={styles.orderTitle}>{order.title}</h4>
+                                <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
+                                <div className={styles.orderTags} style={{ marginTop: 12 }}>
+                                  {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
+                                  {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
+                                  <span className={styles.tagGreen}>до {dayjs(order.deadline).format('DD.MM.YYYY')}</span>
+                                  <span className={styles.tag} style={{ 
+                                    background: `rgba(${getStatusColor(order.status) === 'blue' ? '59, 130, 246' : 
+                                      getStatusColor(order.status) === 'green' ? '16, 185, 129' : 
+                                      getStatusColor(order.status) === 'orange' ? '249, 115, 22' : '107, 114, 128'}, 0.1)`,
+                                    color: getStatusColor(order.status) === 'blue' ? '#3b82f6' :
+                                      getStatusColor(order.status) === 'green' ? '#10b981' :
+                                      getStatusColor(order.status) === 'orange' ? '#f97316' : '#6b7280'
+                                  }}>
+                                    {getStatusText(order.status)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <p className={styles.orderBudget}>{order.budget} ₽</p>
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 16, marginBottom: 16 }}>
+                              <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
+                            </div>
+                            <div className={styles.actionButtons}>
+                              <Button
+                                type="primary"
+                                className={styles.buttonPrimary}
+                                onClick={() => takeMutation.mutate(order.id)}
+                                loading={takeMutation.isPending}
+                              >
+                                Взять в работу
+                              </Button>
+                              <Space>
+                                <InputNumber
+                                  min={1}
+                                  step={1}
+                                  precision={0}
+                                  placeholder="Ваша цена"
+                                  onChange={(value) => (order as any)._bidAmount = value}
+                                  style={{ width: 140, borderRadius: 12 }}
+                                  className={styles.inputField}
+                                />
+                                <Button
+                                  className={styles.buttonSecondary}
+                                  loading={bidLoading[order.id]}
+                                  onClick={async () => {
+                                    try {
+                                      const amount = (order as any)._bidAmount;
+                                      if (!amount || amount <= 0) {
+                                        message.error('Укажите корректную сумму');
+                                        return;
+                                      }
+                                      setBidLoading(prev => ({ ...prev, [order.id]: true }));
+                                      await ordersApi.placeBid(order.id, { amount });
+                                      message.success('Ставка отправлена');
+                                      queryClient.invalidateQueries({ queryKey: ['available-orders'] });
+                                      queryClient.invalidateQueries({ queryKey: ['clientOrders'] });
+                                    } catch (e: any) {
+                                      message.error(e?.response?.data?.detail || e?.response?.data?.amount || 'Не удалось отправить ставку');
+                                    } finally {
+                                      setBidLoading(prev => ({ ...prev, [order.id]: false }));
+                                    }
+                                  }}
+                                >
+                                  Предложить
+                                </Button>
+                              </Space>
+                            </div>
+                            <div style={{ marginTop: 20, padding: 16, background: '#f9fafb', borderRadius: 12 }}>
+                              <strong style={{ display: 'block', marginBottom: 8, fontSize: 14 }}>Чат по заказу</strong>
+                              <OrderChat orderId={order.id} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'works',
+              label: `Работы ${(myCompleted as Order[] | undefined)?.length || 0}`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader}>
+                    <h2 className={styles.sectionTitle}>Мои работы</h2>
+                  </div>
+                  {(myCompleted as Order[] | undefined)?.length === 0 ? (
+                    <div className={styles.emptyState}>
+                      <Text>У вас пока нет завершенных работ</Text>
+                    </div>
+                  ) : (
+                    <div>
+                      {((myCompleted as Order[] | undefined) || []).map((order) => (
+                        <div key={order.id} className={styles.orderCard}>
+                          <div className={styles.orderHeader}>
+                            <div style={{ flex: 1 }}>
+                              <h4 className={styles.orderTitle}>{order.title}</h4>
+                              <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
+                              <div className={styles.orderTags} style={{ marginTop: 12 }}>
+                                {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
+                                {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <p className={styles.orderBudget}>{order.budget} ₽</p>
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 16 }}>
+                            <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ),
+            },
+          ]}
+          style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 24,
+            padding: '24px',
+            marginBottom: 32,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+          }}
+        />
 
-        {/* In Progress Orders Section */}
+        {/* In Progress Orders Section - Always visible */}
         <div className={styles.sectionCard}>
           <div className={styles.sectionCardHeader}>
             <h2 className={styles.sectionTitle}>Мои заказы (в работе)</h2>
@@ -487,12 +895,12 @@ const ExpertDashboard: React.FC = () => {
             fontWeight: 500
           }
         }}
-        maskStyle={{
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        }}
         styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
           content: { 
             borderRadius: 24, 
             padding: 0,
@@ -662,12 +1070,12 @@ const ExpertDashboard: React.FC = () => {
             fontWeight: 500
           }
         }}
-        maskStyle={{
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        }}
         styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
           content: { 
             borderRadius: 24, 
             padding: 0,
@@ -859,6 +1267,257 @@ const ExpertDashboard: React.FC = () => {
             </Form.List>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Specialization Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            {editingSpecialization ? 'Редактировать специализацию' : 'Добавить специализацию'}
+          </div>
+        }
+        open={specializationModalVisible}
+        onCancel={() => {
+          setSpecializationModalVisible(false);
+          setEditingSpecialization(null);
+          specializationForm.resetFields();
+        }}
+        onOk={() => specializationForm.submit()}
+        width={600}
+        okText={editingSpecialization ? 'Сохранить' : 'Добавить'}
+        cancelText="Отмена"
+        okButtonProps={{
+          className: styles.buttonPrimary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        cancelButtonProps={{
+          className: styles.buttonSecondary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        <Form
+          form={specializationForm}
+          layout="vertical"
+          onFinish={(values) => {
+            if (editingSpecialization) {
+              updateSpecializationMutation.mutate({ id: editingSpecialization.id, data: values });
+            } else {
+              createSpecializationMutation.mutate(values);
+            }
+          }}
+        >
+          <Form.Item
+            label="Предмет"
+            name="subject_id"
+            rules={[{ required: true, message: 'Выберите предмет' }]}
+          >
+            <Select 
+              placeholder="Выберите предмет"
+              className={styles.inputField}
+              size="large"
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={subjects.map((subject) => ({
+                label: subject.name,
+                value: subject.id,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Опыт работы (лет)"
+            name="experience_years"
+            rules={[{ required: true, message: 'Укажите опыт работы' }]}
+          >
+            <AntInputNumber 
+              min={0} 
+              max={50} 
+              style={{ width: '100%' }}
+              className={styles.inputField}
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item
+            label="Часовая ставка (₽)"
+            name="hourly_rate"
+            rules={[{ required: true, message: 'Укажите часовую ставку' }]}
+          >
+            <AntInputNumber 
+              min={0} 
+              step={100}
+              style={{ width: '100%' }}
+              className={styles.inputField}
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item
+            label="Описание"
+            name="description"
+          >
+            <Input.TextArea 
+              rows={4} 
+              placeholder="Опишите ваш опыт в этой области"
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Модальное окно приветствия после создания анкеты */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Регистрация прошла успешно!
+          </div>
+        }
+        open={welcomeModalVisible}
+        onCancel={() => setWelcomeModalVisible(false)}
+        footer={[
+          <Button
+            key="submit"
+            type="primary"
+            size="large"
+            onClick={() => setWelcomeModalVisible(false)}
+            style={{
+              borderRadius: 12,
+              height: 44,
+              fontSize: 16,
+              fontWeight: 500,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              border: 'none'
+            }}
+          >
+            Понятно
+          </Button>
+        ]}
+        width={700}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        <div style={{ lineHeight: 1.8, fontSize: 15, color: '#333' }}>
+          <Paragraph style={{ fontSize: 16, marginBottom: 20, fontWeight: 500 }}>
+            Добро пожаловать на сервис помощи студентам SHelp,
+          </Paragraph>
+          
+          <Paragraph style={{ fontSize: 16, marginBottom: 20, fontWeight: 600, color: '#667eea' }}>
+            {userProfile?.username || userProfile?.email || 'Пользователь'}!
+          </Paragraph>
+
+          <Paragraph style={{ fontSize: 15, marginBottom: 16 }}>
+            Для того, чтобы заказчики размещали больше заказов по вашему профилю и выбирали именно Вас, Вам необходимо заполнить в профиле следующую информацию:
+          </Paragraph>
+
+          <div style={{ marginLeft: 20, marginBottom: 20 }}>
+            <Paragraph style={{ marginBottom: 12 }}>
+              <strong>1.</strong> Специализации, с которыми Вы можете помочь заказчикам.
+            </Paragraph>
+            <Paragraph style={{ marginBottom: 12 }}>
+              <strong>2.</strong> Описание профиля – здесь можете указать любую информацию о себе: образование, опыт работы, типы работ с которыми помогаете, график работы и другую индивидуальную информацию о себе
+            </Paragraph>
+            <Paragraph style={{ marginBottom: 0 }}>
+              <strong>3.</strong> Загрузите оригинальную аватарку – чтобы выделяться на фоне остальных исполнителей
+            </Paragraph>
+          </div>
+
+          <Paragraph style={{ fontSize: 15, marginBottom: 16 }}>
+            Для комфортной работы, Вы можете ознакомиться с нашим разделом <strong>FAQ</strong>. По всем вопросам, касающихся работы сервиса, можете обращаться к нашему администратору <strong>Admin</strong>
+          </Paragraph>
+
+          <Paragraph style={{ fontSize: 15, marginTop: 20, fontWeight: 600, color: '#667eea', textAlign: 'center' }}>
+            Желаем легких заказов и высоких доходов!
+          </Paragraph>
+        </div>
       </Modal>
     </div>
   );

@@ -49,6 +49,30 @@ export interface CreateExpertApplicationRequest {
   educations: Education[];
 }
 
+export interface Specialization {
+  id: number;
+  expert: number;
+  subject: {
+    id: number;
+    name: string;
+    slug?: string;
+  };
+  subject_id?: number;
+  experience_years: number;
+  hourly_rate: number;
+  description?: string;
+  is_verified: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateSpecializationRequest {
+  subject_id: number;
+  experience_years: number;
+  hourly_rate: number;
+  description?: string;
+}
+
 export const expertsApi = {
   async rateExpert(payload: CreateExpertRatingRequest) {
     const { data } = await apiClient.post('/experts/ratings/', payload);
@@ -76,6 +100,26 @@ export const expertsApi = {
   async createApplication(payload: CreateExpertApplicationRequest): Promise<ExpertApplication> {
     const { data } = await apiClient.post('/experts/applications/', payload);
     return data;
+  },
+
+  // Специализации
+  async getSpecializations(): Promise<Specialization[]> {
+    const { data } = await apiClient.get('/experts/specializations/');
+    return data.results || data;
+  },
+
+  async createSpecialization(payload: CreateSpecializationRequest): Promise<Specialization> {
+    const { data } = await apiClient.post('/experts/specializations/', payload);
+    return data;
+  },
+
+  async updateSpecialization(id: number, payload: Partial<CreateSpecializationRequest>): Promise<Specialization> {
+    const { data } = await apiClient.patch(`/experts/specializations/${id}/`, payload);
+    return data;
+  },
+
+  async deleteSpecialization(id: number): Promise<void> {
+    await apiClient.delete(`/experts/specializations/${id}/`);
   },
 };
 

@@ -101,8 +101,10 @@ const Login: React.FC = () => {
         if (role === 'client') {
           await redirectClient();
         } else if (role === 'expert') {
-          // При регистрации эксперт сразу отправляется на заполнение анкеты
-          navigate('/expert-application');
+          // Устанавливаем флаг для автоматического открытия формы анкеты
+          localStorage.setItem('expert_just_registered', 'true');
+          // При регистрации эксперт перенаправляется в личный кабинет
+          navigate('/expert');
         } else if (role === 'partner') {
           navigate('/partner');
         } else {
