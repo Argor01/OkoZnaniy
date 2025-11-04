@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,10 +84,10 @@ const Header: React.FC = () => {
                   <a className="header__nav-menu-item-link" href="#support">Поддержка</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="/become-expert">Стать экспертом</a>
+                  <Link className="header__nav-menu-item-link" to="/become-expert">Стать экспертом</Link>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="/become-partner">Стать партнером</a>
+                  <Link className="header__nav-menu-item-link" to="/become-partner">Стать партнером</Link>
                 </li>
               </ul>
 
