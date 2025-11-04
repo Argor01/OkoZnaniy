@@ -3,7 +3,7 @@ import SEO from '../components/SEO';
 import Header from '../components/landing/sections/Header';
 import ExpertFirstScreen from '../components/landing/sections/ExpertFirstScreen';
 import ExpertAdvantages from '../components/landing/sections/ExpertAdvantages';
-import FAQ from '../components/landing/sections/FAQ';
+import FeedbackForm from '../components/landing/sections/FeedbackForm';
 import Footer from '../components/landing/sections/Footer';
 
 const BecomeExpert: React.FC = () => {
@@ -22,7 +22,7 @@ const BecomeExpert: React.FC = () => {
       <main className="main">
         <ExpertFirstScreen />
         <ExpertAdvantages />
-        <FAQ />
+        <FeedbackForm buttonText="Стать экспертом" />
       </main>
       <Footer />
     </div>

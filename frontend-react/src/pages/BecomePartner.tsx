@@ -3,9 +3,8 @@ import SEO from '../components/SEO';
 import Header from '../components/landing/sections/Header';
 import PartnerFirstScreen from '../components/landing/sections/PartnerFirstScreen';
 import PartnerBenefits from '../components/landing/sections/PartnerBenefits';
-import PartnerSteps from '../components/landing/sections/PartnerSteps';
-import Reviews from '../components/landing/sections/Reviews';
-import FAQ from '../components/landing/sections/FAQ';
+import PartnerSteps from "../components/landing/sections/PartnerSteps";
+import FeedbackForm from '../components/landing/sections/FeedbackForm';
 import Footer from '../components/landing/sections/Footer';
 
 const BecomePartner: React.FC = () => {
@@ -25,8 +24,7 @@ const BecomePartner: React.FC = () => {
         <PartnerFirstScreen />
         <PartnerBenefits />
         <PartnerSteps />
-        <Reviews />
-        <FAQ />
+        <FeedbackForm buttonText="Стать партнером" />
       </main>
       <Footer />
     </div>

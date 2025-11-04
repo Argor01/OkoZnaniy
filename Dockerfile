@@ -11,6 +11,10 @@ RUN apt-get update && apt-get install -y \
 # Установка рабочей директории
 WORKDIR /app
 
+# Копирование скрипта запуска и выдача прав
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Копирование файлов зависимостей
 COPY requirements.txt .
 
@@ -38,10 +42,6 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 
 # Порт
 EXPOSE 8000
-
-# Скрипт запуска
-COPY --chown=appuser:appuser docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
 
 # Запуск приложения
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
