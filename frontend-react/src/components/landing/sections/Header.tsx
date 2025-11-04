@@ -48,7 +48,7 @@ const Header: React.FC = () => {
         <div className="header__wrapper">
           <div className="header__logo">
             <div className="header__logo-link">
-              <img className="header__logo-link-image" src="/assets/logo.svg" alt="logo" width={120} height={36} />
+              <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
             </div>
           </div>
 
@@ -56,7 +56,7 @@ const Header: React.FC = () => {
             <div className="header__nav-wrapper">
               <div className="header__logo">
                 <div className="header__logo-link">
-                  <img className="header__logo-link-image" src="/assets/logo.svg" alt="logo" width={120} height={36} />
+                  <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
                 </div>
               </div>
 
@@ -84,10 +84,10 @@ const Header: React.FC = () => {
                   <a className="header__nav-menu-item-link" href="#support">Поддержка</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#be-expert">Стать экспертом</a>
+                  <a className="header__nav-menu-item-link" href="/become-expert">Стать экспертом</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#partners">Стать партнерам</a>
+                  <a className="header__nav-menu-item-link" href="/become-partner">Стать партнером</a>
                 </li>
               </ul>
 

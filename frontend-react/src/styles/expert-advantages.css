@@ -1,0 +1,295 @@
+/* Стилизация блока "Наши условия" для экспертов */
+
+.expert-page .place-task {
+  background: #f0f2f5;
+  padding: 80px 0;
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+}
+
+.expert-page .place-task::before {
+  display: none;
+}
+
+.expert-page .place-task::after {
+  display: none;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+.expert-page .place-task__content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.expert-page .place-task__content-title {
+  color: #238ce2;
+  font-size: 56px;
+  font-weight: 900;
+  margin-bottom: 20px;
+  text-shadow: none;
+  animation: slideInDown 0.8s ease-out;
+}
+
+@media (max-width: 1024px) {
+  .expert-page .place-task__content-title {
+    font-size: 42px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expert-page .place-task__content-title {
+    font-size: 32px;
+  }
+}
+
+.expert-page .place-task__content-description {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 28px;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  animation: slideInUp 0.8s ease-out 0.2s backwards;
+}
+
+@media (max-width: 1024px) {
+  .expert-page .place-task__content-description {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expert-page .place-task__content-description {
+    font-size: 18px;
+  }
+}
+
+.expert-page .place-task__advantages {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .expert-page .place-task__advantages {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    max-width: 500px;
+  }
+}
+
+.expert-page .place-task__advantages-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 45px 35px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  animation: scaleIn 0.6s ease-out backwards;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.expert-page .place-task__advantages-card:nth-child(1) { animation-delay: 0.3s; }
+.expert-page .place-task__advantages-card:nth-child(2) { animation-delay: 0.4s; }
+.expert-page .place-task__advantages-card:nth-child(3) { animation-delay: 0.5s; }
+.expert-page .place-task__advantages-card:nth-child(4) { animation-delay: 0.6s; }
+
+.expert-page .place-task__advantages-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expert-page .place-task__advantages-card:hover::before {
+  transform: scaleX(1);
+}
+
+.expert-page .place-task__advantages-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+  background: rgba(255, 255, 255, 1);
+}
+
+.expert-page .place-task__advantages-card-figure {
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expert-page .place-task__advantages-card:hover .place-task__advantages-card-figure {
+  transform: rotate(360deg) scale(1.1);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+}
+
+.expert-page .place-task__advantages-card-figure-image {
+  filter: brightness(0) invert(1);
+  width: 40px;
+  height: 40px;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expert-page .place-task__advantages-card:hover .place-task__advantages-card-figure-image {
+  transform: scale(1.2);
+}
+
+.expert-page .place-task__advantages-card-icon {
+  font-size: 48px;
+  color: #ffffff;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expert-page .place-task__advantages-card:hover .place-task__advantages-card-icon {
+  transform: scale(1.2);
+}
+
+.expert-page .place-task__advantages-card-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d3748;
+  text-align: center;
+  line-height: 1.6;
+  transition: color 0.3s ease;
+  max-width: 90%;
+}
+
+.expert-page .place-task__advantages-card:hover .place-task__advantages-card-text {
+  color: #667eea;
+}
+
+@media (max-width: 768px) {
+  .expert-page .place-task__advantages-card-text {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expert-page .place-task__advantages-card-text {
+    font-size: 18px;
+  }
+}
+
+/* Анимации */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Дополнительные эффекты */
+.expert-page .place-task__advantages-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.expert-page .place-task__advantages-card:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .expert-page .place-task {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .expert-page .place-task {
+    padding: 50px 0;
+  }
+  
+  .expert-page .place-task__advantages-card {
+    padding: 40px 30px;
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expert-page .place-task {
+    padding: 40px 0;
+  }
+  
+  .expert-page .place-task__advantages-card {
+    padding: 35px 25px;
+    min-height: 200px;
+  }
+  
+  .expert-page .place-task__advantages-card-figure {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .expert-page .place-task__advantages-card-icon {
+    font-size: 42px;
+  }
+}

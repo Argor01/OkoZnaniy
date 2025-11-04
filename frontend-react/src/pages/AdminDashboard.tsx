@@ -99,7 +99,7 @@ const AdminDashboard: React.FC = () => {
   });
 
   // Получение арбитров
-  const { data: arbitrators, isLoading: arbitratorsLoading } = useQuery({
+  const { data: arbitrators, isLoading: _arbitratorsLoading } = useQuery({
     queryKey: ['admin-arbitrators'],
     queryFn: adminApi.getArbitrators,
     select: (data: any) => {
@@ -434,7 +434,7 @@ const AdminDashboard: React.FC = () => {
               selectedArbitratorId = value;
             }}
           >
-            {arbitrators.map((arbitrator) => (
+            {arbitrators.map((arbitrator: any) => (
               <Select.Option key={arbitrator.id} value={arbitrator.id}>
                 {arbitrator.username} ({arbitrator.first_name} {arbitrator.last_name})
               </Select.Option>

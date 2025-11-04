@@ -1,0 +1,170 @@
+/* Плавные переходы между страницами */
+
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+/* Анимация для всей страницы */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.page-wrapper {
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Плавная прокрутка при переходе */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Плавное появление контента */
+.main {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+/* Анимация для секций */
+section {
+  animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+section:nth-child(1) { animation-delay: 0.15s; }
+section:nth-child(2) { animation-delay: 0.2s; }
+section:nth-child(3) { animation-delay: 0.25s; }
+section:nth-child(4) { animation-delay: 0.3s; }
+section:nth-child(5) { animation-delay: 0.35s; }
+section:nth-child(6) { animation-delay: 0.4s; }
+section:nth-child(7) { animation-delay: 0.45s; }
+section:nth-child(8) { animation-delay: 0.5s; }
+
+/* Отключение анимации для пользователей с prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter,
+  .page-transition-enter-active,
+  .page-transition-exit,
+  .page-transition-exit-active,
+  .page-wrapper,
+  .main,
+  section {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* Плавные переходы для навигации */
+.header__nav-menu-item-link {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header__nav-menu-item-link::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #ffb34a;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.header__nav-menu-item-link:hover::before {
+  width: 100%;
+}
+
+/* Плавные переходы для кнопок */
+.button,
+.header__cabinet-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button:hover,
+.header__cabinet-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button:active,
+.header__cabinet-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Плавные переходы для карточек */
+.place-task__advantages-card,
+.advantages__card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.place-task__advantages-card:hover,
+.advantages__card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Плавные переходы для форм */
+.leave-order__form input,
+.leave-order__form textarea {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.leave-order__form input:focus,
+.leave-order__form textarea:focus {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 3px rgba(35, 140, 226, 0.1);
+}
+
+/* Анимация загрузки страницы */
+@keyframes pageLoad {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+body {
+  animation: pageLoad 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

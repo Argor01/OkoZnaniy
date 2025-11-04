@@ -1,0 +1,78 @@
+/* Стили для страниц экспертов и партнеров */
+
+/* Исправление обрезки изображения на странице экспертов */
+.expert-page .first-screen__wrapper,
+.partner-page .first-screen__wrapper {
+  overflow: visible !important;
+}
+
+.expert-page .first-screen__figure,
+.partner-page .first-screen__figure {
+  overflow: visible !important;
+  position: fixed !important;
+  top: 110px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0;
+  z-index: 500 !important;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  margin: 0;
+  margin-left: 100px !important;
+  width: 50vw !important;
+}
+
+.expert-page .first-screen__figure-image,
+.partner-page .first-screen__figure-image {
+  display: block;
+  max-width: none !important;
+  width: auto !important;
+  height: calc(100vh - 110px) !important;
+  object-fit: contain !important;
+  object-position: left bottom !important;
+}
+
+/* Улучшенное позиционирование для средних экранов */
+@media (max-width: 1320px) and (min-width: 1025px) {
+  .expert-page .first-screen__figure,
+  .partner-page .first-screen__figure {
+    top: 80px !important;
+    margin-left: 50px !important;
+  }
+  
+  .expert-page .first-screen__figure-image,
+  .partner-page .first-screen__figure-image {
+    height: calc(100vh - 80px) !important;
+  }
+}
+
+/* Для планшетов и мобильных устройств */
+@media (max-width: 1024px) {
+  .expert-page .first-screen__figure,
+  .partner-page .first-screen__figure {
+    position: static !important;
+    overflow: visible !important;
+    justify-content: center !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+  }
+  
+  .expert-page .first-screen__figure-image,
+  .partner-page .first-screen__figure-image {
+    max-width: 100% !important;
+    width: 680px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+}
+
+/* Для маленьких экранов */
+@media (max-width: 576px) {
+  .expert-page .first-screen__figure-image,
+  .partner-page .first-screen__figure-image {
+    width: 100% !important;
+  }
+}

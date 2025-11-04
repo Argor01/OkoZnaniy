@@ -45,7 +45,7 @@ const OnlyPro: React.FC = () => {
               <figure className="only-pro__logos-item">
                 <img
                   className="only-pro__logos-item-image"
-                  src="/assets/only-pro/only-pro-icon-3.png"
+                  src="/assets/only-pro/only-pro-icon-3.jpg"
                   alt="icon"
                   width={160}
                   height={94}
@@ -55,7 +55,7 @@ const OnlyPro: React.FC = () => {
               <figure className="only-pro__logos-item">
                 <img
                   className="only-pro__logos-item-image"
-                  src="/assets/only-pro/only-pro-icon-4.png"
+                  src="/assets/only-pro/only-pro-icon-4.jpg"
                   alt="icon"
                   width={160}
                   height={94}
@@ -65,7 +65,7 @@ const OnlyPro: React.FC = () => {
               <figure className="only-pro__logos-item">
                 <img
                   className="only-pro__logos-item-image"
-                  src="/assets/only-pro/only-pro-icon-5.png"
+                  src="/assets/only-pro/only-pro-icon-5.jpg"
                   alt="icon"
                   width={160}
                   height={94}
@@ -85,7 +85,7 @@ const OnlyPro: React.FC = () => {
               <figure className="only-pro__logos-item">
                 <img
                   className="only-pro__logos-item-image"
-                  src="/assets/only-pro/only-pro-icon-7.png"
+                  src="/assets/only-pro/only-pro-icon-7.jpg"
                   alt="icon"
                   width={160}
                   height={94}
@@ -95,7 +95,7 @@ const OnlyPro: React.FC = () => {
               <figure className="only-pro__logos-item">
                 <img
                   className="only-pro__logos-item-image"
-                  src="/assets/only-pro/only-pro-icon-8.png"
+                  src="/assets/only-pro/only-pro-icon-8.jpg"
                   alt="icon"
                   width={160}
                   height={94}

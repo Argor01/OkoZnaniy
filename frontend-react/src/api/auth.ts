@@ -88,4 +88,10 @@ export const authApi = {
     const response = await apiClient.patch('/users/update_me/', data);
     return response.data;
   },
+
+  // Сброс пароля: отправка письма со ссылкой
+  resetPassword: async (email: string): Promise<{ detail: string }> => {
+    const response = await apiClient.post('/users/reset_password/', { email });
+    return response.data;
+  },
 };
