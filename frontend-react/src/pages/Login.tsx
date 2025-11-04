@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Tabs } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
 import { ordersApi } from '../api/orders';
@@ -43,7 +43,6 @@ const Login: React.FC = () => {
   const loginUsernamePh = useTypewriter('Email', 35, 100);
   const loginPasswordPh = useTypewriter('Пароль', 35, 250);
   const regEmailPh = useTypewriter('Email', 35, 120);
-  const regPhonePh = useTypewriter('Телефон', 35, 280);
   const regPasswordPh = useTypewriter('Пароль', 35, 420);
   const regPassword2Ph = useTypewriter('Подтвердите пароль', 35, 560);
   const regReferralPh = useTypewriter('Реферальный код', 35, 700);

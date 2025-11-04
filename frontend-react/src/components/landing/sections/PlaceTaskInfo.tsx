@@ -15,7 +15,7 @@ const PlaceTaskInfo: React.FC = () => {
 
           <div className="place-task-info__expert">
             <div className="place-task-info__expert-title">Для экспертов</div>
-            <button className="place-task-info__expert-button button" onClick={() => navigate('/expert/dashboard')}>Стать экспертом</button>
+            <button className="place-task-info__expert-button button" onClick={() => navigate('/become-expert')}>Стать экспертом</button>
           </div>
 
           <figure className="place-task-info__photo">

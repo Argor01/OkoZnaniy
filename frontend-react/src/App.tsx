@@ -7,7 +7,13 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 
 // Import styles
+import './styles/page-transitions.css';
 import './styles/landing.css';
+import './styles/logo.css';
+import './styles/expert-partner-pages.css';
+import './styles/expert-advantages.css';
+import './styles/expert-form.css';
+import './styles/partner-pages.css';
 import './styles/globals.css';
 import './styles/colors.css';
 import './styles/typography.css';
@@ -25,7 +31,10 @@ import ExpertProfile from './pages/ExpertProfile';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ArbitratorDashboard from './pages/ArbitratorDashboard';
+import BecomeExpert from './pages/BecomeExpert';
+import BecomePartner from './pages/BecomePartner';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 // Configure dayjs
 dayjs.locale('ru');
@@ -45,10 +54,13 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider locale={ruRU}>
         <Router>
+          <ScrollToTop />
           <div className="App">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/become-expert" element={<BecomeExpert />} />
+              <Route path="/become-partner" element={<BecomePartner />} />
               <Route 
                 path="/create-order" 
                 element={

@@ -1,0 +1,79 @@
+/* Стили для логотипа с эффектом сияния */
+
+.header__logo-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 12px rgba(255, 255, 255, 0.8),
+    0 0 25px rgba(255, 255, 255, 0.6),
+    0 0 38px rgba(255, 255, 255, 0.4),
+    0 0 50px rgba(255, 255, 255, 0.2);
+  animation: glow 3s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.header__logo-link:hover {
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 1),
+    0 0 40px rgba(255, 255, 255, 0.8),
+    0 0 55px rgba(255, 255, 255, 0.6),
+    0 0 70px rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 15px rgba(255, 255, 255, 0.8),
+      0 0 30px rgba(255, 255, 255, 0.6),
+      0 0 45px rgba(255, 255, 255, 0.4),
+      0 0 60px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 1),
+      0 0 40px rgba(255, 255, 255, 0.8),
+      0 0 55px rgba(255, 255, 255, 0.6),
+      0 0 70px rgba(255, 255, 255, 0.4);
+  }
+}
+
+.header__logo-link-image {
+  position: relative;
+  z-index: 1;
+  width: 62px;
+  height: auto;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .header__logo-link {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .header__logo-link-image {
+    width: 55px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header__logo-link {
+    width: 70px;
+    height: 70px;
+    box-shadow: 
+      0 0 10px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.6),
+      0 0 30px rgba(255, 255, 255, 0.4);
+  }
+  
+  .header__logo-link-image {
+    width: 48px;
+  }
+}
