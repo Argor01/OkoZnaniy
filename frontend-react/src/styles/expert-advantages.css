@@ -83,6 +83,14 @@
   margin: 0 auto;
 }
 
+/* Центрирование последней карточки если она одна в ряду */
+.expert-page .place-task__advantages-card:nth-child(7) {
+  grid-column: 1 / -1;
+  max-width: 470px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .expert-page .place-task__advantages {
     grid-template-columns: 1fr;
@@ -112,6 +120,9 @@
 .expert-page .place-task__advantages-card:nth-child(2) { animation-delay: 0.4s; }
 .expert-page .place-task__advantages-card:nth-child(3) { animation-delay: 0.5s; }
 .expert-page .place-task__advantages-card:nth-child(4) { animation-delay: 0.6s; }
+.expert-page .place-task__advantages-card:nth-child(5) { animation-delay: 0.7s; }
+.expert-page .place-task__advantages-card:nth-child(6) { animation-delay: 0.8s; }
+.expert-page .place-task__advantages-card:nth-child(7) { animation-delay: 0.9s; }
 
 .expert-page .place-task__advantages-card::before {
   content: '';

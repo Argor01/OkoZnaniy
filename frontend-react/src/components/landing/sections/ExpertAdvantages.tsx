@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingOutlined, DollarOutlined, ClockCircleOutlined, LaptopOutlined } from '@ant-design/icons';
+import { ShoppingOutlined, DollarOutlined, ClockCircleOutlined, LaptopOutlined, SafetyOutlined, UserOutlined, CustomerServiceOutlined } from '@ant-design/icons';
 
 const ExpertAdvantages: React.FC = () => {
   return (
@@ -36,6 +36,27 @@ const ExpertAdvantages: React.FC = () => {
               <LaptopOutlined className="place-task__advantages-card-icon" />
             </figure>
             <div className="place-task__advantages-card-text">Начни работать на удаленке прямо сейчас</div>
+          </div>
+
+          <div className="place-task__advantages-card">
+            <figure className="place-task__advantages-card-figure">
+              <SafetyOutlined className="place-task__advantages-card-icon" />
+            </figure>
+            <div className="place-task__advantages-card-text">Безопасная сделка — 100% гарантия оплаты</div>
+          </div>
+
+          <div className="place-task__advantages-card">
+            <figure className="place-task__advantages-card-figure">
+              <UserOutlined className="place-task__advantages-card-icon" />
+            </figure>
+            <div className="place-task__advantages-card-text">Работа напрямую с заказчиком</div>
+          </div>
+
+          <div className="place-task__advantages-card">
+            <figure className="place-task__advantages-card-figure">
+              <CustomerServiceOutlined className="place-task__advantages-card-icon" />
+            </figure>
+            <div className="place-task__advantages-card-text">Быстрая техническая поддержка 7 дней в неделю</div>
           </div>
         </div>
       </div>
