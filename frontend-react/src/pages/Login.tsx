@@ -250,13 +250,21 @@ const Login: React.FC = () => {
           Войти
         </Button>
       </Form.Item>
+      <div style={{ textAlign: 'center', color: '#8c8c8c', margin: '10px 0' }}>
+        или войти через
+      </div>
       <Form.Item>
         <div className="panel-footer">
           <div className="telegram-auth">
             <a className="telegram-login" href="#" aria-label="Telegram">
               <img src="/assets/telegram.png" alt="telegram-bot" />
             </a>
-            <span className="telegram-login-text">Вход через Telegram</span>
+            <a className="google-login" href="#" aria-label="Google">
+              <img src="/assets/google.png" alt="google-login"/>
+            </a>
+            <a className="vk-login" href="#" aria-label="VK">
+              <img src="/assets/vk.png" alt="vk-login"/>
+            </a>
           </div>
         </div>
       </Form.Item>
@@ -343,13 +351,21 @@ const Login: React.FC = () => {
           Зарегистрироваться
         </Button>
       </Form.Item>
+      <div style={{ textAlign: 'center', color: '#8c8c8c', margin: '10px 0' }}>
+        или войти через
+      </div>
       <Form.Item>
         <div className="panel-footer">
           <div className="telegram-auth">
             <a className="telegram-login" href="#" aria-label="Telegram">
               <img src="/assets/telegram.png" alt="telegram-bot" />
             </a>
-            <span className="telegram-login-text">Вход через Telegram</span>
+            <a className="google-login" href="#" aria-label="Google">
+              <img src="/assets/google.png" alt="google-login"/>
+            </a>
+            <a className="vk-login" href="#" aria-label="VK">
+              <img src="/assets/vk.png" alt="vk-login"/>
+            </a>
           </div>
         </div>
       </Form.Item>

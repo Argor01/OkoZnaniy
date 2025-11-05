@@ -416,28 +416,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
 }
 
-.telegram-login {
+.telegram-login, .google-login, .vk-login {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 6px 14px rgba(16, 122, 252, 0.16);
-  border: 1px solid #d7dfef;
+  transition: transform 0.2s;
 }
 
-.telegram-login:hover {
-  background: #e6f0ff;
-  border-color: #b3d4fc;
+.telegram-login:hover, .google-login:hover, .vk-login:hover {
+  transform: translateY(-2px);
 }
-.telegram-login img {
-  width: 36px;
-  height: 36px;
+
+.telegram-login img, .google-login img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.vk-login img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
 }
 
 .telegram-login-text {
