@@ -25,8 +25,8 @@ COPY . .
 
 # Исправление окончаний строк и выдача прав
 RUN if [ -f /app/docker-entrypoint.sh ]; then \
-        awk 'BEGIN{RS="\r\n";ORS="\n"} {print}' /app/docker-entrypoint.sh > /app/docker-entrypoint.sh.new && \
-        mv /app/docker-entrypoint.sh.new /app/docker-entrypoint.sh && \
+        sed -i 's/\r$//' /app/docker-entrypoint.sh || \
+        (cat /app/docker-entrypoint.sh | tr -d '\r' > /app/docker-entrypoint.sh.tmp && mv /app/docker-entrypoint.sh.tmp /app/docker-entrypoint.sh) && \
         chmod +x /app/docker-entrypoint.sh; \
     fi
 
