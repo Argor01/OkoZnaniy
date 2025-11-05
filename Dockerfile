@@ -11,10 +11,6 @@ RUN apt-get update && apt-get install -y \
 # Установка рабочей директории
 WORKDIR /app
 
-# Копирование скрипта запуска и выдача прав
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
 # Копирование файлов зависимостей
 COPY requirements.txt .
 
@@ -26,6 +22,13 @@ RUN adduser --disabled-password --gecos '' appuser
 
 # Копирование исходного кода
 COPY . .
+
+# Исправление окончаний строк и выдача прав
+RUN if [ -f /app/docker-entrypoint.sh ]; then \
+        awk 'BEGIN{RS="\r\n";ORS="\n"} {print}' /app/docker-entrypoint.sh > /app/docker-entrypoint.sh.new && \
+        mv /app/docker-entrypoint.sh.new /app/docker-entrypoint.sh && \
+        chmod +x /app/docker-entrypoint.sh; \
+    fi
 
 # Создание директорий для статических файлов и медиа
 RUN mkdir -p /app/static /app/media
@@ -44,4 +47,4 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 EXPOSE 8000
 
 # Запуск приложения
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/docker-entrypoint.sh"]

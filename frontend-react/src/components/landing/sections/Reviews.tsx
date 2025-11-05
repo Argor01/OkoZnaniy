@@ -17,58 +17,65 @@ interface Review {
 const reviews: Review[] = [
   {
     id: 1,
-    name: 'Имя Фамилия',
-    workType: 'Дипломная работа',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'maxim.hood98',
+    workType: 'Контрольная работа',
+    text: 'Заказал контрольную по высшей математике — благодаря ребятам, получил свою первую пятёрку по этому предмету. Написал им вечером, а к утру у меня уже было готовое решение с подробными пояснениями. Особенно порадовало, что объяснили сложные моменты простыми словами — прям как надо! Сдал работу, никогда ещё так не радовался. Спасибо огромное, теперь знаю, где искать помощь в будущем!',
     rating: 5
   },
   {
     id: 2,
-    name: 'Имя Фамилия',
-    workType: 'Курсовая работа',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'vera_naushnik',
+    workType: 'Презентация',
+    text: 'Очень быстро сделали презентацию по философии. Красочно и ничего лишнего — оформили и слайды, и текст для выступления. Отдельно хочу отметить, что учли мои пожелания: добавили несколько современных примеров, чтобы материал не был "сухим", а ещё помогли подобрать интересные цитаты. Благодаря этой работе получила зачёт без проблем, и даже одногруппники просили поделиться примером для себя. Удобно, что всё онлайн — экономит кучу времени!',
     rating: 5
   },
   {
     id: 3,
-    name: 'Имя Фамилия',
-    workType: 'Контрольная работа',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'dima.truba',
+    workType: 'Отчёт по практике',
+    text: 'Брал отчёт по практике — все расписали грамотно, оформили по стандартам моего вуза, добавили реальные данные с предприятия. Переписали пару разделов под мои конкретные условия, всегда были на связи по всем вопросам. Преподаватель остался доволен, отметил основательность работы и оформление журналов отчёта. Доволен абсолютно всем, теперь планирую брать тут диплом.',
     rating: 5
   },
   {
     id: 4,
-    name: 'Имя Фамилия',
-    workType: 'Реферат',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'katusha.sunny',
+    workType: 'Дипломная работа',
+    text: 'Нашла эту биржу через друзей, когда поняла, что на диплом времени совсем нет. Получила дипломный проект полностью под ключ: сделали не только теорию, но и расчёты, схему, презентацию и даже список литературы с актуальными источниками. В антиплагиате совпадений практически не было, а если попались — быстро помогли переделать. Сдала без единой правки! Теперь рекомендую всем одногруппникам',
     rating: 5
   },
   {
     id: 5,
-    name: 'Имя Фамилия',
-    workType: 'Отчет по практике',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'nastja.artem',
+    workType: 'Эссе',
+    text: 'Попросила выполнить эссе по менеджменту. Менеджер внимательно уточнил тему, необходимые источники и даже стиль письма, чтобы всё соответствовало моим требованиям. Получила очень структурированный и грамотный текст, с отличной аргументацией и тщательной проверкой на уникальность. Преподаватель похвалил, а мне не пришлось сидеть ночами за Google. Буду обращаться ещё!',
     rating: 5
   },
   {
     id: 6,
-    name: 'Имя Фамилия',
-    workType: 'Эссе',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'tamara_liv',
+    workType: 'Курсовая работа',
+    text: 'Моя история с этой биржей началась с курсовой по психологии, которую вообще не знала с чего начать. Оформили работу быстро и чётко. Также в презентацию добавили примеры из современной практики, что было особенно приятно. С преподавателем проблем не возникло, заняла первое место на потоке благодаря этой работе! Теперь здесь беру любые сложные задания, не переживая о результате.',
     rating: 5
   },
   {
     id: 7,
-    name: 'Имя Фамилия',
-    workType: 'Лабораторная работа',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: 'linodashka',
+    workType: 'Домашняя работа',
+    text: 'Домашка по английскому всегда отнимала кучу времени, а тут за пару часов сделали задание и прислали подробные разъяснения по каждому пункту. Указали на типичные грамматические ошибки, которые я делаю, и объяснили, как их избежать в будущем! Прямо мини-обучение, а не просто списывание. В итоге получила максимум баллов, а заодно подтянула язык. Теперь смело заказываю срочные работы — всегда успевают.',
     rating: 5
   },
   {
     id: 8,
-    name: 'Имя Фамилия',
-    workType: 'Чертеж',
-    text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur',
+    name: '9daniel_tsoi',
+    workType: 'Расчётно-графическая работа',
+    text: 'Расчётно-графическая по строительству — это каждый раз стресс из-за требований к оформлению. Решил не мучиться и заказал всё сразу на бирже: расчёты, чертежи, пояснительную записку. Приятно удивили вниманием к деталям — учли даже мелкие требования моего препода по ГОСТам. Приняли без единой доработки. Огромный плюс, что можно заказ делать пакетно и не тратить время на согласования.',
+    rating: 5
+  },
+  {
+    id: 9,
+    name: 'sergei_online',
+    workType: 'Реферат',
+    text: 'Реферат по истории надо было сдать буквально за ночь! Ребята всё сделали в рекордные сроки, прислали оригинальный текст с грамотными ссылками и уникальной структурой. ни одного замечания у преподавателя не было: сразу в журнал "отлично". Оказалось — вообще несложно, если найти хороших исполнителей.',
     rating: 5
   }
 ];

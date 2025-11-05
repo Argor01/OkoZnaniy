@@ -1324,6 +1324,20 @@ img {
   max-height: 94px;
   height: auto;
 }
+.only-pro__additional-text {
+  margin-top: 20px;
+  font-family: "Jost", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+}
+@media (max-width: 576px) {
+  .only-pro__additional-text {
+    font-size: 16px;
+    margin-top: 15px;
+  }
+}
 
 .reviews {
   padding: 125px 0 130px;

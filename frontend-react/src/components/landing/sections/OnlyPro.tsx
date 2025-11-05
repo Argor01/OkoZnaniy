@@ -102,6 +102,7 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
             </div>
+            <div className="only-pro__additional-text">и многие другие</div>
           </div>
         </div>
       </div>
