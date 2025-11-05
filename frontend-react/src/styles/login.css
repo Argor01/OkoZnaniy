@@ -449,13 +449,13 @@
 }
 
 @media (max-width: 768px) {
-  .telegram-login {
+  .telegram-login, .google-login, .vk-login {
     width: 32px;
     height: 32px;
   }
-  .telegram-login img {
-    width: 16px;
-    height: 16px;
+  .telegram-login img, .google-login img, .vk-login img {
+    width: 30px;
+    height: 30px;
   }
   .telegram-login-text {
     font-size: 13px;
