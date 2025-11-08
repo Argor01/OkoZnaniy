@@ -179,16 +179,31 @@ const ArbitratorDashboard: React.FC = () => {
     form.resetFields();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Modal.confirm({
       title: 'Выход из системы',
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
-      onOk: () => {
-        authApi.logout();
-        message.success('Вы вышли из системы');
-        navigate('/login');
+      onOk: async () => {
+        // Получаем роль пользователя перед выходом
+        try {
+          const user = await authApi.getCurrentUser();
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          
+          // Редирект на админ-панель для ролей: arbitrator, partner, admin, director
+          if (['arbitrator', 'partner', 'admin', 'director'].includes(user.role)) {
+            navigate('/admin');
+          } else {
+            navigate('/login');
+          }
+        } catch (error) {
+          // Если не удалось получить пользователя, просто выходим
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          navigate('/admin');
+        }
       },
     });
   };

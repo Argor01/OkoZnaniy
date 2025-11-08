@@ -26,6 +26,7 @@ import ExpertApplication from './pages/ExpertApplication';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ArbitratorDashboard from './pages/ArbitratorDashboard';
+import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
@@ -100,17 +101,21 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/admin" 
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } 
+                element={<AdminDashboard />} 
               />
               <Route 
                 path="/arbitrator"
                 element={
                   <ProtectedRoute>
                     <ArbitratorDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/director"
+                element={
+                  <ProtectedRoute>
+                    <DirectorDashboard />
                   </ProtectedRoute>
                 } 
               />

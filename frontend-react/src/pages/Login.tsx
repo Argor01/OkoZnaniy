@@ -57,9 +57,16 @@ const Login: React.FC = () => {
       } else if (role === 'partner') {
         navigate('/partner');
       } else if (role === 'admin') {
-        navigate('/admin');
+        // Проверяем, не директор ли это (по email)
+        if (user?.email === 'director@test.com') {
+          navigate('/director');
+        } else {
+          navigate('/admin');
+        }
       } else if (role === 'arbitrator') {
         navigate('/arbitrator');
+      } else if (role === 'director') {
+        navigate('/director');
       } else {
         navigate('/dashboard');
       }

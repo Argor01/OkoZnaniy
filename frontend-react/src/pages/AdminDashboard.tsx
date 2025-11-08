@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Card, 
@@ -16,7 +16,9 @@ import {
   Form,
   InputNumber,
   Select,
-  Tabs
+  Tabs,
+  Spin,
+  Result
 } from 'antd';
 import { 
   UserOutlined, 
@@ -33,8 +35,9 @@ import {
 import dayjs from 'dayjs';
 import { adminApi, type Partner, type PartnerEarning, type UpdatePartnerRequest } from '../api/admin';
 import { disputesApi, type Dispute } from '../api/disputes';
-import { authApi } from '../api/auth';
+import { authApi, type User } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
+import AdminLogin from '../components/admin/AdminLogin';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -42,15 +45,51 @@ const { Title, Text, Paragraph } = Typography;
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [form] = Form.useForm();
 
+  // Проверка аутентификации
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-  // Получение данных партнеров
-  const { data: partners, isLoading: partnersLoading } = useQuery({
+  const checkAuth = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const currentUser = await authApi.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      // Токен невалиден
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Обработчик успешного входа
+  const handleLoginSuccess = (loggedInUser: User) => {
+    setUser(loggedInUser);
+    setLoading(false);
+  };
+
+  // Определяем, можно ли загружать данные (только для admin)
+  const canLoadData = !!user && user.role === 'admin';
+
+  // Получение данных партнеров (только если пользователь авторизован и имеет нужную роль)
+  const { data: partners, isLoading: partnersLoading, error: partnersError } = useQuery({
     queryKey: ['admin-partners'],
     queryFn: adminApi.getPartners,
+    enabled: canLoadData,
     select: (data: any) => {
       // Обрабатываем разные форматы ответа
       if (Array.isArray(data)) return data;
@@ -58,12 +97,19 @@ const AdminDashboard: React.FC = () => {
       if (data?.data && Array.isArray(data.data)) return data.data;
       return [];
     },
+    onError: (error: any) => {
+      console.error('Error fetching partners:', error);
+      if (error.response?.status !== 401) {
+        message.error('Ошибка при загрузке данных партнеров');
+      }
+    },
   });
 
-  // Получение начислений
-  const { data: earnings, isLoading: earningsLoading } = useQuery({
+  // Получение начислений (только если пользователь авторизован и имеет нужную роль)
+  const { data: earnings, isLoading: earningsLoading, error: earningsError } = useQuery({
     queryKey: ['admin-earnings'],
     queryFn: adminApi.getEarnings,
+    enabled: canLoadData,
     select: (data: any) => {
       // Обрабатываем разные форматы ответа
       if (Array.isArray(data)) return data;
@@ -71,12 +117,19 @@ const AdminDashboard: React.FC = () => {
       if (data?.data && Array.isArray(data.data)) return data.data;
       return [];
     },
+    onError: (error: any) => {
+      console.error('Error fetching earnings:', error);
+      if (error.response?.status !== 401) {
+        message.error('Ошибка при загрузке данных начислений');
+      }
+    },
   });
 
-  // Получение споров
+  // Получение споров (только если пользователь авторизован и имеет нужную роль)
   const { data: disputes, isLoading: disputesLoading, error: disputesError } = useQuery({
     queryKey: ['admin-disputes'],
     queryFn: disputesApi.getDisputes,
+    enabled: canLoadData,
     select: (data: any) => {
       // API возвращает пагинированный ответ: {count: 2, next: null, previous: null, results: Array}
       if (data?.data?.results && Array.isArray(data.data.results)) {
@@ -96,19 +149,99 @@ const AdminDashboard: React.FC = () => {
       return [];
     },
     retry: false, // Не повторять запрос при ошибке
+    onError: (error: any) => {
+      console.error('Error fetching disputes:', error);
+      // Не показываем ошибку, если это 404 (споры могут отсутствовать)
+      if (error.response?.status !== 401 && error.response?.status !== 404) {
+        message.warning('Не удалось загрузить данные о спорах');
+      }
+    },
   });
 
-  // Получение арбитров
-  const { data: arbitrators, isLoading: arbitratorsLoading } = useQuery({
+  // Получение арбитров (только если пользователь авторизован и имеет нужную роль)
+  const { data: arbitrators, isLoading: arbitratorsLoading, error: arbitratorsError } = useQuery({
     queryKey: ['admin-arbitrators'],
     queryFn: adminApi.getArbitrators,
+    enabled: canLoadData,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data?.results && Array.isArray(data.results)) return data.results;
       if (data?.data && Array.isArray(data.data)) return data.data;
       return [];
     },
+    onError: (error: any) => {
+      console.error('Error fetching arbitrators:', error);
+      if (error.response?.status !== 401) {
+        message.error('Ошибка при загрузке данных арбитров');
+      }
+    },
   });
+
+  // Мутации для обновления данных (должны быть объявлены до условных возвратов)
+  const markEarningPaidMutation = useMutation({
+    mutationFn: adminApi.markEarningPaid,
+    onSuccess: () => {
+      message.success('Начисление отмечено как выплаченное');
+      queryClient.invalidateQueries({ queryKey: ['admin-earnings'] });
+    },
+    onError: () => {
+      message.error('Ошибка при отметке начисления');
+    },
+  });
+
+  const updatePartnerMutation = useMutation({
+    mutationFn: ({ partnerId, data }: { partnerId: number; data: UpdatePartnerRequest }) =>
+      adminApi.updatePartner(partnerId, data),
+    onSuccess: () => {
+      message.success('Партнер обновлен');
+      setEditModalVisible(false);
+      queryClient.invalidateQueries({ queryKey: ['admin-partners'] });
+    },
+    onError: () => {
+      message.error('Ошибка обновления партнера');
+    },
+  });
+
+  // Если загрузка - показываем спиннер
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh' 
+      }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  // Если пользователь не авторизован - показываем форму входа
+  if (!user) {
+    return <AdminLogin onSuccess={handleLoginSuccess} />;
+  }
+
+  // Если пользователь - директор (проверяем по email, так как в БД у него роль admin)
+  if (user.role === 'admin' && user.email === 'director@test.com') {
+    navigate('/director');
+    return null;
+  }
+
+  // Если пользователь авторизован, но не имеет роли admin - показываем ошибку доступа
+  if (user.role !== 'admin') {
+    return (
+      <Result
+        status="403"
+        title="Доступ запрещен"
+        subTitle="У вас нет прав для доступа к админ-панели."
+        extra={
+          <Button type="primary" onClick={() => navigate('/dashboard')}>
+            Вернуться на главную
+          </Button>
+        }
+      />
+    );
+  }
 
   const partnersColumns = [
     {
@@ -358,30 +491,6 @@ const AdminDashboard: React.FC = () => {
     navigate(`/admin/partners/${partner.id}`);
   };
 
-  const markEarningPaidMutation = useMutation({
-    mutationFn: adminApi.markEarningPaid,
-    onSuccess: () => {
-      message.success('Начисление отмечено как выплаченное');
-      queryClient.invalidateQueries({ queryKey: ['admin-earnings'] });
-    },
-    onError: () => {
-      message.error('Ошибка при отметке начисления');
-    },
-  });
-
-  const updatePartnerMutation = useMutation({
-    mutationFn: ({ partnerId, data }: { partnerId: number; data: UpdatePartnerRequest }) =>
-      adminApi.updatePartner(partnerId, data),
-    onSuccess: () => {
-      message.success('Партнер обновлен');
-      setEditModalVisible(false);
-      queryClient.invalidateQueries({ queryKey: ['admin-partners'] });
-    },
-    onError: () => {
-      message.error('Ошибка обновления партнера');
-    },
-  });
-
   const handleMarkAsPaid = (earningId: number) => {
     markEarningPaidMutation.mutate(earningId);
   };
@@ -463,16 +572,31 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Modal.confirm({
       title: 'Выход из системы',
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
-      onOk: () => {
-        authApi.logout();
-        message.success('Вы вышли из системы');
-        navigate('/login');
+      onOk: async () => {
+        // Получаем роль пользователя перед выходом
+        try {
+          const currentUser = user || await authApi.getCurrentUser();
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          
+          // Редирект на админ-панель для ролей: arbitrator, partner, admin, director
+          if (currentUser && ['arbitrator', 'partner', 'admin', 'director'].includes(currentUser.role)) {
+            navigate('/admin');
+          } else {
+            navigate('/admin'); // Для админ-панели всегда редиректим на /admin
+          }
+        } catch (error) {
+          // Если не удалось получить пользователя, просто выходим
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          navigate('/admin');
+        }
       },
     });
   };

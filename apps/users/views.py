@@ -26,6 +26,18 @@ User = get_user_model()
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    
+    def post(self, request, *args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        try:
+            logger.info(f"[Token View] Login request received: {request.data}")
+            print(f"[Token View] Login request received: {request.data}")
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"[Token View] Error in post: {str(e)}")
+            print(f"[Token View] Error in post: {str(e)}")
+            raise
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserViewSet(viewsets.ModelViewSet):

@@ -20,10 +20,10 @@ COPY . .
 
 # Переменные окружения
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=config.settings.production
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 # Порт
 EXPOSE 8000
 
-# Запуск миграций и приложения
-CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+# Запуск миграций, создание тестовых пользователей (в dev режиме) и приложения
+CMD python manage.py migrate && (python manage.py create_dev_users || true) && python manage.py runserver 0.0.0.0:8000

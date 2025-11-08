@@ -20,11 +20,13 @@ import {
   UserAddOutlined, 
   DollarOutlined,
   TeamOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { partnersApi } from '../api/partners';
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '../api/auth';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -156,13 +158,54 @@ const PartnerDashboard: React.FC = () => {
     },
   ];
 
+  const handleLogout = async () => {
+    Modal.confirm({
+      title: 'Выход из системы',
+      content: 'Вы уверены, что хотите выйти?',
+      okText: 'Выйти',
+      cancelText: 'Отмена',
+      onOk: async () => {
+        // Получаем роль пользователя перед выходом
+        try {
+          const user = await authApi.getCurrentUser();
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          
+          // Редирект на админ-панель для ролей: arbitrator, partner, admin, director
+          if (['arbitrator', 'partner', 'admin', 'director'].includes(user.role)) {
+            navigate('/admin');
+          } else {
+            navigate('/login');
+          }
+        } catch (error) {
+          // Если не удалось получить пользователя, просто выходим
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          navigate('/admin');
+        }
+      },
+    });
+  };
+
   return (
     <div style={{ maxWidth: 1200, margin: '24px auto', padding: '0 24px' }}>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>Партнерский кабинет</Title>
-        <Paragraph>
-          Приглашайте новых пользователей и получайте процент с их активности
-        </Paragraph>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <Title level={2}>Партнерский кабинет</Title>
+            <Paragraph>
+              Приглашайте новых пользователей и получайте процент с их активности
+            </Paragraph>
+          </div>
+          <Button 
+            type="primary" 
+            danger 
+            onClick={handleLogout}
+            icon={<LogoutOutlined />}
+          >
+            Выйти
+          </Button>
+        </div>
       </div>
 
       {/* Статистика */}
