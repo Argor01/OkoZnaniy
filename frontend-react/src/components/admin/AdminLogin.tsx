@@ -178,12 +178,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     <div
       style={{
         position: 'relative',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%)',
+        padding: '40px 20px',
         overflow: 'hidden',
       }}
     >
@@ -191,10 +191,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       <div
         style={{
           position: 'absolute',
-          top: '-50px',
-          left: '-50px',
-          width: '200px',
-          height: '200px',
+          top: 100,
+          left: '15%',
+          width: 80,
+          height: 80,
           borderRadius: '50%',
           background: 'rgba(255, 255, 255, 0.1)',
           zIndex: 0,
@@ -203,12 +203,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       <div
         style={{
           position: 'absolute',
-          bottom: '-100px',
-          right: '-100px',
-          width: '300px',
-          height: '300px',
+          bottom: 150,
+          right: '20%',
+          width: 120,
+          height: 120,
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.08)',
+          background: 'rgba(155, 74, 255, 0.15)',
           zIndex: 0,
         }}
       />
@@ -216,33 +216,31 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       <Card
         style={{
           width: '100%',
-          maxWidth: '500px',
-          borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+          maxWidth: '480px',
+          borderRadius: '20px',
+          boxShadow: 'var(--shadow-card)',
           border: 'none',
           position: 'relative',
           zIndex: 1,
-          background: 'rgba(255, 255, 255, 0.98)',
-          backdropFilter: 'blur(10px)',
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div
             style={{
               display: 'inline-block',
-              padding: '12px 24px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '16px',
+              background: 'var(--color-brand-blue-600)',
               borderRadius: '12px',
               marginBottom: '16px',
             }}
           >
             <CrownOutlined style={{ fontSize: '32px', color: '#fff' }} />
           </div>
-          <Title level={2} style={{ marginBottom: '8px', color: '#1a1a1a' }}>
-            Вход в личный кабинет администратора
+          <Title level={2} style={{ marginBottom: '8px', color: '#1a1a1a', fontFamily: 'var(--font-family-display)' }}>
+            Вход в админ-панель
           </Title>
-          <Paragraph style={{ color: '#666', marginBottom: 0, fontSize: '14px' }}>
-            Введите email и пароль для доступа к личному кабинету администратора
+          <Paragraph style={{ color: '#666', marginBottom: 0, fontSize: '16px' }}>
+            Введите email и пароль для доступа к админ-панели
           </Paragraph>
         </div>
 
@@ -283,8 +281,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               autoComplete="email"
               style={{
                 borderRadius: '8px',
-                fontSize: '15px',
-                padding: '8px 12px',
               }}
               onPressEnter={() => {
                 form.submit();
@@ -323,8 +319,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               autoComplete="current-password"
               style={{
                 borderRadius: '8px',
-                fontSize: '15px',
-                padding: '8px 12px',
               }}
               onPressEnter={() => {
                 form.submit();
@@ -344,18 +338,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                 height: '48px',
                 fontSize: '16px',
                 fontWeight: 600,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-                transition: 'all 0.3s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+                borderRadius: '8px',
               }}
             >
               Войти
@@ -404,24 +387,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                       size="large"
                       style={{
                         minWidth: '140px',
-                        height: '44px',
                         borderRadius: '8px',
-                        transition: 'all 0.3s ease',
-                        border: '1px solid #d9d9d9',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!loading) {
-                          e.currentTarget.style.transform = 'translateY(-2px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                          e.currentTarget.style.borderColor = '#667eea';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!loading) {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                          e.currentTarget.style.borderColor = '#d9d9d9';
-                        }
                       }}
                     >
                       {account.label}
