@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker } from 'antd';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Layout } from 'antd';
 import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
@@ -30,6 +30,7 @@ interface UserProfile {
 }
 
 const { Title, Text, Paragraph } = Typography;
+const { Header, Sider, Content, Footer } = Layout;
 
 const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
@@ -242,161 +243,150 @@ const ExpertDashboard: React.FC = () => {
 
   const orders: Order[] = data || [];
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.contentWrapper}>
-        {/* Sidebar */}
-        <div className={`${styles.sidebar} ${styles.collapsed}`}>
-          {/* User Profile Section */}
-          <div className={styles.sidebarProfile}>
-            <div 
-              style={{ 
-                position: 'relative', 
-                display: 'inline-block',
-                cursor: 'pointer'
-              }}
-              onClick={() => setProfileModalVisible(true)}
-            >
-              <Badge 
-                count={<CheckCircleOutlined style={{ color: '#10b981', fontSize: 12 }} />} 
-                offset={[-2, 2]}
-              >
-                <Badge 
-                  count={<span style={{ 
-                    background: '#f97316', 
-                    color: 'white', 
-                    fontSize: 10, 
-                    padding: '2px 6px', 
-                    borderRadius: 10,
-                    fontWeight: 600
-                  }}>pro</span>} 
-                  offset={[10, -5]}
-                >
-                  <Avatar
-                    size={56}
-                    src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
-                    icon={!profile?.avatar && <UserOutlined />}
-                    style={{ 
-                      backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
-                      border: '2px solid #fff',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                </Badge>
-              </Badge>
-            </div>
-            <div 
-              style={{ 
-                flex: 1, 
-                marginLeft: 12,
-                cursor: 'pointer'
-              }}
-              onClick={() => setProfileModalVisible(true)}
-            >
-              <Text strong style={{ fontSize: 15, color: '#1f2937', display: 'block' }}>
-                {profile?.username || profile?.email || 'Эксперт'}
-              </Text>
-            </div>
-            <Button
-              type="text"
-              icon={<SettingOutlined />}
-              size="small"
-              style={{ color: '#6b7280' }}
-              onClick={() => setProfileModalVisible(true)}
-            />
-          </div>
+  const handleLogout = () => {
+    Modal.confirm({
+      title: 'Выход из системы',
+      content: 'Вы уверены, что хотите выйти?',
+      okText: 'Выйти',
+      cancelText: 'Отмена',
+      maskStyle: {
+        backdropFilter: 'blur(4px)',
+      },
+      onOk: async () => {
+        try {
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          navigate('/');
+          window.location.reload();
+        } catch (error) {
+          authApi.logout();
+          message.success('Вы вышли из системы');
+          navigate('/');
+          window.location.reload();
+        }
+      },
+    });
+  };
 
-          {/* Navigation Menu */}
-            <Menu
-              mode="inline"
-              selectedKeys={[selectedMenuKey]}
-              openKeys={openKeys}
-              onOpenChange={setOpenKeys}
-              triggerSubMenuAction="hover"
-              onSelect={({ key }) => {
-                if (key === 'messages') {
-                  setMessageModalVisible(true);
-                  return;
+  return (
+    <>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider
+        width={250}
+        style={{
+          background: '#fff',
+          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+        }}
+      >
+        <div
+          style={{
+            padding: '24px',
+            textAlign: 'center',
+            borderBottom: '1px solid #f0f0f0',
+          }}
+        >
+          <UserOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
+          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
+            Личный кабинет эксперта
+          </Title>
+        </div>
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedMenuKey]}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
+          triggerSubMenuAction="hover"
+          onClick={({ key }) => {
+            if (key === 'messages') {
+              setMessageModalVisible(true);
+              return;
+            }
+            if (key === 'faq') {
+              setFaqModalVisible(true);
+              return;
+            }
+            if (key === 'friends') {
+              setFriendsModalVisible(true);
+              return;
+            }
+            if (key === 'notifications') {
+              setNotificationsModalVisible(true);
+              return;
+            }
+            if (key === 'arbitration') {
+              setArbitrationModalVisible(true);
+              return;
+            }
+            // Обработка подпунктов "На счету"
+            if (key === 'balance' || key.startsWith('balance-')) {
+              setFinanceModalVisible(true);
+              return;
+            }
+            // Обработка подпунктов "Мои заказы"
+            if (key.startsWith('orders-')) {
+              setSelectedMenuKey('orders');
+              setActiveTab('orders');
+              setTimeout(() => {
+                if (tabsRef.current) {
+                  tabsRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
                 }
-                if (key === 'faq') {
-                  setFaqModalVisible(true);
-                  return;
+              }, 100);
+              return;
+            }
+            // Обработка "Мои работы"
+            if (key === 'works') {
+              navigate('/works');
+              return;
+            }
+            // Обработка подпунктов "Авторский магазин"
+            if (key === 'shop-ready-works') {
+              navigate('/shop/ready-works');
+              return;
+            }
+            if (key === 'shop-add-work') {
+              navigate('/shop/add-work');
+              return;
+            }
+            if (key === 'shop-my-works') {
+              navigate('/works');
+              return;
+            }
+            if (key === 'shop-purchased') {
+              navigate('/shop/purchased');
+              return;
+            }
+            // Обработка клика на основное меню "Мои заказы" или "Мои работы"
+            if (key === 'orders') {
+              setSelectedMenuKey(key);
+              setActiveTab(key);
+              setTimeout(() => {
+                if (tabsRef.current) {
+                  tabsRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
                 }
-                if (key === 'friends') {
-                  setFriendsModalVisible(true);
-                  return;
-                }
-                if (key === 'notifications') {
-                  setNotificationsModalVisible(true);
-                  return;
-                }
-                if (key === 'arbitration') {
-                  setArbitrationModalVisible(true);
-                  return;
-                }
-                // Обработка подпунктов "На счету"
-                if (key === 'balance' || key.startsWith('balance-')) {
-                  setFinanceModalVisible(true);
-                  return;
-                }
-                // Обработка подпунктов "Мои заказы"
-                if (key.startsWith('orders-')) {
-                  setSelectedMenuKey('orders');
-                  setActiveTab('orders');
-                  setTimeout(() => {
-                    if (tabsRef.current) {
-                      tabsRef.current.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                      });
-                    }
-                  }, 100);
-                  return;
-                }
-                // Обработка "Мои работы"
-                if (key === 'works') {
-                  navigate('/works');
-                  return;
-                }
-                // Обработка подпунктов "Авторский магазин"
-                if (key === 'shop-ready-works') {
-                  navigate('/shop/ready-works');
-                  return;
-                }
-                if (key === 'shop-add-work') {
-                  navigate('/shop/add-work');
-                  return;
-                }
-                if (key === 'shop-my-works') {
-                  navigate('/works');
-                  return;
-                }
-                if (key === 'shop-purchased') {
-                  navigate('/shop/purchased');
-                  return;
-                }
-                // Обработка клика на основное меню "Мои заказы" или "Мои работы"
-                if (key === 'orders') {
-                  setSelectedMenuKey(key);
-                  setActiveTab(key);
-                  setTimeout(() => {
-                    if (tabsRef.current) {
-                      tabsRef.current.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                      });
-                    }
-                  }, 100);
-                  return;
-                }
-                if (key === 'works') {
-                  navigate('/works');
-                  return;
-                }
-                setSelectedMenuKey(key);
-              }}
-              className={styles.sidebarMenu}
-            >
+              }, 100);
+              return;
+            }
+            if (key === 'works') {
+              navigate('/works');
+              return;
+            }
+            if (key === 'logout') {
+              handleLogout();
+              return;
+            }
+            setSelectedMenuKey(key);
+          }}
+          style={{
+            borderRight: 0,
+            height: 'calc(100vh - 120px)',
+          }}
+        >
               <Menu.Item key="messages" icon={<MessageOutlined />}>
                 Сообщения
               </Menu.Item>
@@ -453,54 +443,49 @@ const ExpertDashboard: React.FC = () => {
             <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
               FAQ
             </Menu.Item>
-            <Menu.Item 
-              key="logout" 
-              icon={<PoweroffOutlined />}
-              danger
-              onClick={() => {
-                authApi.logout();
-                navigate('/');
-                window.location.reload();
-              }}
-              className={styles.logoutMenuItem}
-            >
-              Выход
-            </Menu.Item>
-          </Menu>
-        </div>
-
-        {/* Main Content */}
-        <div className={styles.mainContent}>
-          {/* Header and Profile Block Container */}
-          <div className={styles.headerProfileContainer}>
-          {/* Header */}
-        <div className={styles.header}>
-          <h1 className={styles.headerTitle}>Личный кабинет эксперта</h1>
+          <Menu.Item 
+            key="logout" 
+            icon={<LogoutOutlined />}
+            danger
+          >
+            Выйти
+          </Menu.Item>
+        </Menu>
+      </Sider>
+      <Layout>
+        <Header
+          style={{
+            background: '#fff',
+            padding: '0 24px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Title level={3} style={{ margin: 0 }}>
+            Личный кабинет эксперта
+          </Title>
           <Space>
-            <Button 
-              type="primary"
-              className={styles.buttonPrimary}
-              onClick={() => navigate('/create-order')}
+            <Button
+              type="default"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
             >
-              Разместить задание
-            </Button>
-            <Button 
-              icon={<EditOutlined />}
-              className={styles.buttonSecondary}
-              onClick={() => setProfileModalVisible(true)}
-            >
-              Редактировать профиль
-            </Button>
-            <Button 
-              icon={<ArrowLeftOutlined />}
-              className={styles.buttonSecondary}
-              onClick={() => navigate(-1)}
-            >
-              Назад
+              Выйти
             </Button>
           </Space>
-        </div>
-
+        </Header>
+        <Content
+          style={{
+            margin: '24px',
+            padding: '24px',
+            background: '#fff',
+            borderRadius: '8px',
+            minHeight: 'calc(100vh - 112px)',
+          }}
+        >
         {/* Profile Header Block */}
         <div className={styles.profileBlock}>
           <div className={styles.profileBlockContent}>
@@ -599,7 +584,6 @@ const ExpertDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
         </div>
 
         {/* Application Status Display */}
@@ -1072,8 +1056,12 @@ const ExpertDashboard: React.FC = () => {
           }}
         />
         </div>
-        </div>
-      </div>
+        </Content>
+        <Footer style={{ textAlign: 'center', background: '#fff' }}>
+          Личный кабинет эксперта © {new Date().getFullYear()}
+        </Footer>
+      </Layout>
+    </Layout>
 
       {/* Profile Edit Modal */}
       <Modal
@@ -3048,7 +3036,7 @@ const ExpertDashboard: React.FC = () => {
           </Paragraph>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 
