@@ -61,7 +61,7 @@ const Login: React.FC = () => {
         if (user?.email === 'director@test.com') {
           navigate('/director');
         } else {
-          navigate('/admin');
+          navigate('/administrator');
         }
       } else if (role === 'arbitrator') {
         navigate('/arbitrator');

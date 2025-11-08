@@ -84,7 +84,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       const role = auth?.user?.role || '';
       
-      // Если есть callback (значит мы на странице админ-панели)
+      // Если есть callback (значит мы на странице личного кабинета администратора)
       if (onSuccess && auth?.user) {
         // Только для admin показываем панель, директор должен редиректиться
         if (role === 'admin') {
@@ -128,7 +128,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       message.success(`Успешный вход как ${account.label}!`);
       
-      // Если есть callback (значит мы на странице админ-панели)
+      // Если есть callback (значит мы на странице личного кабинета администратора)
       if (onSuccess && auth?.user) {
         // Проверяем, не директор ли это (по email)
         const isDirector = auth.user.email === 'director@test.com';
@@ -239,10 +239,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             <CrownOutlined style={{ fontSize: '32px', color: '#fff' }} />
           </div>
           <Title level={2} style={{ marginBottom: '8px', color: '#1a1a1a' }}>
-            Вход в админ-панель
+            Вход в личный кабинет администратора
           </Title>
           <Paragraph style={{ color: '#666', marginBottom: 0, fontSize: '14px' }}>
-            Введите email и пароль для доступа к административной панели
+            Введите email и пароль для доступа к личному кабинету администратора
           </Paragraph>
         </div>
 

@@ -46,7 +46,7 @@ export const redirectByRole = async (
       break;
       
     case 'admin':
-      navigate('/admin');
+      navigate('/administrator');
       break;
       
     case 'arbitrator':

@@ -77,11 +77,11 @@ const DirectorDashboard: React.FC = () => {
         try {
           authApi.logout();
           message.success('Вы вышли из системы');
-          navigate('/admin');
+          navigate('/administrator');
         } catch (error) {
           authApi.logout();
           message.success('Вы вышли из системы');
-          navigate('/admin');
+          navigate('/administrator');
         }
       },
     });
