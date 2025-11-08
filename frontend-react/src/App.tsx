@@ -25,7 +25,7 @@ import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import ArbitratorDashboard from './pages/ArbitratorDashboard';
+import ArbitratorDashboard from './pages/ArbitratorDashboard/ArbitratorDashboard';
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';

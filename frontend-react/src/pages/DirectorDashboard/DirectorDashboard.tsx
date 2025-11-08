@@ -7,6 +7,7 @@ import {
   BarChartOutlined,
   LogoutOutlined,
   BankOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
@@ -14,6 +15,7 @@ import PersonnelManagement from './components/PersonnelManagement/PersonnelManag
 import FinancialStatistics from './components/FinancialStatistics/FinancialStatistics';
 import PartnerPanel from './components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from './components/GeneralStatistics/GeneralStatistics';
+import ArbitratorCommunication from './components/ArbitratorCommunication/ArbitratorCommunication';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -54,6 +56,12 @@ const DirectorDashboard: React.FC = () => {
       label: 'Общая статистика',
       component: <GeneralStatistics />,
     },
+    {
+      key: 'arbitrators',
+      icon: <MessageOutlined />,
+      label: 'Коммуникация с арбитрами',
+      component: <ArbitratorCommunication />,
+    },
   ];
 
   const handleLogout = () => {
@@ -62,6 +70,9 @@ const DirectorDashboard: React.FC = () => {
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
+      maskStyle: {
+        backdropFilter: 'blur(4px)',
+      },
       onOk: async () => {
         try {
           authApi.logout();

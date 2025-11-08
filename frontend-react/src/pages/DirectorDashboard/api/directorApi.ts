@@ -12,6 +12,11 @@ import type {
   PartnerTurnoverResponse,
   KPI,
   StatisticsSummary,
+  InternalMessage,
+  GetMessagesParams,
+  PaginatedResponse,
+  SendMessageRequest,
+  Claim,
 } from './types';
 import { 
   mockEmployees, 
@@ -707,5 +712,527 @@ const formatNumber = (value: number): string => {
 const formatChange = (value: number): string => {
   const sign = value >= 0 ? '+' : '';
   return `${sign}${value.toFixed(2)}%`;
+};
+
+// Коммуникация с арбитрами
+
+// Хранилище для сообщений директора
+const getSavedMessages = (): InternalMessage[] => {
+  try {
+    const stored = localStorage.getItem('director_messages');
+    if (stored) {
+      return JSON.parse(stored) as InternalMessage[];
+    }
+  } catch (e) {
+    console.warn('Error reading messages from localStorage:', e);
+  }
+  return [];
+};
+
+const saveMessage = (message: InternalMessage): void => {
+  try {
+    const messages = getSavedMessages();
+    messages.push(message);
+    localStorage.setItem('director_messages', JSON.stringify(messages));
+  } catch (e) {
+    console.warn('Error saving message to localStorage:', e);
+  }
+};
+
+/**
+ * Генерация тестовых сообщений для директора
+ */
+const generateMockMessages = (params?: GetMessagesParams): InternalMessage[] => {
+  const now = new Date();
+  const savedMessages = getSavedMessages();
+  
+  // Получаем сообщения от арбитров из их localStorage
+  let arbitratorMessages: InternalMessage[] = [];
+  try {
+    const stored = localStorage.getItem('arbitrator_messages');
+    if (stored) {
+      arbitratorMessages = JSON.parse(stored) as InternalMessage[];
+      // Фильтруем только сообщения от арбитров директору
+      arbitratorMessages = arbitratorMessages.filter((m) => 
+        m.sender.role === 'arbitrator' && m.recipient.role === 'director'
+      );
+    }
+  } catch (e) {
+    console.warn('Error reading arbitrator messages from localStorage:', e);
+  }
+  
+  // Базовые сообщения от арбитров (используем те же данные, что и в arbitratorApi)
+  const baseMessages: InternalMessage[] = [
+    {
+      id: 1,
+      sender: {
+        id: 1,
+        username: 'Арбитр Системный',
+        role: 'arbitrator',
+      },
+      recipient: {
+        id: 2,
+        username: 'Директор',
+        role: 'director',
+      },
+      text: 'Добрый день! Требуется согласование решения по обращению #4001. Сумма возврата составляет 25000 рублей. Клиент предоставил все необходимые документы, подтверждающие несоответствие работы требованиям.',
+      claim_id: 4001,
+      priority: 'high',
+      attachments: [],
+      created_at: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'read',
+      read_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      sender: {
+        id: 1,
+        username: 'Арбитр Системный',
+        role: 'arbitrator',
+      },
+      recipient: {
+        id: 2,
+        username: 'Директор',
+        role: 'director',
+      },
+      text: 'Конечно, запрошу дополнительную информацию у эксперта и клиента. Сообщу результаты в течение дня.',
+      claim_id: 4001,
+      priority: 'medium',
+      attachments: [],
+      created_at: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'sent',
+    },
+    {
+      id: 4,
+      sender: {
+        id: 1,
+        username: 'Арбитр Системный',
+        role: 'arbitrator',
+      },
+      recipient: {
+        id: 2,
+        username: 'Директор',
+        role: 'director',
+      },
+      text: 'По обращению #4002 требуется ваше мнение по поводу частичного возврата средств. Клиент настаивает на полном возврате, но эксперт выполнил часть работы качественно.',
+      claim_id: 4002,
+      priority: 'medium',
+      attachments: [],
+      created_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'read',
+      read_at: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ];
+  
+  // Объединяем базовые сообщения с сообщениями из localStorage арбитра
+  const allMessages = [...arbitratorMessages, ...baseMessages];
+  
+  // Фильтрация по обращению
+  let filteredMessages = allMessages;
+  if (params?.claim_id) {
+    filteredMessages = filteredMessages.filter((m) => m.claim_id === params.claim_id);
+  }
+
+  // Фильтрация непрочитанных
+  if (params?.unread_only) {
+    filteredMessages = filteredMessages.filter((m) => !m.read_at);
+  }
+
+  // Добавляем сохраненные сообщения директора (ответы)
+  if (savedMessages.length > 0) {
+    let savedFiltered = savedMessages;
+    if (params?.claim_id) {
+      savedFiltered = savedFiltered.filter((m) => m.claim_id === params.claim_id);
+    }
+    if (params?.unread_only) {
+      savedFiltered = savedFiltered.filter((m) => !m.read_at);
+    }
+    filteredMessages = [...savedFiltered, ...filteredMessages];
+  }
+  
+  // Удаляем дубликаты по ID
+  const uniqueMessages = Array.from(new Map(filteredMessages.map(m => [m.id, m])).values());
+  
+  // Сортируем по дате создания (новые первыми)
+  uniqueMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  return uniqueMessages;
+};
+
+/**
+ * Получение списка сообщений от арбитров
+ */
+export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
+  if (USE_MOCK_DATA) {
+    const allMessages = generateMockMessages(params);
+    const totalCount = allMessages.length;
+    
+    // Пагинация
+    const page = params?.page || 1;
+    const pageSize = params?.page_size || 20;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedMessages = allMessages.slice(startIndex, endIndex);
+    
+    console.log('Using mock messages for director:', { params, totalCount, resultsCount: paginatedMessages.length });
+    return {
+      count: totalCount,
+      next: endIndex < totalCount ? 'next' : null,
+      previous: page > 1 ? 'previous' : null,
+      results: paginatedMessages,
+    };
+  }
+
+  try {
+    const response = await apiClient.get('/director/messages/', { params });
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.status === 404 || error?.code === 'ERR_NETWORK') {
+      console.warn('API endpoint not found, using mock data:', error?.response?.status || error?.code);
+      const allMessages = generateMockMessages(params);
+      const totalCount = allMessages.length;
+      const page = params?.page || 1;
+      const pageSize = params?.page_size || 20;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedMessages = allMessages.slice(startIndex, endIndex);
+      return {
+        count: totalCount,
+        next: endIndex < totalCount ? 'next' : null,
+        previous: page > 1 ? 'previous' : null,
+        results: paginatedMessages,
+      };
+    }
+    console.error('Error fetching messages:', error);
+    throw error;
+  }
+};
+
+/**
+ * Отправка сообщения арбитру
+ */
+export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
+  const USE_MOCK_DATA = true;
+
+  const mockSendMessage = (): InternalMessage => {
+    const message: InternalMessage = {
+      id: Date.now(),
+      sender: {
+        id: 2,
+        username: 'Директор',
+        role: 'director',
+      },
+      recipient: {
+        id: 1,
+        username: 'Арбитр Системный',
+        role: 'arbitrator',
+      },
+      text: data.text,
+      claim_id: data.claim_id,
+      priority: data.priority || 'medium',
+      attachments: data.attachments?.map((file, index) => ({
+        id: Date.now() + index,
+        name: file.name,
+        url: '#',
+        size: file.size,
+        type: file.type,
+      })) || [],
+      created_at: new Date().toISOString(),
+      status: 'sent',
+    };
+
+    saveMessage(message);
+    console.log('Using mock data for sendMessage (director):', { message });
+    return message;
+  };
+
+  if (USE_MOCK_DATA) {
+    return mockSendMessage();
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('text', data.text);
+    if (data.claim_id) {
+      formData.append('claim_id', data.claim_id.toString());
+    }
+    if (data.priority) {
+      formData.append('priority', data.priority);
+    }
+    if (data.attachments) {
+      data.attachments.forEach((file) => {
+        formData.append('attachments', file);
+      });
+    }
+
+    const response = await apiClient.post('/director/messages/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.status === 404 || error?.code === 'ERR_NETWORK') {
+      console.warn('API endpoint not found, using mock data:', error?.response?.status || error?.code);
+      return mockSendMessage();
+    }
+    console.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+/**
+ * Получение списка обращений, отправленных на согласование
+ */
+// Импортируем функцию генерации mock-данных из arbitratorApi (через общий механизм)
+// Или создаем свою функцию генерации на основе данных из localStorage
+const generateMockClaimsForDirector = (): Claim[] => {
+  const now = new Date();
+  const claims: Claim[] = [];
+  
+  // Получаем ID обращений, отправленных на согласование
+  try {
+    const stored = localStorage.getItem('arbitrator_pending_approval_claims');
+    if (stored) {
+      const ids = JSON.parse(stored) as number[];
+      // Получаем решения из localStorage
+      const decisionsStored = localStorage.getItem('arbitrator_decisions');
+      const decisions = decisionsStored ? new Map(JSON.parse(decisionsStored) as Array<[number, any]>) : new Map();
+      
+      // Генерируем mock-данные для этих обращений
+      ids.forEach((id) => {
+        const decision = decisions.get(id);
+        // Используем базовые данные в зависимости от ID
+        let baseData: Partial<Claim> = {};
+        
+        if (id === 1001) {
+          baseData = {
+            order: {
+              id: 501,
+              title: 'Дипломная работа по экономике',
+              description: 'Требуется написание дипломной работы по теме "Современные тенденции развития малого бизнеса"',
+              amount: 15000,
+              created_at: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+              status: 'cancelled',
+            },
+            client: {
+              id: 201,
+              username: 'Иван Петров',
+              email: 'ivan.petrov@example.com',
+              phone: '+7 (999) 123-45-67',
+            },
+            expert: {
+              id: 301,
+              username: 'Мария Смирнова',
+              email: 'maria.smirnova@example.com',
+              rating: 4.8,
+            },
+            type: 'refund',
+            priority: 'high',
+          };
+        } else if (id === 2001) {
+          baseData = {
+            order: {
+              id: 601,
+              title: 'Дипломная работа по праву',
+              description: 'Анализ судебной практики по гражданским делам',
+              amount: 20000,
+              created_at: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+              status: 'cancelled',
+            },
+            client: {
+              id: 205,
+              username: 'Владимир Морозов',
+              email: 'vladimir.morozov@example.com',
+            },
+            expert: {
+              id: 305,
+              username: 'Татьяна Федорова',
+              email: 'tatyana.fedorova@example.com',
+              rating: 4.7,
+            },
+            type: 'refund',
+            priority: 'high',
+          };
+        } else if (id === 2002) {
+          baseData = {
+            order: {
+              id: 602,
+              title: 'Контрольная работа по математике',
+              description: 'Решение задач по линейной алгебре',
+              amount: 4000,
+              created_at: new Date(now.getTime() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+              status: 'cancelled',
+            },
+            client: {
+              id: 206,
+              username: 'Екатерина Мишина',
+              email: 'ekaterina.mishina@example.com',
+            },
+            expert: {
+              id: 306,
+              username: 'Павел Орлов',
+              email: 'pavel.orlov@example.com',
+              rating: 4.6,
+            },
+            type: 'dispute',
+            priority: 'medium',
+          };
+        } else {
+          // Дефолтные данные для других ID
+          baseData = {
+            order: {
+              id: id + 4000,
+              title: `Обращение #${id}`,
+              description: 'Требуется согласование дирекции',
+              amount: 15000,
+              created_at: new Date().toISOString(),
+              status: 'cancelled',
+            },
+            client: {
+              id: 201,
+              username: 'Клиент',
+              email: 'client@example.com',
+            },
+            expert: {
+              id: 301,
+              username: 'Эксперт',
+              email: 'expert@example.com',
+              rating: 4.5,
+            },
+            type: 'refund',
+            priority: 'high',
+          };
+        }
+        
+        claims.push({
+          id,
+          status: 'pending_approval',
+          created_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+          taken_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          arbitrator: {
+            id: 1,
+            username: 'Арбитр Системный',
+          },
+          decision: decision || {
+            id: 1,
+            claim_id: id,
+            decision_type: 'full_refund',
+            reasoning: 'Решение требует согласования дирекции',
+            created_at: new Date().toISOString(),
+            arbitrator: { id: 1, username: 'Арбитр Системный' },
+            requires_approval: true,
+            approval_status: 'pending',
+            approval_comment: 'Ожидает решения дирекции',
+          },
+          messages: [],
+          attachments: [],
+          ...baseData,
+        } as Claim);
+      });
+    }
+  } catch (e) {
+    console.warn('Error generating mock claims for director:', e);
+  }
+  
+  return claims;
+};
+
+/**
+ * Получение списка обращений, отправленных на согласование
+ */
+export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
+  if (USE_MOCK_DATA) {
+    const claims = generateMockClaimsForDirector();
+    return claims;
+  }
+  
+  try {
+    const response = await apiClient.get('/director/claims/pending-approval/');
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.status === 404 || error?.code === 'ERR_NETWORK') {
+      console.warn('API endpoint not found, using mock data');
+      return generateMockClaimsForDirector();
+    }
+    console.error('Error fetching pending approval claims:', error);
+    throw error;
+  }
+};
+
+/**
+ * Отметка сообщения как прочитанное
+ */
+export const markMessageAsRead = async (id: number): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    // В реальном приложении это будет обновлять статус на сервере
+    console.log('Marking message as read (mock):', id);
+    return;
+  }
+  try {
+    await apiClient.post(`/director/messages/${id}/read/`);
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    throw error;
+  }
+};
+
+/**
+ * Удаление сообщения
+ */
+export const deleteMessage = async (id: number): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    const messages = getSavedMessages();
+    const filtered = messages.filter((m) => m.id !== id);
+    localStorage.setItem('director_messages', JSON.stringify(filtered));
+    console.log('Deleting message (mock):', id);
+    return;
+  }
+  try {
+    await apiClient.delete(`/director/messages/${id}/`);
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    throw error;
+  }
+};
+
+// Экспорт всех функций в виде объекта
+export const directorApi = {
+  // Управление персоналом
+  getPersonnel,
+  registerEmployee,
+  getExpertApplications,
+  approveApplication,
+  rejectApplication,
+  sendForRework,
+  deactivateEmployee,
+  activateEmployee,
+  archiveEmployee,
+  getArchivedEmployees,
+  restoreEmployee,
+  deleteEmployee,
+  // Финансовая статистика
+  getMonthlyTurnover,
+  getNetProfit,
+  getIncomeDetail,
+  getExpenseDetail,
+  exportFinancialData,
+  // Панель партнёров
+  getPartners,
+  getPartnerTurnover,
+  getAllPartnersTurnover,
+  updatePartnerCommission,
+  togglePartnerStatus,
+  // Общая статистика
+  getKPI,
+  getStatisticsSummary,
+  exportStatisticsReport,
+  // Коммуникация с арбитрами
+  getMessages,
+  sendMessage,
+  getPendingApprovalClaims,
+  markMessageAsRead,
+  deleteMessage,
 };
 

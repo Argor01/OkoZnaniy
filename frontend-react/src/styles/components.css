@@ -1,0 +1,20 @@
+/* Глобальные стили для модальных окон Ant Design */
+/* Размытие фона при открытии модальных окон */
+.ant-modal-mask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Улучшение видимости модального окна на размытом фоне */
+.ant-modal-wrap {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Для модальных окон confirm и других */
+.ant-modal-confirm .ant-modal-mask,
+.ant-modal-confirm-wrap .ant-modal-mask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+

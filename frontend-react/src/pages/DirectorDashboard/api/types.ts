@@ -1,5 +1,116 @@
 // Типы для API директора
 
+// Внутреннее сообщение (используется для коммуникации с арбитрами)
+export interface InternalMessage {
+  id: number;
+  sender: {
+    id: number;
+    username: string;
+    role: string;
+  };
+  recipient: {
+    id: number;
+    username: string;
+    role: string;
+  };
+  text: string;
+  claim_id?: number;
+  priority: 'low' | 'medium' | 'high';
+  attachments: Attachment[];
+  created_at: string;
+  read_at?: string;
+  status: 'sent' | 'read' | 'replied';
+}
+
+export interface Attachment {
+  id: number;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+}
+
+// Параметры запроса списка сообщений
+export interface GetMessagesParams {
+  page?: number;
+  page_size?: number;
+  claim_id?: number;
+  unread_only?: boolean;
+}
+
+// Пагинированный ответ
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+// Запрос на отправку сообщения
+export interface SendMessageRequest {
+  text: string;
+  claim_id?: number;
+  priority?: 'low' | 'medium' | 'high';
+  attachments?: File[];
+}
+
+// Обращение/претензия
+export interface Claim {
+  id: number;
+  type: 'refund' | 'dispute' | 'conflict';
+  status: 'new' | 'in_progress' | 'completed' | 'pending_approval';
+  priority: 'low' | 'medium' | 'high';
+  order: {
+    id: number;
+    title: string;
+    description?: string;
+    amount: number;
+    created_at: string;
+    deadline?: string;
+    status: string;
+  };
+  client: {
+    id: number;
+    username: string;
+    email: string;
+    phone?: string;
+  };
+  expert?: {
+    id: number;
+    username: string;
+    email: string;
+    rating?: number;
+  };
+  created_at: string;
+  updated_at: string;
+  taken_at?: string;
+  arbitrator?: {
+    id: number;
+    username: string;
+  };
+  decision?: Decision;
+  messages?: any[];
+  attachments?: any[];
+}
+
+export interface Decision {
+  id: number;
+  claim_id: number;
+  decision_type: 'full_refund' | 'partial_refund' | 'no_refund' | 'revision' | 'other';
+  refund_amount?: number;
+  reasoning: string;
+  client_comment?: string;
+  expert_comment?: string;
+  created_at: string;
+  arbitrator: {
+    id: number;
+    username: string;
+  };
+  requires_approval: boolean;
+  approval_status?: 'pending' | 'approved' | 'rejected';
+  approval_comment?: string;
+}
+
 export interface Employee {
   id: number;
   email: string;
