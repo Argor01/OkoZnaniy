@@ -9,13 +9,9 @@ services:
     depends_on:
       - postgres
       - redis
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=True
-      - DJANGO_ENV=development
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+    env_file:
+      - .env
+
     volumes:
       - .:/app
       - static_files:/app/static
@@ -74,11 +70,9 @@ services:
     depends_on:
       - redis
       - postgres
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=True
+    env_file:
+      - .env
+
     volumes:
       - .:/app
     networks:

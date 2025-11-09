@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
@@ -252,11 +253,17 @@ const Login: React.FC = () => {
       </Form.Item>
       <Form.Item>
         <div className="panel-footer">
-          <div className="telegram-auth">
-            <a className="telegram-login" href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" />
+          <div style={{ textAlign: 'center', marginBottom: '10px' }}>или войти через</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+            <a href="#" aria-label="Telegram">
+              <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
             </a>
-            <span className="telegram-login-text">Вход через Telegram</span>
+            <a href="#" aria-label="Google">
+              <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+            </a>
+            <a href="#" aria-label="VK">
+              <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
+            </a>
           </div>
         </div>
       </Form.Item>
@@ -345,11 +352,17 @@ const Login: React.FC = () => {
       </Form.Item>
       <Form.Item>
         <div className="panel-footer">
-          <div className="telegram-auth">
-            <a className="telegram-login" href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" />
+          <div style={{ textAlign: 'center', marginBottom: '10px' }}>или войти через</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+            <a href="#" aria-label="Telegram">
+              <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
             </a>
-            <span className="telegram-login-text">Вход через Telegram</span>
+            <a href="#" aria-label="Google">
+              <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+            </a>
+            <a href="#" aria-label="VK">
+              <img src="/assets/vk.png" alt="vk-login" style={{ width: '34px', height: '34px' }} />
+            </a>
           </div>
         </div>
       </Form.Item>
