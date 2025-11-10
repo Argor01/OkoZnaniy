@@ -357,11 +357,11 @@ const Login: React.FC = () => {
             <a href="#" aria-label="Telegram">
               <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
             </a>
-            <a href="#" aria-label="Google">
+            <a href="/api/accounts/google/login/" aria-label="Google">
               <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
             </a>
-            <a href="#" aria-label="VK">
-              <img src="/assets/vk.png" alt="vk-login" style={{ width: '34px', height: '34px' }} />
+            <a href="/api/accounts/vk/login/" aria-label="VK">
+              <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
             </a>
           </div>
         </div>
