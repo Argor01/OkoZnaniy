@@ -172,6 +172,9 @@ class ExpertReview(models.Model):
         verbose_name_plural = "Отзывы об экспертах"
         ordering = ['-created_at']
         unique_together = ['expert', 'order']
+        indexes = [
+            models.Index(fields=['expert', 'is_published', '-created_at']),
+        ]
 
     def __str__(self):
         return f"Отзыв на {self.expert.username} от {self.client.username}"
@@ -181,13 +184,21 @@ class ExpertReview(models.Model):
         if not self.client and self.order:
             self.client = self.order.client
         super().save(*args, **kwargs)
-        # Пересчитываем средний рейтинг эксперта
-        avg_rating = ExpertReview.objects.filter(
-            expert=self.expert,
-            is_published=True
-        ).aggregate(models.Avg('rating'))['rating__avg']
-        self.expert.rating = avg_rating or 0
-        self.expert.save(update_fields=['rating'])
+        # Пересчитываем средний рейтинг эксперта через статистику
+        # Не пытаемся обновить rating напрямую в User, так как этого поля может не быть
+        try:
+            from apps.experts.models import ExpertStatistics
+            stats, _ = ExpertStatistics.objects.get_or_create(expert=self.expert)
+            avg_rating = ExpertReview.objects.filter(
+                expert=self.expert,
+                is_published=True
+            ).aggregate(models.Avg('rating'))['rating__avg']
+            if avg_rating:
+                stats.average_rating = round(float(avg_rating), 2)
+                stats.save()
+        except Exception:
+            # Игнорируем ошибки при обновлении статистики
+            pass
 
 class ExpertRating(models.Model):
     expert = models.ForeignKey(

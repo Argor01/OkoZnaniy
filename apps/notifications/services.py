@@ -56,6 +56,19 @@ class NotificationService:
         )
 
     @staticmethod
+    def notify_expert_assigned(order):
+        """Уведомляет клиента о назначении эксперта на заказ"""
+        NotificationService.create_notification(
+            recipient=order.client,
+            type=NotificationType.ORDER_ASSIGNED,
+            title="Эксперт назначен на заказ",
+            message=f"Эксперт {order.expert.username} взял ваш заказ '{order.title or 'Без названия'}' в работу",
+            related_object_id=order.id,
+            related_object_type='order',
+            data={'expert_id': order.expert.id, 'order_id': order.id}
+        )
+
+    @staticmethod
     def notify_file_uploaded(order_file):
         # Уведомляем заинтересованных пользователей о новом файле
         recipients = [order_file.order.client, order_file.order.expert]
@@ -281,4 +294,66 @@ class NotificationService:
                 message=f"Спор по заказу '{dispute.order.title or 'Без названия'}' решен арбитром. Решение: {dispute.result[:100]}...",
                 related_object_id=dispute.id,
                 related_object_type='dispute'
-            ) 
+            )
+
+    @staticmethod
+    def notify_application_approved(application):
+        """Уведомляет эксперта об одобрении анкеты"""
+        NotificationService.create_notification(
+            recipient=application.expert,
+            type=NotificationType.APPLICATION_APPROVED,
+            title="Анкета одобрена",
+            message=f"Ваша анкета эксперта была одобрена! Теперь вы можете брать заказы в работу.",
+            related_object_id=application.id,
+            related_object_type='expert_application',
+            data={'application_id': application.id}
+        )
+
+    @staticmethod
+    def notify_application_rejected(application):
+        """Уведомляет эксперта об отклонении анкеты"""
+        reason = application.rejection_reason or "Не указана"
+        NotificationService.create_notification(
+            recipient=application.expert,
+            type=NotificationType.APPLICATION_REJECTED,
+            title="Анкета отклонена",
+            message=f"К сожалению, ваша анкета эксперта была отклонена. Причина: {reason}",
+            related_object_id=application.id,
+            related_object_type='expert_application',
+            data={'application_id': application.id, 'reason': reason}
+        )
+
+    @staticmethod
+    def notify_document_uploaded(document):
+        """Уведомляет администраторов о загрузке нового документа экспертом"""
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            NotificationService.create_notification(
+                recipient=admin,
+                type=NotificationType.DOCUMENT_VERIFIED,
+                title="Загружен новый документ эксперта",
+                message=f"Эксперт {document.expert.username} загрузил документ '{document.title}' для проверки",
+                related_object_id=document.id,
+                related_object_type='expert_document',
+                data={'document_id': document.id, 'expert_id': document.expert.id}
+            )
+
+    @staticmethod
+    def bulk_notify_experts(experts, type, title, message, related_object_id=None, related_object_type=None, data=None):
+        """Массовое создание уведомлений для нескольких экспертов"""
+        notifications = []
+        for expert in experts:
+            notification = Notification(
+                recipient=expert,
+                type=type,
+                title=title,
+                message=message,
+                related_object_id=related_object_id,
+                related_object_type=related_object_type,
+                data=data or {}
+            )
+            notifications.append(notification)
+        
+        # Массовое создание для оптимизации
+        Notification.objects.bulk_create(notifications)
+        return len(notifications)
