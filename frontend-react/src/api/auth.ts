@@ -94,4 +94,30 @@ export const authApi = {
     const response = await apiClient.post('/users/reset_password/', { email });
     return response.data;
   },
+
+  // Подтверждение email кодом
+  verifyEmailCode: async (email: string, code: string): Promise<{ detail: string }> => {
+    const response = await apiClient.post('/users/verify_email_code/', { email, code });
+    return response.data;
+  },
+
+  // Повторная отправка кода подтверждения email
+  resendVerificationCode: async (email: string): Promise<{ detail: string }> => {
+    const response = await apiClient.post('/users/resend_verification_code/', { email });
+    return response.data;
+  },
+
+  // Подтверждение сброса пароля по ссылке из письма
+  resetPasswordConfirm: async (
+    uid: string,
+    token: string,
+    new_password: string
+  ): Promise<{ detail: string }> => {
+    const response = await apiClient.post('/users/reset_password_confirm/', {
+      uid,
+      token,
+      new_password,
+    });
+    return response.data;
+  },
 };

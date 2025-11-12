@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Ожидание готовности базы данных
 echo "Waiting for database..."

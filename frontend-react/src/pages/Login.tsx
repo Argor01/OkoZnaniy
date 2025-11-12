@@ -4,6 +4,7 @@ import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
+import EmailVerificationModal from '../components/auth/EmailVerificationModal';
 import { ordersApi } from '../api/orders';
 import '../styles/login.css';
 
@@ -39,6 +40,12 @@ const Login: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'client' | 'expert'>('client');
   const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
+
+  // Модалка подтверждения email
+  const [verificationModalVisible, setVerificationModalVisible] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | undefined>(undefined);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   // Плейсхолдеры с анимацией
   const loginUsernamePh = useTypewriter('Email', 35, 100);
@@ -154,30 +161,10 @@ const Login: React.FC = () => {
       console.log('Sending registration data:', cleanValues);
       
       await authApi.register(cleanValues);
-      message.success('Регистрация успешна! Выполняется вход...');
-      
-      // Автологин после регистрации
-      const loginData = {
-        username: values.email || values.phone || '',
-        password: values.password
-      };
-      
-      try {
-        const auth = await authApi.login(loginData);
-        message.success('Добро пожаловать!');
-        const role = auth?.user?.role;
-        if (role === 'client') {
-          await redirectClient();
-        } else if (role === 'expert') {
-          navigate('/expert');
-        } else if (role === 'partner') {
-          navigate('/partner');
-        } else {
-          navigate('/dashboard');
-        }
-      } catch (loginError) {
-        message.warning('Регистрация успешна, но не удалось войти автоматически. Войдите вручную.');
-      }
+      message.success('Регистрация успешна! Мы отправили вам код на email.');
+      setVerificationEmail(values.email);
+      setVerificationCode('');
+      setVerificationModalVisible(true);
     } catch (error: any) {
       console.error('Registration error:', error);
       const errorData = error?.response?.data;
@@ -201,6 +188,56 @@ const Login: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailCode = async () => {
+    if (!verificationEmail) {
+      message.error('Не указан email для подтверждения');
+      return;
+    }
+    if (!verificationCode || verificationCode.trim().length < 4) {
+      message.error('Введите корректный код подтверждения');
+      return;
+    }
+    setVerificationLoading(true);
+    try {
+      await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
+      message.success('Email подтвержден! Выполняем вход...');
+      const loginData = {
+        username: verificationEmail,
+        password: registerForm.getFieldValue('password') as string,
+      } as LoginRequest;
+      try {
+        const auth = await authApi.login(loginData);
+        const role = auth?.user?.role;
+        if (role === 'client') {
+          await redirectClient();
+        } else if (role === 'expert') {
+          navigate('/expert');
+        } else if (role === 'partner') {
+          navigate('/partner');
+        } else {
+          navigate('/dashboard');
+        }
+      } catch (loginError) {
+        message.warning('Подтверждение прошло, но не удалось войти автоматически. Войдите вручную.');
+      }
+      setVerificationModalVisible(false);
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!verificationEmail) return;
+    try {
+      await authApi.resendVerificationCode(verificationEmail);
+      message.success('Код отправлен повторно');
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось отправить код');
     }
   };
 
@@ -258,12 +295,21 @@ const Login: React.FC = () => {
             <a href="#" aria-label="Telegram">
               <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
             </a>
-            <a href="#" aria-label="Google">
-              <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
-            </a>
-            <a href="#" aria-label="VK">
-              <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
-            </a>
+            {(() => {
+              const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+              const googleHref = `/auth/google`;
+              const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
+              return (
+                <>
+                  <a href={googleHref} aria-label="Google">
+                    <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+                  </a>
+                  <a href={vkHref} aria-label="VK">
+                    <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
+                  </a>
+                </>
+              );
+            })()}
           </div>
         </div>
       </Form.Item>
@@ -357,12 +403,21 @@ const Login: React.FC = () => {
             <a href="#" aria-label="Telegram">
               <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
             </a>
-            <a href="/api/accounts/google/login/" aria-label="Google">
-              <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
-            </a>
-            <a href="/api/accounts/vk/login/" aria-label="VK">
-              <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
-            </a>
+            {(() => {
+              const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+              const googleHref = `/auth/google`;
+              const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
+              return (
+                <>
+                  <a href={googleHref} aria-label="Google">
+                    <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+                  </a>
+                  <a href={vkHref} aria-label="VK">
+                    <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
+                  </a>
+                </>
+              );
+            })()}
           </div>
         </div>
       </Form.Item>
@@ -438,21 +493,31 @@ const Login: React.FC = () => {
             />
           </svg>
         </div>
-        <div className="auth-right">
-          <div className="auth-panel">
-            <div className="panel-body">
-              <Tabs
-                className="antd-tabs-clean"
-                activeKey={activeTab}
-                onChange={(key) => setActiveTab(key)}
-                items={[
-                  { key: 'register', label: 'Зарегистрироваться', children: registerFormComponent },
-                  { key: 'login', label: 'Войти', children: loginFormComponent },
-                ]}
-              />
-            </div>
+      <div className="auth-right">
+        <div className="auth-panel">
+          <div className="panel-body">
+            <Tabs
+              className="antd-tabs-clean"
+              activeKey={activeTab}
+              onChange={(key) => setActiveTab(key)}
+              items={[
+                { key: 'register', label: 'Зарегистрироваться', children: registerFormComponent },
+                { key: 'login', label: 'Войти', children: loginFormComponent },
+              ]}
+            />
+            <EmailVerificationModal
+              open={verificationModalVisible}
+              email={verificationEmail}
+              code={verificationCode}
+              loading={verificationLoading}
+              onChangeCode={setVerificationCode}
+              onVerify={handleVerifyEmailCode}
+              onResend={handleResendCode}
+              onCancel={() => setVerificationModalVisible(false)}
+            />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

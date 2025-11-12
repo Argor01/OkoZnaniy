@@ -5,12 +5,19 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    entrypoint: ["/bin/sh","-c","sed -i 's/\\r$//' /app/docker-entrypoint.sh && /bin/sh /app/docker-entrypoint.sh"]
     restart: always
     depends_on:
       - postgres
       - redis
     env_file:
       - .env
+    environment:
+      - FRONTEND_URL=http://localhost:5173
+      - LOGIN_REDIRECT_URL=http://localhost:5173
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
 
     volumes:
       - .:/app

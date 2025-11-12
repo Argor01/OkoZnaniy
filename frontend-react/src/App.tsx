@@ -24,6 +24,7 @@ import './styles/components.css';
 // Import pages
 import Home from './pages/Home';
 import Login from './pages/Login';
+import GoogleRedirect from './pages/GoogleRedirect';
 import CreateOrder from './pages/CreateOrder';
 import ClientDashboard from './pages/ClientDashboard';
 import ExpertDashboard from './pages/ExpertDashboard';
@@ -33,6 +34,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ArbitratorDashboard from './pages/ArbitratorDashboard';
 import BecomeExpert from './pages/BecomeExpert';
 import BecomePartner from './pages/BecomePartner';
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -59,6 +61,8 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/google" element={<GoogleRedirect />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/become-expert" element={<BecomeExpert />} />
               <Route path="/become-partner" element={<BecomePartner />} />
               <Route 

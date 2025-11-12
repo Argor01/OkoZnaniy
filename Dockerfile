@@ -44,4 +44,4 @@ COPY --chown=appuser:appuser docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Запуск приложения
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]

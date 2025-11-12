@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
-import sys
 import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
@@ -20,8 +19,6 @@ from cryptography.fernet import Fernet
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
@@ -62,19 +59,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.vk',
-    "django_extensions",
 
     'apps.users',
-    'apps.arbitration',
+    'apps.orders',
     'apps.catalog',
-    'apps.chat',
     'apps.core',
-    'apps.dashboard',
     'apps.experts',
     'apps.notifications',
-    'apps.orders',
-    'apps.payments',
-    'apps.referal',
 ]
 
 MIDDLEWARE = [
@@ -86,7 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -102,6 +93,14 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
+# URL для страницы логина (allauth)
+LOGIN_URL = '/api/accounts/login/'
+
+# URL фронтенда и редиректы после логина/логаута
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URL', FRONTEND_URL)
+ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', FRONTEND_URL)
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -113,7 +112,7 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_SECRET_KEY'),
+            'secret': os.getenv('GOOGLE_SECRET_KEY') or os.getenv('GOOGLE_CLIENT_SECRET'),
         }
     },
     'vk': {
@@ -122,10 +121,13 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'APP': {
             'client_id': os.getenv('VK_CLIENT_ID'),
-            'secret': os.getenv('VK_SECRET_KEY'),
+            'secret': os.getenv('VK_SECRET_KEY') or os.getenv('VK_CLIENT_SECRET'),
         }
     }
 }
+
+# Автоматический старт OAuth без промежуточной страницы подтверждения
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Отключаем CSRF для API в режиме разработки
 if DEBUG:
@@ -134,6 +136,8 @@ if DEBUG:
         'http://127.0.0.1:3000',
         'http://localhost:3001',
         'http://127.0.0.1:3001',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
     ]
 
 ROOT_URLCONF = 'config.urls'
@@ -166,10 +170,11 @@ CHANNEL_LAYERS = {
 }
 
 # Настройки кэширования
+REDIS_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
@@ -189,7 +194,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
 # Настройки Redis для Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -316,10 +321,10 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # Frontend URL for password reset
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # Celery Configuration
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
