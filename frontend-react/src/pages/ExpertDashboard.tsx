@@ -29,6 +29,51 @@ interface UserProfile {
   is_verified?: boolean;
 }
 
+interface Notification {
+  id: number;
+  type: 'order' | 'claim' | 'forum' | 'question' | 'system';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  icon?: React.ReactNode;
+  actionUrl?: string;
+}
+
+interface ArbitrationCase {
+  id: number;
+  orderId: number;
+  orderTitle: string;
+  clientName: string;
+  status: 'pending' | 'in_review' | 'resolved' | 'rejected';
+  reason: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  amount: number;
+  decision?: string;
+  documents?: string[];
+}
+
+interface ChatMessage {
+  id: number;
+  chatId: number;
+  userName: string;
+  userAvatar?: string;
+  lastMessage: string;
+  timestamp: string;
+  isRead: boolean;
+  isOnline: boolean;
+  unreadCount: number;
+  messages: {
+    id: number;
+    text: string;
+    timestamp: string;
+    isMine: boolean;
+    isRead: boolean;
+  }[];
+}
+
 const { Title, Text, Paragraph } = Typography;
 const { Header, Sider, Content, Footer } = Layout;
 
@@ -53,6 +98,236 @@ const ExpertDashboard: React.FC = () => {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
+  const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
+
+  // Тестовые данные для уведомлений
+  const mockNotifications: Notification[] = [
+    {
+      id: 1,
+      type: 'order',
+      title: 'Новый заказ доступен',
+      message: 'Появился новый заказ по математике. Срок выполнения: 3 дня. Бюджет: 5000₽',
+      timestamp: '2 минуты назад',
+      isRead: false,
+      icon: <FileDoneOutlined style={{ color: '#3b82f6' }} />
+    },
+    {
+      id: 2,
+      type: 'order',
+      title: 'Заказ принят',
+      message: 'Ваша ставка на заказ "Решение задач по физике" была принята заказчиком',
+      timestamp: '1 час назад',
+      isRead: false,
+      icon: <CheckCircleOutlined style={{ color: '#10b981' }} />
+    },
+    {
+      id: 3,
+      type: 'claim',
+      title: 'Новая претензия',
+      message: 'Заказчик открыл претензию по заказу #1234. Требуется ваш ответ',
+      timestamp: '3 часа назад',
+      isRead: true,
+      icon: <TrophyOutlined style={{ color: '#f59e0b' }} />
+    },
+    {
+      id: 4,
+      type: 'forum',
+      title: 'Новый комментарий',
+      message: 'Пользователь Иван ответил на ваш вопрос в форуме "Методы решения интегралов"',
+      timestamp: '5 часов назад',
+      isRead: true,
+      icon: <CommentOutlined style={{ color: '#8b5cf6' }} />
+    },
+    {
+      id: 5,
+      type: 'question',
+      title: 'Вопрос от заказчика',
+      message: 'Заказчик задал вопрос по заказу "Курсовая работа по экономике"',
+      timestamp: '1 день назад',
+      isRead: true,
+      icon: <QuestionCircleOutlined style={{ color: '#06b6d4' }} />
+    },
+    {
+      id: 6,
+      type: 'system',
+      title: 'Обновление профиля',
+      message: 'Ваш профиль успешно верифицирован. Теперь вы можете принимать больше заказов',
+      timestamp: '2 дня назад',
+      isRead: true,
+      icon: <CheckCircleOutlined style={{ color: '#10b981' }} />
+    },
+    {
+      id: 7,
+      type: 'order',
+      title: 'Заказ завершен',
+      message: 'Заказ "Лабораторная работа по химии" успешно завершен. Средства зачислены на ваш счет',
+      timestamp: '3 дня назад',
+      isRead: true,
+      icon: <DollarOutlined style={{ color: '#10b981' }} />
+    },
+    {
+      id: 8,
+      type: 'forum',
+      title: 'Новая тема в форуме',
+      message: 'Создана новая тема "Лучшие практики оформления дипломных работ"',
+      timestamp: '4 дня назад',
+      isRead: true,
+      icon: <CommentOutlined style={{ color: '#8b5cf6' }} />
+    }
+  ];
+
+  // Тестовые данные для арбитража
+  const mockArbitrationCases: ArbitrationCase[] = [
+    {
+      id: 1,
+      orderId: 1234,
+      orderTitle: 'Решение задач по высшей математике',
+      clientName: 'Иван Петров',
+      status: 'pending',
+      reason: 'Несоответствие качества работы',
+      description: 'Заказчик утверждает, что решения задач содержат ошибки и не соответствуют требованиям задания. Требует полного возврата средств.',
+      createdAt: '2 дня назад',
+      updatedAt: '1 день назад',
+      amount: 5000,
+      documents: ['solution.pdf', 'requirements.docx']
+    },
+    {
+      id: 2,
+      orderId: 1189,
+      orderTitle: 'Курсовая работа по экономике',
+      clientName: 'Мария Сидорова',
+      status: 'in_review',
+      reason: 'Нарушение сроков выполнения',
+      description: 'Работа была сдана с опозданием на 3 дня. Заказчик требует компенсацию за нарушение сроков.',
+      createdAt: '5 дней назад',
+      updatedAt: '2 часа назад',
+      amount: 8000,
+      documents: ['coursework.pdf', 'chat_history.txt']
+    },
+    {
+      id: 3,
+      orderId: 1056,
+      orderTitle: 'Лабораторная работа по физике',
+      clientName: 'Алексей Смирнов',
+      status: 'resolved',
+      reason: 'Плагиат',
+      description: 'Заказчик обнаружил, что часть работы была скопирована из интернета без указания источников.',
+      createdAt: '10 дней назад',
+      updatedAt: '3 дня назад',
+      amount: 3500,
+      decision: 'Арбитраж решен в пользу заказчика. Произведен частичный возврат средств (50%).',
+      documents: ['lab_work.pdf', 'plagiarism_report.pdf']
+    },
+    {
+      id: 4,
+      orderId: 987,
+      orderTitle: 'Дипломная работа по программированию',
+      clientName: 'Елена Козлова',
+      status: 'rejected',
+      reason: 'Необоснованная претензия',
+      description: 'Заказчик требовал дополнительные правки, не предусмотренные первоначальным заданием.',
+      createdAt: '15 дней назад',
+      updatedAt: '7 дней назад',
+      amount: 15000,
+      decision: 'Претензия отклонена. Работа выполнена в полном соответствии с техническим заданием.',
+      documents: ['diploma.pdf', 'technical_requirements.docx', 'correspondence.txt']
+    }
+  ];
+
+  // Тестовые данные для сообщений
+  const mockMessages: ChatMessage[] = [
+    {
+      id: 1,
+      chatId: 1,
+      userName: 'Иван Петров',
+      userAvatar: undefined,
+      lastMessage: 'Здравствуйте! Когда будет готова работа?',
+      timestamp: '2 мин назад',
+      isRead: false,
+      isOnline: true,
+      unreadCount: 3,
+      messages: [
+        { id: 1, text: 'Здравствуйте! Я хотел бы заказать решение задач по математике', timestamp: '10:30', isMine: false, isRead: true },
+        { id: 2, text: 'Здравствуйте! Конечно, пришлите задание', timestamp: '10:32', isMine: true, isRead: true },
+        { id: 3, text: 'Вот файл с заданием', timestamp: '10:35', isMine: false, isRead: true },
+        { id: 4, text: 'Принял в работу. Срок выполнения - 2 дня', timestamp: '10:40', isMine: true, isRead: true },
+        { id: 5, text: 'Отлично, спасибо!', timestamp: '10:42', isMine: false, isRead: true },
+        { id: 6, text: 'Здравствуйте! Когда будет готова работа?', timestamp: '14:25', isMine: false, isRead: false }
+      ]
+    },
+    {
+      id: 2,
+      chatId: 2,
+      userName: 'Мария Сидорова',
+      userAvatar: undefined,
+      lastMessage: 'Спасибо за помощь! Все отлично',
+      timestamp: '1 час назад',
+      isRead: true,
+      isOnline: false,
+      unreadCount: 0,
+      messages: [
+        { id: 1, text: 'Добрый день! Нужна помощь с курсовой по экономике', timestamp: 'Вчера 15:20', isMine: false, isRead: true },
+        { id: 2, text: 'Здравствуйте! Какая тема курсовой?', timestamp: 'Вчера 15:25', isMine: true, isRead: true },
+        { id: 3, text: 'Макроэкономический анализ', timestamp: 'Вчера 15:30', isMine: false, isRead: true },
+        { id: 4, text: 'Хорошо, могу помочь. Срок - неделя', timestamp: 'Вчера 15:35', isMine: true, isRead: true },
+        { id: 5, text: 'Спасибо за помощь! Все отлично', timestamp: '1 час назад', isMine: false, isRead: true }
+      ]
+    },
+    {
+      id: 3,
+      chatId: 3,
+      userName: 'Алексей Смирнов',
+      userAvatar: undefined,
+      lastMessage: 'Можете взять еще один заказ?',
+      timestamp: '3 часа назад',
+      isRead: false,
+      isOnline: true,
+      unreadCount: 1,
+      messages: [
+        { id: 1, text: 'Здравствуйте! Вы делаете лабораторные по физике?', timestamp: 'Вчера 12:00', isMine: false, isRead: true },
+        { id: 2, text: 'Да, конечно. Какая тема?', timestamp: 'Вчера 12:15', isMine: true, isRead: true },
+        { id: 3, text: 'Механика, колебания', timestamp: 'Вчера 12:20', isMine: false, isRead: true },
+        { id: 4, text: 'Хорошо, пришлите задание', timestamp: 'Вчера 12:25', isMine: true, isRead: true },
+        { id: 5, text: 'Можете взять еще один заказ?', timestamp: '3 часа назад', isMine: false, isRead: false }
+      ]
+    },
+    {
+      id: 4,
+      chatId: 4,
+      userName: 'Елена Козлова',
+      userAvatar: undefined,
+      lastMessage: 'Хорошо, жду результат',
+      timestamp: '5 часов назад',
+      isRead: true,
+      isOnline: false,
+      unreadCount: 0,
+      messages: [
+        { id: 1, text: 'Добрый вечер! Нужна дипломная работа', timestamp: '2 дня назад', isMine: false, isRead: true },
+        { id: 2, text: 'Здравствуйте! Какая специальность?', timestamp: '2 дня назад', isMine: true, isRead: true },
+        { id: 3, text: 'Программирование, веб-разработка', timestamp: '2 дня назад', isMine: false, isRead: true },
+        { id: 4, text: 'Хорошо, жду результат', timestamp: '5 часов назад', isMine: false, isRead: true }
+      ]
+    },
+    {
+      id: 5,
+      chatId: 5,
+      userName: 'Дмитрий Волков',
+      userAvatar: undefined,
+      lastMessage: 'Отлично, договорились!',
+      timestamp: '1 день назад',
+      isRead: true,
+      isOnline: false,
+      unreadCount: 0,
+      messages: [
+        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 2, text: 'Добрый день! По какому предмету?', timestamp: '3 дня назад', isMine: true, isRead: true },
+        { id: 3, text: 'История России', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 4, text: 'Отлично, договорились!', timestamp: '1 день назад', isMine: false, isRead: true }
+      ]
+    }
+  ];
+
+  const [selectedChat, setSelectedChat] = useState<ChatMessage | null>(null);
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
@@ -1676,65 +1951,55 @@ const ExpertDashboard: React.FC = () => {
                 onClick={() => setMessageTab('all')}
                 style={{
                   flex: 1,
-                  padding: '12px 8px',
-                  textAlign: 'center',
+                  padding: '12px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   cursor: 'pointer',
                   borderBottom: messageTab === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'all' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'all' ? 600 : 400,
-                  fontSize: 14
+                  fontSize: 13
                 }}
               >
-                <MessageOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                <MessageOutlined style={{ marginRight: 4, fontSize: 14 }} />
                 Все
               </div>
               <div
                 onClick={() => setMessageTab('unread')}
                 style={{
                   flex: 1,
-                  padding: '12px 8px',
-                  textAlign: 'center',
+                  padding: '12px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   cursor: 'pointer',
                   borderBottom: messageTab === 'unread' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'unread' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'unread' ? 600 : 400,
-                  fontSize: 14
+                  fontSize: 13
                 }}
               >
-                <BellOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                <BellOutlined style={{ marginRight: 4, fontSize: 14 }} />
                 Непрочитанные
               </div>
               <div
                 onClick={() => setMessageTab('favorites')}
                 style={{
                   flex: 1,
-                  padding: '12px 8px',
-                  textAlign: 'center',
+                  padding: '12px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   cursor: 'pointer',
                   borderBottom: messageTab === 'favorites' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'favorites' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'favorites' ? 600 : 400,
-                  fontSize: 14
+                  fontSize: 13
                 }}
               >
-                <StarOutlined style={{ marginRight: 6, fontSize: 16 }} />
+                <StarOutlined style={{ marginRight: 4, fontSize: 14 }} />
                 Избранные
-              </div>
-              <div
-                onClick={() => setMessageTab('sms')}
-                style={{
-                  flex: 1,
-                  padding: '12px 8px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  borderBottom: messageTab === 'sms' ? '2px solid #3b82f6' : '2px solid transparent',
-                  color: messageTab === 'sms' ? '#3b82f6' : '#6b7280',
-                  fontWeight: messageTab === 'sms' ? 600 : 400,
-                  fontSize: 14
-                }}
-              >
-                <MobileOutlined style={{ marginRight: 6, fontSize: 16 }} />
-                SMS
               </div>
             </div>
 
@@ -1753,32 +2018,83 @@ const ExpertDashboard: React.FC = () => {
               overflowY: 'auto',
               background: '#ffffff'
             }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                padding: '12px',
-                cursor: 'pointer',
-                borderBottom: '1px solid #f3f4f6'
-              }}>
-                <Avatar
-                  size={40}
-                  src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
-                  icon={!profile?.avatar && <UserOutlined />}
-                  style={{ backgroundColor: '#667eea' }}
-                />
-                <div style={{ flex: 1, marginLeft: 12 }}>
-                  <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block' }}>
-                    {profile?.username || profile?.email || 'Пользователь'}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 12, color: '#6b7280' }}>
-                    Онлайн
-                  </Text>
-                </div>
-                <Space style={{ marginLeft: 8 }}>
-                  <CheckCircleOutlined style={{ color: '#9ca3af', fontSize: 14 }} />
-                  <StarOutlined style={{ color: '#9ca3af', fontSize: 14 }} />
-                </Space>
-              </div>
+              {mockMessages
+                .filter(chat => {
+                  if (messageTab === 'unread') return !chat.isRead;
+                  return true;
+                })
+                .map((chat) => (
+                  <div 
+                    key={chat.id}
+                    onClick={() => setSelectedChat(chat)}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      padding: '12px',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #f3f4f6',
+                      background: selectedChat?.id === chat.id ? '#eff6ff' : (chat.isRead ? '#ffffff' : '#f0fdf4'),
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedChat?.id !== chat.id) {
+                        e.currentTarget.style.background = '#f9fafb';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedChat?.id !== chat.id) {
+                        e.currentTarget.style.background = chat.isRead ? '#ffffff' : '#f0fdf4';
+                      }
+                    }}
+                  >
+                    <Badge dot={chat.isOnline} offset={[-5, 35]}>
+                      <Avatar
+                        size={40}
+                        icon={<UserOutlined />}
+                        style={{ backgroundColor: chat.isOnline ? '#10b981' : '#6b7280' }}
+                      />
+                    </Badge>
+                    <div style={{ flex: 1, marginLeft: 12, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                        <Text strong style={{ 
+                          fontSize: 14, 
+                          color: '#1f2937',
+                          fontWeight: chat.isRead ? 500 : 600
+                        }}>
+                          {chat.userName}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 11, color: '#9ca3af' }}>
+                          {chat.timestamp}
+                        </Text>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text 
+                          ellipsis 
+                          style={{ 
+                            fontSize: 12, 
+                            color: chat.isRead ? '#6b7280' : '#059669',
+                            fontWeight: chat.isRead ? 400 : 500,
+                            maxWidth: '180px'
+                          }}
+                        >
+                          {chat.lastMessage}
+                        </Text>
+                        {chat.unreadCount > 0 && (
+                          <Badge 
+                            count={chat.unreadCount} 
+                            style={{ 
+                              backgroundColor: '#10b981',
+                              fontSize: 10,
+                              height: 18,
+                              minWidth: 18,
+                              lineHeight: '18px'
+                            }} 
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -1791,28 +2107,60 @@ const ExpertDashboard: React.FC = () => {
           }}>
             {/* Header */}
             <div style={{
-              background: '#e0f2fe',
+              background: selectedChat ? '#ffffff' : '#e0f2fe',
               padding: '12px 16px',
               paddingRight: '48px', // Отступ справа для крестика закрытия
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderBottom: '1px solid #bae6fd'
+              borderBottom: `1px solid ${selectedChat ? '#e5e7eb' : '#bae6fd'}`
             }}>
-              <Space>
-                <StarFilled style={{ color: '#0ea5e9', fontSize: 16 }} />
-                <Text style={{ fontSize: 14, color: '#0369a1', fontWeight: 500 }}>
-                  Важные сообщения
-                </Text>
-              </Space>
-              <Button 
-                type="text" 
-                size="small"
-                icon={<MobileOutlined />}
-                style={{ color: '#0369a1', fontSize: 14, marginRight: 0 }}
-              >
-                Отправить SMS
-              </Button>
+              {selectedChat ? (
+                <>
+                  <Space>
+                    <Badge dot={selectedChat.isOnline} offset={[-5, 35]}>
+                      <Avatar
+                        size={36}
+                        icon={<UserOutlined />}
+                        style={{ backgroundColor: selectedChat.isOnline ? '#10b981' : '#6b7280' }}
+                      />
+                    </Badge>
+                    <div>
+                      <Text style={{ fontSize: 15, color: '#1f2937', fontWeight: 500, display: 'block' }}>
+                        {selectedChat.userName}
+                      </Text>
+                      <Text style={{ fontSize: 12, color: selectedChat.isOnline ? '#10b981' : '#6b7280' }}>
+                        {selectedChat.isOnline ? 'В сети' : 'Не в сети'}
+                      </Text>
+                    </div>
+                  </Space>
+                  <Button 
+                    type="text" 
+                    size="small"
+                    icon={<PlusOutlined />}
+                    style={{ color: '#6b7280', fontSize: 14, marginRight: 0 }}
+                  >
+                    Создать заказ
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Space>
+                    <StarFilled style={{ color: '#0ea5e9', fontSize: 16 }} />
+                    <Text style={{ fontSize: 14, color: '#0369a1', fontWeight: 500 }}>
+                      Важные сообщения
+                    </Text>
+                  </Space>
+                  <Button 
+                    type="text" 
+                    size="small"
+                    icon={<PlusOutlined />}
+                    style={{ color: '#0369a1', fontSize: 14, marginRight: 0 }}
+                  >
+                    Создать заказ
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Messages Area */}
@@ -1820,16 +2168,61 @@ const ExpertDashboard: React.FC = () => {
               flex: 1, 
               overflowY: 'auto',
               padding: '20px',
-              background: '#ffffff'
+              background: '#f9fafb'
             }}>
-              <div style={{ 
-                textAlign: 'center', 
-                color: '#9ca3af', 
-                paddingTop: '100px',
-                fontSize: 14
-              }}>
-                Нет сообщений
-              </div>
+              {selectedChat ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {selectedChat.messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: msg.isMine ? 'flex-end' : 'flex-start'
+                      }}
+                    >
+                      <div
+                        style={{
+                          maxWidth: '70%',
+                          padding: '10px 14px',
+                          borderRadius: msg.isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                          background: msg.isMine ? '#3b82f6' : '#ffffff',
+                          color: msg.isMine ? '#ffffff' : '#1f2937',
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          border: msg.isMine ? 'none' : '1px solid #e5e7eb'
+                        }}
+                      >
+                        <Text style={{ 
+                          fontSize: 14, 
+                          color: msg.isMine ? '#ffffff' : '#1f2937',
+                          display: 'block',
+                          marginBottom: 4
+                        }}>
+                          {msg.text}
+                        </Text>
+                        <Text style={{ 
+                          fontSize: 11, 
+                          color: msg.isMine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
+                        }}>
+                          {msg.timestamp}
+                          {msg.isMine && msg.isRead && (
+                            <CheckCircleOutlined style={{ marginLeft: 4, fontSize: 11 }} />
+                          )}
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  color: '#9ca3af', 
+                  paddingTop: '100px',
+                  fontSize: 14
+                }}>
+                  <MessageOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16, display: 'block' }} />
+                  Выберите чат для начала общения
+                </div>
+              )}
             </div>
 
             {/* Input Area */}
@@ -2785,14 +3178,122 @@ const ExpertDashboard: React.FC = () => {
             background: '#ffffff',
             borderRadius: 12,
             border: '1px solid #e5e7eb',
-            padding: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            padding: '16px'
           }}>
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              Нет уведомлений
-            </Text>
+            {mockNotifications
+              .filter(notification => {
+                if (notificationTab === 'all') return true;
+                if (notificationTab === 'orders') return notification.type === 'order';
+                if (notificationTab === 'claims') return notification.type === 'claim';
+                if (notificationTab === 'forum') return notification.type === 'forum';
+                if (notificationTab === 'questions') return notification.type === 'question';
+                return false;
+              })
+              .map((notification) => (
+                <div
+                  key={notification.id}
+                  style={{
+                    padding: '16px',
+                    marginBottom: '12px',
+                    background: notification.isRead ? '#ffffff' : '#eff6ff',
+                    borderRadius: 12,
+                    border: `1px solid ${notification.isRead ? '#e5e7eb' : '#bfdbfe'}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    gap: 16,
+                    alignItems: 'flex-start'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {/* Иконка */}
+                  <div style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    background: notification.isRead ? '#f3f4f6' : '#dbeafe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 20,
+                    flexShrink: 0
+                  }}>
+                    {notification.icon}
+                  </div>
+
+                  {/* Контент */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      marginBottom: 4
+                    }}>
+                      <Text strong style={{ 
+                        fontSize: 15, 
+                        color: '#1f2937',
+                        fontWeight: notification.isRead ? 500 : 600
+                      }}>
+                        {notification.title}
+                      </Text>
+                      {!notification.isRead && (
+                        <div style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          background: '#3b82f6',
+                          flexShrink: 0,
+                          marginLeft: 8,
+                          marginTop: 6
+                        }} />
+                      )}
+                    </div>
+                    <Text style={{ 
+                      fontSize: 14, 
+                      color: '#6b7280',
+                      display: 'block',
+                      marginBottom: 8,
+                      lineHeight: 1.5
+                    }}>
+                      {notification.message}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12, color: '#9ca3af' }}>
+                      <ClockCircleOutlined style={{ marginRight: 4 }} />
+                      {notification.timestamp}
+                    </Text>
+                  </div>
+                </div>
+              ))}
+            
+            {mockNotifications.filter(notification => {
+              if (notificationTab === 'all') return true;
+              if (notificationTab === 'orders') return notification.type === 'order';
+              if (notificationTab === 'claims') return notification.type === 'claim';
+              if (notificationTab === 'forum') return notification.type === 'forum';
+              if (notificationTab === 'questions') return notification.type === 'question';
+              return false;
+            }).length === 0 && (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '48px 24px',
+                minHeight: '400px'
+              }}>
+                <BellOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16 }} />
+                <Text type="secondary" style={{ fontSize: 14 }}>
+                  Нет уведомлений в этой категории
+                </Text>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
@@ -2842,20 +3343,375 @@ const ExpertDashboard: React.FC = () => {
             Арбитраж
           </Text>
 
+          {/* Фильтр статусов */}
+          <div style={{ 
+            display: 'flex', 
+            gap: 0,
+            background: '#f9fafb',
+            borderRadius: 12,
+            padding: '4px',
+            border: '1px solid #e5e7eb'
+          }}>
+            <div
+              onClick={() => setArbitrationStatusFilter('all')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '12px 8px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: arbitrationStatusFilter === 'all' ? '#ffffff' : 'transparent',
+                borderBottom: arbitrationStatusFilter === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <TrophyOutlined style={{ 
+                fontSize: 16, 
+                color: arbitrationStatusFilter === 'all' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 12, 
+                color: arbitrationStatusFilter === 'all' ? '#1f2937' : '#6b7280',
+                fontWeight: arbitrationStatusFilter === 'all' ? 500 : 400,
+                whiteSpace: 'nowrap'
+              }}>
+                Все
+              </Text>
+            </div>
+            <div
+              onClick={() => setArbitrationStatusFilter('pending')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '12px 8px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: arbitrationStatusFilter === 'pending' ? '#ffffff' : 'transparent',
+                borderBottom: arbitrationStatusFilter === 'pending' ? '2px solid #f59e0b' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ClockCircleOutlined style={{ 
+                fontSize: 16, 
+                color: arbitrationStatusFilter === 'pending' ? '#f59e0b' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 12, 
+                color: arbitrationStatusFilter === 'pending' ? '#1f2937' : '#6b7280',
+                fontWeight: arbitrationStatusFilter === 'pending' ? 500 : 400,
+                whiteSpace: 'nowrap'
+              }}>
+                Ожидает
+              </Text>
+            </div>
+            <div
+              onClick={() => setArbitrationStatusFilter('in_review')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '12px 8px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: arbitrationStatusFilter === 'in_review' ? '#ffffff' : 'transparent',
+                borderBottom: arbitrationStatusFilter === 'in_review' ? '2px solid #3b82f6' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileDoneOutlined style={{ 
+                fontSize: 16, 
+                color: arbitrationStatusFilter === 'in_review' ? '#3b82f6' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 12, 
+                color: arbitrationStatusFilter === 'in_review' ? '#1f2937' : '#6b7280',
+                fontWeight: arbitrationStatusFilter === 'in_review' ? 500 : 400,
+                whiteSpace: 'nowrap'
+              }}>
+                На рассмотрении
+              </Text>
+            </div>
+            <div
+              onClick={() => setArbitrationStatusFilter('resolved')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '12px 8px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: arbitrationStatusFilter === 'resolved' ? '#ffffff' : 'transparent',
+                borderBottom: arbitrationStatusFilter === 'resolved' ? '2px solid #10b981' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <CheckCircleOutlined style={{ 
+                fontSize: 16, 
+                color: arbitrationStatusFilter === 'resolved' ? '#10b981' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 12, 
+                color: arbitrationStatusFilter === 'resolved' ? '#1f2937' : '#6b7280',
+                fontWeight: arbitrationStatusFilter === 'resolved' ? 500 : 400,
+                whiteSpace: 'nowrap'
+              }}>
+                Решено
+              </Text>
+            </div>
+            <div
+              onClick={() => setArbitrationStatusFilter('rejected')}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '12px 8px',
+                cursor: 'pointer',
+                borderRadius: 8,
+                background: arbitrationStatusFilter === 'rejected' ? '#ffffff' : 'transparent',
+                borderBottom: arbitrationStatusFilter === 'rejected' ? '2px solid #ef4444' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <CloseCircleOutlined style={{ 
+                fontSize: 16, 
+                color: arbitrationStatusFilter === 'rejected' ? '#ef4444' : '#6b7280' 
+              }} />
+              <Text style={{ 
+                fontSize: 12, 
+                color: arbitrationStatusFilter === 'rejected' ? '#1f2937' : '#6b7280',
+                fontWeight: arbitrationStatusFilter === 'rejected' ? 500 : 400,
+                whiteSpace: 'nowrap'
+              }}>
+                Отклонено
+              </Text>
+            </div>
+          </div>
+
           {/* Область контента */}
           <div style={{ 
             background: '#ffffff',
             borderRadius: 12,
             border: '1px solid #e5e7eb',
-            padding: '48px 24px',
-            minHeight: '350px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            padding: '16px',
+            minHeight: '350px'
           }}>
-            <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
-              У вас нет арбитражей
-            </Text>
+            {mockArbitrationCases.filter(arbitration => {
+              if (arbitrationStatusFilter === 'all') return true;
+              return arbitration.status === arbitrationStatusFilter;
+            }).length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {mockArbitrationCases
+                  .filter(arbitration => {
+                    if (arbitrationStatusFilter === 'all') return true;
+                    return arbitration.status === arbitrationStatusFilter;
+                  })
+                  .map((arbitration) => {
+                  const getStatusConfig = (status: string) => {
+                    switch (status) {
+                      case 'pending':
+                        return { color: '#f59e0b', bg: '#fef3c7', text: 'Ожидает рассмотрения', icon: <ClockCircleOutlined /> };
+                      case 'in_review':
+                        return { color: '#3b82f6', bg: '#dbeafe', text: 'На рассмотрении', icon: <FileDoneOutlined /> };
+                      case 'resolved':
+                        return { color: '#10b981', bg: '#d1fae5', text: 'Решено', icon: <CheckCircleOutlined /> };
+                      case 'rejected':
+                        return { color: '#ef4444', bg: '#fee2e2', text: 'Отклонено', icon: <CloseCircleOutlined /> };
+                      default:
+                        return { color: '#6b7280', bg: '#f3f4f6', text: 'Неизвестно', icon: <QuestionCircleOutlined /> };
+                    }
+                  };
+
+                  const statusConfig = getStatusConfig(arbitration.status);
+
+                  return (
+                    <div
+                      key={arbitration.id}
+                      style={{
+                        padding: '20px',
+                        background: '#ffffff',
+                        borderRadius: 12,
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      {/* Заголовок и статус */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, color: '#1f2937', display: 'block', marginBottom: 4 }}>
+                            Заказ #{arbitration.orderId}: {arbitration.orderTitle}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: 13 }}>
+                            Заказчик: {arbitration.clientName}
+                          </Text>
+                        </div>
+                        <div style={{
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          background: statusConfig.bg,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          marginLeft: 16
+                        }}>
+                          <span style={{ color: statusConfig.color, fontSize: 14 }}>
+                            {statusConfig.icon}
+                          </span>
+                          <Text style={{ fontSize: 13, color: statusConfig.color, fontWeight: 500 }}>
+                            {statusConfig.text}
+                          </Text>
+                        </div>
+                      </div>
+
+                      {/* Причина */}
+                      <div style={{ 
+                        padding: '12px', 
+                        background: '#fef3c7', 
+                        borderRadius: 8, 
+                        marginBottom: 12,
+                        borderLeft: '3px solid #f59e0b'
+                      }}>
+                        <Text strong style={{ fontSize: 13, color: '#92400e', display: 'block', marginBottom: 4 }}>
+                          Причина претензии:
+                        </Text>
+                        <Text style={{ fontSize: 13, color: '#78350f' }}>
+                          {arbitration.reason}
+                        </Text>
+                      </div>
+
+                      {/* Описание */}
+                      <Paragraph 
+                        ellipsis={{ rows: 2, expandable: true, symbol: 'Показать больше' }}
+                        style={{ fontSize: 14, color: '#4b5563', marginBottom: 12 }}
+                      >
+                        {arbitration.description}
+                      </Paragraph>
+
+                      {/* Решение (если есть) */}
+                      {arbitration.decision && (
+                        <div style={{ 
+                          padding: '12px', 
+                          background: arbitration.status === 'resolved' ? '#d1fae5' : '#fee2e2', 
+                          borderRadius: 8, 
+                          marginBottom: 12,
+                          borderLeft: `3px solid ${arbitration.status === 'resolved' ? '#10b981' : '#ef4444'}`
+                        }}>
+                          <Text strong style={{ 
+                            fontSize: 13, 
+                            color: arbitration.status === 'resolved' ? '#065f46' : '#991b1b', 
+                            display: 'block', 
+                            marginBottom: 4 
+                          }}>
+                            Решение арбитража:
+                          </Text>
+                          <Text style={{ 
+                            fontSize: 13, 
+                            color: arbitration.status === 'resolved' ? '#047857' : '#b91c1c' 
+                          }}>
+                            {arbitration.decision}
+                          </Text>
+                        </div>
+                      )}
+
+                      {/* Документы */}
+                      {arbitration.documents && arbitration.documents.length > 0 && (
+                        <div style={{ marginBottom: 12 }}>
+                          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                            Прикрепленные документы:
+                          </Text>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {arbitration.documents.map((doc, index) => (
+                              <div
+                                key={index}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#f3f4f6',
+                                  borderRadius: 6,
+                                  fontSize: 12,
+                                  color: '#4b5563',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                              >
+                                <PaperClipOutlined style={{ fontSize: 12 }} />
+                                {doc}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Футер с информацией */}
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        paddingTop: 12,
+                        borderTop: '1px solid #e5e7eb'
+                      }}>
+                        <div style={{ display: 'flex', gap: 16 }}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            <CalendarOutlined style={{ marginRight: 4 }} />
+                            Создано: {arbitration.createdAt}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            <ClockCircleOutlined style={{ marginRight: 4 }} />
+                            Обновлено: {arbitration.updatedAt}
+                          </Text>
+                        </div>
+                        <Text strong style={{ fontSize: 15, color: '#1f2937' }}>
+                          <DollarOutlined style={{ marginRight: 4 }} />
+                          {arbitration.amount.toLocaleString('ru-RU')} ₽
+                        </Text>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '48px 24px',
+                minHeight: '350px'
+              }}>
+                <TrophyOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16 }} />
+                <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
+                  {arbitrationStatusFilter === 'all' 
+                    ? 'У вас нет арбитражей' 
+                    : `Нет арбитражей со статусом "${
+                        arbitrationStatusFilter === 'pending' ? 'Ожидает рассмотрения' :
+                        arbitrationStatusFilter === 'in_review' ? 'На рассмотрении' :
+                        arbitrationStatusFilter === 'resolved' ? 'Решено' :
+                        arbitrationStatusFilter === 'rejected' ? 'Отклонено' : ''
+                      }"`
+                  }
+                </Text>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
