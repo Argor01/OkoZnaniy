@@ -7,65 +7,119 @@ import {
   DatePicker,
   Button,
   Space,
-  Spin,
   message,
   Typography,
-  Table,
-  Select,
   Alert,
 } from 'antd';
 import {
   ArrowUpOutlined,
-  ArrowDownOutlined,
-  DollarOutlined,
   ShoppingOutlined,
   UserOutlined,
   TeamOutlined,
-  UserAddOutlined,
   DownloadOutlined,
-  FileExcelOutlined,
   FilePdfOutlined,
   ExperimentOutlined,
 } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
-import { getKPI, getStatisticsSummary, exportStatisticsReport, type KPI, type StatisticsSummary } from '../../api/directorApi';
-import type { ColumnsType } from 'antd/es/table';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { RangePicker } = DatePicker;
-const { Option } = Select;
+
+// Тестовые данные для графиков
+const ordersChartData = [
+  { date: '01.11', orders: 45, completed: 38, cancelled: 7 },
+  { date: '02.11', orders: 52, completed: 45, cancelled: 7 },
+  { date: '03.11', orders: 48, completed: 42, cancelled: 6 },
+  { date: '04.11', orders: 61, completed: 54, cancelled: 7 },
+  { date: '05.11', orders: 55, completed: 48, cancelled: 7 },
+  { date: '06.11', orders: 67, completed: 59, cancelled: 8 },
+  { date: '07.11', orders: 58, completed: 51, cancelled: 7 },
+  { date: '08.11', orders: 72, completed: 65, cancelled: 7 },
+  { date: '09.11', orders: 69, completed: 62, cancelled: 7 },
+  { date: '10.11', orders: 75, completed: 68, cancelled: 7 },
+  { date: '11.11', orders: 82, completed: 74, cancelled: 8 },
+  { date: '12.11', orders: 78, completed: 71, cancelled: 7 },
+  { date: '13.11', orders: 85, completed: 77, cancelled: 8 },
+  { date: '14.11', orders: 91, completed: 83, cancelled: 8 },
+  { date: '15.11', orders: 88, completed: 80, cancelled: 8 },
+];
+
+const revenueChartData = [
+  { date: '01.11', revenue: 125000, profit: 45000 },
+  { date: '02.11', revenue: 142000, profit: 52000 },
+  { date: '03.11', revenue: 138000, profit: 48000 },
+  { date: '04.11', revenue: 165000, profit: 61000 },
+  { date: '05.11', revenue: 155000, profit: 55000 },
+  { date: '06.11', revenue: 178000, profit: 67000 },
+  { date: '07.11', revenue: 162000, profit: 58000 },
+  { date: '08.11', revenue: 195000, profit: 72000 },
+  { date: '09.11', revenue: 188000, profit: 69000 },
+  { date: '10.11', revenue: 205000, profit: 75000 },
+  { date: '11.11', revenue: 225000, profit: 82000 },
+  { date: '12.11', revenue: 215000, profit: 78000 },
+  { date: '13.11', revenue: 235000, profit: 85000 },
+  { date: '14.11', revenue: 248000, profit: 91000 },
+  { date: '15.11', revenue: 242000, profit: 88000 },
+];
+
+const categoryData = [
+  { name: 'Математика', value: 450, color: '#1890ff' },
+  { name: 'Физика', value: 320, color: '#52c41a' },
+  { name: 'Программирование', value: 280, color: '#722ed1' },
+  { name: 'Химия', value: 180, color: '#fa8c16' },
+  { name: 'История', value: 150, color: '#eb2f96' },
+  { name: 'Другое', value: 220, color: '#13c2c2' },
+];
+
+const usersOnlineData = [
+  { time: '00:00', users: 12 },
+  { time: '03:00', users: 8 },
+  { time: '06:00', users: 15 },
+  { time: '09:00', users: 35 },
+  { time: '12:00', users: 52 },
+  { time: '15:00', users: 47 },
+  { time: '18:00', users: 38 },
+  { time: '21:00', users: 28 },
+  { time: '24:00', users: 18 },
+];
 
 const GeneralStatistics: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().startOf('month'),
     dayjs().endOf('month'),
   ]);
-  const [exportLoading, setExportLoading] = useState(false);
 
-  const { data: kpiData, isLoading: kpiLoading } = useQuery({
-    queryKey: ['director-kpi', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
-    queryFn: () =>
-      getKPI(
-        dateRange[0].format('YYYY-MM-DD'),
-        dateRange[1].format('YYYY-MM-DD')
-      ),
-    onError: (error: any) => {
-      message.error('Ошибка при загрузке KPI');
-    },
-  });
-
-  const { data: summaryData, isLoading: summaryLoading } = useQuery({
-    queryKey: ['director-summary', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
-    queryFn: () =>
-      getStatisticsSummary(
-        dateRange[0].format('YYYY-MM-DD'),
-        dateRange[1].format('YYYY-MM-DD')
-      ),
-    onError: (error: any) => {
-      message.error('Ошибка при загрузке сводной статистики');
-    },
-  });
+  // Тестовые данные KPI
+  const kpiData = {
+    totalTurnover: 3250000,
+    turnoverChange: 15.3,
+    netProfit: 1180000,
+    profitChange: 18.7,
+    activeOrders: 156,
+    ordersChange: 12.5,
+    averageCheck: 20833,
+    averageCheckChange: 8.2,
+    totalClients: 1247,
+    totalExperts: 89,
+    totalPartners: 23,
+  };
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -92,14 +146,6 @@ const GeneralStatistics: React.FC = () => {
         start = today.subtract(1, 'month').startOf('month');
         end = today.subtract(1, 'month').endOf('month');
         break;
-      case 'thisQuarter':
-        start = today.startOf('quarter');
-        end = today.endOf('quarter');
-        break;
-      case 'lastQuarter':
-        start = today.subtract(1, 'quarter').startOf('quarter');
-        end = today.subtract(1, 'quarter').endOf('quarter');
-        break;
       case 'thisYear':
         start = today.startOf('year');
         end = today.endOf('year');
@@ -115,134 +161,11 @@ const GeneralStatistics: React.FC = () => {
   };
 
   const handleExport = async (format: 'excel' | 'pdf') => {
-    if (!statisticsData) {
-      message.warning('Данные для экспорта ещё не загружены');
-      return;
-    }
-    setExportLoading(true);
-    try {
-      await exportStatisticsReport(
-        dateRange[0].format('YYYY-MM-DD'),
-        dateRange[1].format('YYYY-MM-DD'),
-        format,
-        statisticsData
-      );
-      message.success(`Отчёт в формате ${format.toUpperCase()} успешно экспортирован`);
-    } catch (error) {
-      message.error('Ошибка при экспорте отчёта');
-    } finally {
-      setExportLoading(false);
-    }
+    message.info(`Экспорт в ${format.toUpperCase()} в разработке`);
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const comparisonColumns: ColumnsType<any> = [
-    {
-      title: 'Показатель',
-      dataIndex: 'metric',
-      key: 'metric',
-    },
-    {
-      title: 'Текущий период',
-      dataIndex: 'current',
-      key: 'current',
-      render: (value, record) => {
-        if (record.isCurrency) {
-          return formatCurrency(value);
-        }
-        return value;
-      },
-    },
-    {
-      title: 'Предыдущий период',
-      dataIndex: 'previous',
-      key: 'previous',
-      render: (value, record) => {
-        if (record.isCurrency) {
-          return formatCurrency(value);
-        }
-        return value;
-      },
-    },
-    {
-      title: 'Изменение',
-      dataIndex: 'change',
-      key: 'change',
-      render: (change, record) => {
-        const isPositive = change >= 0;
-        const icon = isPositive ? <ArrowUpOutlined /> : <ArrowDownOutlined />;
-        const color = isPositive ? '#3f8600' : '#cf1322';
-        return (
-          <Space>
-            <Text style={{ color }}>
-              {icon} {Math.abs(change).toFixed(2)}%
-            </Text>
-            {record.isCurrency && (
-              <Text type="secondary">
-                ({isPositive ? '+' : ''}{formatCurrency(record.absoluteChange || 0)})
-              </Text>
-            )}
-          </Space>
-        );
-      },
-    },
-  ];
-
-  const comparisonData = React.useMemo(() => {
-    if (!summaryData) return [];
-    
-    return [
-      {
-        key: 'turnover',
-        metric: 'Общий оборот',
-        current: summaryData.currentPeriod?.turnover || summaryData.current_period?.turnover || 0,
-        previous: summaryData.previousPeriod?.turnover || summaryData.previous_period?.turnover || 0,
-        change: summaryData.turnoverChange || summaryData.turnover_change || 0,
-        absoluteChange: (summaryData.currentPeriod?.turnover || summaryData.current_period?.turnover || 0) - (summaryData.previousPeriod?.turnover || summaryData.previous_period?.turnover || 0),
-        isCurrency: true,
-      },
-      {
-        key: 'profit',
-        metric: 'Чистая прибыль',
-        current: summaryData.currentPeriod?.profit || summaryData.current_period?.profit || 0,
-        previous: summaryData.previousPeriod?.profit || summaryData.previous_period?.profit || 0,
-        change: summaryData.profitChange || summaryData.profit_change || 0,
-        absoluteChange: (summaryData.currentPeriod?.profit || summaryData.current_period?.profit || 0) - (summaryData.previousPeriod?.profit || summaryData.previous_period?.profit || 0),
-        isCurrency: true,
-      },
-      {
-        key: 'orders',
-        metric: 'Количество заказов',
-        current: summaryData.currentPeriod?.orders || summaryData.current_period?.orders || 0,
-        previous: summaryData.previousPeriod?.orders || summaryData.previous_period?.orders || 0,
-        change: summaryData.ordersChange || summaryData.orders_change || 0,
-        isCurrency: false,
-      },
-      {
-        key: 'averageCheck',
-        metric: 'Средний чек',
-        current: summaryData.currentPeriod?.averageCheck || summaryData.current_period?.average_check || 0,
-        previous: summaryData.previousPeriod?.averageCheck || summaryData.previous_period?.average_check || 0,
-        change: summaryData.averageCheckChange || summaryData.average_check_change || 0,
-        absoluteChange: (summaryData.currentPeriod?.averageCheck || summaryData.current_period?.average_check || 0) - (summaryData.previousPeriod?.averageCheck || summaryData.previous_period?.average_check || 0),
-        isCurrency: true,
-      },
-    ];
-  }, [summaryData]);
-
-  const isLoading = kpiLoading || summaryLoading;
 
   return (
     <div>
-      <Title level={3}>Общая статистика</Title>
       <Alert
         message="Режим тестовых данных"
         description="В данный момент используется режим тестовых данных. Все показатели KPI генерируются динамически для демонстрации функционала."
@@ -270,14 +193,12 @@ const GeneralStatistics: React.FC = () => {
               type="primary"
               icon={<DownloadOutlined />}
               onClick={() => handleExport('excel')}
-              loading={exportLoading}
             >
               Экспорт в Excel
             </Button>
             <Button
               icon={<FilePdfOutlined />}
               onClick={() => handleExport('pdf')}
-              loading={exportLoading}
             >
               Экспорт в PDF
             </Button>
@@ -298,12 +219,6 @@ const GeneralStatistics: React.FC = () => {
             <Button size="small" onClick={() => handleQuickSelect('lastMonth')}>
               Прошлый месяц
             </Button>
-            <Button size="small" onClick={() => handleQuickSelect('thisQuarter')}>
-              Этот квартал
-            </Button>
-            <Button size="small" onClick={() => handleQuickSelect('lastQuarter')}>
-              Прошлый квартал
-            </Button>
             <Button size="small" onClick={() => handleQuickSelect('thisYear')}>
               Этот год
             </Button>
@@ -314,176 +229,227 @@ const GeneralStatistics: React.FC = () => {
         </Space>
       </Card>
 
-      <Spin spinning={isLoading}>
-        {kpiData && (
-          <>
-            {/* KPI карточки */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-              <Col xs={24} sm={12} lg={6}>
-                <Card>
-                  <Statistic
-                    title="Общий оборот"
-                    value={kpiData.totalTurnover || kpiData.total_turnover || 0}
-                    prefix="₽"
-                    precision={2}
-                    valueStyle={{ color: '#1890ff' }}
-                    suffix={
-                      <Space>
-                        {(kpiData.turnoverChange || kpiData.turnover_change || 0) >= 0 ? (
-                          <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
-                        ) : (
-                          <ArrowDownOutlined style={{ fontSize: 14, color: '#cf1322' }} />
-                        )}
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: (kpiData.turnoverChange || kpiData.turnover_change || 0) >= 0 ? '#3f8600' : '#cf1322',
-                          }}
-                        >
-                          {Math.abs(kpiData.turnoverChange || kpiData.turnover_change || 0).toFixed(2)}%
-                        </Text>
-                      </Space>
-                    }
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <Card>
-                  <Statistic
-                    title="Чистая прибыль"
-                    value={kpiData.netProfit || kpiData.net_profit || 0}
-                    prefix="₽"
-                    precision={2}
-                    valueStyle={{ color: (kpiData.netProfit || kpiData.net_profit || 0) >= 0 ? '#3f8600' : '#cf1322' }}
-                    suffix={
-                      <Space>
-                        {(kpiData.profitChange || kpiData.profit_change || 0) >= 0 ? (
-                          <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
-                        ) : (
-                          <ArrowDownOutlined style={{ fontSize: 14, color: '#cf1322' }} />
-                        )}
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: (kpiData.profitChange || kpiData.profit_change || 0) >= 0 ? '#3f8600' : '#cf1322',
-                          }}
-                        >
-                          {Math.abs(kpiData.profitChange || kpiData.profit_change || 0).toFixed(2)}%
-                        </Text>
-                      </Space>
-                    }
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <Card>
-                  <Statistic
-                    title="Активные заказы"
-                    value={kpiData.activeOrders || kpiData.active_orders || 0}
-                    prefix={<ShoppingOutlined />}
-                    valueStyle={{ color: '#722ed1' }}
-                    suffix={
-                      <Space>
-                        {(kpiData.ordersChange || kpiData.orders_change || 0) >= 0 ? (
-                          <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
-                        ) : (
-                          <ArrowDownOutlined style={{ fontSize: 14, color: '#cf1322' }} />
-                        )}
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: (kpiData.ordersChange || kpiData.orders_change || 0) >= 0 ? '#3f8600' : '#cf1322',
-                          }}
-                        >
-                          {Math.abs(kpiData.ordersChange || kpiData.orders_change || 0).toFixed(2)}%
-                        </Text>
-                      </Space>
-                    }
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <Card>
-                  <Statistic
-                    title="Средний чек"
-                    value={kpiData.averageCheck || kpiData.average_check || 0}
-                    prefix="₽"
-                    precision={2}
-                    valueStyle={{ color: '#13c2c2' }}
-                    suffix={
-                      <Space>
-                        {(kpiData.averageCheckChange || kpiData.average_check_change || 0) >= 0 ? (
-                          <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
-                        ) : (
-                          <ArrowDownOutlined style={{ fontSize: 14, color: '#cf1322' }} />
-                        )}
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: (kpiData.averageCheckChange || kpiData.average_check_change || 0) >= 0 ? '#3f8600' : '#cf1322',
-                          }}
-                        >
-                          {Math.abs(kpiData.averageCheckChange || kpiData.average_check_change || 0).toFixed(2)}%
-                        </Text>
-                      </Space>
-                    }
-                  />
-                </Card>
-              </Col>
-            </Row>
+      {/* KPI карточки */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Общий оборот"
+              value={kpiData.totalTurnover}
+              prefix="₽"
+              precision={2}
+              valueStyle={{ color: '#1890ff' }}
+              suffix={
+                <Space>
+                  <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
+                  <Text style={{ fontSize: 14, color: '#3f8600' }}>
+                    {kpiData.turnoverChange.toFixed(2)}%
+                  </Text>
+                </Space>
+              }
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Чистая прибыль"
+              value={kpiData.netProfit}
+              prefix="₽"
+              precision={2}
+              valueStyle={{ color: '#3f8600' }}
+              suffix={
+                <Space>
+                  <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
+                  <Text style={{ fontSize: 14, color: '#3f8600' }}>
+                    {kpiData.profitChange.toFixed(2)}%
+                  </Text>
+                </Space>
+              }
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Активные заказы"
+              value={kpiData.activeOrders}
+              prefix={<ShoppingOutlined />}
+              valueStyle={{ color: '#722ed1' }}
+              suffix={
+                <Space>
+                  <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
+                  <Text style={{ fontSize: 14, color: '#3f8600' }}>
+                    {kpiData.ordersChange.toFixed(2)}%
+                  </Text>
+                </Space>
+              }
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Средний чек"
+              value={kpiData.averageCheck}
+              prefix="₽"
+              precision={2}
+              valueStyle={{ color: '#13c2c2' }}
+              suffix={
+                <Space>
+                  <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
+                  <Text style={{ fontSize: 14, color: '#3f8600' }}>
+                    {kpiData.averageCheckChange.toFixed(2)}%
+                  </Text>
+                </Space>
+              }
+            />
+          </Card>
+        </Col>
+      </Row>
 
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-              <Col xs={24} sm={12} lg={8}>
-                <Card>
-                  <Statistic
-                    title="Клиентов"
-                    value={kpiData.totalClients || kpiData.total_clients || 0}
-                    prefix={<UserOutlined />}
-                    valueStyle={{ color: '#fa8c16' }}
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={8}>
-                <Card>
-                  <Statistic
-                    title="Экспертов"
-                    value={kpiData.totalExperts || kpiData.total_experts || 0}
-                    prefix={<TeamOutlined />}
-                    valueStyle={{ color: '#52c41a' }}
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} lg={8}>
-                <Card>
-                  <Statistic
-                    title="Партнёров"
-                    value={kpiData.totalPartners || kpiData.total_partners || 0}
-                    prefix={<UserAddOutlined />}
-                    valueStyle={{ color: '#eb2f96' }}
-                  />
-                </Card>
-              </Col>
-            </Row>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Пользователей онлайн"
+              value={47}
+              prefix={<TeamOutlined />}
+              valueStyle={{ color: '#52c41a' }}
+              suffix={
+                <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
+                  сейчас на сайте
+                </Text>
+              }
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Заказов в сутки"
+              value={156}
+              prefix={<ShoppingOutlined />}
+              valueStyle={{ color: '#1890ff' }}
+              suffix={
+                <Space>
+                  <ArrowUpOutlined style={{ fontSize: 14, color: '#3f8600' }} />
+                  <Text style={{ fontSize: 14, color: '#3f8600' }}>
+                    12.5%
+                  </Text>
+                </Space>
+              }
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Клиентов"
+              value={kpiData.totalClients}
+              prefix={<UserOutlined />}
+              valueStyle={{ color: '#fa8c16' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <Card>
+            <Statistic
+              title="Экспертов"
+              value={kpiData.totalExperts}
+              prefix={<TeamOutlined />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
-            {/* Сравнительная таблица */}
-            <Card title="Сравнение с предыдущим периодом" style={{ marginBottom: 16 }}>
-              <Table
-                columns={comparisonColumns}
-                dataSource={comparisonData}
-                pagination={false}
-                size="small"
-              />
-            </Card>
-
-            {/* Информационное сообщение */}
-            <div style={{ padding: 16, background: '#f0f2f5', borderRadius: 8 }}>
-              <Typography.Text type="secondary">
-                💡 Для отображения графиков установите библиотеку recharts: <code>npm install recharts</code>
-              </Typography.Text>
+      {/* Графики */}
+      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+        {/* График заказов */}
+        <Col xs={24} lg={12}>
+          <Card title="Динамика заказов">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={ordersChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="orders" stroke="#1890ff" name="Всего заказов" strokeWidth={2} />
+                  <Line type="monotone" dataKey="completed" stroke="#52c41a" name="Завершено" strokeWidth={2} />
+                  <Line type="monotone" dataKey="cancelled" stroke="#ff4d4f" name="Отменено" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-          </>
-        )}
-      </Spin>
+          </Card>
+        </Col>
+
+        {/* График выручки */}
+        <Col xs={24} lg={12}>
+          <Card title="Выручка и прибыль">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
+                  <Legend />
+                  <Area type="monotone" dataKey="revenue" stroke="#1890ff" fill="#1890ff" fillOpacity={0.3} name="Выручка" />
+                  <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.3} name="Прибыль" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+
+        {/* График по категориям */}
+        <Col xs={24} lg={12}>
+          <Card title="Распределение заказов по предметам">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+
+        {/* График пользователей онлайн */}
+        <Col xs={24} lg={12}>
+          <Card title="Пользователи онлайн (24 часа)">
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={usersOnlineData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="users" fill="#52c41a" name="Пользователей" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };

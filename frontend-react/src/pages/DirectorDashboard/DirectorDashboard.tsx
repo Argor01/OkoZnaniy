@@ -29,7 +29,7 @@ type MenuItem = {
 
 const DirectorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedMenu, setSelectedMenu] = useState<string>('statistics');
+  const [selectedMenu, setSelectedMenu] = useState<string>('personnel');
 
   const menuItems: MenuItem[] = [
     {

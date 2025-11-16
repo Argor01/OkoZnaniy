@@ -1,200 +1,132 @@
-import React, { useState, useMemo } from 'react';
-import { Card, Statistic, Row, Col, Select, Button, Space, Spin, message, Typography, Table } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined, CalendarOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
-import dayjs from 'dayjs';
-import { getMonthlyTurnover, type MonthlyTurnover } from '../../api/directorApi';
+import React, { useState } from 'react';
+import { Card, Statistic, Row, Col, DatePicker, Space, Button } from 'antd';
+import { ArrowUpOutlined } from '@ant-design/icons';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import dayjs, { Dayjs } from 'dayjs';
 
-const { Title } = Typography;
-const { Option } = Select;
+const { RangePicker } = DatePicker;
+
+// Тестовые данные
+const turnoverData = [
+  { date: '01.11', amount: 125000 },
+  { date: '02.11', amount: 142000 },
+  { date: '03.11', amount: 138000 },
+  { date: '04.11', amount: 165000 },
+  { date: '05.11', amount: 155000 },
+  { date: '06.11', amount: 178000 },
+  { date: '07.11', amount: 162000 },
+  { date: '08.11', amount: 195000 },
+  { date: '09.11', amount: 188000 },
+  { date: '10.11', amount: 205000 },
+  { date: '11.11', amount: 225000 },
+  { date: '12.11', amount: 215000 },
+  { date: '13.11', amount: 235000 },
+  { date: '14.11', amount: 248000 },
+  { date: '15.11', amount: 242000 },
+];
 
 const MonthlyTurnover: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState<string>(dayjs().format('YYYY-MM'));
-  const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
+    dayjs().startOf('month'),
+    dayjs().endOf('month'),
+  ]);
 
-  const { data: turnoverData, isLoading } = useQuery({
-    queryKey: ['director-monthly-turnover', selectedMonth],
-    queryFn: () => getMonthlyTurnover(selectedMonth),
-    onError: (error: any) => {
-      message.error('Ошибка при загрузке данных оборота');
-    },
-  });
+  const totalTurnover = turnoverData.reduce((sum, item) => sum + item.amount, 0);
 
-  const chartData = useMemo(() => {
-    const dailyData = turnoverData?.dailyData || turnoverData?.daily_data || [];
-    if (dailyData.length === 0) return [];
-    
-    if (viewMode === 'weekly') {
-      // Группируем данные по неделям
-      const weeklyData: Record<string, number> = {};
-      dailyData.forEach((item) => {
-        const week = dayjs(item.date).format('YYYY-[W]WW');
-        weeklyData[week] = (weeklyData[week] || 0) + item.amount;
-      });
-      return Object.entries(weeklyData).map(([week, amount]) => ({
-        period: week,
-        amount: Math.round(amount),
-      }));
+  const handleQuickSelect = (type: string) => {
+    const today = dayjs();
+    let start: Dayjs, end: Dayjs;
+
+    switch (type) {
+      case 'thisWeek':
+        start = today.startOf('week');
+        end = today.endOf('week');
+        break;
+      case 'thisMonth':
+        start = today.startOf('month');
+        end = today.endOf('month');
+        break;
+      case 'lastMonth':
+        start = today.subtract(1, 'month').startOf('month');
+        end = today.subtract(1, 'month').endOf('month');
+        break;
+      case 'thisYear':
+        start = today.startOf('year');
+        end = today.endOf('year');
+        break;
+      default:
+        return;
     }
-    
-    return dailyData.map((item) => ({
-      period: dayjs(item.date).format('DD.MM'),
-      amount: item.amount,
-    }));
-  }, [turnoverData, viewMode]);
-
-  const handleMonthChange = (month: string) => {
-    setSelectedMonth(month);
+    setDateRange([start, end]);
   };
-
-  const handleQuickSelect = (type: 'current' | 'previous') => {
-    if (type === 'current') {
-      setSelectedMonth(dayjs().format('YYYY-MM'));
-    } else {
-      setSelectedMonth(dayjs().subtract(1, 'month').format('YYYY-MM'));
-    }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const columns = [
-    {
-      title: 'Период',
-      dataIndex: 'period',
-      key: 'period',
-    },
-    {
-      title: 'Сумма',
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount: number) => formatCurrency(amount),
-    },
-  ];
 
   return (
     <div>
-      <Card>
-        <Title level={4}>Общий оборот за месяц</Title>
-        
-        {/* Селектор месяца и быстрый выбор */}
-        <Space direction="vertical" style={{ width: '100%', marginBottom: 24 }} size="large">
-          <Space>
-            <Select
-              style={{ width: 200 }}
-              value={selectedMonth}
-              onChange={handleMonthChange}
-              suffixIcon={<CalendarOutlined />}
-            >
-              {Array.from({ length: 12 }, (_, i) => {
-                const month = dayjs().subtract(i, 'month');
-                return (
-                  <Option key={month.format('YYYY-MM')} value={month.format('YYYY-MM')}>
-                    {month.format('MMMM YYYY')}
-                  </Option>
-                );
-              })}
-            </Select>
-            <Button onClick={() => handleQuickSelect('current')}>
-              Текущий месяц
-            </Button>
-            <Button onClick={() => handleQuickSelect('previous')}>
-              Прошлый месяц
-            </Button>
-          </Space>
+      <Card style={{ marginBottom: 16 }}>
+        <Space wrap>
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => {
+              if (dates && dates[0] && dates[1]) {
+                setDateRange([dates[0], dates[1]]);
+              }
+            }}
+            format="DD.MM.YYYY"
+          />
+          <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
+          <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
+          <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
+          <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
         </Space>
+      </Card>
 
-        <Spin spinning={isLoading}>
-          {turnoverData && (
-            <>
-              {/* Карточка с общей суммой оборота */}
-              <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={12}>
-                  <Card>
-                    <Statistic
-                      title="Оборот за период"
-                      value={turnoverData.total}
-                      prefix="₽"
-                      precision={2}
-                      valueStyle={{ color: '#1890ff' }}
-                    />
-                  </Card>
-                </Col>
-                <Col span={12}>
-                  <Card>
-                    <Statistic
-                      title="Изменение к предыдущему периоду"
-                      value={Math.abs(turnoverData.changePercent || turnoverData.change_percent || 0)}
-                      prefix={(turnoverData.change || 0) >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-                      suffix="%"
-                      valueStyle={{
-                        color: (turnoverData.change || 0) >= 0 ? '#3f8600' : '#cf1322',
-                      }}
-                    />
-                    <div style={{ marginTop: 8, fontSize: 14, color: '#666' }}>
-                      {(turnoverData.change || 0) >= 0 ? '+' : ''}
-                      {formatCurrency(turnoverData.change || 0)} ({(turnoverData.changePercent || turnoverData.change_percent || 0) >= 0 ? '+' : ''}
-                      {(turnoverData.changePercent || turnoverData.change_percent || 0).toFixed(2)}%)
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={12}>
+          <Card>
+            <Statistic
+              title="Оборот за период"
+              value={totalTurnover}
+              prefix="₽"
+              precision={0}
+              valueStyle={{ color: '#1890ff' }}
+            />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card>
+            <Statistic
+              title="Изменение к предыдущему периоду"
+              value={15.3}
+              prefix={<ArrowUpOutlined />}
+              suffix="%"
+              valueStyle={{ color: '#3f8600' }}
+            />
+          </Card>
+        </Col>
+      </Row>
 
-              {/* Таблица вместо графика */}
-              <Card title="Данные оборота" extra={
-                <Space>
-                  <Button
-                    type={viewMode === 'daily' ? 'primary' : 'default'}
-                    onClick={() => setViewMode('daily')}
-                    size="small"
-                  >
-                    По дням
-                  </Button>
-                  <Button
-                    type={viewMode === 'weekly' ? 'primary' : 'default'}
-                    onClick={() => setViewMode('weekly')}
-                    size="small"
-                  >
-                    По неделям
-                  </Button>
-                </Space>
-              }>
-                <Table
-                  columns={columns}
-                  dataSource={chartData}
-                  rowKey="period"
-                  pagination={{ pageSize: 10 }}
-                  summary={(pageData) => {
-                    const total = pageData.reduce((sum, record) => sum + record.amount, 0);
-                    return (
-                      <Table.Summary fixed>
-                        <Table.Summary.Row>
-                          <Table.Summary.Cell index={0}>
-                            <strong>Итого:</strong>
-                          </Table.Summary.Cell>
-                          <Table.Summary.Cell index={1}>
-                            <strong>{formatCurrency(total)}</strong>
-                          </Table.Summary.Cell>
-                        </Table.Summary.Row>
-                      </Table.Summary>
-                    );
-                  }}
-                />
-                <div style={{ marginTop: 16, padding: 16, background: '#f0f2f5', borderRadius: 8 }}>
-                  <Typography.Text type="secondary">
-                    💡 Для отображения графиков установите библиотеку recharts: <code>npm install recharts</code>
-                  </Typography.Text>
-                </div>
-              </Card>
-            </>
-          )}
-        </Spin>
+      <Card title="Динамика оборота">
+        <div style={{ width: '100%', height: 400 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={turnoverData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
+              <Legend />
+              <Line type="monotone" dataKey="amount" stroke="#1890ff" name="Оборот" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </Card>
     </div>
   );
