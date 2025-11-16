@@ -123,8 +123,8 @@ const NetProfit: React.FC = () => {
               <YAxis />
               <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
               <Legend />
-              <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.3} name="Прибыль" />
-              <Area type="monotone" dataKey="expenses" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.3} name="Расходы" />
+              <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Прибыль" />
+              <Area type="monotone" dataKey="expenses" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

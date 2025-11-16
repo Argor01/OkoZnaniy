@@ -6,7 +6,6 @@ import {
   Button,
   Space,
   Spin,
-  message,
   Typography,
   Tag,
   Row,
@@ -16,10 +15,23 @@ import {
 import { CalendarOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { getAllPartnersTurnover, type PartnerTurnoverResponse } from '../../api/directorApi';
+import { getAllPartnersTurnover } from '../../api/directorApi';
 import type { ColumnsType } from 'antd/es/table';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 const PartnerTurnover: React.FC = () => {
@@ -28,9 +40,6 @@ const PartnerTurnover: React.FC = () => {
   const { data: turnoverData, isLoading } = useQuery({
     queryKey: ['director-partner-turnover', selectedMonth],
     queryFn: () => getAllPartnersTurnover(selectedMonth),
-    onError: (error: any) => {
-      message.error('Ошибка при загрузке данных оборота партнёров');
-    },
   });
 
   const handleMonthChange = (month: string) => {
@@ -56,13 +65,13 @@ const PartnerTurnover: React.FC = () => {
 
   const totalTurnover = useMemo(() => {
     if (!turnoverData?.partners) return 0;
-    return turnoverData.partners.reduce((sum, p) => sum + (p.turnover || 0), 0);
+    return turnoverData.partners.reduce((sum: number, p: any) => sum + (p.turnover || 0), 0);
   }, [turnoverData]);
 
   const topPartners = useMemo(() => {
     if (!turnoverData?.partners) return [];
     return [...turnoverData.partners]
-      .sort((a, b) => (b.turnover || 0) - (a.turnover || 0))
+      .sort((a: any, b: any) => (b.turnover || 0) - (a.turnover || 0))
       .slice(0, 5);
   }, [turnoverData]);
 
@@ -171,7 +180,7 @@ const PartnerTurnover: React.FC = () => {
                 <Card>
                   <Statistic
                     title="Общая комиссия"
-                    value={turnoverData.partners?.reduce((sum, p) => sum + (p.commission || 0), 0) || 0}
+                    value={turnoverData.partners?.reduce((sum: number, p: any) => sum + (p.commission || 0), 0) || 0}
                     prefix="₽"
                     precision={2}
                     valueStyle={{ color: '#3f8600' }}
@@ -189,9 +198,64 @@ const PartnerTurnover: React.FC = () => {
               </Col>
             </Row>
 
+            {/* Графики */}
+            {topPartners.length > 0 && (
+              <Row gutter={16} style={{ marginBottom: 16 }}>
+                <Col span={12}>
+                  <Card title="Топ-5 партнёров по обороту">
+                    <div style={{ width: '100%', height: 300 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={topPartners.map((p) => ({
+                          name: `${p.firstName || p.first_name || ''} ${(p.lastName || p.last_name || '').charAt(0)}.`,
+                          turnover: p.turnover || 0,
+                          commission: p.commission || 0,
+                        }))}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                          <Legend />
+                          <Bar dataKey="turnover" fill="#1890ff" name="Оборот" />
+                          <Bar dataKey="commission" fill="#52c41a" name="Комиссия" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </Card>
+                </Col>
+                <Col span={12}>
+                  <Card title="Распределение оборота">
+                    <div style={{ width: '100%', height: 300 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={topPartners.map((p) => ({
+                              name: `${p.firstName || p.first_name || ''} ${(p.lastName || p.last_name || '').charAt(0)}.`,
+                              value: p.turnover || 0,
+                            }))}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {topPartners.map((_: any, idx: number) => (
+                              <Cell key={`cell-${idx}`} fill={['#1890ff', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96'][idx]} />
+                            ))}
+                          </Pie>
+                          <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </Card>
+                </Col>
+              </Row>
+            )}
+
             {/* Топ-5 партнёров */}
             {topPartners.length > 0 && (
-              <Card title="Топ-5 партнёров по обороту" style={{ marginBottom: 16 }}>
+              <Card title="Детали топ-5 партнёров" style={{ marginBottom: 16 }}>
                 <Space direction="vertical" style={{ width: '100%' }}>
                   {topPartners.map((partner, index) => {
                     const percentage = totalTurnover > 0 ? ((partner.turnover || 0) / totalTurnover) * 100 : 0;
@@ -264,12 +328,7 @@ const PartnerTurnover: React.FC = () => {
               />
             </Card>
 
-            {/* Информационное сообщение */}
-            <div style={{ marginTop: 16, padding: 16, background: '#f0f2f5', borderRadius: 8 }}>
-              <Typography.Text type="secondary">
-                💡 Для отображения графиков установите библиотеку recharts: <code>npm install recharts</code>
-              </Typography.Text>
-            </div>
+
           </>
         )}
       </Spin>
