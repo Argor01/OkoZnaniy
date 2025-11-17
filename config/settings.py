@@ -110,19 +110,11 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         },
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_SECRET_KEY') or os.getenv('GOOGLE_CLIENT_SECRET'),
-        }
     },
     'vk': {
         'SCOPE': [
             'email',
         ],
-        'APP': {
-            'client_id': os.getenv('VK_CLIENT_ID'),
-            'secret': os.getenv('VK_SECRET_KEY') or os.getenv('VK_CLIENT_SECRET'),
-        }
     }
 }
 
