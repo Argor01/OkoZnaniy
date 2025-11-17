@@ -16,6 +16,8 @@ services:
       - DEBUG=${DEBUG:-False}
       - DJANGO_ENV=${DJANGO_ENV:-production}
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
+      - FRONTEND_URL=http://localhost:3000
+      - LOGIN_REDIRECT_URL=http://localhost:3000/dashboard
     volumes:
       - static_files:/app/static
       - media_files:/app/media

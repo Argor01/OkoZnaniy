@@ -109,6 +109,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
+            'prompt': 'consent',
         },
         'APP': {
             'client_id': os.getenv('GOOGLE_CLIENT_ID'),
