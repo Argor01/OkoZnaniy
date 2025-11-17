@@ -27,6 +27,14 @@ class User(AbstractUser):
     portfolio_url = models.URLField(blank=True, null=True, verbose_name="Портфолио")
     is_verified = models.BooleanField(default=False, verbose_name="Верифицирован")
     
+    # Поля анкеты эксперта
+    has_submitted_application = models.BooleanField(default=False, verbose_name="Анкета подана")
+    application_approved = models.BooleanField(default=False, verbose_name="Анкета одобрена")
+    application_submitted_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата подачи анкеты")
+    application_reviewed_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='reviewed_applications', verbose_name="Кто рассмотрел анкету")
+    application_reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата рассмотрения анкеты")
+    application_notes = models.TextField(blank=True, null=True, verbose_name="Заметки по анкете")
+    
     # Поля партнерской системы
     referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Реферальный код")
     partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5.00, verbose_name="Процент партнера (%)")

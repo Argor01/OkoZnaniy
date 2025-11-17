@@ -19,13 +19,25 @@ from apps.orders.serializers import OrderSerializer, TransactionSerializer
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     PasswordResetSerializer, PasswordResetConfirmSerializer,
-    CustomTokenObtainPairSerializer
+    CustomTokenObtainPairSerializer, ExpertApplicationSerializer
 )
 
 User = get_user_model()
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    
+    def post(self, request, *args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        try:
+            logger.info(f"[Token View] Login request received: {request.data}")
+            print(f"[Token View] Login request received: {request.data}")
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"[Token View] Error in post: {str(e)}")
+            print(f"[Token View] Error in post: {str(e)}")
+            raise
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserViewSet(viewsets.ModelViewSet):
@@ -450,3 +462,47 @@ class UserViewSet(viewsets.ModelViewSet):
         arbitrators = User.objects.filter(role='arbitrator').order_by('username')
         serializer = self.get_serializer(arbitrators, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def submit_expert_application(self, request):
+        """Подача анкеты экспертом"""
+        user = request.user
+        if user.role != 'expert':
+            return Response(
+                {'error': 'Доступно только для экспертов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if user.has_submitted_application:
+            return Response(
+                {'error': 'Анкета уже подана'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        from django.utils import timezone
+        
+        serializer = ExpertApplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            # Обновляем данные профиля эксперта
+            user.first_name = serializer.validated_data['first_name']
+            user.last_name = serializer.validated_data['last_name']
+            user.bio = serializer.validated_data['bio']
+            user.experience_years = serializer.validated_data['experience_years']
+            user.education = serializer.validated_data['education']
+            if 'skills' in serializer.validated_data:
+                user.skills = serializer.validated_data['skills']
+            if 'portfolio_url' in serializer.validated_data:
+                user.portfolio_url = serializer.validated_data['portfolio_url']
+            
+            # Помечаем анкету как поданную
+            user.has_submitted_application = True
+            user.application_submitted_at = timezone.now()
+            user.save()
+            
+            # Возвращаем обновленный профиль
+            return Response(
+                UserSerializer(user).data,
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

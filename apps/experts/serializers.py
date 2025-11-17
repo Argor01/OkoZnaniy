@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating
+from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
 from apps.users.serializers import UserSerializer
 from apps.catalog.serializers import SubjectSerializer
 from apps.catalog.models import Subject
@@ -135,3 +135,37 @@ class ExpertMatchSerializer(serializers.ModelSerializer):
     def get_availability(self, obj):
         from .services import ExpertMatchingService
         return ExpertMatchingService.get_expert_availability(obj.expert) 
+
+
+class EducationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Education
+        fields = ['id', 'university', 'start_year', 'end_year', 'degree', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class ExpertApplicationSerializer(serializers.ModelSerializer):
+    expert = UserSerializer(read_only=True)
+    educations = EducationSerializer(many=True, read_only=True)
+    status_display = serializers.CharField(
+        source='get_status_display',
+        read_only=True
+    )
+    reviewed_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ExpertApplication
+        fields = [
+            'id', 'expert', 'full_name', 'work_experience_years',
+            'specializations', 'educations',
+            'status', 'status_display', 'rejection_reason',
+            'reviewed_by', 'reviewed_at', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['expert', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'created_at', 'updated_at']
+
+
+class ExpertApplicationCreateSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=255, required=True)
+    work_experience_years = serializers.IntegerField(min_value=0, required=True)
+    specializations = serializers.CharField(required=True, allow_blank=False, help_text="Специальности, которые вы пишете")
+    educations = EducationSerializer(many=True, required=True, min_length=1) 
