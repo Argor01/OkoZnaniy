@@ -36,6 +36,13 @@ async def cmd_start(message: types.Message):
     first_name = message.from_user.first_name or ""
     last_name = message.from_user.last_name or ""
     
+    # Проверяем, есть ли параметр авторизации
+    command_args = message.text.split()
+    auth_id = None
+    if len(command_args) > 1 and command_args[1].startswith('auth_'):
+        auth_id = command_args[1].replace('auth_', '')
+        logger.info(f"Получен запрос на авторизацию с ID: {auth_id}")
+    
     # Ищем или создаем пользователя
     try:
         user = User.objects.get(telegram_id=telegram_id)
@@ -59,7 +66,42 @@ async def cmd_start(message: types.Message):
         created = True
         logger.info(f"Новый пользователь создан: {user.username} (telegram_id: {telegram_id})")
     
-    # Формируем приветственное сообщение
+    # Если это запрос на авторизацию
+    if auth_id:
+        from django.core.cache import cache
+        from rest_framework_simplejwt.tokens import RefreshToken
+        
+        # Генерируем токены
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        
+        # Сохраняем данные авторизации в кеш на 5 минут
+        auth_data = {
+            'authenticated': True,
+            'access': access_token,
+            'refresh': refresh_token,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.role,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        }
+        cache.set(f'telegram_auth_{auth_id}', auth_data, 300)  # 5 минут
+        logger.info(f"Авторизация сохранена для auth_id: {auth_id}")
+        
+        await message.answer(
+            f"✅ Авторизация успешна!\n\n"
+            f"Вы вошли как: {first_name} {last_name}\n"
+            f"Роль: {user.get_role_display()}\n\n"
+            f"Вернитесь на сайт - вы будете автоматически авторизованы!"
+        )
+        return
+    
+    # Обычное приветствие
     if created:
         welcome_text = (
             f"👋 Привет, {first_name}!\n\n"

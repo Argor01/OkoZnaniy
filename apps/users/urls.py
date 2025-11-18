@@ -26,5 +26,6 @@ router.register('', views.UserViewSet)
 urlpatterns = [
     path('token/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
     path('', include(router.urls)),
 ]

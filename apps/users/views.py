@@ -626,3 +626,22 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Telegram Auth Status Check
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from django.core.cache import cache
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def telegram_auth_status(request, auth_id):
+    """Проверка статуса авторизации через Telegram"""
+    auth_data = cache.get(f'telegram_auth_{auth_id}')
+    
+    if auth_data:
+        # Удаляем из кеша после получения
+        cache.delete(f'telegram_auth_{auth_id}')
+        return Response(auth_data, status=status.HTTP_200_OK)
+    
+    return Response({'authenticated': False}, status=status.HTTP_200_OK)
