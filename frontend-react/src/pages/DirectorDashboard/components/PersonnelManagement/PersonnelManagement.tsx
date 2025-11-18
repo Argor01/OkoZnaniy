@@ -14,7 +14,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'registration',
       label: (
         <span>
-          <UserAddOutlined />
+          <UserAddOutlined style={{ marginRight: 8 }} />
           Регистрация сотрудника
         </span>
       ),
@@ -24,7 +24,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'applications',
       label: (
         <span>
-          <FileTextOutlined />
+          <FileTextOutlined style={{ marginRight: 8 }} />
           Анкеты экспертов
         </span>
       ),
@@ -34,7 +34,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <TeamOutlined />
+          <TeamOutlined style={{ marginRight: 8 }} />
           Список сотрудников
         </span>
       ),
@@ -44,7 +44,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'archive',
       label: (
         <span>
-          <InboxOutlined />
+          <InboxOutlined style={{ marginRight: 8 }} />
           Архив
         </span>
       ),
