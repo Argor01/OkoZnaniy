@@ -21,6 +21,8 @@ from .serializers import (
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     CustomTokenObtainPairSerializer, ExpertApplicationSerializer
 )
+from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
+from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
 
 User = get_user_model()
 
@@ -62,8 +64,18 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            
+            # Если указан email, отправляем код подтверждения
+            if user.email:
+                verification_code = create_verification_code(user)
+                send_verification_code(user.email, verification_code.code)
+            
             # Возвращаем сведения о пользователе после регистрации
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+            response_data = UserSerializer(user).data
+            response_data['message'] = 'Регистрация успешна. Код подтверждения отправлен на ваш email.' if user.email else 'Регистрация успешна.'
+            response_data['email_verification_required'] = bool(user.email and not user.email_verified)
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
         # Логируем ошибки валидации для дебага 400 ошибок
         try:
             print("[User Registration] validation errors:", serializer.errors)
@@ -255,6 +267,114 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def verify_email_code(self, request):
+        """
+        Подтверждение email через код
+        
+        Ожидает:
+        {
+            "email": "user@example.com",
+            "code": "123456"
+        }
+        """
+        email = request.data.get('email')
+        code = request.data.get('code')
+        
+        if not email or not code:
+            return Response(
+                {'error': 'Email и код обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        success, message, user = verify_code(email, code)
+        
+        if success:
+            # Генерируем JWT токены
+            tokens = generate_tokens_for_user(user)
+            
+            return Response({
+                'message': message,
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {'error': message},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def resend_verification_code(self, request):
+        """
+        Повторная отправка кода подтверждения
+        
+        Ожидает:
+        {
+            "email": "user@example.com"
+        }
+        """
+        email = request.data.get('email')
+        
+        if not email:
+            return Response(
+                {'error': 'Email обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        success, message = resend_verification_code(email)
+        
+        if success:
+            return Response({'message': message}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def telegram_auth(self, request):
+        """
+        Авторизация через Telegram бота
+        
+        Ожидает данные от Telegram Login Widget:
+        {
+            "id": 123456789,
+            "first_name": "John",
+            "last_name": "Doe",
+            "username": "johndoe",
+            "photo_url": "https://...",
+            "auth_date": 1234567890,
+            "hash": "abc123..."
+        }
+        """
+        telegram_data = request.data
+        
+        # Проверяем подлинность данных
+        if not verify_telegram_auth(telegram_data):
+            return Response(
+                {'error': 'Неверные данные авторизации Telegram'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Получаем или создаем пользователя
+        try:
+            user = get_or_create_telegram_user(telegram_data)
+            
+            # Генерируем JWT токены
+            tokens = generate_tokens_for_user(user)
+            
+            # Возвращаем токены и данные пользователя
+            return Response({
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Ошибка при авторизации: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def retrieve(self, request, pk=None):
         """Получить данные пользователя по ID (публичный доступ)"""

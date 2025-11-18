@@ -16,6 +16,7 @@ class User(AbstractUser):
     partner = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals', verbose_name="Партнер")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     frozen_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    email_verified = models.BooleanField(default=False, verbose_name="Email подтвержден")
     
     # Поля профиля специалиста
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Аватар")
@@ -78,5 +79,33 @@ class PartnerEarning(models.Model):
     
     def __str__(self):
         return f"{self.partner.username} - {self.amount} ₽ от {self.referral.username}"
+
+
+class EmailVerificationCode(models.Model):
+    """Модель для хранения кодов подтверждения email"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes', verbose_name="Пользователь")
+    email = models.EmailField(verbose_name="Email")
+    code = models.CharField(max_length=6, verbose_name="Код подтверждения")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    expires_at = models.DateTimeField(verbose_name="Срок действия")
+    is_used = models.BooleanField(default=False, verbose_name="Использован")
+    attempts = models.PositiveIntegerField(default=0, verbose_name="Попыток ввода")
+    
+    class Meta:
+        verbose_name = "Код подтверждения email"
+        verbose_name_plural = "Коды подтверждения email"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['email', 'code', 'is_used']),
+            models.Index(fields=['expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.email} - {self.code} ({'использован' if self.is_used else 'активен'})"
+    
+    def is_valid(self):
+        """Проверяет, действителен ли код"""
+        from django.utils import timezone
+        return not self.is_used and self.expires_at > timezone.now() and self.attempts < 3
 
 
