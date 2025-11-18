@@ -96,12 +96,18 @@ def get_or_create_telegram_user(telegram_data):
                 username = f"{base_username}{suffix}"
                 suffix += 1
         
+        # Генерируем email для пользователя Telegram (необязательный)
+        # Используем формат: telegram{telegram_id}@okoznaniy.com
+        email = f"telegram{telegram_id}@okoznaniy.com"
+        
         user = User.objects.create(
             username=username,
+            email=email,  # Генерируем email для совместимости
             telegram_id=telegram_id,
             first_name=telegram_data.get('first_name', ''),
             last_name=telegram_data.get('last_name', ''),
             role='client',  # По умолчанию клиент
+            email_verified=True,  # Telegram пользователи считаются верифицированными
         )
         
         return user

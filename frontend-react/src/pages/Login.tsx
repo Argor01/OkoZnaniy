@@ -5,6 +5,7 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
 import EmailVerificationModal from '../components/auth/EmailVerificationModal';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { ordersApi } from '../api/orders';
 import '../styles/login.css';
 
@@ -125,6 +126,10 @@ const Login: React.FC = () => {
     try {
       const auth = await authApi.login(values);
       message.success('Успешный вход!');
+      
+      // Закрываем модалку подтверждения если она была открыта
+      setVerificationModalVisible(false);
+      
       const role = auth?.user?.role;
       if (role === 'client') {
         await redirectClient();
@@ -161,10 +166,22 @@ const Login: React.FC = () => {
       console.log('Sending registration data:', cleanValues);
       
       await authApi.register(cleanValues);
-      message.success('Регистрация успешна! Мы отправили вам код на email.');
-      setVerificationEmail(values.email);
-      setVerificationCode('');
-      setVerificationModalVisible(true);
+      
+      // Показываем модалку подтверждения только если указан email
+      if (values.email) {
+        message.success('Регистрация успешна! Мы отправили вам код на email.');
+        setVerificationEmail(values.email);
+        setVerificationCode('');
+        setVerificationModalVisible(true);
+      } else {
+        // Если email не указан, просто входим
+        message.success('Регистрация успешна!');
+        const loginData = {
+          username: values.phone || values.email,
+          password: values.password,
+        } as LoginRequest;
+        await onLogin(loginData);
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       const errorData = error?.response?.data;
@@ -257,6 +274,30 @@ const Login: React.FC = () => {
     }
   };
 
+  // Обработчик успешной авторизации через Telegram
+  const handleTelegramAuth = async (user: any) => {
+    message.success('Успешный вход через Telegram!');
+    const role = user?.role;
+    if (role === 'client') {
+      await redirectClient();
+    } else if (role === 'expert') {
+      navigate('/expert');
+    } else if (role === 'partner') {
+      navigate('/partner');
+    } else if (role === 'admin') {
+      navigate('/admin');
+    } else if (role === 'arbitrator') {
+      navigate('/arbitrator');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  // Обработчик ошибки авторизации через Telegram
+  const handleTelegramError = (error: string) => {
+    message.error(`Ошибка авторизации через Telegram: ${error}`);
+  };
+
   const loginFormComponent = (
     <Form form={loginForm} onFinish={onLogin} layout="vertical">
       <Form.Item
@@ -289,29 +330,10 @@ const Login: React.FC = () => {
         </Button>
       </Form.Item>
       <Form.Item>
-        <div className="panel-footer">
-          <div style={{ textAlign: 'center', marginBottom: '10px' }}>или войти через</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
-            <a href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
-            </a>
-            {(() => {
-              const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
-              const googleHref = `/auth/google`;
-              const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
-              return (
-                <>
-                  <a href={googleHref} aria-label="Google">
-                    <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
-                  </a>
-                  <a href={vkHref} aria-label="VK">
-                    <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
-                  </a>
-                </>
-              );
-            })()}
-          </div>
-        </div>
+        <SocialLoginButtons
+          onTelegramAuth={handleTelegramAuth}
+          onTelegramError={handleTelegramError}
+        />
       </Form.Item>
       
     </Form>
@@ -397,29 +419,10 @@ const Login: React.FC = () => {
         </Button>
       </Form.Item>
       <Form.Item>
-        <div className="panel-footer">
-          <div style={{ textAlign: 'center', marginBottom: '10px' }}>или войти через</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
-            <a href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" style={{ width: '32px', height: '32px' }} />
-            </a>
-            {(() => {
-              const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
-              const googleHref = `/auth/google`;
-              const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
-              return (
-                <>
-                  <a href={googleHref} aria-label="Google">
-                    <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
-                  </a>
-                  <a href={vkHref} aria-label="VK">
-                    <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
-                  </a>
-                </>
-              );
-            })()}
-          </div>
-        </div>
+        <SocialLoginButtons
+          onTelegramAuth={handleTelegramAuth}
+          onTelegramError={handleTelegramError}
+        />
       </Form.Item>
     </Form>
   );

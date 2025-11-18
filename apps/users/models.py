@@ -10,6 +10,9 @@ class Roles(models.TextChoices):
     PARTNER = 'partner'
 
 class User(AbstractUser):
+    # Переопределяем email чтобы сделать необязательным
+    email = models.EmailField(blank=True, null=True, verbose_name="Email")
+    
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CLIENT)
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
     telegram_id = models.BigIntegerField(null=True, blank=True)

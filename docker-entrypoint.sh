@@ -1,21 +1,21 @@
 #!/bin/sh
 
-# Ожидание готовности базы данных
+# РћР¶РёРґР°РЅРёРµ РіРѕС‚РѕРІРЅРѕСЃС‚Рё Р±Р°Р·С‹ РґР°РЅРЅС‹С…
 echo "Waiting for database..."
 while ! nc -z postgres 5432; do
   sleep 0.1
 done
 echo "Database is ready!"
 
-# Выполнение миграций
+# Р’С‹РїРѕР»РЅРµРЅРёРµ РјРёРіСЂР°С†РёР№
 echo "Running migrations..."
 python manage.py migrate --noinput
 
-# Сбор статических файлов
+# РЎР±РѕСЂ СЃС‚Р°С‚РёС‡РµСЃРєРёС… С„Р°Р№Р»РѕРІ
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Создание суперпользователя если не существует
+# РЎРѕР·РґР°РЅРёРµ СЃСѓРїРµСЂРїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
 echo "Creating superuser if not exists..."
 python manage.py shell -c "
 from django.contrib.auth import get_user_model
@@ -27,7 +27,7 @@ else:
     print('Superuser already exists')
 "
 
-# Запуск приложения
+# Р—Р°РїСѓСЃРє РїСЂРёР»РѕР¶РµРЅРёСЏ
 if [ "$DJANGO_ENV" = "development" ]; then
     echo "Starting development server..."
     python manage.py runserver 0.0.0.0:8000

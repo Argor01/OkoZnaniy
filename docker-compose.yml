@@ -12,10 +12,21 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG:-False}
       - DJANGO_ENV=${DJANGO_ENV:-production}
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
+      - FRONTEND_URL=http://localhost:3000
+      - LOGIN_REDIRECT_URL=http://localhost:3000/dashboard
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - EMAIL_HOST=smtp.yandex.ru
+      - EMAIL_PORT=587
+      - EMAIL_USE_TLS=True
+      - EMAIL_HOST_USER=YanBrait@yandex.ru
+      - EMAIL_HOST_PASSWORD=tvfibdueaqwoipxn
+      - DEFAULT_FROM_EMAIL=YanBrait@yandex.ru
     volumes:
       - static_files:/app/static
       - media_files:/app/media
@@ -75,7 +86,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG:-False}
     volumes:
       - .:/app

@@ -35,25 +35,34 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log('[TelegramLoginButton] Initializing with botName:', botName);
+    
     // Создаем глобальную функцию для callback
     (window as any).onTelegramAuth = async (user: TelegramUser) => {
+      console.log('[TelegramLoginButton] Telegram auth callback received:', user);
+      
       try {
+        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/users/telegram_auth/`;
+        console.log('[TelegramLoginButton] Sending request to:', apiUrl);
+        
         // Отправляем данные на бэкенд для проверки
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/users/telegram_auth/`,
-          user
-        );
+        const response = await axios.post(apiUrl, user);
+        
+        console.log('[TelegramLoginButton] Backend response:', response.data);
 
         // Сохраняем токены
         const { access, refresh, user: userData } = response.data;
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         localStorage.setItem('user', JSON.stringify(userData));
+        
+        console.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
 
         // Вызываем callback
         onAuth(userData);
       } catch (error: any) {
-        console.error('Telegram auth error:', error);
+        console.error('[TelegramLoginButton] Telegram auth error:', error);
+        console.error('[TelegramLoginButton] Error response:', error.response?.data);
         const errorMessage = error.response?.data?.error || 'Ошибка авторизации через Telegram';
         if (onError) {
           onError(errorMessage);
@@ -74,11 +83,20 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
     script.setAttribute('data-lang', lang);
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.async = true;
+    
+    script.onload = () => {
+      console.log('[TelegramLoginButton] Telegram widget script loaded successfully');
+    };
+    
+    script.onerror = (error) => {
+      console.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
+    };
 
     // Добавляем скрипт в контейнер
     if (containerRef.current) {
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(script);
+      console.log('[TelegramLoginButton] Widget script added to DOM');
     }
 
     // Cleanup
