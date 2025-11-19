@@ -219,28 +219,24 @@ const Login: React.FC = () => {
     }
     setVerificationLoading(true);
     try {
-      await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
-      message.success('Email подтвержден! Выполняем вход...');
-      const loginData = {
-        username: verificationEmail,
-        password: registerForm.getFieldValue('password') as string,
-      } as LoginRequest;
-      try {
-        const auth = await authApi.login(loginData);
-        const role = auth?.user?.role;
-        if (role === 'client') {
-          await redirectClient();
-        } else if (role === 'expert') {
-          navigate('/expert');
-        } else if (role === 'partner') {
-          navigate('/partner');
-        } else {
-          navigate('/dashboard');
-        }
-      } catch (loginError) {
-        message.warning('Подтверждение прошло, но не удалось войти автоматически. Войдите вручную.');
-      }
+      // verifyEmailCode уже возвращает токены и сохраняет их
+      const auth = await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
+      message.success('Email подтвержден! Вход выполнен.');
+      
+      // Токены уже сохранены в authApi.verifyEmailCode
+      const role = auth?.user?.role;
       setVerificationModalVisible(false);
+      
+      // Перенаправляем в зависимости от роли
+      if (role === 'client') {
+        await redirectClient();
+      } else if (role === 'expert') {
+        navigate('/expert');
+      } else if (role === 'partner') {
+        navigate('/partner');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
     } finally {
