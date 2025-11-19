@@ -145,7 +145,17 @@ const Login: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      message.error(error.response?.data?.detail || 'Ошибка входа');
+      const errorData = error.response?.data;
+      const errorMessage = errorData?.detail || errorData?.non_field_errors?.[0] || 'Ошибка входа';
+      
+      message.error(errorMessage);
+      
+      // Если ошибка связана с неверными учетными данными, предлагаем сброс пароля
+      if (errorMessage.includes('учетные данные') || errorMessage.includes('credentials')) {
+        setTimeout(() => {
+          message.info('Забыли пароль? Используйте функцию "Забыли пароль?" ниже');
+        }, 1000);
+      }
     } finally {
       setLoading(false);
     }
