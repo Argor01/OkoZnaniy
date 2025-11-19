@@ -105,9 +105,14 @@ async def cmd_start(message: types.Message):
     # Проверяем, есть ли параметр авторизации
     command_args = message.text.split()
     auth_id = None
-    if len(command_args) > 1 and command_args[1].startswith('auth_'):
-        auth_id = command_args[1].replace('auth_', '')
-        logger.info(f"Получен запрос на авторизацию с ID: {auth_id}")
+    if len(command_args) > 1:
+        raw_param = command_args[1]
+        logger.info(f"📥 Получен параметр: {raw_param}")
+        if raw_param.startswith('auth_'):
+            auth_id = raw_param.replace('auth_', '')
+            logger.info(f"✅ Получен запрос на авторизацию с ID: {auth_id}")
+        else:
+            logger.warning(f"⚠️ Параметр не начинается с 'auth_': {raw_param}")
     
     # Получаем или создаем пользователя
     user, created = await get_or_create_user(telegram_id, username, first_name, last_name)

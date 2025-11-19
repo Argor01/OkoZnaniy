@@ -25,8 +25,8 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     e.preventDefault();
     const authId = generateAuthId();
     
-    // Открываем бота с параметром auth_id
-    window.open(`https://t.me/okoznaniybot?start=auth_${authId}`, '_blank');
+    // Открываем бота с параметром auth_id (authId уже содержит префикс auth_)
+    window.open(`https://t.me/okoznaniybot?start=${authId}`, '_blank');
     
     // Начинаем проверять статус авторизации
     checkAuthStatus(authId);
