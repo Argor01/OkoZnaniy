@@ -55,7 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'reset_password', 'reset_password_confirm']:
+        if self.action in ['create', 'request_password_reset', 'reset_password_with_code']:
             return [permissions.AllowAny()]
         if self.action == 'retrieve':
             return [permissions.AllowAny()]  # Публичный доступ к профилям
@@ -108,71 +108,6 @@ class UserViewSet(viewsets.ModelViewSet):
             print("[User Registration] validation errors:", serializer.errors)
         except Exception:
             pass
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['post'])
-    def reset_password(self, request):
-        serializer = PasswordResetSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            try:
-                user = User.objects.get(email=email)
-                token = default_token_generator.make_token(user)
-                uid = urlsafe_base64_encode(force_bytes(user.pk))
-                
-                # Формируем ссылку для сброса пароля
-                reset_url = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}/"
-                
-                # Отправляем email
-                context = {
-                    'user': user,
-                    'reset_url': reset_url
-                }
-                message = render_to_string('users/password_reset_email.html', context)
-                send_mail(
-                    'Сброс пароля',
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
-                
-                return Response(
-                    {"detail": "Инструкции по сбросу пароля отправлены на email."},
-                    status=status.HTTP_200_OK
-                )
-            except User.DoesNotExist:
-                pass
-            
-            return Response(
-                {"detail": "Если указанный email существует, инструкции по сбросу пароля будут отправлены."},
-                status=status.HTTP_200_OK
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['post'])
-    def reset_password_confirm(self, request):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                uid = force_str(urlsafe_base64_decode(serializer.validated_data['uid']))
-                user = User.objects.get(pk=uid)
-                
-                if default_token_generator.check_token(user, serializer.validated_data['token']):
-                    user.set_password(serializer.validated_data['new_password'])
-                    user.save()
-                    return Response(
-                        {"detail": "Пароль успешно изменен."},
-                        status=status.HTTP_200_OK
-                    )
-                
-            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-                pass
-            
-            return Response(
-                {"detail": "Неверная ссылка для сброса пароля."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])

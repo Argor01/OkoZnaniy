@@ -274,22 +274,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const onForgotPassword = async () => {
-    const email = loginForm.getFieldValue('username');
-    if (!email) {
-      message.warning('Введите email в поле Email');
-      return;
-    }
-    try {
-      const res = await authApi.resetPassword(email);
-      const detail = res?.detail || 'Инструкции по сбросу пароля отправлены на email.';
-      message.success(detail);
-    } catch (error: any) {
-      const detail = error?.response?.data?.detail || 'Не удалось отправить инструкции для сброса пароля';
-      message.error(detail);
-    }
-  };
-
   // Обработчик успешной авторизации через Telegram
   const handleTelegramAuth = async (user: any) => {
     message.success('Успешный вход через Telegram!');
