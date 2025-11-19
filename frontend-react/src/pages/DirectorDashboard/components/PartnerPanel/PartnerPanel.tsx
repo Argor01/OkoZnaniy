@@ -1,10 +1,8 @@
 import React from 'react';
-import { Card, Tabs, Typography, Alert } from 'antd';
+import { Card, Tabs, Alert } from 'antd';
 import { UserAddOutlined, DollarOutlined, ExperimentOutlined } from '@ant-design/icons';
 import PartnerList from './PartnerList';
 import PartnerTurnover from './PartnerTurnover';
-
-const { Title } = Typography;
 
 const PartnerPanel: React.FC = () => {
   const items = [
@@ -12,7 +10,7 @@ const PartnerPanel: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <UserAddOutlined />
+          <UserAddOutlined style={{ marginRight: 8 }} />
           Список партнёров
         </span>
       ),
@@ -22,7 +20,7 @@ const PartnerPanel: React.FC = () => {
       key: 'turnover',
       label: (
         <span>
-          <DollarOutlined />
+          <DollarOutlined style={{ marginRight: 8 }} />
           Оборот по партнёрам
         </span>
       ),
@@ -32,7 +30,6 @@ const PartnerPanel: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Панель партнёров</Title>
       <Alert
         message="Режим тестовых данных"
         description="В данный момент используется режим тестовых данных. Все операции с партнёрами выполняются локально для демонстрации функционала."

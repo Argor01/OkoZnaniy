@@ -1,11 +1,9 @@
 import React from 'react';
-import { Card, Tabs, Typography, Alert } from 'antd';
+import { Card, Tabs, Alert } from 'antd';
 import { DollarOutlined, LineChartOutlined, FileTextOutlined, ExperimentOutlined } from '@ant-design/icons';
 import MonthlyTurnover from './MonthlyTurnover';
 import NetProfit from './NetProfit';
 import IncomeExpenseDetail from './IncomeExpenseDetail';
-
-const { Title } = Typography;
 
 const FinancialStatistics: React.FC = () => {
   const items = [
@@ -13,7 +11,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'turnover',
       label: (
         <span>
-          <DollarOutlined />
+          <DollarOutlined style={{ marginRight: 8 }} />
           Общий оборот
         </span>
       ),
@@ -23,7 +21,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'profit',
       label: (
         <span>
-          <LineChartOutlined />
+          <LineChartOutlined style={{ marginRight: 8 }} />
           Чистая прибыль
         </span>
       ),
@@ -33,7 +31,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'detail',
       label: (
         <span>
-          <FileTextOutlined />
+          <FileTextOutlined style={{ marginRight: 8 }} />
           Доходы и расходы
         </span>
       ),
@@ -43,7 +41,6 @@ const FinancialStatistics: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Финансовая статистика</Title>
       <Alert
         message="Режим тестовых данных"
         description="В данный момент используется режим тестовых данных. Финансовые показатели генерируются динамически для демонстрации функционала."

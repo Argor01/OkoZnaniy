@@ -57,14 +57,13 @@ const EmployeeRegistration: React.FC = () => {
   };
 
   return (
-    <div>
-      <Card>
-        <Title level={4}>Регистрация нового сотрудника</Title>
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <Card style={{ width: '100%', maxWidth: 700 }}>
+        <Title level={4} style={{ textAlign: 'center', marginBottom: 24 }}>Регистрация нового сотрудника</Title>
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          style={{ maxWidth: 600 }}
         >
           <Form.Item
             name="email"

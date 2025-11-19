@@ -47,7 +47,7 @@ const ArbitratorCommunication: React.FC = () => {
       key: 'chat',
       label: (
         <span>
-          <MessageOutlined /> Чат с арбитрами
+          <MessageOutlined style={{ marginRight: 8 }} /> Чат с арбитрами
         </span>
       ),
       children: <ArbitratorChat />,
@@ -56,7 +56,7 @@ const ArbitratorCommunication: React.FC = () => {
       key: 'approvals',
       label: (
         <span>
-          <FileTextOutlined /> Обращения на согласовании ({claims.length})
+          <FileTextOutlined style={{ marginRight: 8 }} /> Обращения на согласовании ({claims.length})
         </span>
       ),
       children: (

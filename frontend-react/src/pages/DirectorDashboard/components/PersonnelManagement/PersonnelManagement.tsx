@@ -14,7 +14,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'registration',
       label: (
         <span>
-          <UserAddOutlined />
+          <UserAddOutlined style={{ marginRight: 8 }} />
           Регистрация сотрудника
         </span>
       ),
@@ -24,7 +24,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'applications',
       label: (
         <span>
-          <FileTextOutlined />
+          <FileTextOutlined style={{ marginRight: 8 }} />
           Анкеты экспертов
         </span>
       ),
@@ -34,7 +34,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <TeamOutlined />
+          <TeamOutlined style={{ marginRight: 8 }} />
           Список сотрудников
         </span>
       ),
@@ -44,7 +44,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'archive',
       label: (
         <span>
-          <InboxOutlined />
+          <InboxOutlined style={{ marginRight: 8 }} />
           Архив
         </span>
       ),
@@ -54,7 +54,6 @@ const PersonnelManagement: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Управление персоналом</Title>
       <Alert
         message="Режим тестовых данных"
         description="В данный момент используется режим тестовых данных. Все операции выполняются локально для демонстрации функционала."
@@ -65,7 +64,18 @@ const PersonnelManagement: React.FC = () => {
         closable
       />
       <Card>
-        <Tabs defaultActiveKey="list" items={items} />
+        <Tabs 
+          defaultActiveKey="list" 
+          items={items}
+          size="large"
+          style={{ 
+            fontSize: '16px'
+          }}
+          tabBarStyle={{
+            fontSize: '16px',
+            fontWeight: 500
+          }}
+        />
       </Card>
     </div>
   );

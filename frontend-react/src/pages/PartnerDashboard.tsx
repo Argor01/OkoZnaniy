@@ -171,7 +171,7 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
       render: (username: string, record: Referral) => (
         <div>
           <div><strong>{username}</strong></div>
-          <div style={{ fontSize: '12px', color: '#666' }}>{record.email}</div>
+          <div style={{ fontSize: '14px', color: '#666' }}>{record.email}</div>
         </div>
       ),
     },
@@ -200,14 +200,31 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
   ];
 
   return (
-    <Card title="Мои рефералы">
+    <Card>
       <Table
         columns={referralsColumns}
         dataSource={referrals}
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет рефералов' }}
+        style={{ fontSize: '16px' }}
+        className="large-table"
       />
+      <style>{`
+        .large-table .ant-table {
+          font-size: 16px;
+        }
+        .large-table .ant-table-thead > tr > th {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .large-table .ant-table-tbody > tr > td {
+          font-size: 16px;
+        }
+        .large-table .ant-tag {
+          font-size: 14px;
+        }
+      `}</style>
     </Card>
   );
 };
@@ -264,14 +281,31 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   ];
 
   return (
-    <Card title="История начислений">
+    <Card>
       <Table
         columns={earningsColumns}
         dataSource={earnings}
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет начислений' }}
+        style={{ fontSize: '16px' }}
+        className="large-table"
       />
+      <style>{`
+        .large-table .ant-table {
+          font-size: 16px;
+        }
+        .large-table .ant-table-thead > tr > th {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .large-table .ant-table-tbody > tr > td {
+          font-size: 16px;
+        }
+        .large-table .ant-tag {
+          font-size: 14px;
+        }
+      `}</style>
     </Card>
   );
 };
@@ -301,7 +335,6 @@ const PartnerDashboard: React.FC = () => {
       label: 'Статистика',
       component: (
         <div>
-          <Title level={3}>Статистика</Title>
           <StatisticsPanel data={data} />
           <ReferralProgram data={data} />
         </div>
@@ -311,23 +344,13 @@ const PartnerDashboard: React.FC = () => {
       key: 'referrals',
       icon: <TeamOutlined />,
       label: 'Мои рефералы',
-      component: (
-        <div>
-          <Title level={3}>Мои рефералы</Title>
-          <ReferralsList data={data} />
-        </div>
-      ),
+      component: <ReferralsList data={data} />,
     },
     {
       key: 'earnings',
       icon: <FileTextOutlined />,
       label: 'История начислений',
-      component: (
-        <div>
-          <Title level={3}>История начислений</Title>
-          <EarningsHistory data={data} />
-        </div>
-      ),
+      component: <EarningsHistory data={data} />,
     },
   ] : [];
 
@@ -446,7 +469,6 @@ const PartnerDashboard: React.FC = () => {
           style={{
             margin: '24px',
             padding: '24px',
-            background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
           }}
