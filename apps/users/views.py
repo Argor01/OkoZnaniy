@@ -640,8 +640,8 @@ def telegram_auth_status(request, auth_id):
     auth_data = cache.get(f'telegram_auth_{auth_id}')
     
     if auth_data:
-        # Удаляем из кеша после получения
-        cache.delete(f'telegram_auth_{auth_id}')
+        # НЕ удаляем сразу - пусть истечет через 5 минут
+        # Это позволяет фронту получить данные даже если первый запрос не сработал
         return Response(auth_data, status=status.HTTP_200_OK)
     
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
