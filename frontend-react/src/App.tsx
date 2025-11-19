@@ -19,7 +19,6 @@ import './styles/components.css';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
-import PasswordReset from './pages/PasswordReset';
 import CreateOrder from './pages/CreateOrder';
 import ClientDashboard from './pages/ClientDashboard';
 import ExpertDashboard from './pages/ExpertDashboard';
@@ -58,7 +57,6 @@ const App: React.FC = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/auth/google/callback" element={<GoogleCallback />} />
-              <Route path="/password-reset" element={<PasswordReset />} />
               <Route 
                 path="/create-order" 
                 element={

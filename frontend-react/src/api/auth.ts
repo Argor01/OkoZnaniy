@@ -107,17 +107,30 @@ export const authApi = {
     return response.data;
   },
 
-  // Подтверждение сброса пароля по ссылке из письма
-  resetPasswordConfirm: async (
-    uid: string,
-    token: string,
+  // Запрос кода для сброса пароля
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/users/request_password_reset/', { email });
+    return response.data;
+  },
+
+  // Сброс пароля с помощью кода
+  resetPasswordWithCode: async (
+    email: string,
+    code: string,
     new_password: string
-  ): Promise<{ detail: string }> => {
-    const response = await apiClient.post('/users/reset_password_confirm/', {
-      uid,
-      token,
+  ): Promise<AuthResponse> => {
+    const response = await apiClient.post('/users/reset_password_with_code/', {
+      email,
+      code,
       new_password,
     });
+    const { access, refresh } = response.data;
+    
+    // Сохраняем токены
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+    
     return response.data;
   },
 };

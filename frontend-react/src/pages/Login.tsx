@@ -48,6 +48,15 @@ const Login: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
 
+  // Модалка восстановления пароля
+  const [passwordResetModalVisible, setPasswordResetModalVisible] = useState(false);
+  const [resetStep, setResetStep] = useState<'email' | 'code'>('email');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState(['', '', '', '', '', '']);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
   // Плейсхолдеры с анимацией
   const loginUsernamePh = useTypewriter('Email', 35, 100);
   const loginPasswordPh = useTypewriter('Пароль', 35, 250);
@@ -274,6 +283,77 @@ const Login: React.FC = () => {
     }
   };
 
+  // Функции восстановления пароля
+  const handleRequestPasswordReset = async () => {
+    if (!resetEmail) {
+      message.error('Введите email');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await authApi.requestPasswordReset(resetEmail);
+      message.success('Код отправлен на ваш email');
+      setResetStep('code');
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || 'Ошибка отправки кода');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleResetCodeChange = (index: number, value: string) => {
+    if (value && !/^\d$/.test(value)) return;
+    const newCode = [...resetCode];
+    newCode[index] = value;
+    setResetCode(newCode);
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`reset-code-${index + 1}`);
+      if (nextInput) (nextInput as HTMLInputElement).focus();
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword !== confirmPassword) {
+      message.error('Пароли не совпадают');
+      return;
+    }
+    if (newPassword.length < 8) {
+      message.error('Пароль должен содержать минимум 8 символов');
+      return;
+    }
+    const codeString = resetCode.join('');
+    if (codeString.length !== 6) {
+      message.error('Введите 6-значный код');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const response = await authApi.resetPasswordWithCode(resetEmail, codeString, newPassword);
+      message.success('Пароль успешно изменен!');
+      setPasswordResetModalVisible(false);
+      // Сбрасываем состояние
+      setResetStep('email');
+      setResetEmail('');
+      setResetCode(['', '', '', '', '', '']);
+      setNewPassword('');
+      setConfirmPassword('');
+      // Перенаправляем
+      const role = response?.user?.role;
+      if (role === 'client') {
+        await redirectClient();
+      } else if (role === 'expert') {
+        navigate('/expert');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
+      setResetCode(['', '', '', '', '', '']);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   // Обработчик успешной авторизации через Telegram
   const handleTelegramAuth = async (user: any) => {
     message.success('Успешный вход через Telegram!');
@@ -312,9 +392,14 @@ const Login: React.FC = () => {
         name="password"
         rules={[{ required: true, message: 'Введите пароль' }]}
         extra={
-          <a href="/password-reset" className="forgot-password-link" style={{ color: '#1890ff' }}>
+          <Button
+            type="link"
+            htmlType="button"
+            className="forgot-password-link"
+            onClick={() => setPasswordResetModalVisible(true)}
+          >
             Забыли пароль?
-          </a>
+          </Button>
         }
       >
         <Input.Password prefix={<LockOutlined />} placeholder={loginPasswordPh || ' '} />
@@ -513,6 +598,90 @@ const Login: React.FC = () => {
               onResend={handleResendCode}
               onCancel={() => setVerificationModalVisible(false)}
             />
+
+            {/* Модальное окно восстановления пароля */}
+            <div className={`modal ${passwordResetModalVisible ? 'show' : ''}`} style={{ display: passwordResetModalVisible ? 'block' : 'none' }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Восстановление пароля</h5>
+                    <button type="button" className="btn-close" onClick={() => {
+                      setPasswordResetModalVisible(false);
+                      setResetStep('email');
+                      setResetEmail('');
+                      setResetCode(['', '', '', '', '', '']);
+                      setNewPassword('');
+                      setConfirmPassword('');
+                    }}></button>
+                  </div>
+                  <div className="modal-body">
+                    {resetStep === 'email' ? (
+                      <div>
+                        <p className="text-muted mb-3">Введите email для получения кода восстановления</p>
+                        <Input
+                          prefix={<MailOutlined />}
+                          placeholder="Email"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          onPressEnter={handleRequestPasswordReset}
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-muted mb-3">Введите 6-значный код из email и новый пароль</p>
+                        <div className="d-flex justify-content-center gap-2 mb-3">
+                          {resetCode.map((digit, index) => (
+                            <input
+                              key={index}
+                              id={`reset-code-${index}`}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => handleResetCodeChange(index, e.target.value)}
+                              disabled={resetLoading}
+                              className="form-control text-center"
+                              style={{ width: '45px', height: '50px', fontSize: '24px', fontWeight: 'bold' }}
+                            />
+                          ))}
+                        </div>
+                        <Input.Password
+                          prefix={<LockOutlined />}
+                          placeholder="Новый пароль (минимум 8 символов)"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="mb-2"
+                        />
+                        <Input.Password
+                          prefix={<LockOutlined />}
+                          placeholder="Подтвердите пароль"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onPressEnter={handleResetPassword}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="modal-footer">
+                    {resetStep === 'email' ? (
+                      <Button type="primary" loading={resetLoading} onClick={handleRequestPasswordReset} block>
+                        Отправить код
+                      </Button>
+                    ) : (
+                      <>
+                        <Button onClick={() => setResetStep('email')}>
+                          ← Назад
+                        </Button>
+                        <Button type="primary" loading={resetLoading} onClick={handleResetPassword}>
+                          Сбросить пароль
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {passwordResetModalVisible && <div className="modal-backdrop fade show"></div>}
           </div>
         </div>
       </div>
