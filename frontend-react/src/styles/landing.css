@@ -1145,7 +1145,12 @@ img {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
-    padding: 80px 0 0;
+    padding: 80px 0 60px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__wrapper {
+    padding: 60px 0 80px;
   }
 }
 .only-pro__teacher {
@@ -1181,13 +1186,15 @@ img {
         -ms-flex-order: 1;
             order: 1;
     margin-top: -54px;
+    margin-bottom: 0;
     width: 100%;
     aspect-ratio: auto;
   }
 }
-@media (max-width: 1024px) and (max-width: 576px) {
+@media (max-width: 576px) {
   .only-pro__teacher {
     margin-top: -40px;
+    margin-bottom: 0;
   }
 }
 .only-pro__teacher-image {
@@ -1234,6 +1241,12 @@ img {
     -webkit-box-ordinal-group: 1;
         -ms-flex-order: 0;
             order: 0;
+    padding-bottom: 20px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__main {
+    padding-bottom: 30px;
   }
 }
 .only-pro__title {
@@ -1323,6 +1336,33 @@ img {
   max-width: 100%;
   max-height: 94px;
   height: auto;
+}
+.only-pro__additional-text {
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding: 0 20px;
+  font-family: "Jost", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+@media (max-width: 1024px) {
+  .only-pro__additional-text {
+    margin-top: 25px;
+    padding: 0 15px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__additional-text {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    line-height: 1.4;
+  }
 }
 
 .reviews {

@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const toggleMenu = useCallback(() => setIsMenuOpen((v) => !v), []);
@@ -42,6 +43,8 @@ const Header: React.FC = () => {
     [closeMenu]
   );
 
+  const isHomePage = location.pathname === '/';
+
   return (
     <header className="header">
       <div className="mcontainer">
@@ -66,22 +69,22 @@ const Header: React.FC = () => {
 
               <ul className="header__nav-menu" onClick={onMenuLinkClick}>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#services">Услуги</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#services" : "/#services"}>Услуги</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#orders">Заказы</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#orders" : "/#orders"}>Заказы</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#experts">Эксперты</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#experts" : "/#experts"}>Эксперты</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#shop">Магазин</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#shop" : "/#shop"}>Магазин</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#faq">FAQ</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#faq" : "/#faq"}>FAQ</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#support">Поддержка</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#support" : "/#support"}>Поддержка</a>
                 </li>
                 <li className="header__nav-menu-item">
                   <Link className="header__nav-menu-item-link" to="/become-expert">Стать экспертом</Link>
