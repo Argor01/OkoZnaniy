@@ -40,10 +40,17 @@ const RegisterWithEmailVerification: React.FC = () => {
     try {
       const response = await axios.post(`${API_URL}/api/users/`, formData);
       
-      // Переходим к шагу подтверждения
-      setEmail(formData.email);
-      setStep('verify');
+      // Проверяем, нужна ли верификация email
+      if (response.data.email_verification_required) {
+        // Переходим к шагу подтверждения
+        setEmail(formData.email);
+        setStep('verify');
+      } else {
+        // Email не требуется или уже подтвержден
+        navigate('/login');
+      }
     } catch (err: any) {
+      console.error('Registration error:', err);
       const errorMessage = err.response?.data?.email?.[0] || 
                           err.response?.data?.password?.[0] ||
                           err.response?.data?.detail ||
