@@ -655,3 +655,56 @@ def telegram_auth_status(request, auth_id):
     
     print(f"❌ API: Возвращаем authenticated=False")
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
+
+
+# Google OAuth Callback
+from django.shortcuts import redirect
+from allauth.socialaccount.models import SocialAccount
+from django.http import HttpResponse
+
+def google_callback(request):
+    """
+    Обработка callback после авторизации через Google.
+    Генерируем JWT токены и перенаправляем на фронт с токенами.
+    """
+    user = request.user
+    
+    if not user.is_authenticated:
+        # Если пользователь не авторизован, перенаправляем на страницу логина
+        return redirect(f"{settings.FRONTEND_URL}/login?error=auth_failed")
+    
+    # Генерируем JWT токены
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    refresh_token = str(refresh)
+    
+    # Получаем email из Google аккаунта
+    try:
+        social_account = SocialAccount.objects.get(user=user, provider='google')
+        email = social_account.extra_data.get('email', user.email)
+        
+        # Обновляем email пользователя если он не был установлен
+        if not user.email and email:
+            user.email = email
+            user.save()
+    except SocialAccount.DoesNotExist:
+        pass
+    
+    # Определяем URL для редиректа в зависимости от роли
+    redirect_url = '/dashboard'
+    if user.role == 'expert':
+        redirect_url = '/expert'
+    elif user.role == 'partner':
+        redirect_url = '/partner'
+    elif user.role == 'admin':
+        redirect_url = '/admin'
+    elif user.role == 'arbitrator':
+        redirect_url = '/arbitrator'
+    
+    # Перенаправляем на фронт с токенами в URL
+    # Фронт должен извлечь токены из URL и сохранить в localStorage
+    return redirect(
+        f"{settings.FRONTEND_URL}{redirect_url}?"
+        f"access={access_token}&refresh={refresh_token}&"
+        f"user_id={user.id}&username={user.username}&role={user.role}"
+    )

@@ -7,7 +7,7 @@ interface SocialLoginButtonsProps {
 
 const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
-  const googleHref = `/auth/google`;
+  const googleHref = `${API_BASE_URL}/api/accounts/google/login/?process=login`;
   const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
   
   // Очищаем старые данные авторизации при загрузке страницы

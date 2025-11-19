@@ -97,8 +97,8 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 LOGIN_URL = '/api/accounts/login/'
 
 # URL фронтенда и редиректы после логина/логаута
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
-LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URL', FRONTEND_URL)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+LOGIN_REDIRECT_URL = '/api/users/google/callback/'
 ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', FRONTEND_URL)
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -110,6 +110,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         },
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+        }
     },
     'vk': {
         'SCOPE': [
@@ -120,6 +124,14 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Автоматический старт OAuth без промежуточной страницы подтверждения
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Custom adapters для обработки социальной авторизации
+SOCIALACCOUNT_ADAPTER = 'apps.users.adapters.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'apps.users.adapters.CustomAccountAdapter'
+
+# Автоматически связываем аккаунты по email
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
 
 # Отключаем CSRF для API в режиме разработки
 if DEBUG:
