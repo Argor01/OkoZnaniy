@@ -6,6 +6,37 @@ from django.conf import settings
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     """Custom adapter для обработки социальной авторизации"""
     
+    def get_app(self, request, provider, client_id=None):
+        """
+        Переопределяем метод get_app чтобы избежать ошибки MultipleObjectsReturned
+        """
+        from allauth.socialaccount.models import SocialApp
+        from django.contrib.sites.models import Site
+        
+        try:
+            # Пытаемся получить приложение стандартным способом
+            return super().get_app(request, provider, client_id)
+        except Exception as e:
+            # Если возникла ошибка, пытаемся получить первое подходящее приложение
+            site = Site.objects.get_current(request)
+            apps = SocialApp.objects.filter(provider=provider, sites=site)
+            
+            if client_id:
+                apps = apps.filter(client_id=client_id)
+            
+            if apps.exists():
+                return apps.first()
+            
+            # Если не нашли по site, ищем любое приложение с этим provider
+            apps = SocialApp.objects.filter(provider=provider)
+            if client_id:
+                apps = apps.filter(client_id=client_id)
+            
+            if apps.exists():
+                return apps.first()
+            
+            raise e
+    
     def pre_social_login(self, request, sociallogin):
         """
         Вызывается перед входом через социальную сеть.
