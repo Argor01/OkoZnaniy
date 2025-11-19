@@ -637,11 +637,21 @@ from django.core.cache import cache
 @permission_classes([AllowAny])
 def telegram_auth_status(request, auth_id):
     """Проверка статуса авторизации через Telegram"""
-    auth_data = cache.get(f'telegram_auth_{auth_id}')
+    print(f"🔍 API: Проверяем auth_id: {auth_id}")
+    
+    # Убираем префикс auth_ если он есть, так как бот уже убрал его при сохранении
+    clean_auth_id = auth_id.replace('auth_', '', 1) if auth_id.startswith('auth_') else auth_id
+    cache_key = f'telegram_auth_{clean_auth_id}'
+    print(f"🔑 API: Cache key: {cache_key}")
+    
+    auth_data = cache.get(cache_key)
+    print(f"📦 API: Cache data: {auth_data}")
     
     if auth_data:
+        print(f"✅ API: Возвращаем authenticated=True")
         # НЕ удаляем сразу - пусть истечет через 5 минут
         # Это позволяет фронту получить данные даже если первый запрос не сработал
         return Response(auth_data, status=status.HTTP_200_OK)
     
+    print(f"❌ API: Возвращаем authenticated=False")
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
