@@ -5,6 +5,7 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
 import EmailVerificationModal from '../components/auth/EmailVerificationModal';
+import PasswordResetModal from '../components/auth/PasswordResetModal';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { ordersApi } from '../api/orders';
 import '../styles/login.css';
@@ -599,89 +600,30 @@ const Login: React.FC = () => {
               onCancel={() => setVerificationModalVisible(false)}
             />
 
-            {/* Модальное окно восстановления пароля */}
-            <div className={`modal ${passwordResetModalVisible ? 'show' : ''}`} style={{ display: passwordResetModalVisible ? 'block' : 'none' }}>
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Восстановление пароля</h5>
-                    <button type="button" className="btn-close" onClick={() => {
-                      setPasswordResetModalVisible(false);
-                      setResetStep('email');
-                      setResetEmail('');
-                      setResetCode(['', '', '', '', '', '']);
-                      setNewPassword('');
-                      setConfirmPassword('');
-                    }}></button>
-                  </div>
-                  <div className="modal-body">
-                    {resetStep === 'email' ? (
-                      <div>
-                        <p className="text-muted mb-3">Введите email для получения кода восстановления</p>
-                        <Input
-                          prefix={<MailOutlined />}
-                          placeholder="Email"
-                          value={resetEmail}
-                          onChange={(e) => setResetEmail(e.target.value)}
-                          onPressEnter={handleRequestPasswordReset}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-muted mb-3">Введите 6-значный код из email и новый пароль</p>
-                        <div className="d-flex justify-content-center gap-2 mb-3">
-                          {resetCode.map((digit, index) => (
-                            <input
-                              key={index}
-                              id={`reset-code-${index}`}
-                              type="text"
-                              inputMode="numeric"
-                              maxLength={1}
-                              value={digit}
-                              onChange={(e) => handleResetCodeChange(index, e.target.value)}
-                              disabled={resetLoading}
-                              className="form-control text-center"
-                              style={{ width: '45px', height: '50px', fontSize: '24px', fontWeight: 'bold' }}
-                            />
-                          ))}
-                        </div>
-                        <Input.Password
-                          prefix={<LockOutlined />}
-                          placeholder="Новый пароль (минимум 8 символов)"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="mb-2"
-                        />
-                        <Input.Password
-                          prefix={<LockOutlined />}
-                          placeholder="Подтвердите пароль"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          onPressEnter={handleResetPassword}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="modal-footer">
-                    {resetStep === 'email' ? (
-                      <Button type="primary" loading={resetLoading} onClick={handleRequestPasswordReset} block>
-                        Отправить код
-                      </Button>
-                    ) : (
-                      <>
-                        <Button onClick={() => setResetStep('email')}>
-                          ← Назад
-                        </Button>
-                        <Button type="primary" loading={resetLoading} onClick={handleResetPassword}>
-                          Сбросить пароль
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {passwordResetModalVisible && <div className="modal-backdrop fade show"></div>}
+            <PasswordResetModal
+              open={passwordResetModalVisible}
+              step={resetStep}
+              email={resetEmail}
+              code={resetCode}
+              newPassword={newPassword}
+              confirmPassword={confirmPassword}
+              loading={resetLoading}
+              onEmailChange={setResetEmail}
+              onCodeChange={handleResetCodeChange}
+              onNewPasswordChange={setNewPassword}
+              onConfirmPasswordChange={setConfirmPassword}
+              onRequestCode={handleRequestPasswordReset}
+              onResetPassword={handleResetPassword}
+              onBackToEmail={() => setResetStep('email')}
+              onCancel={() => {
+                setPasswordResetModalVisible(false);
+                setResetStep('email');
+                setResetEmail('');
+                setResetCode(['', '', '', '', '', '']);
+                setNewPassword('');
+                setConfirmPassword('');
+              }}
+            />
           </div>
         </div>
       </div>
