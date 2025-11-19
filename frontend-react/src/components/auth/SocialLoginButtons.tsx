@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 interface SocialLoginButtonsProps {
   onTelegramAuth?: (user: any) => void;
@@ -18,7 +18,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   
   // Генерируем уникальный ID для сессии авторизации
   const generateAuthId = () => {
-    return `auth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `auth_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   };
 
   const handleTelegramAuth = (e: React.MouseEvent) => {
@@ -36,20 +36,29 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     let attempts = 0;
     const maxAttempts = 150; // 5 минут (150 * 2 секунды)
     
+    console.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
+    
     const checkInterval = setInterval(async () => {
       attempts++;
+      console.log(`🔄 Попытка ${attempts}/${maxAttempts}: Проверяем статус авторизации...`);
       
       try {
         const response = await fetch(`${API_BASE_URL}/api/users/telegram_auth_status/${authId}/`);
+        console.log(`📡 Ответ сервера:`, response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log(`📦 Данные:`, data);
+          
           if (data.authenticated) {
+            console.log(`✅ Авторизация подтверждена!`);
             clearInterval(checkInterval);
             
             // Сохраняем токены
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
+            console.log(`💾 Токены сохранены`);
             
             // Определяем куда перенаправить пользователя
             const user = data.user;
@@ -65,12 +74,15 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
               redirectUrl = '/arbitrator';
             }
             
+            console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
             // Перенаправляем пользователя
             window.location.href = redirectUrl;
+          } else {
+            console.log(`⏳ Ожидаем подтверждения...`);
           }
         }
       } catch (error) {
-        console.error('Error checking auth status:', error);
+        console.error('❌ Ошибка проверки статуса:', error);
       }
       
       // Останавливаем проверку после максимального количества попыток
