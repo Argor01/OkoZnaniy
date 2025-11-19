@@ -8,6 +8,81 @@ import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
 
+// Тестовые данные для демонстрации
+const mockExpertData = {
+  id: 1,
+  username: 'expert_ivanov',
+  email: 'ivanov@example.com',
+  first_name: 'Иван',
+  last_name: 'Иванов',
+  role: 'expert',
+  phone: '+7 (999) 123-45-67',
+  avatar: undefined,
+  bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Помогаю студентам разобраться в сложных темах и успешно сдать экзамены. Индивидуальный подход к каждому ученику.',
+  experience_years: 10,
+  hourly_rate: 1500,
+  education: 'МГУ им. М.В. Ломоносова, факультет вычислительной математики и кибернетики, магистр математики (2013). Аспирантура по специальности "Математическое моделирование" (2016).',
+  skills: 'Высшая математика, Линейная алгебра, Математический анализ, Теория вероятностей, Физика, Python, MATLAB',
+  portfolio_url: 'https://github.com/expert_ivanov',
+  is_verified: true,
+  date_joined: '2023-01-15T10:00:00Z'
+};
+
+const mockReviews = [
+  {
+    id: 1,
+    client_name: 'Мария Петрова',
+    rating: 5,
+    comment: 'Отличный эксперт! Помог разобраться с высшей математикой. Все объяснил понятно и доступно. Работа выполнена качественно и в срок. Рекомендую!',
+    order_title: 'Решение задач по высшей математике',
+    created_at: '2024-11-10T14:30:00Z'
+  },
+  {
+    id: 2,
+    client_name: 'Алексей Смирнов',
+    rating: 5,
+    comment: 'Профессионал своего дела. Быстро и качественно выполнил курсовую работу по физике. Все требования были учтены. Спасибо!',
+    order_title: 'Курсовая работа по физике',
+    created_at: '2024-11-05T16:20:00Z'
+  },
+  {
+    id: 3,
+    client_name: 'Елена Козлова',
+    rating: 4,
+    comment: 'Хороший эксперт, но немного задержал сдачу работы. В остальном все отлично, работа выполнена качественно.',
+    order_title: 'Лабораторная работа по математическому анализу',
+    created_at: '2024-10-28T11:15:00Z'
+  },
+  {
+    id: 4,
+    client_name: 'Дмитрий Волков',
+    rating: 5,
+    comment: 'Очень доволен работой! Эксперт помог с подготовкой к экзамену по теории вероятностей. Все понятно объяснил, дал дополнительные материалы.',
+    order_title: 'Подготовка к экзамену по теории вероятностей',
+    created_at: '2024-10-20T09:45:00Z'
+  },
+  {
+    id: 5,
+    client_name: 'Анна Сидорова',
+    rating: 5,
+    comment: 'Отличная работа! Быстро, качественно, профессионально. Буду обращаться еще!',
+    order_title: 'Контрольная работа по линейной алгебре',
+    created_at: '2024-10-15T13:00:00Z'
+  }
+];
+
+const mockStatsData: ExpertStatistics = {
+  id: 1,
+  expert: 1,
+  total_orders: 156,
+  completed_orders: 142,
+  average_rating: 4.8,
+  success_rate: 0.91,
+  total_earnings: 234500,
+  response_time_avg: 120, // в минутах
+  last_updated: new Date().toISOString()
+};
+
 const ExpertProfile: React.FC = () => {
   const { expertId } = useParams<{ expertId: string }>();
   const navigate = useNavigate();
@@ -34,12 +109,22 @@ const ExpertProfile: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (expertData) setExpert(expertData);
+    // Используем данные с API или моковые данные для демонстрации
+    if (expertData) {
+      setExpert(expertData);
+    } else if (!expertLoading && !expertData) {
+      // Если API не вернул данные, используем моковые
+      setExpert(mockExpertData);
+    }
+    
     if (statsData) {
       console.log('Expert stats loaded:', statsData);
       setExpertStats(statsData);
+    } else if (!statsLoading && !statsData) {
+      // Если API не вернул статистику, используем моковую
+      setExpertStats(mockStatsData);
     }
-  }, [expertData, statsData]);
+  }, [expertData, statsData, expertLoading, statsLoading]);
 
   if (expertLoading) {
     return (
@@ -251,6 +336,43 @@ const ExpertProfile: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Отзывы */}
+      <Card title={`Отзывы (${mockReviews.length})`} style={{ marginTop: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {mockReviews.map((review) => (
+            <div 
+              key={review.id}
+              style={{
+                padding: 16,
+                background: '#fafafa',
+                borderRadius: 8,
+                border: '1px solid #f0f0f0'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div>
+                  <Text strong style={{ fontSize: 15 }}>{review.client_name}</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {review.order_title}
+                  </Text>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {dayjs(review.created_at).format('DD.MM.YYYY')}
+                  </Text>
+                </div>
+              </div>
+              <Paragraph style={{ margin: 0, fontSize: 14 }}>
+                {review.comment}
+              </Paragraph>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 };

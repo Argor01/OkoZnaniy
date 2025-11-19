@@ -35,6 +35,10 @@ export interface User {
   skills?: string;
   portfolio_url?: string;
   is_verified?: boolean;
+  has_submitted_application?: boolean;
+  application_approved?: boolean;
+  application_submitted_at?: string;
+  application_reviewed_at?: string;
 }
 
 export interface AuthResponse {
@@ -89,9 +93,17 @@ export const authApi = {
     return response.data;
   },
 
-  // Сброс пароля: отправка письма со ссылкой
-  resetPassword: async (email: string): Promise<{ detail: string }> => {
-    const response = await apiClient.post('/users/reset_password/', { email });
+  // Подать анкету эксперта
+  submitExpertApplication: async (data: {
+    first_name: string;
+    last_name: string;
+    bio: string;
+    experience_years: number;
+    education: string;
+    skills?: string;
+    portfolio_url?: string;
+  }): Promise<User> => {
+    const response = await apiClient.post('/users/submit_expert_application/', data);
     return response.data;
   },
 };

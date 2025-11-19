@@ -1,8 +1,12 @@
+/// <reference types="react" />
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth';
+import EmailVerificationModal from '../components/auth/EmailVerificationModal';
+import PasswordResetModal from '../components/auth/PasswordResetModal';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { ordersApi } from '../api/orders';
 import '../styles/login.css';
 
@@ -38,6 +42,21 @@ const Login: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'client' | 'expert'>('client');
   const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
+
+  // Модалка подтверждения email
+  const [verificationModalVisible, setVerificationModalVisible] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | undefined>(undefined);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationLoading, setVerificationLoading] = useState(false);
+
+  // Модалка восстановления пароля
+  const [passwordResetModalVisible, setPasswordResetModalVisible] = useState(false);
+  const [resetStep, setResetStep] = useState<'email' | 'code'>('email');
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState(['', '', '', '', '', '']);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Плейсхолдеры с анимацией
   const loginUsernamePh = useTypewriter('Email', 35, 100);
@@ -117,6 +136,10 @@ const Login: React.FC = () => {
     try {
       const auth = await authApi.login(values);
       message.success('Успешный вход!');
+      
+      // Закрываем модалку подтверждения если она была открыта
+      setVerificationModalVisible(false);
+      
       const role = auth?.user?.role;
       if (role === 'client') {
         await redirectClient();
@@ -132,7 +155,17 @@ const Login: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      message.error(error.response?.data?.detail || 'Ошибка входа');
+      const errorData = error.response?.data;
+      const errorMessage = errorData?.detail || errorData?.non_field_errors?.[0] || 'Ошибка входа';
+      
+      message.error(errorMessage);
+      
+      // Если ошибка связана с неверными учетными данными, предлагаем сброс пароля
+      if (errorMessage.includes('учетные данные') || errorMessage.includes('credentials')) {
+        setTimeout(() => {
+          message.info('Забыли пароль? Используйте функцию "Забыли пароль?" ниже');
+        }, 1000);
+      }
     } finally {
       setLoading(false);
     }
@@ -153,29 +186,21 @@ const Login: React.FC = () => {
       console.log('Sending registration data:', cleanValues);
       
       await authApi.register(cleanValues);
-      message.success('Регистрация успешна! Выполняется вход...');
       
-      // Автологин после регистрации
-      const loginData = {
-        username: values.email || values.phone || '',
-        password: values.password
-      };
-      
-      try {
-        const auth = await authApi.login(loginData);
-        message.success('Добро пожаловать!');
-        const role = auth?.user?.role;
-        if (role === 'client') {
-          await redirectClient();
-        } else if (role === 'expert') {
-          navigate('/expert');
-        } else if (role === 'partner') {
-          navigate('/partner');
-        } else {
-          navigate('/dashboard');
-        }
-      } catch (loginError) {
-        message.warning('Регистрация успешна, но не удалось войти автоматически. Войдите вручную.');
+      // Показываем модалку подтверждения только если указан email
+      if (values.email) {
+        message.success('Регистрация успешна! Мы отправили вам код на email.');
+        setVerificationEmail(values.email);
+        setVerificationCode('');
+        setVerificationModalVisible(true);
+      } else {
+        // Если email не указан, просто входим
+        message.success('Регистрация успешна!');
+        const loginData = {
+          username: values.phone || values.email,
+          password: values.password,
+        } as LoginRequest;
+        await onLogin(loginData);
       }
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -185,9 +210,19 @@ const Login: React.FC = () => {
         if (entries.length === 0) {
           message.error('Ошибка регистрации');
         } else {
-          entries.forEach(([_, v]) => {
+          entries.forEach(([field, v]) => {
             if (Array.isArray(v)) {
-              v.forEach((msg) => message.error(String(msg)));
+              v.forEach((msg) => {
+                const errorMsg = String(msg);
+                message.error(errorMsg);
+                
+                // Если email уже существует и подтвержден, предлагаем войти
+                if (field === 'email' && errorMsg.includes('уже существует')) {
+                  setTimeout(() => {
+                    message.info('Попробуйте войти с этим email на вкладке "Вход"');
+                  }, 1000);
+                }
+              });
             } else if (typeof v === 'string') {
               message.error(v);
             } else if (v && typeof v === 'object' && 'detail' in v) {
@@ -203,20 +238,145 @@ const Login: React.FC = () => {
     }
   };
 
-  const onForgotPassword = async () => {
-    const email = loginForm.getFieldValue('username');
-    if (!email) {
-      message.warning('Введите email в поле Email');
+  const handleVerifyEmailCode = async () => {
+    if (!verificationEmail) {
+      message.error('Не указан email для подтверждения');
       return;
     }
-    try {
-      const res = await authApi.resetPassword(email);
-      const detail = res?.detail || 'Инструкции по сбросу пароля отправлены на email.';
-      message.success(detail);
-    } catch (error: any) {
-      const detail = error?.response?.data?.detail || 'Не удалось отправить инструкции для сброса пароля';
-      message.error(detail);
+    if (!verificationCode || verificationCode.trim().length < 4) {
+      message.error('Введите корректный код подтверждения');
+      return;
     }
+    setVerificationLoading(true);
+    try {
+      // verifyEmailCode уже возвращает токены и сохраняет их
+      const auth = await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
+      message.success('Email подтвержден! Вход выполнен.');
+      
+      // Токены уже сохранены в authApi.verifyEmailCode
+      const role = auth?.user?.role;
+      setVerificationModalVisible(false);
+      
+      // Перенаправляем в зависимости от роли
+      if (role === 'client') {
+        await redirectClient();
+      } else if (role === 'expert') {
+        navigate('/expert');
+      } else if (role === 'partner') {
+        navigate('/partner');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!verificationEmail) return;
+    try {
+      await authApi.resendVerificationCode(verificationEmail);
+      message.success('Код отправлен повторно');
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось отправить код');
+    }
+  };
+
+  // Функции восстановления пароля
+  const handleRequestPasswordReset = async () => {
+    if (!resetEmail) {
+      message.error('Введите email');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await authApi.requestPasswordReset(resetEmail);
+      message.success('Код отправлен на ваш email');
+      setResetStep('code');
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || 'Ошибка отправки кода');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleResetCodeChange = (index: number, value: string) => {
+    if (value && !/^\d$/.test(value)) return;
+    const newCode = [...resetCode];
+    newCode[index] = value;
+    setResetCode(newCode);
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`reset-code-${index + 1}`);
+      if (nextInput) (nextInput as HTMLInputElement).focus();
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword !== confirmPassword) {
+      message.error('Пароли не совпадают');
+      return;
+    }
+    if (newPassword.length < 8) {
+      message.error('Пароль должен содержать минимум 8 символов');
+      return;
+    }
+    const codeString = resetCode.join('');
+    if (codeString.length !== 6) {
+      message.error('Введите 6-значный код');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const response = await authApi.resetPasswordWithCode(resetEmail, codeString, newPassword);
+      message.success('Пароль успешно изменен!');
+      setPasswordResetModalVisible(false);
+      // Сбрасываем состояние
+      setResetStep('email');
+      setResetEmail('');
+      setResetCode(['', '', '', '', '', '']);
+      setNewPassword('');
+      setConfirmPassword('');
+      // Перенаправляем
+      const role = response?.user?.role;
+      if (role === 'client') {
+        await redirectClient();
+      } else if (role === 'expert') {
+        navigate('/expert');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
+      setResetCode(['', '', '', '', '', '']);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  // Обработчик успешной авторизации через Telegram
+  const handleTelegramAuth = async (user: any) => {
+    message.success('Успешный вход через Telegram!');
+    const role = user?.role;
+    if (role === 'client') {
+      await redirectClient();
+    } else if (role === 'expert') {
+      navigate('/expert');
+    } else if (role === 'partner') {
+      navigate('/partner');
+    } else if (role === 'admin') {
+      navigate('/admin');
+    } else if (role === 'arbitrator') {
+      navigate('/arbitrator');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  // Обработчик ошибки авторизации через Telegram
+  const handleTelegramError = (error: string) => {
+    message.error(`Ошибка авторизации через Telegram: ${error}`);
   };
 
   const loginFormComponent = (
@@ -237,7 +397,7 @@ const Login: React.FC = () => {
             type="link"
             htmlType="button"
             className="forgot-password-link"
-            onClick={onForgotPassword}
+            onClick={() => setPasswordResetModalVisible(true)}
           >
             Забыли пароль?
           </Button>
@@ -250,23 +410,11 @@ const Login: React.FC = () => {
           Войти
         </Button>
       </Form.Item>
-      <div style={{ textAlign: 'center', color: '#8c8c8c', margin: '10px 0' }}>
-        или войти через
-      </div>
       <Form.Item>
-        <div className="panel-footer">
-          <div className="telegram-auth">
-            <a className="telegram-login" href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" />
-            </a>
-            <a className="google-login" href="#" aria-label="Google">
-              <img src="/assets/google.png" alt="google-login"/>
-            </a>
-            <a className="vk-login" href="#" aria-label="VK">
-              <img src="/assets/vk.png" alt="vk-login"/>
-            </a>
-          </div>
-        </div>
+        <SocialLoginButtons
+          onTelegramAuth={handleTelegramAuth}
+          onTelegramError={handleTelegramError}
+        />
       </Form.Item>
       
     </Form>
@@ -351,23 +499,11 @@ const Login: React.FC = () => {
           Зарегистрироваться
         </Button>
       </Form.Item>
-      <div style={{ textAlign: 'center', color: '#8c8c8c', margin: '10px 0' }}>
-        или войти через
-      </div>
       <Form.Item>
-        <div className="panel-footer">
-          <div className="telegram-auth">
-            <a className="telegram-login" href="#" aria-label="Telegram">
-              <img src="/assets/telegram.png" alt="telegram-bot" />
-            </a>
-            <a className="google-login" href="#" aria-label="Google">
-              <img src="/assets/google.png" alt="google-login"/>
-            </a>
-            <a className="vk-login" href="#" aria-label="VK">
-              <img src="/assets/vk.png" alt="vk-login"/>
-            </a>
-          </div>
-        </div>
+        <SocialLoginButtons
+          onTelegramAuth={handleTelegramAuth}
+          onTelegramError={handleTelegramError}
+        />
       </Form.Item>
     </Form>
   );
@@ -441,21 +577,56 @@ const Login: React.FC = () => {
             />
           </svg>
         </div>
-        <div className="auth-right">
-          <div className="auth-panel">
-            <div className="panel-body">
-              <Tabs
-                className="antd-tabs-clean"
-                activeKey={activeTab}
-                onChange={(key) => setActiveTab(key)}
-                items={[
-                  { key: 'register', label: 'Зарегистрироваться', children: registerFormComponent },
-                  { key: 'login', label: 'Войти', children: loginFormComponent },
-                ]}
-              />
-            </div>
+      <div className="auth-right">
+        <div className="auth-panel">
+          <div className="panel-body">
+            <Tabs
+              className="antd-tabs-clean"
+              activeKey={activeTab}
+              onChange={(key) => setActiveTab(key)}
+              items={[
+                { key: 'register', label: 'Зарегистрироваться', children: registerFormComponent },
+                { key: 'login', label: 'Войти', children: loginFormComponent },
+              ]}
+            />
+            <EmailVerificationModal
+              open={verificationModalVisible}
+              email={verificationEmail}
+              code={verificationCode}
+              loading={verificationLoading}
+              onChangeCode={setVerificationCode}
+              onVerify={handleVerifyEmailCode}
+              onResend={handleResendCode}
+              onCancel={() => setVerificationModalVisible(false)}
+            />
+
+            <PasswordResetModal
+              open={passwordResetModalVisible}
+              step={resetStep}
+              email={resetEmail}
+              code={resetCode}
+              newPassword={newPassword}
+              confirmPassword={confirmPassword}
+              loading={resetLoading}
+              onEmailChange={setResetEmail}
+              onCodeChange={handleResetCodeChange}
+              onNewPasswordChange={setNewPassword}
+              onConfirmPasswordChange={setConfirmPassword}
+              onRequestCode={handleRequestPasswordReset}
+              onResetPassword={handleResetPassword}
+              onBackToEmail={() => setResetStep('email')}
+              onCancel={() => {
+                setPasswordResetModalVisible(false);
+                setResetStep('email');
+                setResetEmail('');
+                setResetCode(['', '', '', '', '', '']);
+                setNewPassword('');
+                setConfirmPassword('');
+              }}
+            />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

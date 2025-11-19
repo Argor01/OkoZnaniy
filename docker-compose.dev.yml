@@ -5,17 +5,20 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    entrypoint: ["/bin/sh","-c","sed -i 's/\\r$//' /app/docker-entrypoint.sh && /bin/sh /app/docker-entrypoint.sh"]
     restart: always
     depends_on:
       - postgres
       - redis
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=True
-      - DJANGO_ENV=development
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - FRONTEND_URL=http://localhost:5173
+      - LOGIN_REDIRECT_URL=http://localhost:5173
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
     volumes:
       - .:/app
       - static_files:/app/static
@@ -74,11 +77,9 @@ services:
     depends_on:
       - redis
       - postgres
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DEBUG=True
+    env_file:
+      - .env
+
     volumes:
       - .:/app
     networks:

@@ -23,13 +23,6 @@ RUN adduser --disabled-password --gecos '' appuser
 # Копирование исходного кода
 COPY . .
 
-# Исправление окончаний строк и выдача прав
-RUN if [ -f /app/docker-entrypoint.sh ]; then \
-        sed -i 's/\r$//' /app/docker-entrypoint.sh || \
-        (cat /app/docker-entrypoint.sh | tr -d '\r' > /app/docker-entrypoint.sh.tmp && mv /app/docker-entrypoint.sh.tmp /app/docker-entrypoint.sh) && \
-        chmod +x /app/docker-entrypoint.sh; \
-    fi
-
 # Создание директорий для статических файлов и медиа
 RUN mkdir -p /app/static /app/media
 
@@ -46,5 +39,9 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 # Порт
 EXPOSE 8000
 
+# Скрипт запуска
+COPY --chown=appuser:appuser docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Запуск приложения
-ENTRYPOINT ["/bin/bash", "/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]

@@ -10,6 +10,7 @@ router.register('reviews', views.ExpertReviewViewSet, basename='expert-review')
 router.register('ratings', views.ExpertRatingViewSet, basename='expert-rating')
 router.register('statistics', views.ExpertStatisticsViewSet, basename='expert-statistics')
 router.register('dashboard', views.ExpertDashboardViewSet, basename='expert-dashboard')
+router.register('applications', views.ExpertApplicationViewSet, basename='expert-application')
 
 urlpatterns = [
     path('', include(router.urls)),

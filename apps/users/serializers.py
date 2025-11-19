@@ -17,9 +17,11 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar', 'bio', 'experience_years', 'hourly_rate', 'education', 
             'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate', 'total_referrals', 
-            'active_referrals', 'total_earnings'
+            'active_referrals', 'total_earnings',
+            'has_submitted_application', 'application_approved',
+            'application_submitted_at', 'application_reviewed_at'
         ]
-        read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified']
+        read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified', 'has_submitted_application', 'application_approved', 'application_submitted_at', 'application_reviewed_at']
     
     def get_specializations(self, obj):
         """Возвращает специализации только для экспертов"""
@@ -112,6 +114,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'education', 'skills', 'portfolio_url'
         ]
 
+class ExpertApplicationSerializer(serializers.Serializer):
+    """Сериализатор для подачи анкеты эксперта"""
+    first_name = serializers.CharField(max_length=150, required=True)
+    last_name = serializers.CharField(max_length=150, required=True)
+    bio = serializers.CharField(required=True, help_text="О себе")
+    experience_years = serializers.IntegerField(required=True, min_value=0, help_text="Опыт работы в годах")
+    education = serializers.CharField(required=True, help_text="Образование: вуз, специальность, годы обучения")
+    skills = serializers.CharField(required=False, allow_blank=True, help_text="Навыки")
+    portfolio_url = serializers.URLField(required=False, allow_blank=True, help_text="Ссылка на портфолио")
+
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -128,9 +140,22 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # Поддерживаем вход по username, email или телефону
         username = attrs.get('username')
         password = attrs.get('password')
+        
+        # Логируем входящие данные для отладки
+        logger.info(f"[Login] Attempting login with username: {username}")
+        print(f"[Login] Attempting login with username: {username}")
+        
+        # Проверяем, что username и password не пустые
+        if not username or not password:
+            logger.warning(f"[Login] Missing username or password")
+            print(f"[Login] Missing username or password")
+            raise serializers.ValidationError('Укажите имя пользователя и пароль')
         
         # Пытаемся найти пользователя по username, email или телефону
         user = None
@@ -138,27 +163,69 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Сначала пробуем по username
         try:
             user = User.objects.get(username=username)
+            logger.info(f"[Login] User found by username: {username}")
         except User.DoesNotExist:
             pass
         
         # Если не найден по username, пробуем по email
-        if not user and '@' in username:
+        if not user and username and '@' in username:
             try:
                 user = User.objects.get(email=username)
+                logger.info(f"[Login] User found by email: {username}, user_id: {user.id}")
+                print(f"[Login] User found by email: {username}, user_id: {user.id}")
             except User.DoesNotExist:
-                pass
+                logger.warning(f"[Login] User not found by email: {username}")
+                print(f"[Login] User not found by email: {username}")
+            except User.MultipleObjectsReturned:
+                user = User.objects.filter(email=username).first()
+                logger.warning(f"[Login] Multiple users found by email: {username}, using first: {user.id}")
+                print(f"[Login] Multiple users found by email: {username}, using first: {user.id}")
         
         # Если не найден по email, пробуем по телефону
-        if not user and (username.startswith('+') or username.replace('+', '').replace('-', '').replace(' ', '').isdigit()):
-            try:
-                user = User.objects.get(phone=username)
-            except User.DoesNotExist:
-                pass
+        if not user and username:
+            # Нормализуем телефон для поиска
+            phone_normalized = username.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
+            if phone_normalized.isdigit():
+                try:
+                    # Ищем по точному совпадению или по нормализованному номеру
+                    user = User.objects.filter(phone=username).first()
+                    if not user:
+                        # Пробуем найти по нормализованному номеру
+                        for u in User.objects.filter(phone__isnull=False).exclude(phone=''):
+                            if u.phone and u.phone.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '') == phone_normalized:
+                                user = u
+                                break
+                    if user:
+                        logger.info(f"[Login] User found by phone: {username}")
+                except Exception as e:
+                    logger.warning(f"[Login] Error searching by phone: {str(e)}")
         
-        if user and user.check_password(password):
-            attrs['username'] = user.username  # Передаем username для JWT
-            data = super().validate(attrs)
-            data['user'] = UserSerializer(user).data
-            return data
+        if user:
+            # Проверяем пароль
+            password_valid = user.check_password(password)
+            logger.info(f"[Login] User found: {user.username}, password_valid: {password_valid}")
+            print(f"[Login] User found: {user.username}, password_valid: {password_valid}")
+            
+            if password_valid:
+                attrs['username'] = user.username  # Передаем username для JWT
+                try:
+                    data = super().validate(attrs)
+                    data['user'] = UserSerializer(user).data
+                    logger.info(f"[Login] Login successful for user: {user.username}")
+                    print(f"[Login] Login successful for user: {user.username}")
+                    return data
+                except Exception as e:
+                    logger.error(f"[Login] Error in super().validate: {str(e)}")
+                    print(f"[Login] Error in super().validate: {str(e)}")
+                    import traceback
+                    print(traceback.format_exc())
+                    raise serializers.ValidationError('Ошибка при создании токена')
+            else:
+                logger.warning(f"[Login] Invalid password for user: {user.username}")
+                print(f"[Login] Invalid password for user: {user.username}")
         else:
-            raise serializers.ValidationError('Неверные учетные данные') 
+            logger.warning(f"[Login] User not found for username: {username}")
+            print(f"[Login] User not found for username: {username}")
+        
+        # Если дошли сюда, значит пользователь не найден или пароль неверный
+        raise serializers.ValidationError('Неверные учетные данные') 
