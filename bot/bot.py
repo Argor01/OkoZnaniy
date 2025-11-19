@@ -113,15 +113,18 @@ async def cmd_start(message: types.Message):
             f"📧 <b>Email:</b> {user.email or 'Не указан'}\n\n"
             "✨ <b>Вы успешно вошли на платформу OkoZnaniy!</b>\n\n"
             "🔄 Вернитесь на сайт - авторизация произойдет автоматически через несколько секунд.\n\n"
-            "💡 <i>Совет: Держите это окно открытым до завершения входа на сайте.</i>"
+            "💡 <i>Совет: Держите окно браузера открытым до завершения входа.</i>"
         )
         
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)],
-            [InlineKeyboardButton(text="📊 Мой профиль", url=f"{WEBSITE_URL}/profile")]
-        ])
-        
-        await message.answer(success_message, parse_mode="HTML", reply_markup=keyboard)
+        # Добавляем кнопки только если URL не localhost (Telegram не поддерживает localhost в кнопках)
+        if 'localhost' not in WEBSITE_URL and '127.0.0.1' not in WEBSITE_URL:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)],
+                [InlineKeyboardButton(text="📊 Мой профиль", url=f"{WEBSITE_URL}/profile")]
+            ])
+            await message.answer(success_message, parse_mode="HTML", reply_markup=keyboard)
+        else:
+            await message.answer(success_message, parse_mode="HTML")
         return
     
     # Обычное приветствие
@@ -149,12 +152,14 @@ async def cmd_start(message: types.Message):
             f"/balance - Баланс"
         )
     
-    # Кнопка для перехода на сайт
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)]
-    ])
-    
-    await message.answer(welcome_text, reply_markup=keyboard)
+    # Кнопка для перехода на сайт (только если не localhost)
+    if 'localhost' not in WEBSITE_URL and '127.0.0.1' not in WEBSITE_URL:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)]
+        ])
+        await message.answer(welcome_text, reply_markup=keyboard)
+    else:
+        await message.answer(welcome_text)
 
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
