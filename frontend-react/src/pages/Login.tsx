@@ -328,14 +328,9 @@ const Login: React.FC = () => {
         name="password"
         rules={[{ required: true, message: 'Введите пароль' }]}
         extra={
-          <Button
-            type="link"
-            htmlType="button"
-            className="forgot-password-link"
-            onClick={onForgotPassword}
-          >
+          <a href="/password-reset" className="forgot-password-link" style={{ color: '#1890ff' }}>
             Забыли пароль?
-          </Button>
+          </a>
         }
       >
         <Input.Password prefix={<LockOutlined />} placeholder={loginPasswordPh || ' '} />

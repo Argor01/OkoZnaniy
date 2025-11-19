@@ -23,6 +23,7 @@ from .serializers import (
 )
 from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
 from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
+from .password_reset import create_password_reset_code, send_password_reset_code, verify_password_reset_code, delete_password_reset_code
 
 User = get_user_model()
 
@@ -356,6 +357,98 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'message': message}, status=status.HTTP_200_OK)
         else:
             return Response({'error': message}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def request_password_reset(self, request):
+        """
+        Запрос кода для сброса пароля
+        
+        Ожидает:
+        {
+            "email": "user@example.com"
+        }
+        """
+        email = request.data.get('email')
+        
+        if not email:
+            return Response(
+                {'error': 'Email обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Не раскрываем, существует ли пользователь
+            return Response(
+                {'message': 'Если пользователь с таким email существует, код был отправлен'},
+                status=status.HTTP_200_OK
+            )
+        
+        # Создаем и отправляем код
+        code = create_password_reset_code(user)
+        send_password_reset_code(email, code)
+        
+        return Response(
+            {'message': 'Код для сброса пароля отправлен на ваш email'},
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def reset_password_with_code(self, request):
+        """
+        Сброс пароля с помощью кода
+        
+        Ожидает:
+        {
+            "email": "user@example.com",
+            "code": "123456",
+            "new_password": "newpassword123"
+        }
+        """
+        email = request.data.get('email')
+        code = request.data.get('code')
+        new_password = request.data.get('new_password')
+        
+        if not all([email, code, new_password]):
+            return Response(
+                {'error': 'Email, код и новый пароль обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Проверяем код
+        user_id = verify_password_reset_code(email, code)
+        
+        if not user_id:
+            return Response(
+                {'error': 'Неверный или истекший код'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Устанавливаем новый пароль
+        user.set_password(new_password)
+        user.save()
+        
+        # Удаляем код из кеша
+        delete_password_reset_code(email)
+        
+        # Генерируем токены для автоматического входа
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'message': 'Пароль успешно изменен',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def telegram_auth(self, request):
