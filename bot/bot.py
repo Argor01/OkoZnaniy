@@ -105,12 +105,23 @@ async def cmd_start(message: types.Message):
     if auth_id:
         role_display = await save_auth_data(auth_id, user)
         
-        await message.answer(
-            f"✅ Авторизация успешна!\n\n"
-            f"Вы вошли как: {first_name} {last_name}\n"
-            f"Роль: {role_display}\n\n"
-            f"Вернитесь на сайт - вы будете автоматически авторизованы!"
+        # Красивое сообщение об успешной авторизации
+        success_message = (
+            "🎉 <b>Авторизация успешна!</b>\n\n"
+            f"👤 <b>Пользователь:</b> {first_name} {last_name}\n"
+            f"🎭 <b>Роль:</b> {role_display}\n"
+            f"📧 <b>Email:</b> {user.email or 'Не указан'}\n\n"
+            "✨ <b>Вы успешно вошли на платформу OkoZnaniy!</b>\n\n"
+            "🔄 Вернитесь на сайт - авторизация произойдет автоматически через несколько секунд.\n\n"
+            "💡 <i>Совет: Держите это окно открытым до завершения входа на сайте.</i>"
         )
+        
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)],
+            [InlineKeyboardButton(text="📊 Мой профиль", url=f"{WEBSITE_URL}/profile")]
+        ])
+        
+        await message.answer(success_message, parse_mode="HTML", reply_markup=keyboard)
         return
     
     # Обычное приветствие
