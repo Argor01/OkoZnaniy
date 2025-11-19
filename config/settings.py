@@ -176,7 +176,7 @@ CACHES = {
             'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
             'IGNORE_EXCEPTIONS': True,
         },
-        'KEY_PREFIX': 'pricing',
+        'KEY_PREFIX': '',  # Убираем префикс для совместимости с ботом
         'TIMEOUT': 3600,  # 1 час
     }
 }
