@@ -79,8 +79,19 @@ def save_auth_data(auth_id, user):
             'last_name': user.last_name,
         }
     }
-    cache.set(f'telegram_auth_{auth_id}', auth_data, 300)  # 5 минут
+    cache_key = f'telegram_auth_{auth_id}'
+    cache.set(cache_key, auth_data, 300)  # 5 минут
     logger.info(f"Авторизация сохранена для auth_id: {auth_id}")
+    logger.info(f"Cache key: {cache_key}")
+    logger.info(f"Cache data: {auth_data}")
+    
+    # Проверяем, что данные действительно сохранились
+    test_data = cache.get(cache_key)
+    if test_data:
+        logger.info(f"✅ Данные успешно сохранены в кеш и проверены")
+    else:
+        logger.error(f"❌ ОШИБКА: Данные НЕ сохранились в кеш!")
+    
     return user.get_role_display()
 
 @dp.message(Command("start"))
