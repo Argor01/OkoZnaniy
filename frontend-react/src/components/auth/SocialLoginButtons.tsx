@@ -15,13 +15,14 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     return `auth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   };
 
-  const handleTelegramAuth = () => {
+  const handleTelegramAuth = (e: React.MouseEvent) => {
+    e.preventDefault();
     const authId = generateAuthId();
     // Сохраняем ID в localStorage для проверки после авторизации
     localStorage.setItem('telegram_auth_id', authId);
     
     // Открываем бота с параметром auth_id
-    window.open(`https://t.me/oko_expert_bot?start=auth_${authId}`, '_blank');
+    window.open(`https://t.me/okoznaniybot?start=auth_${authId}`, '_blank');
     
     // Начинаем проверять статус авторизации
     checkAuthStatus(authId);
@@ -61,40 +62,16 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   return (
     <div className="panel-footer">
       <div style={{ textAlign: 'center', marginBottom: '15px' }}>или войти через</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-        {/* Telegram Auth Button */}
-        <button
-          onClick={handleTelegramAuth}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 20px',
-            background: '#0088cc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#006ba3'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#0088cc'}
-        >
-          <img src="/assets/telegram.png" alt="telegram" style={{ width: '20px', height: '20px' }} />
-          Войти через Telegram
-        </button>
-        
-        {/* Другие способы входа */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '5px' }}>
-          <a href={googleHref} aria-label="Google">
-            <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
-          </a>
-          <a href={vkHref} aria-label="VK">
-            <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
-          </a>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+        <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
+          <img src="/assets/telegram.png" alt="telegram-login" style={{ width: '32px', height: '32px' }} />
+        </a>
+        <a href={googleHref} aria-label="Google">
+          <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+        </a>
+        <a href={vkHref} aria-label="VK">
+          <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
+        </a>
       </div>
     </div>
   );

@@ -128,8 +128,7 @@ async def cmd_start(message: types.Message):
     
     # Кнопка для перехода на сайт
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)],
-        [InlineKeyboardButton(text="📱 Войти через Telegram", url=f"{WEBSITE_URL}/login")]
+        [InlineKeyboardButton(text="🌐 Открыть сайт", url=WEBSITE_URL)]
     ])
     
     await message.answer(welcome_text, reply_markup=keyboard)
