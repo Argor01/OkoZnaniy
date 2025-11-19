@@ -190,9 +190,19 @@ const Login: React.FC = () => {
         if (entries.length === 0) {
           message.error('Ошибка регистрации');
         } else {
-          entries.forEach(([_, v]) => {
+          entries.forEach(([field, v]) => {
             if (Array.isArray(v)) {
-              v.forEach((msg) => message.error(String(msg)));
+              v.forEach((msg) => {
+                const errorMsg = String(msg);
+                message.error(errorMsg);
+                
+                // Если email уже существует и подтвержден, предлагаем войти
+                if (field === 'email' && errorMsg.includes('уже существует')) {
+                  setTimeout(() => {
+                    message.info('Попробуйте войти с этим email на вкладке "Вход"');
+                  }, 1000);
+                }
+              });
             } else if (typeof v === 'string') {
               message.error(v);
             } else if (v && typeof v === 'object' && 'detail' in v) {
