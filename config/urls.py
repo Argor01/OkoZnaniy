@@ -20,9 +20,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from apps.core.health import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', health_check, name='health_check'),
     path('api/users/', include('apps.users.urls')),
     path('api/orders/', include('apps.orders.urls')),
     path('api/catalog/', include('apps.catalog.urls')),
