@@ -35,6 +35,10 @@ export interface User {
   skills?: string;
   portfolio_url?: string;
   is_verified?: boolean;
+  has_submitted_application?: boolean;
+  application_approved?: boolean;
+  application_submitted_at?: string;
+  application_reviewed_at?: string;
 }
 
 export interface AuthResponse {
@@ -89,48 +93,17 @@ export const authApi = {
     return response.data;
   },
 
-  // Сброс пароля: отправка письма со ссылкой
-  resetPassword: async (email: string): Promise<{ detail: string }> => {
-    const response = await apiClient.post('/users/reset_password/', { email });
-    return response.data;
-  },
-
-  // Подтверждение email кодом
-  verifyEmailCode: async (email: string, code: string): Promise<{ detail: string }> => {
-    const response = await apiClient.post('/users/verify_email_code/', { email, code });
-    return response.data;
-  },
-
-  // Повторная отправка кода подтверждения email
-  resendVerificationCode: async (email: string): Promise<{ detail: string }> => {
-    const response = await apiClient.post('/users/resend_verification_code/', { email });
-    return response.data;
-  },
-
-  // Запрос кода для сброса пароля
-  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
-    const response = await apiClient.post('/users/request_password_reset/', { email });
-    return response.data;
-  },
-
-  // Сброс пароля с помощью кода
-  resetPasswordWithCode: async (
-    email: string,
-    code: string,
-    new_password: string
-  ): Promise<AuthResponse> => {
-    const response = await apiClient.post('/users/reset_password_with_code/', {
-      email,
-      code,
-      new_password,
-    });
-    const { access, refresh } = response.data;
-    
-    // Сохраняем токены
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    
+  // Подать анкету эксперта
+  submitExpertApplication: async (data: {
+    first_name: string;
+    last_name: string;
+    bio: string;
+    experience_years: number;
+    education: string;
+    skills?: string;
+    portfolio_url?: string;
+  }): Promise<User> => {
+    const response = await apiClient.post('/users/submit_expert_application/', data);
     return response.data;
   },
 };
