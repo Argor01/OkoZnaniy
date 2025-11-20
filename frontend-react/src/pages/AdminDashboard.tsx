@@ -664,7 +664,7 @@ const AdminDashboard: React.FC = () => {
     <div>
       <Title level={3}>Обзор</Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Всего партнеров"
@@ -673,7 +673,7 @@ const AdminDashboard: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Всего рефералов"
@@ -682,17 +682,7 @@ const AdminDashboard: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Общие доходы"
-              value={totalEarnings}
-              suffix="₽"
-              prefix={<DollarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Невыплаченные"
