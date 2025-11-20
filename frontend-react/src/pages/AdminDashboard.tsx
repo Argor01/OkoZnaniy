@@ -795,7 +795,7 @@ const AdminDashboard: React.FC = () => {
             title="Доступ запрещен"
             subTitle="У вас нет прав для доступа к личному кабинету администратора."
             extra={
-              <Button type="primary" onClick={() => navigate('/dashboard')}>
+              <Button type="primary" onClick={() => navigate('/')}>
                 Вернуться на главную
               </Button>
             }

@@ -16,8 +16,8 @@ services:
       - DEBUG=${DEBUG:-False}
       - DJANGO_ENV=${DJANGO_ENV:-production}
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
-      - FRONTEND_URL=http://localhost:3000
-      - LOGIN_REDIRECT_URL=http://localhost:3000/dashboard
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - LOGIN_REDIRECT_URL=${FRONTEND_URL:-http://localhost:5173}/expert
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
@@ -46,7 +46,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:80"
+      - "5173:80"
     networks:
       - app_network
 
