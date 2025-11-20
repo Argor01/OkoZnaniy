@@ -51,7 +51,7 @@ const CreateOrder: React.FC = () => {
     onSuccess: () => {
       message.success('Заказ создан успешно!');
       form.resetFields();
-      navigate('/dashboard');
+      navigate('/expert');
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.deadline?.[0] || 
@@ -84,7 +84,7 @@ const CreateOrder: React.FC = () => {
           {!checkingOrders && hasExistingOrders && (
             <Button 
               type="default" 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/expert')}
             >
               Перейти в дашборд
             </Button>

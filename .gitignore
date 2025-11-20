@@ -205,3 +205,5 @@ DEVELOPMENT_PLAN.md
 ./frontend/.next/cache/webpack/server-production/0.pack
 ./frontend/public/landing_main_oko_znanii.svg
 ./venv/lib/python3.12/site-packages/cryptography/hazmat/bindings/_rust.abi3.so
+cert.pem
+key.pem

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -20,16 +20,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from apps.core.health import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
+    path('api/health/', health_check, name='health_check'),
     path('api/users/', include('apps.users.urls')),
-    path('api/catalog/', include('apps.catalog.urls')),
     path('api/orders/', include('apps.orders.urls')),
+    path('api/catalog/', include('apps.catalog.urls')),
     path('api/experts/', include('apps.experts.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
-    path('api/', include('apps.core.urls')),
+    path("api/accounts/", include("allauth.urls")),
 ]
 
 if settings.DEBUG:

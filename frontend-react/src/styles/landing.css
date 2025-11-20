@@ -10,7 +10,7 @@ html {
 body {
   position: relative;
   margin: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
   color: var(--color-grey-900);
   background-color: #ffffff;
 }
@@ -116,12 +116,30 @@ img {
       -ms-flex-pack: start;
           justify-content: flex-start;
   width: 100%;
+  position: relative;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
+              0 0 40px rgba(255, 255, 255, 0.2),
+              inset 0 0 10px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+.header__logo-link:hover {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4),
+              0 0 60px rgba(255, 255, 255, 0.3),
+              inset 0 0 15px rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 .header__logo-link-image {
   display: block;
   max-width: 100%;
   width: 100%;
   height: auto;
+  position: relative;
+  z-index: 1;
 }
 .header__cabinet {
   display: -webkit-box;
@@ -1145,7 +1163,12 @@ img {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
-    padding: 80px 0 0;
+    padding: 80px 0 60px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__wrapper {
+    padding: 60px 0 80px;
   }
 }
 .only-pro__teacher {
@@ -1181,13 +1204,15 @@ img {
         -ms-flex-order: 1;
             order: 1;
     margin-top: -54px;
+    margin-bottom: 0;
     width: 100%;
     aspect-ratio: auto;
   }
 }
-@media (max-width: 1024px) and (max-width: 576px) {
+@media (max-width: 576px) {
   .only-pro__teacher {
     margin-top: -40px;
+    margin-bottom: 0;
   }
 }
 .only-pro__teacher-image {
@@ -1234,6 +1259,12 @@ img {
     -webkit-box-ordinal-group: 1;
         -ms-flex-order: 0;
             order: 0;
+    padding-bottom: 20px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__main {
+    padding-bottom: 30px;
   }
 }
 .only-pro__title {
@@ -1323,6 +1354,33 @@ img {
   max-width: 100%;
   max-height: 94px;
   height: auto;
+}
+.only-pro__additional-text {
+  margin-top: 20px;
+  margin-bottom: 0;
+  padding: 0 20px;
+  font-family: "Jost", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+@media (max-width: 1024px) {
+  .only-pro__additional-text {
+    margin-top: 25px;
+    padding: 0 15px;
+  }
+}
+@media (max-width: 576px) {
+  .only-pro__additional-text {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding: 0 10px;
+    line-height: 1.4;
+  }
 }
 
 .reviews {

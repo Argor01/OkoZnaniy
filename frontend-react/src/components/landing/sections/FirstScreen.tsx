@@ -18,7 +18,7 @@ const FirstScreen: React.FC = () => {
               <button className="first-screen__content-buttons-task button" onClick={() => navigate('/create-order')}>
                 Разместить задание
               </button>
-              <button className="first-screen__content-buttons-expert button" onClick={() => navigate('/login')}>Стать экспертом</button>
+              <button className="first-screen__content-buttons-expert button" onClick={() => navigate('/become-expert')}>Стать экспертом</button>
             </div>
           </div>
 

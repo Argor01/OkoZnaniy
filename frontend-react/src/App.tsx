@@ -18,8 +18,8 @@ import './styles/components.css';
 // Import pages
 import Home from './pages/Home';
 import Login from './pages/Login';
+import GoogleCallback from './pages/GoogleCallback';
 import CreateOrder from './pages/CreateOrder';
-import ClientDashboard from './pages/ClientDashboard';
 import ExpertDashboard from './pages/ExpertDashboard';
 import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
@@ -32,6 +32,7 @@ import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
 import PurchasedWorks from './pages/PurchasedWorks';
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/layout/DashboardLayout';
 
 // Configure dayjs
 dayjs.locale('ru');
@@ -55,21 +56,20 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/google/callback" element={<GoogleCallback />} />
               <Route 
                 path="/create-order" 
                 element={
                   <ProtectedRoute>
-                    <CreateOrder />
+                    <DashboardLayout>
+                      <CreateOrder />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <ClientDashboard />
-                  </ProtectedRoute>
-                } 
+                element={<Navigate to="/expert" replace />} 
               />
               <Route 
                 path="/expert" 
@@ -127,7 +127,9 @@ const App: React.FC = () => {
                 path="/shop/ready-works"
                 element={
                   <ProtectedRoute>
-                    <ShopReadyWorks />
+                    <DashboardLayout>
+                      <ShopReadyWorks />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -135,7 +137,9 @@ const App: React.FC = () => {
                 path="/shop/add-work"
                 element={
                   <ProtectedRoute>
-                    <AddWorkToShop />
+                    <DashboardLayout>
+                      <AddWorkToShop />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -143,7 +147,9 @@ const App: React.FC = () => {
                 path="/works"
                 element={
                   <ProtectedRoute>
-                    <MyWorks />
+                    <DashboardLayout>
+                      <MyWorks />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -151,7 +157,9 @@ const App: React.FC = () => {
                 path="/shop/purchased"
                 element={
                   <ProtectedRoute>
-                    <PurchasedWorks />
+                    <DashboardLayout>
+                      <PurchasedWorks />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />

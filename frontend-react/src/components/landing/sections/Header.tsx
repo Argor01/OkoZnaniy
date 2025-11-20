@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const toggleMenu = useCallback(() => setIsMenuOpen((v) => !v), []);
@@ -19,7 +20,7 @@ const Header: React.FC = () => {
   const goToCabinet = useCallback(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
-      navigate('/dashboard');
+      navigate('/expert');
     } else {
       navigate('/login');
     }
@@ -42,13 +43,15 @@ const Header: React.FC = () => {
     [closeMenu]
   );
 
+  const isHomePage = location.pathname === '/';
+
   return (
     <header className="header">
       <div className="mcontainer">
         <div className="header__wrapper">
           <div className="header__logo">
             <div className="header__logo-link">
-              <img className="header__logo-link-image" src="/assets/logo.svg" alt="logo" width={120} height={36} />
+              <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
             </div>
           </div>
 
@@ -56,7 +59,7 @@ const Header: React.FC = () => {
             <div className="header__nav-wrapper">
               <div className="header__logo">
                 <div className="header__logo-link">
-                  <img className="header__logo-link-image" src="/assets/logo.svg" alt="logo" width={120} height={36} />
+                  <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
                 </div>
               </div>
 
@@ -66,28 +69,28 @@ const Header: React.FC = () => {
 
               <ul className="header__nav-menu" onClick={onMenuLinkClick}>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#services">Услуги</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#services" : "/#services"}>Услуги</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#orders">Заказы</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#orders" : "/#orders"}>Заказы</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#experts">Эксперты</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#experts" : "/#experts"}>Эксперты</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#shop">Магазин</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#shop" : "/#shop"}>Магазин</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#faq">FAQ</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#faq" : "/#faq"}>FAQ</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#support">Поддержка</a>
+                  <a className="header__nav-menu-item-link" href={isHomePage ? "#support" : "/#support"}>Поддержка</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#be-expert">Стать экспертом</a>
+                  <Link className="header__nav-menu-item-link" to="/become-expert">Стать экспертом</Link>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href="#partners">Стать партнерам</a>
+                  <Link className="header__nav-menu-item-link" to="/become-partner">Стать партнером</Link>
                 </li>
               </ul>
 

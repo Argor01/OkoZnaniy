@@ -1,0 +1,135 @@
+/* Стили для страницы партнеров */
+
+/* Преимущества партнерства - 2x2 сетка */
+.partner-benefits__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .partner-benefits__grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    max-width: 500px;
+  }
+}
+
+.partner-benefits .place-task__advantages-card {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 45px 35px;
+}
+
+.partner-benefits .place-task__advantages-card-figure {
+  margin-bottom: 25px;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
+}
+
+.partner-benefits .place-task__advantages-card-icon {
+  font-size: 48px;
+  color: #ffffff;
+}
+
+.partner-benefits .place-task__advantages-card-text {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 90%;
+}
+
+/* Как проходит работа - 2x3 сетка */
+.partner-page .advantages__wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .partner-page .advantages__wrapper {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.partner-page .advantages__card {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 25px;
+}
+
+.partner-page .advantages__card-icon {
+  margin-bottom: 20px;
+}
+
+.partner-page .advantages__card-icon-image {
+  width: 70px;
+  height: 70px;
+}
+
+.partner-page .advantages__card-title {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.partner-page .advantages__card-text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+@media (max-width: 576px) {
+  .partner-benefits .place-task__advantages-card {
+    padding: 35px 25px;
+    min-height: 200px;
+  }
+  
+  .partner-benefits .place-task__advantages-card-figure {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .partner-benefits .place-task__advantages-card-icon {
+    font-size: 42px;
+  }
+  
+  .partner-benefits .place-task__advantages-card-text {
+    font-size: 18px;
+  }
+}
+
+
+/* Стили для иконки Ant Design в блоке advantages */
+.partner-page .advantages__card-icon-antd {
+  font-size: 61px;
+  color: #ffb34a;
+  font-weight: 300;
+}
+
+/* Стили для иконки Flaticon в блоке advantages */
+.partner-page .advantages__card-icon-flaticon {
+  font-size: 61px;
+  color: #ffb34a;
+  line-height: 1;
+}
+
+.partner-page .advantages__card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

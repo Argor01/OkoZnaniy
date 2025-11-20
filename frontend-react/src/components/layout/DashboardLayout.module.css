@@ -1,0 +1,155 @@
+/* Sidebar */
+.sidebar {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  transition: width 0.3s ease;
+}
+
+.sidebarProfile {
+  display: flex;
+  align-items: center;
+  padding: 20px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.sidebarMenu {
+  background: transparent;
+  border: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarMenu :global(.ant-menu-item) {
+  border-radius: 0;
+  margin: 0;
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  font-weight: 400;
+  padding-left: 16px !important;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebarMenu :global(.ant-menu-item:hover) {
+  background: #f3f4f6;
+  border-left-color: #667eea;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected) {
+  background: #f3f4f6;
+  color: #667eea;
+  border-left-color: #667eea;
+  font-weight: 500;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected .anticon) {
+  color: #667eea;
+}
+
+.sidebarMenu :global(.ant-menu-item .anticon) {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.sidebarMenu :global(.ant-menu-submenu) {
+  border-radius: 0;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-title) {
+  border-radius: 0;
+  margin: 0;
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  font-weight: 400;
+  padding-left: 16px !important;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-title:hover) {
+  background: #f3f4f6;
+  border-left-color: #667eea;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
+  background: #f3f4f6;
+  border-left-color: #667eea;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-title .anticon) {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title .anticon) {
+  color: #667eea;
+}
+
+.sidebarMenu :global(.ant-menu-sub) {
+  background: transparent;
+  border: none;
+}
+
+.sidebarMenu :global(.ant-menu-sub .ant-menu-item) {
+  padding-left: 48px !important;
+  font-size: 13px;
+  height: 36px;
+  line-height: 36px;
+  border-left: 3px solid transparent;
+}
+
+.sidebarMenu :global(.ant-menu-sub .ant-menu-item:hover) {
+  background: #f3f4f6;
+  border-left-color: #667eea;
+}
+
+.sidebarMenu :global(.ant-menu-sub .ant-menu-item-selected) {
+  background: #f3f4f6;
+  color: #667eea;
+  border-left-color: #667eea;
+  font-weight: 500;
+}
+
+.sidebarMenu :global(.ant-menu-item-danger) {
+  color: #ef4444 !important;
+}
+
+.sidebarMenu :global(.ant-menu-item-danger:hover) {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-left-color: #ef4444 !important;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  height: 100vh;
+  background: #f3f4f6;
+}
+
+@media (max-width: 840px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    position: relative;
+  }
+
+  .mainContent {
+    height: auto;
+  }
+}

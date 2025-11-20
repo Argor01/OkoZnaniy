@@ -28,6 +28,7 @@ export interface User {
   date_joined: string;
   last_login?: string;
   specializations: any[];
+  avatar?: string;
   bio?: string;
   experience_years?: number;
   hourly_rate?: number;

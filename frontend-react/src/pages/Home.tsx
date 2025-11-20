@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import SEO from '../components/SEO';
 import Header from '../components/landing/sections/Header';
 import FirstScreen from '../components/landing/sections/FirstScreen';
 import PlaceTask from '../components/landing/sections/PlaceTask';
@@ -24,7 +25,16 @@ const Home: React.FC = () => {
     }
   }, [searchParams]);
   return (
-    <>
+    <div className="page-wrapper">
+      <SEO 
+        title="Око Знаний - Онлайн сервис помощи студентам | Курсовые, Дипломы, Рефераты"
+        description="Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене. Экономьте время: разместите задание и эксперт быстро поможет с консультацией. Курсовые, дипломы, рефераты, контрольные работы."
+        keywords="помощь студентам, написание работ, курсовые работы, дипломные работы, рефераты, контрольные работы, эссе, онлайн помощь, студенческие работы, заказать работу, помощь с учебой, консультации студентам"
+        ogTitle="Око Знаний - Помощь студентам онлайн"
+        ogDescription="Разместите задание и получите помощь от профессиональных экспертов. Быстро, надёжно, по выгодной цене."
+        ogUrl="https://okoznaniy.ru"
+        canonical="https://okoznaniy.ru"
+      />
       <Header />
       <main className="main">
         <FirstScreen />
@@ -38,7 +48,7 @@ const Home: React.FC = () => {
         <PlaceTaskInfo />
       </main>
       <Footer />
-    </>
+    </div>
   );
 };
 
