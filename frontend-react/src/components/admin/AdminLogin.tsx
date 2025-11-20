@@ -359,20 +359,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           >
             Быстрый вход
           </Divider>
-          <Space 
-            direction="vertical" 
-            size="middle" 
-            style={{ width: '100%' }}
-          >
-            <Space 
-              wrap 
-              style={{ 
-                width: '100%', 
-                justifyContent: 'center',
-                gap: '12px',
-              }}
-            >
-              {DEV_ACCOUNTS.map((account) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              {DEV_ACCOUNTS.slice(0, 2).map((account) => (
                 <Tooltip
                   key={account.role}
                   title={`Войти как ${account.label} (${account.email})`}
@@ -385,6 +374,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                     disabled={loading}
                     size="large"
                     style={{
+                      flex: 1,
                       minWidth: '140px',
                       borderRadius: '8px',
                     }}
@@ -393,8 +383,32 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                   </Button>
                 </Tooltip>
               ))}
-            </Space>
-          </Space>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              {DEV_ACCOUNTS.slice(2, 4).map((account) => (
+                <Tooltip
+                  key={account.role}
+                  title={`Войти как ${account.label} (${account.email})`}
+                  placement="top"
+                >
+                  <Button
+                    icon={getRoleIcon(account.role)}
+                    onClick={() => handleQuickLogin(account)}
+                    loading={loading}
+                    disabled={loading}
+                    size="large"
+                    style={{
+                      flex: 1,
+                      minWidth: '140px',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    {account.label}
+                  </Button>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
         </>
       </Card>
     </div>
