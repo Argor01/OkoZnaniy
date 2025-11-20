@@ -346,58 +346,56 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           </Form.Item>
         </Form>
 
-        {/* Кнопки быстрого входа (только в режиме разработки) */}
-        {import.meta.env.DEV && (
-          <>
-            <Divider 
+        {/* Кнопки быстрого входа */}
+        <>
+          <Divider 
+            style={{ 
+              margin: '32px 0 20px 0',
+              borderColor: '#e8e8e8',
+              fontSize: '13px',
+              color: '#999',
+              fontWeight: 500,
+            }}
+          >
+            Быстрый вход
+          </Divider>
+          <Space 
+            direction="vertical" 
+            size="middle" 
+            style={{ width: '100%' }}
+          >
+            <Space 
+              wrap 
               style={{ 
-                margin: '32px 0 20px 0',
-                borderColor: '#e8e8e8',
-                fontSize: '13px',
-                color: '#999',
-                fontWeight: 500,
+                width: '100%', 
+                justifyContent: 'center',
+                gap: '12px',
               }}
             >
-              Быстрый вход
-            </Divider>
-            <Space 
-              direction="vertical" 
-              size="middle" 
-              style={{ width: '100%' }}
-            >
-              <Space 
-                wrap 
-                style={{ 
-                  width: '100%', 
-                  justifyContent: 'center',
-                  gap: '12px',
-                }}
-              >
-                {DEV_ACCOUNTS.map((account) => (
-                  <Tooltip
-                    key={account.role}
-                    title={`Войти как ${account.label} (${account.email})`}
-                    placement="top"
+              {DEV_ACCOUNTS.map((account) => (
+                <Tooltip
+                  key={account.role}
+                  title={`Войти как ${account.label} (${account.email})`}
+                  placement="top"
+                >
+                  <Button
+                    icon={getRoleIcon(account.role)}
+                    onClick={() => handleQuickLogin(account)}
+                    loading={loading}
+                    disabled={loading}
+                    size="large"
+                    style={{
+                      minWidth: '140px',
+                      borderRadius: '8px',
+                    }}
                   >
-                    <Button
-                      icon={getRoleIcon(account.role)}
-                      onClick={() => handleQuickLogin(account)}
-                      loading={loading}
-                      disabled={loading}
-                      size="large"
-                      style={{
-                        minWidth: '140px',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      {account.label}
-                    </Button>
-                  </Tooltip>
-                ))}
-              </Space>
+                    {account.label}
+                  </Button>
+                </Tooltip>
+              ))}
             </Space>
-          </>
-        )}
+          </Space>
+        </>
       </Card>
     </div>
   );
