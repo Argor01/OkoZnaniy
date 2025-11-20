@@ -599,6 +599,39 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
+  const handleQuickLogin = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const response = await authApi.login({ username: email, password });
+      
+      // Сохраняем токены
+      localStorage.setItem('access_token', response.access);
+      localStorage.setItem('refresh_token', response.refresh);
+      
+      // Получаем данные пользователя
+      const currentUser = await authApi.getCurrentUser();
+      setUser(currentUser);
+      
+      message.success(`Вход выполнен как ${currentUser.username}`);
+      
+      // Перенаправляем в зависимости от роли
+      if (currentUser.role === 'partner') {
+        navigate('/partner');
+      } else if (currentUser.role === 'arbitrator') {
+        navigate('/arbitrator');
+      } else if (currentUser.email === 'director@test.com') {
+        navigate('/director');
+      } else if (currentUser.role === 'admin') {
+        // Остаемся на админ-панели
+        queryClient.invalidateQueries();
+      }
+    } catch (error: any) {
+      message.error('Ошибка входа: ' + (error?.response?.data?.detail || 'Неизвестная ошибка'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     Modal.confirm({
       title: 'Выход из системы',
@@ -885,6 +918,31 @@ const AdminDashboard: React.FC = () => {
             {currentMenuItem?.label || 'Личный кабинет администратора'}
           </Title>
           <Space>
+            <Text type="secondary" style={{ marginRight: 8 }}>Быстрый вход:</Text>
+            <Button
+              size="small"
+              onClick={() => handleQuickLogin('partner@test.com', 'test123')}
+            >
+              Партнер
+            </Button>
+            <Button
+              size="small"
+              onClick={() => handleQuickLogin('admin@test.com', 'test123')}
+            >
+              Администратор
+            </Button>
+            <Button
+              size="small"
+              onClick={() => handleQuickLogin('arbitrator@test.com', 'test123')}
+            >
+              Арбитр
+            </Button>
+            <Button
+              size="small"
+              onClick={() => handleQuickLogin('director@test.com', 'test123')}
+            >
+              Директор
+            </Button>
             <Button
               type="default"
               danger
