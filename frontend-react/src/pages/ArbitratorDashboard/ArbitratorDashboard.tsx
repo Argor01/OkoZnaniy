@@ -71,7 +71,7 @@ const ArbitratorDashboard: React.FC = () => {
       // Проверка роли
       if (currentUser.role !== 'arbitrator') {
         message.error('У вас нет доступа к этой странице');
-        navigate('/dashboard');
+        navigate('/expert');
         return;
       }
     } catch (error) {
@@ -151,7 +151,7 @@ const ArbitratorDashboard: React.FC = () => {
         title="Доступ запрещен"
         subTitle="У вас нет прав для доступа к кабинету арбитра."
         extra={
-          <Button type="primary" onClick={() => navigate('/dashboard')}>
+          <Button type="primary" onClick={() => navigate('/')}>
             Вернуться на главную
           </Button>
         }

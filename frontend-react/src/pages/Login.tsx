@@ -123,12 +123,8 @@ const Login: React.FC = () => {
 
   // Функция для определения куда перенаправить клиента
   const redirectClient = async () => {
-    const hasOrders = await checkClientOrders();
-    if (hasOrders) {
-      navigate('/dashboard');
-    } else {
-      navigate('/create-order');
-    }
+    // Клиенты теперь идут на ExpertDashboard
+    navigate('/expert');
   };
 
   const onLogin = async (values: LoginRequest) => {
@@ -141,9 +137,7 @@ const Login: React.FC = () => {
       setVerificationModalVisible(false);
       
       const role = auth?.user?.role;
-      if (role === 'client') {
-        await redirectClient();
-      } else if (role === 'expert') {
+      if (role === 'client' || role === 'expert') {
         navigate('/expert');
       } else if (role === 'partner') {
         navigate('/partner');
@@ -152,7 +146,7 @@ const Login: React.FC = () => {
       } else if (role === 'arbitrator') {
         navigate('/arbitrator');
       } else {
-        navigate('/dashboard');
+        navigate('/expert');
       }
     } catch (error: any) {
       const errorData = error.response?.data;
@@ -258,14 +252,12 @@ const Login: React.FC = () => {
       setVerificationModalVisible(false);
       
       // Перенаправляем в зависимости от роли
-      if (role === 'client') {
-        await redirectClient();
-      } else if (role === 'expert') {
+      if (role === 'client' || role === 'expert') {
         navigate('/expert');
       } else if (role === 'partner') {
         navigate('/partner');
       } else {
-        navigate('/dashboard');
+        navigate('/expert');
       }
     } catch (error: any) {
       message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
@@ -339,14 +331,7 @@ const Login: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       // Перенаправляем
-      const role = response?.user?.role;
-      if (role === 'client') {
-        await redirectClient();
-      } else if (role === 'expert') {
-        navigate('/expert');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/expert');
     } catch (error: any) {
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
@@ -359,9 +344,7 @@ const Login: React.FC = () => {
   const handleTelegramAuth = async (user: any) => {
     message.success('Успешный вход через Telegram!');
     const role = user?.role;
-    if (role === 'client') {
-      await redirectClient();
-    } else if (role === 'expert') {
+    if (role === 'client' || role === 'expert') {
       navigate('/expert');
     } else if (role === 'partner') {
       navigate('/partner');
@@ -370,7 +353,7 @@ const Login: React.FC = () => {
     } else if (role === 'arbitrator') {
       navigate('/arbitrator');
     } else {
-      navigate('/dashboard');
+      navigate('/expert');
     }
   };
 

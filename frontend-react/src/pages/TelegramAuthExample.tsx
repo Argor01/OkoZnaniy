@@ -9,13 +9,7 @@ const TelegramAuthExample: React.FC = () => {
     console.log('Успешная авторизация:', user);
     
     // Перенаправляем пользователя в зависимости от роли
-    if (user.role === 'expert') {
-      navigate('/expert/dashboard');
-    } else if (user.role === 'client') {
-      navigate('/client/dashboard');
-    } else {
-      navigate('/dashboard');
-    }
+    navigate('/expert');
   };
 
   const handleTelegramError = (error: string) => {

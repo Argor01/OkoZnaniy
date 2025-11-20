@@ -33,8 +33,8 @@ const GoogleCallback: React.FC = () => {
       console.log('✅ Google авторизация успешна');
 
       // Перенаправляем на соответствующую страницу в зависимости от роли
-      let redirectUrl = '/dashboard';
-      if (role === 'expert') {
+      let redirectUrl = '/expert'; // По умолчанию все идут на ExpertDashboard
+      if (role === 'client' || role === 'expert') {
         redirectUrl = '/expert';
       } else if (role === 'partner') {
         redirectUrl = '/partner';

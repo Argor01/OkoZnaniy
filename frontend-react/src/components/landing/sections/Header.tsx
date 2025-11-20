@@ -20,7 +20,7 @@ const Header: React.FC = () => {
   const goToCabinet = useCallback(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
-      navigate('/dashboard');
+      navigate('/expert');
     } else {
       navigate('/login');
     }
