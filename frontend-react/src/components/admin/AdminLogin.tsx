@@ -5,7 +5,6 @@ import {
   LockOutlined, 
   TeamOutlined, 
   CrownOutlined, 
-  SafetyOutlined, 
   BankOutlined 
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -165,8 +164,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         return <TeamOutlined />;
       case 'admin':
         return <CrownOutlined />;
-      case 'arbitrator':
-        return <SafetyOutlined />;
       case 'director':
         return <BankOutlined />;
       default:
@@ -359,55 +356,29 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           >
             Быстрый вход
           </Divider>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              {DEV_ACCOUNTS.slice(0, 2).map((account) => (
-                <Tooltip
-                  key={account.role}
-                  title={`Войти как ${account.label} (${account.email})`}
-                  placement="top"
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {DEV_ACCOUNTS.map((account) => (
+              <Tooltip
+                key={account.role}
+                title={`Войти как ${account.label} (${account.email})`}
+                placement="top"
+              >
+                <Button
+                  icon={getRoleIcon(account.role)}
+                  onClick={() => handleQuickLogin(account)}
+                  loading={loading}
+                  disabled={loading}
+                  size="large"
+                  style={{
+                    flex: '1 1 140px',
+                    minWidth: '140px',
+                    borderRadius: '8px',
+                  }}
                 >
-                  <Button
-                    icon={getRoleIcon(account.role)}
-                    onClick={() => handleQuickLogin(account)}
-                    loading={loading}
-                    disabled={loading}
-                    size="large"
-                    style={{
-                      flex: 1,
-                      minWidth: '140px',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    {account.label}
-                  </Button>
-                </Tooltip>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              {DEV_ACCOUNTS.slice(2, 4).map((account) => (
-                <Tooltip
-                  key={account.role}
-                  title={`Войти как ${account.label} (${account.email})`}
-                  placement="top"
-                >
-                  <Button
-                    icon={getRoleIcon(account.role)}
-                    onClick={() => handleQuickLogin(account)}
-                    loading={loading}
-                    disabled={loading}
-                    size="large"
-                    style={{
-                      flex: 1,
-                      minWidth: '140px',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    {account.label}
-                  </Button>
-                </Tooltip>
-              ))}
-            </div>
+                  {account.label}
+                </Button>
+              </Tooltip>
+            ))}
           </div>
         </>
       </Card>

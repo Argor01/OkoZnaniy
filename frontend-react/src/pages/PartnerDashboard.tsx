@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, Space, message, Modal, Card, Row, Col, Statistic, Table, Tag, Input, Spin, Alert } from 'antd';
+import { Layout, Menu, Button, Typography, Space, message, Modal, Card, Row, Col, Statistic, Table, Tag, Input, Spin, Alert, Drawer, Grid } from 'antd';
 import {
   TeamOutlined,
   DollarOutlined,
@@ -10,6 +10,7 @@ import {
   CopyOutlined,
   FileTextOutlined,
   ExperimentOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -319,7 +320,13 @@ type MenuItem = {
 
 const PartnerDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   const [selectedMenu, setSelectedMenu] = useState<string>('statistics');
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['partner-dashboard'],
@@ -379,6 +386,30 @@ const PartnerDashboard: React.FC = () => {
 
   const currentMenuItem = menuItems.find((item) => item.key === selectedMenu);
 
+  const handleMenuClick = (key: string) => {
+    setSelectedMenu(key);
+    if (isMobile) {
+      setDrawerVisible(false);
+    }
+  };
+
+  const renderMenu = () => (
+    <Menu
+      mode="inline"
+      selectedKeys={[selectedMenu]}
+      onClick={({ key }) => handleMenuClick(key)}
+      style={{
+        borderRight: 0,
+        height: isMobile ? 'auto' : 'calc(100vh - 120px)',
+      }}
+      items={menuItems.map((item) => ({
+        key: item.key,
+        icon: item.icon,
+        label: item.label,
+      }))}
+    />
+  );
+
   if (isLoading) {
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -406,87 +437,118 @@ const PartnerDashboard: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={250}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        }}
+      {!isMobile && (
+        <Sider
+          width={isTablet ? 200 : 250}
+          style={{
+            background: '#fff',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          }}
+          breakpoint="lg"
+          collapsedWidth="0"
+        >
+          <div
+            style={{
+              padding: isTablet ? '16px' : '24px',
+              textAlign: 'center',
+              borderBottom: '1px solid #f0f0f0',
+            }}
+          >
+            <UserAddOutlined style={{ fontSize: isTablet ? '28px' : '32px', color: '#1890ff', marginBottom: '8px' }} />
+            <Title level={4} style={{ margin: 0, fontSize: isTablet ? '14px' : '16px' }}>
+              {isTablet ? 'ЛК партнера' : 'Партнерский кабинет'}
+            </Title>
+          </div>
+          {renderMenu()}
+        </Sider>
+      )}
+
+      {/* Drawer для мобильных */}
+      <Drawer
+        title="Меню"
+        placement="left"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={280}
+        styles={{ body: { padding: 0 } }}
       >
         <div
           style={{
-            padding: '24px',
+            padding: '16px',
             textAlign: 'center',
             borderBottom: '1px solid #f0f0f0',
           }}
         >
-          <UserAddOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Партнерский кабинет
+          <UserAddOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
+          <Title level={5} style={{ margin: 0 }}>
+            ЛК партнера
           </Title>
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedMenu]}
-          onClick={({ key }) => setSelectedMenu(key)}
-          style={{
-            borderRight: 0,
-            height: 'calc(100vh - 120px)',
-          }}
-          items={menuItems.map((item) => ({
-            key: item.key,
-            icon: item.icon,
-            label: item.label,
-          }))}
-        />
-      </Sider>
+        {renderMenu()}
+      </Drawer>
+
       <Layout>
         <Header
           style={{
             background: '#fff',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Title level={3} style={{ margin: 0 }}>
-            {currentMenuItem?.label || 'Партнерский кабинет'}
-          </Title>
           <Space>
-            <Button
-              type="default"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-            >
-              Выйти
-            </Button>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerVisible(true)}
+                style={{ fontSize: '18px' }}
+              />
+            )}
+            <Title level={isMobile ? 5 : 3} style={{ margin: 0 }}>
+              {isMobile 
+                ? currentMenuItem?.label?.split(' ')[0] || 'Партнер'
+                : currentMenuItem?.label || 'Партнерский кабинет'}
+            </Title>
           </Space>
+          <Button
+            type="default"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            size={isMobile ? 'small' : 'middle'}
+          >
+            {!isMobile && 'Выйти'}
+          </Button>
         </Header>
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
+            margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
+            padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
           }}
         >
-          <Alert
-            message="Режим тестовых данных"
-            description="В данный момент используется режим тестовых данных. Все данные отображаются локально для демонстрации функционала."
-            type="info"
-            icon={<ExperimentOutlined />}
-            showIcon
-            style={{ marginBottom: 16 }}
-            closable
-          />
+          {!isMobile && (
+            <Alert
+              message="Режим тестовых данных"
+              description="В данный момент используется режим тестовых данных. Все данные отображаются локально для демонстрации функционала."
+              type="info"
+              icon={<ExperimentOutlined />}
+              showIcon
+              style={{ marginBottom: 16 }}
+              closable
+            />
+          )}
           {currentMenuItem?.component}
         </Content>
-        <Footer style={{ textAlign: 'center', background: '#fff' }}>
-          Партнерский кабинет © {new Date().getFullYear()}
-        </Footer>
+        {!isMobile && (
+          <Footer style={{ textAlign: 'center', background: '#fff', padding: isTablet ? '12px' : '24px' }}>
+            Партнерский кабинет © {new Date().getFullYear()}
+          </Footer>
+        )}
       </Layout>
     </Layout>
   );
