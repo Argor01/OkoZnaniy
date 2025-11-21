@@ -23,6 +23,8 @@ import CreateOrder from './pages/CreateOrder';
 import ExpertDashboard from './pages/ExpertDashboard';
 import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
+import BecomeExpert from './pages/BecomeExpert';
+import BecomePartner from './pages/BecomePartner';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
@@ -85,6 +87,14 @@ const App: React.FC = () => {
                     <ExpertApplication />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/become-expert" 
+                element={<BecomeExpert />} 
+              />
+              <Route 
+                path="/become-partner" 
+                element={<BecomePartner />} 
               />
               <Route 
                 path="/expert/:expertId" 
