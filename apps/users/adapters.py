@@ -6,6 +6,32 @@ from django.conf import settings
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     """Custom adapter для обработки социальной авторизации"""
     
+    def get_callback_url(self, request, app):
+        """
+        Переопределяем callback URL для использования правильного домена в production
+        """
+        callback_url = super().get_callback_url(request, app)
+        
+        # В production используем FRONTEND_URL из настроек
+        if not settings.DEBUG and settings.FRONTEND_URL:
+            # Заменяем localhost на правильный URL
+            if 'localhost' in callback_url or '127.0.0.1' in callback_url:
+                from urllib.parse import urlparse, urlunparse
+                parsed = urlparse(callback_url)
+                frontend_parsed = urlparse(settings.FRONTEND_URL)
+                
+                # Заменяем scheme и netloc на правильные
+                callback_url = urlunparse((
+                    frontend_parsed.scheme,
+                    frontend_parsed.netloc,
+                    parsed.path,
+                    parsed.params,
+                    parsed.query,
+                    parsed.fragment
+                ))
+        
+        return callback_url
+    
     def get_app(self, request, provider, client_id=None):
         """
         Переопределяем метод get_app чтобы избежать ошибки MultipleObjectsReturned

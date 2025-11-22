@@ -101,6 +101,13 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 LOGIN_REDIRECT_URL = '/api/users/google/callback/'
 ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', FRONTEND_URL)
 
+# Настройка для правильного формирования callback URL в production
+# Это важно для Google OAuth на хостинге
+if not DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Измените на 'https' когда будет SSL
+    # Принудительно используем IP хостинга для callback URL
+    SOCIALACCOUNT_CALLBACK_URL = f"{FRONTEND_URL}/api/accounts/google/login/callback/"
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
