@@ -346,58 +346,122 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           </Form.Item>
         </Form>
 
-        {/* Кнопки быстрого входа (только в режиме разработки) */}
-        {import.meta.env.DEV && (
-          <>
-            <Divider 
+        {/* Кнопки быстрого входа */}
+        <>
+          <Divider 
+            style={{ 
+              margin: '32px 0 20px 0',
+              borderColor: '#e8e8e8',
+              fontSize: '13px',
+              color: '#999',
+              fontWeight: 500,
+            }}
+          >
+            Быстрый вход
+          </Divider>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+            {/* Первая строка - Партнер и Администратор */}
+            <div 
               style={{ 
-                margin: '32px 0 20px 0',
-                borderColor: '#e8e8e8',
-                fontSize: '13px',
-                color: '#999',
-                fontWeight: 500,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
               }}
             >
-              Быстрый вход
-            </Divider>
-            <Space 
-              direction="vertical" 
-              size="middle" 
-              style={{ width: '100%' }}
-            >
-              <Space 
-                wrap 
-                style={{ 
-                  width: '100%', 
-                  justifyContent: 'center',
-                  gap: '12px',
-                }}
-              >
-                {DEV_ACCOUNTS.map((account) => (
-                  <Tooltip
-                    key={account.role}
-                    title={`Войти как ${account.label} (${account.email})`}
-                    placement="top"
+              {DEV_ACCOUNTS.filter(acc => acc.role !== 'director').map((account) => (
+                <Tooltip
+                  key={account.role}
+                  title={`${account.email}`}
+                  placement="top"
+                >
+                  <Button
+                    icon={getRoleIcon(account.role)}
+                    onClick={() => handleQuickLogin(account)}
+                    loading={loading}
+                    disabled={loading}
+                    size="large"
+                    style={{
+                      height: '56px',
+                      borderRadius: '12px',
+                      fontSize: '15px',
+                      fontWeight: 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      border: '1px solid #e0e0e0',
+                      background: '#fff',
+                      color: '#333',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-brand-blue-600)';
+                      e.currentTarget.style.color = 'var(--color-brand-blue-600)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.color = '#333';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   >
-                    <Button
-                      icon={getRoleIcon(account.role)}
-                      onClick={() => handleQuickLogin(account)}
-                      loading={loading}
-                      disabled={loading}
-                      size="large"
-                      style={{
-                        minWidth: '140px',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      {account.label}
-                    </Button>
-                  </Tooltip>
-                ))}
-              </Space>
-            </Space>
-          </>
-        )}
+                    {account.label}
+                  </Button>
+                </Tooltip>
+              ))}
+            </div>
+            
+            {/* Вторая строка - Директор по центру */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              {DEV_ACCOUNTS.filter(acc => acc.role === 'director').map((account) => (
+                <Tooltip
+                  key={account.role}
+                  title={`${account.email}`}
+                  placement="top"
+                >
+                  <Button
+                    icon={getRoleIcon(account.role)}
+                    onClick={() => handleQuickLogin(account)}
+                    loading={loading}
+                    disabled={loading}
+                    size="large"
+                    style={{
+                      height: '56px',
+                      borderRadius: '12px',
+                      fontSize: '15px',
+                      fontWeight: 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      border: '1px solid #e0e0e0',
+                      background: '#fff',
+                      color: '#333',
+                      transition: 'all 0.3s ease',
+                      minWidth: '200px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-brand-blue-600)';
+                      e.currentTarget.style.color = 'var(--color-brand-blue-600)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.color = '#333';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {account.label}
+                  </Button>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
+        </>
       </Card>
     </div>
   );
