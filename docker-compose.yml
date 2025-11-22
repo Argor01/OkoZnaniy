@@ -15,7 +15,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG:-False}
       - DJANGO_ENV=${DJANGO_ENV:-production}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
       - LOGIN_REDIRECT_URL=${FRONTEND_URL:-http://localhost:5173}/expert
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
