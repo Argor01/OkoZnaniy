@@ -107,4 +107,36 @@ export const authApi = {
     const response = await apiClient.post('/users/submit_expert_application/', data);
     return response.data;
   },
+
+  // Подтвердить email через код
+  verifyEmailCode: async (email: string, code: string): Promise<AuthResponse> => {
+    const response = await apiClient.post('/users/verify_email_code/', { email, code });
+    const { access, refresh } = response.data;
+    
+    // Сохраняем токены
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+    
+    return response.data;
+  },
+
+  // Повторно отправить код подтверждения
+  resendVerificationCode: async (email: string): Promise<void> => {
+    await apiClient.post('/users/resend_verification_code/', { email });
+  },
+
+  // Запросить сброс пароля
+  requestPasswordReset: async (email: string): Promise<void> => {
+    await apiClient.post('/users/request_password_reset/', { email });
+  },
+
+  // Подтвердить сброс пароля
+  confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<void> => {
+    await apiClient.post('/users/confirm_password_reset/', {
+      email,
+      code,
+      new_password: newPassword,
+    });
+  },
 };
