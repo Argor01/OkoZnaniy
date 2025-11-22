@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, Space, message, Modal } from 'antd';
+import { Layout, Menu, Button, Typography, Space, message, Modal, Drawer, Grid } from 'antd';
 import {
   TeamOutlined,
   DollarOutlined,
@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   BankOutlined,
   MessageOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
@@ -29,7 +30,13 @@ type MenuItem = {
 
 const DirectorDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   const [selectedMenu, setSelectedMenu] = useState<string>('personnel');
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
 
   const menuItems: MenuItem[] = [
     {
@@ -89,71 +96,122 @@ const DirectorDashboard: React.FC = () => {
 
   const currentMenuItem = menuItems.find((item) => item.key === selectedMenu);
 
+  const handleMenuClick = (key: string) => {
+    setSelectedMenu(key);
+    if (isMobile) {
+      setDrawerVisible(false);
+    }
+  };
+
+  const renderMenu = () => (
+    <Menu
+      mode="inline"
+      selectedKeys={[selectedMenu]}
+      onClick={({ key }) => handleMenuClick(key)}
+      style={{
+        borderRight: 0,
+        height: isMobile ? 'auto' : 'calc(100vh - 120px)',
+      }}
+      items={menuItems.map((item) => ({
+        key: item.key,
+        icon: item.icon,
+        label: item.label,
+      }))}
+    />
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={250}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        }}
+      {!isMobile && (
+        <Sider
+          width={isTablet ? 200 : 250}
+          style={{
+            background: '#fff',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          }}
+          breakpoint="lg"
+          collapsedWidth="0"
+        >
+          <div
+            style={{
+              padding: isTablet ? '16px' : '24px',
+              textAlign: 'center',
+              borderBottom: '1px solid #f0f0f0',
+            }}
+          >
+            <BankOutlined style={{ fontSize: isTablet ? '28px' : '32px', color: '#1890ff', marginBottom: '8px' }} />
+            <Title level={4} style={{ margin: 0, fontSize: isTablet ? '14px' : '16px' }}>
+              ЛК директора
+            </Title>
+          </div>
+          {renderMenu()}
+        </Sider>
+      )}
+
+      {/* Drawer для мобильных */}
+      <Drawer
+        title="Меню"
+        placement="left"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={280}
+        styles={{ body: { padding: 0 } }}
       >
         <div
           style={{
-            padding: '24px',
+            padding: '16px',
             textAlign: 'center',
             borderBottom: '1px solid #f0f0f0',
           }}
         >
-          <BankOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет директора
+          <BankOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
+          <Title level={5} style={{ margin: 0 }}>
+            ЛК директора
           </Title>
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedMenu]}
-          onClick={({ key }) => setSelectedMenu(key)}
-          style={{
-            borderRight: 0,
-            height: 'calc(100vh - 120px)',
-          }}
-          items={menuItems.map((item) => ({
-            key: item.key,
-            icon: item.icon,
-            label: item.label,
-          }))}
-        />
-      </Sider>
+        {renderMenu()}
+      </Drawer>
+
       <Layout>
         <Header
           style={{
             background: '#fff',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Title level={3} style={{ margin: 0 }}>
-            {currentMenuItem?.label || 'Личный кабинет директора'}
-          </Title>
           <Space>
-            <Button
-              type="default"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-            >
-              Выйти
-            </Button>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerVisible(true)}
+                style={{ fontSize: '18px' }}
+              />
+            )}
+            <Title level={isMobile ? 5 : 3} style={{ margin: 0 }}>
+              {isMobile 
+                ? currentMenuItem?.label?.split(' ')[0] || 'Директор'
+                : currentMenuItem?.label || 'Личный кабинет директора'}
+            </Title>
           </Space>
+          <Button
+            type="default"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            size={isMobile ? 'small' : 'middle'}
+          >
+            {!isMobile && 'Выйти'}
+          </Button>
         </Header>
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
+            margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
+            padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
             background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
@@ -161,9 +219,11 @@ const DirectorDashboard: React.FC = () => {
         >
           {currentMenuItem?.component}
         </Content>
-        <Footer style={{ textAlign: 'center', background: '#fff' }}>
-          Личный кабинет директора © {new Date().getFullYear()}
-        </Footer>
+        {!isMobile && (
+          <Footer style={{ textAlign: 'center', background: '#fff', padding: isTablet ? '12px' : '24px' }}>
+            Личный кабинет директора © {new Date().getFullYear()}
+          </Footer>
+        )}
       </Layout>
     </Layout>
   );

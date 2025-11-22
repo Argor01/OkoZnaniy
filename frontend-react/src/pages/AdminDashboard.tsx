@@ -21,7 +21,9 @@ import {
   Spin,
   Result,
   Alert,
-  Tooltip
+  Tooltip,
+  Drawer,
+  Grid
 } from 'antd';
 import { 
   UserOutlined, 
@@ -37,7 +39,11 @@ import {
   LogoutOutlined,
   SettingOutlined,
   BarChartOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  BellOutlined,
+  MessageOutlined,
+  HourglassOutlined,
+  MenuOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { adminApi, type Partner, type PartnerEarning, type UpdatePartnerRequest, type Arbitrator } from '../api/admin';
@@ -45,6 +51,22 @@ import { disputesApi, type Dispute } from '../api/disputes';
 import { authApi, type User } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import AdminLogin from '../components/admin/AdminLogin';
+import DirectorCommunication from '../components/admin/DirectorCommunication';
+import { 
+  ClaimStatus, 
+  ClaimType,
+  getClaimTypeLabel, 
+  getClaimPriorityLabel, 
+  getClaimPriorityColor,
+  getClaimStatusLabel,
+  getClaimStatusColor,
+  getDirectorCommunicationStatusLabel
+} from '../types/claims';
+import { 
+  getMockClaimsByStatus, 
+  getMockClaims,
+  getMockDirectorCommunications 
+} from '../mocks/claimsData';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -59,13 +81,20 @@ type MenuItem = {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<string>('overview');
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const [form] = Form.useForm();
+
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
 
   // Проверка аутентификации
   useEffect(() => {
@@ -599,6 +628,39 @@ const AdminDashboard: React.FC = () => {
     });
   };
 
+  const handleQuickLogin = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const response = await authApi.login({ username: email, password });
+      
+      // Сохраняем токены
+      localStorage.setItem('access_token', response.access);
+      localStorage.setItem('refresh_token', response.refresh);
+      
+      // Получаем данные пользователя
+      const currentUser = await authApi.getCurrentUser();
+      setUser(currentUser);
+      
+      message.success(`Вход выполнен как ${currentUser.username}`);
+      
+      // Перенаправляем в зависимости от роли
+      if (currentUser.role === 'partner') {
+        navigate('/partner');
+      } else if (currentUser.role === 'arbitrator') {
+        navigate('/arbitrator');
+      } else if (currentUser.email === 'director@test.com') {
+        navigate('/director');
+      } else if (currentUser.role === 'admin') {
+        // Остаемся на админ-панели
+        queryClient.invalidateQueries();
+      }
+    } catch (error: any) {
+      message.error('Ошибка входа: ' + (error?.response?.data?.detail || 'Неизвестная ошибка'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     Modal.confirm({
       title: 'Выход из системы',
@@ -631,7 +693,7 @@ const AdminDashboard: React.FC = () => {
     <div>
       <Title level={3}>Обзор</Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Всего партнеров"
@@ -640,7 +702,7 @@ const AdminDashboard: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Всего рефералов"
@@ -649,17 +711,7 @@ const AdminDashboard: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic
-              title="Общие доходы"
-              value={totalEarnings}
-              suffix="₽"
-              prefix={<DollarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
+        <Col xs={24} sm={12} md={8}>
           <Card>
             <Statistic
               title="Невыплаченные"
@@ -763,6 +815,819 @@ const AdminDashboard: React.FC = () => {
     </div>
   );
 
+  // Новые секции для обращений
+  const NewClaimsSection = () => {
+    const newClaims = getMockClaimsByStatus(ClaimStatus.NEW);
+    
+    const claimsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Пользователь',
+        dataIndex: 'user',
+        key: 'user',
+        render: (user: any) => (
+          <div>
+            <div><strong>{user.username}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+          </div>
+        ),
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'claimType',
+        key: 'claimType',
+        render: (type: string) => getClaimTypeLabel(type),
+      },
+      {
+        title: 'Приоритет',
+        dataIndex: 'priority',
+        key: 'priority',
+        render: (priority: string) => (
+          <Tag color={getClaimPriorityColor(priority)}>
+            {getClaimPriorityLabel(priority)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Тема',
+        dataIndex: 'subject',
+        key: 'subject',
+        ellipsis: true,
+      },
+      {
+        title: 'Дата создания',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
+        render: (date: string) => dayjs(date).format('DD.MM.YYYY HH:mm'),
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 100,
+        render: (record: any) => (
+          <Space>
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => {
+                Modal.info({
+                  title: `Обращение #${record.id}`,
+                  content: (
+                    <div>
+                      <p><strong>От:</strong> {record.user.username} ({record.user.email})</p>
+                      <p><strong>Тип:</strong> {getClaimTypeLabel(record.claimType)}</p>
+                      <p><strong>Приоритет:</strong> {getClaimPriorityLabel(record.priority)}</p>
+                      <p><strong>Тема:</strong> {record.subject}</p>
+                      <p><strong>Описание:</strong></p>
+                      <p>{record.description}</p>
+                      {record.relatedOrder && (
+                        <p><strong>Связанный заказ:</strong> #{record.relatedOrder.id} - {record.relatedOrder.title}</p>
+                      )}
+                    </div>
+                  ),
+                  width: 600,
+                  maskStyle: {
+                    backdropFilter: 'blur(4px)',
+                  },
+                });
+              }}
+            />
+            <Button 
+              size="small" 
+              type="primary"
+              icon={<UserOutlined />}
+              onClick={() => {
+                message.success(`Обращение #${record.id} назначено на вас`);
+              }}
+            />
+          </Space>
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <Card>
+          <Table
+            columns={claimsColumns}
+            dataSource={newClaims}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет новых обращений' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
+  const InProgressClaimsSection = () => {
+    const inProgressClaims = getMockClaimsByStatus(ClaimStatus.IN_PROGRESS);
+    
+    const claimsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Пользователь',
+        dataIndex: 'user',
+        key: 'user',
+        render: (user: any) => (
+          <div>
+            <div><strong>{user.username}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+          </div>
+        ),
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'claimType',
+        key: 'claimType',
+        render: (type: string) => getClaimTypeLabel(type),
+      },
+      {
+        title: 'Приоритет',
+        dataIndex: 'priority',
+        key: 'priority',
+        render: (priority: string) => (
+          <Tag color={getClaimPriorityColor(priority)}>
+            {getClaimPriorityLabel(priority)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Тема',
+        dataIndex: 'subject',
+        key: 'subject',
+        ellipsis: true,
+      },
+      {
+        title: 'Администратор',
+        dataIndex: 'assignedAdmin',
+        key: 'assignedAdmin',
+        render: (admin: any) => admin?.username || 'Не назначен',
+      },
+      {
+        title: 'В работе',
+        dataIndex: 'startedAt',
+        key: 'startedAt',
+        render: (date: string) => {
+          const hours = dayjs().diff(dayjs(date), 'hour');
+          const isOverdue = hours > 24;
+          return (
+            <span style={{ color: isOverdue ? '#ff4d4f' : undefined }}>
+              {hours}ч {isOverdue && <ExclamationCircleOutlined />}
+            </span>
+          );
+        },
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 100,
+        render: (record: any) => (
+          <Space>
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => {
+                Modal.info({
+                  title: `Обращение #${record.id}`,
+                  content: (
+                    <div>
+                      <p><strong>От:</strong> {record.user.username} ({record.user.email})</p>
+                      <p><strong>Тип:</strong> {getClaimTypeLabel(record.claimType)}</p>
+                      <p><strong>Приоритет:</strong> {getClaimPriorityLabel(record.priority)}</p>
+                      <p><strong>Тема:</strong> {record.subject}</p>
+                      <p><strong>Описание:</strong></p>
+                      <p>{record.description}</p>
+                      {record.messages && record.messages.length > 0 && (
+                        <>
+                          <p><strong>Сообщения:</strong></p>
+                          {record.messages.map((msg: any) => (
+                            <div key={msg.id} style={{ marginBottom: 8, padding: 8, background: '#f5f5f5', borderRadius: 4 }}>
+                              <div style={{ fontSize: '12px', color: '#666' }}>
+                                {msg.author.username} - {dayjs(msg.createdAt).format('DD.MM.YYYY HH:mm')}
+                                {msg.isInternal && <Tag color="orange" style={{ marginLeft: 8 }}>Внутренняя</Tag>}
+                              </div>
+                              <div>{msg.message}</div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  ),
+                  width: 700,
+                  maskStyle: {
+                    backdropFilter: 'blur(4px)',
+                  },
+                });
+              }}
+            />
+            <Button 
+              size="small" 
+              type="primary"
+              icon={<MessageOutlined />}
+              onClick={() => {
+                message.success(`Ответ на обращение #${record.id} отправлен`);
+              }}
+            />
+          </Space>
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <Card>
+          <Table
+            columns={claimsColumns}
+            dataSource={inProgressClaims}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет обращений в работе' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
+  const CompletedClaimsSection = () => {
+    const completedClaims = getMockClaimsByStatus(ClaimStatus.RESOLVED);
+    
+    const claimsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Пользователь',
+        dataIndex: 'user',
+        key: 'user',
+        render: (user: any) => (
+          <div>
+            <div><strong>{user.username}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+          </div>
+        ),
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'claimType',
+        key: 'claimType',
+        render: (type: string) => getClaimTypeLabel(type),
+      },
+      {
+        title: 'Тема',
+        dataIndex: 'subject',
+        key: 'subject',
+        ellipsis: true,
+      },
+      {
+        title: 'Решение',
+        dataIndex: 'resolution',
+        key: 'resolution',
+        ellipsis: true,
+        render: (resolution: string) => (
+          <Text ellipsis={{ tooltip: resolution }}>
+            {resolution}
+          </Text>
+        ),
+      },
+      {
+        title: 'Дата решения',
+        dataIndex: 'resolvedAt',
+        key: 'resolvedAt',
+        render: (date: string) => dayjs(date).format('DD.MM.YYYY HH:mm'),
+      },
+      {
+        title: 'Время обработки',
+        key: 'processingTime',
+        render: (record: any) => {
+          const hours = dayjs(record.resolvedAt).diff(dayjs(record.createdAt), 'hour');
+          return `${hours}ч`;
+        },
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 80,
+        render: (record: any) => (
+          <Button 
+            size="small" 
+            icon={<EyeOutlined />}
+            onClick={() => {
+              Modal.info({
+                title: `Обращение #${record.id} (Решено)`,
+                content: (
+                  <div>
+                    <p><strong>От:</strong> {record.user.username} ({record.user.email})</p>
+                    <p><strong>Тип:</strong> {getClaimTypeLabel(record.claimType)}</p>
+                    <p><strong>Тема:</strong> {record.subject}</p>
+                    <p><strong>Описание:</strong></p>
+                    <p>{record.description}</p>
+                    <p><strong>Решение:</strong></p>
+                    <p style={{ background: '#f0f9ff', padding: 12, borderRadius: 4 }}>{record.resolution}</p>
+                    <p><strong>Время обработки:</strong> {dayjs(record.resolvedAt).diff(dayjs(record.createdAt), 'hour')} часов</p>
+                  </div>
+                ),
+                width: 700,
+                maskStyle: {
+                  backdropFilter: 'blur(4px)',
+                },
+              });
+            }}
+          />
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <Card>
+          <Table
+            columns={claimsColumns}
+            dataSource={completedClaims}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет завершённых обращений' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
+  const PendingApprovalSection = () => {
+    const pendingClaims = getMockClaimsByStatus(ClaimStatus.PENDING_DIRECTOR);
+    
+    const claimsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Пользователь',
+        dataIndex: 'user',
+        key: 'user',
+        render: (user: any) => (
+          <div>
+            <div><strong>{user.username}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+          </div>
+        ),
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'claimType',
+        key: 'claimType',
+        render: (type: string) => getClaimTypeLabel(type),
+      },
+      {
+        title: 'Приоритет',
+        dataIndex: 'priority',
+        key: 'priority',
+        render: (priority: string) => (
+          <Tag color={getClaimPriorityColor(priority)}>
+            {getClaimPriorityLabel(priority)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Тема',
+        dataIndex: 'subject',
+        key: 'subject',
+        ellipsis: true,
+      },
+      {
+        title: 'Эскалировано',
+        key: 'escalatedTime',
+        render: (record: any) => {
+          const lastHistory = record.statusHistory[record.statusHistory.length - 1];
+          return dayjs(lastHistory.createdAt).format('DD.MM.YYYY HH:mm');
+        },
+      },
+      {
+        title: 'Статус обсуждения',
+        key: 'discussionStatus',
+        render: () => (
+          <Tag color="processing">
+            Обсуждается с дирекцией
+          </Tag>
+        ),
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 100,
+        render: (record: any) => (
+          <Space>
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => {
+                Modal.info({
+                  title: `Обращение #${record.id} (Ожидает решения)`,
+                  content: (
+                    <div>
+                      <p><strong>От:</strong> {record.user.username} ({record.user.email})</p>
+                      <p><strong>Тип:</strong> {getClaimTypeLabel(record.claimType)}</p>
+                      <p><strong>Приоритет:</strong> {getClaimPriorityLabel(record.priority)}</p>
+                      <p><strong>Тема:</strong> {record.subject}</p>
+                      <p><strong>Описание:</strong></p>
+                      <p>{record.description}</p>
+                      <Alert
+                        message="Обращение эскалировано в дирекцию"
+                        description="Ожидается решение от дирекции. Проверьте раздел 'Коммуникация с дирекцией' для получения обновлений."
+                        type="warning"
+                        showIcon
+                        style={{ marginTop: 16 }}
+                      />
+                    </div>
+                  ),
+                  width: 700,
+                  maskStyle: {
+                    backdropFilter: 'blur(4px)',
+                  },
+                });
+              }}
+            />
+            <Button 
+              size="small" 
+              type="primary"
+              icon={<MessageOutlined />}
+              onClick={() => {
+                message.info('Переход к обсуждению с дирекцией');
+              }}
+            />
+          </Space>
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <Card>
+          <Table
+            columns={claimsColumns}
+            dataSource={pendingClaims}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет обращений, ожидающих решения' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
+  const ClaimsProcessingSection = () => {
+    // Фильтруем только претензии и жалобы
+    const complaints = getMockClaims().filter((claim: any) => 
+      claim.claimType === ClaimType.USER_COMPLAINT || claim.claimType === ClaimType.ORDER_ISSUE
+    );
+    
+    const complaintsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Заявитель',
+        dataIndex: 'user',
+        key: 'user',
+        render: (user: any) => (
+          <div>
+            <div><strong>{user.username}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{user.role === 'client' ? 'Клиент' : 'Эксперт'}</div>
+          </div>
+        ),
+      },
+      {
+        title: 'Ответчик',
+        key: 'respondent',
+        render: (record: any) => {
+          if (record.relatedOrder) {
+            const respondent = record.user.role === 'client' ? record.relatedOrder.expert : record.relatedOrder.client;
+            return respondent ? (
+              <div>
+                <div><strong>{respondent.username}</strong></div>
+                <div style={{ fontSize: '12px', color: '#666' }}>{respondent.role === 'client' ? 'Клиент' : 'Эксперт'}</div>
+              </div>
+            ) : '-';
+          }
+          return '-';
+        },
+      },
+      {
+        title: 'Связанный заказ',
+        dataIndex: 'relatedOrder',
+        key: 'relatedOrder',
+        render: (order: any) => order ? (
+          <div>
+            <div><strong>#{order.id}</strong></div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{order.title}</div>
+          </div>
+        ) : '-',
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'claimType',
+        key: 'claimType',
+        render: (type: string) => getClaimTypeLabel(type),
+      },
+      {
+        title: 'Приоритет',
+        dataIndex: 'priority',
+        key: 'priority',
+        render: (priority: string) => (
+          <Tag color={getClaimPriorityColor(priority)}>
+            {getClaimPriorityLabel(priority)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Статус',
+        dataIndex: 'status',
+        key: 'status',
+        render: (status: string) => (
+          <Tag color={getClaimStatusColor(status)}>
+            {getClaimStatusLabel(status)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 100,
+        render: (record: any) => (
+          <Space>
+            <Button 
+              size="small" 
+              icon={<CheckOutlined />}
+              onClick={() => {
+                Modal.confirm({
+                  title: `Претензия #${record.id}`,
+                  content: (
+                    <div>
+                      <p><strong>Заявитель:</strong> {record.user.username}</p>
+                      <p><strong>Тип:</strong> {getClaimTypeLabel(record.claimType)}</p>
+                      <p><strong>Тема:</strong> {record.subject}</p>
+                      <p><strong>Описание:</strong></p>
+                      <p>{record.description}</p>
+                      {record.relatedOrder && (
+                        <p><strong>Заказ:</strong> #{record.relatedOrder.id} - {record.relatedOrder.title}</p>
+                      )}
+                      <div style={{ marginTop: 16 }}>
+                        <p><strong>Выберите действие:</strong></p>
+                      </div>
+                    </div>
+                  ),
+                  width: 700,
+                  okText: 'Удовлетворить',
+                  cancelText: 'Отклонить',
+                  maskStyle: {
+                    backdropFilter: 'blur(4px)',
+                  },
+                  onOk: () => {
+                    message.success(`Претензия #${record.id} удовлетворена`);
+                  },
+                  onCancel: () => {
+                    message.info(`Претензия #${record.id} отклонена`);
+                  },
+                });
+              }}
+            />
+            <Button 
+              size="small" 
+              danger
+              icon={<ExclamationCircleOutlined />}
+              onClick={() => {
+                message.warning(`Претензия #${record.id} эскалирована в дирекцию`);
+              }}
+            />
+          </Space>
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <Card>
+          <Alert
+            message="Претензии и жалобы"
+            description="В этом разделе отображаются все обращения типа 'Жалоба на пользователя' и 'Проблема с заказом', требующие особого внимания."
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+          <Table
+            columns={complaintsColumns}
+            dataSource={complaints}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет претензий для обработки' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
+  const CommunicationSection = () => {
+    const communications = getMockDirectorCommunications();
+    
+    const communicationsColumns = [
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 60,
+        render: (id: number) => `#${id}`,
+      },
+      {
+        title: 'Тема',
+        dataIndex: 'subject',
+        key: 'subject',
+        ellipsis: true,
+      },
+      {
+        title: 'Приоритет',
+        dataIndex: 'priority',
+        key: 'priority',
+        render: (priority: string) => (
+          <Tag color={getClaimPriorityColor(priority)}>
+            {getClaimPriorityLabel(priority)}
+          </Tag>
+        ),
+      },
+      {
+        title: 'Статус',
+        dataIndex: 'status',
+        key: 'status',
+        render: (status: string) => {
+          const colors: Record<string, string> = {
+            open: 'blue',
+            in_discussion: 'processing',
+            resolved: 'success',
+            closed: 'default',
+          };
+          return (
+            <Tag color={colors[status]}>
+              {getDirectorCommunicationStatusLabel(status)}
+            </Tag>
+          );
+        },
+      },
+      {
+        title: 'Связанное обращение',
+        dataIndex: 'relatedClaim',
+        key: 'relatedClaim',
+        render: (claim: any) => claim ? `#${claim.id}` : '-',
+      },
+      {
+        title: 'Непрочитанных',
+        dataIndex: 'unreadCount',
+        key: 'unreadCount',
+        render: (count: number) => count > 0 ? (
+          <Tag color="red">{count}</Tag>
+        ) : (
+          <span style={{ color: '#999' }}>0</span>
+        ),
+      },
+      {
+        title: 'Последнее обновление',
+        dataIndex: 'updatedAt',
+        key: 'updatedAt',
+        render: (date: string) => dayjs(date).format('DD.MM.YYYY HH:mm'),
+      },
+      {
+        title: 'Действия',
+        key: 'actions',
+        width: 150,
+        render: (record: any) => (
+          <Button 
+            size="small" 
+            type="primary"
+            icon={<MessageOutlined />}
+            onClick={() => {
+              Modal.info({
+                title: record.subject,
+                content: (
+                  <div>
+                    <div style={{ marginBottom: 16 }}>
+                      <Tag color={getClaimPriorityColor(record.priority)}>
+                        {getClaimPriorityLabel(record.priority)}
+                      </Tag>
+                      {record.relatedClaim && (
+                        <Tag color="blue">Обращение #{record.relatedClaim.id}</Tag>
+                      )}
+                    </div>
+                    
+                    <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                      {record.messages.map((msg: any) => (
+                        <div 
+                          key={msg.id} 
+                          style={{ 
+                            marginBottom: 12, 
+                            padding: 12, 
+                            background: msg.author.role === 'director' ? '#e6f7ff' : '#f5f5f5',
+                            borderRadius: 8,
+                            borderLeft: `3px solid ${msg.author.role === 'director' ? '#1890ff' : '#d9d9d9'}`
+                          }}
+                        >
+                          <div style={{ 
+                            fontSize: '12px', 
+                            color: '#666', 
+                            marginBottom: 4,
+                            display: 'flex',
+                            justifyContent: 'space-between'
+                          }}>
+                            <span>
+                              <strong>{msg.author.username}</strong>
+                              {msg.author.role === 'director' && <Tag color="purple" style={{ marginLeft: 8, fontSize: '11px' }}>Дирекция</Tag>}
+                            </span>
+                            <span>{dayjs(msg.createdAt).format('DD.MM HH:mm')}</span>
+                          </div>
+                          <div>{msg.message}</div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {record.decision && (
+                      <div style={{ marginTop: 16, padding: 12, background: '#f6ffed', borderRadius: 8, border: '1px solid #b7eb8f' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Решение:</div>
+                        <div>{record.decision}</div>
+                      </div>
+                    )}
+                    
+                    <div style={{ marginTop: 16 }}>
+                      <Input.TextArea 
+                        placeholder="Введите ваше сообщение..."
+                        rows={3}
+                        style={{ marginBottom: 8 }}
+                      />
+                      <Button type="primary" icon={<MessageOutlined />}>
+                        Отправить сообщение
+                      </Button>
+                    </div>
+                  </div>
+                ),
+                width: 800,
+                maskStyle: {
+                  backdropFilter: 'blur(4px)',
+                },
+                okText: 'Закрыть',
+              });
+            }}
+          >
+            Открыть
+          </Button>
+        ),
+      },
+    ];
+    
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16 }}>
+          <Button 
+            type="primary" 
+            icon={<MessageOutlined />}
+            onClick={() => {
+              message.info('Создание нового обсуждения');
+            }}
+          >
+            Новое обсуждение
+          </Button>
+        </div>
+        <Card>
+          <Table
+            columns={communicationsColumns}
+            dataSource={communications}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            locale={{ emptyText: 'Нет обсуждений с дирекцией' }}
+          />
+        </Card>
+      </div>
+    );
+  };
+
   // Если загрузка - показываем спиннер
   if (loading) {
     return (
@@ -805,110 +1670,225 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  const menuItems: MenuItem[] = [
+  // Маппинг ключей на компоненты
+  const componentMap: Record<string, React.ReactNode> = {
+    overview: <OverviewSection />,
+    partners: <PartnersSection />,
+    earnings: <EarningsSection />,
+    disputes: <DisputesSection />,
+    new_claims: <NewClaimsSection />,
+    in_progress_claims: <InProgressClaimsSection />,
+    completed_claims: <CompletedClaimsSection />,
+    pending_approval: <PendingApprovalSection />,
+    claims_processing: <ClaimsProcessingSection />,
+    communication: <DirectorCommunication />,
+  };
+
+  // Маппинг ключей на заголовки
+  const titleMap: Record<string, string> = {
+    overview: 'Обзор',
+    partners: 'Партнеры',
+    earnings: 'Начисления',
+    disputes: 'Споры',
+    new_claims: 'Новые обращения',
+    in_progress_claims: 'В работе',
+    completed_claims: 'Завершённые',
+    pending_approval: 'Ожидают решения',
+    claims_processing: 'Обработка претензий',
+    communication: 'Коммуникация с дирекцией',
+  };
+
+  const handleMenuClick = (key: string) => {
+    setSelectedMenu(key);
+    // Если выбран подпункт обращений, открываем меню "Обращения"
+    if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(key)) {
+      setOpenKeys(['claims']);
+    }
+    // Закрываем drawer на мобильных после выбора
+    if (isMobile) {
+      setDrawerVisible(false);
+    }
+  };
+
+  const currentComponent = componentMap[selectedMenu];
+  const currentTitle = titleMap[selectedMenu] || 'Личный кабинет администратора';
+
+  const menuItems = [
     {
       key: 'overview',
       icon: <BarChartOutlined />,
       label: 'Обзор',
-      component: <OverviewSection />,
     },
     {
       key: 'partners',
       icon: <TeamOutlined />,
       label: 'Партнеры',
-      component: <PartnersSection />,
     },
     {
       key: 'earnings',
       icon: <DollarOutlined />,
       label: 'Начисления',
-      component: <EarningsSection />,
     },
     {
       key: 'disputes',
       icon: <FileTextOutlined />,
       label: 'Споры',
-      component: <DisputesSection />,
+    },
+    {
+      key: 'claims',
+      icon: <FileTextOutlined />,
+      label: 'Обращения',
+      children: [
+        {
+          key: 'new_claims',
+          icon: <BellOutlined />,
+          label: 'Новые обращения',
+        },
+        {
+          key: 'in_progress_claims',
+          icon: <ClockCircleOutlined />,
+          label: 'В работе',
+        },
+        {
+          key: 'completed_claims',
+          icon: <CheckCircleOutlined />,
+          label: 'Завершённые',
+        },
+        {
+          key: 'pending_approval',
+          icon: <HourglassOutlined />,
+          label: 'Ожидают решения',
+        },
+      ],
+    },
+    {
+      key: 'claims_processing',
+      icon: <FileTextOutlined />,
+      label: 'Обработка претензий',
+    },
+    {
+      key: 'communication',
+      icon: <MessageOutlined />,
+      label: 'Коммуникация с дирекцией',
     },
   ];
 
-  const currentMenuItem = menuItems.find((item) => item.key === selectedMenu);
+  const renderMenu = () => (
+    <Menu
+      mode="inline"
+      selectedKeys={[selectedMenu]}
+      openKeys={openKeys}
+      onClick={({ key }) => handleMenuClick(key as string)}
+      onOpenChange={(keys) => setOpenKeys(keys)}
+      style={{
+        borderRight: 0,
+        height: isMobile ? 'auto' : 'calc(100vh - 120px)',
+      }}
+      items={menuItems}
+    />
+  );
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={250}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        }}
+      {!isMobile && (
+        <Sider
+          width={isTablet ? 200 : 250}
+          style={{
+            background: '#fff',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          }}
+          breakpoint="lg"
+          collapsedWidth="0"
+        >
+          <div
+            style={{
+              padding: isTablet ? '16px' : '24px',
+              textAlign: 'center',
+              borderBottom: '1px solid #f0f0f0',
+            }}
+          >
+            <SettingOutlined style={{ fontSize: isTablet ? '28px' : '32px', color: '#1890ff', marginBottom: '8px' }} />
+            <Title level={4} style={{ margin: 0, fontSize: isTablet ? '14px' : '16px' }}>
+              ЛК администратора
+            </Title>
+          </div>
+          {renderMenu()}
+        </Sider>
+      )}
+
+      {/* Drawer для мобильных */}
+      <Drawer
+        title="Меню"
+        placement="left"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={280}
+        styles={{ body: { padding: 0 } }}
       >
         <div
           style={{
-            padding: '24px',
+            padding: '16px',
             textAlign: 'center',
             borderBottom: '1px solid #f0f0f0',
           }}
         >
-          <SettingOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет администратора
+          <SettingOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
+          <Title level={5} style={{ margin: 0 }}>
+            ЛК администратора
           </Title>
         </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedMenu]}
-          onClick={({ key }) => setSelectedMenu(key)}
-          style={{
-            borderRight: 0,
-            height: 'calc(100vh - 120px)',
-          }}
-          items={menuItems.map((item) => ({
-            key: item.key,
-            icon: item.icon,
-            label: item.label,
-          }))}
-        />
-      </Sider>
+        {renderMenu()}
+      </Drawer>
       <Layout>
         <Header
           style={{
             background: '#fff',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Title level={3} style={{ margin: 0 }}>
-            {currentMenuItem?.label || 'Личный кабинет администратора'}
-          </Title>
           <Space>
-            <Button
-              type="default"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-            >
-              Выйти
-            </Button>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerVisible(true)}
+                style={{ fontSize: '18px' }}
+              />
+            )}
+            <Title level={isMobile ? 5 : 3} style={{ margin: 0 }}>
+              {isMobile ? titleMap[selectedMenu]?.split(' ')[0] || 'Админ' : currentTitle}
+            </Title>
           </Space>
+          <Button
+            type="default"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            size={isMobile ? 'small' : 'middle'}
+          >
+            {!isMobile && 'Выйти'}
+          </Button>
         </Header>
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
+            margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
+            padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
             background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
           }}
         >
-          {currentMenuItem?.component}
+          {currentComponent}
         </Content>
-        <Footer style={{ textAlign: 'center', background: '#fff' }}>
-          Личный кабинет администратора © {new Date().getFullYear()}
-        </Footer>
+        {!isMobile && (
+          <Footer style={{ textAlign: 'center', background: '#fff', padding: isTablet ? '12px' : '24px' }}>
+            Личный кабинет администратора © {new Date().getFullYear()}
+          </Footer>
+        )}
       </Layout>
 
       {/* Модальное окно просмотра партнера */}
