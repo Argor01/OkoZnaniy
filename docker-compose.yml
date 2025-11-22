@@ -93,6 +93,31 @@ services:
     networks:
       - app_network
 
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    restart: always
+    depends_on:
+      - backend
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_WEBHOOK_URL=${TELEGRAM_BOT_WEBHOOK_URL}
+      - BACKEND_URL=http://backend:8000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - DEBUG=${DEBUG:-False}
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=config.settings
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+
   nginx:
     image: nginx:alpine
     restart: always
