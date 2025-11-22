@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 
 interface SocialLoginButtonsProps {
   onTelegramAuth?: (user: any) => void;
@@ -6,7 +7,6 @@ interface SocialLoginButtonsProps {
 }
 
 const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
-  const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
   const googleHref = `${API_BASE_URL}/api/accounts/google/login/?process=login`;
   const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
   
