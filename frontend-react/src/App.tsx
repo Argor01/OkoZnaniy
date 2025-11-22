@@ -23,9 +23,10 @@ import CreateOrder from './pages/CreateOrder';
 import ExpertDashboard from './pages/ExpertDashboard';
 import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
+import BecomeExpert from './pages/BecomeExpert';
+import BecomePartner from './pages/BecomePartner';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import ArbitratorDashboard from './pages/ArbitratorDashboard/ArbitratorDashboard';
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
@@ -88,6 +89,14 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
+                path="/become-expert" 
+                element={<BecomeExpert />} 
+              />
+              <Route 
+                path="/become-partner" 
+                element={<BecomePartner />} 
+              />
+              <Route 
                 path="/expert/:expertId" 
                 element={<ExpertProfile />} 
               />
@@ -106,14 +115,6 @@ const App: React.FC = () => {
               <Route 
                 path="/administrator" 
                 element={<AdminDashboard />} 
-              />
-              <Route 
-                path="/arbitrator"
-                element={
-                  <ProtectedRoute>
-                    <ArbitratorDashboard />
-                  </ProtectedRoute>
-                } 
               />
               <Route 
                 path="/director"
