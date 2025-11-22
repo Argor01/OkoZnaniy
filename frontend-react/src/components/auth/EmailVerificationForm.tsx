@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
 interface EmailVerificationFormProps {
   email: string;
@@ -17,8 +18,6 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [message, setMessage] = useState('');
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // Таймер для повторной отправки
   useEffect(() => {
@@ -101,7 +100,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/users/verify_email_code/`, {
+      const response = await axios.post(`${API_BASE_URL}/api/users/verify_email_code/`, {
         email,
         code: verificationCode,
       });
@@ -143,7 +142,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
     setMessage('');
 
     try {
-      await axios.post(`${API_URL}/api/users/resend_verification_code/`, {
+      await axios.post(`${API_BASE_URL}/api/users/resend_verification_code/`, {
         email,
       });
 
