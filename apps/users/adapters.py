@@ -69,24 +69,34 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Связываем существующего пользователя с социальным аккаунтом если email совпадает.
         Если пользователя нет - перенаправляем на регистрацию с email.
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"🔍 pre_social_login called, is_existing: {sociallogin.is_existing}")
+        
         # Если пользователь уже авторизован, ничего не делаем
         if sociallogin.is_existing:
+            logger.info("✅ User already exists, continuing with login")
             return
         
         # Получаем email из данных социальной сети
         email = sociallogin.account.extra_data.get('email')
+        logger.info(f"📧 Email from Google: {email}")
+        
         if not email:
+            logger.warning("⚠️ No email from Google")
             return
         
         # Ищем пользователя с таким email
         from apps.users.models import User
         try:
             user = User.objects.get(email=email)
+            logger.info(f"✅ User found: {user.username}, connecting social account")
             # Связываем социальный аккаунт с существующим пользователем
             sociallogin.connect(request, user)
         except User.DoesNotExist:
+            logger.info(f"❌ User not found, redirecting to registration")
             # Пользователя нет - сохраняем email в сессии для регистрации
-            from allauth.socialaccount.adapter import get_adapter
             from django.shortcuts import redirect
             
             # Сохраняем данные из Google в сессии
@@ -99,6 +109,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             from allauth.exceptions import ImmediateHttpResponse
             frontend_url = settings.FRONTEND_URL or 'http://localhost:5173'
             redirect_url = f"{frontend_url}/register?email={email}&from=google"
+            logger.info(f"🔀 Redirecting to: {redirect_url}")
             raise ImmediateHttpResponse(redirect(redirect_url))
     
     def populate_user(self, request, sociallogin, data):
