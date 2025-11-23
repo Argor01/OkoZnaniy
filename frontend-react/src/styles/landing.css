@@ -585,7 +585,7 @@ img {
 }
 .first-screen__figure {
   position: absolute;
-  top: 110px;
+  top: 160px;
   left: 598px;
   right: -129px;
   bottom: 0;
@@ -604,7 +604,7 @@ img {
 }
 @media (max-width: 1320px) {
   .first-screen__figure {
-    top: 64px;
+    top: 120px;
     left: 480px;
   }
 }
@@ -1168,7 +1168,7 @@ img {
 }
 @media (max-width: 576px) {
   .only-pro__wrapper {
-    padding: 60px 0 80px;
+    padding: 60px 0 0px;
   }
 }
 .only-pro__teacher {
@@ -1179,14 +1179,14 @@ img {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-align: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
   width: 952px;
-  aspect-ratio: 952/901;
+  height: 100%;
 }
 @media (max-width: 1320px) {
   .only-pro__teacher {
@@ -1219,7 +1219,9 @@ img {
   display: block;
   max-width: 100%;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
 }
 @media (max-width: 1024px) {
   .only-pro__teacher-image {

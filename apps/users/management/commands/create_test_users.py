@@ -8,11 +8,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         test_users = [
             {
-                'username': 'admin',
-                'email': 'admin@test.com',
+                'username': 'administrator',
+                'email': 'administrator@test.com',
                 'password': 'test123',
                 'role': 'admin',
-                'first_name': 'Админ',
+                'first_name': 'Администратор',
                 'last_name': 'Тестовый',
             },
             {

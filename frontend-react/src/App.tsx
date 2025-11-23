@@ -110,11 +110,11 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/admin" 
-                element={<Navigate to="/administrator" replace />} 
+                element={<AdminDashboard />} 
               />
               <Route 
                 path="/administrator" 
-                element={<AdminDashboard />} 
+                element={<Navigate to="/admin" replace />} 
               />
               <Route 
                 path="/director"

@@ -2,7 +2,7 @@ import React from 'react';
 
 const ExpertFirstScreen: React.FC = () => {
   return (
-    <section className="first-screen">
+    <section className="first-screen" style={{ paddingTop: '100px' }}>
       <div className="mcontainer">
         <div className="first-screen__wrapper">
           <div className="first-screen__content">

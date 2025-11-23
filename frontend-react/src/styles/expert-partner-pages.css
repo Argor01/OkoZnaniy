@@ -14,7 +14,7 @@
 .partner-page .first-screen__figure {
   overflow: visible !important;
   position: fixed !important;
-  top: 110px !important;
+  top: 200px !important;
   left: 50% !important;
   right: auto !important;
   bottom: 0;
@@ -32,7 +32,7 @@
   display: block;
   max-width: none !important;
   width: auto !important;
-  height: calc(100vh - 110px) !important;
+  height: calc(100vh - 200px) !important;
   object-fit: contain !important;
   object-position: left bottom !important;
 }

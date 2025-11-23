@@ -15,7 +15,7 @@ export const DEV_ACCOUNTS: DevAccount[] = [
   {
     role: 'admin',
     label: 'Администратор',
-    email: 'admin@test.com',
+    email: 'administrator@test.com',
     password: 'test123'
   },
   {
