@@ -14,7 +14,7 @@ test_users = [
     {
         'username': 'admin_test',
         'email': 'admin@test.com',
-        'password': 'admin123',
+        'password': 'test123',
         'role': 'admin',
         'first_name': 'Администратор',
         'is_staff': True,
@@ -23,14 +23,14 @@ test_users = [
     {
         'username': 'partner_test',
         'email': 'partner@test.com',
-        'password': 'partner123',
+        'password': 'test123',
         'role': 'partner',
         'first_name': 'Партнер',
     },
     {
         'username': 'director_test',
         'email': 'director@test.com',
-        'password': 'director123',
+        'password': 'test123',
         'role': 'admin',
         'first_name': 'Директор',
         'is_staff': True,
@@ -38,14 +38,14 @@ test_users = [
     {
         'username': 'expert_test',
         'email': 'expert@test.com',
-        'password': 'expert123',
+        'password': 'test123',
         'role': 'expert',
         'first_name': 'Эксперт',
     },
     {
         'username': 'client_test',
         'email': 'client@test.com',
-        'password': 'client123',
+        'password': 'test123',
         'role': 'client',
         'first_name': 'Клиент',
     },
