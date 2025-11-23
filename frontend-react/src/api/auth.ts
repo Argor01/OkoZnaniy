@@ -133,7 +133,7 @@ export const authApi = {
 
   // Подтвердить сброс пароля
   confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<void> => {
-    await apiClient.post('/users/confirm_password_reset/', {
+    await apiClient.post('/users/reset_password_with_code/', {
       email,
       code,
       new_password: newPassword,
@@ -142,7 +142,7 @@ export const authApi = {
 
   // Alias для совместимости
   resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<void> => {
-    await apiClient.post('/users/confirm_password_reset/', {
+    await apiClient.post('/users/reset_password_with_code/', {
       email,
       code,
       new_password: newPassword,
