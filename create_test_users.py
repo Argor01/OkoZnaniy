@@ -12,8 +12,8 @@ from apps.users.models import User
 # Тестовые пользователи
 test_users = [
     {
-        'username': 'admin_test',
-        'email': 'admin@test.com',
+        'username': 'administrator',
+        'email': 'administrator@test.com',
         'password': 'test123',
         'role': 'admin',
         'first_name': 'Администратор',
@@ -21,14 +21,14 @@ test_users = [
         'is_superuser': True,
     },
     {
-        'username': 'partner_test',
+        'username': 'partner',
         'email': 'partner@test.com',
         'password': 'test123',
         'role': 'partner',
         'first_name': 'Партнер',
     },
     {
-        'username': 'director_test',
+        'username': 'director',
         'email': 'director@test.com',
         'password': 'test123',
         'role': 'admin',
