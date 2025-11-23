@@ -23,6 +23,7 @@ dj-database-url==2.3.0
 Django==5.2.1
 django-allauth==0.62.0
 django-extensions==3.2.3
+django-hijack==3.4.5
 werkzeug==3.0.3
 pyOpenSSL==24.1.0
 django-cors-headers==4.3.1

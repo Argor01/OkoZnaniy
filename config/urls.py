@@ -24,6 +24,7 @@ from apps.core.health import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('hijack/', include('hijack.urls')),
     path('api/health/', health_check, name='health_check'),
     path('api/users/', include('apps.users.urls')),
     path('api/orders/', include('apps.orders.urls')),

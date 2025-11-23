@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'channels',
+    'hijack',
+    'hijack.contrib.admin',
 
     'allauth',
     'allauth.account',
@@ -78,6 +80,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'hijack.middleware.HijackUserMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
