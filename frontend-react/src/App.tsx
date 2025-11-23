@@ -39,6 +39,7 @@ import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
 import PurchasedWorks from './pages/PurchasedWorks';
+import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 
@@ -172,6 +173,8 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
+              {/* 404 - должен быть последним */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </Router>

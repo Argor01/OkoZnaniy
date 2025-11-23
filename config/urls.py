@@ -23,7 +23,7 @@ from django.urls import path
 from apps.core.health import health_check
 
 urlpatterns = [
-    path('api/admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('api/health/', health_check, name='health_check'),
     path('api/users/', include('apps.users.urls')),
     path('api/orders/', include('apps.orders.urls')),
