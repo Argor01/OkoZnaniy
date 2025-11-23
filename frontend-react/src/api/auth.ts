@@ -139,4 +139,13 @@ export const authApi = {
       new_password: newPassword,
     });
   },
+
+  // Alias для совместимости
+  resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<void> => {
+    await apiClient.post('/users/confirm_password_reset/', {
+      email,
+      code,
+      new_password: newPassword,
+    });
+  },
 };
