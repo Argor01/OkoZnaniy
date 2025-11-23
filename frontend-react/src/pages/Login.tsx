@@ -51,7 +51,7 @@ const Login: React.FC = () => {
 
   // Модалка восстановления пароля
   const [passwordResetModalVisible, setPasswordResetModalVisible] = useState(false);
-  const [resetStep, setResetStep] = useState<'email' | 'code'>('email');
+  const [resetStep, setResetStep] = useState<'email' | 'code' | 'password'>('email');
   const [resetEmail, setResetEmail] = useState('');
   const [resetCode, setResetCode] = useState(['', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
@@ -305,6 +305,17 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleVerifyResetCode = async () => {
+    const codeString = resetCode.join('');
+    if (codeString.length !== 6) {
+      message.error('Введите 6-значный код');
+      return;
+    }
+    // Просто переходим к следующему шагу
+    // Проверка кода произойдет при сбросе пароля
+    setResetStep('password');
+  };
+
   const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
       message.error('Пароли не совпадают');
@@ -335,6 +346,8 @@ const Login: React.FC = () => {
     } catch (error: any) {
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
+      // Возвращаем на шаг ввода кода при ошибке
+      setResetStep('code');
     } finally {
       setResetLoading(false);
     }
@@ -596,8 +609,11 @@ const Login: React.FC = () => {
               onNewPasswordChange={setNewPassword}
               onConfirmPasswordChange={setConfirmPassword}
               onRequestCode={handleRequestPasswordReset}
+              onVerifyCode={handleVerifyResetCode}
               onResetPassword={handleResetPassword}
               onBackToEmail={() => setResetStep('email')}
+              onBackToCode={() => setResetStep('code')}
+              onGoToCodeStep={() => setResetStep('code')}
               onCancel={() => {
                 setPasswordResetModalVisible(false);
                 setResetStep('email');

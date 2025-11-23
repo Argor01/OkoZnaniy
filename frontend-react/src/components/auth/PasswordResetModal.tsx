@@ -4,7 +4,7 @@ import { MailOutlined, LockOutlined } from '@ant-design/icons';
 
 interface PasswordResetModalProps {
   open: boolean;
-  step: 'email' | 'code';
+  step: 'email' | 'code' | 'password';
   email: string;
   code: string[];
   newPassword: string;
@@ -15,8 +15,11 @@ interface PasswordResetModalProps {
   onNewPasswordChange: (password: string) => void;
   onConfirmPasswordChange: (password: string) => void;
   onRequestCode: () => void;
+  onVerifyCode: () => void;
   onResetPassword: () => void;
   onBackToEmail: () => void;
+  onBackToCode: () => void;
+  onGoToCodeStep: () => void;
   onCancel: () => void;
 }
 
@@ -33,8 +36,11 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   onNewPasswordChange,
   onConfirmPasswordChange,
   onRequestCode,
+  onVerifyCode,
   onResetPassword,
   onBackToEmail,
+  onBackToCode,
+  onGoToCodeStep,
   onCancel,
 }) => {
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -58,7 +64,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
     >
       {step === 'email' ? (
         <div>
-          <p className="text-muted mb-3">
+          <p className="text-muted" style={{ marginBottom: '5px' }}>
             Введите email для получения кода восстановления
           </p>
           <Input
@@ -74,21 +80,21 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             type="primary"
             loading={loading}
             onClick={onRequestCode}
-            block
             size="large"
+            block
             style={{ marginTop: '16px' }}
           >
             Отправить код
           </Button>
         </div>
-      ) : (
+      ) : step === 'code' ? (
         <div>
           <p className="text-muted mb-3">
-            Введите 6-значный код из email и новый пароль
+            Введите 6-значный код из email
           </p>
           
           {/* Поля для ввода кода */}
-          <div className="d-flex justify-content-center gap-2 mb-3">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -100,18 +106,43 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 onChange={(e) => onCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={loading}
-                className="form-control text-center"
                 style={{
                   width: '45px',
                   height: '50px',
                   fontSize: '24px',
-                  fontWeight: 'bold',
+                  fontWeight: '500',
                   border: '2px solid #d9d9d9',
                   borderRadius: '8px',
+                  textAlign: 'center',
+                  lineHeight: '46px',
+                  padding: '0',
+                  outline: 'none',
                 }}
               />
             ))}
           </div>
+
+          {/* Кнопки */}
+          <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+            <Button onClick={onBackToEmail} disabled={loading}>
+              ← Назад
+            </Button>
+            <Button
+              type="primary"
+              loading={loading}
+              onClick={onVerifyCode}
+              style={{ flex: 1 }}
+              size="large"
+            >
+              Подтвердить код
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <p className="text-muted" style={{ marginBottom: '5px' }}>
+            Введите новый пароль
+          </p>
 
           {/* Поля для нового пароля */}
           <Input.Password
@@ -135,7 +166,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
           {/* Кнопки */}
           <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-            <Button onClick={onBackToEmail} disabled={loading}>
+            <Button onClick={onBackToCode} disabled={loading}>
               ← Назад
             </Button>
             <Button
