@@ -341,11 +341,17 @@ class UserViewSet(viewsets.ModelViewSet):
             "new_password": "newpassword123"
         }
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         email = request.data.get('email')
         code = request.data.get('code')
         new_password = request.data.get('new_password')
         
+        logger.info(f"🔐 Password reset request: email={email}, code={code}")
+        
         if not all([email, code, new_password]):
+            logger.warning("❌ Missing required fields")
             return Response(
                 {'error': 'Email, код и новый пароль обязательны'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -353,8 +359,10 @@ class UserViewSet(viewsets.ModelViewSet):
         
         # Проверяем код
         user_id = verify_password_reset_code(email, code)
+        logger.info(f"🔍 Code verification result: user_id={user_id}")
         
         if not user_id:
+            logger.warning(f"❌ Invalid or expired code for email: {email}")
             return Response(
                 {'error': 'Неверный или истекший код'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -362,7 +370,9 @@ class UserViewSet(viewsets.ModelViewSet):
         
         try:
             user = User.objects.get(id=user_id)
+            logger.info(f"✅ User found: {user.username}")
         except User.DoesNotExist:
+            logger.error(f"❌ User not found with id: {user_id}")
             return Response(
                 {'error': 'Пользователь не найден'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -371,12 +381,14 @@ class UserViewSet(viewsets.ModelViewSet):
         # Устанавливаем новый пароль
         user.set_password(new_password)
         user.save()
+        logger.info(f"✅ Password updated for user: {user.username}")
         
         # Удаляем код из кеша
         delete_password_reset_code(email)
         
         # Генерируем токены для автоматического входа
         refresh = RefreshToken.for_user(user)
+        logger.info(f"✅ Tokens generated for user: {user.username}")
         
         return Response({
             'message': 'Пароль успешно изменен',
