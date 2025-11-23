@@ -6,11 +6,9 @@ upstream frontend {
     server frontend:80;
 }
 
-# Увеличиваем размер буфера для больших запросов
 client_max_body_size 100M;
 client_body_buffer_size 128k;
 
-# Редирект с HTTP на HTTPS
 server {
     listen 80;
     server_name okoznaniy.ru www.okoznaniy.ru 45.12.239.226;
@@ -20,51 +18,21 @@ server {
         root /var/www/certbot;
     }
 
-    # Редирект на HTTPS
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-# HTTPS сервер
-server {
-    listen 443 ssl http2;
-    server_name okoznaniy.ru www.okoznaniy.ru;
-
-    # SSL сертификаты (будут созданы через certbot)
-    ssl_certificate /etc/letsencrypt/live/okoznaniy.ru/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/okoznaniy.ru/privkey.pem;
-    
-    # SSL настройки
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-
-    # Настройки безопасности
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    # Логи
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
 
-    # Статические файлы Django
     location /static/ {
         alias /var/www/static/;
         expires 30d;
         access_log off;
         add_header Cache-Control "public, immutable";
-        
-        # CORS для статики
         add_header Access-Control-Allow-Origin "*";
     }
 
-    # Медиа файлы
     location /media/ {
         alias /var/www/media/;
         expires 7d;
@@ -72,7 +40,6 @@ server {
         add_header Cache-Control "public";
     }
 
-    # API бэкенда
     location /api/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
@@ -80,19 +47,16 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-        # Таймауты
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
         
-        # Буферизация
         proxy_buffering on;
         proxy_buffer_size 4k;
         proxy_buffers 8 4k;
         proxy_busy_buffers_size 8k;
     }
 
-    # Админка Django
     location /admin/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
@@ -105,7 +69,6 @@ server {
         proxy_read_timeout 60s;
     }
 
-    # Django auth endpoints
     location /auth/ {
         proxy_pass http://backend;
         proxy_set_header Host $host;
@@ -114,7 +77,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Фронтенд
     location / {
         proxy_pass http://frontend;
         proxy_set_header Host $host;
@@ -122,18 +84,15 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # WebSocket поддержка
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         
-        # Таймауты для WebSocket
         proxy_connect_timeout 7d;
         proxy_send_timeout 7d;
         proxy_read_timeout 7d;
     }
 
-    # Healthcheck endpoint
     location /health {
         access_log off;
         return 200 "OK\n";
