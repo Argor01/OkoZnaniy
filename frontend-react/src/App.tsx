@@ -7,7 +7,14 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 
 // Import styles
+import './styles/page-transitions.css';
 import './styles/landing.css';
+import './styles/logo.css';
+import './styles/expert-partner-pages.css';
+import './styles/expert-advantages.css';
+import './styles/expert-form.css';
+import './styles/feedback-form.css';
+import './styles/partner-pages.css';
 import './styles/globals.css';
 import './styles/colors.css';
 import './styles/typography.css';

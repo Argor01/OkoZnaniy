@@ -54,6 +54,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
       footer={null}
       centered
       width={500}
+      wrapClassName="password-reset-modal"
     >
       {step === 'email' ? (
         <div>

@@ -116,30 +116,12 @@ img {
       -ms-flex-pack: start;
           justify-content: flex-start;
   width: 100%;
-  position: relative;
-  padding: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
-              0 0 40px rgba(255, 255, 255, 0.2),
-              inset 0 0 10px rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-.header__logo-link:hover {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.4),
-              0 0 60px rgba(255, 255, 255, 0.3),
-              inset 0 0 15px rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
 }
 .header__logo-link-image {
   display: block;
   max-width: 100%;
   width: 100%;
   height: auto;
-  position: relative;
-  z-index: 1;
 }
 .header__cabinet {
   display: -webkit-box;
@@ -583,9 +565,9 @@ img {
 .first-screen__content-buttons-expert:active {
   background-color: #8cc9fb;
 }
-.first-screen__figure {
+ .first-screen__figure {
   position: absolute;
-  top: 160px;
+  top: 110px;
   left: 598px;
   right: -129px;
   bottom: 0;
@@ -601,13 +583,13 @@ img {
           justify-content: flex-start;
   margin: 0;
   overflow: hidden;
-}
-@media (max-width: 1320px) {
+ }
+ @media (max-width: 1320px) {
   .first-screen__figure {
-    top: 120px;
+    top: 64px;
     left: 480px;
   }
-}
+ }
 @media (max-width: 1024px) {
   .first-screen__figure {
     position: static;

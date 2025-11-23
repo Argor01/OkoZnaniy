@@ -29,6 +29,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       onCancel={onCancel}
       footer={null}
       destroyOnClose
+      wrapClassName="verification-modal"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Typography.Paragraph>
