@@ -67,6 +67,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         Вызывается перед входом через социальную сеть.
         Связываем существующего пользователя с социальным аккаунтом если email совпадает.
+        Если пользователя нет - перенаправляем на регистрацию с email.
         """
         # Если пользователь уже авторизован, ничего не делаем
         if sociallogin.is_existing:
@@ -84,7 +85,21 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Связываем социальный аккаунт с существующим пользователем
             sociallogin.connect(request, user)
         except User.DoesNotExist:
-            pass
+            # Пользователя нет - сохраняем email в сессии для регистрации
+            from allauth.socialaccount.adapter import get_adapter
+            from django.shortcuts import redirect
+            
+            # Сохраняем данные из Google в сессии
+            request.session['google_email'] = email
+            request.session['google_first_name'] = sociallogin.account.extra_data.get('given_name', '')
+            request.session['google_last_name'] = sociallogin.account.extra_data.get('family_name', '')
+            request.session['google_picture'] = sociallogin.account.extra_data.get('picture', '')
+            
+            # Прерываем процесс авторизации
+            from allauth.exceptions import ImmediateHttpResponse
+            frontend_url = settings.FRONTEND_URL or 'http://localhost:5173'
+            redirect_url = f"{frontend_url}/register?email={email}&from=google"
+            raise ImmediateHttpResponse(redirect(redirect_url))
     
     def populate_user(self, request, sociallogin, data):
         """

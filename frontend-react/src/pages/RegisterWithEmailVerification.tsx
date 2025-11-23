@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import EmailVerificationForm from '../components/auth/EmailVerificationForm';
 
 const RegisterWithEmailVerification: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<'register' | 'verify'>('register');
   const [email, setEmail] = useState('');
   const [formData, setFormData] = useState({
@@ -15,6 +16,21 @@ const RegisterWithEmailVerification: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fromGoogle, setFromGoogle] = useState(false);
+
+  // Проверяем, пришли ли мы из Google OAuth
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    const fromParam = searchParams.get('from');
+    
+    if (emailParam && fromParam === 'google') {
+      setFormData(prev => ({
+        ...prev,
+        email: emailParam
+      }));
+      setFromGoogle(true);
+    }
+  }, [searchParams]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -99,8 +115,18 @@ const RegisterWithEmailVerification: React.FC = () => {
             Регистрация
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Создайте аккаунт на платформе OkoZnaniy
+            {fromGoogle ? 'Завершите регистрацию с Google аккаунтом' : 'Создайте аккаунт на платформе OkoZnaniy'}
           </p>
+          {fromGoogle && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-700">
+                ✓ Email из Google: <strong>{formData.email}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                Создайте пароль для завершения регистрации
+              </p>
+            </div>
+          )}
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -116,7 +142,8 @@ const RegisterWithEmailVerification: React.FC = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                disabled={fromGoogle}
+                className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${fromGoogle ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 placeholder="your@email.com"
               />
             </div>
