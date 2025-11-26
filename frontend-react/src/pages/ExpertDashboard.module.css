@@ -576,6 +576,15 @@
   background: #ffffff;
 }
 
+.modalEducationRow .ant-form-item {
+  margin-bottom: 0 !important;
+}
+
+.modalEducationRow .ant-col {
+  display: flex;
+  align-items: flex-start;
+}
+
 /* Card (general) */
 .card {
   background: rgba(255, 255, 255, 0.95);

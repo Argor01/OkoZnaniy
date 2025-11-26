@@ -66,3 +66,36 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Fix for modal close icon alignment */
+.ant-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-modal-close-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+}
+
+.ant-modal-close-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fix for all anticon alignment */
+.anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.anticon svg {
+  display: block;
+}

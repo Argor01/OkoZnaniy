@@ -105,6 +105,12 @@ const ExpertDashboard: React.FC = () => {
   const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
   const uploadRef = useRef<any>(null);
 
+  // Forms
+  const [profileForm] = Form.useForm();
+  const [applicationForm] = Form.useForm();
+  const [specializationForm] = Form.useForm();
+  const [createOrderForm] = Form.useForm();
+
   // Тестовые данные для уведомлений
   const mockNotifications: Notification[] = [
     {
@@ -919,8 +925,23 @@ const ExpertDashboard: React.FC = () => {
               label: `О себе`,
               children: (
                 <div className={styles.sectionCard}>
-                  <div className={styles.sectionCardHeader}>
+                  <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 className={styles.sectionTitle}>О себе</h2>
+                    <Button 
+                      type="primary"
+                      icon={<EditOutlined />}
+                      className={styles.buttonPrimary}
+                      onClick={() => {
+                        profileForm.setFieldsValue({
+                          bio: profile?.bio || 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.',
+                          education: profile?.education || 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.',
+                          skills: profile?.skills || 'Математический анализ, Линейная алгебра, Дифференциальные уравнения, Теория вероятностей, Python, C++, JavaScript, Физика, Механика, Электродинамика'
+                        });
+                        setProfileModalVisible(true);
+                      }}
+                    >
+                      Редактировать
+                    </Button>
                   </div>
                   <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
                     {profile?.bio || 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.'}
@@ -1347,6 +1368,128 @@ const ExpertDashboard: React.FC = () => {
                 </div>
               ),
             },
+            {
+              key: 'friends',
+              label: `Мои друзья 5`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader}>
+                    <h2 className={styles.sectionTitle}>Мои друзья</h2>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#3b82f6' }}>ИП</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Иван Петров</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Математика, Физика</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>127 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                          Написать
+                        </Button>
+                        <Button size="small" icon={<UserOutlined />}>
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#10b981' }}>МС</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Мария Сидорова</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Экономика, Бухучет</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>89 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                          Написать
+                        </Button>
+                        <Button size="small" icon={<UserOutlined />}>
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#f59e0b' }}>АС</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Алексей Смирнов</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Программирование</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>156 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                          Написать
+                        </Button>
+                        <Button size="small" icon={<UserOutlined />}>
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#8b5cf6' }}>ЕК</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Елена Козлова</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Химия, Биология</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>203 работы</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                          Написать
+                        </Button>
+                        <Button size="small" icon={<UserOutlined />}>
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#ec4899' }}>ДН</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Дмитрий Новиков</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>История, Философия</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>74 работы</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                          Написать
+                        </Button>
+                        <Button size="small" icon={<UserOutlined />}>
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ),
+            },
           ]}
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
@@ -1677,10 +1820,7 @@ const ExpertDashboard: React.FC = () => {
               min={0} 
               max={50}
               precision={0}
-              parser={(value) => {
-                const parsed = value?.replace(/\D/g, '');
-                return parsed ? Number(parsed) : 0;
-              }}
+              parser={(value) => value?.replace(/\D/g, '') || ''}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
@@ -1737,6 +1877,8 @@ const ExpertDashboard: React.FC = () => {
                               style={{ width: '100%' }}
                               className={styles.inputField}
                               size="large"
+                              precision={0}
+                              parser={(value) => value?.replace(/\D/g, '') || ''}
                             />
                           </Form.Item>
                         </Col>
@@ -1753,6 +1895,8 @@ const ExpertDashboard: React.FC = () => {
                               style={{ width: '100%' }}
                               className={styles.inputField}
                               size="large"
+                              precision={0}
+                              parser={(value) => value?.replace(/\D/g, '') || ''}
                             />
                           </Form.Item>
                         </Col>
@@ -1769,12 +1913,13 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={2} style={{ textAlign: 'center' }}>
+                        <Col span={2} style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Button
                             type="text"
                             danger
                             icon={<DeleteOutlined />}
                             onClick={() => remove(name)}
+                            style={{ marginTop: 0 }}
                           />
                         </Col>
                       </Row>
@@ -4020,10 +4165,145 @@ const ExpertDashboard: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item label="Срок выполнения" required>
-            <DatePicker style={{ width: '100%' }} placeholder="Выберите дату" />
+            <DatePicker 
+              style={{ width: '100%' }} 
+              placeholder="Выберите дату"
+              format="DD.MM.YYYY"
+              disabledDate={(current) => {
+                return current && current < dayjs().startOf('day');
+              }}
+              inputReadOnly
+            />
           </Form.Item>
           <Form.Item label="Бюджет (₽)" required>
             <InputNumber min={0} style={{ width: '100%' }} placeholder="Укажите бюджет" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Profile Edit Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1890ff'
+          }}>
+            Редактировать профиль
+          </div>
+        }
+        open={profileModalVisible}
+        onCancel={() => setProfileModalVisible(false)}
+        onOk={() => profileForm.submit()}
+        width={750}
+        okText="Сохранить"
+        cancelText="Отмена"
+        okButtonProps={{
+          className: styles.buttonPrimary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        cancelButtonProps={{
+          className: styles.buttonSecondary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        <Form
+          form={profileForm}
+          layout="vertical"
+          onFinish={(values) => {
+            // Update profile logic here
+            setProfile({
+              ...profile!,
+              bio: values.bio,
+              education: values.education,
+              skills: values.skills
+            });
+            message.success('Профиль успешно обновлен');
+            setProfileModalVisible(false);
+          }}
+        >
+          <Form.Item
+            label="О себе"
+            name="bio"
+            rules={[{ required: true, message: 'Расскажите о себе' }]}
+          >
+            <Input.TextArea 
+              rows={6} 
+              placeholder="Расскажите о своем опыте, образовании и подходе к работе" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Образование"
+            name="education"
+            rules={[{ required: true, message: 'Укажите образование' }]}
+          >
+            <Input.TextArea 
+              rows={3} 
+              placeholder="Укажите ваше образование и квалификации" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Навыки"
+            name="skills"
+            rules={[{ required: true, message: 'Укажите навыки' }]}
+            extra="Перечислите навыки через запятую"
+          >
+            <Input.TextArea 
+              rows={3} 
+              placeholder="Например: Математический анализ, Python, C++, Физика" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
           </Form.Item>
         </Form>
       </Modal>
