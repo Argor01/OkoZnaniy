@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Layout } from 'antd';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Layout, Popover } from 'antd';
 import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined } from '@ant-design/icons';
+import EmojiPicker from 'emoji-picker-react';
 import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
@@ -99,6 +100,10 @@ const ExpertDashboard: React.FC = () => {
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
+  const uploadRef = useRef<any>(null);
 
   // Тестовые данные для уведомлений
   const mockNotifications: Notification[] = [
@@ -765,21 +770,16 @@ const ExpertDashboard: React.FC = () => {
         <div className={styles.profileBlock}>
           <div className={styles.profileBlockContent}>
             <div className={styles.profileLeft}>
-              <Badge 
-                count={<TrophyOutlined style={{ color: '#f97316', fontSize: 16 }} />} 
-                offset={[-5, 5]}
-              >
-                <Avatar
-                  size={80}
-                  src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
-                  icon={!profile?.avatar && <UserOutlined />}
-                  style={{ 
-                    backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
-                    border: '3px solid #fff',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                  }}
-                />
-              </Badge>
+              <Avatar
+                size={80}
+                src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
+                icon={!profile?.avatar && <UserOutlined />}
+                style={{ 
+                  backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
+                  border: '3px solid #fff',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                }}
+              />
               <div className={styles.profileInfo}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: 20 }}>
@@ -842,19 +842,16 @@ const ExpertDashboard: React.FC = () => {
                   На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
                 </Text>
                 <div>
-                  <Space>
-                    <TrophyOutlined style={{ color: '#667eea', fontSize: 16 }} />
-                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
-                      Статистика работ:{' '}
-                      <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
-                      {' | '}
-                      <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
-                      {' | '}
-                      <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
-                      {' | '}
-                      <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
-                    </Text>
-                  </Space>
+                  <Text style={{ fontSize: 14, color: '#1f2937' }}>
+                    Статистика работ:{' '}
+                    <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
+                    {' | '}
+                    <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
+                    {' | '}
+                    <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
+                    {' | '}
+                    <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
+                  </Text>
                 </div>
               </div>
             </div>
@@ -926,28 +923,24 @@ const ExpertDashboard: React.FC = () => {
                     <h2 className={styles.sectionTitle}>О себе</h2>
                   </div>
                   <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
-                    {profile?.bio || 'Расскажите о себе, своем опыте и специализации...'}
+                    {profile?.bio || 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.'}
                   </Paragraph>
-                  {profile?.education && (
-                    <div style={{ marginTop: 24 }}>
-                      <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
-                      <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
-                        {profile.education}
-                      </Paragraph>
+                  <div style={{ marginTop: 24 }}>
+                    <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
+                    <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
+                      {profile?.education || 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.'}
+                    </Paragraph>
+                  </div>
+                  <div style={{ marginTop: 24 }}>
+                    <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {(profile?.skills ? profile.skills.split(',') : ['Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения', 'Теория вероятностей', 'Python', 'C++', 'JavaScript', 'Физика', 'Механика', 'Электродинамика']).map((skill: string, index: number) => (
+                        <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 14 }}>
+                          {skill.trim()}
+                        </Tag>
+                      ))}
                     </div>
-                  )}
-                  {profile?.skills && (
-                    <div style={{ marginTop: 24 }}>
-                      <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {profile.skills.split(',').map((skill: string, index: number) => (
-                          <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 14 }}>
-                            {skill.trim()}
-                          </Tag>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               ),
             },
@@ -1037,14 +1030,52 @@ const ExpertDashboard: React.FC = () => {
             },
             {
               key: 'reviews',
-              label: `Отзывы 0`,
+              label: `Отзывы 3`,
               children: (
                 <div className={styles.sectionCard}>
                   <div className={styles.sectionCardHeader}>
                     <h2 className={styles.sectionTitle}>Отзывы</h2>
                   </div>
-                  <div className={styles.emptyState}>
-                    <Text>Отзывов пока нет</Text>
+                  <div style={{ display: 'grid', gap: 16 }}>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Иван Петров</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>15.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Отличная работа! Все выполнено качественно и в срок. Решения подробно расписаны, все понятно. Рекомендую этого исполнителя!
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Решение задач по высшей математике</Text>
+                    </div>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Мария Сидорова</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>10.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Очень довольна результатом! Курсовая работа выполнена на высоком уровне, все требования учтены. Спасибо за оперативность и профессионализм!
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Курсовая работа по экономике</Text>
+                    </div>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Алексей Смирнов</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>05.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={4} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Хорошая работа, все сделано правильно. Единственное - хотелось бы чуть больше комментариев в коде. В целом доволен.
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Лабораторная работа по программированию</Text>
+                    </div>
                   </div>
                 </div>
               ),
@@ -1171,10 +1202,7 @@ const ExpertDashboard: React.FC = () => {
                             height: 48,
                             borderRadius: 8,
                             fontSize: 15,
-                            fontWeight: 500,
-                            background: 'linear-gradient(135deg, #FFA726 0%, #FF9800 100%)',
-                            border: 'none',
-                            boxShadow: '0 4px 12px rgba(255, 152, 0, 0.3)'
+                            fontWeight: 500
                           }}
                         >
                           Поиск
@@ -1496,10 +1524,34 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea rows={4} placeholder="Расскажите о себе, своем опыте и специализации" className={styles.textareaField} style={{ fontSize: 15 }} />
           </Form.Item>
           <Form.Item label="Опыт работы (лет)" name="experience_years">
-            <AntInputNumber min={0} max={50} style={{ width: '100%' }} className={styles.inputField} size="large" />
+            <AntInputNumber 
+              min={0} 
+              max={50} 
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              style={{ width: '100%' }} 
+              className={styles.inputField} 
+              size="large"
+              placeholder="0"
+            />
           </Form.Item>
           <Form.Item label="Почасовая ставка (₽)" name="hourly_rate">
-            <AntInputNumber min={0} step={100} style={{ width: '100%' }} className={styles.inputField} size="large" />
+            <AntInputNumber 
+              min={0} 
+              step={100}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              style={{ width: '100%' }} 
+              className={styles.inputField} 
+              size="large"
+              placeholder="0"
+            />
           </Form.Item>
           <Form.Item label="Образование" name="education">
             <Input.TextArea rows={3} placeholder="Укажите ваше образование и квалификации" className={styles.textareaField} style={{ fontSize: 15 }} />
@@ -1519,10 +1571,7 @@ const ExpertDashboard: React.FC = () => {
           <div style={{ 
             fontSize: 24, 
             fontWeight: 600, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            color: '#1890ff'
           }}>
             Заполнение анкеты эксперта
           </div>
@@ -1626,10 +1675,16 @@ const ExpertDashboard: React.FC = () => {
           >
             <AntInputNumber 
               min={0} 
-              max={50} 
+              max={50}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
 
@@ -1653,8 +1708,8 @@ const ExpertDashboard: React.FC = () => {
                 <>
                   {fields.map(({ key, name, ...restField }) => (
                     <div key={key} className={styles.modalEducationRow}>
-                      <Row gutter={16}>
-                        <Col span={9}>
+                      <Row gutter={16} align="middle">
+                        <Col span={10}>
                           <Form.Item
                             {...restField}
                             name={[name, 'university']}
@@ -1668,7 +1723,7 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={5}>
+                        <Col span={4}>
                           <Form.Item
                             {...restField}
                             name={[name, 'start_year']}
@@ -1685,7 +1740,7 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={5}>
+                        <Col span={4}>
                           <Form.Item
                             {...restField}
                             name={[name, 'end_year']}
@@ -1714,13 +1769,12 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={1}>
+                        <Col span={2} style={{ textAlign: 'center' }}>
                           <Button
                             type="text"
                             danger
                             icon={<DeleteOutlined />}
                             onClick={() => remove(name)}
-                            style={{ marginTop: 4 }}
                           />
                         </Col>
                       </Row>
@@ -1757,11 +1811,8 @@ const ExpertDashboard: React.FC = () => {
         title={
           <div style={{ 
             fontSize: 24, 
-            fontWeight: 600, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            fontWeight: 600,
+            color: '#1f2937'
           }}>
             {editingSpecialization ? 'Редактировать специализацию' : 'Добавить специализацию'}
           </div>
@@ -1841,36 +1892,22 @@ const ExpertDashboard: React.FC = () => {
           }}
         >
           <Form.Item
-            label="Предмет"
-            name="subject_id"
-            rules={[{ required: true, message: 'Выберите предмет' }]}
-          >
-            <Select 
-              placeholder="Выберите предмет"
-              className={styles.inputField}
-              size="large"
-              showSearch
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-              }
-              options={subjects.map((subject) => ({
-                label: subject.name,
-                value: subject.id,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
             rules={[{ required: true, message: 'Укажите опыт работы' }]}
           >
             <AntInputNumber 
               min={0} 
-              max={50} 
+              max={50}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
           <Form.Item
@@ -1879,11 +1916,17 @@ const ExpertDashboard: React.FC = () => {
             rules={[{ required: true, message: 'Укажите часовую ставку' }]}
           >
             <AntInputNumber 
-              min={0} 
+              min={0}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }} 
               step={100}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
           <Form.Item
@@ -2109,7 +2152,7 @@ const ExpertDashboard: React.FC = () => {
             <div style={{
               background: selectedChat ? '#ffffff' : '#e0f2fe',
               padding: '12px 16px',
-              paddingRight: '48px', // Отступ справа для крестика закрытия
+              paddingRight: '56px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -2135,10 +2178,11 @@ const ExpertDashboard: React.FC = () => {
                     </div>
                   </Space>
                   <Button 
-                    type="text" 
+                    type="primary" 
                     size="small"
                     icon={<PlusOutlined />}
-                    style={{ color: '#6b7280', fontSize: 14, marginRight: 0 }}
+                    onClick={() => setCreateOrderModalVisible(true)}
+                    style={{ fontSize: 14 }}
                   >
                     Создать заказ
                   </Button>
@@ -2152,10 +2196,11 @@ const ExpertDashboard: React.FC = () => {
                     </Text>
                   </Space>
                   <Button 
-                    type="text" 
+                    type="primary" 
                     size="small"
                     icon={<PlusOutlined />}
-                    style={{ color: '#0369a1', fontSize: 14, marginRight: 0 }}
+                    onClick={() => setCreateOrderModalVisible(true)}
+                    style={{ fontSize: 14 }}
                   >
                     Создать заказ
                   </Button>
@@ -2229,62 +2274,102 @@ const ExpertDashboard: React.FC = () => {
             <div style={{ 
               padding: '16px',
               borderTop: '1px solid #e5e7eb',
-              background: '#ffffff',
-              display: 'flex',
-              gap: 8,
-              alignItems: 'flex-end'
+              background: '#ffffff'
             }}>
-              <Input.TextArea
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Введите сообщение..."
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                style={{ 
-                  flex: 1,
-                  borderRadius: 8,
-                  border: '1px solid #d1d5db'
-                }}
-              />
-              <Button
-                type="default"
-                shape="circle"
-                icon={<PaperClipOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff'
-                }}
-              />
-              <Button
-                type="default"
-                shape="circle"
-                icon={<SmileOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff'
-                }}
-              />
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<SendOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  background: '#3b82f6',
-                  border: 'none'
-                }}
-                onClick={() => {
-                  if (messageText.trim()) {
-                    // Здесь будет логика отправки сообщения
-                    setMessageText('');
-                    message.success('Сообщение отправлено');
+              {fileList.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <Upload
+                    fileList={fileList}
+                    onRemove={(file) => {
+                      setFileList(fileList.filter((f) => f.uid !== file.uid));
+                    }}
+                    beforeUpload={() => false}
+                  />
+                </div>
+              )}
+              <div style={{ 
+                display: 'flex',
+                gap: 8,
+                alignItems: 'flex-end'
+              }}>
+                <Input.TextArea
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Введите сообщение..."
+                  autoSize={{ minRows: 1, maxRows: 3 }}
+                  style={{ 
+                    flex: 1,
+                    borderRadius: 8,
+                    border: '1px solid #d1d5db'
+                  }}
+                />
+                <Upload
+                  fileList={fileList}
+                  onChange={({ fileList }) => setFileList(fileList)}
+                  beforeUpload={() => false}
+                  multiple
+                  showUploadList={false}
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    icon={<PaperClipOutlined />}
+                    style={{ 
+                      width: 40, 
+                      height: 40,
+                      border: '1px solid #d1d5db',
+                      background: '#ffffff'
+                    }}
+                  />
+                </Upload>
+                <Popover
+                  content={
+                    <EmojiPicker
+                      onEmojiClick={(emojiData: any) => {
+                        setMessageText(messageText + emojiData.emoji);
+                        setEmojiPickerOpen(false);
+                      }}
+                      width={350}
+                      height={400}
+                    />
                   }
-                }}
-              />
+                  trigger="click"
+                  open={emojiPickerOpen}
+                  onOpenChange={setEmojiPickerOpen}
+                  placement="topRight"
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    icon={<SmileOutlined />}
+                    style={{ 
+                      width: 40, 
+                      height: 40,
+                      border: '1px solid #d1d5db',
+                      background: '#ffffff'
+                    }}
+                  />
+                </Popover>
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<SendOutlined />}
+                  style={{ 
+                    width: 40, 
+                    height: 40,
+                    background: '#3b82f6',
+                    border: 'none'
+                  }}
+                  onClick={() => {
+                    if (messageText.trim()) {
+                      // Здесь будет логика отправки сообщения
+                      setMessageText('');
+                      setFileList([]);
+                      message.success('Сообщение отправлено');
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -3891,6 +3976,56 @@ const ExpertDashboard: React.FC = () => {
             Желаем легких заказов и высоких доходов!
           </Paragraph>
         </div>
+      </Modal>
+
+      {/* Модальное окно создания заказа */}
+      <Modal
+        title="Создать заказ"
+        open={createOrderModalVisible}
+        onCancel={() => setCreateOrderModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setCreateOrderModalVisible(false)}>
+            Отмена
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => {
+            message.info('Функция создания заказа в разработке');
+            setCreateOrderModalVisible(false);
+          }}>
+            Создать
+          </Button>
+        ]}
+        width={700}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Название заказа" required>
+            <Input placeholder="Введите название заказа" />
+          </Form.Item>
+          <Form.Item label="Описание" required>
+            <Input.TextArea rows={4} placeholder="Опишите задание подробно" />
+          </Form.Item>
+          <Form.Item label="Предмет" required>
+            <Select placeholder="Выберите предмет">
+              <Select.Option value="math">Математика</Select.Option>
+              <Select.Option value="physics">Физика</Select.Option>
+              <Select.Option value="chemistry">Химия</Select.Option>
+              <Select.Option value="programming">Программирование</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Тип работы" required>
+            <Select placeholder="Выберите тип работы">
+              <Select.Option value="essay">Реферат</Select.Option>
+              <Select.Option value="coursework">Курсовая</Select.Option>
+              <Select.Option value="diploma">Диплом</Select.Option>
+              <Select.Option value="test">Контрольная</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Срок выполнения" required>
+            <DatePicker style={{ width: '100%' }} placeholder="Выберите дату" />
+          </Form.Item>
+          <Form.Item label="Бюджет (₽)" required>
+            <InputNumber min={0} style={{ width: '100%' }} placeholder="Укажите бюджет" />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   );

@@ -148,7 +148,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
               marginBottom: '8px',
               borderRadius: '8px',
               border: isUnread ? '2px solid #1890ff' : '1px solid #f0f0f0',
-              borderLeft: message.sender.role === 'arbitrator' ? '4px solid #1890ff' : '4px solid #52c41a',
+              borderLeft: message.sender.role === 'arbitrator' ? '4px solid #1890ff' : '4px solid #1890ff',
             }}
             onMouseEnter={() => handleMarkAsRead(message)}
           >
@@ -157,7 +157,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 <Avatar
                   icon={<UserOutlined />}
                   style={{
-                    backgroundColor: isCurrentUser ? '#52c41a' : '#1890ff',
+                    backgroundColor: isCurrentUser ? '#1890ff' : '#1890ff',
                   }}
                 />
               }

@@ -306,19 +306,20 @@
 
 /* Buttons */
 .buttonPrimary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+  background: #1890ff !important;
   border: none !important;
   border-radius: 12px !important;
   height: 44px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3) !important;
   transition: all 0.3s ease !important;
 }
 
 .buttonPrimary:hover {
+  background: #40a9ff !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
 }
 
 .buttonSecondary {

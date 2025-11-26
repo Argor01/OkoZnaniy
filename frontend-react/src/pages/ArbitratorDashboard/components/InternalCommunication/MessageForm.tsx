@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Input, Select, Button, Upload, Space, message } from 'antd';
-import { UploadOutlined, SendOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
+import { Form, Input, Select, Button, Upload, Space, message, Popover } from 'antd';
+import { UploadOutlined, SendOutlined, SmileOutlined, PaperClipOutlined } from '@ant-design/icons';
+import type { UploadFile, UploadProps } from 'antd';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { arbitratorApi } from '../../api/arbitratorApi';
 import type { SendMessageRequest } from '../../api/types';
 
@@ -26,7 +27,9 @@ const MessageForm: React.FC<MessageFormProps> = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const textAreaRef = useRef<any>(null);
+  const uploadRef = useRef<any>(null);
 
   // Установка начального текста при ответе и фокус на поле
   useEffect(() => {
@@ -76,6 +79,42 @@ const MessageForm: React.FC<MessageFormProps> = ({
     }
   };
 
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    const currentText = form.getFieldValue('text') || '';
+    const textArea = textAreaRef.current?.resizableTextArea?.textArea;
+    
+    if (textArea) {
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const newText = currentText.substring(0, start) + emojiData.emoji + currentText.substring(end);
+      
+      form.setFieldsValue({ text: newText });
+      
+      // Устанавливаем курсор после эмодзи
+      setTimeout(() => {
+        const newPosition = start + emojiData.emoji.length;
+        textArea.setSelectionRange(newPosition, newPosition);
+        textArea.focus();
+      }, 0);
+    } else {
+      form.setFieldsValue({ text: currentText + emojiData.emoji });
+    }
+    
+    setEmojiPickerOpen(false);
+  };
+
+  const handleAttachClick = () => {
+    uploadRef.current?.click();
+  };
+
+  const uploadProps: UploadProps = {
+    fileList,
+    onChange: ({ fileList }) => setFileList(fileList),
+    beforeUpload: () => false,
+    multiple: true,
+    showUploadList: false,
+  };
+
   return (
     <Form
       form={form}
@@ -90,13 +129,60 @@ const MessageForm: React.FC<MessageFormProps> = ({
         label="Текст сообщения"
         rules={[{ required: true, message: 'Введите текст сообщения' }]}
       >
-        <TextArea
-          ref={textAreaRef}
-          rows={4}
-          placeholder="Введите ваше сообщение дирекции..."
-          showCount
-          maxLength={2000}
-        />
+        <div style={{ position: 'relative' }}>
+          <TextArea
+            ref={textAreaRef}
+            rows={4}
+            placeholder="Введите ваше сообщение дирекции..."
+            showCount
+            maxLength={2000}
+          />
+          <Upload {...uploadProps}>
+            <Button
+              type="default"
+              shape="circle"
+              icon={<PaperClipOutlined />}
+              onClick={handleAttachClick}
+              style={{
+                position: 'absolute',
+                bottom: 8,
+                right: 108,
+                width: 40,
+                height: 40,
+                border: '1px solid #d1d5db',
+                background: '#fff',
+              }}
+            />
+          </Upload>
+          <Popover
+            content={
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                width={350}
+                height={400}
+              />
+            }
+            trigger="click"
+            open={emojiPickerOpen}
+            onOpenChange={setEmojiPickerOpen}
+            placement="bottomRight"
+          >
+            <Button
+              type="default"
+              shape="circle"
+              icon={<SmileOutlined />}
+              style={{
+                position: 'absolute',
+                bottom: 8,
+                right: 60,
+                width: 40,
+                height: 40,
+                border: '1px solid #d1d5db',
+                background: '#fff',
+              }}
+            />
+          </Popover>
+        </div>
       </Form.Item>
 
       {claims.length > 0 && (
@@ -135,19 +221,21 @@ const MessageForm: React.FC<MessageFormProps> = ({
         </Select>
       </Form.Item>
 
-      <Form.Item
-        name="attachments"
-        label="Прикрепленные файлы (опционально)"
-      >
-        <Upload
-          fileList={fileList}
-          onChange={({ fileList }) => setFileList(fileList)}
-          beforeUpload={() => false}
-          multiple
-        >
-          <Button icon={<UploadOutlined />}>Выбрать файлы</Button>
-        </Upload>
-      </Form.Item>
+      {fileList.length > 0 && (
+        <Form.Item label="Прикрепленные файлы">
+          <Upload
+            fileList={fileList}
+            onChange={({ fileList }) => setFileList(fileList)}
+            beforeUpload={() => false}
+            multiple
+            onRemove={(file) => {
+              setFileList(fileList.filter((f) => f.uid !== file.uid));
+            }}
+          >
+            <Button icon={<UploadOutlined />}>Добавить еще файлы</Button>
+          </Upload>
+        </Form.Item>
+      )}
 
       <Form.Item>
         <Space>

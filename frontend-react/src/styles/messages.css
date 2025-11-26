@@ -1,0 +1,39 @@
+/* Стили для непрочитанных сообщений */
+
+/* Фон карточки с непрочитанным сообщением - зеленый заменен на синий с прозрачностью */
+.ant-card.unread-message,
+[style*="background: rgb(240, 253, 244)"],
+[style*="background-color: rgb(240, 253, 244)"] {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Аватар пользователя с непрочитанными сообщениями - зеленый заменен на синий */
+.ant-avatar.unread-avatar,
+.ant-avatar[style*="background-color: rgb(16, 185, 129)"] {
+  background-color: rgba(59, 130, 246, 0.9) !important;
+}
+
+/* Бейдж с количеством непрочитанных сообщений - зеленый заменен на синий */
+.ant-badge-count.unread-badge,
+.ant-badge-count[style*="background-color: rgb(16, 185, 129)"] {
+  background-color: rgba(59, 130, 246, 0.9) !important;
+}
+
+/* Текст непрочитанного сообщения - зеленый заменен на синий */
+.unread-message-text,
+[style*="color: rgb(5, 150, 105)"] {
+  color: rgba(59, 130, 246, 1) !important;
+  font-weight: 500;
+}
+
+/* Точка индикатора непрочитанных - зеленый заменен на синий */
+.ant-badge-dot.unread-indicator,
+.ant-badge-dot[style*="background"] {
+  background-color: rgba(59, 130, 246, 0.9) !important;
+}
+
+/* Глобальное переопределение зеленых цветов на синие для непрочитанных элементов */
+.ant-list-item[style*="background"],
+.ant-card[style*="background: rgb(240, 253, 244)"] {
+  background: rgba(59, 130, 246, 0.1) !important;
+}

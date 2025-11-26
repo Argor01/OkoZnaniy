@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Card, Input, Button, Space, Typography, Divider, Empty, Tag, message, Grid, Tabs } from 'antd';
-import { SendOutlined, MessageOutlined } from '@ant-design/icons';
+import React, { useState, useRef } from 'react';
+import { Card, Input, Button, Space, Typography, Divider, Empty, Tag, message, Grid, Tabs, Popover, Upload } from 'antd';
+import { SendOutlined, MessageOutlined, SmileOutlined, PaperClipOutlined } from '@ant-design/icons';
+import type { UploadFile, UploadProps } from 'antd';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import dayjs from 'dayjs';
 import {
   getMockDirectorCommunications,
@@ -21,6 +23,9 @@ const DirectorCommunication: React.FC = () => {
   const isMobile = !screens.md;
   const [selectedCommunication, setSelectedCommunication] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const uploadRef = useRef<any>(null);
 
   const communications = getMockDirectorCommunications();
   const selectedComm = communications.find((c) => c.id === selectedCommunication);
@@ -32,6 +37,23 @@ const DirectorCommunication: React.FC = () => {
     }
     message.success('Сообщение отправлено');
     setMessageText('');
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setMessageText(messageText + emojiData.emoji);
+    setEmojiPickerOpen(false);
+  };
+
+  const handleAttachClick = () => {
+    uploadRef.current?.click();
+  };
+
+  const uploadProps: UploadProps = {
+    fileList,
+    onChange: ({ fileList }) => setFileList(fileList),
+    beforeUpload: () => false,
+    multiple: true,
+    showUploadList: false,
   };
 
   const getStatusColor = (status: string) => {
@@ -178,21 +200,52 @@ const DirectorCommunication: React.FC = () => {
                           )}
 
                           {selectedComm.status !== 'resolved' && selectedComm.status !== 'closed' && (
-                            <Space.Compact style={{ width: '100%' }}>
-                              <TextArea
-                                placeholder="Сообщение..."
-                                value={messageText}
-                                onChange={(e) => setMessageText(e.target.value)}
-                                rows={2}
-                                style={{ resize: 'none', fontSize: '13px' }}
-                              />
-                              <Button
-                                type="primary"
-                                icon={<SendOutlined />}
-                                onClick={handleSendMessage}
-                                style={{ height: 'auto' }}
-                              />
-                            </Space.Compact>
+                            <div style={{ position: 'relative' }}>
+                              <Space.Compact style={{ width: '100%' }}>
+                                <TextArea
+                                  placeholder="Сообщение..."
+                                  value={messageText}
+                                  onChange={(e) => setMessageText(e.target.value)}
+                                  rows={2}
+                                  style={{ resize: 'none', fontSize: '13px', paddingRight: '50px' }}
+                                />
+                                <Button
+                                  type="primary"
+                                  icon={<SendOutlined />}
+                                  onClick={handleSendMessage}
+                                  style={{ height: 'auto' }}
+                                />
+                              </Space.Compact>
+                              <Popover
+                                content={
+                                  <EmojiPicker
+                                    onEmojiClick={handleEmojiClick}
+                                    width={300}
+                                    height={350}
+                                  />
+                                }
+                                trigger="click"
+                                open={emojiPickerOpen}
+                                onOpenChange={setEmojiPickerOpen}
+                                placement="topRight"
+                              >
+                                <Button
+                                  type="default"
+                                  shape="circle"
+                                  icon={<SmileOutlined />}
+                                  style={{
+                                    position: 'absolute',
+                                    bottom: 8,
+                                    right: 50,
+                                    width: 32,
+                                    height: 32,
+                                    border: '1px solid #d1d5db',
+                                    background: '#fff',
+                                    zIndex: 1,
+                                  }}
+                                />
+                              </Popover>
+                            </div>
                           )}
                         </Space>
                       ),
@@ -360,23 +413,54 @@ const DirectorCommunication: React.FC = () => {
                   {selectedComm.status !== 'resolved' && selectedComm.status !== 'closed' && (
                     <>
                       <Divider style={{ margin: '8px 0' }} />
-                      <Space.Compact style={{ width: '100%' }}>
-                        <TextArea
-                          placeholder="Введите ваше сообщение..."
-                          value={messageText}
-                          onChange={(e) => setMessageText(e.target.value)}
-                          rows={3}
-                          style={{ resize: 'none' }}
-                        />
-                        <Button
-                          type="primary"
-                          icon={<SendOutlined />}
-                          onClick={handleSendMessage}
-                          style={{ height: 'auto' }}
+                      <div style={{ position: 'relative' }}>
+                        <Space.Compact style={{ width: '100%' }}>
+                          <TextArea
+                            placeholder="Введите ваше сообщение..."
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            rows={3}
+                            style={{ resize: 'none', paddingRight: '50px' }}
+                          />
+                          <Button
+                            type="primary"
+                            icon={<SendOutlined />}
+                            onClick={handleSendMessage}
+                            style={{ height: 'auto' }}
+                          >
+                            Отправить
+                          </Button>
+                        </Space.Compact>
+                        <Popover
+                          content={
+                            <EmojiPicker
+                              onEmojiClick={handleEmojiClick}
+                              width={350}
+                              height={400}
+                            />
+                          }
+                          trigger="click"
+                          open={emojiPickerOpen}
+                          onOpenChange={setEmojiPickerOpen}
+                          placement="topRight"
                         >
-                          Отправить
-                        </Button>
-                      </Space.Compact>
+                          <Button
+                            type="default"
+                            shape="circle"
+                            icon={<SmileOutlined />}
+                            style={{
+                              position: 'absolute',
+                              bottom: 8,
+                              right: 100,
+                              width: 40,
+                              height: 40,
+                              border: '1px solid #d1d5db',
+                              background: '#fff',
+                              zIndex: 1,
+                            }}
+                          />
+                        </Popover>
+                      </div>
                     </>
                   )}
                 </Space>
