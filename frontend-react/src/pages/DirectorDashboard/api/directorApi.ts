@@ -32,24 +32,75 @@ import {
   generateStatisticsSummary,
 } from './mockData';
 
-// Флаг для использования тестовых данных (можно переключить на false для работы с реальным API)
-const USE_MOCK_DATA = true;
+// Флаг для использования тестовых данных (переключено на реальные данные API)
+const USE_MOCK_DATA = false;
+
+const getDeactivatedEmployeeIds = (): Set<number> => {
+  try {
+    const raw = localStorage.getItem('director_deactivated_employees');
+    if (!raw) return new Set<number>();
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) return new Set<number>(arr);
+  } catch {}
+  return new Set<number>();
+};
+
+const addDeactivatedEmployeeId = (id: number): void => {
+  const set = getDeactivatedEmployeeIds();
+  set.add(id);
+  localStorage.setItem('director_deactivated_employees', JSON.stringify(Array.from(set)));
+};
+
+const removeDeactivatedEmployeeId = (id: number): void => {
+  const set = getDeactivatedEmployeeIds();
+  set.delete(id);
+  localStorage.setItem('director_deactivated_employees', JSON.stringify(Array.from(set)));
+};
 
 // Управление персоналом
 export const getPersonnel = async (): Promise<Employee[]> => {
   if (USE_MOCK_DATA) {
     // Используем тестовые данные с небольшой задержкой для имитации запроса
     await new Promise(resolve => setTimeout(resolve, 500));
-    return mockEmployees.filter(emp => emp.is_active);
+    const ids = getDeactivatedEmployeeIds();
+    return mockEmployees.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
   }
   try {
     const response = await apiClient.get('/director/personnel/');
-    return response.data;
+    const list: Employee[] = response.data || [];
+    const ids = getDeactivatedEmployeeIds();
+    const arr = Array.isArray(list) ? list : [];
+    return arr.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
   } catch (error) {
     console.error('Error fetching personnel:', error);
-    // Fallback на тестовые данные при ошибке
-    console.warn('Using mock data as fallback');
-    return mockEmployees.filter(emp => emp.is_active);
+    // Пытаемся получить список пользователей как резервный источник
+    try {
+      const usersResp = await apiClient.get('/users/');
+      const raw = usersResp.data?.results || usersResp.data || [];
+      const users: any[] = Array.isArray(raw) ? raw : [];
+      const employees: Employee[] = users.map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        first_name: u.first_name,
+        last_name: u.last_name,
+        phone: u.phone,
+        role: u.role,
+        // Поле is_active может отсутствовать в сериализаторе; по умолчанию считаем активным
+        is_active: u.is_active !== false,
+        date_joined: u.date_joined,
+        last_login: u.last_login,
+        username: u.username,
+      }));
+      // Исключаем клиентов из вкладки сотрудников
+      const ids = getDeactivatedEmployeeIds();
+      return employees
+        .filter(e => e.role !== 'client')
+        .map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
+    } catch (fallbackError) {
+      console.warn('Using mock data as fallback');
+      const ids = getDeactivatedEmployeeIds();
+      return mockEmployees.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
+    }
   }
 };
 
@@ -97,12 +148,63 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
   }
   try {
     const response = await apiClient.get('/director/personnel/expert-applications/');
-    return response.data;
+    const raw = response.data?.results || response.data || [];
+    return (raw as any[]).map((app: any) => {
+      const specs = typeof app.specializations === 'string'
+        ? app.specializations.split(/[\n,]+/).map((s: string) => s.trim()).filter((s: string) => !!s)
+        : Array.isArray(app.specializations) ? app.specializations : [];
+      const educationStr = Array.isArray(app.educations)
+        ? app.educations.map((e: any) => {
+            const period = e.end_year ? `${e.start_year}-${e.end_year}` : `${e.start_year}-н.в.`;
+            const degree = e.degree ? `, ${e.degree}` : '';
+            return `${e.university} (${period})${degree}`;
+          }).join('; ')
+        : (app.education || '');
+      const statusMap = app.status === 'pending' ? 'under_review' : app.status;
+      return {
+        id: app.id,
+        user: app.expert || app.user,
+        experience_years: app.work_experience_years ?? app.experience_years,
+        education: educationStr,
+        skills: app.skills,
+        portfolio_url: app.portfolio_url,
+        bio: app.bio,
+        biography: app.biography,
+        specializations: specs,
+        status: statusMap,
+        submitted_at: app.created_at,
+        reviewed_at: app.reviewed_at,
+        application_submitted_at: app.created_at,
+        application_reviewed_at: app.reviewed_at,
+        application_approved: app.status === 'approved',
+      } as ExpertApplication;
+    });
   } catch (error) {
     console.error('Error fetching expert applications:', error);
     // Fallback на тестовые данные при ошибке
     console.warn('Using mock data as fallback');
-    return mockExpertApplications;
+    try {
+      if (mockExpertApplications.length > 0) {
+        return mockExpertApplications;
+      }
+      const demo = mockEmployees.find(e => e.username === 'demo_expert' || e.id === 1000) || mockEmployees[0];
+      const demoApp: ExpertApplication = {
+        id: 1,
+        user: demo,
+        experience_years: 5,
+        education: 'Демо образование',
+        skills: 'Копирайтинг, редактирование',
+        portfolio_url: 'https://example.com/demo',
+        bio: 'Демо аккаунт для тестирования интерфейса.',
+        specializations: ['Копирайтинг'],
+        status: 'new',
+        submitted_at: new Date().toISOString(),
+        application_submitted_at: new Date().toISOString(),
+      } as ExpertApplication;
+      return [demoApp];
+    } catch (_) {
+      return [];
+    }
   }
 };
 
@@ -168,21 +270,151 @@ export const sendForRework = async (id: number, comment: string): Promise<Expert
   }
 };
 
-export const deactivateEmployee = async (id: number): Promise<Employee> => {
+export const deactivateEmployee = async (id: number, employeePayload?: Employee): Promise<Employee> => {
   if (USE_MOCK_DATA) {
     await new Promise(resolve => setTimeout(resolve, 500));
-    const employee = mockEmployees.find(emp => emp.id === id);
-    if (employee) {
-      employee.is_active = false;
-      return employee;
+    const index = mockEmployees.findIndex(emp => emp.id === id);
+    if (index > -1) {
+      const employee = mockEmployees[index];
+      const deactivated: Employee = { ...employee, is_active: false };
+      mockEmployees[index] = deactivated;
+      addDeactivatedEmployeeId(id);
+
+      // Переводим обратно на этап рассмотрения анкеты
+      const existingAppIndex = mockExpertApplications.findIndex(app => app.user?.id === id);
+      const applicationSubmittedAt = new Date().toISOString();
+      if (existingAppIndex > -1) {
+        const existing = mockExpertApplications[existingAppIndex];
+        mockExpertApplications[existingAppIndex] = {
+          ...existing,
+          user: deactivated,
+          status: 'deactivated',
+          status_display: 'деактивирован',
+          application_approved: false,
+          reviewed_at: applicationSubmittedAt,
+          application_reviewed_at: applicationSubmittedAt,
+          submitted_at: existing.submitted_at || applicationSubmittedAt,
+          application_submitted_at: existing.application_submitted_at || applicationSubmittedAt,
+        };
+      } else {
+        const newApp: ExpertApplication = {
+          id: Date.now(),
+          user: deactivated,
+          experience_years: 0,
+          education: '',
+          skills: '',
+          bio: '',
+          specializations: [],
+          status: 'deactivated',
+          status_display: 'деактивирован',
+          submitted_at: applicationSubmittedAt,
+          application_submitted_at: applicationSubmittedAt,
+          application_approved: false,
+          reviewed_at: applicationSubmittedAt,
+          application_reviewed_at: applicationSubmittedAt,
+        };
+        mockExpertApplications.push(newApp);
+      }
+      return deactivated;
+    }
+    if (employeePayload) {
+      const deactivated: Employee = { ...employeePayload, is_active: false };
+      const applicationSubmittedAt = new Date().toISOString();
+      const newApp: ExpertApplication = {
+        id: Date.now(),
+        user: deactivated,
+        experience_years: 0,
+        education: '',
+        skills: '',
+        bio: '',
+        specializations: [],
+        status: 'deactivated',
+        status_display: 'деактивирован',
+        submitted_at: applicationSubmittedAt,
+        application_submitted_at: applicationSubmittedAt,
+        application_approved: false,
+      };
+      mockExpertApplications.push(newApp);
+      addDeactivatedEmployeeId(id);
+      return deactivated;
     }
     throw new Error('Employee not found');
   }
   try {
     const response = await apiClient.post(`/director/personnel/${id}/deactivate/`);
-    return response.data;
+    const updated: Employee = response.data;
+    addDeactivatedEmployeeId(id);
+    return updated;
   } catch (error) {
     console.error('Error deactivating employee:', error);
+    // Локальный фолбэк: удаляем из списка и создаём/обновляем анкету
+    try {
+      const index = mockEmployees.findIndex(emp => emp.id === id);
+      if (index > -1) {
+        const employee = mockEmployees[index];
+        const deactivated: Employee = { ...employee, is_active: false };
+        mockEmployees[index] = deactivated;
+        const existingAppIndex = mockExpertApplications.findIndex(app => app.user?.id === id);
+        const applicationSubmittedAt = new Date().toISOString();
+        if (existingAppIndex > -1) {
+          const existing = mockExpertApplications[existingAppIndex];
+          mockExpertApplications[existingAppIndex] = {
+            ...existing,
+            user: deactivated,
+            status: 'deactivated',
+            status_display: 'деактивирован',
+            application_approved: false,
+            reviewed_at: applicationSubmittedAt,
+            application_reviewed_at: applicationSubmittedAt,
+            submitted_at: existing.submitted_at || applicationSubmittedAt,
+            application_submitted_at: existing.application_submitted_at || applicationSubmittedAt,
+          };
+        } else {
+          const newApp: ExpertApplication = {
+            id: Date.now(),
+            user: deactivated,
+            experience_years: 0,
+            education: '',
+            skills: '',
+            bio: '',
+            specializations: [],
+            status: 'deactivated',
+            status_display: 'деактивирован',
+            submitted_at: applicationSubmittedAt,
+            application_submitted_at: applicationSubmittedAt,
+            application_approved: false,
+            reviewed_at: applicationSubmittedAt,
+            application_reviewed_at: applicationSubmittedAt,
+          };
+          mockExpertApplications.push(newApp);
+        }
+        addDeactivatedEmployeeId(id);
+        return deactivated;
+      }
+      if (employeePayload) {
+        const deactivated: Employee = { ...employeePayload, is_active: false };
+        const applicationSubmittedAt = new Date().toISOString();
+        const newApp: ExpertApplication = {
+          id: Date.now(),
+          user: deactivated,
+          experience_years: 0,
+          education: '',
+          skills: '',
+          bio: '',
+          specializations: [],
+          status: 'deactivated',
+          status_display: 'деактивирован',
+          submitted_at: applicationSubmittedAt,
+          application_submitted_at: applicationSubmittedAt,
+          application_approved: false,
+          reviewed_at: applicationSubmittedAt,
+          application_reviewed_at: applicationSubmittedAt,
+        };
+        mockExpertApplications.push(newApp);
+        addDeactivatedEmployeeId(id);
+        return deactivated;
+      }
+    } catch (_) {}
     throw error;
   }
 };
@@ -193,13 +425,16 @@ export const activateEmployee = async (id: number): Promise<Employee> => {
     const employee = mockEmployees.find(emp => emp.id === id);
     if (employee) {
       employee.is_active = true;
+      removeDeactivatedEmployeeId(id);
       return employee;
     }
     throw new Error('Employee not found');
   }
   try {
     const response = await apiClient.post(`/director/personnel/${id}/activate/`);
-    return response.data;
+    const updated: Employee = response.data;
+    removeDeactivatedEmployeeId(id);
+    return updated;
   } catch (error) {
     console.error('Error activating employee:', error);
     throw error;

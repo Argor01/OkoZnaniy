@@ -48,10 +48,15 @@ const EmployeeList: React.FC = () => {
   });
 
   const deactivateMutation = useMutation({
-    mutationFn: (id: number) => deactivateEmployee(id),
-    onSuccess: () => {
+    mutationFn: (payload: { id: number; employee: Employee }) => deactivateEmployee(payload.id, payload.employee),
+    onSuccess: (updated: Employee) => {
       message.success('Сотрудник деактивирован');
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: false } : e));
+      });
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при деактивации сотрудника';
@@ -96,7 +101,7 @@ const EmployeeList: React.FC = () => {
       okText: 'Деактивировать',
       cancelText: 'Отмена',
       onOk: () => {
-        deactivateMutation.mutate(employee.id);
+        deactivateMutation.mutate({ id: employee.id, employee });
       },
     });
   };
@@ -256,7 +261,7 @@ const EmployeeList: React.FC = () => {
   return (
     <div>
       <Card>
-        <Title level={4}>Активные сотрудники</Title>
+        <Title level={4}>Сотрудники</Title>
         <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="large">
           <Space>
             <Search

@@ -1,9 +1,7 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions, status, serializers
+from rest_framework import permissions, status, viewsets, serializers
+from django.db import IntegrityError, transaction
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Q
 from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
 from .serializers import (
     SpecializationSerializer, ExpertDocumentSerializer,
@@ -662,7 +660,26 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             )
         
         # Проверяем, есть ли уже анкета
-        if ExpertApplication.objects.filter(expert=self.request.user).exists():
+        existing = ExpertApplication.objects.filter(expert=self.request.user).first()
+        if existing:
+            # Если предыдущая анкета была отклонена — разрешаем повторную подачу
+            if existing.status == 'rejected':
+                educations_data = serializer.validated_data.pop('educations', [])
+                with transaction.atomic():
+                    existing.full_name = serializer.validated_data.get('full_name', existing.full_name)
+                    existing.work_experience_years = serializer.validated_data.get('work_experience_years', existing.work_experience_years)
+                    existing.specializations = serializer.validated_data.get('specializations', existing.specializations)
+                    existing.status = 'pending'
+                    existing.rejection_reason = ''
+                    existing.reviewed_by = None
+                    existing.reviewed_at = None
+                    existing.save()
+                    # Пересоздаем образование
+                    existing.educations.all().delete()
+                    for education_data in educations_data:
+                        Education.objects.create(application=existing, **education_data)
+                return existing
+            # Для любых других статусов блокируем повторную подачу
             raise serializers.ValidationError(
                 'У вас уже есть анкета. Вы можете изменить существующую.'
             )
@@ -670,15 +687,14 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         # Создаем анкету
         if isinstance(serializer, ExpertApplicationCreateSerializer):
             educations_data = serializer.validated_data.pop('educations', [])
-            
-            application = ExpertApplication.objects.create(
-                expert=self.request.user,
-                **serializer.validated_data
-            )
-            
-            # Создаем записи об образовании
-            for education_data in educations_data:
-                Education.objects.create(application=application, **education_data)
+            with transaction.atomic():
+                application = ExpertApplication.objects.create(
+                    expert=self.request.user,
+                    **serializer.validated_data
+                )
+                # Создаем записи об образовании
+                for education_data in educations_data:
+                    Education.objects.create(application=application, **education_data)
             
             # Возвращаем созданную анкету
             return application
@@ -687,8 +703,17 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        application = self.perform_create(serializer)
+        try:
+            serializer.is_valid(raise_exception=True)
+            application = self.perform_create(serializer)
+        except permissions.PermissionDenied as e:
+            return Response({'detail': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response({'detail': 'Ошибка данных анкеты'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'detail': f'Ошибка на сервере: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Возвращаем сериализованную анкету
         output_serializer = ExpertApplicationSerializer(application)
@@ -709,6 +734,15 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         application.reviewed_by = request.user
         application.reviewed_at = timezone.now()
         application.save()
+        # Обновляем поля пользователя для согласованной анкеты
+        try:
+            user = application.expert
+            user.application_approved = True
+            user.application_reviewed_at = application.reviewed_at
+            user.application_reviewed_by = request.user
+            user.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by'])
+        except Exception:
+            pass
         
         # Уведомляем эксперта
         from apps.notifications.services import NotificationService

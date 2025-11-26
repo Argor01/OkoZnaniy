@@ -134,12 +134,13 @@ export interface ExpertApplication {
   bio?: string;
   biography?: string;
   specializations?: string[];
-  status?: 'new' | 'under_review' | 'approved' | 'rejected';
+  status?: 'new' | 'under_review' | 'approved' | 'rejected' | 'deactivated';
   submitted_at?: string;
   reviewed_at?: string;
   application_submitted_at?: string;
   application_reviewed_at?: string;
   application_approved?: boolean;
+  status_display?: string;
 }
 
 export interface RegisterEmployeeRequest {
