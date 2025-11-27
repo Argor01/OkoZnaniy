@@ -36,6 +36,8 @@ const MyWorks: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('all');
   const [selectedMenuKey, setSelectedMenuKey] = useState<string>('works');
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [workDetailModalVisible, setWorkDetailModalVisible] = useState(false);
+  const [selectedWork, setSelectedWork] = useState<any>(null);
 
   const handleLogout = () => {
     Modal.confirm({
@@ -377,7 +379,14 @@ const MyWorks: React.FC = () => {
                           {work.price.toLocaleString('ru-RU')} ₽
                         </Title>
                         <Space style={{ marginTop: 16 }}>
-                          <Button type="primary" size="small">
+                          <Button 
+                            type="primary" 
+                            size="small"
+                            onClick={() => {
+                              setSelectedWork(work);
+                              setWorkDetailModalVisible(true);
+                            }}
+                          >
                             Подробнее
                           </Button>
                           {work.status === 'in_progress' && (
@@ -430,6 +439,123 @@ const MyWorks: React.FC = () => {
         />
         </Sider>
       </Layout>
+
+      {/* Work Detail Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1890ff'
+          }}>
+            Детали работы
+          </div>
+        }
+        open={workDetailModalVisible}
+        onCancel={() => setWorkDetailModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setWorkDetailModalVisible(false)}>
+            Закрыть
+          </Button>,
+          <Button key="message" type="primary" icon={<MessageOutlined />}>
+            Написать заказчику
+          </Button>
+        ]}
+        width={800}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        {selectedWork && (
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <div>
+              <Title level={4} style={{ marginBottom: 8 }}>{selectedWork.title}</Title>
+              <Tag 
+                icon={
+                  selectedWork.status === 'in_progress' ? <ClockCircleOutlined /> :
+                  selectedWork.status === 'completed' ? <CheckCircleOutlined /> :
+                  <CloseCircleOutlined />
+                }
+                color={
+                  selectedWork.status === 'in_progress' ? 'blue' :
+                  selectedWork.status === 'completed' ? 'green' :
+                  'red'
+                }
+              >
+                {selectedWork.status === 'in_progress' ? 'В работе' :
+                 selectedWork.status === 'completed' ? 'Завершено' :
+                 'Отменено'}
+              </Tag>
+            </div>
+
+            <div>
+              <Text strong>Предмет:</Text>
+              <div style={{ marginTop: 8 }}>
+                <Text>{selectedWork.subject}</Text>
+              </div>
+            </div>
+
+            <div>
+              <Text strong>Заказчик:</Text>
+              <div style={{ marginTop: 8 }}>
+                <Text>{selectedWork.client}</Text>
+              </div>
+            </div>
+
+            <div>
+              <Text strong>Срок выполнения:</Text>
+              <div style={{ marginTop: 8 }}>
+                <Text>{selectedWork.deadline}</Text>
+              </div>
+            </div>
+
+            <div>
+              <Text strong>Бюджет:</Text>
+              <div style={{ marginTop: 8 }}>
+                <Title level={3} style={{ margin: 0, color: '#52c41a' }}>
+                  {selectedWork.price.toLocaleString('ru-RU')} ₽
+                </Title>
+              </div>
+            </div>
+
+            <div>
+              <Text strong>Описание:</Text>
+              <div style={{ marginTop: 8, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
+                <Text>{selectedWork.description}</Text>
+              </div>
+            </div>
+          </Space>
+        )}
+      </Modal>
     </Layout>
   );
 };

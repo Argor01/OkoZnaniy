@@ -103,6 +103,9 @@ const ExpertDashboard: React.FC = () => {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
   const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
+  const [friendChatModalVisible, setFriendChatModalVisible] = useState(false);
+  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const uploadRef = useRef<any>(null);
 
   // Forms
@@ -342,8 +345,6 @@ const ExpertDashboard: React.FC = () => {
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
-  const [applicationForm] = Form.useForm();
-  const [specializationForm] = Form.useForm();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['available-orders'],
@@ -573,7 +574,7 @@ const ExpertDashboard: React.FC = () => {
         >
           <UserOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
           <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет эксперта
+            Личный кабинет
           </Title>
         </div>
         <Menu
@@ -717,15 +718,6 @@ const ExpertDashboard: React.FC = () => {
             <Menu.Item key="friends" icon={<TeamOutlined />}>
               Мои друзья
             </Menu.Item>
-            <Menu.Item key="favorites" icon={<HeartOutlined />}>
-              Избранное
-            </Menu.Item>
-            <Menu.Item key="bonuses" icon={<GiftOutlined />}>
-              Бонусы
-            </Menu.Item>
-            <Menu.Item key="paid-services" icon={<DollarOutlined />}>
-              Платные услуги
-            </Menu.Item>
             <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
               FAQ
             </Menu.Item>
@@ -750,7 +742,7 @@ const ExpertDashboard: React.FC = () => {
           }}
         >
           <Title level={3} style={{ margin: 0 }}>
-            Личный кабинет эксперта
+            Личный кабинет
           </Title>
           <Space>
             <Button
@@ -1504,7 +1496,7 @@ const ExpertDashboard: React.FC = () => {
         </div>
         </Content>
         <Footer style={{ textAlign: 'center', background: '#fff' }}>
-          Личный кабинет эксперта © {new Date().getFullYear()}
+          Личный кабинет © {new Date().getFullYear()}
         </Footer>
       </Layout>
     </Layout>
@@ -3994,28 +3986,342 @@ const ExpertDashboard: React.FC = () => {
               console.log('Поиск:', value);
             }}
           />
-          <div style={{ 
-            minHeight: '400px',
-            background: '#ffffff',
-            borderRadius: 12,
-            border: '1px solid #e5e7eb',
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <TeamOutlined style={{ 
-              fontSize: 64, 
-              color: '#d1d5db',
-              marginBottom: 16 
-            }} />
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              У вас пока нет друзей
-            </Text>
-            <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
-              Пригласите друзей, чтобы начать общение
-            </Text>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#3b82f6' }}>ИП</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Иван Петров</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Математика, Физика</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>127 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Иван Петров', specialization: 'Математика, Физика' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Иван Петров', 
+                      specialization: 'Математика, Физика',
+                      rating: 5,
+                      worksCount: 127,
+                      avatar: 'ИП',
+                      avatarColor: '#3b82f6',
+                      bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
+                      education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
+                      experience: '10 лет',
+                      skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#10b981' }}>МС</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Мария Сидорова</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Экономика, Бухучет</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>89 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Мария Сидорова', specialization: 'Экономика, Бухучет' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Мария Сидорова', 
+                      specialization: 'Экономика, Бухучет',
+                      rating: 5,
+                      worksCount: 89,
+                      avatar: 'МС',
+                      avatarColor: '#10b981',
+                      bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
+                      education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
+                      experience: '7 лет',
+                      skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#f59e0b' }}>АС</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Алексей Смирнов</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Программирование</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>156 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Алексей Смирнов', specialization: 'Программирование' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Алексей Смирнов', 
+                      specialization: 'Программирование',
+                      rating: 4,
+                      worksCount: 156,
+                      avatar: 'АС',
+                      avatarColor: '#f59e0b',
+                      bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
+                      education: 'МФТИ, Факультет инноваций и высоких технологий',
+                      experience: '8 лет',
+                      skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#8b5cf6' }}>ЕК</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Елена Козлова</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Химия, Биология</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>203 работы</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Елена Козлова', specialization: 'Химия, Биология' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Елена Козлова', 
+                      specialization: 'Химия, Биология',
+                      rating: 5,
+                      worksCount: 203,
+                      avatar: 'ЕК',
+                      avatarColor: '#8b5cf6',
+                      bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
+                      education: 'МГУ им. М.В. Ломоносова, Химический факультет',
+                      experience: '12 лет',
+                      skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#ec4899' }}>ДН</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Дмитрий Новиков</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>История, Философия</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>74 работы</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Дмитрий Новиков', specialization: 'История, Философия' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Дмитрий Новиков', 
+                      specialization: 'История, Философия',
+                      rating: 4,
+                      worksCount: 74,
+                      avatar: 'ДН',
+                      avatarColor: '#ec4899',
+                      bio: 'Историк и философ. Помогаю понять сложные исторические процессы и философские концепции.',
+                      education: 'СПбГУ, Исторический факультет',
+                      experience: '6 лет',
+                      skills: ['История России', 'Всемирная история', 'Философия', 'Обществознание']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Avatar size={56} style={{ backgroundColor: '#06b6d4' }}>ОВ</Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block' }}>Ольга Васильева</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Английский язык</Text>
+                  <div style={{ marginTop: 4 }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>312 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Ольга Васильева', specialization: 'Английский язык' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Ольга Васильева', 
+                      specialization: 'Английский язык',
+                      rating: 5,
+                      worksCount: 312,
+                      avatar: 'ОВ',
+                      avatarColor: '#06b6d4',
+                      bio: 'Преподаватель английского языка с международными сертификатами. Готовлю к IELTS, TOEFL и ЕГЭ.',
+                      education: 'МГЛУ, Факультет английского языка',
+                      experience: '15 лет',
+                      skills: ['Английский язык', 'IELTS', 'TOEFL', 'Деловой английский', 'Разговорная практика']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </Modal>
@@ -4125,48 +4431,120 @@ const ExpertDashboard: React.FC = () => {
 
       {/* Модальное окно создания заказа */}
       <Modal
-        title="Создать заказ"
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1890ff'
+          }}>
+            Создать заказ
+          </div>
+        }
         open={createOrderModalVisible}
         onCancel={() => setCreateOrderModalVisible(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setCreateOrderModalVisible(false)}>
-            Отмена
-          </Button>,
-          <Button key="submit" type="primary" onClick={() => {
-            message.info('Функция создания заказа в разработке');
-            setCreateOrderModalVisible(false);
-          }}>
-            Создать
-          </Button>
-        ]}
-        width={700}
+        onOk={() => {
+          message.info('Функция создания заказа в разработке');
+          setCreateOrderModalVisible(false);
+        }}
+        width={750}
+        okText="Создать"
+        cancelText="Отмена"
+        okButtonProps={{
+          className: styles.buttonPrimary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        cancelButtonProps={{
+          className: styles.buttonSecondary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
       >
-        <Form layout="vertical">
-          <Form.Item label="Название заказа" required>
-            <Input placeholder="Введите название заказа" />
+        <Form layout="vertical" form={createOrderForm}>
+          <Form.Item label="Название заказа" name="title" rules={[{ required: true, message: 'Введите название' }]}>
+            <Input 
+              placeholder="Введите название заказа" 
+              className={styles.inputField}
+              size="large"
+            />
           </Form.Item>
-          <Form.Item label="Описание" required>
-            <Input.TextArea rows={4} placeholder="Опишите задание подробно" />
+          <Form.Item label="Описание" name="description" rules={[{ required: true, message: 'Введите описание' }]}>
+            <Input.TextArea 
+              rows={4} 
+              placeholder="Опишите задание подробно" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
           </Form.Item>
-          <Form.Item label="Предмет" required>
-            <Select placeholder="Выберите предмет">
+          <Form.Item label="Предмет" name="subject" rules={[{ required: true, message: 'Выберите предмет' }]}>
+            <Select 
+              placeholder="Выберите предмет"
+              className={styles.inputField}
+              size="large"
+            >
               <Select.Option value="math">Математика</Select.Option>
               <Select.Option value="physics">Физика</Select.Option>
               <Select.Option value="chemistry">Химия</Select.Option>
               <Select.Option value="programming">Программирование</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Тип работы" required>
-            <Select placeholder="Выберите тип работы">
+          <Form.Item label="Тип работы" name="work_type" rules={[{ required: true, message: 'Выберите тип работы' }]}>
+            <Select 
+              placeholder="Выберите тип работы"
+              className={styles.inputField}
+              size="large"
+            >
               <Select.Option value="essay">Реферат</Select.Option>
               <Select.Option value="coursework">Курсовая</Select.Option>
               <Select.Option value="diploma">Диплом</Select.Option>
               <Select.Option value="test">Контрольная</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Срок выполнения" required>
+          <Form.Item label="Срок выполнения" name="deadline" rules={[{ required: true, message: 'Выберите дату' }]}>
             <DatePicker 
-              style={{ width: '100%' }} 
+              style={{ width: '100%', height: 48, borderRadius: 8, fontSize: 14 }} 
               placeholder="Выберите дату"
               format="DD.MM.YYYY"
               disabledDate={(current) => {
@@ -4175,8 +4553,16 @@ const ExpertDashboard: React.FC = () => {
               inputReadOnly
             />
           </Form.Item>
-          <Form.Item label="Бюджет (₽)" required>
-            <InputNumber min={0} style={{ width: '100%' }} placeholder="Укажите бюджет" />
+          <Form.Item label="Бюджет (₽)" name="budget" rules={[{ required: true, message: 'Укажите бюджет' }]}>
+            <InputNumber 
+              min={0} 
+              style={{ width: '100%' }} 
+              placeholder="Укажите бюджет"
+              className={styles.inputField}
+              size="large"
+              precision={0}
+              parser={(value) => value?.replace(/\D/g, '') || ''}
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -4306,6 +4692,223 @@ const ExpertDashboard: React.FC = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Friend Profile Modal */}
+      <Modal
+        title={null}
+        open={friendProfileModalVisible}
+        onCancel={() => setFriendProfileModalVisible(false)}
+        footer={null}
+        width={700}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            padding: 0
+          }
+        }}
+      >
+        {selectedFriend && (
+          <div>
+            {/* Header with gradient background */}
+            <div style={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '40px 32px',
+              position: 'relative'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 20 
+              }}>
+                <Avatar 
+                  size={100} 
+                  style={{ 
+                    backgroundColor: selectedFriend.avatarColor,
+                    fontSize: 36,
+                    fontWeight: 600,
+                    border: '4px solid rgba(255, 255, 255, 0.3)'
+                  }}
+                >
+                  {selectedFriend.avatar}
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text 
+                    strong 
+                    style={{ 
+                      fontSize: 28, 
+                      display: 'block',
+                      color: '#ffffff',
+                      marginBottom: 8
+                    }}
+                  >
+                    {selectedFriend.name}
+                  </Text>
+                  <Text 
+                    style={{ 
+                      fontSize: 16, 
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      display: 'block',
+                      marginBottom: 12
+                    }}
+                  >
+                    {selectedFriend.specialization}
+                  </Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div>
+                      <Rate 
+                        disabled 
+                        defaultValue={selectedFriend.rating} 
+                        style={{ fontSize: 16, color: '#fbbf24' }} 
+                      />
+                    </div>
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 14 }}>
+                      {selectedFriend.worksCount} работ
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '32px' }}>
+              {/* Bio Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <UserOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    О себе
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563', lineHeight: 1.6 }}>
+                  {selectedFriend.bio}
+                </Text>
+              </div>
+
+              {/* Education Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <TrophyOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Образование
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563' }}>
+                  {selectedFriend.education}
+                </Text>
+              </div>
+
+              {/* Experience Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <ClockCircleOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Опыт работы
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563' }}>
+                  {selectedFriend.experience}
+                </Text>
+              </div>
+
+              {/* Skills Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <StarFilled style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Навыки
+                  </Text>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {selectedFriend.skills?.map((skill: string, index: number) => (
+                    <Tag 
+                      key={index}
+                      style={{ 
+                        padding: '6px 16px',
+                        fontSize: 14,
+                        borderRadius: 20,
+                        border: '1px solid #e0e7ff',
+                        background: '#f5f7ff',
+                        color: '#667eea'
+                      }}
+                    >
+                      {skill}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ 
+                display: 'flex', 
+                gap: 12,
+                paddingTop: 24,
+                borderTop: '1px solid #e5e7eb'
+              }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<MessageOutlined />}
+                  style={{ 
+                    flex: 1,
+                    height: 48,
+                    borderRadius: 12,
+                    fontSize: 16
+                  }}
+                  onClick={() => {
+                    setFriendProfileModalVisible(false);
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать сообщение
+                </Button>
+                <Button 
+                  size="large"
+                  icon={<HeartOutlined />}
+                  style={{ 
+                    height: 48,
+                    borderRadius: 12,
+                    fontSize: 16
+                  }}
+                >
+                  В избранное
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </>
   );

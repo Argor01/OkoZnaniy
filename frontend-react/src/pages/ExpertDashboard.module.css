@@ -578,11 +578,16 @@
 
 .modalEducationRow .ant-form-item {
   margin-bottom: 0 !important;
+  height: 100%;
 }
 
 .modalEducationRow .ant-col {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+}
+
+.modalEducationRow .ant-form-item-control-input {
+  min-height: auto;
 }
 
 /* Card (general) */
