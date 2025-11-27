@@ -4948,6 +4948,155 @@ const ExpertDashboard: React.FC = () => {
         </Form>
       </Modal>
 
+      {/* Friend Chat Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 20, 
+            fontWeight: 600, 
+            color: '#1890ff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <MessageOutlined />
+            {selectedFriend ? `Чат с ${selectedFriend.name}` : 'Чат'}
+          </div>
+        }
+        open={friendChatModalVisible}
+        onCancel={() => setFriendChatModalVisible(false)}
+        footer={null}
+        width={600}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '20px 24px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '0',
+            background: 'rgba(255, 255, 255, 0.95)',
+            height: '500px',
+            display: 'flex',
+            flexDirection: 'column'
+          }
+        }}
+      >
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '500px'
+        }}>
+          {/* Chat messages area */}
+          <div style={{ 
+            flex: 1, 
+            padding: '20px 24px', 
+            overflowY: 'auto',
+            background: '#f8f9fa'
+          }}>
+            <div style={{ 
+              textAlign: 'center', 
+              color: '#8c8c8c', 
+              fontSize: 14,
+              marginBottom: 20
+            }}>
+              Начало переписки с {selectedFriend?.name}
+            </div>
+            
+            {/* Sample messages */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ 
+                background: '#e6f7ff', 
+                padding: '12px 16px', 
+                borderRadius: '12px 12px 12px 4px',
+                maxWidth: '70%',
+                marginLeft: 'auto',
+                border: '1px solid #91d5ff'
+              }}>
+                <Text>Привет! Как дела с проектом?</Text>
+                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4, textAlign: 'right' }}>
+                  14:30
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ 
+                background: '#ffffff', 
+                padding: '12px 16px', 
+                borderRadius: '12px 12px 4px 12px',
+                maxWidth: '70%',
+                border: '1px solid #d9d9d9'
+              }}>
+                <Text>Привет! Всё отлично, работаю над задачами. А у тебя как успехи?</Text>
+                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4 }}>
+                  14:32
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Message input area */}
+          <div style={{ 
+            padding: '16px 24px', 
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            background: 'rgba(255, 255, 255, 0.95)'
+          }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+              <Input.TextArea 
+                placeholder="Напишите сообщение..."
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                style={{ 
+                  borderRadius: 12,
+                  resize: 'none'
+                }}
+                onPressEnter={(e) => {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    message.info('Сообщение отправлено!');
+                  }
+                }}
+              />
+              <Button 
+                type="primary" 
+                icon={<SendOutlined />}
+                style={{ 
+                  borderRadius: 12,
+                  height: 40,
+                  minWidth: 40
+                }}
+                onClick={() => {
+                  message.info('Сообщение отправлено!');
+                }}
+              />
+            </div>
+            <div style={{ 
+              fontSize: 12, 
+              color: '#8c8c8c', 
+              marginTop: 8,
+              textAlign: 'center'
+            }}>
+              Нажмите Enter для отправки, Shift+Enter для новой строки
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       {/* Friend Profile Modal */}
       <Modal
         title={null}
