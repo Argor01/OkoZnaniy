@@ -909,21 +909,6 @@ const ExpertDashboard: React.FC = () => {
                   <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: 20 }}>
                     {profile?.username || profile?.email || 'Эксперт'}
                   </Title>
-                  <Button 
-                    type="primary" 
-                    size="small"
-                    style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      border: 'none',
-                      borderRadius: 8,
-                      height: 28,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      padding: '0 12px'
-                    }}
-                  >
-                    Готов к работе
-                  </Button>
                 </div>
                 <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
                   Онлайн
