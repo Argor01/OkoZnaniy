@@ -966,16 +966,16 @@ const ExpertDashboard: React.FC = () => {
                 }}
               />
               <div className={styles.profileInfo}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                   <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: 20 }}>
                     {profile?.username || profile?.email || 'Эксперт'}
                   </Title>
+                  <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
+                    Онлайн
+                  </Text>
                 </div>
-                <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
-                  Онлайн
-                </Text>
-                <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'nowrap', overflow: 'auto' }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
                       <Text style={{ fontSize: 14, color: '#1f2937', marginBottom: 4 }}>Рейтинг исполнителя:</Text>
                       <Rate
@@ -989,7 +989,7 @@ const ExpertDashboard: React.FC = () => {
                       </Text>
                     </Space>
                   </div>
-                  <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
                       <Text style={{ fontSize: 14, color: '#1f2937', marginBottom: 4 }}>Рейтинг заказчика:</Text>
                       <Rate
@@ -1104,7 +1104,7 @@ const ExpertDashboard: React.FC = () => {
                         setProfileModalVisible(true);
                       }}
                     >
-                      Редактировать
+                      {!isMobile && 'Редактировать'}
                     </Button>
                   </div>
                   <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
@@ -1138,6 +1138,7 @@ const ExpertDashboard: React.FC = () => {
                     <h2 className={styles.sectionTitle}>Мои специализации</h2>
                     <Button 
                       type="primary"
+                      icon={<EditOutlined />}
                       className={styles.buttonPrimary}
                       onClick={() => {
                         setEditingSpecialization(null);
@@ -1145,7 +1146,7 @@ const ExpertDashboard: React.FC = () => {
                         setSpecializationModalVisible(true);
                       }}
                     >
-                      Редактировать
+                      {!isMobile && 'Редактировать'}
                     </Button>
                   </div>
                   {specializationsLoading ? (
@@ -2144,7 +2145,13 @@ const ExpertDashboard: React.FC = () => {
               min={0} 
               max={50}
               precision={0}
-              parser={(value) => value?.replace(/\D/g, '') || ''}
+              controls={false}
+              keyboard={true}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
@@ -2202,7 +2209,13 @@ const ExpertDashboard: React.FC = () => {
                               className={styles.inputField}
                               size="large"
                               precision={0}
-                              parser={(value) => value?.replace(/\D/g, '') || ''}
+                              controls={false}
+                              keyboard={true}
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </Form.Item>
                         </Col>
@@ -2220,7 +2233,13 @@ const ExpertDashboard: React.FC = () => {
                               className={styles.inputField}
                               size="large"
                               precision={0}
-                              parser={(value) => value?.replace(/\D/g, '') || ''}
+                              controls={false}
+                              keyboard={true}
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </Form.Item>
                         </Col>
@@ -4316,23 +4335,26 @@ const ExpertDashboard: React.FC = () => {
               console.log('Поиск:', value);
             }}
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16, alignItems: 'stretch' }}>
             <div style={{ 
               background: '#ffffff',
               borderRadius: 12,
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#3b82f6' }}>ИП</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Иван Петров</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Математика, Физика</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#3b82f6', flexShrink: 0 }}>ИП</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Иван Петров</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Математика, Физика</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>127 работ</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>127 работ</Text>
                   </div>
                 </div>
               </div>
@@ -4379,16 +4401,19 @@ const ExpertDashboard: React.FC = () => {
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#10b981' }}>МС</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Мария Сидорова</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Экономика, Бухучет</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#10b981', flexShrink: 0 }}>МС</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Мария Сидорова</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Экономика, Бухучет</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>89 работ</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>89 работ</Text>
                   </div>
                 </div>
               </div>
@@ -4435,16 +4460,19 @@ const ExpertDashboard: React.FC = () => {
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#f59e0b' }}>АС</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Алексей Смирнов</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Программирование</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#f59e0b', flexShrink: 0 }}>АС</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Алексей Смирнов</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Программирование</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>156 работ</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>156 работ</Text>
                   </div>
                 </div>
               </div>
@@ -4491,16 +4519,19 @@ const ExpertDashboard: React.FC = () => {
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#8b5cf6' }}>ЕК</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Елена Козлова</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Химия, Биология</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#8b5cf6', flexShrink: 0 }}>ЕК</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Елена Козлова</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Химия, Биология</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>203 работы</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>203 работы</Text>
                   </div>
                 </div>
               </div>
@@ -4547,16 +4578,19 @@ const ExpertDashboard: React.FC = () => {
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#ec4899' }}>ДН</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Дмитрий Новиков</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>История, Философия</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#ec4899', flexShrink: 0 }}>ДН</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Дмитрий Новиков</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>История, Философия</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>74 работы</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>74 работы</Text>
                   </div>
                 </div>
               </div>
@@ -4603,16 +4637,19 @@ const ExpertDashboard: React.FC = () => {
               border: '1px solid #e5e7eb',
               padding: '16px',
               transition: 'all 0.3s',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar size={56} style={{ backgroundColor: '#06b6d4' }}>ОВ</Avatar>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 16, display: 'block' }}>Ольга Васильева</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Английский язык</Text>
-                  <div style={{ marginTop: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#06b6d4', flexShrink: 0 }}>ОВ</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Ольга Васильева</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Английский язык</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>312 работ</Text>
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>312 работ</Text>
                   </div>
                 </div>
               </div>
@@ -4891,7 +4928,13 @@ const ExpertDashboard: React.FC = () => {
               className={styles.inputField}
               size="large"
               precision={0}
-              parser={(value) => value?.replace(/\D/g, '') || ''}
+              controls={false}
+              keyboard={true}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
             />
           </Form.Item>
         </Form>
