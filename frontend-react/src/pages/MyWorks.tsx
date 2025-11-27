@@ -457,7 +457,15 @@ const MyWorks: React.FC = () => {
           <Button key="close" onClick={() => setWorkDetailModalVisible(false)}>
             Закрыть
           </Button>,
-          <Button key="message" type="primary" icon={<MessageOutlined />}>
+          <Button 
+            key="message" 
+            type="primary" 
+            icon={<MessageOutlined />}
+            onClick={() => {
+              setWorkDetailModalVisible(false);
+              navigate('/expert', { state: { openChat: selectedWork?.client?.username || 'Заказчик' } });
+            }}
+          >
             Написать заказчику
           </Button>
         ]}

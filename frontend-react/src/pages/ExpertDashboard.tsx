@@ -6,7 +6,7 @@ import EmojiPicker from 'emoji-picker-react';
 import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { expertsApi, type ExpertApplication, type Education, type Specialization } from '../api/experts';
 import { catalogApi } from '../api/catalog';
@@ -81,6 +81,7 @@ const { Header, Sider, Content, Footer } = Layout;
 const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
   const [bidLoading, setBidLoading] = useState<Record<number, boolean>>({});
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
@@ -604,6 +605,20 @@ const ExpertDashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Handle opening chat from external navigation
+  React.useEffect(() => {
+    const state = location.state as any;
+    if (state?.openChat) {
+      const chat = mockMessages.find(m => m.userName.includes(state.openChat) || state.openChat.includes(m.userName));
+      if (chat) {
+        setSelectedChat(chat);
+      }
+      setMessageModalVisible(true);
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   if (isLoading) return <Text>Загрузка...</Text>;
   if (isError) return <Text type="danger">Ошибка загрузки заказов</Text>;
