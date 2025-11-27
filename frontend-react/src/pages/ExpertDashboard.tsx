@@ -327,7 +327,7 @@ const ExpertDashboard: React.FC = () => {
     {
       id: 5,
       chatId: 5,
-      userName: 'Дмитрий Волков',
+      userName: 'Дмитрий Новиков',
       userAvatar: undefined,
       lastMessage: 'Отлично, договорились!',
       timestamp: '1 день назад',
@@ -335,9 +335,9 @@ const ExpertDashboard: React.FC = () => {
       isOnline: false,
       unreadCount: 0,
       messages: [
-        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом', timestamp: '3 дня назад', isMine: false, isRead: true },
-        { id: 2, text: 'Добрый день! По какому предмету?', timestamp: '3 дня назад', isMine: true, isRead: true },
-        { id: 3, text: 'История России', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом по истории', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 2, text: 'Добрый день! Какая тема?', timestamp: '3 дня назад', isMine: true, isRead: true },
+        { id: 3, text: 'Реформы Петра I', timestamp: '3 дня назад', isMine: false, isRead: true },
         { id: 4, text: 'Отлично, договорились!', timestamp: '1 день назад', isMine: false, isRead: true }
       ]
     }
@@ -1499,8 +1499,11 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            setSelectedFriend({ name: 'Иван Петров', specialization: 'Математика, Физика' });
-                            setFriendChatModalVisible(true);
+                            const chat = mockMessages.find(m => m.userName === 'Иван Петров');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
                             setFriendsModalVisible(false);
                           }}
                         >
@@ -1550,8 +1553,11 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            setSelectedFriend({ name: 'Мария Сидорова', specialization: 'Экономика, Бухучет' });
-                            setFriendChatModalVisible(true);
+                            const chat = mockMessages.find(m => m.userName === 'Мария Сидорова');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
                             setFriendsModalVisible(false);
                           }}
                         >
@@ -1601,8 +1607,11 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            setSelectedFriend({ name: 'Алексей Смирнов', specialization: 'Программирование' });
-                            setFriendChatModalVisible(true);
+                            const chat = mockMessages.find(m => m.userName === 'Алексей Смирнов');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
                             setFriendsModalVisible(false);
                           }}
                         >
@@ -1652,8 +1661,11 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            setSelectedFriend({ name: 'Елена Козлова', specialization: 'Химия, Биология' });
-                            setFriendChatModalVisible(true);
+                            const chat = mockMessages.find(m => m.userName === 'Елена Козлова');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
                             setFriendsModalVisible(false);
                           }}
                         >
@@ -1703,8 +1715,11 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            setSelectedFriend({ name: 'Дмитрий Новиков', specialization: 'История, Философия' });
-                            setFriendChatModalVisible(true);
+                            const chat = mockMessages.find(m => m.userName === 'Дмитрий Новиков');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
                             setFriendsModalVisible(false);
                           }}
                         >
