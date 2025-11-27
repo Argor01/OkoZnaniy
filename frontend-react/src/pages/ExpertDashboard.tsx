@@ -623,7 +623,68 @@ const ExpertDashboard: React.FC = () => {
   if (isLoading) return <Text>Загрузка...</Text>;
   if (isError) return <Text type="danger">Ошибка загрузки заказов</Text>;
 
-  const orders: Order[] = data || [];
+  const orders: Order[] = data && data.length > 0 ? data : [
+    {
+      id: 2001,
+      title: 'Решение задач по высшей математике',
+      description: 'Необходимо решить 20 задач по математическому анализу. Темы: пределы, производные, интегралы, дифференциальные уравнения.',
+      budget: 2500,
+      status: 'new',
+      subject: { id: 1, name: 'Математика' },
+      work_type: { id: 1, name: 'Контрольная работа' },
+      deadline: '2024-12-05',
+      created_at: '2024-11-27',
+      client: { id: 201, username: 'student_anna', first_name: 'Анна', last_name: 'Иванова' }
+    },
+    {
+      id: 2002,
+      title: 'Курсовая работа по программированию',
+      description: 'Разработка веб-приложения на React с использованием TypeScript. Требуется реализовать CRUD операции, авторизацию и адаптивный дизайн.',
+      budget: 12000,
+      status: 'new',
+      subject: { id: 5, name: 'Программирование' },
+      work_type: { id: 3, name: 'Курсовая работа' },
+      deadline: '2024-12-10',
+      created_at: '2024-11-26',
+      client: { id: 202, username: 'student_sergey', first_name: 'Сергей', last_name: 'Петров' }
+    },
+    {
+      id: 2003,
+      title: 'Лабораторные работы по физике',
+      description: '3 лабораторные работы по механике и термодинамике. Нужны расчеты, графики и выводы.',
+      budget: 1800,
+      status: 'new',
+      subject: { id: 2, name: 'Физика' },
+      work_type: { id: 2, name: 'Лабораторная работа' },
+      deadline: '2024-12-03',
+      created_at: '2024-11-27',
+      client: { id: 203, username: 'student_kate', first_name: 'Екатерина', last_name: 'Смирнова' }
+    },
+    {
+      id: 2004,
+      title: 'Дипломная работа по экономике',
+      description: 'Тема: "Анализ финансового состояния предприятия". Требуется провести полный финансовый анализ, построить модели, дать рекомендации.',
+      budget: 18000,
+      status: 'new',
+      subject: { id: 6, name: 'Экономика' },
+      work_type: { id: 4, name: 'Дипломная работа' },
+      deadline: '2024-12-20',
+      created_at: '2024-11-25',
+      client: { id: 204, username: 'student_alex', first_name: 'Александр', last_name: 'Козлов' }
+    },
+    {
+      id: 2005,
+      title: 'Реферат по истории России',
+      description: 'Реферат на тему "Внешняя политика России в XIX веке". Объем 15-20 страниц, оформление по ГОСТ.',
+      budget: 1200,
+      status: 'new',
+      subject: { id: 8, name: 'История' },
+      work_type: { id: 5, name: 'Реферат' },
+      deadline: '2024-12-01',
+      created_at: '2024-11-27',
+      client: { id: 205, username: 'student_maria', first_name: 'Мария', last_name: 'Волкова' }
+    }
+  ] as any;
 
   const handleLogout = () => {
     Modal.confirm({
