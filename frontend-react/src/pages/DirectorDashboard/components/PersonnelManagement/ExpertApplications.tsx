@@ -27,8 +27,8 @@ import {
   approveApplication,
   rejectApplication,
   sendForRework,
-  type ExpertApplication,
 } from '../../api/directorApi';
+import { type ExpertApplication } from '../../api/types';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -53,7 +53,6 @@ const ExpertApplications: React.FC = () => {
       message.success('Анкета утверждена');
       setDetailModalVisible(false);
       queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
-      // После утверждения анкеты обновляем список сотрудников
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     },
     onError: (error: any) => {

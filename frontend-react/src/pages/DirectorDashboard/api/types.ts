@@ -122,6 +122,11 @@ export interface Employee {
   date_joined: string;
   last_login?: string;
   username?: string;
+  experience_years?: number;
+  education?: string;
+  skills?: string;
+  portfolio_url?: string;
+  bio?: string;
 }
 
 export interface ExpertApplication {

@@ -24,8 +24,8 @@ import {
   getArchivedEmployees,
   restoreEmployee,
   deleteEmployee,
-  type Employee,
 } from '../../api/directorApi';
+import { type Employee } from '../../api/types';
 
 const { Title } = Typography;
 const { Search } = Input;
