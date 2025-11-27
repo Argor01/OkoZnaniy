@@ -67,10 +67,10 @@ export const getPersonnel = async (): Promise<Employee[]> => {
   }
   try {
     const response = await apiClient.get('/director/personnel/');
-    const list: Employee[] = response.data || [];
+    const raw = (response.data && (response.data.results || response.data)) || [];
+    const list: Employee[] = Array.isArray(raw) ? raw : [];
     const ids = getDeactivatedEmployeeIds();
-    const arr = Array.isArray(list) ? list : [];
-    return arr.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
+    return list.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
   } catch (error) {
     console.error('Error fetching personnel:', error);
     // Пытаемся получить список пользователей как резервный источник
@@ -437,6 +437,17 @@ export const activateEmployee = async (id: number): Promise<Employee> => {
     return updated;
   } catch (error) {
     console.error('Error activating employee:', error);
+    try {
+      const index = mockEmployees.findIndex(emp => emp.id === id);
+      if (index > -1) {
+        const employee = mockEmployees[index];
+        const activated: Employee = { ...employee, is_active: true };
+        mockEmployees[index] = activated;
+        removeDeactivatedEmployeeId(id);
+        return activated;
+      }
+      removeDeactivatedEmployeeId(id);
+    } catch (_) {}
     throw error;
   }
 };

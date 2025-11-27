@@ -66,13 +66,38 @@ const EmployeeList: React.FC = () => {
 
   const activateMutation = useMutation({
     mutationFn: (id: number) => activateEmployee(id),
-    onSuccess: () => {
+    onSuccess: (updated: Employee) => {
       message.success('Сотрудник активирован');
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: true } : e));
+      });
+      try {
+        const raw = localStorage.getItem('director_deactivated_employees');
+        const arr = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(arr)) {
+          const next = arr.filter((x: number) => x !== updated.id);
+          localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
+        }
+      } catch {}
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     },
-    onError: (error: any) => {
+    onError: (error: any, id: number) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при активации сотрудника';
       message.error(errorMessage);
+      try {
+        const raw = localStorage.getItem('director_deactivated_employees');
+        const arr = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(arr)) {
+          const next = arr.filter((x: number) => x !== id);
+          localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
+        }
+      } catch {}
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === id ? { ...e, is_active: true } : e));
+      });
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     },
   });
 
