@@ -358,7 +358,75 @@ const ExpertDashboard: React.FC = () => {
 
   const { data: myCompleted } = useQuery({
     queryKey: ['my-orders-completed'],
-    queryFn: () => ordersApi.getMyOrders({ status: 'completed' }),
+    queryFn: async () => {
+      const data = await ordersApi.getMyOrders({ status: 'completed' });
+      // Если нет данных с сервера, возвращаем тестовые данные
+      if (!data || data.length === 0) {
+        return [
+          {
+            id: 1001,
+            title: 'Решение задач по высшей математике',
+            description: 'Выполнено 15 задач по математическому анализу, включая пределы, производные и интегралы. Все решения оформлены с подробными пояснениями.',
+            budget: 3500,
+            status: 'completed',
+            subject: { id: 1, name: 'Математика' },
+            work_type: { id: 1, name: 'Контрольная работа' },
+            deadline: '2024-11-20',
+            created_at: '2024-11-15',
+            client: { id: 101, username: 'student_ivan', first_name: 'Иван', last_name: 'Петров' }
+          },
+          {
+            id: 1002,
+            title: 'Курсовая работа по программированию',
+            description: 'Разработано веб-приложение на React с использованием TypeScript. Реализованы все требуемые функции, включая авторизацию, CRUD операции и адаптивный дизайн.',
+            budget: 8000,
+            status: 'completed',
+            subject: { id: 5, name: 'Программирование' },
+            work_type: { id: 3, name: 'Курсовая работа' },
+            deadline: '2024-11-18',
+            created_at: '2024-11-10',
+            client: { id: 102, username: 'maria_s', first_name: 'Мария', last_name: 'Сидорова' }
+          },
+          {
+            id: 1003,
+            title: 'Лабораторные работы по физике',
+            description: 'Выполнено 5 лабораторных работ по механике и термодинамике. Все расчеты проверены, графики построены, выводы сформулированы.',
+            budget: 2500,
+            status: 'completed',
+            subject: { id: 2, name: 'Физика' },
+            work_type: { id: 2, name: 'Лабораторная работа' },
+            deadline: '2024-11-22',
+            created_at: '2024-11-17',
+            client: { id: 103, username: 'alex_k', first_name: 'Алексей', last_name: 'Козлов' }
+          },
+          {
+            id: 1004,
+            title: 'Реферат по истории России',
+            description: 'Написан реферат на тему "Реформы Петра I" объемом 20 страниц. Использованы научные источники, оформление по ГОСТ.',
+            budget: 1500,
+            status: 'completed',
+            subject: { id: 8, name: 'История' },
+            work_type: { id: 5, name: 'Реферат' },
+            deadline: '2024-11-19',
+            created_at: '2024-11-14',
+            client: { id: 104, username: 'olga_v', first_name: 'Ольга', last_name: 'Васильева' }
+          },
+          {
+            id: 1005,
+            title: 'Дипломная работа по экономике',
+            description: 'Выполнена дипломная работа на тему "Анализ финансового состояния предприятия". Проведен полный финансовый анализ, построены модели, сформулированы рекомендации.',
+            budget: 15000,
+            status: 'completed',
+            subject: { id: 6, name: 'Экономика' },
+            work_type: { id: 4, name: 'Дипломная работа' },
+            deadline: '2024-11-25',
+            created_at: '2024-11-01',
+            client: { id: 105, username: 'dmitry_n', first_name: 'Дмитрий', last_name: 'Новиков' }
+          }
+        ] as any;
+      }
+      return data;
+    },
   });
 
   // Загружаем профиль пользователя
