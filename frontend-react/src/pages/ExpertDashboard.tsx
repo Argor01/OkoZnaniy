@@ -1493,10 +1493,39 @@ const ExpertDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setSelectedFriend({ name: 'Иван Петров', specialization: 'Математика, Физика' });
+                            setFriendChatModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Написать
                         </Button>
-                        <Button size="small" icon={<UserOutlined />}>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Иван Петров', 
+                              specialization: 'Математика, Физика',
+                              rating: 5,
+                              worksCount: 127,
+                              avatar: 'ИП',
+                              avatarColor: '#3b82f6',
+                              bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
+                              education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
+                              experience: '10 лет',
+                              skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Профиль
                         </Button>
                       </div>
@@ -1515,10 +1544,39 @@ const ExpertDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setSelectedFriend({ name: 'Мария Сидорова', specialization: 'Экономика, Бухучет' });
+                            setFriendChatModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Написать
                         </Button>
-                        <Button size="small" icon={<UserOutlined />}>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Мария Сидорова', 
+                              specialization: 'Экономика, Бухучет',
+                              rating: 5,
+                              worksCount: 89,
+                              avatar: 'МС',
+                              avatarColor: '#10b981',
+                              bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
+                              education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
+                              experience: '7 лет',
+                              skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Профиль
                         </Button>
                       </div>
@@ -1537,10 +1595,39 @@ const ExpertDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setSelectedFriend({ name: 'Алексей Смирнов', specialization: 'Программирование' });
+                            setFriendChatModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Написать
                         </Button>
-                        <Button size="small" icon={<UserOutlined />}>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Алексей Смирнов', 
+                              specialization: 'Программирование',
+                              rating: 4,
+                              worksCount: 156,
+                              avatar: 'АС',
+                              avatarColor: '#f59e0b',
+                              bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
+                              education: 'МФТИ, Факультет инноваций и высоких технологий',
+                              experience: '8 лет',
+                              skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Профиль
                         </Button>
                       </div>
@@ -1559,10 +1646,39 @@ const ExpertDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setSelectedFriend({ name: 'Елена Козлова', specialization: 'Химия, Биология' });
+                            setFriendChatModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Написать
                         </Button>
-                        <Button size="small" icon={<UserOutlined />}>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Елена Козлова', 
+                              specialization: 'Химия, Биология',
+                              rating: 5,
+                              worksCount: 203,
+                              avatar: 'ЕК',
+                              avatarColor: '#8b5cf6',
+                              bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
+                              education: 'МГУ им. М.В. Ломоносова, Химический факультет',
+                              experience: '12 лет',
+                              skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Профиль
                         </Button>
                       </div>
@@ -1581,10 +1697,39 @@ const ExpertDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                        <Button type="primary" size="small" icon={<MessageOutlined />} style={{ flex: 1 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            setSelectedFriend({ name: 'Дмитрий Новиков', specialization: 'История, Философия' });
+                            setFriendChatModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Написать
                         </Button>
-                        <Button size="small" icon={<UserOutlined />}>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Дмитрий Новиков', 
+                              specialization: 'История, Философия',
+                              rating: 4,
+                              worksCount: 74,
+                              avatar: 'ДН',
+                              avatarColor: '#ec4899',
+                              bio: 'Историк и философ. Помогаю понять сложные исторические процессы и философские концепции.',
+                              education: 'СПбГУ, Исторический факультет',
+                              experience: '6 лет',
+                              skills: ['История России', 'Всемирная история', 'Философия', 'Обществознание']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
                           Профиль
                         </Button>
                       </div>
