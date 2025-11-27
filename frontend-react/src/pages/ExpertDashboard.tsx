@@ -106,6 +106,8 @@ const ExpertDashboard: React.FC = () => {
   const [friendChatModalVisible, setFriendChatModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const uploadRef = useRef<any>(null);
 
   // Forms
@@ -593,6 +595,16 @@ const ExpertDashboard: React.FC = () => {
     }
   };
 
+  // Handle window resize for mobile responsiveness
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (isLoading) return <Text>Загрузка...</Text>;
   if (isError) return <Text type="danger">Ошибка загрузки заказов</Text>;
 
@@ -628,9 +640,25 @@ const ExpertDashboard: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
         width={250}
+        breakpoint="md"
+        collapsedWidth={isMobile ? 0 : 80}
+        collapsed={isMobile ? !mobileMenuVisible : undefined}
+        onCollapse={(collapsed) => {
+          if (isMobile) {
+            setMobileMenuVisible(!collapsed);
+          }
+        }}
         style={{
           background: '#fff',
           boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          position: isMobile ? 'fixed' : 'relative',
+          bottom: isMobile ? 0 : 'auto',
+          left: isMobile ? 0 : 'auto',
+          right: isMobile ? 0 : 'auto',
+          zIndex: isMobile ? 1000 : 'auto',
+          height: isMobile ? 'auto' : '100vh',
+          borderTop: isMobile ? '1px solid #f0f0f0' : 'none',
+          borderRight: isMobile ? 'none' : '1px solid #f0f0f0',
         }}
       >
         <div
@@ -646,12 +674,15 @@ const ExpertDashboard: React.FC = () => {
           </Title>
         </div>
         <Menu
-          mode="inline"
+          mode={isMobile ? "horizontal" : "inline"}
           selectedKeys={[selectedMenuKey]}
-          openKeys={openKeys}
+          openKeys={isMobile ? [] : openKeys}
           onOpenChange={setOpenKeys}
           triggerSubMenuAction="hover"
           onClick={({ key }) => {
+            if (isMobile) {
+              setMobileMenuVisible(false);
+            }
             if (key === 'messages') {
               setMessageModalVisible(true);
               return;
@@ -754,35 +785,43 @@ const ExpertDashboard: React.FC = () => {
             <Menu.Item key="balance" icon={<WalletOutlined />}>
               Счет: 0.00 ₽
             </Menu.Item>
-            <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
-              <Menu.Item key="orders-all">Все (0)</Menu.Item>
-              <Menu.Item key="orders-open">Открыт ()</Menu.Item>
-              <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
-              <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
-              <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
-              <Menu.Item key="orders-review">На проверке ()</Menu.Item>
-              <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
-              <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
-              <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
-              <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
-            </Menu.SubMenu>
+            {!isMobile ? (
+              <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
+                <Menu.Item key="orders-all">Все (0)</Menu.Item>
+                <Menu.Item key="orders-open">Открыт ()</Menu.Item>
+                <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
+                <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
+                <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
+                <Menu.Item key="orders-review">На проверке ()</Menu.Item>
+                <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
+                <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
+                <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
+                <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
+              </Menu.SubMenu>
+            ) : (
+              <Menu.Item key="orders" icon={<ShoppingOutlined />}>
+                Заказы
+              </Menu.Item>
+            )}
             <Menu.Item key="works" icon={<FileDoneOutlined />}>
               Мои работы
             </Menu.Item>
-            <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
-              <Menu.Item key="shop-ready-works">
-                Магазин готовых работ
-              </Menu.Item>
-              <Menu.Item key="shop-add-work">
-                Добавить работу в магазин
-              </Menu.Item>
-              <Menu.Item key="shop-my-works">
-                Мои работы
-              </Menu.Item>
-              <Menu.Item key="shop-purchased">
-                Купленные работы
-              </Menu.Item>
-            </Menu.SubMenu>
+            {!isMobile && (
+              <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
+                <Menu.Item key="shop-ready-works">
+                  Магазин готовых работ
+                </Menu.Item>
+                <Menu.Item key="shop-add-work">
+                  Добавить работу в магазин
+                </Menu.Item>
+                <Menu.Item key="shop-my-works">
+                  Мои работы
+                </Menu.Item>
+                <Menu.Item key="shop-purchased">
+                  Купленные работы
+                </Menu.Item>
+              </Menu.SubMenu>
+            )}
             <Menu.Item key="friends" icon={<TeamOutlined />}>
               Мои друзья
             </Menu.Item>
@@ -802,34 +841,38 @@ const ExpertDashboard: React.FC = () => {
         <Header
           style={{
             background: '#fff',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Title level={3} style={{ margin: 0 }}>
-            Личный кабинет
-          </Title>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
+              Личный кабинет
+            </Title>
+          </div>
           <Space>
             <Button
               type="default"
               danger
               icon={<LogoutOutlined />}
               onClick={handleLogout}
+              size={isMobile ? 'small' : 'middle'}
             >
-              Выйти
+              {!isMobile && 'Выйти'}
             </Button>
           </Space>
         </Header>
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
+            margin: isMobile ? '12px' : '24px',
+            padding: isMobile ? '16px' : '24px',
             background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
+            marginBottom: isMobile ? '80px' : '24px',
           }}
         >
         {/* Profile Header Block */}
