@@ -3166,8 +3166,6 @@ const ExpertDashboard: React.FC = () => {
                   type="primary"
                   block
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                    border: 'none',
                     borderRadius: 8,
                     height: 40
                   }}
