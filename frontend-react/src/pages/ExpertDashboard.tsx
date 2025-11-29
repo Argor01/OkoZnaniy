@@ -2435,11 +2435,12 @@ const ExpertDashboard: React.FC = () => {
             padding: 0,
             background: 'rgba(255, 255, 255, 0.95)',
             height: isMobile ? '100vh' : isTablet ? '500px' : '600px',
-            display: 'flex'
+            display: 'flex',
+            overflow: 'hidden'
           }
         }}
       >
-        <div style={{ display: 'flex', height: '100%', width: '100%', flexDirection: isMobile ? 'column' : 'row' }}>
+        <div style={{ display: 'flex', height: '100%', width: '100%', flexDirection: isMobile ? 'column' : 'row', overflow: 'hidden' }}>
           {/* Left Sidebar */}
           <div style={{ 
             width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
@@ -2448,7 +2449,7 @@ const ExpertDashboard: React.FC = () => {
             borderBottom: isMobile ? '1px solid #e5e7eb' : 'none',
             display: selectedChat && isMobile ? 'none' : 'flex',
             flexDirection: 'column',
-            maxHeight: isMobile ? '40vh' : 'auto'
+            height: isMobile ? '100%' : 'auto'
           }}>
             {/* Tabs */}
             <div style={{ 
