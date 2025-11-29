@@ -110,6 +110,7 @@ const ExpertDashboard: React.FC = () => {
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
   const uploadRef = useRef<any>(null);
 
   // Forms
@@ -669,6 +670,7 @@ const ExpertDashboard: React.FC = () => {
   React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 840);
+      setIsTablet(window.innerWidth > 840 && window.innerWidth <= 1024);
     };
 
     window.addEventListener('resize', handleResize);
@@ -2408,7 +2410,7 @@ const ExpertDashboard: React.FC = () => {
         open={messageModalVisible}
         onCancel={() => setMessageModalVisible(false)}
         footer={null}
-        width={900}
+        width={isMobile ? '100%' : isTablet ? 700 : 900}
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -2416,12 +2418,15 @@ const ExpertDashboard: React.FC = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.3)'
           },
           content: { 
-            borderRadius: 24, 
+            borderRadius: isMobile ? 0 : 24, 
             padding: 0,
             overflow: 'hidden',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            maxHeight: isMobile ? '100vh' : 'auto',
+            margin: isMobile ? 0 : 'auto',
+            top: isMobile ? 0 : undefined
           },
           header: {
             display: 'none'
@@ -2429,32 +2434,34 @@ const ExpertDashboard: React.FC = () => {
           body: {
             padding: 0,
             background: 'rgba(255, 255, 255, 0.95)',
-            height: '600px',
+            height: isMobile ? '100vh' : isTablet ? '500px' : '600px',
             display: 'flex'
           }
         }}
       >
-        <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+        <div style={{ display: 'flex', height: '100%', width: '100%', flexDirection: isMobile ? 'column' : 'row' }}>
           {/* Left Sidebar */}
           <div style={{ 
-            width: '300px', 
+            width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
             background: '#f3f4f6', 
-            borderRight: '1px solid #e5e7eb',
-            display: 'flex',
-            flexDirection: 'column'
+            borderRight: isMobile ? 'none' : '1px solid #e5e7eb',
+            borderBottom: isMobile ? '1px solid #e5e7eb' : 'none',
+            display: selectedChat && isMobile ? 'none' : 'flex',
+            flexDirection: 'column',
+            maxHeight: isMobile ? '40vh' : 'auto'
           }}>
             {/* Tabs */}
             <div style={{ 
               display: 'flex', 
               borderBottom: '1px solid #e5e7eb',
               background: '#ffffff',
-              padding: '0 8px'
+              padding: isMobile ? '0 4px' : '0 8px'
             }}>
               <div
                 onClick={() => setMessageTab('all')}
                 style={{
                   flex: 1,
-                  padding: '12px 4px',
+                  padding: isMobile ? '10px 2px' : '12px 4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2462,17 +2469,17 @@ const ExpertDashboard: React.FC = () => {
                   borderBottom: messageTab === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'all' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'all' ? 600 : 400,
-                  fontSize: 13
+                  fontSize: isMobile ? 11 : 13
                 }}
               >
-                <MessageOutlined style={{ marginRight: 4, fontSize: 14 }} />
-                Все
+                <MessageOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
+                {isMobile ? 'Все' : 'Все'}
               </div>
               <div
                 onClick={() => setMessageTab('unread')}
                 style={{
                   flex: 1,
-                  padding: '12px 4px',
+                  padding: isMobile ? '10px 2px' : '12px 4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2480,17 +2487,17 @@ const ExpertDashboard: React.FC = () => {
                   borderBottom: messageTab === 'unread' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'unread' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'unread' ? 600 : 400,
-                  fontSize: 13
+                  fontSize: isMobile ? 11 : 13
                 }}
               >
-                <BellOutlined style={{ marginRight: 4, fontSize: 14 }} />
-                Непрочитанные
+                <BellOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
+                {isMobile ? 'Новые' : 'Непрочитанные'}
               </div>
               <div
                 onClick={() => setMessageTab('favorites')}
                 style={{
                   flex: 1,
-                  padding: '12px 4px',
+                  padding: isMobile ? '10px 2px' : '12px 4px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2498,20 +2505,21 @@ const ExpertDashboard: React.FC = () => {
                   borderBottom: messageTab === 'favorites' ? '2px solid #3b82f6' : '2px solid transparent',
                   color: messageTab === 'favorites' ? '#3b82f6' : '#6b7280',
                   fontWeight: messageTab === 'favorites' ? 600 : 400,
-                  fontSize: 13
+                  fontSize: isMobile ? 11 : 13
                 }}
               >
-                <StarOutlined style={{ marginRight: 4, fontSize: 14 }} />
-                Избранные
+                <StarOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
+                {isMobile ? '★' : 'Избранные'}
               </div>
             </div>
 
             {/* Search */}
-            <div style={{ padding: '12px', background: '#ffffff' }}>
+            <div style={{ padding: isMobile ? '8px' : '12px', background: '#ffffff' }}>
               <Input
-                prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
-                placeholder="Поиск пользователя"
-                style={{ borderRadius: 8 }}
+                prefix={<SearchOutlined style={{ color: '#9ca3af', fontSize: isMobile ? 12 : 14 }} />}
+                placeholder={isMobile ? 'Поиск...' : 'Поиск пользователя'}
+                style={{ borderRadius: 8, fontSize: isMobile ? 12 : 14 }}
+                size={isMobile ? 'small' : 'middle'}
               />
             </div>
 
@@ -2533,7 +2541,7 @@ const ExpertDashboard: React.FC = () => {
                     style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      padding: '12px',
+                      padding: isMobile ? '8px' : '12px',
                       cursor: 'pointer',
                       borderBottom: '1px solid #f3f4f6',
                       background: selectedChat?.id === chat.id ? '#eff6ff' : (chat.isRead ? '#ffffff' : '#f0fdf4'),
@@ -2550,23 +2558,23 @@ const ExpertDashboard: React.FC = () => {
                       }
                     }}
                   >
-                    <Badge dot={chat.isOnline} offset={[-5, 35]}>
+                    <Badge dot={chat.isOnline} offset={[-5, isMobile ? 30 : 35]}>
                       <Avatar
-                        size={40}
+                        size={isMobile ? 36 : 40}
                         icon={<UserOutlined />}
                         style={{ backgroundColor: chat.isOnline ? '#10b981' : '#6b7280' }}
                       />
                     </Badge>
-                    <div style={{ flex: 1, marginLeft: 12, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
                         <Text strong style={{ 
-                          fontSize: 14, 
+                          fontSize: isMobile ? 13 : 14, 
                           color: '#1f2937',
                           fontWeight: chat.isRead ? 500 : 600
                         }}>
                           {chat.userName}
                         </Text>
-                        <Text type="secondary" style={{ fontSize: 11, color: '#9ca3af' }}>
+                        <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
                           {chat.timestamp}
                         </Text>
                       </div>
@@ -2574,10 +2582,10 @@ const ExpertDashboard: React.FC = () => {
                         <Text 
                           ellipsis 
                           style={{ 
-                            fontSize: 12, 
+                            fontSize: isMobile ? 11 : 12, 
                             color: chat.isRead ? '#6b7280' : '#059669',
                             fontWeight: chat.isRead ? 400 : 500,
-                            maxWidth: '180px'
+                            maxWidth: isMobile ? '140px' : '180px'
                           }}
                         >
                           {chat.lastMessage}
@@ -2587,10 +2595,10 @@ const ExpertDashboard: React.FC = () => {
                             count={chat.unreadCount} 
                             style={{ 
                               backgroundColor: '#10b981',
-                              fontSize: 10,
-                              height: 18,
-                              minWidth: 18,
-                              lineHeight: '18px'
+                              fontSize: isMobile ? 9 : 10,
+                              height: isMobile ? 16 : 18,
+                              minWidth: isMobile ? 16 : 18,
+                              lineHeight: isMobile ? '16px' : '18px'
                             }} 
                           />
                         )}
@@ -2604,15 +2612,15 @@ const ExpertDashboard: React.FC = () => {
           {/* Right Content Area */}
           <div style={{ 
             flex: 1, 
-            display: 'flex', 
+            display: (!selectedChat && isMobile) ? 'none' : 'flex',
             flexDirection: 'column',
             background: '#ffffff'
           }}>
             {/* Header */}
             <div style={{
               background: selectedChat ? '#ffffff' : '#e0f2fe',
-              padding: '12px 16px',
-              paddingRight: '56px',
+              padding: isMobile ? '8px 12px' : '12px 16px',
+              paddingRight: isMobile ? '12px' : '56px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -2621,49 +2629,61 @@ const ExpertDashboard: React.FC = () => {
               {selectedChat ? (
                 <>
                   <Space>
+                    {isMobile && (
+                      <Button
+                        type="text"
+                        icon={<ArrowLeftOutlined />}
+                        onClick={() => setSelectedChat(null)}
+                        size="small"
+                      />
+                    )}
                     <Badge dot={selectedChat.isOnline} offset={[-5, 35]}>
                       <Avatar
-                        size={36}
+                        size={isMobile ? 32 : 36}
                         icon={<UserOutlined />}
                         style={{ backgroundColor: selectedChat.isOnline ? '#10b981' : '#6b7280' }}
                       />
                     </Badge>
                     <div>
-                      <Text style={{ fontSize: 15, color: '#1f2937', fontWeight: 500, display: 'block' }}>
+                      <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500, display: 'block' }}>
                         {selectedChat.userName}
                       </Text>
-                      <Text style={{ fontSize: 12, color: selectedChat.isOnline ? '#10b981' : '#6b7280' }}>
+                      <Text style={{ fontSize: isMobile ? 11 : 12, color: selectedChat.isOnline ? '#10b981' : '#6b7280' }}>
                         {selectedChat.isOnline ? 'В сети' : 'Не в сети'}
                       </Text>
                     </div>
                   </Space>
-                  <Button 
-                    type="primary" 
-                    size="small"
-                    icon={<PlusOutlined />}
-                    onClick={() => setCreateOrderModalVisible(true)}
-                    style={{ fontSize: 14 }}
-                  >
-                    Создать заказ
-                  </Button>
+                  {!isMobile && (
+                    <Button 
+                      type="primary" 
+                      size="small"
+                      icon={<PlusOutlined />}
+                      onClick={() => setCreateOrderModalVisible(true)}
+                      style={{ fontSize: 14 }}
+                    >
+                      Создать заказ
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>
                   <Space>
-                    <StarFilled style={{ color: '#0ea5e9', fontSize: 16 }} />
-                    <Text style={{ fontSize: 14, color: '#0369a1', fontWeight: 500 }}>
+                    <StarFilled style={{ color: '#0ea5e9', fontSize: isMobile ? 14 : 16 }} />
+                    <Text style={{ fontSize: isMobile ? 12 : 14, color: '#0369a1', fontWeight: 500 }}>
                       Важные сообщения
                     </Text>
                   </Space>
-                  <Button 
-                    type="primary" 
-                    size="small"
-                    icon={<PlusOutlined />}
-                    onClick={() => setCreateOrderModalVisible(true)}
-                    style={{ fontSize: 14 }}
-                  >
-                    Создать заказ
-                  </Button>
+                  {!isMobile && (
+                    <Button 
+                      type="primary" 
+                      size="small"
+                      icon={<PlusOutlined />}
+                      onClick={() => setCreateOrderModalVisible(true)}
+                      style={{ fontSize: 14 }}
+                    >
+                      Создать заказ
+                    </Button>
+                  )}
                 </>
               )}
             </div>
@@ -2672,11 +2692,11 @@ const ExpertDashboard: React.FC = () => {
             <div style={{ 
               flex: 1, 
               overflowY: 'auto',
-              padding: '20px',
+              padding: isMobile ? '12px' : '20px',
               background: '#f9fafb'
             }}>
               {selectedChat ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
                   {selectedChat.messages.map((msg) => (
                     <div
                       key={msg.id}
@@ -2687,8 +2707,8 @@ const ExpertDashboard: React.FC = () => {
                     >
                       <div
                         style={{
-                          maxWidth: '70%',
-                          padding: '10px 14px',
+                          maxWidth: isMobile ? '85%' : '70%',
+                          padding: isMobile ? '8px 12px' : '10px 14px',
                           borderRadius: msg.isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                           background: msg.isMine ? '#3b82f6' : '#ffffff',
                           color: msg.isMine ? '#ffffff' : '#1f2937',
@@ -2697,7 +2717,7 @@ const ExpertDashboard: React.FC = () => {
                         }}
                       >
                         <Text style={{ 
-                          fontSize: 14, 
+                          fontSize: isMobile ? 13 : 14, 
                           color: msg.isMine ? '#ffffff' : '#1f2937',
                           display: 'block',
                           marginBottom: 4
@@ -2705,12 +2725,12 @@ const ExpertDashboard: React.FC = () => {
                           {msg.text}
                         </Text>
                         <Text style={{ 
-                          fontSize: 11, 
+                          fontSize: isMobile ? 10 : 11, 
                           color: msg.isMine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
                         }}>
                           {msg.timestamp}
                           {msg.isMine && msg.isRead && (
-                            <CheckCircleOutlined style={{ marginLeft: 4, fontSize: 11 }} />
+                            <CheckCircleOutlined style={{ marginLeft: 4, fontSize: isMobile ? 10 : 11 }} />
                           )}
                         </Text>
                       </div>
@@ -2721,10 +2741,10 @@ const ExpertDashboard: React.FC = () => {
                 <div style={{ 
                   textAlign: 'center', 
                   color: '#9ca3af', 
-                  paddingTop: '100px',
-                  fontSize: 14
+                  paddingTop: isMobile ? '50px' : '100px',
+                  fontSize: isMobile ? 12 : 14
                 }}>
-                  <MessageOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16, display: 'block' }} />
+                  <MessageOutlined style={{ fontSize: isMobile ? 36 : 48, color: '#d1d5db', marginBottom: isMobile ? 12 : 16, display: 'block' }} />
                   Выберите чат для начала общения
                 </div>
               )}
@@ -2732,7 +2752,7 @@ const ExpertDashboard: React.FC = () => {
 
             {/* Input Area */}
             <div style={{ 
-              padding: '16px',
+              padding: isMobile ? '8px 12px' : '16px',
               borderTop: '1px solid #e5e7eb',
               background: '#ffffff'
             }}>
@@ -2749,18 +2769,19 @@ const ExpertDashboard: React.FC = () => {
               )}
               <div style={{ 
                 display: 'flex',
-                gap: 8,
+                gap: isMobile ? 6 : 8,
                 alignItems: 'flex-end'
               }}>
                 <Input.TextArea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: 3 }}
+                  autoSize={{ minRows: 1, maxRows: isMobile ? 2 : 3 }}
                   style={{ 
                     flex: 1,
                     borderRadius: 8,
-                    border: '1px solid #d1d5db'
+                    border: '1px solid #d1d5db',
+                    fontSize: isMobile ? 13 : 14
                   }}
                 />
                 <Upload
@@ -2775,50 +2796,54 @@ const ExpertDashboard: React.FC = () => {
                     shape="circle"
                     icon={<PaperClipOutlined />}
                     style={{ 
-                      width: 40, 
-                      height: 40,
+                      width: isMobile ? 36 : 40, 
+                      height: isMobile ? 36 : 40,
                       border: '1px solid #d1d5db',
-                      background: '#ffffff'
+                      background: '#ffffff',
+                      fontSize: isMobile ? 14 : 16
                     }}
                   />
                 </Upload>
-                <Popover
-                  content={
-                    <EmojiPicker
-                      onEmojiClick={(emojiData: any) => {
-                        setMessageText(messageText + emojiData.emoji);
-                        setEmojiPickerOpen(false);
+                {!isMobile && (
+                  <Popover
+                    content={
+                      <EmojiPicker
+                        onEmojiClick={(emojiData: any) => {
+                          setMessageText(messageText + emojiData.emoji);
+                          setEmojiPickerOpen(false);
+                        }}
+                        width={350}
+                        height={400}
+                      />
+                    }
+                    trigger="click"
+                    open={emojiPickerOpen}
+                    onOpenChange={setEmojiPickerOpen}
+                    placement="topRight"
+                  >
+                    <Button
+                      type="default"
+                      shape="circle"
+                      icon={<SmileOutlined />}
+                      style={{ 
+                        width: 40, 
+                        height: 40,
+                        border: '1px solid #d1d5db',
+                        background: '#ffffff'
                       }}
-                      width={350}
-                      height={400}
                     />
-                  }
-                  trigger="click"
-                  open={emojiPickerOpen}
-                  onOpenChange={setEmojiPickerOpen}
-                  placement="topRight"
-                >
-                  <Button
-                    type="default"
-                    shape="circle"
-                    icon={<SmileOutlined />}
-                    style={{ 
-                      width: 40, 
-                      height: 40,
-                      border: '1px solid #d1d5db',
-                      background: '#ffffff'
-                    }}
-                  />
-                </Popover>
+                  </Popover>
+                )}
                 <Button
                   type="primary"
                   shape="circle"
                   icon={<SendOutlined />}
                   style={{ 
-                    width: 40, 
-                    height: 40,
+                    width: isMobile ? 36 : 40, 
+                    height: isMobile ? 36 : 40,
                     background: '#3b82f6',
-                    border: 'none'
+                    border: 'none',
+                    fontSize: isMobile ? 14 : 16
                   }}
                   onClick={() => {
                     if (messageText.trim()) {
