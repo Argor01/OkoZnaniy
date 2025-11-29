@@ -274,6 +274,16 @@ const ExpertApplication: React.FC = () => {
                   placeholder="Укажите ваш опыт работы в годах" 
                   size="large"
                   disabled={hasSubmitted}
+                  min={0}
+                  max={50}
+                  precision={0}
+                  controls={false}
+                  keyboard={true}
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </Form.Item>
 

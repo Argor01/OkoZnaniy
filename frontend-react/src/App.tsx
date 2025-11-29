@@ -21,6 +21,7 @@ import './styles/typography.css';
 import './styles/spacing.css';
 import './styles/tokens.css';
 import './styles/components.css';
+import './styles/messages.css';
 
 // Import pages
 import Home from './pages/Home';

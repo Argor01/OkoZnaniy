@@ -777,16 +777,11 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_application(self, request):
         """Получить свою анкету"""
-        if request.user.role != 'expert':
-            return Response(
-                {'detail': 'Только эксперты могут просматривать свои анкеты'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         try:
             application = ExpertApplication.objects.get(expert=request.user)
             return Response(ExpertApplicationSerializer(application).data)
         except ExpertApplication.DoesNotExist:
+            # Возвращаем 404 вместо 403, чтобы фронтенд мог корректно обработать отсутствие анкеты
             return Response(
                 {'detail': 'Анкета не найдена'},
                 status=status.HTTP_404_NOT_FOUND

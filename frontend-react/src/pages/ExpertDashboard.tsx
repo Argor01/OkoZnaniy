@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Layout } from 'antd';
+import { Button, Typography, Tag, message, Upload, Space, InputNumber, Input, Spin, Modal, Form, InputNumber as AntInputNumber, Row, Col, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Layout, Popover } from 'antd';
 import { UploadOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, LogoutOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined } from '@ant-design/icons';
+import EmojiPicker from 'emoji-picker-react';
 import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 import { ordersApi, type Order, type OrderComment } from '../api/orders';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { expertsApi, type ExpertApplication, type Education, type Specialization } from '../api/experts';
 import { catalogApi } from '../api/catalog';
@@ -80,6 +81,7 @@ const { Header, Sider, Content, Footer } = Layout;
 const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
   const [bidLoading, setBidLoading] = useState<Record<number, boolean>>({});
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
@@ -99,6 +101,21 @@ const ExpertDashboard: React.FC = () => {
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [fileList, setFileList] = useState<any[]>([]);
+  const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
+  const [friendChatModalVisible, setFriendChatModalVisible] = useState(false);
+  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const uploadRef = useRef<any>(null);
+
+  // Forms
+  const [profileForm] = Form.useForm();
+  const [applicationForm] = Form.useForm();
+  const [specializationForm] = Form.useForm();
+  const [createOrderForm] = Form.useForm();
 
   // Тестовые данные для уведомлений
   const mockNotifications: Notification[] = [
@@ -311,7 +328,7 @@ const ExpertDashboard: React.FC = () => {
     {
       id: 5,
       chatId: 5,
-      userName: 'Дмитрий Волков',
+      userName: 'Дмитрий Новиков',
       userAvatar: undefined,
       lastMessage: 'Отлично, договорились!',
       timestamp: '1 день назад',
@@ -319,9 +336,9 @@ const ExpertDashboard: React.FC = () => {
       isOnline: false,
       unreadCount: 0,
       messages: [
-        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом', timestamp: '3 дня назад', isMine: false, isRead: true },
-        { id: 2, text: 'Добрый день! По какому предмету?', timestamp: '3 дня назад', isMine: true, isRead: true },
-        { id: 3, text: 'История России', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом по истории', timestamp: '3 дня назад', isMine: false, isRead: true },
+        { id: 2, text: 'Добрый день! Какая тема?', timestamp: '3 дня назад', isMine: true, isRead: true },
+        { id: 3, text: 'Реформы Петра I', timestamp: '3 дня назад', isMine: false, isRead: true },
         { id: 4, text: 'Отлично, договорились!', timestamp: '1 день назад', isMine: false, isRead: true }
       ]
     }
@@ -331,8 +348,6 @@ const ExpertDashboard: React.FC = () => {
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
-  const [applicationForm] = Form.useForm();
-  const [specializationForm] = Form.useForm();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['available-orders'],
@@ -346,7 +361,75 @@ const ExpertDashboard: React.FC = () => {
 
   const { data: myCompleted } = useQuery({
     queryKey: ['my-orders-completed'],
-    queryFn: () => ordersApi.getMyOrders({ status: 'completed' }),
+    queryFn: async () => {
+      const data = await ordersApi.getMyOrders({ status: 'completed' });
+      // Если нет данных с сервера, возвращаем тестовые данные
+      if (!data || data.length === 0) {
+        return [
+          {
+            id: 1001,
+            title: 'Решение задач по высшей математике',
+            description: 'Выполнено 15 задач по математическому анализу, включая пределы, производные и интегралы. Все решения оформлены с подробными пояснениями.',
+            budget: 3500,
+            status: 'completed',
+            subject: { id: 1, name: 'Математика' },
+            work_type: { id: 1, name: 'Контрольная работа' },
+            deadline: '2024-11-20',
+            created_at: '2024-11-15',
+            client: { id: 101, username: 'student_ivan', first_name: 'Иван', last_name: 'Петров' }
+          },
+          {
+            id: 1002,
+            title: 'Курсовая работа по программированию',
+            description: 'Разработано веб-приложение на React с использованием TypeScript. Реализованы все требуемые функции, включая авторизацию, CRUD операции и адаптивный дизайн.',
+            budget: 8000,
+            status: 'completed',
+            subject: { id: 5, name: 'Программирование' },
+            work_type: { id: 3, name: 'Курсовая работа' },
+            deadline: '2024-11-18',
+            created_at: '2024-11-10',
+            client: { id: 102, username: 'maria_s', first_name: 'Мария', last_name: 'Сидорова' }
+          },
+          {
+            id: 1003,
+            title: 'Лабораторные работы по физике',
+            description: 'Выполнено 5 лабораторных работ по механике и термодинамике. Все расчеты проверены, графики построены, выводы сформулированы.',
+            budget: 2500,
+            status: 'completed',
+            subject: { id: 2, name: 'Физика' },
+            work_type: { id: 2, name: 'Лабораторная работа' },
+            deadline: '2024-11-22',
+            created_at: '2024-11-17',
+            client: { id: 103, username: 'alex_k', first_name: 'Алексей', last_name: 'Козлов' }
+          },
+          {
+            id: 1004,
+            title: 'Реферат по истории России',
+            description: 'Написан реферат на тему "Реформы Петра I" объемом 20 страниц. Использованы научные источники, оформление по ГОСТ.',
+            budget: 1500,
+            status: 'completed',
+            subject: { id: 8, name: 'История' },
+            work_type: { id: 5, name: 'Реферат' },
+            deadline: '2024-11-19',
+            created_at: '2024-11-14',
+            client: { id: 104, username: 'olga_v', first_name: 'Ольга', last_name: 'Васильева' }
+          },
+          {
+            id: 1005,
+            title: 'Дипломная работа по экономике',
+            description: 'Выполнена дипломная работа на тему "Анализ финансового состояния предприятия". Проведен полный финансовый анализ, построены модели, сформулированы рекомендации.',
+            budget: 15000,
+            status: 'completed',
+            subject: { id: 6, name: 'Экономика' },
+            work_type: { id: 4, name: 'Дипломная работа' },
+            deadline: '2024-11-25',
+            created_at: '2024-11-01',
+            client: { id: 105, username: 'dmitry_n', first_name: 'Дмитрий', last_name: 'Новиков' }
+          }
+        ] as any;
+      }
+      return data;
+    },
   });
 
   // Загружаем профиль пользователя
@@ -581,10 +664,95 @@ const ExpertDashboard: React.FC = () => {
     }
   };
 
+  // Handle window resize for mobile responsiveness
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Handle opening chat from external navigation
+  React.useEffect(() => {
+    const state = location.state as any;
+    if (state?.openChat) {
+      const chat = mockMessages.find(m => m.userName.includes(state.openChat) || state.openChat.includes(m.userName));
+      if (chat) {
+        setSelectedChat(chat);
+      }
+      setMessageModalVisible(true);
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
+
   if (isLoading) return <Text>Загрузка...</Text>;
   if (isError) return <Text type="danger">Ошибка загрузки заказов</Text>;
 
-  const orders: Order[] = data || [];
+  const orders: Order[] = data && data.length > 0 ? data : [
+    {
+      id: 2001,
+      title: 'Решение задач по высшей математике',
+      description: 'Необходимо решить 20 задач по математическому анализу. Темы: пределы, производные, интегралы, дифференциальные уравнения.',
+      budget: 2500,
+      status: 'new',
+      subject: { id: 1, name: 'Математика' },
+      work_type: { id: 1, name: 'Контрольная работа' },
+      deadline: '2024-12-05',
+      created_at: '2024-11-27',
+      client: { id: 201, username: 'student_anna', first_name: 'Анна', last_name: 'Иванова' }
+    },
+    {
+      id: 2002,
+      title: 'Курсовая работа по программированию',
+      description: 'Разработка веб-приложения на React с использованием TypeScript. Требуется реализовать CRUD операции, авторизацию и адаптивный дизайн.',
+      budget: 12000,
+      status: 'new',
+      subject: { id: 5, name: 'Программирование' },
+      work_type: { id: 3, name: 'Курсовая работа' },
+      deadline: '2024-12-10',
+      created_at: '2024-11-26',
+      client: { id: 202, username: 'student_sergey', first_name: 'Сергей', last_name: 'Петров' }
+    },
+    {
+      id: 2003,
+      title: 'Лабораторные работы по физике',
+      description: '3 лабораторные работы по механике и термодинамике. Нужны расчеты, графики и выводы.',
+      budget: 1800,
+      status: 'new',
+      subject: { id: 2, name: 'Физика' },
+      work_type: { id: 2, name: 'Лабораторная работа' },
+      deadline: '2024-12-03',
+      created_at: '2024-11-27',
+      client: { id: 203, username: 'student_kate', first_name: 'Екатерина', last_name: 'Смирнова' }
+    },
+    {
+      id: 2004,
+      title: 'Дипломная работа по экономике',
+      description: 'Тема: "Анализ финансового состояния предприятия". Требуется провести полный финансовый анализ, построить модели, дать рекомендации.',
+      budget: 18000,
+      status: 'new',
+      subject: { id: 6, name: 'Экономика' },
+      work_type: { id: 4, name: 'Дипломная работа' },
+      deadline: '2024-12-20',
+      created_at: '2024-11-25',
+      client: { id: 204, username: 'student_alex', first_name: 'Александр', last_name: 'Козлов' }
+    },
+    {
+      id: 2005,
+      title: 'Реферат по истории России',
+      description: 'Реферат на тему "Внешняя политика России в XIX веке". Объем 15-20 страниц, оформление по ГОСТ.',
+      budget: 1200,
+      status: 'new',
+      subject: { id: 8, name: 'История' },
+      work_type: { id: 5, name: 'Реферат' },
+      deadline: '2024-12-01',
+      created_at: '2024-11-27',
+      client: { id: 205, username: 'student_maria', first_name: 'Мария', last_name: 'Волкова' }
+    }
+  ] as any;
 
   const handleLogout = () => {
     Modal.confirm({
@@ -616,9 +784,25 @@ const ExpertDashboard: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
         width={250}
+        breakpoint="md"
+        collapsedWidth={isMobile ? 0 : 80}
+        collapsed={isMobile ? !mobileMenuVisible : undefined}
+        onCollapse={(collapsed) => {
+          if (isMobile) {
+            setMobileMenuVisible(!collapsed);
+          }
+        }}
         style={{
           background: '#fff',
           boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+          position: isMobile ? 'fixed' : 'relative',
+          bottom: isMobile ? 0 : 'auto',
+          left: isMobile ? 0 : 'auto',
+          right: isMobile ? 0 : 'auto',
+          zIndex: isMobile ? 1000 : 'auto',
+          height: isMobile ? 'auto' : '100vh',
+          borderTop: isMobile ? '1px solid #f0f0f0' : 'none',
+          borderRight: isMobile ? 'none' : '1px solid #f0f0f0',
         }}
       >
         <div
@@ -630,16 +814,19 @@ const ExpertDashboard: React.FC = () => {
         >
           <UserOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
           <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет эксперта
+            Личный кабинет
           </Title>
         </div>
         <Menu
-          mode="inline"
+          mode={isMobile ? "horizontal" : "inline"}
           selectedKeys={[selectedMenuKey]}
-          openKeys={openKeys}
+          openKeys={isMobile ? [] : openKeys}
           onOpenChange={setOpenKeys}
           triggerSubMenuAction="hover"
           onClick={({ key }) => {
+            if (isMobile) {
+              setMobileMenuVisible(false);
+            }
             if (key === 'messages') {
               setMessageModalVisible(true);
               return;
@@ -742,46 +929,45 @@ const ExpertDashboard: React.FC = () => {
             <Menu.Item key="balance" icon={<WalletOutlined />}>
               Счет: 0.00 ₽
             </Menu.Item>
-            <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
-              <Menu.Item key="orders-all">Все (0)</Menu.Item>
-              <Menu.Item key="orders-open">Открыт ()</Menu.Item>
-              <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
-              <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
-              <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
-              <Menu.Item key="orders-review">На проверке ()</Menu.Item>
-              <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
-              <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
-              <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
-              <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
-            </Menu.SubMenu>
+            {!isMobile ? (
+              <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
+                <Menu.Item key="orders-all">Все (0)</Menu.Item>
+                <Menu.Item key="orders-open">Открыт ()</Menu.Item>
+                <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
+                <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
+                <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
+                <Menu.Item key="orders-review">На проверке ()</Menu.Item>
+                <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
+                <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
+                <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
+                <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
+              </Menu.SubMenu>
+            ) : (
+              <Menu.Item key="orders" icon={<ShoppingOutlined />}>
+                Заказы
+              </Menu.Item>
+            )}
             <Menu.Item key="works" icon={<FileDoneOutlined />}>
               Мои работы
             </Menu.Item>
-            <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
-              <Menu.Item key="shop-ready-works">
-                Магазин готовых работ
-              </Menu.Item>
-              <Menu.Item key="shop-add-work">
-                Добавить работу в магазин
-              </Menu.Item>
-              <Menu.Item key="shop-my-works">
-                Мои работы
-              </Menu.Item>
-              <Menu.Item key="shop-purchased">
-                Купленные работы
-              </Menu.Item>
-            </Menu.SubMenu>
+            {!isMobile && (
+              <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
+                <Menu.Item key="shop-ready-works">
+                  Магазин готовых работ
+                </Menu.Item>
+                <Menu.Item key="shop-add-work">
+                  Добавить работу в магазин
+                </Menu.Item>
+                <Menu.Item key="shop-my-works">
+                  Мои работы
+                </Menu.Item>
+                <Menu.Item key="shop-purchased">
+                  Купленные работы
+                </Menu.Item>
+              </Menu.SubMenu>
+            )}
             <Menu.Item key="friends" icon={<TeamOutlined />}>
               Мои друзья
-            </Menu.Item>
-            <Menu.Item key="favorites" icon={<HeartOutlined />}>
-              Избранное
-            </Menu.Item>
-            <Menu.Item key="bonuses" icon={<GiftOutlined />}>
-              Бонусы
-            </Menu.Item>
-            <Menu.Item key="paid-services" icon={<DollarOutlined />}>
-              Платные услуги
             </Menu.Item>
             <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
               FAQ
@@ -799,81 +985,65 @@ const ExpertDashboard: React.FC = () => {
         <Header
           style={{
             background: '#fff',
-            padding: '0 24px',
+            padding: isMobile ? '0 16px' : '0 24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Title level={3} style={{ margin: 0 }}>
-            Личный кабинет эксперта
-          </Title>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
+              Личный кабинет
+            </Title>
+          </div>
           <Space>
             <Button
               type="default"
               danger
               icon={<LogoutOutlined />}
               onClick={handleLogout}
+              size={isMobile ? 'small' : 'middle'}
             >
-              Выйти
+              {!isMobile && 'Выйти'}
             </Button>
           </Space>
         </Header>
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
+            margin: isMobile ? '12px' : '24px',
+            padding: isMobile ? '16px' : '24px',
             background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 112px)',
+            marginBottom: isMobile ? '80px' : '24px',
           }}
         >
         {/* Profile Header Block */}
         <div className={styles.profileBlock}>
           <div className={styles.profileBlockContent}>
             <div className={styles.profileLeft}>
-              <Badge 
-                count={<TrophyOutlined style={{ color: '#f97316', fontSize: 16 }} />} 
-                offset={[-5, 5]}
-              >
-                <Avatar
-                  size={80}
-                  src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
-                  icon={!profile?.avatar && <UserOutlined />}
-                  style={{ 
-                    backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
-                    border: '3px solid #fff',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                  }}
-                />
-              </Badge>
+              <Avatar
+                size={80}
+                src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
+                icon={!profile?.avatar && <UserOutlined />}
+                style={{ 
+                  backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
+                  border: '3px solid #fff',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                }}
+              />
               <div className={styles.profileInfo}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                   <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: 20 }}>
                     {profile?.username || profile?.email || 'Эксперт'}
                   </Title>
-                  <Button 
-                    type="primary" 
-                    size="small"
-                    style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      border: 'none',
-                      borderRadius: 8,
-                      height: 28,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      padding: '0 12px'
-                    }}
-                  >
-                    Готов к работе
-                  </Button>
+                  <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
+                    Онлайн
+                  </Text>
                 </div>
-                <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 14, color: '#6b7280' }}>
-                  Онлайн
-                </Text>
-                <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'nowrap', overflow: 'auto' }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
                       <Text style={{ fontSize: 14, color: '#1f2937', marginBottom: 4 }}>Рейтинг исполнителя:</Text>
                       <Rate
@@ -887,7 +1057,7 @@ const ExpertDashboard: React.FC = () => {
                       </Text>
                     </Space>
                   </div>
-                  <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
                       <Text style={{ fontSize: 14, color: '#1f2937', marginBottom: 4 }}>Рейтинг заказчика:</Text>
                       <Rate
@@ -910,19 +1080,16 @@ const ExpertDashboard: React.FC = () => {
                   На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
                 </Text>
                 <div>
-                  <Space>
-                    <TrophyOutlined style={{ color: '#667eea', fontSize: 16 }} />
-                    <Text style={{ fontSize: 14, color: '#1f2937' }}>
-                      Статистика работ:{' '}
-                      <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
-                      {' | '}
-                      <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
-                      {' | '}
-                      <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
-                      {' | '}
-                      <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
-                    </Text>
-                  </Space>
+                  <Text style={{ fontSize: 14, color: '#1f2937' }}>
+                    Статистика работ:{' '}
+                    <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
+                    {' | '}
+                    <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
+                    {' | '}
+                    <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
+                    {' | '}
+                    <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
+                  </Text>
                 </div>
               </div>
             </div>
@@ -1046,32 +1213,43 @@ const ExpertDashboard: React.FC = () => {
               label: `О себе`,
               children: (
                 <div className={styles.sectionCard}>
-                  <div className={styles.sectionCardHeader}>
+                  <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 className={styles.sectionTitle}>О себе</h2>
+                    <Button 
+                      type="primary"
+                      icon={<EditOutlined />}
+                      className={styles.buttonPrimary}
+                      onClick={() => {
+                        profileForm.setFieldsValue({
+                          bio: profile?.bio || 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.',
+                          education: profile?.education || 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.',
+                          skills: profile?.skills || 'Математический анализ, Линейная алгебра, Дифференциальные уравнения, Теория вероятностей, Python, C++, JavaScript, Физика, Механика, Электродинамика'
+                        });
+                        setProfileModalVisible(true);
+                      }}
+                    >
+                      {!isMobile && 'Редактировать'}
+                    </Button>
                   </div>
                   <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
-                    {profile?.bio || 'Расскажите о себе, своем опыте и специализации...'}
+                    {profile?.bio || 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.'}
                   </Paragraph>
-                  {profile?.education && (
-                    <div style={{ marginTop: 24 }}>
-                      <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
-                      <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
-                        {profile.education}
-                      </Paragraph>
+                  <div style={{ marginTop: 24 }}>
+                    <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
+                    <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>
+                      {profile?.education || 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.'}
+                    </Paragraph>
+                  </div>
+                  <div style={{ marginTop: 24 }}>
+                    <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {(profile?.skills ? profile.skills.split(',') : ['Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения', 'Теория вероятностей', 'Python', 'C++', 'JavaScript', 'Физика', 'Механика', 'Электродинамика']).map((skill: string, index: number) => (
+                        <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 14 }}>
+                          {skill.trim()}
+                        </Tag>
+                      ))}
                     </div>
-                  )}
-                  {profile?.skills && (
-                    <div style={{ marginTop: 24 }}>
-                      <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {profile.skills.split(',').map((skill: string, index: number) => (
-                          <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 14 }}>
-                            {skill.trim()}
-                          </Tag>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               ),
             },
@@ -1084,6 +1262,7 @@ const ExpertDashboard: React.FC = () => {
                     <h2 className={styles.sectionTitle}>Мои специализации</h2>
                     <Button 
                       type="primary"
+                      icon={<EditOutlined />}
                       className={styles.buttonPrimary}
                       onClick={() => {
                         setEditingSpecialization(null);
@@ -1091,7 +1270,7 @@ const ExpertDashboard: React.FC = () => {
                         setSpecializationModalVisible(true);
                       }}
                     >
-                      Редактировать
+                      {!isMobile && 'Редактировать'}
                     </Button>
                   </div>
                   {specializationsLoading ? (
@@ -1161,14 +1340,52 @@ const ExpertDashboard: React.FC = () => {
             },
             {
               key: 'reviews',
-              label: `Отзывы 0`,
+              label: `Отзывы 3`,
               children: (
                 <div className={styles.sectionCard}>
                   <div className={styles.sectionCardHeader}>
                     <h2 className={styles.sectionTitle}>Отзывы</h2>
                   </div>
-                  <div className={styles.emptyState}>
-                    <Text>Отзывов пока нет</Text>
+                  <div style={{ display: 'grid', gap: 16 }}>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Иван Петров</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>15.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Отличная работа! Все выполнено качественно и в срок. Решения подробно расписаны, все понятно. Рекомендую этого исполнителя!
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Решение задач по высшей математике</Text>
+                    </div>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Мария Сидорова</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>10.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Очень довольна результатом! Курсовая работа выполнена на высоком уровне, все требования учтены. Спасибо за оперативность и профессионализм!
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Курсовая работа по экономике</Text>
+                    </div>
+                    <div className={styles.orderCard}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div>
+                          <Text strong style={{ fontSize: 16 }}>Алексей Смирнов</Text>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>05.11.2024</Text>
+                        </div>
+                        <Rate disabled defaultValue={4} style={{ fontSize: 16 }} />
+                      </div>
+                      <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
+                        Хорошая работа, все сделано правильно. Единственное - хотелось бы чуть больше комментариев в коде. В целом доволен.
+                      </Paragraph>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Лабораторная работа по программированию</Text>
+                    </div>
                   </div>
                 </div>
               ),
@@ -1295,10 +1512,7 @@ const ExpertDashboard: React.FC = () => {
                             height: 48,
                             borderRadius: 8,
                             fontSize: 15,
-                            fontWeight: 500,
-                            background: 'linear-gradient(135deg, #FFA726 0%, #FF9800 100%)',
-                            border: 'none',
-                            boxShadow: '0 4px 12px rgba(255, 152, 0, 0.3)'
+                            fontWeight: 500
                           }}
                         >
                           Поиск
@@ -1443,6 +1657,288 @@ const ExpertDashboard: React.FC = () => {
                 </div>
               ),
             },
+            {
+              key: 'friends',
+              label: `Мои друзья 5`,
+              children: (
+                <div className={styles.sectionCard}>
+                  <div className={styles.sectionCardHeader}>
+                    <h2 className={styles.sectionTitle}>Мои друзья</h2>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#3b82f6' }}>ИП</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Иван Петров</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Математика, Физика</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>127 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            const chat = mockMessages.find(m => m.userName === 'Иван Петров');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Написать
+                        </Button>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Иван Петров', 
+                              specialization: 'Математика, Физика',
+                              rating: 5,
+                              worksCount: 127,
+                              avatar: 'ИП',
+                              avatarColor: '#3b82f6',
+                              bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
+                              education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
+                              experience: '10 лет',
+                              skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#10b981' }}>МС</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Мария Сидорова</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Экономика, Бухучет</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>89 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            const chat = mockMessages.find(m => m.userName === 'Мария Сидорова');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Написать
+                        </Button>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Мария Сидорова', 
+                              specialization: 'Экономика, Бухучет',
+                              rating: 5,
+                              worksCount: 89,
+                              avatar: 'МС',
+                              avatarColor: '#10b981',
+                              bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
+                              education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
+                              experience: '7 лет',
+                              skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#f59e0b' }}>АС</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Алексей Смирнов</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Программирование</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>156 работ</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            const chat = mockMessages.find(m => m.userName === 'Алексей Смирнов');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Написать
+                        </Button>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Алексей Смирнов', 
+                              specialization: 'Программирование',
+                              rating: 4,
+                              worksCount: 156,
+                              avatar: 'АС',
+                              avatarColor: '#f59e0b',
+                              bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
+                              education: 'МФТИ, Факультет инноваций и высоких технологий',
+                              experience: '8 лет',
+                              skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#8b5cf6' }}>ЕК</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Елена Козлова</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Химия, Биология</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>203 работы</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            const chat = mockMessages.find(m => m.userName === 'Елена Козлова');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Написать
+                        </Button>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Елена Козлова', 
+                              specialization: 'Химия, Биология',
+                              rating: 5,
+                              worksCount: 203,
+                              avatar: 'ЕК',
+                              avatarColor: '#8b5cf6',
+                              bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
+                              education: 'МГУ им. М.В. Ломоносова, Химический факультет',
+                              experience: '12 лет',
+                              skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className={styles.orderCard} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Avatar size={64} style={{ backgroundColor: '#ec4899' }}>ДН</Avatar>
+                        <div style={{ flex: 1 }}>
+                          <Text strong style={{ fontSize: 16, display: 'block' }}>Дмитрий Новиков</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>История, Философия</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>74 работы</Text>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<MessageOutlined />} 
+                          style={{ flex: 1 }}
+                          onClick={() => {
+                            const chat = mockMessages.find(m => m.userName === 'Дмитрий Новиков');
+                            if (chat) {
+                              setSelectedChat(chat);
+                            }
+                            setMessageModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Написать
+                        </Button>
+                        <Button 
+                          size="small" 
+                          icon={<UserOutlined />}
+                          onClick={() => {
+                            setSelectedFriend({ 
+                              name: 'Дмитрий Новиков', 
+                              specialization: 'История, Философия',
+                              rating: 4,
+                              worksCount: 74,
+                              avatar: 'ДН',
+                              avatarColor: '#ec4899',
+                              bio: 'Историк и философ. Помогаю понять сложные исторические процессы и философские концепции.',
+                              education: 'СПбГУ, Исторический факультет',
+                              experience: '6 лет',
+                              skills: ['История России', 'Всемирная история', 'Философия', 'Обществознание']
+                            });
+                            setFriendProfileModalVisible(true);
+                            setFriendsModalVisible(false);
+                          }}
+                        >
+                          Профиль
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ),
+            },
           ]}
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
@@ -1457,7 +1953,7 @@ const ExpertDashboard: React.FC = () => {
         </div>
         </Content>
         <Footer style={{ textAlign: 'center', background: '#fff' }}>
-          Личный кабинет эксперта © {new Date().getFullYear()}
+          Личный кабинет © {new Date().getFullYear()}
         </Footer>
       </Layout>
     </Layout>
@@ -1620,10 +2116,34 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea rows={4} placeholder="Расскажите о себе, своем опыте и специализации" className={styles.textareaField} style={{ fontSize: 15 }} />
           </Form.Item>
           <Form.Item label="Опыт работы (лет)" name="experience_years">
-            <AntInputNumber min={0} max={50} style={{ width: '100%' }} className={styles.inputField} size="large" />
+            <AntInputNumber 
+              min={0} 
+              max={50} 
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              style={{ width: '100%' }} 
+              className={styles.inputField} 
+              size="large"
+              placeholder="0"
+            />
           </Form.Item>
           <Form.Item label="Почасовая ставка (₽)" name="hourly_rate">
-            <AntInputNumber min={0} step={100} style={{ width: '100%' }} className={styles.inputField} size="large" />
+            <AntInputNumber 
+              min={0} 
+              step={100}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              style={{ width: '100%' }} 
+              className={styles.inputField} 
+              size="large"
+              placeholder="0"
+            />
           </Form.Item>
           <Form.Item label="Образование" name="education">
             <Input.TextArea rows={3} placeholder="Укажите ваше образование и квалификации" className={styles.textareaField} style={{ fontSize: 15 }} />
@@ -1643,10 +2163,7 @@ const ExpertDashboard: React.FC = () => {
           <div style={{ 
             fontSize: 24, 
             fontWeight: 600, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            color: '#1890ff'
           }}>
             Заполнение анкеты эксперта
           </div>
@@ -1750,10 +2267,19 @@ const ExpertDashboard: React.FC = () => {
           >
             <AntInputNumber 
               min={0} 
-              max={50} 
+              max={50}
+              precision={0}
+              controls={false}
+              keyboard={true}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
 
@@ -1777,8 +2303,8 @@ const ExpertDashboard: React.FC = () => {
                 <>
                   {fields.map(({ key, name, ...restField }) => (
                     <div key={key} className={styles.modalEducationRow}>
-                      <Row gutter={16}>
-                        <Col span={9}>
+                      <Row gutter={16} align="middle">
+                        <Col span={10}>
                           <Form.Item
                             {...restField}
                             name={[name, 'university']}
@@ -1792,7 +2318,7 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={5}>
+                        <Col span={4}>
                           <Form.Item
                             {...restField}
                             name={[name, 'start_year']}
@@ -1806,10 +2332,18 @@ const ExpertDashboard: React.FC = () => {
                               style={{ width: '100%' }}
                               className={styles.inputField}
                               size="large"
+                              precision={0}
+                              controls={false}
+                              keyboard={true}
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={5}>
+                        <Col span={4}>
                           <Form.Item
                             {...restField}
                             name={[name, 'end_year']}
@@ -1822,6 +2356,14 @@ const ExpertDashboard: React.FC = () => {
                               style={{ width: '100%' }}
                               className={styles.inputField}
                               size="large"
+                              precision={0}
+                              controls={false}
+                              keyboard={true}
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                             />
                           </Form.Item>
                         </Col>
@@ -1838,13 +2380,13 @@ const ExpertDashboard: React.FC = () => {
                             />
                           </Form.Item>
                         </Col>
-                        <Col span={1}>
+                        <Col span={2} style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Button
                             type="text"
                             danger
                             icon={<DeleteOutlined />}
                             onClick={() => remove(name)}
-                            style={{ marginTop: 4 }}
+                            style={{ marginTop: 0 }}
                           />
                         </Col>
                       </Row>
@@ -1881,11 +2423,8 @@ const ExpertDashboard: React.FC = () => {
         title={
           <div style={{ 
             fontSize: 24, 
-            fontWeight: 600, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
+            fontWeight: 600,
+            color: '#1f2937'
           }}>
             {editingSpecialization ? 'Редактировать специализацию' : 'Добавить специализацию'}
           </div>
@@ -1965,36 +2504,22 @@ const ExpertDashboard: React.FC = () => {
           }}
         >
           <Form.Item
-            label="Предмет"
-            name="subject_id"
-            rules={[{ required: true, message: 'Выберите предмет' }]}
-          >
-            <Select 
-              placeholder="Выберите предмет"
-              className={styles.inputField}
-              size="large"
-              showSearch
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-              }
-              options={subjects.map((subject) => ({
-                label: subject.name,
-                value: subject.id,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
             rules={[{ required: true, message: 'Укажите опыт работы' }]}
           >
             <AntInputNumber 
               min={0} 
-              max={50} 
+              max={50}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
           <Form.Item
@@ -2003,11 +2528,17 @@ const ExpertDashboard: React.FC = () => {
             rules={[{ required: true, message: 'Укажите часовую ставку' }]}
           >
             <AntInputNumber 
-              min={0} 
+              min={0}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }} 
               step={100}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
+              placeholder="0"
             />
           </Form.Item>
           <Form.Item
@@ -2233,7 +2764,7 @@ const ExpertDashboard: React.FC = () => {
             <div style={{
               background: selectedChat ? '#ffffff' : '#e0f2fe',
               padding: '12px 16px',
-              paddingRight: '48px', // Отступ справа для крестика закрытия
+              paddingRight: '56px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -2259,10 +2790,11 @@ const ExpertDashboard: React.FC = () => {
                     </div>
                   </Space>
                   <Button 
-                    type="text" 
+                    type="primary" 
                     size="small"
                     icon={<PlusOutlined />}
-                    style={{ color: '#6b7280', fontSize: 14, marginRight: 0 }}
+                    onClick={() => setCreateOrderModalVisible(true)}
+                    style={{ fontSize: 14 }}
                   >
                     Создать заказ
                   </Button>
@@ -2276,10 +2808,11 @@ const ExpertDashboard: React.FC = () => {
                     </Text>
                   </Space>
                   <Button 
-                    type="text" 
+                    type="primary" 
                     size="small"
                     icon={<PlusOutlined />}
-                    style={{ color: '#0369a1', fontSize: 14, marginRight: 0 }}
+                    onClick={() => setCreateOrderModalVisible(true)}
+                    style={{ fontSize: 14 }}
                   >
                     Создать заказ
                   </Button>
@@ -2353,62 +2886,102 @@ const ExpertDashboard: React.FC = () => {
             <div style={{ 
               padding: '16px',
               borderTop: '1px solid #e5e7eb',
-              background: '#ffffff',
-              display: 'flex',
-              gap: 8,
-              alignItems: 'flex-end'
+              background: '#ffffff'
             }}>
-              <Input.TextArea
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Введите сообщение..."
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                style={{ 
-                  flex: 1,
-                  borderRadius: 8,
-                  border: '1px solid #d1d5db'
-                }}
-              />
-              <Button
-                type="default"
-                shape="circle"
-                icon={<PaperClipOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff'
-                }}
-              />
-              <Button
-                type="default"
-                shape="circle"
-                icon={<SmileOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  border: '1px solid #d1d5db',
-                  background: '#ffffff'
-                }}
-              />
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<SendOutlined />}
-                style={{ 
-                  width: 40, 
-                  height: 40,
-                  background: '#3b82f6',
-                  border: 'none'
-                }}
-                onClick={() => {
-                  if (messageText.trim()) {
-                    // Здесь будет логика отправки сообщения
-                    setMessageText('');
-                    message.success('Сообщение отправлено');
+              {fileList.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <Upload
+                    fileList={fileList}
+                    onRemove={(file) => {
+                      setFileList(fileList.filter((f) => f.uid !== file.uid));
+                    }}
+                    beforeUpload={() => false}
+                  />
+                </div>
+              )}
+              <div style={{ 
+                display: 'flex',
+                gap: 8,
+                alignItems: 'flex-end'
+              }}>
+                <Input.TextArea
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Введите сообщение..."
+                  autoSize={{ minRows: 1, maxRows: 3 }}
+                  style={{ 
+                    flex: 1,
+                    borderRadius: 8,
+                    border: '1px solid #d1d5db'
+                  }}
+                />
+                <Upload
+                  fileList={fileList}
+                  onChange={({ fileList }) => setFileList(fileList)}
+                  beforeUpload={() => false}
+                  multiple
+                  showUploadList={false}
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    icon={<PaperClipOutlined />}
+                    style={{ 
+                      width: 40, 
+                      height: 40,
+                      border: '1px solid #d1d5db',
+                      background: '#ffffff'
+                    }}
+                  />
+                </Upload>
+                <Popover
+                  content={
+                    <EmojiPicker
+                      onEmojiClick={(emojiData: any) => {
+                        setMessageText(messageText + emojiData.emoji);
+                        setEmojiPickerOpen(false);
+                      }}
+                      width={350}
+                      height={400}
+                    />
                   }
-                }}
-              />
+                  trigger="click"
+                  open={emojiPickerOpen}
+                  onOpenChange={setEmojiPickerOpen}
+                  placement="topRight"
+                >
+                  <Button
+                    type="default"
+                    shape="circle"
+                    icon={<SmileOutlined />}
+                    style={{ 
+                      width: 40, 
+                      height: 40,
+                      border: '1px solid #d1d5db',
+                      background: '#ffffff'
+                    }}
+                  />
+                </Popover>
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<SendOutlined />}
+                  style={{ 
+                    width: 40, 
+                    height: 40,
+                    background: '#3b82f6',
+                    border: 'none'
+                  }}
+                  onClick={() => {
+                    if (messageText.trim()) {
+                      // Здесь будет логика отправки сообщения
+                      setMessageText('');
+                      setFileList([]);
+                      message.success('Сообщение отправлено');
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -3000,8 +3573,6 @@ const ExpertDashboard: React.FC = () => {
                   type="primary"
                   block
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                    border: 'none',
                     borderRadius: 8,
                     height: 40
                   }}
@@ -3888,28 +4459,360 @@ const ExpertDashboard: React.FC = () => {
               console.log('Поиск:', value);
             }}
           />
-          <div style={{ 
-            minHeight: '400px',
-            background: '#ffffff',
-            borderRadius: 12,
-            border: '1px solid #e5e7eb',
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <TeamOutlined style={{ 
-              fontSize: 64, 
-              color: '#d1d5db',
-              marginBottom: 16 
-            }} />
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              У вас пока нет друзей
-            </Text>
-            <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
-              Пригласите друзей, чтобы начать общение
-            </Text>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16, alignItems: 'stretch' }}>
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#3b82f6', flexShrink: 0 }}>ИП</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Иван Петров</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Математика, Физика</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>127 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Иван Петров', specialization: 'Математика, Физика' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Иван Петров', 
+                      specialization: 'Математика, Физика',
+                      rating: 5,
+                      worksCount: 127,
+                      avatar: 'ИП',
+                      avatarColor: '#3b82f6',
+                      bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
+                      education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
+                      experience: '10 лет',
+                      skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#10b981', flexShrink: 0 }}>МС</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Мария Сидорова</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Экономика, Бухучет</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>89 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Мария Сидорова', specialization: 'Экономика, Бухучет' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Мария Сидорова', 
+                      specialization: 'Экономика, Бухучет',
+                      rating: 5,
+                      worksCount: 89,
+                      avatar: 'МС',
+                      avatarColor: '#10b981',
+                      bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
+                      education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
+                      experience: '7 лет',
+                      skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#f59e0b', flexShrink: 0 }}>АС</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Алексей Смирнов</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Программирование</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>156 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Алексей Смирнов', specialization: 'Программирование' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Алексей Смирнов', 
+                      specialization: 'Программирование',
+                      rating: 4,
+                      worksCount: 156,
+                      avatar: 'АС',
+                      avatarColor: '#f59e0b',
+                      bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
+                      education: 'МФТИ, Факультет инноваций и высоких технологий',
+                      experience: '8 лет',
+                      skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#8b5cf6', flexShrink: 0 }}>ЕК</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Елена Козлова</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Химия, Биология</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>203 работы</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Елена Козлова', specialization: 'Химия, Биология' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Елена Козлова', 
+                      specialization: 'Химия, Биология',
+                      rating: 5,
+                      worksCount: 203,
+                      avatar: 'ЕК',
+                      avatarColor: '#8b5cf6',
+                      bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
+                      education: 'МГУ им. М.В. Ломоносова, Химический факультет',
+                      experience: '12 лет',
+                      skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#ec4899', flexShrink: 0 }}>ДН</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Дмитрий Новиков</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>История, Философия</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={4} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>74 работы</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Дмитрий Новиков', specialization: 'История, Философия' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Дмитрий Новиков', 
+                      specialization: 'История, Философия',
+                      rating: 4,
+                      worksCount: 74,
+                      avatar: 'ДН',
+                      avatarColor: '#ec4899',
+                      bio: 'Историк и философ. Помогаю понять сложные исторические процессы и философские концепции.',
+                      education: 'СПбГУ, Исторический факультет',
+                      experience: '6 лет',
+                      skills: ['История России', 'Всемирная история', 'Философия', 'Обществознание']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: '#ffffff',
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              padding: '16px',
+              transition: 'all 0.3s',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: 1 }}>
+                <Avatar size={56} style={{ backgroundColor: '#06b6d4', flexShrink: 0 }}>ОВ</Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong style={{ fontSize: 16, display: 'block', lineHeight: '22px' }}>Ольга Васильева</Text>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>Английский язык</Text>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <Rate disabled defaultValue={5} style={{ fontSize: 12 }} />
+                    <Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>312 работ</Text>
+                  </div>
+                </div>
+              </div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  size="small" 
+                  icon={<MessageOutlined />} 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setSelectedFriend({ name: 'Ольга Васильева', specialization: 'Английский язык' });
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать
+                </Button>
+                <Button 
+                  size="small" 
+                  icon={<UserOutlined />}
+                  onClick={() => {
+                    setSelectedFriend({ 
+                      name: 'Ольга Васильева', 
+                      specialization: 'Английский язык',
+                      rating: 5,
+                      worksCount: 312,
+                      avatar: 'ОВ',
+                      avatarColor: '#06b6d4',
+                      bio: 'Преподаватель английского языка с международными сертификатами. Готовлю к IELTS, TOEFL и ЕГЭ.',
+                      education: 'МГЛУ, Факультет английского языка',
+                      experience: '15 лет',
+                      skills: ['Английский язык', 'IELTS', 'TOEFL', 'Деловой английский', 'Разговорная практика']
+                    });
+                    setFriendProfileModalVisible(true);
+                  }}
+                >
+                  Профиль
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </Modal>
@@ -4015,6 +4918,643 @@ const ExpertDashboard: React.FC = () => {
             Желаем легких заказов и высоких доходов!
           </Paragraph>
         </div>
+      </Modal>
+
+      {/* Модальное окно создания заказа */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1890ff'
+          }}>
+            Создать заказ
+          </div>
+        }
+        open={createOrderModalVisible}
+        onCancel={() => setCreateOrderModalVisible(false)}
+        onOk={() => {
+          message.info('Функция создания заказа в разработке');
+          setCreateOrderModalVisible(false);
+        }}
+        width={750}
+        okText="Создать"
+        cancelText="Отмена"
+        okButtonProps={{
+          className: styles.buttonPrimary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        cancelButtonProps={{
+          className: styles.buttonSecondary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        <Form layout="vertical" form={createOrderForm}>
+          <Form.Item label="Название заказа" name="title" rules={[{ required: true, message: 'Введите название' }]}>
+            <Input 
+              placeholder="Введите название заказа" 
+              className={styles.inputField}
+              size="large"
+            />
+          </Form.Item>
+          <Form.Item label="Описание" name="description" rules={[{ required: true, message: 'Введите описание' }]}>
+            <Input.TextArea 
+              rows={4} 
+              placeholder="Опишите задание подробно" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+          <Form.Item label="Предмет" name="subject" rules={[{ required: true, message: 'Выберите предмет' }]}>
+            <Select 
+              placeholder="Выберите предмет"
+              className={styles.inputField}
+              size="large"
+            >
+              <Select.Option value="math">Математика</Select.Option>
+              <Select.Option value="physics">Физика</Select.Option>
+              <Select.Option value="chemistry">Химия</Select.Option>
+              <Select.Option value="programming">Программирование</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Тип работы" name="work_type" rules={[{ required: true, message: 'Выберите тип работы' }]}>
+            <Select 
+              placeholder="Выберите тип работы"
+              className={styles.inputField}
+              size="large"
+            >
+              <Select.Option value="essay">Реферат</Select.Option>
+              <Select.Option value="coursework">Курсовая</Select.Option>
+              <Select.Option value="diploma">Диплом</Select.Option>
+              <Select.Option value="test">Контрольная</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Срок выполнения" name="deadline" rules={[{ required: true, message: 'Выберите дату' }]}>
+            <DatePicker 
+              style={{ width: '100%', height: 48, borderRadius: 8, fontSize: 14 }} 
+              placeholder="Выберите дату"
+              format="DD.MM.YYYY"
+              disabledDate={(current) => {
+                return current && current < dayjs().startOf('day');
+              }}
+              inputReadOnly
+            />
+          </Form.Item>
+          <Form.Item label="Бюджет (₽)" name="budget" rules={[{ required: true, message: 'Укажите бюджет' }]}>
+            <InputNumber 
+              min={0} 
+              style={{ width: '100%' }} 
+              placeholder="Укажите бюджет"
+              className={styles.inputField}
+              size="large"
+              precision={0}
+              controls={false}
+              keyboard={true}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Profile Edit Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1890ff'
+          }}>
+            Редактировать профиль
+          </div>
+        }
+        open={profileModalVisible}
+        onCancel={() => setProfileModalVisible(false)}
+        onOk={() => profileForm.submit()}
+        width={750}
+        okText="Сохранить"
+        cancelText="Отмена"
+        okButtonProps={{
+          className: styles.buttonPrimary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        cancelButtonProps={{
+          className: styles.buttonSecondary,
+          size: 'large',
+          style: { 
+            borderRadius: 12,
+            height: 44,
+            fontSize: 16,
+            fontWeight: 500
+          }
+        }}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '24px 32px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)'
+          },
+          footer: {
+            padding: '24px 32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '0 0 24px 24px'
+          }
+        }}
+      >
+        <Form
+          form={profileForm}
+          layout="vertical"
+          onFinish={(values) => {
+            // Update profile logic here
+            setProfile({
+              ...profile!,
+              bio: values.bio,
+              education: values.education,
+              skills: values.skills
+            });
+            message.success('Профиль успешно обновлен');
+            setProfileModalVisible(false);
+          }}
+        >
+          <Form.Item
+            label="О себе"
+            name="bio"
+            rules={[{ required: true, message: 'Расскажите о себе' }]}
+          >
+            <Input.TextArea 
+              rows={6} 
+              placeholder="Расскажите о своем опыте, образовании и подходе к работе" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Образование"
+            name="education"
+            rules={[{ required: true, message: 'Укажите образование' }]}
+          >
+            <Input.TextArea 
+              rows={3} 
+              placeholder="Укажите ваше образование и квалификации" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Навыки"
+            name="skills"
+            rules={[{ required: true, message: 'Укажите навыки' }]}
+            extra="Перечислите навыки через запятую"
+          >
+            <Input.TextArea 
+              rows={3} 
+              placeholder="Например: Математический анализ, Python, C++, Физика" 
+              className={styles.textareaField}
+              style={{ fontSize: 15 }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Friend Chat Modal */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 20, 
+            fontWeight: 600, 
+            color: '#1890ff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12
+          }}>
+            <MessageOutlined />
+            {selectedFriend ? `Чат с ${selectedFriend.name}` : 'Чат'}
+          </div>
+        }
+        open={friendChatModalVisible}
+        onCancel={() => setFriendChatModalVisible(false)}
+        footer={null}
+        width={600}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          header: {
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            padding: '20px 24px',
+            borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+            borderRadius: '24px 24px 0 0'
+          },
+          body: {
+            padding: '0',
+            background: 'rgba(255, 255, 255, 0.95)',
+            height: '500px',
+            display: 'flex',
+            flexDirection: 'column'
+          }
+        }}
+      >
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '500px'
+        }}>
+          {/* Chat messages area */}
+          <div style={{ 
+            flex: 1, 
+            padding: '20px 24px', 
+            overflowY: 'auto',
+            background: '#f8f9fa'
+          }}>
+            <div style={{ 
+              textAlign: 'center', 
+              color: '#8c8c8c', 
+              fontSize: 14,
+              marginBottom: 20
+            }}>
+              Начало переписки с {selectedFriend?.name}
+            </div>
+            
+            {/* Sample messages */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ 
+                background: '#e6f7ff', 
+                padding: '12px 16px', 
+                borderRadius: '12px 12px 12px 4px',
+                maxWidth: '70%',
+                marginLeft: 'auto',
+                border: '1px solid #91d5ff'
+              }}>
+                <Text>Привет! Как дела с проектом?</Text>
+                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4, textAlign: 'right' }}>
+                  14:30
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ 
+                background: '#ffffff', 
+                padding: '12px 16px', 
+                borderRadius: '12px 12px 4px 12px',
+                maxWidth: '70%',
+                border: '1px solid #d9d9d9'
+              }}>
+                <Text>Привет! Всё отлично, работаю над задачами. А у тебя как успехи?</Text>
+                <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 4 }}>
+                  14:32
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Message input area */}
+          <div style={{ 
+            padding: '16px 24px', 
+            borderTop: '1px solid rgba(102, 126, 234, 0.1)',
+            background: 'rgba(255, 255, 255, 0.95)'
+          }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+              <Input.TextArea 
+                placeholder="Напишите сообщение..."
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                style={{ 
+                  borderRadius: 12,
+                  resize: 'none'
+                }}
+                onPressEnter={(e) => {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    message.info('Сообщение отправлено!');
+                  }
+                }}
+              />
+              <Button 
+                type="primary" 
+                icon={<SendOutlined />}
+                style={{ 
+                  borderRadius: 12,
+                  height: 40,
+                  minWidth: 40
+                }}
+                onClick={() => {
+                  message.info('Сообщение отправлено!');
+                }}
+              />
+            </div>
+            <div style={{ 
+              fontSize: 12, 
+              color: '#8c8c8c', 
+              marginTop: 8,
+              textAlign: 'center'
+            }}>
+              Нажмите Enter для отправки, Shift+Enter для новой строки
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Friend Profile Modal */}
+      <Modal
+        title={null}
+        open={friendProfileModalVisible}
+        onCancel={() => setFriendProfileModalVisible(false)}
+        footer={null}
+        width={700}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: 0,
+            overflow: 'hidden',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            padding: 0
+          }
+        }}
+      >
+        {selectedFriend && (
+          <div>
+            {/* Header with gradient background */}
+            <div style={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '40px 32px',
+              position: 'relative'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 20 
+              }}>
+                <Avatar 
+                  size={100} 
+                  style={{ 
+                    backgroundColor: selectedFriend.avatarColor,
+                    fontSize: 36,
+                    fontWeight: 600,
+                    border: '4px solid rgba(255, 255, 255, 0.3)'
+                  }}
+                >
+                  {selectedFriend.avatar}
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <Text 
+                    strong 
+                    style={{ 
+                      fontSize: 28, 
+                      display: 'block',
+                      color: '#ffffff',
+                      marginBottom: 8
+                    }}
+                  >
+                    {selectedFriend.name}
+                  </Text>
+                  <Text 
+                    style={{ 
+                      fontSize: 16, 
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      display: 'block',
+                      marginBottom: 12
+                    }}
+                  >
+                    {selectedFriend.specialization}
+                  </Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div>
+                      <Rate 
+                        disabled 
+                        defaultValue={selectedFriend.rating} 
+                        style={{ fontSize: 16, color: '#fbbf24' }} 
+                      />
+                    </div>
+                    <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 14 }}>
+                      {selectedFriend.worksCount} работ
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '32px' }}>
+              {/* Bio Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <UserOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    О себе
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563', lineHeight: 1.6 }}>
+                  {selectedFriend.bio}
+                </Text>
+              </div>
+
+              {/* Education Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <TrophyOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Образование
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563' }}>
+                  {selectedFriend.education}
+                </Text>
+              </div>
+
+              {/* Experience Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <ClockCircleOutlined style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Опыт работы
+                  </Text>
+                </div>
+                <Text style={{ fontSize: 15, color: '#4b5563' }}>
+                  {selectedFriend.experience}
+                </Text>
+              </div>
+
+              {/* Skills Section */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 8,
+                  marginBottom: 12
+                }}>
+                  <StarFilled style={{ fontSize: 20, color: '#667eea' }} />
+                  <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+                    Навыки
+                  </Text>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {selectedFriend.skills?.map((skill: string, index: number) => (
+                    <Tag 
+                      key={index}
+                      style={{ 
+                        padding: '6px 16px',
+                        fontSize: 14,
+                        borderRadius: 20,
+                        border: '1px solid #e0e7ff',
+                        background: '#f5f7ff',
+                        color: '#667eea'
+                      }}
+                    >
+                      {skill}
+                    </Tag>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ 
+                display: 'flex', 
+                gap: 12,
+                paddingTop: 24,
+                borderTop: '1px solid #e5e7eb'
+              }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  icon={<MessageOutlined />}
+                  style={{ 
+                    flex: 1,
+                    height: 48,
+                    borderRadius: 12,
+                    fontSize: 16
+                  }}
+                  onClick={() => {
+                    setFriendProfileModalVisible(false);
+                    setFriendChatModalVisible(true);
+                  }}
+                >
+                  Написать сообщение
+                </Button>
+                <Button 
+                  size="large"
+                  icon={<HeartOutlined />}
+                  style={{ 
+                    height: 48,
+                    borderRadius: 12,
+                    fontSize: 16
+                  }}
+                >
+                  В избранное
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </>
   );

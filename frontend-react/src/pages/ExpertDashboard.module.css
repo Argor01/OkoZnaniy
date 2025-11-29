@@ -306,19 +306,20 @@
 
 /* Buttons */
 .buttonPrimary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+  background: #1890ff !important;
   border: none !important;
   border-radius: 12px !important;
   height: 44px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3) !important;
   transition: all 0.3s ease !important;
 }
 
 .buttonPrimary:hover {
+  background: #40a9ff !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
 }
 
 .buttonSecondary {
@@ -575,6 +576,20 @@
   background: #ffffff;
 }
 
+.modalEducationRow .ant-form-item {
+  margin-bottom: 0 !important;
+  height: 100%;
+}
+
+.modalEducationRow .ant-col {
+  display: flex;
+  align-items: center;
+}
+
+.modalEducationRow .ant-form-item-control-input {
+  min-height: auto;
+}
+
 /* Card (general) */
 .card {
   background: rgba(255, 255, 255, 0.95);
@@ -703,6 +718,29 @@
   text-underline-offset: 3px;
 }
 
+/* Tablet and Mobile Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .mainContent {
+    padding: 16px;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .headerTitle {
+    font-size: 28px;
+  }
+
+  .sectionCard {
+    padding: 24px;
+  }
+}
+
 @media (max-width: 840px) {
   .container {
     flex-direction: column;
@@ -716,23 +754,249 @@
   .sidebar {
     width: 100%;
     height: auto;
-    max-height: 400px;
-    position: relative;
+    max-height: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-right: none;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebarProfile {
+    display: none;
+  }
+
+  .sidebarMenu {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+    max-height: 70px;
+  }
+
+  .sidebarMenu .ant-menu-item,
+  .sidebarMenu .ant-menu-submenu-title {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    height: 60px;
+    padding: 8px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .sidebarMenu .ant-menu-item .anticon,
+  .sidebarMenu .ant-menu-submenu-title .anticon {
+    font-size: 20px;
+    margin: 0 0 4px 0;
+  }
+
+  .sidebarMenu .ant-menu-item-selected {
+    border-bottom-color: #667eea;
+    background: transparent;
+  }
+
+  .sidebarMenu .ant-menu-item:hover {
+    border-bottom-color: #667eea;
+    background: transparent;
+  }
+
+  .sidebarMenu .ant-menu-submenu {
+    display: none;
+  }
+
+  .logoutMenuItem {
+    margin-top: 0 !important;
+    border-top: none !important;
+    padding-top: 0 !important;
   }
 
   .mainContent {
     height: auto;
+    padding: 12px;
+    padding-bottom: 80px;
+  }
+
+  .header {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .headerTitle {
+    font-size: 24px;
   }
 
   .profileBlockContent {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 24px;
+    gap: 20px;
+  }
+
+  .profileLeft {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .profileRight {
     align-items: center;
     text-align: center;
+    width: 100%;
+  }
+
+  .profileStats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .orderCard {
+    padding: 16px;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orderTitle {
+    font-size: 18px;
+  }
+
+  .orderBudget {
+    font-size: 20px;
+  }
+
+  .actionButtons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+
+  .applicationCard,
+  .emptyApplicationCard {
+    padding: 20px;
+  }
+
+  .applicationTitle {
+    font-size: 20px;
+  }
+
+  .applicationHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .mainContent {
+    padding: 8px;
+    padding-bottom: 80px;
+  }
+
+  .header {
+    padding: 12px;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+  }
+
+  .headerProfileContainer {
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+
+  .profileBlock {
+    padding: 16px;
+  }
+
+  .sectionCard {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .orderCard {
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  .orderTitle {
+    font-size: 16px;
+  }
+
+  .orderBudget {
+    font-size: 18px;
+  }
+
+  .orderTags {
+    gap: 6px;
+  }
+
+  .tag,
+  .tagBlue,
+  .tagGreen {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  .applicationCard,
+  .emptyApplicationCard {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .applicationTitle {
+    font-size: 18px;
+  }
+
+  .buttonPrimary,
+  .buttonSecondary,
+  .buttonDanger {
+    height: 40px !important;
+    font-size: 14px !important;
+  }
+
+  .sidebarMenu .ant-menu-item,
+  .sidebarMenu .ant-menu-submenu-title {
+    min-width: 60px;
+    height: 55px;
+    font-size: 10px;
+  }
+
+  .sidebarMenu .ant-menu-item .anticon,
+  .sidebarMenu .ant-menu-submenu-title .anticon {
+    font-size: 18px;
   }
 }

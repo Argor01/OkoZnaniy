@@ -5,37 +5,52 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    entrypoint: ["/bin/sh","-c","sed -i 's/\\r$//' /app/docker-entrypoint.sh && /bin/sh /app/docker-entrypoint.sh"]
     restart: always
     depends_on:
       - postgres
       - redis
-    env_file:
-      - .env
     environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=True
+      - DJANGO_ENV=development
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
       - FRONTEND_URL=http://localhost:5173
-      - LOGIN_REDIRECT_URL=http://localhost:5173
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-
+      - LOGIN_REDIRECT_URL=http://localhost:5173/expert
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - EMAIL_HOST=smtp.yandex.ru
+      - EMAIL_PORT=587
+      - EMAIL_USE_TLS=True
+      - EMAIL_HOST_USER=YanBrait@yandex.ru
+      - EMAIL_HOST_PASSWORD=tvfibdueaqwoipxn
+      - DEFAULT_FROM_EMAIL=YanBrait@yandex.ru
+      - PYTHONUNBUFFERED=1
     volumes:
-      - .:/app
       - static_files:/app/static
       - media_files:/app/media
+      - .:/app
     ports:
       - "8000:8000"
     networks:
       - app_network
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
 
   frontend:
-    image: node:22-alpine
-    working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile.dev
+      target: development
     restart: always
     environment:
       - VITE_API_URL=http://localhost:8000
       - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
     volumes:
       - ./frontend-react:/app
       - /app/node_modules
@@ -43,6 +58,7 @@ services:
       - "5173:5173"
     networks:
       - app_network
+    command: npm run dev -- --host 0.0.0.0
 
   postgres:
     image: postgres:15-alpine
@@ -54,7 +70,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - app_network
 
@@ -72,14 +88,43 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-    command: celery -A config worker -l INFO
+    command: celery -A config worker -l INFO --autoreload
     restart: always
     depends_on:
       - redis
       - postgres
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=True
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    networks:
+      - app_network
 
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    restart: always
+    depends_on:
+      - backend
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_WEBHOOK_URL=${TELEGRAM_BOT_WEBHOOK_URL}
+      - BACKEND_URL=http://backend:8000
+      - FRONTEND_URL=http://localhost:5173
+      - DEBUG=True
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - PYTHONUNBUFFERED=1
     volumes:
       - .:/app
     networks:
