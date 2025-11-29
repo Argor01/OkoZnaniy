@@ -102,7 +102,7 @@ LOGIN_URL = '/api/accounts/login/'
 
 # URL фронтенда и редиректы после логина/логаута
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URL', f'{FRONTEND_URL}/expert')
+LOGIN_REDIRECT_URL = '/api/users/google/callback/'
 ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', FRONTEND_URL)
 
 # Настройка для правильного формирования callback URL в production
