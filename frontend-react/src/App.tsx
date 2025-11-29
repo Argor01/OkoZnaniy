@@ -22,6 +22,7 @@ import './styles/spacing.css';
 import './styles/tokens.css';
 import './styles/components.css';
 import './styles/messages.css';
+import './styles/modals.css';
 
 // Import pages
 import Home from './pages/Home';

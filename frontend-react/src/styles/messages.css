@@ -37,3 +37,180 @@
 .ant-card[style*="background: rgb(240, 253, 244)"] {
   background: rgba(59, 130, 246, 0.1) !important;
 }
+
+
+/* ========================================
+   АДАПТИВНЫЕ СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН СООБЩЕНИЙ
+   ======================================== */
+
+/* Планшеты (до 840px) */
+@media (max-width: 840px) {
+  /* Модальное окно сообщений */
+  .ant-modal.messages-modal {
+    max-width: 90% !important;
+  }
+
+  .ant-modal.messages-modal .ant-modal-body {
+    padding: 12px !important;
+  }
+
+  /* Список чатов */
+  .ant-list-item {
+    padding: 12px !important;
+  }
+
+  .ant-avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* Сообщения в чате */
+  .ant-comment {
+    padding: 8px !important;
+  }
+
+  .ant-comment-content {
+    font-size: 14px !important;
+  }
+
+  /* Форма отправки сообщения */
+  .ant-input-textarea textarea {
+    font-size: 14px !important;
+  }
+}
+
+/* Мобильные устройства (до 480px) */
+@media (max-width: 480px) {
+  /* Модальное окно на весь экран */
+  .ant-modal.messages-modal {
+    max-width: 100% !important;
+    margin: 0 !important;
+    top: 0 !important;
+    padding: 0 !important;
+  }
+
+  .ant-modal.messages-modal .ant-modal-content {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .ant-modal.messages-modal .ant-modal-header {
+    padding: 12px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ant-modal.messages-modal .ant-modal-body {
+    padding: 8px !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+
+  .ant-modal.messages-modal .ant-modal-footer {
+    padding: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Список чатов */
+  .ant-list-item {
+    padding: 8px !important;
+  }
+
+  .ant-avatar {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .ant-list-item-meta-title {
+    font-size: 14px !important;
+  }
+
+  .ant-list-item-meta-description {
+    font-size: 12px !important;
+  }
+
+  /* Badge с количеством сообщений */
+  .ant-badge-count {
+    font-size: 11px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    line-height: 18px !important;
+  }
+
+  /* Сообщения в чате */
+  .ant-comment {
+    padding: 6px !important;
+  }
+
+  .ant-comment-avatar {
+    margin-right: 8px !important;
+  }
+
+  .ant-comment-content {
+    font-size: 13px !important;
+  }
+
+  .ant-comment-content-author {
+    font-size: 12px !important;
+  }
+
+  .ant-comment-content-author-time {
+    font-size: 11px !important;
+  }
+
+  /* Форма отправки сообщения */
+  .ant-input-textarea textarea {
+    font-size: 13px !important;
+    min-height: 60px !important;
+  }
+
+  .ant-btn {
+    height: 32px !important;
+    font-size: 13px !important;
+  }
+
+  /* Tabs для переключения между чатами */
+  .ant-tabs-tab {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Поиск в сообщениях */
+  .ant-input-search {
+    font-size: 13px !important;
+  }
+
+  .ant-input-search .ant-input {
+    height: 32px !important;
+  }
+}
+
+/* Очень маленькие экраны (до 360px) */
+@media (max-width: 360px) {
+  .ant-list-item {
+    padding: 6px !important;
+  }
+
+  .ant-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .ant-list-item-meta-title {
+    font-size: 13px !important;
+  }
+
+  .ant-list-item-meta-description {
+    font-size: 11px !important;
+  }
+
+  .ant-comment-content {
+    font-size: 12px !important;
+  }
+
+  .ant-input-textarea textarea {
+    font-size: 12px !important;
+    min-height: 50px !important;
+  }
+}

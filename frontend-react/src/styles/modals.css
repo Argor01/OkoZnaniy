@@ -1,0 +1,427 @@
+/* ========================================
+   АДАПТИВНЫЕ СТИЛИ ДЛЯ ВСЕХ МОДАЛЬНЫХ ОКОН
+   ======================================== */
+
+/* Базовые стили для модальных окон */
+.ant-modal {
+  max-width: 90%;
+}
+
+.ant-modal-content {
+  border-radius: 16px;
+}
+
+.ant-modal-header {
+  border-radius: 16px 16px 0 0;
+  padding: 20px 24px;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-modal-footer {
+  padding: 16px 24px;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Планшеты (до 840px) */
+@media (max-width: 840px) {
+  .ant-modal {
+    max-width: 90% !important;
+    margin: 20px auto !important;
+  }
+
+  .ant-modal-content {
+    border-radius: 12px !important;
+  }
+
+  .ant-modal-header {
+    padding: 16px 20px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  .ant-modal-title {
+    font-size: 18px !important;
+  }
+
+  .ant-modal-body {
+    padding: 16px 20px !important;
+    max-height: calc(100vh - 200px) !important;
+    overflow-y: auto !important;
+  }
+
+  .ant-modal-footer {
+    padding: 12px 20px !important;
+    border-radius: 0 0 12px 12px !important;
+  }
+
+  .ant-modal-footer .ant-btn {
+    height: 36px !important;
+  }
+
+  /* Формы в модальных окнах */
+  .ant-form-item {
+    margin-bottom: 16px !important;
+  }
+
+  .ant-form-item-label > label {
+    font-size: 14px !important;
+  }
+
+  .ant-input,
+  .ant-input-number,
+  .ant-select-selector,
+  .ant-picker {
+    height: 36px !important;
+    font-size: 14px !important;
+  }
+
+  .ant-input-textarea textarea {
+    font-size: 14px !important;
+  }
+}
+
+/* Мобильные устройства (до 480px) */
+@media (max-width: 480px) {
+  /* Модальное окно на весь экран */
+  .ant-modal {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    top: 0 !important;
+    padding: 0 !important;
+  }
+
+  .ant-modal-wrap {
+    overflow: hidden !important;
+  }
+
+  .ant-modal-content {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .ant-modal-header {
+    padding: 12px 16px !important;
+    border-radius: 0 !important;
+    flex-shrink: 0 !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+  }
+
+  .ant-modal-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+
+  .ant-modal-close {
+    top: 12px !important;
+    right: 12px !important;
+  }
+
+  .ant-modal-close-x {
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: 16px !important;
+  }
+
+  .ant-modal-body {
+    padding: 12px 16px !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: none !important;
+  }
+
+  .ant-modal-footer {
+    padding: 12px 16px !important;
+    border-radius: 0 !important;
+    flex-shrink: 0 !important;
+    border-top: 1px solid #f0f0f0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .ant-modal-footer .ant-btn {
+    width: 100% !important;
+    height: 40px !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+  }
+
+  /* Формы в модальных окнах */
+  .ant-form-item {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-form-item-label {
+    padding-bottom: 4px !important;
+  }
+
+  .ant-form-item-label > label {
+    font-size: 13px !important;
+    height: auto !important;
+  }
+
+  .ant-input,
+  .ant-input-number,
+  .ant-select-selector,
+  .ant-picker {
+    height: 40px !important;
+    font-size: 14px !important;
+  }
+
+  .ant-input-textarea textarea {
+    font-size: 14px !important;
+    min-height: 80px !important;
+  }
+
+  .ant-select-dropdown {
+    max-height: 50vh !important;
+  }
+
+  .ant-picker-dropdown {
+    max-width: 95vw !important;
+  }
+
+  /* Tabs в модальных окнах */
+  .ant-tabs-nav {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Table в модальных окнах */
+  .ant-table {
+    font-size: 12px !important;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  /* Upload в модальных окнах */
+  .ant-upload-list-item {
+    font-size: 12px !important;
+  }
+
+  /* Steps в модальных окнах */
+  .ant-steps-item-title {
+    font-size: 13px !important;
+  }
+
+  .ant-steps-item-description {
+    font-size: 11px !important;
+  }
+
+  /* Collapse в модальных окнах */
+  .ant-collapse-header {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-collapse-content-box {
+    padding: 12px !important;
+  }
+
+  /* Descriptions в модальных окнах */
+  .ant-descriptions-item-label {
+    font-size: 12px !important;
+  }
+
+  .ant-descriptions-item-content {
+    font-size: 13px !important;
+  }
+
+  /* Timeline в модальных окнах */
+  .ant-timeline-item-content {
+    font-size: 13px !important;
+  }
+
+  /* Card в модальных окнах */
+  .ant-card {
+    font-size: 13px !important;
+  }
+
+  .ant-card-head {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  /* List в модальных окнах */
+  .ant-list-item {
+    padding: 10px 0 !important;
+  }
+
+  .ant-list-item-meta-title {
+    font-size: 13px !important;
+  }
+
+  .ant-list-item-meta-description {
+    font-size: 12px !important;
+  }
+
+  /* Divider в модальных окнах */
+  .ant-divider {
+    margin: 12px 0 !important;
+  }
+
+  /* Alert в модальных окнах */
+  .ant-alert {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Badge в модальных окнах */
+  .ant-badge {
+    font-size: 11px !important;
+  }
+
+  /* Tag в модальных окнах */
+  .ant-tag {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Radio/Checkbox в модальных окнах */
+  .ant-radio-wrapper,
+  .ant-checkbox-wrapper {
+    font-size: 13px !important;
+  }
+
+  /* Switch в модальных окнах */
+  .ant-switch {
+    min-width: 40px !important;
+    height: 20px !important;
+  }
+
+  /* Slider в модальных окнах */
+  .ant-slider {
+    margin: 8px 0 !important;
+  }
+
+  /* Rate в модальных окнах */
+  .ant-rate {
+    font-size: 18px !important;
+  }
+
+  /* Pagination в модальных окнах */
+  .ant-pagination-item {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    font-size: 12px !important;
+  }
+
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+  }
+}
+
+/* Очень маленькие экраны (до 360px) */
+@media (max-width: 360px) {
+  .ant-modal-header {
+    padding: 10px 12px !important;
+  }
+
+  .ant-modal-title {
+    font-size: 15px !important;
+  }
+
+  .ant-modal-body {
+    padding: 10px 12px !important;
+  }
+
+  .ant-modal-footer {
+    padding: 10px 12px !important;
+  }
+
+  .ant-modal-footer .ant-btn {
+    height: 36px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-form-item {
+    margin-bottom: 10px !important;
+  }
+
+  .ant-input,
+  .ant-input-number,
+  .ant-select-selector,
+  .ant-picker {
+    height: 36px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-input-textarea textarea {
+    font-size: 13px !important;
+    min-height: 70px !important;
+  }
+}
+
+/* Landscape режим на мобильных */
+@media (max-width: 840px) and (orientation: landscape) {
+  .ant-modal-body {
+    max-height: calc(100vh - 120px) !important;
+  }
+}
+
+/* Drawer адаптив */
+@media (max-width: 480px) {
+  .ant-drawer-content-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .ant-drawer-header {
+    padding: 12px 16px !important;
+  }
+
+  .ant-drawer-title {
+    font-size: 16px !important;
+  }
+
+  .ant-drawer-body {
+    padding: 12px 16px !important;
+  }
+
+  .ant-drawer-footer {
+    padding: 12px 16px !important;
+  }
+}
+
+/* Popover/Tooltip адаптив */
+@media (max-width: 480px) {
+  .ant-popover {
+    max-width: 90vw !important;
+  }
+
+  .ant-popover-inner-content {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-tooltip-inner {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+}
