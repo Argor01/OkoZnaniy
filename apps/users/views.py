@@ -773,3 +773,54 @@ def google_callback(request):
     
     logger.info(f"🔀 Redirecting to: {redirect_url}")
     return redirect(redirect_url)
+
+
+def telegram_auth_status(request, auth_id):
+    """
+    Проверка статуса авторизации через Telegram
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    from django.core.cache import cache
+    from django.http import JsonResponse
+    
+    logger.info(f"📱 Checking telegram auth status for: {auth_id}")
+    
+    # Получаем данные из кэша
+    cache_key = f"telegram_auth_{auth_id}"
+    auth_data = cache.get(cache_key)
+    
+    if not auth_data:
+        logger.warning(f"⚠️ No auth data found for: {auth_id}")
+        return JsonResponse({
+            'status': 'pending',
+            'message': 'Ожидание авторизации'
+        })
+    
+    # Если авторизация успешна
+    if auth_data.get('status') == 'success':
+        logger.info(f"✅ Auth successful for: {auth_id}")
+        # Удаляем из кэша
+        cache.delete(cache_key)
+        return JsonResponse({
+            'status': 'success',
+            'access': auth_data.get('access'),
+            'refresh': auth_data.get('refresh'),
+            'user': auth_data.get('user')
+        })
+    
+    # Если ошибка
+    if auth_data.get('status') == 'error':
+        logger.error(f"❌ Auth failed for: {auth_id}")
+        cache.delete(cache_key)
+        return JsonResponse({
+            'status': 'error',
+            'message': auth_data.get('message', 'Ошибка авторизации')
+        })
+    
+    # Ожидание
+    return JsonResponse({
+        'status': 'pending',
+        'message': 'Ожидание авторизации'
+    })
