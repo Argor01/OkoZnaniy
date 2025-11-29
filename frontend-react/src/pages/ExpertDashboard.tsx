@@ -10,6 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { expertsApi, type ExpertApplication, type Education, type Specialization } from '../api/experts';
 import { catalogApi } from '../api/catalog';
+import Sidebar from '../components/layout/Sidebar';
 import styles from './ExpertDashboard.module.css';
 
 interface UserProfile {
@@ -779,208 +780,55 @@ const ExpertDashboard: React.FC = () => {
     });
   };
 
+  const handleMenuSelect = (key: string) => {
+    if (key.startsWith('orders-')) {
+      setSelectedMenuKey('orders');
+      setActiveTab('orders');
+      setTimeout(() => {
+        if (tabsRef.current) {
+          tabsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }, 100);
+      return;
+    }
+    if (key === 'orders') {
+      setSelectedMenuKey(key);
+      setActiveTab(key);
+      setTimeout(() => {
+        if (tabsRef.current) {
+          tabsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }, 100);
+      return;
+    }
+    setSelectedMenuKey(key);
+  };
+
   return (
     <>
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        width={250}
-        breakpoint="md"
-        collapsedWidth={isMobile ? 0 : 80}
-        collapsed={isMobile ? !mobileMenuVisible : undefined}
-        onCollapse={(collapsed) => {
-          if (isMobile) {
-            setMobileMenuVisible(!collapsed);
-          }
-        }}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-          position: isMobile ? 'fixed' : 'relative',
-          bottom: isMobile ? 0 : 'auto',
-          left: isMobile ? 0 : 'auto',
-          right: isMobile ? 0 : 'auto',
-          zIndex: isMobile ? 1000 : 'auto',
-          height: isMobile ? 'auto' : '100vh',
-          borderTop: isMobile ? '1px solid #f0f0f0' : 'none',
-          borderRight: isMobile ? 'none' : '1px solid #f0f0f0',
-        }}
-      >
-        <div
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-          }}
-        >
-          <UserOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет
-          </Title>
-        </div>
-        <Menu
-          mode={isMobile ? "horizontal" : "inline"}
-          selectedKeys={[selectedMenuKey]}
-          openKeys={isMobile ? [] : openKeys}
-          onOpenChange={setOpenKeys}
-          triggerSubMenuAction="hover"
-          onClick={({ key }) => {
-            if (isMobile) {
-              setMobileMenuVisible(false);
-            }
-            if (key === 'messages') {
-              setMessageModalVisible(true);
-              return;
-            }
-            if (key === 'faq') {
-              setFaqModalVisible(true);
-              return;
-            }
-            if (key === 'friends') {
-              setFriendsModalVisible(true);
-              return;
-            }
-            if (key === 'notifications') {
-              setNotificationsModalVisible(true);
-              return;
-            }
-            if (key === 'arbitration') {
-              setArbitrationModalVisible(true);
-              return;
-            }
-            // Обработка подпунктов "На счету"
-            if (key === 'balance' || key.startsWith('balance-')) {
-              setFinanceModalVisible(true);
-              return;
-            }
-            // Обработка подпунктов "Мои заказы"
-            if (key.startsWith('orders-')) {
-              setSelectedMenuKey('orders');
-              setActiveTab('orders');
-              setTimeout(() => {
-                if (tabsRef.current) {
-                  tabsRef.current.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                  });
-                }
-              }, 100);
-              return;
-            }
-            // Обработка "Мои работы"
-            if (key === 'works') {
-              navigate('/works');
-              return;
-            }
-            // Обработка подпунктов "Авторский магазин"
-            if (key === 'shop-ready-works') {
-              navigate('/shop/ready-works');
-              return;
-            }
-            if (key === 'shop-add-work') {
-              navigate('/shop/add-work');
-              return;
-            }
-            if (key === 'shop-my-works') {
-              navigate('/works');
-              return;
-            }
-            if (key === 'shop-purchased') {
-              navigate('/shop/purchased');
-              return;
-            }
-            // Обработка клика на основное меню "Мои заказы" или "Мои работы"
-            if (key === 'orders') {
-              setSelectedMenuKey(key);
-              setActiveTab(key);
-              setTimeout(() => {
-                if (tabsRef.current) {
-                  tabsRef.current.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                  });
-                }
-              }, 100);
-              return;
-            }
-            if (key === 'works') {
-              navigate('/works');
-              return;
-            }
-            if (key === 'logout') {
-              handleLogout();
-              return;
-            }
-            setSelectedMenuKey(key);
-          }}
-          style={{
-            borderRight: 0,
-            height: 'calc(100vh - 120px)',
-          }}
-        >
-              <Menu.Item key="messages" icon={<MessageOutlined />}>
-                Сообщения
-              </Menu.Item>
-            <Menu.Item key="notifications" icon={<BellOutlined />}>
-              У вас нет уведомлений
-            </Menu.Item>
-            <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
-              Арбитраж
-            </Menu.Item>
-            <Menu.Item key="balance" icon={<WalletOutlined />}>
-              Счет: 0.00 ₽
-            </Menu.Item>
-            {!isMobile ? (
-              <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
-                <Menu.Item key="orders-all">Все (0)</Menu.Item>
-                <Menu.Item key="orders-open">Открыт ()</Menu.Item>
-                <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
-                <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
-                <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
-                <Menu.Item key="orders-review">На проверке ()</Menu.Item>
-                <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
-                <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
-                <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
-                <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
-              </Menu.SubMenu>
-            ) : (
-              <Menu.Item key="orders" icon={<ShoppingOutlined />}>
-                Заказы
-              </Menu.Item>
-            )}
-            <Menu.Item key="works" icon={<FileDoneOutlined />}>
-              Мои работы
-            </Menu.Item>
-            {!isMobile && (
-              <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
-                <Menu.Item key="shop-ready-works">
-                  Магазин готовых работ
-                </Menu.Item>
-                <Menu.Item key="shop-add-work">
-                  Добавить работу в магазин
-                </Menu.Item>
-                <Menu.Item key="shop-my-works">
-                  Мои работы
-                </Menu.Item>
-                <Menu.Item key="shop-purchased">
-                  Купленные работы
-                </Menu.Item>
-              </Menu.SubMenu>
-            )}
-            <Menu.Item key="friends" icon={<TeamOutlined />}>
-              Мои друзья
-            </Menu.Item>
-            <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
-              FAQ
-            </Menu.Item>
-          <Menu.Item 
-            key="logout" 
-            icon={<LogoutOutlined />}
-            danger
-          >
-            Выйти
-          </Menu.Item>
-        </Menu>
-      </Sider>
+      <Sidebar
+        selectedKey={selectedMenuKey}
+        onMenuSelect={handleMenuSelect}
+        onLogout={handleLogout}
+        onMessagesClick={() => setMessageModalVisible(true)}
+        onNotificationsClick={() => setNotificationsModalVisible(true)}
+        onArbitrationClick={() => setArbitrationModalVisible(true)}
+        onFinanceClick={() => setFinanceModalVisible(true)}
+        onFriendsClick={() => setFriendsModalVisible(true)}
+        onFaqClick={() => setFaqModalVisible(true)}
+        userProfile={profile ? {
+          username: profile.username,
+          avatar: profile.avatar,
+          role: profile.role
+        } : undefined}
+      />
       <Layout>
         <Header
           style={{

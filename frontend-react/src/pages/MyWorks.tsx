@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, Space, Card, Tag, Empty, message, Modal } from 'antd';
+import { Layout, Menu, Button, Typography, Space, Card, Tag, Empty, Modal, message } from 'antd';
 import {
   FileDoneOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ShoppingOutlined,
-  UserOutlined,
   MessageOutlined,
-  BellOutlined,
-  TrophyOutlined,
-  WalletOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  HeartOutlined,
-  GiftOutlined,
-  DollarOutlined,
-  QuestionCircleOutlined,
-  LogoutOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/layout/Sidebar';
 import { authApi } from '../api/auth';
 
 const { Sider, Content } = Layout;
@@ -34,8 +24,6 @@ type MenuItem = {
 const MyWorks: React.FC = () => {
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState<string>('all');
-  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('works');
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [workDetailModalVisible, setWorkDetailModalVisible] = useState(false);
   const [selectedWork, setSelectedWork] = useState<any>(null);
 
@@ -60,6 +48,10 @@ const MyWorks: React.FC = () => {
         }
       },
     });
+  };
+
+  const handleMenuSelect = (key: string) => {
+    // Обработка выбора меню если нужно
   };
 
   const menuItems: MenuItem[] = [
@@ -165,169 +157,17 @@ const MyWorks: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Левый сайдбар */}
-      <Sider
-        width={250}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        }}
-      >
-        <div
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-          }}
-        >
-          <UserOutlined style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
-            Личный кабинет эксперта
-          </Title>
-        </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedMenuKey]}
-          openKeys={openKeys}
-          onOpenChange={setOpenKeys}
-          triggerSubMenuAction="hover"
-          onClick={({ key }) => {
-            if (key === 'messages') {
-              message.info('Сообщения');
-              return;
-            }
-            if (key === 'notifications') {
-              message.info('Уведомления');
-              return;
-            }
-            if (key === 'arbitration') {
-              message.info('Арбитраж');
-              return;
-            }
-            if (key === 'balance') {
-              message.info('Финансы');
-              return;
-            }
-            if (key.startsWith('orders-') || key === 'orders') {
-              navigate('/expert-dashboard');
-              return;
-            }
-            if (key === 'works') {
-              // Уже на этой странице
-              return;
-            }
-            if (key === 'shop-ready-works') {
-              navigate('/shop/ready-works');
-              return;
-            }
-            if (key === 'shop-add-work') {
-              navigate('/shop/add-work');
-              return;
-            }
-            if (key === 'shop-my-works') {
-              // Уже на этой странице
-              return;
-            }
-            if (key === 'shop-purchased') {
-              navigate('/shop/purchased');
-              return;
-            }
-            if (key === 'friends') {
-              message.info('Мои друзья');
-              return;
-            }
-            if (key === 'favorites') {
-              message.info('Избранное');
-              return;
-            }
-            if (key === 'bonuses') {
-              message.info('Бонусы');
-              return;
-            }
-            if (key === 'paid-services') {
-              message.info('Платные услуги');
-              return;
-            }
-            if (key === 'faq') {
-              message.info('FAQ');
-              return;
-            }
-            if (key === 'logout') {
-              handleLogout();
-              return;
-            }
-            setSelectedMenuKey(key);
-          }}
-          style={{
-            borderRight: 0,
-            height: 'calc(100vh - 120px)',
-          }}
-        >
-          <Menu.Item key="messages" icon={<MessageOutlined />}>
-            Сообщения
-          </Menu.Item>
-          <Menu.Item key="notifications" icon={<BellOutlined />}>
-            У вас нет уведомлений
-          </Menu.Item>
-          <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
-            Арбитраж
-          </Menu.Item>
-          <Menu.Item key="balance" icon={<WalletOutlined />}>
-            Счет: 0.00 ₽
-          </Menu.Item>
-          <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
-            <Menu.Item key="orders-all">Все (0)</Menu.Item>
-            <Menu.Item key="orders-open">Открыт ()</Menu.Item>
-            <Menu.Item key="orders-confirming">На подтверждении ()</Menu.Item>
-            <Menu.Item key="orders-progress">На выполнении ()</Menu.Item>
-            <Menu.Item key="orders-payment">Ожидает оплаты ()</Menu.Item>
-            <Menu.Item key="orders-review">На проверке ()</Menu.Item>
-            <Menu.Item key="orders-completed">Выполнен ()</Menu.Item>
-            <Menu.Item key="orders-revision">На доработке ()</Menu.Item>
-            <Menu.Item key="orders-download">Ожидает скачивания ()</Menu.Item>
-            <Menu.Item key="orders-closed">Закрыт ()</Menu.Item>
-          </Menu.SubMenu>
-          <Menu.Item key="works" icon={<FileDoneOutlined />}>
-            Мои работы
-          </Menu.Item>
-          <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
-            <Menu.Item key="shop-ready-works">
-              Магазин готовых работ
-            </Menu.Item>
-            <Menu.Item key="shop-add-work">
-              Добавить работу в магазин
-            </Menu.Item>
-            <Menu.Item key="shop-my-works">
-              Мои работы
-            </Menu.Item>
-            <Menu.Item key="shop-purchased">
-              Купленные работы
-            </Menu.Item>
-          </Menu.SubMenu>
-          <Menu.Item key="friends" icon={<TeamOutlined />}>
-            Мои друзья
-          </Menu.Item>
-          <Menu.Item key="favorites" icon={<HeartOutlined />}>
-            Избранное
-          </Menu.Item>
-          <Menu.Item key="bonuses" icon={<GiftOutlined />}>
-            Бонусы
-          </Menu.Item>
-          <Menu.Item key="paid-services" icon={<DollarOutlined />}>
-            Платные услуги
-          </Menu.Item>
-          <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
-            FAQ
-          </Menu.Item>
-          <Menu.Item 
-            key="logout" 
-            icon={<LogoutOutlined />}
-            danger
-          >
-            Выйти
-          </Menu.Item>
-        </Menu>
-      </Sider>
+      <Sidebar 
+        selectedKey="works"
+        onMenuSelect={handleMenuSelect}
+        onLogout={handleLogout}
+        onMessagesClick={() => message.info('Сообщения')}
+        onNotificationsClick={() => message.info('Уведомления')}
+        onArbitrationClick={() => message.info('Арбитраж')}
+        onFinanceClick={() => message.info('Финансы')}
+        onFriendsClick={() => message.info('Мои друзья')}
+        onFaqClick={() => message.info('FAQ')}
+      />
 
       <Layout>
         <Content style={{ margin: '24px', minHeight: 280 }}>
