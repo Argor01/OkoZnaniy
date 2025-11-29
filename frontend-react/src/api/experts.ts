@@ -90,7 +90,7 @@ export const expertsApi = {
       return data;
     } catch (error: any) {
       // Если анкета не найдена (404), это нормально - значит её ещё нет
-      if (error.response?.status === 404) {
+      if (error.response?.status === 404 || error.response?.status === 403) {
         return null;
       }
       throw error;

@@ -442,6 +442,26 @@ const ExpertDashboard: React.FC = () => {
     },
   });
 
+  const t = (s: any) => {
+    const m = String(s)
+      .replace('This field is required', 'Это поле обязательно для заполнения')
+      .replace('This field may not be blank', 'Это поле не может быть пустым')
+      .replace('A valid integer is required', 'Введите корректное целое число')
+      .replace('Ensure this value is greater than or equal to 0', 'Значение должно быть больше или равно 0')
+      .replace('Ensure this value is less than or equal to 2100', 'Значение должно быть меньше или равно 2100')
+      .replace('Not a valid string', 'Некорректная строка')
+      .replace('This list may not be empty', 'Список не может быть пустым')
+      .replace('Invalid input.', 'Некорректные данные')
+      .replace('Expected a list of items but got type', 'Ожидается список элементов')
+      .replace('Enter a valid URL.', 'Введите корректную ссылку')
+      .replace('Enter a valid email address.', 'Введите корректный email')
+      .replace('You do not have permission to perform this action.', 'Недостаточно прав для выполнения действия')
+      .replace('Internal Server Error', 'Внутренняя ошибка сервера')
+      .replace('Network Error', 'Ошибка сети')
+      .replace(/Request failed with status code (\d+)/, (_match, p1) => `Ошибка сервера (${p1}). Попробуйте позже`);
+    return m;
+  };
+
   const createApplicationMutation = useMutation({
     mutationFn: (data: any) => expertsApi.createApplication(data),
     onSuccess: () => {
@@ -452,7 +472,55 @@ const ExpertDashboard: React.FC = () => {
       setWelcomeModalVisible(true);
     },
     onError: (err: any) => {
-      message.error(err?.response?.data?.detail || 'Не удалось создать анкету');
+      const data = err?.response?.data;
+      const fields: any[] = [];
+      const messages: string[] = [];
+      if (data && typeof data === 'object') {
+        const nf = data.non_field_errors;
+        if (Array.isArray(nf) && nf.length) {
+          nf.forEach((m: any) => messages.push(t(m)));
+        }
+        const mapLabel: Record<string, string> = {
+          full_name: 'ФИО',
+          work_experience_years: 'Опыт работы',
+          specializations: 'Специальности',
+          educations: 'Образование',
+        };
+        Object.keys(mapLabel).forEach((key) => {
+          const v = (data as any)[key];
+          if (!v) return;
+          if (key === 'educations') {
+            if (Array.isArray(v)) {
+              v.forEach((item: any, idx: number) => {
+                if (item && typeof item === 'object') {
+                  const iu = item.university;
+                  const isy = item.start_year;
+                  const msgs: string[] = [];
+                  if (Array.isArray(iu)) iu.forEach((m: any) => msgs.push(t(m)));
+                  if (Array.isArray(isy)) isy.forEach((m: any) => msgs.push(t(m)));
+                  if (msgs.length) messages.push(`Образование #${idx + 1}: ${msgs.join(', ')}`);
+                } else if (Array.isArray(item)) {
+                  messages.push(`Образование #${idx + 1}: ${item.map((m: any) => t(m)).join(', ')}`);
+                }
+              });
+            } else if (Array.isArray(v)) {
+              v.forEach((m: any) => messages.push(t(m)));
+            }
+          } else if (Array.isArray(v)) {
+            fields.push({ name: key, errors: v.map((m: any) => t(m)) });
+            v.forEach((m: any) => messages.push(`${mapLabel[key]}: ${t(m)}`));
+          } else if (typeof v === 'string') {
+            fields.push({ name: key, errors: [t(v)] });
+            messages.push(`${mapLabel[key]}: ${t(v)}`);
+          }
+        });
+      }
+      if (fields.length) applicationForm.setFields(fields);
+      if (messages.length) {
+        messages.forEach((m) => message.error(m));
+      } else {
+        message.error(t(err?.response?.data?.detail || err?.message || 'Не удалось создать анкету'));
+      }
     },
   });
 
@@ -875,13 +943,43 @@ const ExpertDashboard: React.FC = () => {
               </div>
               <div 
                 className={`${styles.statusBadge} ${
-                  (application as ExpertApplication).status === 'pending' ? styles.statusPending :
-                  (application as ExpertApplication).status === 'approved' ? styles.statusApproved :
-                  styles.statusRejected
+                  (function(){
+                    try {
+                      const raw = localStorage.getItem('director_deactivated_employees');
+                      const arr = raw ? JSON.parse(raw) : [];
+                      const isDeactivated = Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
+                      return isDeactivated ? styles.statusRejected :
+                        (application as ExpertApplication).status === 'pending' ? styles.statusPending :
+                        (application as ExpertApplication).status === 'approved' ? styles.statusApproved :
+                        styles.statusRejected;
+                    } catch {
+                      return ((application as ExpertApplication).status === 'pending') ? styles.statusPending :
+                        ((application as ExpertApplication).status === 'approved') ? styles.statusApproved :
+                        styles.statusRejected;
+                    }
+                  })()
                 }`}
               >
-                {getApplicationStatusIcon((application as ExpertApplication).status)}
-                <span>{(application as ExpertApplication).status_display}</span>
+                {(function(){
+                  try {
+                    const raw = localStorage.getItem('director_deactivated_employees');
+                    const arr = raw ? JSON.parse(raw) : [];
+                    const isDeactivated = Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
+                    return isDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon((application as ExpertApplication).status);
+                  } catch {
+                    return getApplicationStatusIcon((application as ExpertApplication).status);
+                  }
+                })()}
+                <span>{(function(){
+                  try {
+                    const raw = localStorage.getItem('director_deactivated_employees');
+                    const arr = raw ? JSON.parse(raw) : [];
+                    const isDeactivated = Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
+                    return isDeactivated ? 'Деактивирован' : (application as ExpertApplication).status_display;
+                  } catch {
+                    return (application as ExpertApplication).status_display;
+                  }
+                })()}</span>
               </div>
             </div>
             {(application as ExpertApplication).status === 'rejected' && (application as ExpertApplication).rejection_reason && (
@@ -889,6 +987,32 @@ const ExpertDashboard: React.FC = () => {
                 <Text type="danger" style={{ fontSize: 14 }}>
                   <strong>Причина отклонения:</strong> {(application as ExpertApplication).rejection_reason}
                 </Text>
+              </div>
+            )}
+            {(application as ExpertApplication).status === 'rejected' && (
+              <div style={{ marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  className={styles.buttonPrimary}
+                  size="large"
+                  onClick={() => {
+                    const app = application as ExpertApplication;
+                    applicationForm.setFieldsValue({
+                      full_name: app.full_name,
+                      work_experience_years: app.work_experience_years,
+                      specializations: app.specializations,
+                      educations: (app.educations || []).map((e) => ({
+                        university: e.university,
+                        start_year: e.start_year,
+                        end_year: e.end_year ?? null,
+                        degree: e.degree || ''
+                      }))
+                    });
+                    setApplicationModalVisible(true);
+                  }}
+                >
+                  Подать анкету заново
+                </Button>
               </div>
             )}
           </div>

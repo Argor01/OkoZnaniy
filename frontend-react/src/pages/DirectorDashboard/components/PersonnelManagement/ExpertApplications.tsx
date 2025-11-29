@@ -27,8 +27,8 @@ import {
   approveApplication,
   rejectApplication,
   sendForRework,
-  type ExpertApplication,
 } from '../../api/directorApi';
+import { type ExpertApplication } from '../../api/types';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -53,6 +53,7 @@ const ExpertApplications: React.FC = () => {
       message.success('Анкета утверждена');
       setDetailModalVisible(false);
       queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при утверждении анкеты';
@@ -133,6 +134,7 @@ const ExpertApplications: React.FC = () => {
       under_review: { color: 'orange', text: 'На рассмотрении' },
       approved: { color: 'green', text: 'Одобрена' },
       rejected: { color: 'red', text: 'Отклонена' },
+      deactivated: { color: 'red', text: 'Деактивирована' },
     };
     const config = statusConfig[status as keyof typeof statusConfig] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;
@@ -307,11 +309,13 @@ const ExpertApplications: React.FC = () => {
                   : 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
-                {selectedApplication.application_approved 
-                  ? getStatusTag('approved')
-                  : selectedApplication.application_submitted_at 
-                    ? getStatusTag('under_review')
-                    : getStatusTag('new')}
+                {selectedApplication.status
+                  ? getStatusTag(selectedApplication.status)
+                  : selectedApplication.application_approved
+                    ? getStatusTag('approved')
+                    : (selectedApplication.application_reviewed_at || selectedApplication.application_submitted_at)
+                      ? getStatusTag('under_review')
+                      : getStatusTag('new')}
               </Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 16, textAlign: 'right' }}>
