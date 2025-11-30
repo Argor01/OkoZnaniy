@@ -1,0 +1,14 @@
+# Продакшн образ с nginx - использует готовые собранные файлы
+FROM nginx:alpine
+
+# Копируем готовые файлы из dist
+COPY dist /usr/share/nginx/html
+
+# Копируем конфигурацию nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Открываем порт
+EXPOSE 80
+
+# Запускаем nginx
+CMD ["nginx", "-g", "daemon off;"]
