@@ -169,3 +169,54 @@ class ExpertApplicationCreateSerializer(serializers.Serializer):
     work_experience_years = serializers.IntegerField(min_value=0, required=True)
     specializations = serializers.CharField(required=True, allow_blank=False, help_text="Специальности, которые вы пишете")
     educations = EducationSerializer(many=True, required=True, min_length=1) 
+
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    """Сериализатор для транзакций эксперта"""
+    order_info = serializers.SerializerMethodField()
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    
+    class Meta:
+        from apps.orders.models import Transaction
+        model = Transaction
+        fields = ['id', 'type', 'type_display', 'amount', 'order_info', 'timestamp']
+        read_only_fields = fields
+        
+    def get_order_info(self, obj):
+        """Возвращает информацию о заказе"""
+        if obj.order:
+            return {
+                'id': obj.order.id,
+                'title': obj.order.title or 'Без названия'
+            }
+        return None
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Сериализатор для уведомлений"""
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    
+    class Meta:
+        from apps.notifications.models import Notification
+        model = Notification
+        fields = ['id', 'type', 'type_display', 'title', 'message', 'data', 'is_read', 'created_at']
+        read_only_fields = ['id', 'type', 'type_display', 'title', 'message', 'data', 'created_at']
+
+
+class ExpertReviewDetailSerializer(serializers.ModelSerializer):
+    """Детальный сериализатор для отзывов о эксперте"""
+    client = UserSerializer(read_only=True)
+    order = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ExpertReview
+        fields = ['id', 'rating', 'comment', 'client', 'order', 'created_at']
+        read_only_fields = fields
+        
+    def get_order(self, obj):
+        """Возвращает информацию о заказе"""
+        return {
+            'id': obj.order.id,
+            'title': obj.order.title or 'Без названия'
+        }

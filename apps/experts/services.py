@@ -99,58 +99,152 @@ class ExpertMatchingService:
 
 class ExpertStatisticsService:
     @staticmethod
-    def update_expert_statistics(expert):
-        """Обновляет статистику эксперта"""
-        statistics, _ = ExpertStatistics.objects.get_or_create(expert=expert)
-
-        # Подсчет заказов
-        orders_completed = Order.objects.filter(
+    def get_dashboard_statistics(expert):
+        """
+        Получает агрегированную статистику для дашборда эксперта
+        
+        Returns:
+            dict: Словарь со статистикой включающей заработок, заказы, рейтинг
+        """
+        from django.core.cache import cache
+        from apps.orders.models import Transaction
+        from .models import ExpertReview
+        
+        # Пытаемся получить из кэша
+        cache_key = f'expert_dashboard_stats_{expert.id}'
+        cached_stats = cache.get(cache_key)
+        if cached_stats:
+            return cached_stats
+        
+        # Получаем или создаем статистику
+        stats, created = ExpertStatistics.objects.get_or_create(expert=expert)
+        if created:
+            ExpertStatisticsService.update_expert_statistics(expert)
+            stats.refresh_from_db()
+        
+        # Общий заработок из транзакций
+        total_earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Заработок за текущий месяц
+        current_month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        monthly_earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout',
+            timestamp__gte=current_month_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Активные заказы
+        active_orders_count = Order.objects.filter(
+            expert=expert,
+            status__in=['in_progress', 'review', 'revision']
+        ).count()
+        
+        # Завершенные заказы
+        completed_orders_count = Order.objects.filter(
             expert=expert,
             status='completed'
         ).count()
-
-        orders_in_progress = Order.objects.filter(
-            expert=expert,
-            status__in=['in_progress', 'revision']
-        ).count()
-
-        orders_cancelled = Order.objects.filter(
-            expert=expert,
-            status='cancelled'
-        ).count()
-
-        # Подсчет заработка
-        total_earnings = Order.objects.filter(
-            expert=expert,
-            status='completed',
-            payment_status='paid'
-        ).aggregate(
-            total=Sum('expert_payment')
-        )['total'] or 0
-
+        
         # Средний рейтинг
-        average_rating = expert.reviews.filter(
+        avg_rating = ExpertReview.objects.filter(
+            expert=expert,
             is_published=True
-        ).aggregate(
-            avg=Avg('rating')
-        )['avg'] or 0
+        ).aggregate(avg=Avg('rating'))['avg'] or 0
+        
+        # Количество верифицированных специализаций
+        verified_specializations = Specialization.objects.filter(
+            expert=expert,
+            is_verified=True
+        ).count()
+        
+        result = {
+            'total_earnings': float(total_earnings),
+            'monthly_earnings': float(monthly_earnings),
+            'active_orders': active_orders_count,
+            'completed_orders': completed_orders_count,
+            'average_rating': float(avg_rating),
+            'verified_specializations': verified_specializations,
+            'success_rate': float(stats.success_rate),
+            'total_orders': stats.total_orders,
+            'response_time_avg': stats.response_time_avg.total_seconds() if stats.response_time_avg else None
+        }
+        
+        # Кэшируем на 5 минут
+        cache.set(cache_key, result, timeout=300)
+        
+        return result
+    
+    @staticmethod
+    def get_earnings_by_period(expert, start_date, end_date):
+        """
+        Получает заработок эксперта за указанный период
+        
+        Args:
+            expert: Объект пользователя-эксперта
+            start_date: Начальная дата периода
+            end_date: Конечная дата периода
+            
+        Returns:
+            Decimal: Сумма заработка за период
+        """
+        from apps.orders.models import Transaction
+        
+        earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout',
+            timestamp__gte=start_date,
+            timestamp__lte=end_date
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        return earnings
+    
+    @staticmethod
+    def update_expert_statistics(expert):
+        """Обновляет статистику эксперта"""
+        from django.core.cache import cache
+        from apps.orders.models import Transaction
+        from .models import ExpertReview
+        
+        statistics, _ = ExpertStatistics.objects.get_or_create(expert=expert)
+
+        # Подсчет заказов
+        orders = Order.objects.filter(expert=expert)
+        total_orders = orders.count()
+        completed_orders = orders.filter(status='completed').count()
+
+        # Подсчет заработка из транзакций
+        total_earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        # Средний рейтинг из отзывов
+        average_rating = ExpertReview.objects.filter(
+            expert=expert,
+            is_published=True
+        ).aggregate(avg=Avg('rating'))['avg'] or 0
 
         # Процент успешных заказов
-        total_orders = orders_completed + orders_cancelled
         if total_orders > 0:
-            success_rate = (orders_completed / total_orders) * 100
+            success_rate = (completed_orders / total_orders) * 100
         else:
             success_rate = 0
 
         # Обновление статистики
-        statistics.orders_completed = orders_completed
-        statistics.orders_in_progress = orders_in_progress
-        statistics.orders_cancelled = orders_cancelled
+        statistics.total_orders = total_orders
+        statistics.completed_orders = completed_orders
         statistics.total_earnings = total_earnings
         statistics.average_rating = round(average_rating, 2)
         statistics.success_rate = round(success_rate, 2)
         statistics.last_updated = timezone.now()
         statistics.save()
+        
+        # Инвалидируем кэш
+        cache_key = f'expert_dashboard_stats_{expert.id}'
+        cache.delete(cache_key)
 
         return statistics
 
@@ -166,4 +260,266 @@ class ExpertStatisticsService:
                 updated_count += 1
             except Exception as e:
                 print(f"Ошибка обновления статистики эксперта {expert.id}: {str(e)}")
-        return updated_count 
+        return updated_count
+
+
+class ExpertFinanceService:
+    """Сервис для работы с финансами эксперта"""
+    
+    @staticmethod
+    def get_financial_summary(expert):
+        """
+        Получает финансовую сводку эксперта
+        
+        Returns:
+            dict: Словарь с финансовой информацией
+        """
+        from apps.orders.models import Transaction
+        from decimal import Decimal
+        
+        # Текущий баланс
+        current_balance = expert.balance
+        frozen_balance = expert.frozen_balance
+        available_balance = current_balance - frozen_balance
+        
+        # Общий заработок
+        total_earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout'
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        
+        # Заработок за текущий месяц
+        current_month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        monthly_earnings = Transaction.objects.filter(
+            user=expert,
+            type='payout',
+            timestamp__gte=current_month_start
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        
+        # Ожидающие выплаты (замороженные средства)
+        pending_payouts = frozen_balance
+        
+        # Последняя выплата
+        last_payout = ExpertFinanceService.get_last_payout(expert)
+        last_payout_data = None
+        if last_payout:
+            last_payout_data = {
+                'amount': float(last_payout.amount),
+                'date': last_payout.timestamp.isoformat()
+            }
+        
+        return {
+            'current_balance': float(current_balance),
+            'frozen_balance': float(frozen_balance),
+            'available_balance': float(available_balance),
+            'total_earnings': float(total_earnings),
+            'monthly_earnings': float(monthly_earnings),
+            'pending_payouts': float(pending_payouts),
+            'last_payout': last_payout_data
+        }
+    
+    @staticmethod
+    def get_transactions(expert, filters=None):
+        """
+        Получает транзакции эксперта с фильтрацией
+        
+        Args:
+            expert: Объект пользователя-эксперта
+            filters: Словарь с фильтрами (type, date_from, date_to)
+            
+        Returns:
+            QuerySet: Отфильтрованный QuerySet транзакций
+        """
+        from apps.orders.models import Transaction
+        
+        queryset = Transaction.objects.filter(user=expert).select_related('order')
+        
+        if filters:
+            # Фильтр по типу транзакции
+            if 'type' in filters and filters['type']:
+                queryset = queryset.filter(type=filters['type'])
+            
+            # Фильтр по дате от
+            if 'date_from' in filters and filters['date_from']:
+                queryset = queryset.filter(timestamp__gte=filters['date_from'])
+            
+            # Фильтр по дате до
+            if 'date_to' in filters and filters['date_to']:
+                # Добавляем 1 день чтобы включить конечную дату
+                end_date = filters['date_to'] + timedelta(days=1)
+                queryset = queryset.filter(timestamp__lt=end_date)
+        
+        return queryset.order_by('-timestamp')
+    
+    @staticmethod
+    def calculate_pending_payouts(expert):
+        """
+        Вычисляет сумму ожидающих выплат
+        
+        Returns:
+            Decimal: Сумма ожидающих выплат
+        """
+        return expert.frozen_balance
+    
+    @staticmethod
+    def get_last_payout(expert):
+        """
+        Получает последнюю выплату эксперта
+        
+        Returns:
+            Transaction или None: Последняя транзакция типа payout
+        """
+        from apps.orders.models import Transaction
+        
+        return Transaction.objects.filter(
+            user=expert,
+            type='payout'
+        ).order_by('-timestamp').first()
+
+
+class ExpertOrderService:
+    """Сервис для работы с заказами эксперта"""
+    
+    @staticmethod
+    def get_available_orders(expert):
+        """
+        Получает доступные заказы по специализациям эксперта
+        с оптимизацией запросов
+        
+        Returns:
+            QuerySet: Доступные заказы
+        """
+        # Получаем ID предметов из верифицированных специализаций эксперта
+        expert_subjects = Specialization.objects.filter(
+            expert=expert,
+            is_verified=True
+        ).values_list('subject_id', flat=True)
+        
+        # Ищем заказы по специализациям эксперта
+        orders = Order.objects.filter(
+            status='new',
+            subject_id__in=expert_subjects,
+            expert__isnull=True
+        ).select_related(
+            'client',
+            'subject',
+            'work_type',
+            'complexity'
+        ).order_by('-created_at')
+        
+        return orders
+    
+    @staticmethod
+    def get_active_orders(expert):
+        """
+        Получает активные заказы эксперта с оптимизацией
+        
+        Returns:
+            QuerySet: Активные заказы
+        """
+        orders = Order.objects.filter(
+            expert=expert,
+            status__in=['in_progress', 'review', 'revision']
+        ).select_related(
+            'client',
+            'subject',
+            'work_type',
+            'complexity'
+        ).order_by('-created_at')
+        
+        return orders
+    
+    @staticmethod
+    def can_take_order(expert, order):
+        """
+        Проверяет может ли эксперт взять заказ
+        
+        Args:
+            expert: Объект пользователя-эксперта
+            order: Объект заказа
+            
+        Returns:
+            tuple: (can_take: bool, reason: str)
+        """
+        # Проверяем статус заказа
+        if order.status != 'new':
+            return False, 'Заказ уже взят в работу или завершен'
+        
+        # Проверяем что заказ не назначен другому эксперту
+        if order.expert is not None:
+            return False, 'Заказ уже назначен другому эксперту'
+        
+        # Проверяем наличие специализации
+        if order.subject:
+            has_specialization = Specialization.objects.filter(
+                expert=expert,
+                subject=order.subject,
+                is_verified=True
+            ).exists()
+            
+            if not has_specialization:
+                return False, 'У вас нет верифицированной специализации по данному предмету'
+        
+        return True, 'OK'
+    
+    @staticmethod
+    def take_order(expert, order):
+        """
+        Берет заказ в работу
+        
+        Args:
+            expert: Объект пользователя-эксперта
+            order: Объект заказа
+            
+        Returns:
+            tuple: (success: bool, message: str)
+        """
+        from apps.notifications.services import NotificationService
+        
+        # Проверяем возможность взятия заказа
+        can_take, reason = ExpertOrderService.can_take_order(expert, order)
+        if not can_take:
+            return False, reason
+        
+        # Назначаем эксперта на заказ
+        order.expert = expert
+        order.status = 'in_progress'
+        order.save()
+        
+        # Отправляем уведомление клиенту
+        try:
+            NotificationService.notify_expert_assigned(order)
+        except Exception as e:
+            print(f"Ошибка отправки уведомления: {str(e)}")
+        
+        return True, 'Заказ успешно взят в работу'
+
+
+
+class ExpertCacheService:
+    """Сервис для управления кэшем эксперта"""
+    
+    @staticmethod
+    def invalidate_expert_cache(expert):
+        """Инвалидирует весь кэш эксперта"""
+        from django.core.cache import cache
+        
+        cache_keys = [
+            f'expert_dashboard_stats_{expert.id}',
+            f'expert_profile_{expert.id}',
+        ]
+        
+        for key in cache_keys:
+            cache.delete(key)
+    
+    @staticmethod
+    def invalidate_statistics_cache(expert):
+        """Инвалидирует кэш статистики"""
+        from django.core.cache import cache
+        cache.delete(f'expert_dashboard_stats_{expert.id}')
+    
+    @staticmethod
+    def invalidate_profile_cache(expert):
+        """Инвалидирует кэш профиля"""
+        from django.core.cache import cache
+        cache.delete(f'expert_profile_{expert.id}')

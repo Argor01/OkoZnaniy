@@ -6,6 +6,7 @@ from django.utils import timezone
 class NotificationType(models.TextChoices):
     NEW_ORDER = 'new_order', 'Новый заказ'
     ORDER_TAKEN = 'order_taken', 'Заказ принят'
+    ORDER_ASSIGNED = 'order_assigned', 'Заказ назначен'
     FILE_UPLOADED = 'file_uploaded', 'Загружен файл'
     NEW_COMMENT = 'new_comment', 'Новый комментарий'
     STATUS_CHANGED = 'status_changed', 'Изменен статус'
@@ -18,6 +19,8 @@ class NotificationType(models.TextChoices):
     PAYMENT_RECEIVED = 'payment_received', 'Получена оплата'
     ORDER_COMPLETED = 'order_completed', 'Заказ завершен'
     NEW_CONTACT = 'new_contact', 'Новое обращение'
+    APPLICATION_APPROVED = 'application_approved', 'Анкета одобрена'
+    APPLICATION_REJECTED = 'application_rejected', 'Анкета отклонена'
 
 
 class Notification(models.Model):
@@ -38,6 +41,11 @@ class Notification(models.Model):
     )
     message = models.TextField(
         verbose_name="Сообщение"
+    )
+    data = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Дополнительные данные"
     )
     related_object_id = models.IntegerField(
         null=True,

@@ -160,6 +160,11 @@ class Order(models.Model):
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['expert', 'status', '-created_at']),
+            models.Index(fields=['status', 'subject', '-created_at']),
+            models.Index(fields=['-created_at']),
+        ]
 
     def __str__(self):
         return f"{self.title or 'Без названия'} ({self.get_status_display()})"
@@ -300,6 +305,12 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     type = models.CharField(max_length=20, choices=TransactionType.choices)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', '-timestamp']),
+            models.Index(fields=['user', 'type', '-timestamp']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} — {self.get_type_display()} — {self.amount}"

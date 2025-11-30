@@ -1,7 +1,12 @@
-from rest_framework import permissions, status, viewsets, serializers
-from django.db import IntegrityError, transaction
+from django.shortcuts import render
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.db.models import Avg, Count, Q
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
 from .serializers import (
     SpecializationSerializer, ExpertDocumentSerializer,
@@ -311,62 +316,23 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
     def statistics(self, request):
         """Получение статистики специалиста"""
         if request.user.role != 'expert':
+            logger.warning(f"Попытка доступа к статистике не-экспертом: user_id={request.user.id}")
             return Response(
                 {'detail': 'Только специалисты могут просматривать статистику'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Получаем или создаем статистику
-        stats, created = ExpertStatistics.objects.get_or_create(expert=request.user)
-        if created:
-            stats.update_statistics()
-        
-        # Дополнительная статистика
-        total_earnings = Transaction.objects.filter(
-            user=request.user,
-            type='payout'
-        ).aggregate(total=models.Sum('amount'))['total'] or 0
-        
-        monthly_earnings = Transaction.objects.filter(
-            user=request.user,
-            type='payout',
-            timestamp__month=timezone.now().month,
-            timestamp__year=timezone.now().year
-        ).aggregate(total=models.Sum('amount'))['total'] or 0
-        
-        active_orders_count = Order.objects.filter(
-            expert=request.user,
-            status__in=['in_progress', 'review', 'revision']
-        ).count()
-        
-        completed_orders_count = Order.objects.filter(
-            expert=request.user,
-            status='completed'
-        ).count()
-        
-        # Рейтинг
-        avg_rating = ExpertReview.objects.filter(
-            expert=request.user,
-            is_published=True
-        ).aggregate(avg=models.Avg('rating'))['avg'] or 0
-        
-        # Специализации
-        specializations_count = Specialization.objects.filter(
-            expert=request.user,
-            is_verified=True
-        ).count()
-        
-        return Response({
-            'total_earnings': float(total_earnings),
-            'monthly_earnings': float(monthly_earnings),
-            'active_orders': active_orders_count,
-            'completed_orders': completed_orders_count,
-            'average_rating': float(avg_rating),
-            'verified_specializations': specializations_count,
-            'success_rate': float(stats.success_rate),
-            'total_orders': stats.total_orders,
-            'response_time_avg': stats.response_time_avg.total_seconds() if stats.response_time_avg else None
-        })
+        try:
+            logger.info(f"Запрос статистики эксперта: user_id={request.user.id}")
+            from .services import ExpertStatisticsService
+            stats = ExpertStatisticsService.get_dashboard_statistics(request.user)
+            return Response(stats)
+        except Exception as e:
+            logger.error(f"Ошибка получения статистики для эксперта {request.user.id}: {str(e)}", exc_info=True)
+            return Response(
+                {'detail': 'Ошибка при получении статистики'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @action(detail=False, methods=['get'])
     def active_orders(self, request):
@@ -377,12 +343,8 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        orders = Order.objects.filter(
-            expert=request.user,
-            status__in=['in_progress', 'review', 'revision']
-        ).select_related(
-            'client', 'subject', 'work_type', 'complexity'
-        ).order_by('-created_at')
+        from .services import ExpertOrderService
+        orders = ExpertOrderService.get_active_orders(request.user)
         
         orders_data = []
         for order in orders:
@@ -424,20 +386,8 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Получаем специализации эксперта
-        expert_subjects = Specialization.objects.filter(
-            expert=request.user,
-            is_verified=True
-        ).values_list('subject_id', flat=True)
-        
-        # Ищем заказы по специализациям эксперта
-        orders = Order.objects.filter(
-            status='new',
-            subject_id__in=expert_subjects,
-            expert__isnull=True
-        ).select_related(
-            'client', 'subject', 'work_type', 'complexity'
-        ).order_by('-created_at')
+        from .services import ExpertOrderService
+        orders = ExpertOrderService.get_available_orders(request.user)
         
         orders_data = []
         for order in orders:
@@ -512,6 +462,14 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        from django.core.cache import cache
+        
+        # Пытаемся получить из кэша
+        cache_key = f'expert_profile_{request.user.id}'
+        cached_profile = cache.get(cache_key)
+        if cached_profile:
+            return Response(cached_profile)
+        
         # Специализации
         specializations = Specialization.objects.filter(
             expert=request.user
@@ -571,69 +529,301 @@ class ExpertDashboardViewSet(viewsets.ViewSet):
                 }
             })
         
-        return Response({
+        profile_data = {
             'user': {
                 'id': request.user.id,
                 'username': request.user.username,
                 'email': request.user.email,
                 'first_name': request.user.first_name,
                 'last_name': request.user.last_name,
-                'rating': float(request.user.rating) if request.user.rating else 0
+                'rating': float(request.user.rating) if hasattr(request.user, 'rating') and request.user.rating else 0
             },
             'specializations': specializations_data,
             'documents': documents_data,
             'reviews': reviews_data
-        })
+        }
+        
+        # Кэшируем на 10 минут
+        cache.set(cache_key, profile_data, timeout=600)
+        
+        return Response(profile_data)
 
     @action(detail=False, methods=['post'])
     def take_order(self, request):
         """Взять заказ в работу"""
         if request.user.role != 'expert':
+            logger.warning(f"Попытка взять заказ не-экспертом: user_id={request.user.id}")
             return Response(
                 {'detail': 'Только специалисты могут брать заказы'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        from .services import ExpertOrderService
+        
         order_id = request.data.get('order_id')
         if not order_id:
+            logger.warning(f"Попытка взять заказ без order_id: user_id={request.user.id}")
             return Response(
                 {'detail': 'Необходимо указать order_id'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            order = Order.objects.get(id=order_id, status='new', expert__isnull=True)
+            order = Order.objects.get(id=order_id)
         except Order.DoesNotExist:
+            logger.warning(f"Попытка взять несуществующий заказ: order_id={order_id}, user_id={request.user.id}")
             return Response(
-                {'detail': 'Заказ не найден или недоступен'},
+                {'detail': 'Заказ не найден'},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Проверяем, есть ли у эксперта специализация по предмету заказа
-        if order.subject:
-            has_specialization = Specialization.objects.filter(
-                expert=request.user,
-                subject=order.subject,
-                is_verified=True
-            ).exists()
+        try:
+            # Используем сервис для взятия заказа
+            success, message = ExpertOrderService.take_order(request.user, order)
             
-            if not has_specialization:
+            if not success:
+                logger.info(f"Эксперт не смог взять заказ: user_id={request.user.id}, order_id={order_id}, reason={message}")
                 return Response(
-                    {'detail': 'У вас нет специализации по данному предмету'},
-                    status=status.HTTP_403_FORBIDDEN
+                    {'detail': message},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            logger.info(f"Эксперт взял заказ: user_id={request.user.id}, order_id={order_id}")
+            return Response({
+                'detail': message,
+                'order_id': order.id
+            })
+        except Exception as e:
+            logger.error(f"Ошибка при взятии заказа: user_id={request.user.id}, order_id={order_id}, error={str(e)}", exc_info=True)
+            return Response(
+                {'detail': 'Ошибка при взятии заказа'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def financial_summary(self, request):
+        """Получение финансовой сводки эксперта"""
+        if request.user.role != 'expert':
+            logger.warning(f"Попытка доступа к финансам не-экспертом: user_id={request.user.id}")
+            return Response(
+                {'detail': 'Только эксперты могут просматривать финансовую информацию'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            logger.info(f"Запрос финансовой сводки: user_id={request.user.id}")
+            from .services import ExpertFinanceService
+            summary = ExpertFinanceService.get_financial_summary(request.user)
+            return Response(summary)
+        except Exception as e:
+            logger.error(f"Ошибка получения финансовой сводки для эксперта {request.user.id}: {str(e)}", exc_info=True)
+            return Response(
+                {'detail': 'Ошибка при получении финансовой информации'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def transactions(self, request):
+        """Получение списка транзакций эксперта с фильтрацией"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут просматривать транзакции'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from .services import ExpertFinanceService
+        from .serializers import TransactionSerializer
+        from rest_framework.pagination import PageNumberPagination
+        from datetime import datetime
+        
+        # Получаем фильтры из query параметров
+        filters = {}
+        if request.query_params.get('type'):
+            filters['type'] = request.query_params.get('type')
+        
+        if request.query_params.get('date_from'):
+            try:
+                filters['date_from'] = datetime.strptime(
+                    request.query_params.get('date_from'), 
+                    '%Y-%m-%d'
+                ).date()
+            except ValueError:
+                return Response(
+                    {'detail': 'Неверный формат date_from. Используйте YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
         
-        # Назначаем эксперта на заказ
-        order.expert = request.user
-        order.status = 'in_progress'
-        order.save()
+        if request.query_params.get('date_to'):
+            try:
+                filters['date_to'] = datetime.strptime(
+                    request.query_params.get('date_to'), 
+                    '%Y-%m-%d'
+                ).date()
+            except ValueError:
+                return Response(
+                    {'detail': 'Неверный формат date_to. Используйте YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        # Отправляем уведомление клиенту
-        NotificationService.notify_expert_assigned(order)
+        # Получаем транзакции
+        transactions = ExpertFinanceService.get_transactions(request.user, filters)
+        
+        # Применяем пагинацию
+        paginator = PageNumberPagination()
+        paginator.page_size = int(request.query_params.get('page_size', 20))
+        page = paginator.paginate_queryset(transactions, request)
+        
+        if page is not None:
+            serializer = TransactionSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def reviews(self, request):
+        """Получение отзывов о работе эксперта"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут просматривать отзывы'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from .serializers import ExpertReviewDetailSerializer
+        from rest_framework.pagination import PageNumberPagination
+        
+        # Базовый queryset
+        reviews = ExpertReview.objects.filter(
+            expert=request.user,
+            is_published=True
+        ).select_related('client', 'order')
+        
+        # Фильтр по рейтингу
+        rating_filter = request.query_params.get('rating')
+        if rating_filter:
+            try:
+                rating = int(rating_filter)
+                if 1 <= rating <= 5:
+                    reviews = reviews.filter(rating=rating)
+                else:
+                    return Response(
+                        {'detail': 'Рейтинг должен быть от 1 до 5'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except ValueError:
+                return Response(
+                    {'detail': 'Неверный формат рейтинга'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Вычисляем статистику
+        all_reviews = ExpertReview.objects.filter(
+            expert=request.user,
+            is_published=True
+        )
+        
+        avg_rating = all_reviews.aggregate(avg=models.Avg('rating'))['avg'] or 0
+        
+        # Распределение по рейтингам
+        rating_distribution = {}
+        for i in range(1, 6):
+            rating_distribution[str(i)] = all_reviews.filter(rating=i).count()
+        
+        # Применяем пагинацию
+        paginator = PageNumberPagination()
+        paginator.page_size = int(request.query_params.get('page_size', 10))
+        page = paginator.paginate_queryset(reviews.order_by('-created_at'), request)
+        
+        if page is not None:
+            serializer = ExpertReviewDetailSerializer(page, many=True)
+            response_data = paginator.get_paginated_response(serializer.data).data
+            response_data['average_rating'] = float(avg_rating)
+            response_data['rating_distribution'] = rating_distribution
+            return Response(response_data)
+        
+        serializer = ExpertReviewDetailSerializer(reviews, many=True)
+        return Response({
+            'count': reviews.count(),
+            'average_rating': float(avg_rating),
+            'rating_distribution': rating_distribution,
+            'results': serializer.data
+        })
+
+    @action(detail=False, methods=['get'])
+    def notifications(self, request):
+        """Получение уведомлений эксперта"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут просматривать уведомления'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from apps.notifications.models import Notification
+        from .serializers import NotificationSerializer
+        from rest_framework.pagination import PageNumberPagination
+        
+        # Базовый queryset
+        notifications = Notification.objects.filter(recipient=request.user)
+        
+        # Фильтр только непрочитанные
+        if request.query_params.get('unread_only') == 'true':
+            notifications = notifications.filter(is_read=False)
+        
+        # Фильтр по типу
+        notification_type = request.query_params.get('type')
+        if notification_type:
+            notifications = notifications.filter(type=notification_type)
+        
+        # Подсчет непрочитанных
+        unread_count = Notification.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).count()
+        
+        # Применяем пагинацию
+        paginator = PageNumberPagination()
+        paginator.page_size = int(request.query_params.get('page_size', 20))
+        page = paginator.paginate_queryset(notifications.order_by('-created_at'), request)
+        
+        if page is not None:
+            serializer = NotificationSerializer(page, many=True)
+            response_data = paginator.get_paginated_response(serializer.data).data
+            response_data['unread_count'] = unread_count
+            return Response(response_data)
+        
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response({
+            'unread_count': unread_count,
+            'results': serializer.data
+        })
+
+    @action(detail=True, methods=['post'], url_path='mark-read')
+    def mark_notification_read(self, request, pk=None):
+        """Отметить уведомление как прочитанное"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут отмечать уведомления'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from apps.notifications.models import Notification
+        
+        try:
+            notification = Notification.objects.get(
+                id=pk,
+                recipient=request.user
+            )
+        except Notification.DoesNotExist:
+            return Response(
+                {'detail': 'Уведомление не найдено'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        notification.mark_as_read()
         
         return Response({
-            'detail': 'Заказ успешно взят в работу',
-            'order_id': order.id
+            'success': True,
+            'message': 'Уведомление отмечено как прочитанное'
         })
 
 
@@ -660,26 +850,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             )
         
         # Проверяем, есть ли уже анкета
-        existing = ExpertApplication.objects.filter(expert=self.request.user).first()
-        if existing:
-            # Если предыдущая анкета была отклонена — разрешаем повторную подачу
-            if existing.status == 'rejected':
-                educations_data = serializer.validated_data.pop('educations', [])
-                with transaction.atomic():
-                    existing.full_name = serializer.validated_data.get('full_name', existing.full_name)
-                    existing.work_experience_years = serializer.validated_data.get('work_experience_years', existing.work_experience_years)
-                    existing.specializations = serializer.validated_data.get('specializations', existing.specializations)
-                    existing.status = 'pending'
-                    existing.rejection_reason = ''
-                    existing.reviewed_by = None
-                    existing.reviewed_at = None
-                    existing.save()
-                    # Пересоздаем образование
-                    existing.educations.all().delete()
-                    for education_data in educations_data:
-                        Education.objects.create(application=existing, **education_data)
-                return existing
-            # Для любых других статусов блокируем повторную подачу
+        if ExpertApplication.objects.filter(expert=self.request.user).exists():
             raise serializers.ValidationError(
                 'У вас уже есть анкета. Вы можете изменить существующую.'
             )
@@ -687,14 +858,15 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         # Создаем анкету
         if isinstance(serializer, ExpertApplicationCreateSerializer):
             educations_data = serializer.validated_data.pop('educations', [])
-            with transaction.atomic():
-                application = ExpertApplication.objects.create(
-                    expert=self.request.user,
-                    **serializer.validated_data
-                )
-                # Создаем записи об образовании
-                for education_data in educations_data:
-                    Education.objects.create(application=application, **education_data)
+            
+            application = ExpertApplication.objects.create(
+                expert=self.request.user,
+                **serializer.validated_data
+            )
+            
+            # Создаем записи об образовании
+            for education_data in educations_data:
+                Education.objects.create(application=application, **education_data)
             
             # Возвращаем созданную анкету
             return application
@@ -703,17 +875,8 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-            application = self.perform_create(serializer)
-        except permissions.PermissionDenied as e:
-            return Response({'detail': str(e)}, status=status.HTTP_403_FORBIDDEN)
-        except serializers.ValidationError as e:
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError:
-            return Response({'detail': 'Ошибка данных анкеты'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'detail': f'Ошибка на сервере: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        application = self.perform_create(serializer)
         
         # Возвращаем сериализованную анкету
         output_serializer = ExpertApplicationSerializer(application)
@@ -734,15 +897,6 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         application.reviewed_by = request.user
         application.reviewed_at = timezone.now()
         application.save()
-        # Обновляем поля пользователя для согласованной анкеты
-        try:
-            user = application.expert
-            user.application_approved = True
-            user.application_reviewed_at = application.reviewed_at
-            user.application_reviewed_by = request.user
-            user.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by'])
-        except Exception:
-            pass
         
         # Уведомляем эксперта
         from apps.notifications.services import NotificationService
@@ -777,11 +931,16 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_application(self, request):
         """Получить свою анкету"""
+        if request.user.role != 'expert':
+            return Response(
+                {'detail': 'Только эксперты могут просматривать свои анкеты'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         try:
             application = ExpertApplication.objects.get(expert=request.user)
             return Response(ExpertApplicationSerializer(application).data)
         except ExpertApplication.DoesNotExist:
-            # Возвращаем 404 вместо 403, чтобы фронтенд мог корректно обработать отсутствие анкеты
             return Response(
                 {'detail': 'Анкета не найдена'},
                 status=status.HTTP_404_NOT_FOUND
