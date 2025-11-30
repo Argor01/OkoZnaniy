@@ -95,22 +95,27 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Связываем социальный аккаунт с существующим пользователем
             sociallogin.connect(request, user)
         except User.DoesNotExist:
-            logger.info(f"❌ User not found, redirecting to registration")
-            # Пользователя нет - сохраняем email в сессии для регистрации
-            from django.shortcuts import redirect
+            logger.info(f"❌ User not found, creating new user automatically")
+            # Создаем нового пользователя автоматически
+            username = email.split('@')[0]
+            # Проверяем уникальность username
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
             
-            # Сохраняем данные из Google в сессии
-            request.session['google_email'] = email
-            request.session['google_first_name'] = sociallogin.account.extra_data.get('given_name', '')
-            request.session['google_last_name'] = sociallogin.account.extra_data.get('family_name', '')
-            request.session['google_picture'] = sociallogin.account.extra_data.get('picture', '')
-            
-            # Прерываем процесс авторизации
-            from allauth.exceptions import ImmediateHttpResponse
-            frontend_url = settings.FRONTEND_URL or 'http://localhost:5173'
-            redirect_url = f"{frontend_url}/login?email={email}&from=google&register=true"
-            logger.info(f"🔀 Redirecting to: {redirect_url}")
-            raise ImmediateHttpResponse(redirect(redirect_url))
+            user = User.objects.create(
+                username=username,
+                email=email,
+                first_name=sociallogin.account.extra_data.get('given_name', ''),
+                last_name=sociallogin.account.extra_data.get('family_name', ''),
+                role='client',
+                email_verified=True  # Email уже подтвержден через Google
+            )
+            logger.info(f"✅ New user created: {user.username}")
+            # Связываем социальный аккаунт с новым пользователем
+            sociallogin.connect(request, user)
     
     def populate_user(self, request, sociallogin, data):
         """
