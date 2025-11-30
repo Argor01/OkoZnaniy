@@ -4,7 +4,16 @@
  */
 
 // Получаем базовый URL API из переменной окружения или используем текущий origin
-export const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+// Всегда используем тот же протокол что и сайт (http/https)
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Используем текущий origin (автоматически будет https если сайт на https)
+  return window.location.origin;
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 // Полный URL для API endpoints
 export const API_URL = `${API_BASE_URL}/api`;
