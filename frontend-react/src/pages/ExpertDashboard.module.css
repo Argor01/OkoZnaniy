@@ -820,19 +820,21 @@
 
   .mainContent {
     height: auto;
-    padding: 12px;
-    padding-bottom: 80px;
+    padding: 16px;
+    padding-bottom: 90px;
   }
 
   .header {
-    padding: 16px;
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    padding: 20px 16px;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .headerTitle {
-    font-size: 24px;
+    font-size: 26px;
+    flex: 1;
   }
 
   .profileBlockContent {
@@ -1364,5 +1366,96 @@
 
   :global(.ant-modal-body) {
     max-height: calc(100vh - 100px) !important;
+  }
+}
+
+
+/* Улучшенный адаптив для мобильных */
+@media (max-width: 840px) {
+  .header {
+    padding: 20px 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .headerTitle {
+    font-size: 26px !important;
+    flex: 1 !important;
+  }
+
+  .mainContent {
+    padding: 16px !important;
+    padding-bottom: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 16px 12px !important;
+  }
+
+  .headerTitle {
+    font-size: 22px !important;
+  }
+
+  .mainContent {
+    padding: 12px !important;
+    padding-bottom: 90px !important;
+  }
+
+  .profileBlock {
+    padding: 20px !important;
+  }
+
+  .sectionCard {
+    padding: 20px !important;
+    margin-bottom: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .sectionTitle {
+    font-size: 20px !important;
+  }
+
+  .orderCard {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .orderTitle {
+    font-size: 18px !important;
+  }
+
+  .orderBudget {
+    font-size: 22px !important;
+  }
+
+  .tag,
+  .tagBlue,
+  .tagGreen {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .buttonPrimary,
+  .buttonSecondary,
+  .buttonDanger {
+    height: 44px !important;
+    font-size: 15px !important;
+    padding: 0 20px !important;
+  }
+
+  .sidebarMenu .ant-menu-item,
+  .sidebarMenu .ant-menu-submenu-title {
+    min-width: 70px !important;
+    height: 60px !important;
+    font-size: 12px !important;
+  }
+
+  .sidebarMenu .ant-menu-item .anticon,
+  .sidebarMenu .ant-menu-submenu-title .anticon {
+    font-size: 22px !important;
+    margin-bottom: 6px !important;
   }
 }
