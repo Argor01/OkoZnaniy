@@ -108,7 +108,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Прерываем процесс авторизации
             from allauth.exceptions import ImmediateHttpResponse
             frontend_url = settings.FRONTEND_URL or 'http://localhost:5173'
-            redirect_url = f"{frontend_url}/register?email={email}&from=google"
+            redirect_url = f"{frontend_url}/login?email={email}&from=google&register=true"
             logger.info(f"🔀 Redirecting to: {redirect_url}")
             raise ImmediateHttpResponse(redirect(redirect_url))
     

@@ -107,6 +107,20 @@ const Login: React.FC = () => {
     if (savedReferralCode) {
       registerForm.setFieldsValue({ referral_code: savedReferralCode });
     }
+    
+    // Обработка редиректа с Google OAuth
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromGoogle = urlParams.get('from') === 'google';
+    const shouldRegister = urlParams.get('register') === 'true';
+    const email = urlParams.get('email');
+    
+    if (fromGoogle && shouldRegister && email) {
+      // Переключаемся на таб регистрации
+      setActiveTab('register');
+      // Предзаполняем email
+      registerForm.setFieldsValue({ email });
+      message.info('Пожалуйста, завершите регистрацию');
+    }
   }, [registerForm]);
 
   // Функция для проверки наличия заказов у клиента
