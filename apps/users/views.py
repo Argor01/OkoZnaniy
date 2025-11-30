@@ -710,6 +710,15 @@ def telegram_auth_status(request, auth_id):
     cache_key = f'telegram_auth_{clean_auth_id}'
     print(f"🔑 API: Cache key: {cache_key}")
     
+    # Проверяем все ключи в Redis для отладки
+    from django_redis import get_redis_connection
+    try:
+        redis_conn = get_redis_connection("default")
+        all_keys = redis_conn.keys('telegram_auth_*')
+        print(f"🗝️ API: Все ключи в Redis: {[k.decode() if isinstance(k, bytes) else k for k in all_keys]}")
+    except Exception as e:
+        print(f"❌ API: Ошибка получения ключей из Redis: {e}")
+    
     auth_data = cache.get(cache_key)
     print(f"📦 API: Cache data: {auth_data}")
     
