@@ -43,13 +43,12 @@
   top: 0 !important;
   left: 0 !important;
   bottom: 0 !important;
-  width: 280px !important;
-  max-width: 85vw !important;
+  width: 100vw !important;
   background: #fff !important;
   overflow-y: auto !important;
   display: flex !important;
   flex-direction: column !important;
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
   z-index: 100000 !important;
 }
