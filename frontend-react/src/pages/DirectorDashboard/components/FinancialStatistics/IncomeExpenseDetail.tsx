@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import mobileStyles from '../shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
 
@@ -78,34 +79,25 @@ const IncomeExpenseDetail: React.FC = () => {
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
       }}>
-        <Space 
-          wrap 
-          direction={isMobile ? 'vertical' : 'horizontal'}
-          style={{ width: '100%' }}
-          size={isMobile ? 'middle' : 'small'}
-        >
-          <RangePicker
-            value={dateRange}
-            onChange={(dates) => {
-              if (dates && dates[0] && dates[1]) {
-                setDateRange([dates[0], dates[1]]);
-              }
-            }}
-            format="DD.MM.YYYY"
-            style={{ width: isMobile ? '100%' : 'auto' }}
-            size={isMobile ? 'large' : 'middle'}
-          />
-          {isMobile ? (
-            <Row gutter={[8, 8]} style={{ width: '100%' }}>
+        {isMobile ? (
+          <div className={mobileStyles.datePickerContainer}>
+            <RangePicker
+              value={dateRange}
+              onChange={(dates) => {
+                if (dates && dates[0] && dates[1]) {
+                  setDateRange([dates[0], dates[1]]);
+                }
+              }}
+              format="DD.MM.YYYY"
+              className={mobileStyles.mobileRangePicker}
+              size="large"
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            />
+            <Row gutter={[8, 8]} className={mobileStyles.quickSelectButtons}>
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisWeek')}
-                  size="large"
-                  style={{ 
-                    width: '100%',
-                    fontSize: 13,
-                    height: 40
-                  }}
+                  className={mobileStyles.quickSelectButton}
                 >
                   Эта неделя
                 </Button>
@@ -113,12 +105,7 @@ const IncomeExpenseDetail: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisMonth')}
-                  size="large"
-                  style={{ 
-                    width: '100%',
-                    fontSize: 13,
-                    height: 40
-                  }}
+                  className={mobileStyles.quickSelectButton}
                 >
                   Этот месяц
                 </Button>
@@ -126,12 +113,7 @@ const IncomeExpenseDetail: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('lastMonth')}
-                  size="large"
-                  style={{ 
-                    width: '100%',
-                    fontSize: 13,
-                    height: 40
-                  }}
+                  className={mobileStyles.quickSelectButton}
                 >
                   Прошлый месяц
                 </Button>
@@ -139,26 +121,30 @@ const IncomeExpenseDetail: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisYear')}
-                  size="large"
-                  style={{ 
-                    width: '100%',
-                    fontSize: 13,
-                    height: 40
-                  }}
+                  className={mobileStyles.quickSelectButton}
                 >
                   Этот год
                 </Button>
               </Col>
             </Row>
-          ) : (
-            <Space wrap size="middle">
-              <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
-              <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
-              <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
-              <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
-            </Space>
-          )}
-        </Space>
+          </div>
+        ) : (
+          <Space wrap size="middle">
+            <RangePicker
+              value={dateRange}
+              onChange={(dates) => {
+                if (dates && dates[0] && dates[1]) {
+                  setDateRange([dates[0], dates[1]]);
+                }
+              }}
+              format="DD.MM.YYYY"
+            />
+            <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
+            <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
+            <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
+            <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
+          </Space>
+        )}
       </Card>
 
       <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>

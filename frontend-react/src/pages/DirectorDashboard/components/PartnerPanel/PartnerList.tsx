@@ -38,6 +38,7 @@ import {
 } from '../../api/directorApi';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './PartnerList.module.css';
+import mobileStyles from '../shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
@@ -463,14 +464,17 @@ const PartnerList: React.FC = () => {
                   </Button>
                 </Col>
               </Row>
-              <RangePicker
-                value={dateRange}
-                onChange={setDateRange}
-                format="DD.MM.YYYY"
-                placeholder={['Дата от', 'Дата до']}
-                style={{ width: '100%' }}
-                size="large"
-              />
+              <div className={mobileStyles.datePickerContainer}>
+                <RangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                  format="DD.MM.YYYY"
+                  placeholder={['Дата от', 'Дата до']}
+                  className={mobileStyles.mobileRangePicker}
+                  size="large"
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                />
+              </div>
             </>
           ) : (
             // Десктопная версия - горизонтальное расположение

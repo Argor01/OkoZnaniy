@@ -38,6 +38,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import styles from './GeneralStatistics.module.css';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -198,7 +199,7 @@ const GeneralStatistics: React.FC = () => {
           size={isMobile ? 'middle' : 'small'}
         >
           {isMobile ? (
-            <div style={{ width: '100%' }}>
+            <div className={styles.datePickerContainer}>
               <RangePicker
                 value={dateRange}
                 onChange={(dates) => {
@@ -207,17 +208,17 @@ const GeneralStatistics: React.FC = () => {
                   }
                 }}
                 format="DD.MM.YYYY"
-                style={{ width: '100%', marginBottom: 12 }}
+                className={styles.mobileRangePicker}
                 size="large"
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
               />
-              <Row gutter={[8, 8]}>
+              <Row gutter={[8, 8]} style={{ marginTop: 12 }}>
                 <Col span={12}>
                   <Button
                     type="primary"
                     icon={<DownloadOutlined />}
                     onClick={() => handleExport('excel')}
-                    style={{ width: '100%', height: 40 }}
-                    size="large"
+                    className={styles.quickSelectButton}
                   >
                     Excel
                   </Button>
@@ -226,8 +227,7 @@ const GeneralStatistics: React.FC = () => {
                   <Button
                     icon={<FilePdfOutlined />}
                     onClick={() => handleExport('pdf')}
-                    style={{ width: '100%', height: 40 }}
-                    size="large"
+                    className={styles.quickSelectButton}
                   >
                     PDF
                   </Button>
@@ -262,11 +262,11 @@ const GeneralStatistics: React.FC = () => {
           )}
           
           {isMobile ? (
-            <Row gutter={[8, 8]}>
+            <Row gutter={[8, 8]} className={styles.quickSelectButtons}>
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('today')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Сегодня
                 </Button>
@@ -274,7 +274,7 @@ const GeneralStatistics: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('yesterday')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Вчера
                 </Button>
@@ -282,7 +282,7 @@ const GeneralStatistics: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisWeek')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Эта неделя
                 </Button>
@@ -290,7 +290,7 @@ const GeneralStatistics: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisMonth')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Этот месяц
                 </Button>
@@ -298,7 +298,7 @@ const GeneralStatistics: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('lastMonth')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Прошлый месяц
                 </Button>
@@ -306,7 +306,7 @@ const GeneralStatistics: React.FC = () => {
               <Col span={12}>
                 <Button 
                   onClick={() => handleQuickSelect('thisYear')}
-                  style={{ width: '100%', height: 36 }}
+                  className={styles.quickSelectButton}
                 >
                   Этот год
                 </Button>
@@ -696,7 +696,7 @@ const GeneralStatistics: React.FC = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={isMobile ? false : ({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    label={isMobile ? false : ({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                     outerRadius={isMobile ? 80 : 100}
                     fill="#8884d8"
                     dataKey="value"
