@@ -31,6 +31,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
   onClaimClick,
 }) => {
   const queryClient = useQueryClient();
+  const isMobile = window.innerWidth <= 840;
 
   // Мутация для удаления сообщения
   const deleteMessageMutation = useMutation({
@@ -144,9 +145,9 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
             key={message.id}
             style={{
               backgroundColor: isUnread ? '#f0f7ff' : message.sender.role === 'arbitrator' ? '#fafafa' : 'transparent',
-              padding: '16px',
-              marginBottom: '8px',
-              borderRadius: '8px',
+              padding: isMobile ? '12px' : '16px',
+              marginBottom: isMobile ? '6px' : '8px',
+              borderRadius: isMobile ? 6 : 8,
               border: isUnread ? '2px solid #1890ff' : '1px solid #f0f0f0',
               borderLeft: message.sender.role === 'arbitrator' ? '4px solid #1890ff' : '4px solid #1890ff',
             }}
@@ -155,32 +156,54 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
             <List.Item.Meta
               avatar={
                 <Avatar
+                  size={isMobile ? 40 : 48}
                   icon={<UserOutlined />}
                   style={{
                     backgroundColor: isCurrentUser ? '#1890ff' : '#1890ff',
+                    flexShrink: 0,
                   }}
                 />
               }
               title={
-                <Space>
-                  <Text strong>{message.sender.username}</Text>
-                  <Tag color={message.sender.role === 'arbitrator' ? 'blue' : 'purple'}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: '8px', 
+                  alignItems: 'center',
+                  minWidth: 0,
+                }}>
+                  <Text strong style={{ whiteSpace: 'nowrap', minWidth: 0 }}>
+                    {message.sender.username}
+                  </Text>
+                  <Tag 
+                    color={message.sender.role === 'arbitrator' ? 'blue' : 'purple'}
+                    style={{ margin: 0, flexShrink: 0 }}
+                  >
                     {message.sender.role === 'arbitrator' ? 'Арбитр' : 'Дирекция'}
                   </Tag>
                   {message.priority && (
-                    <Tag color={getPriorityColor(message.priority)}>
+                    <Tag 
+                      color={getPriorityColor(message.priority)}
+                      style={{ margin: 0, flexShrink: 0 }}
+                    >
                       {getPriorityText(message.priority)}
                     </Tag>
                   )}
-                  <Tag color={getStatusColor(message.status, message.read_at)}>
+                  <Tag 
+                    color={getStatusColor(message.status, message.read_at)}
+                    style={{ margin: 0, flexShrink: 0 }}
+                  >
                     {getStatusText(message.status, message.read_at)}
                   </Tag>
-                </Space>
+                </div>
               }
               description={
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                  <Text type="secondary">
-                    {dayjs(message.created_at).format('DD.MM.YYYY HH:mm')}
+                  <Text 
+                    type="secondary"
+                    style={{ fontSize: isMobile ? 11 : 12 }}
+                  >
+                    {dayjs(message.created_at).format(isMobile ? 'DD.MM.YY HH:mm' : 'DD.MM.YYYY HH:mm')}
                   </Text>
                   {message.claim_id && (
                     <Text
@@ -188,6 +211,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                       style={{
                         cursor: onClaimClick ? 'pointer' : 'default',
                         textDecoration: onClaimClick ? 'underline' : 'none',
+                        fontSize: isMobile ? 11 : 12,
                       }}
                       onClick={() => onClaimClick && onClaimClick(message.claim_id!)}
                     >
@@ -197,21 +221,42 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 </Space>
               }
             />
-            <Paragraph style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <Paragraph 
+              style={{ 
+                marginTop: isMobile ? '6px' : '8px', 
+                marginBottom: isMobile ? '6px' : '8px',
+                fontSize: isMobile ? 13 : 14,
+                lineHeight: 1.6,
+              }}
+            >
               {message.text}
             </Paragraph>
             {message.attachments && message.attachments.length > 0 && (
-              <div style={{ marginTop: '8px' }}>
-                <Text type="secondary" style={{ marginRight: '8px' }}>
-                  <PaperClipOutlined /> Прикрепленные файлы:
+              <div style={{ marginTop: isMobile ? '6px' : '8px' }}>
+                <Text 
+                  type="secondary" 
+                  style={{ 
+                    marginRight: isMobile ? '4px' : '8px',
+                    fontSize: isMobile ? 11 : 12,
+                  }}
+                >
+                  <PaperClipOutlined /> {isMobile ? 'Файлы:' : 'Прикрепленные файлы:'}
                 </Text>
-                <Space>
+                <Space 
+                  direction={isMobile ? 'vertical' : 'horizontal'}
+                  size="small"
+                  style={{ width: isMobile ? '100%' : 'auto' }}
+                >
                   {message.attachments.map((attachment) => (
                     <a
                       key={attachment.id}
                       href={attachment.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      style={{ 
+                        fontSize: isMobile ? 12 : 14,
+                        wordBreak: 'break-all',
+                      }}
                     >
                       {attachment.name}
                     </a>
@@ -219,15 +264,16 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 </Space>
               </div>
             )}
-            <div style={{ marginTop: '8px' }}>
-              <Space>
+            <div style={{ marginTop: isMobile ? '6px' : '8px' }}>
+              <Space size={isMobile ? 'small' : 'middle'}>
                 {!isCurrentUser && (
                   <Button
                     size="small"
                     icon={<ArrowLeftOutlined />}
                     onClick={() => onReply && onReply(message)}
+                    style={{ fontSize: isMobile ? 12 : 14 }}
                   >
-                    Ответить
+                    {isMobile ? 'Ответ' : 'Ответить'}
                   </Button>
                 )}
                 {isCurrentUser && (
@@ -237,8 +283,9 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                     icon={<DeleteOutlined />}
                     onClick={() => handleDelete(message.id)}
                     loading={deleteMessageMutation.isPending}
+                    style={{ fontSize: isMobile ? 12 : 14 }}
                   >
-                    Удалить
+                    {isMobile ? '' : 'Удалить'}
                   </Button>
                 )}
               </Space>

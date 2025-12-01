@@ -129,60 +129,13 @@ const ArbitratorMessageForm: React.FC<ArbitratorMessageFormProps> = ({
         label="Текст сообщения"
         rules={[{ required: true, message: 'Введите текст сообщения' }]}
       >
-        <div style={{ position: 'relative' }}>
-          <TextArea
-            ref={textAreaRef}
-            rows={4}
-            placeholder="Введите ваше сообщение арбитру..."
-            showCount
-            maxLength={2000}
-          />
-          <Upload {...uploadProps}>
-            <Button
-              type="default"
-              shape="circle"
-              icon={<PaperClipOutlined />}
-              onClick={handleAttachClick}
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 108,
-                width: 40,
-                height: 40,
-                border: '1px solid #d1d5db',
-                background: '#fff',
-              }}
-            />
-          </Upload>
-          <Popover
-            content={
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                width={350}
-                height={400}
-              />
-            }
-            trigger="click"
-            open={emojiPickerOpen}
-            onOpenChange={setEmojiPickerOpen}
-            placement="bottomRight"
-          >
-            <Button
-              type="default"
-              shape="circle"
-              icon={<SmileOutlined />}
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 60,
-                width: 40,
-                height: 40,
-                border: '1px solid #d1d5db',
-                background: '#fff',
-              }}
-            />
-          </Popover>
-        </div>
+        <TextArea
+          ref={textAreaRef}
+          rows={4}
+          placeholder="Введите ваше сообщение арбитру..."
+          showCount
+          maxLength={2000}
+        />
       </Form.Item>
 
       {claims.length > 0 && (
@@ -219,6 +172,40 @@ const ArbitratorMessageForm: React.FC<ArbitratorMessageFormProps> = ({
           <Option value="medium">Средний</Option>
           <Option value="high">Высокий</Option>
         </Select>
+      </Form.Item>
+
+      <Form.Item>
+        <Space size="middle">
+          <Upload {...uploadProps}>
+            <Button
+              type="default"
+              icon={<PaperClipOutlined />}
+              onClick={handleAttachClick}
+            >
+              Прикрепить файл
+            </Button>
+          </Upload>
+          <Popover
+            content={
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                width={350}
+                height={400}
+              />
+            }
+            trigger="click"
+            open={emojiPickerOpen}
+            onOpenChange={setEmojiPickerOpen}
+            placement="bottomRight"
+          >
+            <Button
+              type="default"
+              icon={<SmileOutlined />}
+            >
+              Эмодзи
+            </Button>
+          </Popover>
+        </Space>
       </Form.Item>
 
       {fileList.length > 0 && (

@@ -5,7 +5,6 @@ const PartnerForm: React.FC = () => {
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
-    console.log('Заявка партнера:', values);
     // Здесь будет отправка данных на сервер
   };
 

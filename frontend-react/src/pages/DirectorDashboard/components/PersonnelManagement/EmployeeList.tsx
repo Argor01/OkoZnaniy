@@ -283,54 +283,103 @@ const EmployeeList: React.FC = () => {
     },
   ];
 
+  const isMobile = window.innerWidth <= 840;
+
   return (
     <div>
-      <Card>
-        <Title level={4}>Сотрудники</Title>
-        <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="large">
-          <Space>
-            <Search
-              placeholder="Поиск по имени, фамилии или email"
-              allowClear
-              style={{ width: 300 }}
-              onSearch={setSearchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-            <Select
-              placeholder="Фильтр по роли"
-              style={{ width: 200 }}
-              value={roleFilter}
-              onChange={setRoleFilter}
-            >
-              <Option value="all">Все роли</Option>
-              <Option value="admin">Администратор</Option>
-              <Option value="arbitrator">Арбитр</Option>
-              <Option value="partner">Партнёр</Option>
-              <Option value="expert">Эксперт</Option>
-            </Select>
-            <Select
-              placeholder="Фильтр по статусу"
-              style={{ width: 200 }}
-              value={statusFilter}
-              onChange={setStatusFilter}
-            >
-              <Option value="all">Все статусы</Option>
-              <Option value="active">Активные</Option>
-              <Option value="inactive">Неактивные</Option>
-            </Select>
-          </Space>
-        </Space>
-        <Spin spinning={isLoading}>
-          <Table
-            columns={columns}
-            dataSource={filteredEmployees}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Всего: ${total}`,
+      <Card
+        style={{
+          borderRadius: isMobile ? 8 : 12,
+          border: 'none',
+          background: '#fafafa',
+        }}
+      >
+        <Title 
+          level={4} 
+          style={{
+            marginBottom: isMobile ? 16 : 24,
+            fontSize: isMobile ? 18 : 20,
+            color: '#1f2937',
+          }}
+        >
+          Сотрудники
+        </Title>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? 12 : 16,
+            marginBottom: isMobile ? 16 : 24,
+            padding: isMobile ? 12 : 16,
+            background: '#fff',
+            borderRadius: isMobile ? 8 : 12,
+            border: '1px solid #e5e7eb',
+          }}
+        >
+          <Search
+            placeholder={isMobile ? "Поиск..." : "Поиск по имени, фамилии или email"}
+            allowClear
+            size={isMobile ? 'middle' : 'large'}
+            style={{ 
+              width: isMobile ? '100%' : 300,
             }}
+            onSearch={setSearchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
+          <Select
+            placeholder="Фильтр по роли"
+            size={isMobile ? 'middle' : 'large'}
+            style={{ width: isMobile ? '100%' : 200 }}
+            value={roleFilter}
+            onChange={setRoleFilter}
+          >
+            <Option value="all">Все роли</Option>
+            <Option value="admin">Администратор</Option>
+            <Option value="arbitrator">Арбитр</Option>
+            <Option value="partner">Партнёр</Option>
+            <Option value="expert">Эксперт</Option>
+          </Select>
+          <Select
+            placeholder="Фильтр по статусу"
+            size={isMobile ? 'middle' : 'large'}
+            style={{ width: isMobile ? '100%' : 200 }}
+            value={statusFilter}
+            onChange={setStatusFilter}
+          >
+            <Option value="all">Все статусы</Option>
+            <Option value="active">Активные</Option>
+            <Option value="inactive">Неактивные</Option>
+          </Select>
+        </div>
+        <Spin spinning={isLoading}>
+          <div 
+            style={{ 
+              overflowX: 'auto', 
+              width: '100%',
+              background: '#fff',
+              borderRadius: isMobile ? 8 : 12,
+              border: '1px solid #e5e7eb',
+            }}
+          >
+            <Table
+              columns={columns}
+              dataSource={filteredEmployees}
+              rowKey="id"
+              scroll={{ x: isMobile ? 800 : undefined }}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: !isMobile,
+                showTotal: (total) => `Всего: ${total}`,
+                simple: isMobile,
+                style: {
+                  padding: isMobile ? '12px' : '16px',
+                }
+              }}
+              style={{
+                borderRadius: isMobile ? 8 : 12,
+              }}
+            />
+          </div>
         </Spin>
       </Card>
 
@@ -343,12 +392,26 @@ const EmployeeList: React.FC = () => {
           setSelectedEmployee(null);
         }}
         footer={null}
-        width={600}
+        width={isMobile ? '100%' : 600}
+        style={isMobile ? {
+          top: 0,
+          padding: 0,
+          maxWidth: '100%',
+          margin: 0
+        } : {}}
         styles={{
           mask: {
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
           },
+          content: isMobile ? {
+            borderRadius: 0,
+            height: '100vh'
+          } : {},
+          body: isMobile ? {
+            maxHeight: 'calc(100vh - 55px)',
+            overflowY: 'auto'
+          } : {}
         }}
       >
         {selectedEmployee && (

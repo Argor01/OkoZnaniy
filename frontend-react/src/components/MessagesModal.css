@@ -205,29 +205,63 @@
   }
 
   .messages-modal .messages-container {
-    flex-direction: column;
+    position: relative;
   }
 
-  /* Показываем либо список чатов, либо окно чата */
+  /* Список чатов */
   .messages-modal .chats-list {
     width: 100%;
     border-right: none;
     display: flex;
+    transition: transform 0.3s ease;
   }
 
+  .messages-modal .chats-list.hidden {
+    display: none;
+  }
+
+  /* Окно чата */
   .messages-modal .chat-window {
     position: absolute;
-    top: 55px;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     background: #fff;
     z-index: 10;
+    display: none;
   }
 
-  /* Скрываем окно чата, если чат не выбран */
-  .messages-modal .chat-window:not(:has(.messages-list)) {
-    display: none;
+  .messages-modal .chat-window.visible {
+    display: flex;
+  }
+
+  /* Хедер чата на мобильных */
+  .messages-modal .chat-header-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+  }
+
+  .messages-modal .back-button {
+    padding: 4px 8px;
+    font-size: 18px;
+  }
+
+  .messages-modal .chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .messages-modal .chat-header-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2937;
   }
 
   .messages-modal .chats-header {

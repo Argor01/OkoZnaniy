@@ -118,7 +118,6 @@ const ExpertProfile: React.FC = () => {
     }
     
     if (statsData) {
-      console.log('Expert stats loaded:', statsData);
       setExpertStats(statsData);
     } else if (!statsLoading && !statsData) {
       // Если API не вернул статистику, используем моковую

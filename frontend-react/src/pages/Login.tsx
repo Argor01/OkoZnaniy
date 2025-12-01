@@ -177,8 +177,6 @@ const Login: React.FC = () => {
         role: values.role || 'client',
       } as RegisterRequest;
       
-      console.log('Sending registration data:', cleanValues);
-      
       await authApi.register(cleanValues);
       
       // Показываем модалку подтверждения только если указан email

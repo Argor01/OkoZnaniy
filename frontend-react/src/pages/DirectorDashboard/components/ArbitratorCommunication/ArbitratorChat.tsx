@@ -133,59 +133,102 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
     setSelectedClaimId(claimId);
   };
 
+  const isMobile = window.innerWidth <= 840;
+
   return (
     <div>
-      <Card>
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Card
+        style={{
+          borderRadius: isMobile ? 8 : 12,
+          border: 'none',
+          background: '#fafafa',
+        }}
+      >
+        <Space direction="vertical" size={isMobile ? 'middle' : 'large'} style={{ width: '100%' }}>
           <div>
-            <Title level={4}>Коммуникация с арбитрами</Title>
-            <Text type="secondary">
+            <Title 
+              level={4}
+              style={{
+                fontSize: isMobile ? 18 : 20,
+                marginBottom: isMobile ? 8 : 16,
+              }}
+            >
+              Коммуникация с арбитрами
+            </Title>
+            <Text 
+              type="secondary"
+              style={{
+                fontSize: isMobile ? 13 : 14,
+              }}
+            >
               Общение с арбитрами по вопросам согласования решений и других вопросов
             </Text>
           </div>
 
-          <Divider />
+          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
           {/* Фильтры и поиск */}
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <Space wrap>
-              <Input
-                placeholder="Поиск по сообщениям..."
-                prefix={<SearchOutlined />}
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 300 }}
-                allowClear
-              />
-              <Select
-                placeholder="Фильтр по обращению"
-                style={{ width: 300 }}
-                value={selectedClaimId}
-                onChange={(value) => setSelectedClaimId(value)}
-                allowClear
-              >
-                {claims.map((claim) => (
-                  <Option key={claim.id} value={claim.id}>
-                    #{claim.id} - {claim.order.title}
-                  </Option>
-                ))}
-              </Select>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => refetch()}
-                loading={isLoading}
-              >
-                Обновить
-              </Button>
-            </Space>
-          </Space>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? 12 : 16,
+              padding: isMobile ? 12 : 16,
+              background: '#fff',
+              borderRadius: isMobile ? 8 : 12,
+              border: '1px solid #e5e7eb',
+            }}
+          >
+            <Input
+              placeholder={isMobile ? "Поиск..." : "Поиск по сообщениям..."}
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: '100%' }}
+              size={isMobile ? 'middle' : 'large'}
+              allowClear
+            />
+            <Select
+              placeholder="Фильтр по обращению"
+              style={{ width: '100%' }}
+              size={isMobile ? 'middle' : 'large'}
+              value={selectedClaimId}
+              onChange={(value) => setSelectedClaimId(value)}
+              allowClear
+            >
+              {claims.map((claim) => (
+                <Option key={claim.id} value={claim.id}>
+                  #{claim.id} - {claim.order.title}
+                </Option>
+              ))}
+            </Select>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => refetch()}
+              loading={isLoading}
+              size={isMobile ? 'middle' : 'large'}
+              style={{ width: isMobile ? '100%' : 'auto' }}
+            >
+              Обновить
+            </Button>
+          </div>
 
-          <Divider />
+          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
           {/* Список сообщений */}
-          <div style={{ minHeight: '400px', maxHeight: '600px', overflowY: 'auto' }}>
+          <div 
+            style={{ 
+              minHeight: isMobile ? '300px' : '400px', 
+              maxHeight: isMobile ? '400px' : '600px', 
+              overflowY: 'auto',
+              background: '#fff',
+              borderRadius: isMobile ? 8 : 12,
+              border: '1px solid #e5e7eb',
+              padding: isMobile ? 12 : 16,
+            }}
+          >
             {isLoading ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
+              <div style={{ textAlign: 'center', padding: isMobile ? '24px' : '40px' }}>
                 <Spin size="large" />
               </div>
             ) : filteredMessages.length === 0 ? (
@@ -203,7 +246,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
             )}
           </div>
 
-          <Divider />
+          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
           {/* Форма отправки сообщения */}
           <div ref={messageFormRef}>

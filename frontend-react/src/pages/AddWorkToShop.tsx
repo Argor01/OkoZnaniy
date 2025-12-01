@@ -218,11 +218,10 @@ const AddWorkToShop: React.FC = () => {
     const handleFormat = (format: string) => {
       // Простая реализация форматирования
       // В реальном проекте можно использовать document.execCommand или библиотеку
-      console.log('Format:', format);
     };
 
     const handleInsert = (type: 'link' | 'image') => {
-      console.log('Insert:', type);
+      // Вставка ссылки или изображения
     };
 
     return (
@@ -587,7 +586,6 @@ const AddWorkToShop: React.FC = () => {
                     type="primary"
                     onClick={() => {
                       // Логика сохранения работы
-                      console.log('Save work:', formData);
                     }}
                     style={{
                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
@@ -1358,7 +1356,7 @@ const AddWorkToShop: React.FC = () => {
             allowClear
             style={{ marginBottom: 24 }}
             onSearch={(value) => {
-              console.log('Поиск:', value);
+              // Поиск по работам
             }}
           />
           <div style={{ 

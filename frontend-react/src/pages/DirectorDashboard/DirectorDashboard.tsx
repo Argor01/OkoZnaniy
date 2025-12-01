@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, Space, message, Modal, Drawer, Grid } from 'antd';
+import { Layout, Menu, Button, Typography, message, Modal } from 'antd';
 import {
   TeamOutlined,
   DollarOutlined,
@@ -30,13 +30,22 @@ type MenuItem = {
 
 const DirectorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { useBreakpoint } = Grid;
-  const screens = useBreakpoint();
   const [selectedMenu, setSelectedMenu] = useState<string>('personnel');
   const [drawerVisible, setDrawerVisible] = useState(false);
 
-  const isMobile = !screens.md;
-  const isTablet = screens.md && !screens.lg;
+  const isMobile = window.innerWidth <= 840;
+  const isTablet = window.innerWidth > 840 && window.innerWidth <= 1024;
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 840;
+      if (mobile !== isMobile) {
+        window.location.reload(); // Простой способ обновить состояние
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile]);
 
   const menuItems: MenuItem[] = [
     {
@@ -149,28 +158,72 @@ const DirectorDashboard: React.FC = () => {
       )}
 
       {/* Drawer для мобильных */}
-      <Drawer
-        title="Меню"
-        placement="left"
-        onClose={() => setDrawerVisible(false)}
-        open={drawerVisible}
-        width={280}
-        styles={{ body: { padding: 0 } }}
-      >
-        <div
-          style={{
-            padding: '16px',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-          }}
-        >
-          <BankOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={5} style={{ margin: 0 }}>
-            ЛК директора
-          </Title>
-        </div>
-        {renderMenu()}
-      </Drawer>
+      {isMobile && (
+        <>
+          {/* Overlay */}
+          {drawerVisible && (
+            <div
+              onClick={() => setDrawerVisible(false)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9998,
+                opacity: drawerVisible ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
+            />
+          )}
+          {/* Sidebar */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: '100vw',
+              background: '#fff',
+              zIndex: 9999,
+              overflowY: 'auto',
+              boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
+              transform: drawerVisible ? 'translateX(0)' : 'translateX(-100%)',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <div style={{ padding: '16px', textAlign: 'right', borderBottom: '1px solid #f0f0f0' }}>
+              <button
+                onClick={() => setDrawerVisible(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  color: '#666',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div
+              style={{
+                padding: '16px',
+                textAlign: 'center',
+                borderBottom: '1px solid #f0f0f0',
+              }}
+            >
+              <BankOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
+              <Title level={5} style={{ margin: 0 }}>
+                ЛК директора
+              </Title>
+            </div>
+            {renderMenu()}
+          </div>
+        </>
+      )}
 
       <Layout>
         <Header
@@ -181,29 +234,52 @@ const DirectorDashboard: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            position: 'relative',
           }}
         >
-          <Space>
-            {isMobile && (
-              <Button
-                type="text"
-                icon={<MenuOutlined />}
-                onClick={() => setDrawerVisible(true)}
-                style={{ fontSize: '18px' }}
-              />
-            )}
-            <Title level={isMobile ? 5 : 3} style={{ margin: 0 }}>
-              {isMobile 
-                ? currentMenuItem?.label?.split(' ')[0] || 'Директор'
-                : currentMenuItem?.label || 'Личный кабинет директора'}
-            </Title>
-          </Space>
+          {isMobile && (
+            <Button
+              type="primary"
+              icon={<MenuOutlined />}
+              onClick={() => setDrawerVisible(true)}
+              style={{
+                borderRadius: '8px',
+                height: '40px',
+                width: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                left: '16px',
+                zIndex: 1,
+              }}
+            />
+          )}
+          <Title 
+            level={isMobile ? 5 : 3} 
+            style={{ 
+              margin: 0,
+              flex: 1,
+              textAlign: isMobile ? 'center' : 'left',
+              paddingLeft: isMobile ? '52px' : 0,
+              paddingRight: isMobile ? '52px' : 0,
+            }}
+          >
+            {isMobile 
+              ? currentMenuItem?.label?.split(' ')[0] || 'Директор'
+              : currentMenuItem?.label || 'Личный кабинет директора'}
+          </Title>
           <Button
             type="default"
             danger
             icon={<LogoutOutlined />}
             onClick={handleLogout}
             size={isMobile ? 'small' : 'middle'}
+            style={isMobile ? {
+              position: 'absolute',
+              right: '16px',
+              zIndex: 1,
+            } : {}}
           >
             {!isMobile && 'Выйти'}
           </Button>

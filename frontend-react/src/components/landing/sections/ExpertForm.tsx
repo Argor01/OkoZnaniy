@@ -5,7 +5,6 @@ const ExpertForm: React.FC = () => {
   const [form] = Form.useForm();
 
   const onFinish = (values: any) => {
-    console.log('Заявка эксперта:', values);
     // Здесь будет отправка данных на сервер
   };
 

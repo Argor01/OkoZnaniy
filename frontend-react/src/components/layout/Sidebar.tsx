@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, Typography, Badge, Button, Drawer } from 'antd';
+import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -8,17 +8,48 @@ import {
   BellOutlined,
   WalletOutlined,
   LogoutOutlined,
-  MenuOutlined,
   TeamOutlined,
   QuestionCircleOutlined,
   TrophyOutlined,
   ShopOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 
 const { Sider } = Layout;
 const { Text, Title } = Typography;
+
+// Экспортируем кнопку для использования в хедере
+export const MobileMenuButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      width: '44px',
+      height: '44px',
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      border: 'none',
+      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
+      color: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'scale(1.05)';
+      e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'scale(1)';
+      e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
+    }}
+  >
+    <MenuOutlined style={{ fontSize: '20px' }} />
+  </button>
+);
 
 interface SidebarProps {
   selectedKey: string;
@@ -37,6 +68,8 @@ interface SidebarProps {
   onFinanceClick?: () => void;
   onFriendsClick?: () => void;
   onFaqClick?: () => void;
+  mobileDrawerOpen?: boolean;
+  onMobileDrawerChange?: (open: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -52,10 +85,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   onFinanceClick,
   onFriendsClick,
   onFaqClick,
+  mobileDrawerOpen = false,
+  onMobileDrawerChange,
 }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
-  const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   useEffect(() => {
@@ -68,8 +102,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    if (isMobile) {
-      setMobileDrawerVisible(false);
+    // Закрываем drawer на мобильных после клика
+    if (isMobile && onMobileDrawerChange) {
+      onMobileDrawerChange(false);
     }
 
     if (key === 'messages') {
@@ -129,147 +164,197 @@ const Sidebar: React.FC<SidebarProps> = ({
     onMenuSelect(key);
   };
 
-  const menuItems = (
-    <Menu
-      mode="inline"
-      selectedKeys={[selectedKey]}
-      openKeys={isMobile ? [] : openKeys}
-      onOpenChange={setOpenKeys}
-      onClick={handleMenuClick}
-      className={styles.sidebarMenu}
-    >
-      <Menu.Item key="messages" icon={<MessageOutlined />}>
+  const menuItems = [
+    {
+      key: 'messages',
+      icon: <MessageOutlined />,
+      label: (
         <Badge count={unreadMessages} offset={[10, 0]}>
           Сообщения
         </Badge>
-      </Menu.Item>
-      <Menu.Item key="notifications" icon={<BellOutlined />}>
+      ),
+    },
+    {
+      key: 'notifications',
+      icon: <BellOutlined />,
+      label: (
         <Badge count={unreadNotifications} offset={[10, 0]}>
           Уведомления
         </Badge>
-      </Menu.Item>
-      <Menu.Item key="arbitration" icon={<TrophyOutlined />}>
-        Арбитраж
-      </Menu.Item>
-      <Menu.Item key="balance" icon={<WalletOutlined />}>
-        Счет: 0.00 ₽
-      </Menu.Item>
-      {!isMobile ? (
-        <Menu.SubMenu key="orders" icon={<ShoppingOutlined />} title="Мои заказы">
-          <Menu.Item key="orders-all">Все (0)</Menu.Item>
-          <Menu.Item key="orders-open">Открыт (0)</Menu.Item>
-          <Menu.Item key="orders-confirming">На подтверждении (0)</Menu.Item>
-          <Menu.Item key="orders-progress">На выполнении (0)</Menu.Item>
-          <Menu.Item key="orders-payment">Ожидает оплаты (0)</Menu.Item>
-          <Menu.Item key="orders-review">На проверке (0)</Menu.Item>
-          <Menu.Item key="orders-completed">Выполнен (0)</Menu.Item>
-          <Menu.Item key="orders-revision">На доработке (0)</Menu.Item>
-          <Menu.Item key="orders-download">Ожидает скачивания (0)</Menu.Item>
-          <Menu.Item key="orders-closed">Закрыт (0)</Menu.Item>
-        </Menu.SubMenu>
-      ) : (
-        <Menu.Item key="orders" icon={<ShoppingOutlined />}>
-          Заказы
-        </Menu.Item>
-      )}
-      <Menu.Item key="works" icon={<FileDoneOutlined />}>
-        Мои работы
-      </Menu.Item>
-      {!isMobile && (
-        <Menu.SubMenu key="shop" icon={<ShopOutlined />} title="Авторский магазин">
-          <Menu.Item key="shop-ready-works">Магазин готовых работ</Menu.Item>
-          <Menu.Item key="shop-add-work">Добавить работу в магазин</Menu.Item>
-          <Menu.Item key="shop-my-works">Мои работы</Menu.Item>
-          <Menu.Item key="shop-purchased">Купленные работы</Menu.Item>
-        </Menu.SubMenu>
-      )}
-      <Menu.Item key="friends" icon={<TeamOutlined />}>
-        Мои друзья
-      </Menu.Item>
-      <Menu.Item key="faq" icon={<QuestionCircleOutlined />}>
-        FAQ
-      </Menu.Item>
-      <Menu.Item key="logout" icon={<LogoutOutlined />} danger className={styles.logoutMenuItem}>
-        Выйти
-      </Menu.Item>
-    </Menu>
+      ),
+    },
+    {
+      key: 'arbitration',
+      icon: <TrophyOutlined />,
+      label: 'Арбитраж',
+    },
+    {
+      key: 'balance',
+      icon: <WalletOutlined />,
+      label: 'Счет: 0.00 ₽',
+    },
+    !isMobile ? {
+      key: 'orders',
+      icon: <ShoppingOutlined />,
+      label: 'Мои заказы',
+      children: [
+        { key: 'orders-all', label: 'Все (0)' },
+        { key: 'orders-open', label: 'Открыт (0)' },
+        { key: 'orders-confirming', label: 'На подтверждении (0)' },
+        { key: 'orders-progress', label: 'На выполнении (0)' },
+        { key: 'orders-payment', label: 'Ожидает оплаты (0)' },
+        { key: 'orders-review', label: 'На проверке (0)' },
+        { key: 'orders-completed', label: 'Выполнен (0)' },
+        { key: 'orders-revision', label: 'На доработке (0)' },
+        { key: 'orders-download', label: 'Ожидает скачивания (0)' },
+        { key: 'orders-closed', label: 'Закрыт (0)' },
+      ],
+    } : {
+      key: 'orders',
+      icon: <ShoppingOutlined />,
+      label: 'Заказы',
+    },
+    {
+      key: 'works',
+      icon: <FileDoneOutlined />,
+      label: 'Мои работы',
+    },
+    !isMobile ? {
+      key: 'shop',
+      icon: <ShopOutlined />,
+      label: 'Авторский магазин',
+      children: [
+        { key: 'shop-ready-works', label: 'Магазин готовых работ' },
+        { key: 'shop-add-work', label: 'Добавить работу в магазин' },
+        { key: 'shop-my-works', label: 'Мои работы' },
+        { key: 'shop-purchased', label: 'Купленные работы' },
+      ],
+    } : null,
+    {
+      key: 'friends',
+      icon: <TeamOutlined />,
+      label: 'Мои друзья',
+    },
+    {
+      key: 'faq',
+      icon: <QuestionCircleOutlined />,
+      label: 'FAQ',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Выйти',
+      danger: true,
+      className: styles.logoutMenuItem,
+    },
+  ].filter(Boolean);
+
+  const profileSection = (
+    <div className={styles.sidebarProfile}>
+      <Avatar
+        size={48}
+        src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
+        icon={!userProfile?.avatar && <UserOutlined />}
+        style={{ backgroundColor: '#667eea' }}
+      />
+      <div style={{ marginLeft: 12, flex: 1 }}>
+        <Title level={5} style={{ margin: 0, fontSize: 14, color: 'white' }}>
+          {userProfile?.username || 'Пользователь'}
+        </Title>
+        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
+          {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+        </Text>
+      </div>
+    </div>
   );
 
-  if (isMobile) {
-    return (
-      <>
-        <Button
-          type="primary"
-          icon={<MenuOutlined />}
-          onClick={() => setMobileDrawerVisible(true)}
-          className={styles.mobileMenuButton}
-        >
-          Меню
-        </Button>
-        <Drawer
-          title={
-            <div className={styles.drawerHeader}>
-              <Avatar
-                size={48}
-                src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
-                icon={!userProfile?.avatar && <UserOutlined />}
-                style={{ backgroundColor: '#667eea' }}
-              />
-              <div>
-                <Title level={5} style={{ margin: 0 }}>
-                  {userProfile?.username || 'Пользователь'}
-                </Title>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-                </Text>
-              </div>
-            </div>
-          }
-          placement="left"
-          onClose={() => setMobileDrawerVisible(false)}
-          open={mobileDrawerVisible}
-          width={280}
-          styles={{
-            body: { padding: 0 },
-            header: { borderBottom: '1px solid #f0f0f0' },
-          }}
-        >
-          {menuItems}
-        </Drawer>
-      </>
-    );
-  }
+  const sidebarContent = (
+    <>
+      {profileSection}
+      <Menu
+        mode="inline"
+        selectedKeys={[selectedKey]}
+        openKeys={isMobile ? [] : openKeys}
+        onOpenChange={setOpenKeys}
+        onClick={handleMenuClick}
+        className={styles.sidebarMenu}
+        items={menuItems}
+      />
+    </>
+  );
 
   return (
-    <Sider
-      width={250}
-      className={styles.sidebar}
-      style={{
-        background: '#fff',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        position: 'relative',
-        height: '100vh',
-        borderRight: '1px solid #f0f0f0',
-      }}
-    >
-      <div className={styles.sidebarProfile}>
-        <Avatar
-          size={48}
-          src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
-          icon={!userProfile?.avatar && <UserOutlined />}
-          style={{ backgroundColor: '#667eea' }}
-        />
-        <div style={{ marginLeft: 12 }}>
-          <Title level={5} style={{ margin: 0, fontSize: 14 }}>
-            {userProfile?.username || 'Пользователь'}
-          </Title>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-          </Text>
-        </div>
-      </div>
-      {menuItems}
-    </Sider>
+    <>
+      {/* Overlay для мобильных */}
+      {isMobile && (
+        <>
+          <div
+            onClick={() => onMobileDrawerChange?.(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 9998,
+              opacity: mobileDrawerOpen ? 1 : 0,
+              visibility: mobileDrawerOpen ? 'visible' : 'hidden',
+              transition: 'opacity 0.3s ease, visibility 0.3s ease',
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: '100vw',
+              background: '#fff',
+              zIndex: 9999,
+              overflowY: 'auto',
+              boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
+              transform: mobileDrawerOpen ? 'translateX(0)' : 'translateX(-100%)',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <div style={{ padding: '16px', textAlign: 'right', borderBottom: '1px solid #f0f0f0' }}>
+              <button
+                onClick={() => onMobileDrawerChange?.(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  color: '#666',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {sidebarContent}
+          </div>
+        </>
+      )}
+
+      {/* Десктопный Sider */}
+      {!isMobile && (
+        <Sider
+          width={250}
+          className={styles.sidebar}
+          style={{
+            background: '#fff',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+            position: 'relative',
+            height: '100vh',
+            borderRight: '1px solid #f0f0f0',
+          }}
+        >
+          {sidebarContent}
+        </Sider>
+      )}
+    </>
   );
 };
 

@@ -6,8 +6,6 @@ const TelegramAuthExample: React.FC = () => {
   const navigate = useNavigate();
 
   const handleTelegramAuth = (user: any) => {
-    console.log('Успешная авторизация:', user);
-    
     // Перенаправляем пользователя в зависимости от роли
     navigate('/expert');
   };

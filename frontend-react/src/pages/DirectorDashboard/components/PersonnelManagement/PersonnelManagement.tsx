@@ -52,6 +52,8 @@ const PersonnelManagement: React.FC = () => {
     },
   ];
 
+  const isMobile = window.innerWidth <= 840;
+
   return (
     <div>
       <Alert
@@ -60,20 +62,32 @@ const PersonnelManagement: React.FC = () => {
         type="info"
         icon={<ExperimentOutlined />}
         showIcon
-        style={{ marginBottom: 16 }}
+        style={{ 
+          marginBottom: 16,
+          borderRadius: isMobile ? 8 : 12,
+          border: '1px solid #91d5ff',
+          background: 'linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)',
+        }}
         closable
       />
-      <Card>
+      <Card
+        style={{
+          borderRadius: isMobile ? 8 : 16,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #f0f0f0',
+        }}
+      >
         <Tabs 
           defaultActiveKey="list" 
           items={items}
-          size="large"
+          size={isMobile ? 'middle' : 'large'}
           style={{ 
-            fontSize: '16px'
+            fontSize: isMobile ? '14px' : '16px'
           }}
           tabBarStyle={{
-            fontSize: '16px',
-            fontWeight: 500
+            fontSize: isMobile ? '14px' : '16px',
+            fontWeight: 500,
+            marginBottom: isMobile ? 16 : 24,
           }}
         />
       </Card>

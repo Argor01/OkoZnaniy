@@ -21,7 +21,6 @@ const Home: React.FC = () => {
     const refCode = searchParams.get('ref');
     if (refCode) {
       localStorage.setItem('referral_code', refCode);
-      console.log('Реферальный код сохранен:', refCode);
     }
   }, [searchParams]);
   return (

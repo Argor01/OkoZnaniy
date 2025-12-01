@@ -21,6 +21,7 @@ const ArbitratorCommunication: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ArbitratorCommunicationTab>('chat');
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const isMobile = window.innerWidth <= 840;
 
   // Получение списка обращений, отправленных на согласование
   const { data: claimsData } = useQuery({
@@ -46,8 +47,9 @@ const ArbitratorCommunication: React.FC = () => {
     {
       key: 'chat',
       label: (
-        <span>
-          <MessageOutlined style={{ marginRight: 8 }} /> Чат с арбитрами
+        <span style={{ whiteSpace: 'nowrap' }}>
+          <MessageOutlined style={{ marginRight: isMobile ? 4 : 8 }} /> 
+          {isMobile ? 'Чат' : 'Чат с арбитрами'}
         </span>
       ),
       children: <ArbitratorChat />,
@@ -55,38 +57,76 @@ const ArbitratorCommunication: React.FC = () => {
     {
       key: 'approvals',
       label: (
-        <span>
-          <FileTextOutlined style={{ marginRight: 8 }} /> Обращения на согласовании ({claims.length})
+        <span style={{ whiteSpace: 'nowrap' }}>
+          <FileTextOutlined style={{ marginRight: isMobile ? 4 : 8 }} /> 
+          {isMobile ? `Согласование (${claims.length})` : `Обращения на согласовании (${claims.length})`}
         </span>
       ),
       children: (
         <div>
-          <Card>
-            <Title level={4}>Обращения, отправленные на согласование</Title>
-            <Text type="secondary">
+          <Card
+            style={{
+              borderRadius: isMobile ? 8 : 12,
+              border: 'none',
+              background: '#fafafa',
+            }}
+          >
+            <Title 
+              level={4}
+              style={{
+                fontSize: isMobile ? 18 : 20,
+                marginBottom: isMobile ? 8 : 16,
+              }}
+            >
+              Обращения, отправленные на согласование
+            </Title>
+            <Text 
+              type="secondary"
+              style={{
+                fontSize: isMobile ? 13 : 14,
+                display: 'block',
+                marginBottom: isMobile ? 16 : 24,
+              }}
+            >
               Список обращений, отправленных арбитрами на согласование дирекции
             </Text>
             {claims.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
+              <div style={{ textAlign: 'center', padding: isMobile ? '24px' : '40px' }}>
                 <Empty
                   description="Нет обращений на согласовании"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               </div>
             ) : (
-              <div style={{ marginTop: 16 }}>
+              <div style={{ marginTop: isMobile ? 12 : 16 }}>
                 {claims.map((claim) => (
                   <Card
                     key={claim.id}
-                    style={{ marginBottom: 16, cursor: 'pointer' }}
+                    style={{ 
+                      marginBottom: isMobile ? 12 : 16, 
+                      cursor: 'pointer',
+                      borderRadius: isMobile ? 8 : 12,
+                      border: '1px solid #e5e7eb',
+                    }}
                     onClick={() => handleViewClaim(claim)}
                     hoverable
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ flex: 1 }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      gap: isMobile ? 12 : 0,
+                    }}>
+                      <div style={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                          <div>
-                            <Text strong style={{ fontSize: '16px' }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            flexWrap: 'wrap', 
+                            alignItems: 'center', 
+                            gap: 8 
+                          }}>
+                            <Text strong style={{ fontSize: isMobile ? 15 : 16 }}>
                               Обращение #{claim.id}
                             </Text>
                             <Tag
@@ -97,7 +137,6 @@ const ArbitratorCommunication: React.FC = () => {
                                   ? 'orange'
                                   : 'red'
                               }
-                              style={{ marginLeft: 8 }}
                             >
                               {claim.type === 'refund'
                                 ? 'Возврат средств'
@@ -106,43 +145,67 @@ const ArbitratorCommunication: React.FC = () => {
                                 : 'Конфликт'}
                             </Tag>
                           </div>
-                          <Text type="secondary">
+                          <Text 
+                            type="secondary"
+                            style={{
+                              fontSize: isMobile ? 13 : 14,
+                            }}
+                          >
                             {claim.order.title || 'Без названия'}
                           </Text>
-                          <Space>
-                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                          <Space 
+                            direction={isMobile ? 'vertical' : 'horizontal'}
+                            size="small"
+                            style={{ width: isMobile ? '100%' : 'auto' }}
+                          >
+                            <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                               <ClockCircleOutlined /> Отправлено:{' '}
                               {dayjs(claim.created_at).format('DD.MM.YYYY HH:mm')}
                             </Text>
                             {claim.decision?.created_at && (
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                                 Решение принято:{' '}
                                 {dayjs(claim.decision.created_at).format('DD.MM.YYYY HH:mm')}
                               </Text>
                             )}
                           </Space>
                           {claim.decision?.reasoning && (
-                            <div style={{ marginTop: 8, padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                            <div style={{ 
+                              marginTop: 8, 
+                              padding: isMobile ? '6px' : '8px', 
+                              backgroundColor: '#f5f5f5', 
+                              borderRadius: isMobile ? 6 : 8,
+                            }}>
+                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                                 <strong>Обоснование:</strong> {claim.decision.reasoning}
                               </Text>
                             </div>
                           )}
                           {claim.decision?.approval_comment && (
-                            <div style={{ marginTop: 8, padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                            <div style={{ 
+                              marginTop: 8, 
+                              padding: isMobile ? '6px' : '8px', 
+                              backgroundColor: '#f5f5f5', 
+                              borderRadius: isMobile ? 6 : 8,
+                            }}>
+                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                                 Комментарий: {claim.decision.approval_comment}
                               </Text>
                             </div>
                           )}
                         </Space>
                       </div>
-                      <div style={{ marginLeft: 16 }}>
+                      <div style={{ marginLeft: isMobile ? 0 : 16, width: isMobile ? '100%' : 'auto' }}>
                         {claim.decision?.approval_status === 'pending' && (
                           <Tag
                             color="orange"
                             icon={<ClockCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            style={{ 
+                              fontSize: isMobile ? 12 : 14, 
+                              padding: isMobile ? '2px 8px' : '4px 12px',
+                              width: isMobile ? '100%' : 'auto',
+                              textAlign: 'center',
+                            }}
                           >
                             Ожидает решения
                           </Tag>
@@ -151,7 +214,12 @@ const ArbitratorCommunication: React.FC = () => {
                           <Tag
                             color="green"
                             icon={<CheckCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            style={{ 
+                              fontSize: isMobile ? 12 : 14, 
+                              padding: isMobile ? '2px 8px' : '4px 12px',
+                              width: isMobile ? '100%' : 'auto',
+                              textAlign: 'center',
+                            }}
                           >
                             Согласовано
                           </Tag>
@@ -160,7 +228,12 @@ const ArbitratorCommunication: React.FC = () => {
                           <Tag
                             color="red"
                             icon={<CloseCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            style={{ 
+                              fontSize: isMobile ? 12 : 14, 
+                              padding: isMobile ? '2px 8px' : '4px 12px',
+                              width: isMobile ? '100%' : 'auto',
+                              textAlign: 'center',
+                            }}
                           >
                             Отклонено
                           </Tag>
@@ -179,12 +252,21 @@ const ArbitratorCommunication: React.FC = () => {
 
   return (
     <div>
-      <Card>
+      <Card
+        style={{
+          borderRadius: isMobile ? 8 : 16,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #f0f0f0',
+        }}
+      >
         <Tabs
           activeKey={activeTab}
           onChange={(key) => setActiveTab(key as ArbitratorCommunicationTab)}
           items={tabItems}
-          size="large"
+          size={isMobile ? 'middle' : 'large'}
+          tabBarStyle={{
+            marginBottom: isMobile ? 16 : 24,
+          }}
         />
       </Card>
     </div>

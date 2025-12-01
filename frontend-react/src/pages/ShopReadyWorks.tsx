@@ -1324,7 +1324,7 @@ const ShopReadyWorks: React.FC = () => {
             allowClear
             style={{ marginBottom: 24 }}
             onSearch={(value) => {
-              console.log('Поиск:', value);
+              // Поиск по работам
             }}
           />
           <div style={{ 

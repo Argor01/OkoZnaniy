@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Tabs, List, Avatar, Badge, Input, Button, Empty } from 'antd';
-import { MessageOutlined, SearchOutlined, SendOutlined } from '@ant-design/icons';
+import { MessageOutlined, SearchOutlined, SendOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import './MessagesModal.css';
 
 interface Message {
@@ -30,6 +30,15 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 480);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Моковые данные
   const mockChats: Chat[] = [
@@ -80,7 +89,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
 
   const handleSendMessage = () => {
     if (messageText.trim()) {
-      console.log('Sending message:', messageText);
+      // Отправка сообщения
       setMessageText('');
     }
   };
@@ -103,7 +112,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
     >
       <div className="messages-container">
         {/* Список чатов */}
-        <div className="chats-list">
+        <div className={`chats-list ${isMobile && selectedChat ? 'hidden' : ''}`}>
           <div className="chats-header">
             <Input
               placeholder="Поиск..."
@@ -154,9 +163,27 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
         </div>
 
         {/* Окно чата */}
-        <div className="chat-window">
+        <div className={`chat-window ${isMobile && selectedChat ? 'visible' : ''}`}>
           {selectedChat ? (
             <>
+              {isMobile && (
+                <div className="chat-header-mobile">
+                  <Button
+                    type="text"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => setSelectedChat(null)}
+                    className="back-button"
+                  />
+                  <div className="chat-header-info">
+                    <Avatar size={36}>
+                      {mockChats.find((c) => c.id === selectedChat)?.name[0]}
+                    </Avatar>
+                    <span className="chat-header-name">
+                      {mockChats.find((c) => c.id === selectedChat)?.name}
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="messages-list">
                 {mockMessages.map((msg) => (
                   <div

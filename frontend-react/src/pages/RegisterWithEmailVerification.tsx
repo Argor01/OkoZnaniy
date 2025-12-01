@@ -78,8 +78,6 @@ const RegisterWithEmailVerification: React.FC = () => {
   };
 
   const handleVerificationSuccess = (user: any, tokens: { access: string; refresh: string }) => {
-    console.log('Регистрация и подтверждение успешны:', user);
-    
     // Перенаправляем в зависимости от роли
     navigate('/expert');
   };
