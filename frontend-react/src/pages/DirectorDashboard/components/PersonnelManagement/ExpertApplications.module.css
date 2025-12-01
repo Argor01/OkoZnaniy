@@ -1,0 +1,102 @@
+/* Мобильные стили для анкет экспертов */
+.mobileCard {
+  margin-bottom: 12px !important;
+}
+
+.mobileCard .ant-card-body {
+  padding: 12px !important;
+}
+
+.mobileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.mobileActions .ant-btn {
+  flex: 1;
+  min-width: 80px;
+}
+
+.statusTag {
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+}
+
+.mobileUserInfo {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.mobileUserName {
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+}
+
+.mobileUserEmail {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 2px;
+}
+
+.mobileMetaInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mobileDate {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+/* Адаптация модальных окон */
+@media screen and (max-width: 840px) {
+  .ant-modal {
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  
+  .ant-modal-content {
+    border-radius: 8px 8px 0 0 !important;
+  }
+  
+  .ant-descriptions-item-label {
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+  
+  .ant-descriptions-item-content {
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+  
+  .ant-tag {
+    font-size: 11px !important;
+    margin: 2px !important;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .mobileCard .ant-card-body {
+    padding: 8px !important;
+  }
+  
+  .mobileActions .ant-btn {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+  }
+  
+  .mobileUserName {
+    font-size: 13px;
+  }
+  
+  .mobileUserEmail {
+    font-size: 11px;
+  }
+}

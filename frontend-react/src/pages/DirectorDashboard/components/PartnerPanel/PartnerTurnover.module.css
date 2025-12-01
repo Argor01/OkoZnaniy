@@ -1,0 +1,411 @@
+/* Мобильные стили для календаря в обороте партнеров */
+.datePickerContainer {
+  width: 100%;
+}
+
+.mobileRangePicker {
+  width: 100% !important;
+  height: 44px !important;
+  font-size: 16px !important;
+  border-radius: 8px !important;
+}
+
+.mobileRangePicker .ant-picker-input input {
+  font-size: 14px !important;
+  text-align: center !important;
+}
+
+.mobileRangePicker .ant-picker-separator {
+  font-size: 12px !important;
+}
+
+.quickSelectButtons {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.quickSelectButton {
+  width: 100% !important;
+  height: 40px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+}
+
+/* Глобальные стили для мобильного календаря */
+@media screen and (max-width: 840px) {
+  /* Мобильные стили календаря применяются только к календарю в этом компоненте */
+  .datePickerContainer :global(.ant-picker-dropdown) {
+    position: absolute !important;
+    top: calc(100% + 4px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 70vh !important;
+    z-index: 1050 !important;
+    overflow: hidden !important;
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 6px !important;
+  }
+  
+  /* Панель календаря - только для этого компонента */
+  .datePickerContainer :global(.ant-picker-panel-container) {
+    width: 100% !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-panels) {
+    flex-direction: column !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-panel) {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Скрываем вторую панель месяца на мобильных */
+  .datePickerContainer :global(.ant-picker-panels .ant-picker-panel:last-child) {
+    display: none !important;
+  }
+  
+  /* Показываем только первую панель */
+  .datePickerContainer :global(.ant-picker-panels .ant-picker-panel:first-child) {
+    display: block !important;
+    width: 100% !important;
+  }
+  
+  /* Контент календаря */
+  .datePickerContainer :global(.ant-picker-content) {
+    width: 100% !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-content table) {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  
+  /* Ячейки календаря */
+  .datePickerContainer :global(.ant-picker-cell) {
+    height: 32px !important;
+    line-height: 30px !important;
+    padding: 0 !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-cell-inner) {
+    font-size: 13px !important;
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 28px !important;
+    border-radius: 4px !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Заголовки дней недели */
+  .datePickerContainer :global(.ant-picker-content thead th) {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #8c8c8c !important;
+    height: 28px !important;
+    padding: 4px 2px !important;
+    text-align: center !important;
+  }
+  
+  /* Футер календаря */
+  :global(.ant-picker-footer) {
+    padding: 12px !important;
+    border-top: 1px solid #f0f0f0 !important;
+  }
+  
+  :global(.ant-picker-footer .ant-btn) {
+    font-size: 14px !important;
+    height: 40px !important;
+    padding: 6px 16px !important;
+    border-radius: 6px !important;
+  }
+  
+  /* Заголовок с навигацией */
+  .datePickerContainer :global(.ant-picker-header) {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    min-height: 56px !important;
+  }
+  
+  /* Левые кнопки навигации */
+  .datePickerContainer :global(.ant-picker-header .ant-picker-header-prev) {
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  
+  /* Правые кнопки навигации */
+  .datePickerContainer :global(.ant-picker-header .ant-picker-header-next) {
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header-view) {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    flex: 1 !important;
+    text-align: center !important;
+    margin: 0 12px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  
+  /* Принудительные стили для всех элементов в header-view */
+  .datePickerContainer :global(.ant-picker-header-view *) {
+    height: 36px !important;
+    padding: 8px 16px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 2px solid #e6f7ff !important;
+    background: #ffffff !important;
+    color: #1890ff !important;
+    cursor: pointer !important;
+    margin: 0 4px !important;
+    min-width: 60px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Кнопки месяца и года в заголовке */
+  :global(.ant-picker-header-view button),
+  :global(.ant-picker-header-view .ant-btn),
+  :global(.ant-picker-header-view span[role="button"]) {
+    height: 36px !important;
+    padding: 8px 16px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 2px solid #e6f7ff !important;
+    background: #ffffff !important;
+    color: #1890ff !important;
+    cursor: pointer !important;
+    margin: 0 6px !important;
+    min-width: 60px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  :global(.ant-picker-header-view button:hover),
+  :global(.ant-picker-header-view .ant-btn:hover),
+  :global(.ant-picker-header-view span[role="button"]:hover) {
+    border-color: #1890ff !important;
+    color: #ffffff !important;
+    background: #1890ff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(24,144,255,0.3) !important;
+  }
+  
+  :global(.ant-picker-header-view button:active),
+  :global(.ant-picker-header-view .ant-btn:active),
+  :global(.ant-picker-header-view span[role="button"]:active) {
+    background: #0050b3 !important;
+    transform: translateY(0) !important;
+  }
+  
+  /* Дополнительные селекторы для всех возможных вариантов кнопок */
+  :global(.ant-picker-month-btn),
+  :global(.ant-picker-year-btn),
+  :global(.ant-picker-header-view > *),
+  :global(.ant-picker-header-view .ant-picker-month-panel-month-btn),
+  :global(.ant-picker-header-view .ant-picker-year-panel-year-btn) {
+    height: 36px !important;
+    padding: 8px 16px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: 2px solid #e6f7ff !important;
+    background: #ffffff !important;
+    color: #1890ff !important;
+    cursor: pointer !important;
+    margin: 0 6px !important;
+    min-width: 60px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  :global(.ant-picker-month-btn:hover),
+  :global(.ant-picker-year-btn:hover),
+  :global(.ant-picker-header-view > *:hover) {
+    border-color: #1890ff !important;
+    color: #ffffff !important;
+    background: #1890ff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(24,144,255,0.3) !important;
+  }
+  
+  /* Все кнопки навигации */
+  .datePickerContainer :global(.ant-picker-header button) {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid #d9d9d9 !important;
+    background: #ffffff !important;
+    color: #595959 !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-width: 32px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header button:hover) {
+    border-color: #1890ff !important;
+    color: #1890ff !important;
+    background: #f0f9ff !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header button:active) {
+    background: #e6f7ff !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .datePickerContainer :global(.ant-picker-cell) {
+    height: 30px !important;
+    line-height: 28px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-cell-inner) {
+    font-size: 13px !important;
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-content thead th) {
+    font-size: 11px !important;
+    height: 26px !important;
+    padding: 3px 2px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header) {
+    padding: 10px 12px !important;
+    min-height: 48px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header button) {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 14px !important;
+    min-width: 28px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header-view) {
+    font-size: 14px !important;
+    margin: 0 8px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header-view button),
+  .datePickerContainer :global(.ant-picker-header-view .ant-btn),
+  .datePickerContainer :global(.ant-picker-header-view span[role="button"]),
+  .datePickerContainer :global(.ant-picker-header-view > *) {
+    height: 32px !important;
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+    margin: 0 4px !important;
+    min-width: 50px !important;
+  }
+  
+  .mobileRangePicker {
+    height: 48px !important;
+    font-size: 14px !important;
+  }
+  
+  .mobileRangePicker .ant-picker-input input {
+    font-size: 13px !important;
+  }
+  
+  .quickSelectButton {
+    height: 44px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Стили для очень маленьких экранов */
+@media screen and (max-width: 380px) {
+  .datePickerContainer :global(.ant-picker-cell) {
+    height: 28px !important;
+    line-height: 26px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-cell-inner) {
+    font-size: 12px !important;
+    width: 26px !important;
+    height: 26px !important;
+    line-height: 24px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-content thead th) {
+    font-size: 10px !important;
+    height: 24px !important;
+    padding: 2px 1px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header) {
+    padding: 8px 10px !important;
+    min-height: 44px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header button) {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 13px !important;
+    min-width: 26px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header-view) {
+    font-size: 13px !important;
+    margin: 0 6px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header-view button),
+  .datePickerContainer :global(.ant-picker-header-view .ant-btn),
+  .datePickerContainer :global(.ant-picker-header-view span[role="button"]),
+  .datePickerContainer :global(.ant-picker-header-view > *) {
+    height: 28px !important;
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    margin: 0 3px !important;
+    min-width: 45px !important;
+  }
+  
+  .datePickerContainer :global(.ant-picker-header .ant-picker-header-prev),
+  .datePickerContainer :global(.ant-picker-header .ant-picker-header-next) {
+    gap: 4px !important;
+  }
+  
+  .mobileRangePicker .ant-picker-input input {
+    font-size: 12px !important;
+  }
+  
+  .mobileRangePicker .ant-picker-separator {
+    font-size: 10px !important;
+  }
+  
+  .quickSelectButton {
+    font-size: 11px !important;
+    height: 40px !important;
+  }
+}

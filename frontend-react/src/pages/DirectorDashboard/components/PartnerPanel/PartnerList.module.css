@@ -1,0 +1,83 @@
+/* Компактное модальное окно комиссии */
+.compactModal {
+  /* Убираем отступы у body полностью, добавляем свои */
+}
+
+.compactModal .ant-modal-body {
+  padding: 16px 20px 8px 20px !important;
+  min-height: auto !important;
+}
+
+.compactModal .ant-modal-footer {
+  padding: 8px 20px 16px 20px !important;
+  margin-top: 0 !important;
+  border-top: 1px solid #f0f0f0;
+}
+
+.compactModal .ant-form {
+  margin: 0 !important;
+}
+
+.compactModal .ant-form-item {
+  margin-bottom: 8px !important;
+}
+
+.compactModal .ant-form-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.compactModal .ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
+.compactModal .ant-form-item-label > label {
+  height: auto !important;
+}
+
+.compactModal .ant-form-item-control {
+  margin-bottom: 0 !important;
+}
+
+.compactModal .ant-form-item-control-input {
+  min-height: auto !important;
+}
+
+/* Мобильные стили */
+@media screen and (max-width: 840px) {
+  .compactModal .ant-modal-body {
+    padding: 4px 16px 2px 16px !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+  
+  .compactModal .ant-modal-footer {
+    padding: 4px 16px 8px 16px !important;
+    margin-top: 0 !important;
+  }
+  
+  .compactModal .ant-form {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .compactModal .ant-form-item {
+    margin-bottom: 2px !important;
+  }
+  
+  .compactModal .ant-form-item:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .compactModal .ant-form-item-label {
+    padding-bottom: 2px !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .compactModal .ant-form-item-control {
+    margin-bottom: 0 !important;
+  }
+  
+  .compactModal .ant-form-item-control-input {
+    min-height: auto !important;
+  }
+}

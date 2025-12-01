@@ -1,0 +1,95 @@
+/* Кастомное поле поиска для мобильных */
+.customSearchContainer {
+  display: flex !important;
+  height: 40px !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  border: 1px solid #d9d9d9 !important;
+  background: #fff !important;
+}
+
+.customSearchContainer:focus-within {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.customSearchInput {
+  flex: 1 !important;
+  height: 40px !important;
+  border: none !important;
+  outline: none !important;
+  padding: 8px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+  background: transparent !important;
+}
+
+.customSearchInput::placeholder {
+  color: #bfbfbf !important;
+  font-size: 15px !important;
+}
+
+.customSearchButton {
+  width: 40px !important;
+  height: 40px !important;
+  border: none !important;
+  background: #fafafa !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  color: #666 !important;
+  font-size: 16px !important;
+  transition: background-color 0.2s !important;
+}
+
+.customSearchButton:hover {
+  background: #f0f0f0 !important;
+}
+
+.customSearchButton:active {
+  background: #e6f7ff !important;
+}
+
+/* Адаптация для малых экранов */
+@media screen and (max-width: 380px) {
+  .customSearchButton {
+    width: 32px !important;
+    font-size: 14px !important;
+  }
+  
+  .customSearchInput {
+    font-size: 14px !important;
+  }
+  
+  .customSearchInput::placeholder {
+    font-size: 14px !important;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .customSearchButton {
+    width: 28px !important;
+    font-size: 12px !important;
+  }
+  
+  .customSearchInput {
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+  }
+  
+  .customSearchInput::placeholder {
+    font-size: 13px !important;
+  }
+}
+
+/* Отступы между селекторами на мобильных */
+.mobileFiltersContainer {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.mobileFiltersContainer .ant-select {
+  margin-bottom: 0 !important;
+}

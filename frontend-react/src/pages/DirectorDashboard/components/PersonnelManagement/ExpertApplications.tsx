@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   Card,
@@ -13,7 +13,10 @@ import {
   Descriptions,
   Spin,
   Tooltip,
+  Row,
+  Col,
 } from 'antd';
+import styles from './ExpertApplications.module.css';
 import {
   CheckOutlined,
   CloseOutlined,
@@ -40,7 +43,18 @@ const ExpertApplications: React.FC = () => {
   const [selectedApplication, setSelectedApplication] = useState<ExpertApplication | null>(null);
   const [rejectForm] = Form.useForm();
   const [reworkForm] = Form.useForm();
+  const [isMobile, setIsMobile] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { data: applications, isLoading } = useQuery({
     queryKey: ['director-expert-applications'],
@@ -223,21 +237,107 @@ const ExpertApplications: React.FC = () => {
     },
   ];
 
+  const renderMobileCard = (application: ExpertApplication) => {
+    const canModify = application.status === 'new' || application.status === 'under_review' || (!application.status && !application.application_approved);
+    
+    return (
+      <Card 
+        key={application.id} 
+        className={styles.mobileCard}
+        size="small"
+      >
+        <div className={styles.mobileUserInfo}>
+          <div className={styles.mobileUserName}>
+            {application.user.first_name} {application.user.last_name}
+          </div>
+          <div className={styles.mobileUserEmail}>
+            {application.user.email}
+          </div>
+        </div>
+        
+        <div className={styles.mobileMetaInfo}>
+          <span className={styles.mobileDate}>
+            {application.application_submitted_at 
+              ? dayjs(application.application_submitted_at).format('DD.MM.YYYY')
+              : '-'}
+          </span>
+          <div className={styles.statusTag}>
+            {application.status
+              ? getStatusTag(application.status)
+              : application.application_approved
+                ? getStatusTag('approved')
+                : (application.application_reviewed_at || application.application_submitted_at)
+                  ? getStatusTag('under_review')
+                  : getStatusTag('new')}
+          </div>
+        </div>
+        
+        <div className={styles.mobileActions}>
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetails(application)}
+          >
+            Просмотр
+          </Button>
+          {canModify && (
+            <>
+              <Button
+                size="small"
+                type="primary"
+                icon={<CheckOutlined />}
+                onClick={() => handleApprove(application.id)}
+              >
+                Утвердить
+              </Button>
+              <Button
+                size="small"
+                danger
+                icon={<CloseOutlined />}
+                onClick={() => handleReject(application)}
+              >
+                Отклонить
+              </Button>
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleRework(application)}
+              >
+                Доработка
+              </Button>
+            </>
+          )}
+        </div>
+      </Card>
+    );
+  };
+
   return (
     <div>
       <Card>
         <Title level={4}>Анкеты экспертов</Title>
         <Spin spinning={isLoading}>
-          <Table
-            columns={columns}
-            dataSource={applications || []}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Всего: ${total}`,
-            }}
-          />
+          {isMobile ? (
+            <div>
+              {(applications || []).map(renderMobileCard)}
+              {applications && applications.length > 0 && (
+                <div style={{ textAlign: 'center', marginTop: 16 }}>
+                  <Text type="secondary">Всего: {applications.length}</Text>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={applications || []}
+              rowKey="id"
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Всего: ${total}`,
+              }}
+            />
+          )}
         </Spin>
       </Card>
 
@@ -250,17 +350,23 @@ const ExpertApplications: React.FC = () => {
           setSelectedApplication(null);
         }}
         footer={null}
-        width={800}
+        width={isMobile ? '95%' : 800}
+        style={isMobile ? { top: 20 } : {}}
         styles={{
           mask: {
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
           },
+          body: isMobile ? { padding: '12px' } : {},
         }}
       >
         {selectedApplication && (
           <div>
-            <Descriptions column={2} bordered>
+            <Descriptions 
+              column={isMobile ? 1 : 2} 
+              bordered 
+              size={isMobile ? 'small' : 'default'}
+            >
               <Descriptions.Item label="Имя">
                 {selectedApplication.user.first_name}
               </Descriptions.Item>
@@ -279,10 +385,10 @@ const ExpertApplications: React.FC = () => {
               <Descriptions.Item label="Образование">
                 {selectedApplication.education || selectedApplication.user.education || 'Не указано'}
               </Descriptions.Item>
-              <Descriptions.Item label="Навыки" span={2}>
+              <Descriptions.Item label="Навыки" span={isMobile ? 1 : 2}>
                 {selectedApplication.skills || selectedApplication.user.skills || 'Не указано'}
               </Descriptions.Item>
-              <Descriptions.Item label="Портфолио" span={2}>
+              <Descriptions.Item label="Портфолио" span={isMobile ? 1 : 2}>
                 {selectedApplication.portfolio_url || selectedApplication.user.portfolio_url ? (
                   <a href={selectedApplication.portfolio_url || selectedApplication.user.portfolio_url} target="_blank" rel="noopener noreferrer">
                     {selectedApplication.portfolio_url || selectedApplication.user.portfolio_url}
@@ -291,10 +397,10 @@ const ExpertApplications: React.FC = () => {
                   'Не указано'
                 )}
               </Descriptions.Item>
-              <Descriptions.Item label="Биография" span={2}>
+              <Descriptions.Item label="Биография" span={isMobile ? 1 : 2}>
                 {selectedApplication.biography || selectedApplication.bio || selectedApplication.user.bio || 'Не указано'}
               </Descriptions.Item>
-              <Descriptions.Item label="Специализации" span={2}>
+              <Descriptions.Item label="Специализации" span={isMobile ? 1 : 2}>
                 {(selectedApplication.specializations || []).length > 0 ? (
                   selectedApplication.specializations!.map((spec: string, index: number) => (
                     <Tag key={index}>{spec}</Tag>
@@ -318,33 +424,71 @@ const ExpertApplications: React.FC = () => {
                       : getStatusTag('new')}
               </Descriptions.Item>
             </Descriptions>
-            <div style={{ marginTop: 16, textAlign: 'right' }}>
-              <Space>
-                <Button
-                  onClick={() => {
-                    setDetailModalVisible(false);
-                    handleReject(selectedApplication);
-                  }}
-                  danger
-                >
-                  Отклонить
-                </Button>
-                <Button
-                  onClick={() => {
-                    setDetailModalVisible(false);
-                    handleRework(selectedApplication);
-                  }}
-                >
-                  На доработку
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() => handleApprove(selectedApplication.id)}
-                  loading={approveMutation.isPending}
-                >
-                  Утвердить
-                </Button>
-              </Space>
+            <div style={{ marginTop: 16, textAlign: isMobile ? 'center' : 'right' }}>
+              {isMobile ? (
+                <Row gutter={[8, 8]}>
+                  <Col span={24}>
+                    <Button
+                      block
+                      onClick={() => {
+                        setDetailModalVisible(false);
+                        handleReject(selectedApplication);
+                      }}
+                      danger
+                    >
+                      Отклонить
+                    </Button>
+                  </Col>
+                  <Col span={24}>
+                    <Button
+                      block
+                      onClick={() => {
+                        setDetailModalVisible(false);
+                        handleRework(selectedApplication);
+                      }}
+                    >
+                      На доработку
+                    </Button>
+                  </Col>
+                  <Col span={24}>
+                    <Button
+                      block
+                      type="primary"
+                      onClick={() => handleApprove(selectedApplication.id)}
+                      loading={approveMutation.isPending}
+                    >
+                      Утвердить
+                    </Button>
+                  </Col>
+                </Row>
+              ) : (
+                <Space>
+                  <Button
+                    onClick={() => {
+                      setDetailModalVisible(false);
+                      handleReject(selectedApplication);
+                    }}
+                    danger
+                  >
+                    Отклонить
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setDetailModalVisible(false);
+                      handleRework(selectedApplication);
+                    }}
+                  >
+                    На доработку
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() => handleApprove(selectedApplication.id)}
+                    loading={approveMutation.isPending}
+                  >
+                    Утвердить
+                  </Button>
+                </Space>
+              )}
             </div>
           </div>
         )}
@@ -360,6 +504,9 @@ const ExpertApplications: React.FC = () => {
         }}
         onOk={() => rejectForm.submit()}
         confirmLoading={rejectMutation.isPending}
+        width={isMobile ? '95%' : 520}
+        style={isMobile ? { top: 20 } : {}}
+        styles={isMobile ? { body: { padding: '12px' } } : {}}
       >
         <Form
           form={rejectForm}
@@ -389,6 +536,9 @@ const ExpertApplications: React.FC = () => {
         }}
         onOk={() => reworkForm.submit()}
         confirmLoading={reworkMutation.isPending}
+        width={isMobile ? '95%' : 520}
+        style={isMobile ? { top: 20 } : {}}
+        styles={isMobile ? { body: { padding: '12px' } } : {}}
       >
         <Form
           form={reworkForm}

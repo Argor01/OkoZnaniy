@@ -37,6 +37,7 @@ import {
   type Partner,
 } from '../../api/directorApi';
 import type { ColumnsType } from 'antd/es/table';
+import styles from './PartnerList.module.css';
 
 const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
@@ -51,6 +52,8 @@ const PartnerList: React.FC = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [commissionModalVisible, setCommissionModalVisible] = useState(false);
   const [referralsModalVisible, setReferralsModalVisible] = useState(false);
+  
+  const isMobile = window.innerWidth <= 840;
 
   const [commissionForm] = Form.useForm();
 
@@ -345,79 +348,172 @@ const PartnerList: React.FC = () => {
   return (
     <div>
       {/* Карточка с общим количеством партнёров */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card>
+      <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
             <Statistic
               title="Активных партнёров"
               value={activePartnersCount}
               suffix={`/ ${totalPartnersCount}`}
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ 
+                color: '#3f8600',
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: 600
+              }}
+              style={{
+                padding: isMobile ? '8px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card>
+        <Col xs={24} sm={12} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
             <Statistic
               title="Общий доход партнёров"
               value={partners?.reduce((sum, p) => sum + (p.totalEarnings || p.total_earnings || 0), 0) || 0}
               prefix="₽"
               precision={2}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ 
+                color: '#1890ff',
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: 600
+              }}
+              style={{
+                padding: isMobile ? '8px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card>
+        <Col xs={24} sm={24} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center',
+            background: isMobile ? '#f9f0ff' : '#fff',
+            border: isMobile ? '2px solid #722ed1' : '1px solid #d9d9d9'
+          }}>
             <Statistic
               title="Всего рефералов"
               value={partners?.reduce((sum, p) => sum + (p.totalReferrals || p.total_referrals || 0), 0) || 0}
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ 
+                color: '#722ed1',
+                fontSize: isMobile ? 22 : 24,
+                fontWeight: 700
+              }}
+              style={{
+                padding: isMobile ? '12px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
       </Row>
 
       {/* Фильтры и поиск */}
-      <Card style={{ marginBottom: 16 }}>
-        <Space direction="vertical" style={{ width: '100%' }} size="middle">
-          <Space wrap>
-            <Input
-              placeholder="Поиск по имени или email"
-              prefix={<SearchOutlined />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 300 }}
-              allowClear
-            />
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 150 }}
-            >
-              <Option value="all">Все</Option>
-              <Option value="active">Активные</Option>
-              <Option value="inactive">Неактивные</Option>
-            </Select>
-            <RangePicker
-              value={dateRange}
-              onChange={setDateRange}
-              format="DD.MM.YYYY"
-              placeholder={['Дата от', 'Дата до']}
-            />
-            <Button onClick={() => {
-              setSearchText('');
-              setStatusFilter('all');
-              setDateRange(null);
-            }}>
-              Сбросить фильтры
-            </Button>
-          </Space>
+      <Card style={{ 
+        marginBottom: 16,
+        borderRadius: isMobile ? 8 : 12
+      }}>
+        <Space 
+          direction="vertical" 
+          style={{ width: '100%' }} 
+          size={isMobile ? "middle" : "large"}
+        >
+          {isMobile ? (
+            // Мобильная версия - вертикальное расположение
+            <>
+              <Input
+                placeholder="Поиск по имени или email"
+                prefix={<SearchOutlined />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: '100%' }}
+                size="large"
+                allowClear
+              />
+              <Row gutter={[8, 8]}>
+                <Col span={12}>
+                  <Select
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    style={{ width: '100%' }}
+                    size="large"
+                    placeholder="Статус"
+                  >
+                    <Option value="all">Все</Option>
+                    <Option value="active">Активные</Option>
+                    <Option value="inactive">Неактивные</Option>
+                  </Select>
+                </Col>
+                <Col span={12}>
+                  <Button 
+                    onClick={() => {
+                      setSearchText('');
+                      setStatusFilter('all');
+                      setDateRange(null);
+                    }}
+                    style={{ width: '100%', height: 40 }}
+                    size="large"
+                  >
+                    Сбросить
+                  </Button>
+                </Col>
+              </Row>
+              <RangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                format="DD.MM.YYYY"
+                placeholder={['Дата от', 'Дата до']}
+                style={{ width: '100%' }}
+                size="large"
+              />
+            </>
+          ) : (
+            // Десктопная версия - горизонтальное расположение
+            <Space wrap>
+              <Input
+                placeholder="Поиск по имени или email"
+                prefix={<SearchOutlined />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+                allowClear
+              />
+              <Select
+                value={statusFilter}
+                onChange={setStatusFilter}
+                style={{ width: 150 }}
+              >
+                <Option value="all">Все</Option>
+                <Option value="active">Активные</Option>
+                <Option value="inactive">Неактивные</Option>
+              </Select>
+              <RangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                format="DD.MM.YYYY"
+                placeholder={['Дата от', 'Дата до']}
+              />
+              <Button onClick={() => {
+                setSearchText('');
+                setStatusFilter('all');
+                setDateRange(null);
+              }}>
+                Сбросить фильтры
+              </Button>
+            </Space>
+          )}
         </Space>
       </Card>
 
       {/* Таблица с партнёрами */}
-      <Card>
+      <Card style={{ 
+        borderRadius: isMobile ? 8 : 12
+      }}>
         <Spin spinning={isLoading}>
           <Table
             columns={columns}
@@ -426,10 +522,14 @@ const PartnerList: React.FC = () => {
             scroll={{ x: 1200 }}
             pagination={{
               pageSize: 10,
-              showSizeChanger: true,
+              showSizeChanger: !isMobile,
               showTotal: (total) => `Всего: ${total}`,
+              simple: isMobile,
+              style: {
+                padding: isMobile ? '12px' : '16px',
+              }
             }}
-            size="small"
+            size={isMobile ? "middle" : "small"}
           />
         </Spin>
       </Card>
@@ -440,20 +540,43 @@ const PartnerList: React.FC = () => {
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         footer={[
-          <Button key="close" onClick={() => setDetailModalVisible(false)}>
+          <Button 
+            key="close" 
+            onClick={() => setDetailModalVisible(false)}
+            size={isMobile ? 'large' : 'middle'}
+            style={{ width: isMobile ? '100%' : 'auto' }}
+          >
             Закрыть
           </Button>,
         ]}
-        width={800}
+        width={isMobile ? '100%' : 800}
+        style={isMobile ? {
+          top: 0,
+          padding: 0,
+          maxWidth: '100%',
+          margin: 0
+        } : {}}
         styles={{
           mask: {
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
           },
+          content: isMobile ? {
+            borderRadius: 0,
+            height: '100vh'
+          } : {},
+          body: isMobile ? {
+            maxHeight: 'calc(100vh - 55px)',
+            overflowY: 'auto'
+          } : {}
         }}
       >
         {selectedPartner && (
-          <Descriptions bordered column={2}>
+          <Descriptions 
+            bordered 
+            column={isMobile ? 1 : 2}
+            size={isMobile ? 'middle' : 'default'}
+          >
             <Descriptions.Item label="Имя">
               {selectedPartner.firstName || selectedPartner.first_name}
             </Descriptions.Item>
@@ -493,12 +616,43 @@ const PartnerList: React.FC = () => {
       <Modal
         title="Изменить процент комиссии"
         open={commissionModalVisible}
+        className={styles.compactModal}
         onCancel={() => {
           setCommissionModalVisible(false);
           commissionForm.resetFields();
         }}
         onOk={() => commissionForm.submit()}
         confirmLoading={updateCommissionMutation.isPending}
+        width={isMobile ? (window.innerWidth <= 380 ? '95%' : '90%') : 400}
+        centered
+        style={isMobile ? {
+          maxWidth: window.innerWidth <= 380 ? '95%' : '90%',
+          margin: '0 auto'
+        } : {}}
+
+        styles={{
+          body: isMobile ? {
+            padding: '4px 16px 2px 16px',
+            minHeight: 'auto',
+            height: 'auto'
+          } : {
+            padding: '16px 20px 8px 20px',
+            minHeight: 'auto'
+          },
+          footer: isMobile ? {
+            padding: '4px 16px 8px 16px',
+            marginTop: 0
+          } : {
+            padding: '8px 20px 16px 20px',
+            marginTop: 0
+          }
+        }}
+        okButtonProps={{
+          size: isMobile ? 'large' : 'middle'
+        }}
+        cancelButtonProps={{
+          size: isMobile ? 'large' : 'middle'
+        }}
       >
         <Form
           form={commissionForm}
@@ -519,6 +673,8 @@ const PartnerList: React.FC = () => {
               max={100}
               precision={2}
               step={0.1}
+              size={isMobile ? 'large' : 'middle'}
+              placeholder="Введите процент от 0 до 100"
             />
           </Form.Item>
         </Form>
@@ -530,16 +686,35 @@ const PartnerList: React.FC = () => {
         open={referralsModalVisible}
         onCancel={() => setReferralsModalVisible(false)}
         footer={[
-          <Button key="close" onClick={() => setReferralsModalVisible(false)}>
+          <Button 
+            key="close" 
+            onClick={() => setReferralsModalVisible(false)}
+            size={isMobile ? 'large' : 'middle'}
+            style={{ width: isMobile ? '100%' : 'auto' }}
+          >
             Закрыть
           </Button>,
         ]}
-        width={800}
+        width={isMobile ? '100%' : 800}
+        style={isMobile ? {
+          top: 0,
+          padding: 0,
+          maxWidth: '100%',
+          margin: 0
+        } : {}}
         styles={{
           mask: {
             backdropFilter: 'blur(4px)',
             WebkitBackdropFilter: 'blur(4px)',
           },
+          content: isMobile ? {
+            borderRadius: 0,
+            height: '100vh'
+          } : {},
+          body: isMobile ? {
+            maxHeight: 'calc(100vh - 55px)',
+            overflowY: 'auto'
+          } : {}
         }}
       >
         {selectedPartner && (

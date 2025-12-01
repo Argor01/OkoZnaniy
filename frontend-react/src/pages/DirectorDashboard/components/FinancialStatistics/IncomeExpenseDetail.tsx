@@ -39,6 +39,8 @@ const IncomeExpenseDetail: React.FC = () => {
     dayjs().endOf('month'),
   ]);
 
+  const isMobile = window.innerWidth <= 840;
+
   const totalIncome = incomeExpenseData.reduce((sum, item) => sum + item.income, 0);
   const totalExpense = incomeExpenseData.reduce((sum, item) => sum + item.expense, 0);
   const netProfit = totalIncome - totalExpense;
@@ -72,8 +74,16 @@ const IncomeExpenseDetail: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ marginBottom: 16 }}>
-        <Space wrap>
+      <Card style={{ 
+        marginBottom: 16,
+        borderRadius: isMobile ? 8 : 12
+      }}>
+        <Space 
+          wrap 
+          direction={isMobile ? 'vertical' : 'horizontal'}
+          style={{ width: '100%' }}
+          size={isMobile ? 'middle' : 'small'}
+        >
           <RangePicker
             value={dateRange}
             onChange={(dates) => {
@@ -82,59 +92,190 @@ const IncomeExpenseDetail: React.FC = () => {
               }
             }}
             format="DD.MM.YYYY"
+            style={{ width: isMobile ? '100%' : 'auto' }}
+            size={isMobile ? 'large' : 'middle'}
           />
-          <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
-          <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
-          <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
-          <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
+          {isMobile ? (
+            <Row gutter={[8, 8]} style={{ width: '100%' }}>
+              <Col span={12}>
+                <Button 
+                  onClick={() => handleQuickSelect('thisWeek')}
+                  size="large"
+                  style={{ 
+                    width: '100%',
+                    fontSize: 13,
+                    height: 40
+                  }}
+                >
+                  Эта неделя
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button 
+                  onClick={() => handleQuickSelect('thisMonth')}
+                  size="large"
+                  style={{ 
+                    width: '100%',
+                    fontSize: 13,
+                    height: 40
+                  }}
+                >
+                  Этот месяц
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button 
+                  onClick={() => handleQuickSelect('lastMonth')}
+                  size="large"
+                  style={{ 
+                    width: '100%',
+                    fontSize: 13,
+                    height: 40
+                  }}
+                >
+                  Прошлый месяц
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button 
+                  onClick={() => handleQuickSelect('thisYear')}
+                  size="large"
+                  style={{ 
+                    width: '100%',
+                    fontSize: 13,
+                    height: 40
+                  }}
+                >
+                  Этот год
+                </Button>
+              </Col>
+            </Row>
+          ) : (
+            <Space wrap size="middle">
+              <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
+              <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
+              <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
+              <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
+            </Space>
+          )}
         </Space>
       </Card>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card>
+      <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
             <Statistic
               title="Общий доход"
               value={totalIncome}
               prefix="₽"
               precision={0}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ 
+                color: '#52c41a',
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: 600
+              }}
+              style={{
+                padding: isMobile ? '8px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card>
+        <Col xs={24} sm={12} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
             <Statistic
               title="Общие расходы"
               value={totalExpense}
               prefix="₽"
               precision={0}
-              valueStyle={{ color: '#ff4d4f' }}
+              valueStyle={{ 
+                color: '#ff4d4f',
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: 600
+              }}
+              style={{
+                padding: isMobile ? '8px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card>
+        <Col xs={24} sm={24} md={8}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center',
+            background: isMobile ? '#f0f9ff' : '#fff',
+            border: isMobile ? '2px solid #1890ff' : '1px solid #d9d9d9'
+          }}>
             <Statistic
               title="Чистая прибыль"
               value={netProfit}
               prefix="₽"
               precision={0}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ 
+                color: '#1890ff',
+                fontSize: isMobile ? 22 : 24,
+                fontWeight: 700
+              }}
+              style={{
+                padding: isMobile ? '12px 0' : '12px 0'
+              }}
             />
           </Card>
         </Col>
       </Row>
 
-      <Card title="Доходы и расходы">
-        <div style={{ width: '100%', height: 400 }}>
+      <Card 
+        title="Доходы и расходы"
+        style={{ 
+          borderRadius: isMobile ? 8 : 12
+        }}
+        headStyle={{
+          fontSize: isMobile ? 16 : 18,
+          fontWeight: 600
+        }}
+      >
+        <div style={{ 
+          width: '100%', 
+          height: isMobile ? 300 : 400,
+          overflowX: isMobile ? 'auto' : 'visible'
+        }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={incomeExpenseData}>
+            <BarChart 
+              data={incomeExpenseData}
+              margin={{
+                top: 20,
+                right: isMobile ? 10 : 30,
+                left: isMobile ? 10 : 20,
+                bottom: 5,
+              }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
-              <Legend />
+              <XAxis 
+                dataKey="date" 
+                fontSize={isMobile ? 10 : 12}
+                interval={isMobile ? 1 : 0}
+              />
+              <YAxis 
+                fontSize={isMobile ? 10 : 12}
+                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip 
+                formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
+                contentStyle={{
+                  fontSize: isMobile ? 12 : 14,
+                  borderRadius: 8
+                }}
+              />
+              <Legend 
+                wrapperStyle={{
+                  fontSize: isMobile ? 12 : 14
+                }}
+              />
               <Bar dataKey="income" fill="#52c41a" name="Доход" />
               <Bar dataKey="expense" fill="#ff4d4f" name="Расход" />
             </BarChart>

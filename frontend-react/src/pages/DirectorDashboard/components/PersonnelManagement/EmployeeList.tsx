@@ -19,6 +19,7 @@ import {
   CheckCircleOutlined,
   InboxOutlined,
   EyeOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -29,6 +30,7 @@ import {
   archiveEmployee,
 } from '../../api/directorApi';
 import { type Employee } from '../../api/types';
+import styles from './EmployeeList.module.css';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -305,10 +307,11 @@ const EmployeeList: React.FC = () => {
           Сотрудники
         </Title>
         <div
+          className={isMobile ? styles.mobileFiltersContainer : ''}
           style={{
             display: 'flex',
             flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 12 : 16,
+            gap: isMobile ? 0 : 16,
             marginBottom: isMobile ? 16 : 24,
             padding: isMobile ? 12 : 16,
             background: '#fff',
@@ -316,20 +319,52 @@ const EmployeeList: React.FC = () => {
             border: '1px solid #e5e7eb',
           }}
         >
-          <Search
-            placeholder={isMobile ? "Поиск..." : "Поиск по имени, фамилии или email"}
-            allowClear
-            size={isMobile ? 'middle' : 'large'}
-            style={{ 
-              width: isMobile ? '100%' : 300,
-            }}
-            onSearch={setSearchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
+          {isMobile ? (
+            <div 
+              className={styles.customSearchContainer}
+              style={{ 
+                width: '100%',
+                marginBottom: 12,
+              }}
+            >
+              <input
+                className={styles.customSearchInput}
+                placeholder="Поиск..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchText(e.currentTarget.value);
+                  }
+                }}
+              />
+              <button
+                className={styles.customSearchButton}
+                onClick={() => setSearchText(searchText)}
+                type="button"
+              >
+                <SearchOutlined />
+              </button>
+            </div>
+          ) : (
+            <Search
+              placeholder="Поиск по имени, фамилии или email"
+              allowClear
+              size="large"
+              style={{ 
+                width: 300,
+              }}
+              onSearch={setSearchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          )}
           <Select
             placeholder="Фильтр по роли"
             size={isMobile ? 'middle' : 'large'}
-            style={{ width: isMobile ? '100%' : 200 }}
+            style={{ 
+              width: isMobile ? '100%' : 200,
+              marginBottom: isMobile ? 12 : 0,
+            }}
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -342,7 +377,10 @@ const EmployeeList: React.FC = () => {
           <Select
             placeholder="Фильтр по статусу"
             size={isMobile ? 'middle' : 'large'}
-            style={{ width: isMobile ? '100%' : 200 }}
+            style={{ 
+              width: isMobile ? '100%' : 200,
+              marginBottom: isMobile ? 8 : 0,
+            }}
             value={statusFilter}
             onChange={setStatusFilter}
           >
