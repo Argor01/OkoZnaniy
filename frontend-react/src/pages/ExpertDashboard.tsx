@@ -881,10 +881,10 @@ const ExpertDashboard: React.FC = () => {
         </Header>
         <Content
           style={{
-            margin: isMobile ? '12px' : '24px',
+            margin: isMobile ? '0' : '24px',
             padding: isMobile ? '16px' : '24px',
             background: '#fff',
-            borderRadius: '8px',
+            borderRadius: isMobile ? '0' : '8px',
             minHeight: 'calc(100vh - 112px)',
             marginBottom: isMobile ? '80px' : '24px',
           }}
@@ -2597,22 +2597,31 @@ const ExpertDashboard: React.FC = () => {
                       }
                     }}
                   >
-                    <Badge dot={chat.isOnline} offset={[-5, isMobile ? 30 : 35]}>
-                      <Avatar
-                        size={isMobile ? 36 : 40}
-                        icon={<UserOutlined />}
-                        style={{ backgroundColor: chat.isOnline ? '#10b981' : '#6b7280' }}
-                      />
-                    </Badge>
+                    <Avatar
+                      size={isMobile ? 36 : 40}
+                      icon={<UserOutlined />}
+                      style={{ backgroundColor: chat.isOnline ? '#10b981' : '#6b7280' }}
+                    />
                     <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                        <Text strong style={{ 
-                          fontSize: isMobile ? 13 : 14, 
-                          color: '#1f2937',
-                          fontWeight: chat.isRead ? 500 : 600
-                        }}>
-                          {chat.userName}
-                        </Text>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Text strong style={{ 
+                            fontSize: isMobile ? 13 : 14, 
+                            color: '#1f2937',
+                            fontWeight: chat.isRead ? 500 : 600
+                          }}>
+                            {chat.userName}
+                          </Text>
+                          {chat.isOnline && (
+                            <span style={{ 
+                              width: '8px', 
+                              height: '8px', 
+                              borderRadius: '50%', 
+                              backgroundColor: '#10b981',
+                              display: 'inline-block'
+                            }} />
+                          )}
+                        </div>
                         <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
                           {chat.timestamp}
                         </Text>
@@ -2676,18 +2685,25 @@ const ExpertDashboard: React.FC = () => {
                         size="small"
                       />
                     )}
-                    <Badge dot={selectedChat.isOnline} offset={[-5, 35]}>
-                      <Avatar
-                        size={isMobile ? 32 : 36}
-                        icon={<UserOutlined />}
-                        style={{ backgroundColor: selectedChat.isOnline ? '#10b981' : '#6b7280' }}
-                      />
-                    </Badge>
-                    <div>
-                      <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500, display: 'block' }}>
+                    <Avatar
+                      size={isMobile ? 32 : 36}
+                      icon={<UserOutlined />}
+                      style={{ backgroundColor: selectedChat.isOnline ? '#10b981' : '#6b7280' }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500 }}>
                         {selectedChat.userName}
                       </Text>
-                      <Text style={{ fontSize: isMobile ? 11 : 12, color: selectedChat.isOnline ? '#10b981' : '#6b7280' }}>
+                      {selectedChat.isOnline && (
+                        <span style={{ 
+                          width: '8px', 
+                          height: '8px', 
+                          borderRadius: '50%', 
+                          backgroundColor: '#10b981',
+                          display: 'inline-block'
+                        }} />
+                      )}
+                      <Text style={{ fontSize: isMobile ? 11 : 12, color: selectedChat.isOnline ? '#10b981' : '#6b7280', display: 'block' }}>
                         {selectedChat.isOnline ? 'В сети' : 'Не в сети'}
                       </Text>
                     </div>
@@ -3368,7 +3384,7 @@ const ExpertDashboard: React.FC = () => {
         open={financeModalVisible}
         onCancel={() => setFinanceModalVisible(false)}
         footer={null}
-        width={1200}
+        width={isMobile ? '100%' : 1200}
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -3376,32 +3392,37 @@ const ExpertDashboard: React.FC = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.3)'
           },
           content: { 
-            borderRadius: 24, 
-            padding: '32px',
+            borderRadius: isMobile ? 0 : 24, 
+            padding: isMobile ? '16px' : '32px',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            margin: isMobile ? 0 : undefined,
+            maxWidth: isMobile ? '100vw' : undefined,
+            top: isMobile ? 0 : undefined,
+            height: isMobile ? '100vh' : undefined
           },
           body: {
             padding: '0',
-            maxHeight: '80vh',
+            maxHeight: isMobile ? 'calc(100vh - 100px)' : '80vh',
             overflowY: 'auto'
           }
         }}
       >
-        <div style={{ display: 'flex', gap: 24, minHeight: '600px' }}>
+        <div style={{ display: 'flex', gap: isMobile ? 16 : 24, minHeight: isMobile ? 'auto' : '600px', flexDirection: isMobile ? 'column' : 'row' }}>
           {/* Левая часть - История операций */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <Text strong style={{ fontSize: 20, color: '#1f2937', display: 'block', marginBottom: 20 }}>
+          <div style={{ flex: 1, minWidth: 0, order: isMobile ? 2 : 1 }}>
+            <Text strong style={{ fontSize: isMobile ? 18 : 20, color: '#1f2937', display: 'block', marginBottom: isMobile ? 16 : 20 }}>
               История операций
             </Text>
 
             {/* Фильтры */}
-            <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: isMobile ? 8 : 12, marginBottom: isMobile ? 16 : 24, flexWrap: 'wrap' }}>
               <Select
                 defaultValue="all"
-                style={{ width: 180 }}
+                style={{ width: isMobile ? '100%' : 180 }}
                 suffixIcon={<DownOutlined />}
+                size={isMobile ? 'middle' : 'middle'}
               >
                 <Select.Option value="all">Все операции</Select.Option>
                 <Select.Option value="income">Поступления</Select.Option>
@@ -3411,13 +3432,15 @@ const ExpertDashboard: React.FC = () => {
               <RangePicker
                 defaultValue={[dayjs().startOf('month'), dayjs().endOf('month')]}
                 format="DD.MM.YYYY"
-                style={{ width: 280 }}
+                style={{ width: isMobile ? '100%' : 280 }}
+                size={isMobile ? 'middle' : 'middle'}
               />
 
               <Input
                 placeholder="Поиск по операциям"
                 prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
-                style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
+                style={{ flex: 1, minWidth: isMobile ? '100%' : 200, maxWidth: isMobile ? '100%' : 400 }}
+                size={isMobile ? 'middle' : 'middle'}
               />
             </div>
 
@@ -3466,19 +3489,19 @@ const ExpertDashboard: React.FC = () => {
           </div>
 
           {/* Правая часть - Боковая панель */}
-          <div style={{ width: 300, flexShrink: 0 }}>
+          <div style={{ width: isMobile ? '100%' : 300, flexShrink: 0, order: isMobile ? 1 : 2 }}>
             <div style={{ 
               background: '#f9fafb', 
-              borderRadius: 16, 
-              padding: '24px',
+              borderRadius: isMobile ? 12 : 16, 
+              padding: isMobile ? '16px' : '24px',
               border: '1px solid #e5e7eb'
             }}>
               {/* Текущий баланс */}
-              <div style={{ marginBottom: 24 }}>
-                <Text style={{ fontSize: 14, color: '#6b7280', display: 'block', marginBottom: 8 }}>
+              <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+                <Text style={{ fontSize: isMobile ? 13 : 14, color: '#6b7280', display: 'block', marginBottom: 8 }}>
                   Текущий баланс:
                 </Text>
-                <Text strong style={{ fontSize: 32, color: '#1f2937', display: 'block', marginBottom: 16 }}>
+                <Text strong style={{ fontSize: isMobile ? 28 : 32, color: '#1f2937', display: 'block', marginBottom: isMobile ? 12 : 16 }}>
                   0.00 ₽
                 </Text>
                 <Button 
@@ -4336,21 +4359,23 @@ const ExpertDashboard: React.FC = () => {
                       <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
-                        alignItems: 'center',
+                        alignItems: isMobile ? 'flex-start' : 'center',
                         paddingTop: 12,
-                        borderTop: '1px solid #e5e7eb'
+                        borderTop: '1px solid #e5e7eb',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: isMobile ? 12 : 0
                       }}>
-                        <div style={{ display: 'flex', gap: 16 }}>
-                          <Text type="secondary" style={{ fontSize: 12 }}>
+                        <div style={{ display: 'flex', gap: isMobile ? 12 : 16, flexDirection: isMobile ? 'column' : 'row', width: isMobile ? '100%' : 'auto' }}>
+                          <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>
                             <CalendarOutlined style={{ marginRight: 4 }} />
                             Создано: {arbitration.createdAt}
                           </Text>
-                          <Text type="secondary" style={{ fontSize: 12 }}>
+                          <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>
                             <ClockCircleOutlined style={{ marginRight: 4 }} />
                             Обновлено: {arbitration.updatedAt}
                           </Text>
                         </div>
-                        <Text strong style={{ fontSize: 15, color: '#1f2937' }}>
+                        <Text strong style={{ fontSize: isMobile ? 16 : 15, color: '#1f2937', whiteSpace: 'nowrap' }}>
                           <DollarOutlined style={{ marginRight: 4 }} />
                           {arbitration.amount.toLocaleString('ru-RU')} ₽
                         </Text>

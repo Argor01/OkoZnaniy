@@ -279,7 +279,6 @@ img {
     -ms-flex-wrap: wrap;
         flex-wrap: wrap;
     gap: 30px;
-    max-width: 360px;
     height: 100%;
     width: 100%;
     padding: 30px 20px;

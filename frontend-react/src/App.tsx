@@ -85,11 +85,7 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/expert" 
-                element={
-                  <ProtectedRoute>
-                    <ExpertDashboard />
-                  </ProtectedRoute>
-                } 
+                element={<ExpertDashboard />} 
               />
               <Route 
                 path="/expert-application" 

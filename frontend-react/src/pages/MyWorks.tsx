@@ -26,6 +26,15 @@ const MyWorks: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('all');
   const [workDetailModalVisible, setWorkDetailModalVisible] = useState(false);
   const [selectedWork, setSelectedWork] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = () => {
     Modal.confirm({
@@ -170,7 +179,40 @@ const MyWorks: React.FC = () => {
       />
 
       <Layout>
-        <Content style={{ margin: '24px', minHeight: 280 }}>
+        {!isMobile && (
+          <Sider
+            width={250}
+            style={{
+              background: '#fff',
+              borderRight: '1px solid #f0f0f0',
+              padding: '24px 0',
+            }}
+          >
+            <Title level={4} style={{ padding: '0 24px', marginBottom: 16 }}>
+              Фильтры
+            </Title>
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedMenu]}
+              onClick={({ key }) => setSelectedMenu(key)}
+              items={menuItems}
+              style={{ border: 'none' }}
+            />
+          </Sider>
+        )}
+        <Content style={{ margin: isMobile ? '0' : '24px', padding: isMobile ? '16px' : '24px', background: '#fff', borderRadius: isMobile ? 0 : 8, minHeight: 280 }}>
+        {isMobile && (
+          <div style={{ marginBottom: 16 }}>
+            <Title level={4} style={{ marginBottom: 12 }}>Фильтры</Title>
+            <Menu
+              mode="horizontal"
+              selectedKeys={[selectedMenu]}
+              onClick={({ key }) => setSelectedMenu(key)}
+              items={menuItems}
+              style={{ border: 'none', marginBottom: 16 }}
+            />
+          </div>
+        )}
         {selectedMenu === 'shop' ? (
           <Card>
             <Empty description="Магазин работ в разработке" />

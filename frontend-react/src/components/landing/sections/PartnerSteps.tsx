@@ -19,7 +19,7 @@ const PartnerSteps: React.FC = () => {
             fontFamily: 'var(--font-family-display)',
             fontWeight: 800
           }}>
-            Гарантируем 1 000 000 ₽ оборот вашего агентства через 2 месяца!
+            Гарантируем <span style={{ whiteSpace: 'nowrap' }}>1 000 000 ₽</span> оборот вашего агентства через 2 месяца!
           </h2>
           <p style={{ fontSize: '18px', marginBottom: '8px', color: '#333' }}>
             ✅ Персональная поддержка от директора биржи на протяжении 1 месяца
