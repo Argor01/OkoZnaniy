@@ -1235,12 +1235,12 @@ const ExpertDashboard: React.FC = () => {
                   </div>
                   <div style={{ display: 'grid', gap: 16 }}>
                     <div className={styles.orderCard}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           <Text strong style={{ fontSize: 16 }}>Иван Петров</Text>
-                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>15.11.2024</Text>
+                          <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
                         </div>
-                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                        <Text type="secondary" style={{ fontSize: 12 }}>15.11.2024</Text>
                       </div>
                       <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
                         Отличная работа! Все выполнено качественно и в срок. Решения подробно расписаны, все понятно. Рекомендую этого исполнителя!
@@ -1248,12 +1248,12 @@ const ExpertDashboard: React.FC = () => {
                       <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Решение задач по высшей математике</Text>
                     </div>
                     <div className={styles.orderCard}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           <Text strong style={{ fontSize: 16 }}>Мария Сидорова</Text>
-                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>10.11.2024</Text>
+                          <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
                         </div>
-                        <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                        <Text type="secondary" style={{ fontSize: 12 }}>10.11.2024</Text>
                       </div>
                       <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
                         Очень довольна результатом! Курсовая работа выполнена на высоком уровне, все требования учтены. Спасибо за оперативность и профессионализм!
@@ -1261,12 +1261,12 @@ const ExpertDashboard: React.FC = () => {
                       <Text type="secondary" style={{ fontSize: 12 }}>Заказ: Курсовая работа по экономике</Text>
                     </div>
                     <div className={styles.orderCard}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <div>
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                           <Text strong style={{ fontSize: 16 }}>Алексей Смирнов</Text>
-                          <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>05.11.2024</Text>
+                          <Rate disabled defaultValue={4} style={{ fontSize: 16 }} />
                         </div>
-                        <Rate disabled defaultValue={4} style={{ fontSize: 16 }} />
+                        <Text type="secondary" style={{ fontSize: 12 }}>05.11.2024</Text>
                       </div>
                       <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
                         Хорошая работа, все сделано правильно. Единственное - хотелось бы чуть больше комментариев в коде. В целом доволен.
