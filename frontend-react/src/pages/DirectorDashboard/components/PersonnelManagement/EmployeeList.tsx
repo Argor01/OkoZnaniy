@@ -184,13 +184,22 @@ const EmployeeList: React.FC = () => {
       employee.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       employee.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchText.toLowerCase());
-    const matchesRole = roleFilter === 'all' || employee.role === roleFilter;
-    const isActive = employee.is_active !== false; // По умолчанию считаем активным, если поле не указано
+    
     const isDeactivatedExpert = employee.role === 'client' && employee.application_approved === false;
+    
+    // Фильтр по роли: деактивированные эксперты показываются при фильтре "Эксперт"
+    const matchesRole = 
+      roleFilter === 'all' || 
+      employee.role === roleFilter ||
+      (roleFilter === 'expert' && isDeactivatedExpert);
+    
+    const isActive = employee.is_active !== false; // По умолчанию считаем активным, если поле не указано
+    
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && isActive && !isDeactivatedExpert) ||
       (statusFilter === 'inactive' && (!isActive || isDeactivatedExpert));
+    
     return matchesSearch && matchesRole && matchesStatus;
   }) || [];
 
