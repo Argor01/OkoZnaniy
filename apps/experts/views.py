@@ -919,6 +919,13 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         application.reviewed_at = timezone.now()
         application.save()
         
+        # Меняем роль пользователя на эксперта
+        expert_user = application.expert
+        if expert_user.role != 'expert':
+            expert_user.role = 'expert'
+            expert_user.save()
+            logger.info(f"User {expert_user.id} role changed to expert after application approval")
+        
         # Уведомляем эксперта
         from apps.notifications.services import NotificationService
         NotificationService.notify_application_approved(application)
