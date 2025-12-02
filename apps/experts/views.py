@@ -871,12 +871,37 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         # Проверяем, есть ли уже анкета
-        if ExpertApplication.objects.filter(expert=self.request.user).exists():
-            raise serializers.ValidationError(
-                'У вас уже есть анкету. Вы можете изменить существующую.'
-            )
+        existing_application = ExpertApplication.objects.filter(expert=self.request.user).first()
         
-        # Создаем анкету
+        if existing_application:
+            logger.info(f"User {self.request.user.id} already has application {existing_application.id}, updating it")
+            # Обновляем существующую анкету
+            if isinstance(serializer, ExpertApplicationCreateSerializer):
+                educations_data = serializer.validated_data.pop('educations', [])
+                
+                # Обновляем поля анкеты
+                for field, value in serializer.validated_data.items():
+                    setattr(existing_application, field, value)
+                
+                # Сбрасываем статус на pending при повторной подаче
+                existing_application.status = 'pending'
+                existing_application.save()
+                
+                # Удаляем старые записи об образовании и создаем новые
+                existing_application.educations.all().delete()
+                for education_data in educations_data:
+                    Education.objects.create(application=existing_application, **education_data)
+                
+                return existing_application
+            else:
+                for field, value in serializer.validated_data.items():
+                    setattr(existing_application, field, value)
+                existing_application.status = 'pending'
+                existing_application.save()
+                return existing_application
+        
+        # Создаем новую анкету
+        logger.info(f"Creating new application for user {self.request.user.id}")
         if isinstance(serializer, ExpertApplicationCreateSerializer):
             educations_data = serializer.validated_data.pop('educations', [])
             
@@ -892,7 +917,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             # Возвращаем созданную анкету
             return application
         else:
-            serializer.save(expert=self.request.user)
+            return serializer.save(expert=self.request.user)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
