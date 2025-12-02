@@ -186,10 +186,11 @@ const EmployeeList: React.FC = () => {
       employee.email.toLowerCase().includes(searchText.toLowerCase());
     const matchesRole = roleFilter === 'all' || employee.role === roleFilter;
     const isActive = employee.is_active !== false; // По умолчанию считаем активным, если поле не указано
+    const isDeactivatedExpert = employee.role === 'client' && employee.application_approved === false;
     const matchesStatus =
       statusFilter === 'all' ||
-      (statusFilter === 'active' && isActive) ||
-      (statusFilter === 'inactive' && !isActive);
+      (statusFilter === 'active' && isActive && !isDeactivatedExpert) ||
+      (statusFilter === 'inactive' && (!isActive || isDeactivatedExpert));
     return matchesSearch && matchesRole && matchesStatus;
   }) || [];
 
@@ -228,12 +229,21 @@ const EmployeeList: React.FC = () => {
       dataIndex: 'is_active',
       key: 'is_active',
       render: (isActive: boolean | undefined, record: Employee) => {
+        // Деактивированный эксперт - это клиент с application_approved = false
+        const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
         const active = isActive !== false; // По умолчанию активен
-        return (
-          <Tag color={active ? 'green' : 'red'}>
-            {active ? 'Активен' : 'Неактивен'}
-          </Tag>
-        );
+        
+        if (!active) {
+          // Заархивированный
+          return <Tag color="red">Неактивен</Tag>;
+        }
+        
+        if (isDeactivatedExpert) {
+          // Деактивированный эксперт
+          return <Tag color="orange">Неактивен (эксперт)</Tag>;
+        }
+        
+        return <Tag color="green">Активен</Tag>;
       },
     },
     {
