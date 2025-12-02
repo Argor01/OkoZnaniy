@@ -334,6 +334,7 @@ class ExpertApplication(models.Model):
         ('pending', 'В рассмотрении'),
         ('approved', 'Одобрено'),
         ('rejected', 'Отклонено'),
+        ('deactivated', 'Деактивировано'),
     ]
     
     expert = models.OneToOneField(
