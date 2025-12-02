@@ -106,10 +106,54 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def deactivate(self, request, pk=None):
+        """Деактивация эксперта - убирает роль expert, но не деактивирует аккаунт"""
+        user = self.get_object()
+        
+        # Если это эксперт, меняем роль на client и отклоняем анкету
+        if user.role == 'expert':
+            user.role = 'client'
+            user.application_approved = False
+            user.save(update_fields=['role', 'application_approved'])
+            
+            # Отклоняем анкету, если она есть
+            try:
+                application = ExpertApplication.objects.get(expert=user)
+                application.status = 'rejected'
+                application.rejection_reason = 'Деактивирован администратором'
+                application.reviewed_by = request.user
+                application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'updated_at'])
+            except ExpertApplication.DoesNotExist:
+                pass
+        else:
+            # Для других ролей просто деактивируем аккаунт
+            user.is_active = False
+            user.save(update_fields=['is_active'])
+        
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def archive(self, request, pk=None):
+        """Архивирование сотрудника - полная деактивация аккаунта"""
         user = self.get_object()
         user.is_active = False
         user.save(update_fields=['is_active'])
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'])
+    def restore(self, request, pk=None):
+        """Восстановление сотрудника из архива"""
+        user = self.get_object()
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path='archive')
+    def get_archive(self, request):
+        """Получить список заархивированных сотрудников"""
+        User = get_user_model()
+        archived = User.objects.filter(is_active=False).exclude(role='client')
+        serializer = UserSerializer(archived, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def register(self, request):
