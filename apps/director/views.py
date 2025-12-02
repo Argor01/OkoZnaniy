@@ -109,16 +109,16 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         """Деактивация эксперта - убирает роль expert, но не деактивирует аккаунт"""
         user = self.get_object()
         
-        # Если это эксперт, меняем роль на client и отклоняем анкету
+        # Если это эксперт, меняем роль на client и деактивируем анкету
         if user.role == 'expert':
             user.role = 'client'
             user.application_approved = False
             user.save(update_fields=['role', 'application_approved'])
             
-            # Отклоняем анкету, если она есть
+            # Деактивируем анкету, если она есть (нельзя подавать заново)
             try:
                 application = ExpertApplication.objects.get(expert=user)
-                application.status = 'rejected'
+                application.status = 'deactivated'
                 application.rejection_reason = 'Деактивирован администратором'
                 application.reviewed_by = request.user
                 application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'updated_at'])

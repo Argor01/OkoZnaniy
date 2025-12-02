@@ -874,8 +874,15 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         existing_application = ExpertApplication.objects.filter(expert=self.request.user).first()
         
         if existing_application:
+            # Если анкета деактивирована - запрещаем повторную подачу
+            if existing_application.status == 'deactivated':
+                logger.warning(f"User {self.request.user.id} tried to resubmit deactivated application")
+                raise serializers.ValidationError(
+                    'Ваша анкета была деактивирована администратором. Повторная подача невозможна.'
+                )
+            
             logger.info(f"User {self.request.user.id} already has application {existing_application.id}, updating it")
-            # Обновляем существующую анкету
+            # Обновляем существующую анкету (только если не деактивирована)
             if isinstance(serializer, ExpertApplicationCreateSerializer):
                 educations_data = serializer.validated_data.pop('educations', [])
                 
