@@ -7,6 +7,61 @@
   overflow: hidden;
 }
 
+/* Фиксированная навигация для ExpertDashboard */
+.expertDashboardPage :global(.ant-layout-sider) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100vh !important;
+  z-index: 1001 !important; /* Выше хедера */
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Фиксированный хедер - на всю ширину */
+.expertDashboardPage :global(.ant-layout-header) {
+  margin: 0 !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  width: 100% !important; /* Полная ширина */
+  max-width: 100% !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important; /* Начинается с левого края */
+  z-index: 998 !important; /* Ниже сайдбара */
+  box-sizing: border-box !important;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Контент с отступами для фиксированных элементов */
+.expertDashboardPage :global(.ant-layout-content) {
+  width: 100% !important; /* Полная ширина */
+  max-width: 100% !important;
+  margin-left: 0 !important; /* Убираем левый отступ */
+  margin-top: 0 !important; /* Убираем отступ сверху */
+  min-height: 100vh !important;
+  box-sizing: border-box !important;
+}
+
+/* Ограничиваем ширину контента в ExpertDashboard */
+.expertContentContainer {
+  max-width: none; /* Убираем ограничение ширины */
+  margin: 0; /* Убираем центрирование */
+  width: 100%;
+  padding: 64px 24px 24px 24px; /* Отступы со всех сторон */
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .expertContentContainer {
+    width: 100%;
+    max-width: 100%;
+    padding: 80px 16px 16px 16px; /* Добавляем отступ сверху для хедера */
+  }
+}
+
 .contentWrapper {
   display: flex;
   width: 100%;
@@ -598,6 +653,57 @@
   min-height: auto;
 }
 
+/* Стили для формы образования - новая структура */
+.modalEducationRow {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.modalEducationRow:hover {
+  border-color: rgba(102, 126, 234, 0.3);
+  background: #ffffff;
+}
+
+/* Отступы между рядами инпутов */
+.modalEducationRow :global(.ant-row) {
+  margin: 0 0 8px 0 !important;
+}
+
+.modalEducationRow :global(.ant-row:last-child) {
+  margin-bottom: 0 !important;
+}
+
+.modalEducationRow :global(.ant-col) {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.modalEducationRow :global(.ant-col:first-child) {
+  padding-left: 0 !important;
+}
+
+.modalEducationRow :global(.ant-col:last-child) {
+  padding-right: 0 !important;
+}
+
+.modalEducationRow :global(.ant-form-item) {
+  margin-bottom: 0 !important;
+}
+
+/* На мобильных увеличиваем отступы */
+@media (max-width: 480px) {
+  .modalEducationRow {
+    padding: 20px 16px !important;
+  }
+  
+  .modalEducationRow :global(.ant-row) {
+    margin: 0 0 12px 0 !important;
+  }
+}
+
 /* Card (general) */
 .card {
   background: rgba(255, 255, 255, 0.95);
@@ -921,6 +1027,8 @@
     align-items: flex-start;
   }
 }
+
+
 
 /* Mobile Responsive */
 @media (max-width: 480px) {
@@ -1534,5 +1642,212 @@
   .sidebarMenu .ant-menu-submenu-title .anticon {
     font-size: 22px !important;
     margin-bottom: 6px !important;
+  }
+}
+
+/* ========================================
+   СТИЛИ ДЛЯ ПОЛЕЙ ФОРМЫ АНКЕТЫ ЭКСПЕРТА
+   ======================================== */
+
+/* Стили для поля опыта работы */
+.experienceField {
+  position: relative;
+}
+
+.experienceField :global(.ant-input) {
+  text-align: left !important;
+  font-weight: 500 !important;
+}
+
+.experienceField :global(.ant-input::placeholder) {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+}
+
+/* Стили для поля специальностей */
+.specializationsField :global(.ant-input) {
+  resize: vertical !important;
+}
+
+/* На мобильных устройствах поле специальностей автоматически расширяется */
+@media (max-width: 480px) {
+  .specializationsField :global(.ant-input) {
+    min-height: 100px !important;
+    max-height: 200px !important;
+    resize: vertical !important;
+    overflow-y: auto !important;
+  }
+  
+  .textareaField :global(.ant-input) {
+    min-height: 80px !important;
+    height: auto !important;
+    resize: vertical !important;
+  }
+  
+  /* Улучшенные стили для поля опыта работы на мобильных */
+  .experienceField :global(.ant-input) {
+    height: 48px !important;
+    line-height: 46px !important;
+    font-size: 16px !important;
+    padding: 0 16px !important;
+  }
+}/* =====
+===================================
+   СТИЛИ ДЛЯ ЧАТОВ НА МОБИЛЬНЫХ УСТРОЙСТВАХ
+   ======================================== */
+
+/* Обеспечиваем правильное отображение чатов на мобильных */
+@media (max-width: 840px) {
+  /* Модальное окно чатов на мобильных */
+  :global(.ant-modal-wrap) {
+    padding: 0 !important;
+  }
+  
+  :global(.ant-modal) {
+    margin: 0 !important;
+    padding: 0 !important;
+    top: 0 !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+  
+  :global(.ant-modal-content) {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  :global(.ant-modal-body) {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+  }
+  
+  /* Область чата должна занимать всю доступную высоту */
+  .chatContainer {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  
+  .chatMessagesArea {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+  
+  .chatInputArea {
+    flex-shrink: 0 !important;
+    padding: 8px 12px 12px 12px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e5e7eb !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Дополнительные стили для очень маленьких экранов */
+  .chatInputArea {
+    padding: 6px 8px 10px 8px !important;
+  }
+  
+  .chatInputArea :global(.ant-input) {
+    font-size: 14px !important;
+  }
+  
+  .chatInputArea :global(.ant-btn) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}/* Дополни
+тельные стили для полного удаления отступов в модальном окне чатов */
+@media (max-width: 840px) {
+  /* Убираем все возможные отступы и границы */
+  :global(.ant-modal-root) {
+    padding: 0 !important;
+  }
+  
+  :global(.ant-modal-mask) {
+    padding: 0 !important;
+  }
+  
+  /* Убираем отступы у контейнера модального окна */
+  :global(.ant-modal-wrap) {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Убираем все отступы у самого модального окна */
+  :global(.ant-modal.ant-modal) {
+    margin: 0 !important;
+    padding: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+  
+  /* Убираем отступы у содержимого */
+  :global(.ant-modal-content.ant-modal-content) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    background: #ffffff !important;
+  }
+  
+  /* Убираем отступы у тела модального окна */
+  :global(.ant-modal-body.ant-modal-body) {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
+}
+/* Моби
+льные стили для фиксированной навигации */
+@media (max-width: 840px) {
+  .expertDashboardPage :global(.ant-layout-header) {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    width: 100% !important; /* На мобильных хедер на всю ширину */
+    max-width: 100% !important;
+    left: 0 !important; /* Начинается с левого края */
+  }
+  
+  /* На мобильных сайдбар не фиксированный */
+  .expertDashboardPage :global(.ant-layout-sider) {
+    position: relative !important;
+    height: auto !important;
+    z-index: auto !important;
+  }
+  
+  /* На мобильных убираем отступ для сайдбара */
+  .expertDashboardPage :global(.ant-layout-content) {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }

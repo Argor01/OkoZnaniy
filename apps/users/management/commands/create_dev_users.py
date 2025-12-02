@@ -39,6 +39,14 @@ class Command(BaseCommand):
                 'role': 'admin',  # Директор использует роль admin
                 'first_name': 'Директор',
                 'last_name': 'Тестовый'
+            },
+            {
+                'email': 'expert@test.com',
+                'username': 'expert',
+                'password': 'test123',
+                'role': 'expert',
+                'first_name': 'Эксперт',
+                'last_name': 'Тестовый'
             }
         ]
         
@@ -144,4 +152,5 @@ class Command(BaseCommand):
         self.stdout.write('  - Администратор: admin@test.com / test123')
         self.stdout.write('  - Арбитр: arbitrator@test.com / test123')
         self.stdout.write('  - Директор: director@test.com / test123 (роль: admin)')
+        self.stdout.write('  - Эксперт: expert@test.com / test123')
 

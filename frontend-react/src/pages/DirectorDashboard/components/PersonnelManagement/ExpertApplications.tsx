@@ -156,14 +156,20 @@ const ExpertApplications: React.FC = () => {
 
   const columns = [
     {
+      title: 'Фамилия',
+      dataIndex: ['user', 'last_name'],
+      key: 'last_name',
+    },
+    {
       title: 'Имя',
       dataIndex: ['user', 'first_name'],
       key: 'first_name',
     },
     {
-      title: 'Фамилия',
-      dataIndex: ['user', 'last_name'],
-      key: 'last_name',
+      title: 'Отчество',
+      dataIndex: ['user', 'middle_name'],
+      key: 'middle_name',
+      render: (text: string) => text || '-',
     },
     {
       title: 'Email',
@@ -248,7 +254,9 @@ const ExpertApplications: React.FC = () => {
       >
         <div className={styles.mobileUserInfo}>
           <div className={styles.mobileUserName}>
-            {application.user.first_name} {application.user.last_name}
+            {[application.user.last_name, application.user.first_name, application.user.middle_name]
+              .filter(Boolean)
+              .join(' ')}
           </div>
           <div className={styles.mobileUserEmail}>
             {application.user.email}
@@ -367,11 +375,14 @@ const ExpertApplications: React.FC = () => {
               bordered 
               size={isMobile ? 'small' : 'default'}
             >
+              <Descriptions.Item label="Фамилия">
+                {selectedApplication.user.last_name}
+              </Descriptions.Item>
               <Descriptions.Item label="Имя">
                 {selectedApplication.user.first_name}
               </Descriptions.Item>
-              <Descriptions.Item label="Фамилия">
-                {selectedApplication.user.last_name}
+              <Descriptions.Item label="Отчество">
+                {selectedApplication.user.middle_name || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
                 {selectedApplication.user.email}

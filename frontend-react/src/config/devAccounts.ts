@@ -1,5 +1,5 @@
 export interface DevAccount {
-  role: 'partner' | 'admin' | 'director';
+  role: 'partner' | 'admin' | 'director' | 'expert';
   label: string;
   email: string;
   password: string;
@@ -22,6 +22,12 @@ export const DEV_ACCOUNTS: DevAccount[] = [
     role: 'director',
     label: 'Директор',
     email: 'director@test.com',
+    password: 'test123'
+  },
+  {
+    role: 'expert',
+    label: 'Эксперт',
+    email: 'expert@test.com',
     password: 'test123'
   }
 ];

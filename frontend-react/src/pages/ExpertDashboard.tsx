@@ -96,6 +96,7 @@ const ExpertDashboard: React.FC = () => {
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
+  const [selectedChat, setSelectedChat] = useState<any>(null);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [financeModalVisible, setFinanceModalVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
@@ -111,6 +112,7 @@ const ExpertDashboard: React.FC = () => {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [isTablet, setIsTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
   const uploadRef = useRef<any>(null);
 
   // Forms
@@ -346,9 +348,56 @@ const ExpertDashboard: React.FC = () => {
     }
   ];
 
-  const [selectedChat, setSelectedChat] = useState<ChatMessage | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(mockMessages);
+
+  // Функция прокрутки к последнему сообщению
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Функция отправки сообщения
+  const sendMessage = () => {
+    if (messageText.trim() && selectedChat) {
+      // Создаем новое сообщение
+      const newMessage = {
+        id: Date.now(),
+        text: messageText.trim(),
+        timestamp: new Date().toLocaleTimeString('ru-RU', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        isMine: true,
+        isRead: false
+      };
+
+      // Обновляем сообщения в выбранном чате
+      const updatedChatMessages = chatMessages.map(chat => {
+        if (chat.id === selectedChat.id) {
+          const updatedChat = {
+            ...chat,
+            messages: [...chat.messages, newMessage],
+            lastMessage: messageText.trim(),
+            timestamp: 'Только что',
+            isRead: true
+          };
+          setSelectedChat(updatedChat);
+          return updatedChat;
+        }
+        return chat;
+      });
+
+      setChatMessages(updatedChatMessages);
+      setMessageText('');
+      setFileList([]);
+      message.success('Сообщение отправлено');
+      
+      // Прокручиваем к последнему сообщению
+      setTimeout(scrollToBottom, 100);
+    }
+  };
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [form] = Form.useForm();
 
   const { data, isLoading, isError } = useQuery({
@@ -681,7 +730,7 @@ const ExpertDashboard: React.FC = () => {
   React.useEffect(() => {
     const state = location.state as any;
     if (state?.openChat) {
-      const chat = mockMessages.find(m => m.userName.includes(state.openChat) || state.openChat.includes(m.userName));
+      const chat = chatMessages.find(m => m.userName.includes(state.openChat) || state.openChat.includes(m.userName));
       if (chat) {
         setSelectedChat(chat);
       }
@@ -815,7 +864,7 @@ const ExpertDashboard: React.FC = () => {
 
   return (
     <>
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh' }} className={styles.expertDashboardPage}>
       <Sidebar
         selectedKey={selectedMenuKey}
         onMenuSelect={handleMenuSelect}
@@ -834,7 +883,7 @@ const ExpertDashboard: React.FC = () => {
           role: profile.role
         } : undefined}
       />
-      <Layout>
+      <Layout style={{ marginLeft: isMobile ? 0 : 250 }}>
         <Header
           style={{
             background: '#fff',
@@ -889,6 +938,7 @@ const ExpertDashboard: React.FC = () => {
             marginBottom: isMobile ? '80px' : '24px',
           }}
         >
+        <div className={styles.expertContentContainer}>
         {/* Profile Header Block */}
         <div className={styles.profileBlock}>
           <div className={styles.profileBlockContent}>
@@ -1051,8 +1101,14 @@ const ExpertDashboard: React.FC = () => {
                   size="large"
                   onClick={() => {
                     const app = application as ExpertApplication;
+                    // Разбиваем full_name на отдельные поля
+                    const nameParts = app.full_name?.split(' ') || [];
+                    const [last_name = '', first_name = '', middle_name = ''] = nameParts;
+                    
                     applicationForm.setFieldsValue({
-                      full_name: app.full_name,
+                      last_name,
+                      first_name,
+                      middle_name,
                       work_experience_years: app.work_experience_years,
                       specializations: app.specializations,
                       educations: (app.educations || []).map((e) => ({
@@ -1282,131 +1338,7 @@ const ExpertDashboard: React.FC = () => {
               label: `Заказы ${orders.length || 0}`,
               children: (
                 <div>
-                  {/* Search and Filters Section */}
-                  <div style={{ 
-                    background: '#ffffff',
-                    borderRadius: 16,
-                    padding: 24,
-                    marginBottom: 24,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                  }}>
-                    <h3 style={{ 
-                      fontSize: 20, 
-                      fontWeight: 600, 
-                      color: '#1f2937',
-                      marginBottom: 24 
-                    }}>
-                      Поиск по работам
-                    </h3>
-                    
-                    <Row gutter={[16, 16]}>
-                      <Col xs={24} sm={12} lg={6}>
-                        <Input 
-                          placeholder="Текст поиска" 
-                          prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
-                          style={{ 
-                            height: 48,
-                            borderRadius: 8,
-                            fontSize: 14
-                          }}
-                        />
-                      </Col>
-                      
-                      <Col xs={24} sm={12} lg={6}>
-                        <Select
-                          placeholder="Тип работы"
-                          suffixIcon={<DownOutlined style={{ color: '#9ca3af' }} />}
-                          style={{ width: '100%' }}
-                          size="large"
-                          options={[
-                            { value: 'all', label: 'Все типы' },
-                            { value: 'essay', label: 'Реферат' },
-                            { value: 'coursework', label: 'Курсовая' },
-                            { value: 'diploma', label: 'Диплом' },
-                            { value: 'test', label: 'Контрольная' },
-                          ]}
-                        />
-                      </Col>
-                      
-                      <Col xs={24} sm={12} lg={6}>
-                        <Select
-                          placeholder="Выбрать предмет"
-                          suffixIcon={<DownOutlined style={{ color: '#9ca3af' }} />}
-                          style={{ width: '100%' }}
-                          size="large"
-                          options={[
-                            { value: 'all', label: 'Все предметы' },
-                            { value: 'math', label: 'Математика' },
-                            { value: 'physics', label: 'Физика' },
-                            { value: 'chemistry', label: 'Химия' },
-                            { value: 'history', label: 'История' },
-                          ]}
-                        />
-                      </Col>
-                      
-                      <Col xs={24} sm={12} lg={6}>
-                        <Row gutter={[8, 8]}>
-                          <Col span={12}>
-                            <Input 
-                              placeholder="Исполнитель" 
-                              style={{ 
-                                height: 48,
-                                borderRadius: 8,
-                                fontSize: 14
-                              }}
-                            />
-                          </Col>
-                          <Col span={12}>
-                            <DatePicker
-                              placeholder="Дата"
-                              style={{ 
-                                width: '100%',
-                                height: 48,
-                                borderRadius: 8,
-                                fontSize: 14
-                              }}
-                              format="DD.MM.YYYY"
-                            />
-                          </Col>
-                        </Row>
-                      </Col>
-                    </Row>
-                    
-                    <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                      <Col xs={24} sm={12} lg={6}>
-                        <Select
-                          placeholder="Все"
-                          defaultValue="all"
-                          suffixIcon={<DownOutlined style={{ color: '#9ca3af' }} />}
-                          style={{ width: '100%' }}
-                          size="large"
-                          options={[
-                            { value: 'all', label: 'Все' },
-                            { value: 'new', label: 'Новые' },
-                            { value: 'in_progress', label: 'В работе' },
-                            { value: 'completed', label: 'Завершённые' },
-                          ]}
-                        />
-                      </Col>
-                      
-                      <Col xs={24} sm={12} lg={6}>
-                        <Button 
-                          type="primary"
-                          icon={<SearchOutlined />}
-                          size="large"
-                          block
-                          style={{
-                            height: 48,
-                            borderRadius: 8,
-                            fontSize: 15,
-                            fontWeight: 500
-                          }}
-                        >
-                          Поиск
-                        </Button>
-                      </Col>
-                    </Row>
-                  </div>
+
 
                   {/* Available Orders Section */}
                   <div className={styles.sectionCard}>
@@ -1514,34 +1446,112 @@ const ExpertDashboard: React.FC = () => {
                   <div className={styles.sectionCardHeader}>
                     <h2 className={styles.sectionTitle}>Мои работы</h2>
                   </div>
-                  {(myCompleted as Order[] | undefined)?.length === 0 ? (
-                    <div className={styles.emptyState}>
-                      <Text>У вас пока нет завершенных работ</Text>
-                    </div>
-                  ) : (
-                    <div>
-                      {((myCompleted as Order[] | undefined) || []).map((order) => (
-                        <div key={order.id} className={styles.orderCard}>
-                          <div className={styles.orderHeader}>
-                            <div style={{ flex: 1 }}>
-                              <h4 className={styles.orderTitle}>{order.title}</h4>
-                              <Text type="secondary" style={{ fontSize: 14 }}>#{order.id}</Text>
-                              <div className={styles.orderTags} style={{ marginTop: 12 }}>
-                                {order.subject && <span className={styles.tagBlue}>{order.subject.name}</span>}
-                                {order.work_type && <span className={styles.tag}>{order.work_type.name}</span>}
-                              </div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <p className={styles.orderBudget}>{order.budget} ₽</p>
-                            </div>
-                          </div>
-                          <div style={{ marginTop: 16 }}>
-                            <Text style={{ color: '#6b7280', fontSize: 14 }}>{order.description}</Text>
-                          </div>
+                  
+                  {/* Краткая статистика */}
+                  <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                    <Col xs={24} sm={8}>
+                      <div style={{ 
+                        background: '#f0fdf4', 
+                        padding: '16px', 
+                        borderRadius: 12, 
+                        border: '1px solid #bbf7d0',
+                        textAlign: 'center'
+                      }}>
+                        <CheckCircleOutlined style={{ fontSize: 24, color: '#10b981', marginBottom: 8 }} />
+                        <div style={{ fontSize: 20, fontWeight: 600, color: '#10b981' }}>
+                          {(myCompleted as Order[] | undefined)?.length || 5}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <Text type="secondary" style={{ fontSize: 12 }}>Завершенные</Text>
+                      </div>
+                    </Col>
+                    <Col xs={24} sm={8}>
+                      <div style={{ 
+                        background: '#fef3c7', 
+                        padding: '16px', 
+                        borderRadius: 12, 
+                        border: '1px solid #fde68a',
+                        textAlign: 'center'
+                      }}>
+                        <ClockCircleOutlined style={{ fontSize: 24, color: '#f59e0b', marginBottom: 8 }} />
+                        <div style={{ fontSize: 20, fontWeight: 600, color: '#f59e0b' }}>
+                          {(myInProgress as Order[] | undefined)?.length || 2}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>В работе</Text>
+                      </div>
+                    </Col>
+                    <Col xs={24} sm={8}>
+                      <div style={{ 
+                        background: '#eff6ff', 
+                        padding: '16px', 
+                        borderRadius: 12, 
+                        border: '1px solid #bfdbfe',
+                        textAlign: 'center'
+                      }}>
+                        <DollarOutlined style={{ fontSize: 24, color: '#3b82f6', marginBottom: 8 }} />
+                        <div style={{ fontSize: 20, fontWeight: 600, color: '#3b82f6' }}>
+                          {((myCompleted as any[] | undefined)?.reduce((sum, order) => sum + (Number(order.budget) || 0), 0) || 30800).toLocaleString('ru-RU')} ₽
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>Общий доход</Text>
+                      </div>
+                    </Col>
+                  </Row>
+
+                  {/* Последние работы */}
+                  <div style={{ marginBottom: 24 }}>
+                    <Title level={4} style={{ marginBottom: 16 }}>Последние завершенные работы</Title>
+                    {(myCompleted as Order[] | undefined)?.length ? (
+                      <div style={{ display: 'grid', gap: 16 }}>
+                        {(myCompleted as any[]).slice(0, 3).map((work: any) => (
+                          <div key={work.id} className={styles.orderCard}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                              <div style={{ flex: 1 }}>
+                                <Title level={5} style={{ margin: 0, marginBottom: 4 }}>
+                                  {work.title}
+                                </Title>
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                  {work.subject?.name} • {work.work_type?.name}
+                                </Text>
+                              </div>
+                              <Tag color="green" style={{ marginLeft: 12 }}>
+                                Завершен
+                              </Tag>
+                            </div>
+                            <Paragraph 
+                              ellipsis={{ rows: 1 }}
+                              style={{ color: '#6b7280', marginBottom: 8, fontSize: 14 }}
+                            >
+                              {work.description}
+                            </Paragraph>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Text strong style={{ color: '#10b981', fontSize: 16 }}>
+                                {Number(work.budget)?.toLocaleString('ru-RU')} ₽
+                              </Text>
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {work.client?.first_name} {work.client?.last_name}
+                              </Text>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={styles.emptyState}>
+                        <Text>У вас пока нет завершенных работ</Text>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Кнопка перехода на полную страницу */}
+                  <div style={{ textAlign: 'center', paddingTop: 16, borderTop: '1px solid #e5e7eb' }}>
+                    <Button 
+                      type="primary" 
+                      size="large"
+                      className={styles.buttonPrimary}
+                      onClick={() => navigate('/works')}
+                      style={{ minWidth: 200 }}
+                    >
+                      Посмотреть все работы
+                    </Button>
+                  </div>
                 </div>
               ),
             },
@@ -1573,7 +1583,7 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            const chat = mockMessages.find(m => m.userName === 'Иван Петров');
+                            const chat = chatMessages.find(m => m.userName === 'Иван Петров');
                             if (chat) {
                               setSelectedChat(chat);
                             }
@@ -1627,7 +1637,7 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            const chat = mockMessages.find(m => m.userName === 'Мария Сидорова');
+                            const chat = chatMessages.find(m => m.userName === 'Мария Сидорова');
                             if (chat) {
                               setSelectedChat(chat);
                             }
@@ -1681,7 +1691,7 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            const chat = mockMessages.find(m => m.userName === 'Алексей Смирнов');
+                            const chat = chatMessages.find(m => m.userName === 'Алексей Смирнов');
                             if (chat) {
                               setSelectedChat(chat);
                             }
@@ -1735,7 +1745,7 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            const chat = mockMessages.find(m => m.userName === 'Елена Козлова');
+                            const chat = chatMessages.find(m => m.userName === 'Елена Козлова');
                             if (chat) {
                               setSelectedChat(chat);
                             }
@@ -1789,7 +1799,7 @@ const ExpertDashboard: React.FC = () => {
                           icon={<MessageOutlined />} 
                           style={{ flex: 1 }}
                           onClick={() => {
-                            const chat = mockMessages.find(m => m.userName === 'Дмитрий Новиков');
+                            const chat = chatMessages.find(m => m.userName === 'Дмитрий Новиков');
                             if (chat) {
                               setSelectedChat(chat);
                             }
@@ -1838,6 +1848,7 @@ const ExpertDashboard: React.FC = () => {
             border: '1px solid rgba(255, 255, 255, 0.2)',
           }}
         />
+        </div>
         </div>
         </Content>
         <Footer style={{ textAlign: 'center', background: '#fff' }}>
@@ -2006,7 +2017,7 @@ const ExpertDashboard: React.FC = () => {
           <Form.Item label="Опыт работы (лет)" name="experience_years">
             <AntInputNumber 
               min={0} 
-              max={50} 
+              max={90} 
               precision={0}
               parser={(value) => {
                 const parsed = value?.replace(/\D/g, '');
@@ -2130,19 +2141,48 @@ const ExpertDashboard: React.FC = () => {
               return;
             }
             
+            // Формируем full_name из отдельных полей
+            const full_name = [values.last_name, values.first_name, values.middle_name]
+              .filter(Boolean)
+              .join(' ');
+            
             createApplicationMutation.mutate({
               ...values,
+              full_name,
               educations
             });
           }}
         >
           <Form.Item
-            label="ФИО"
-            name="full_name"
-            rules={[{ required: true, message: 'Введите ФИО' }]}
+            label="Фамилия"
+            name="last_name"
+            rules={[{ required: true, message: 'Введите фамилию' }]}
           >
             <Input 
-              placeholder="Иванов Иван Иванович" 
+              placeholder="Иванов" 
+              className={styles.inputField}
+              size="large"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Имя"
+            name="first_name"
+            rules={[{ required: true, message: 'Введите имя' }]}
+          >
+            <Input 
+              placeholder="Иван" 
+              className={styles.inputField}
+              size="large"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Отчество"
+            name="middle_name"
+          >
+            <Input 
+              placeholder="Иванович" 
               className={styles.inputField}
               size="large"
             />
@@ -2151,23 +2191,42 @@ const ExpertDashboard: React.FC = () => {
           <Form.Item
             label="Опыт работы (лет)"
             name="work_experience_years"
-            rules={[{ required: true, message: 'Укажите опыт работы' }]}
+            rules={[
+              { required: true, message: 'Укажите опыт работы' },
+              { 
+                pattern: /^[0-9]+$/, 
+                message: 'Введите только цифры' 
+              },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const num = parseInt(value, 10);
+                  if (num < 0) return Promise.reject(new Error('Опыт не может быть отрицательным'));
+                  if (num > 90) return Promise.reject(new Error('Максимальный опыт - 90 лет'));
+                  return Promise.resolve();
+                }
+              }
+            ]}
+            extra="Укажите общий опыт работы в годах (от 0 до 90)"
           >
-            <AntInputNumber 
-              min={0} 
-              max={50}
-              precision={0}
-              controls={false}
-              keyboard={true}
+            <Input 
+              placeholder="Например: 5"
+              className={`${styles.inputField} ${styles.experienceField}`}
+              size="large"
+              maxLength={2}
               onKeyPress={(e) => {
-                if (!/[0-9]/.test(e.key)) {
+                if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
                   e.preventDefault();
                 }
               }}
-              style={{ width: '100%' }}
-              className={styles.inputField}
-              size="large"
-              placeholder="0"
+              onChange={(e) => {
+                const value = e.target.value;
+                // Удаляем все нецифровые символы
+                const numericValue = value.replace(/[^0-9]/g, '');
+                if (numericValue !== value) {
+                  e.target.value = numericValue;
+                }
+              }}
             />
           </Form.Item>
 
@@ -2180,8 +2239,9 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea 
               rows={4} 
               placeholder="Например: Математика, Физика, Информатика или каждую на новой строке"
-              className={styles.textareaField}
+              className={`${styles.textareaField} ${styles.specializationsField}`}
               style={{ fontSize: 15 }}
+              autoSize={{ minRows: 4, maxRows: 8 }}
             />
           </Form.Item>
 
@@ -2191,78 +2251,17 @@ const ExpertDashboard: React.FC = () => {
                 <>
                   {fields.map(({ key, name, ...restField }) => (
                     <div key={key} className={styles.modalEducationRow}>
-                      <Row gutter={16} align="middle">
-                        <Col span={10}>
+                      {/* Название ВУЗа - отдельная строка */}
+                      <Row gutter={16}>
+                        <Col span={22}>
                           <Form.Item
                             {...restField}
                             name={[name, 'university']}
                             rules={[{ required: true, message: 'Введите ВУЗ' }]}
-                            style={{ marginBottom: 0 }}
+                            style={{ marginBottom: 12 }}
                           >
                             <Input 
                               placeholder="Название ВУЗа" 
-                              className={styles.inputField}
-                              size="large"
-                            />
-                          </Form.Item>
-                        </Col>
-                        <Col span={4}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'start_year']}
-                            rules={[{ required: true, message: 'Год начала' }]}
-                            style={{ marginBottom: 0 }}
-                          >
-                            <AntInputNumber 
-                              min={1950} 
-                              max={2100} 
-                              placeholder="Год начала" 
-                              style={{ width: '100%' }}
-                              className={styles.inputField}
-                              size="large"
-                              precision={0}
-                              controls={false}
-                              keyboard={true}
-                              onKeyPress={(e) => {
-                                if (!/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
-                            />
-                          </Form.Item>
-                        </Col>
-                        <Col span={4}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'end_year']}
-                            style={{ marginBottom: 0 }}
-                          >
-                            <AntInputNumber 
-                              min={1950} 
-                              max={2100} 
-                              placeholder="Год окончания" 
-                              style={{ width: '100%' }}
-                              className={styles.inputField}
-                              size="large"
-                              precision={0}
-                              controls={false}
-                              keyboard={true}
-                              onKeyPress={(e) => {
-                                if (!/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
-                            />
-                          </Form.Item>
-                        </Col>
-                        <Col span={4}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'degree']}
-                            style={{ marginBottom: 0 }}
-                          >
-                            <Input 
-                              placeholder="Степень" 
                               className={styles.inputField}
                               size="large"
                             />
@@ -2276,6 +2275,82 @@ const ExpertDashboard: React.FC = () => {
                             onClick={() => remove(name)}
                             style={{ marginTop: 0 }}
                           />
+                        </Col>
+                      </Row>
+                      
+                      {/* Годы - в одной строке */}
+                      <Row gutter={16}>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'start_year']}
+                            rules={[{ required: true, message: 'Год начала' }]}
+                            style={{ marginBottom: 12 }}
+                          >
+                            <Input 
+                              type="number"
+                              min={1950} 
+                              max={2100} 
+                              placeholder="Год начала" 
+                              className={styles.inputField}
+                              size="large"
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value && (parseInt(value) < 1950 || parseInt(value) > 2100)) {
+                                  e.target.value = Math.max(1950, Math.min(2100, parseInt(value) || 1950)).toString();
+                                }
+                              }}
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'end_year']}
+                            style={{ marginBottom: 12 }}
+                          >
+                            <Input 
+                              type="number"
+                              min={1950} 
+                              max={2100} 
+                              placeholder="Год окончания" 
+                              className={styles.inputField}
+                              size="large"
+                              onKeyPress={(e) => {
+                                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value && (parseInt(value) < 1950 || parseInt(value) > 2100)) {
+                                  e.target.value = Math.max(1950, Math.min(2100, parseInt(value) || 1950)).toString();
+                                }
+                              }}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      
+                      {/* Степень - отдельная строка */}
+                      <Row gutter={16}>
+                        <Col span={24}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'degree']}
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Input 
+                              placeholder="Степень" 
+                              className={styles.inputField}
+                              size="large"
+                            />
+                          </Form.Item>
                         </Col>
                       </Row>
                     </div>
@@ -2398,7 +2473,7 @@ const ExpertDashboard: React.FC = () => {
           >
             <AntInputNumber 
               min={0} 
-              max={50}
+              max={90}
               precision={0}
               parser={(value) => {
                 const parsed = value?.replace(/\D/g, '');
@@ -2448,7 +2523,7 @@ const ExpertDashboard: React.FC = () => {
         open={messageModalVisible}
         onCancel={() => setMessageModalVisible(false)}
         footer={null}
-        width={isMobile ? '100%' : isTablet ? 700 : 900}
+        width="auto"
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -2458,27 +2533,41 @@ const ExpertDashboard: React.FC = () => {
           content: { 
             borderRadius: isMobile ? 0 : 24, 
             padding: 0,
-            overflow: 'hidden',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-            maxHeight: isMobile ? '100vh' : 'auto',
             margin: isMobile ? 0 : 'auto',
-            top: isMobile ? 0 : undefined
+            overflow: 'hidden',
+            background: '#ffffff',
+            boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
+            maxHeight: isMobile ? '100vh' : 'auto',
+            top: isMobile ? 0 : '60px',
+            left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
+            right: isMobile ? 0 : '20px',
+            bottom: isMobile ? 0 : '20px',
+            width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+            height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
+            transform: 'none',
+            position: 'fixed'
           },
           header: {
             display: 'none'
           },
           body: {
             padding: 0,
-            background: 'rgba(255, 255, 255, 0.95)',
+            margin: 0,
+            background: '#ffffff',
             height: isMobile ? '100vh' : isTablet ? '500px' : '600px',
             display: 'flex',
             overflow: 'hidden'
           }
         }}
       >
-        <div style={{ display: 'flex', height: '100%', width: '100%', flexDirection: isMobile ? 'column' : 'row', overflow: 'hidden' }}>
+        <div style={{ 
+          display: 'flex', 
+          height: '100%', 
+          width: '100%', 
+          flexDirection: isMobile ? 'column' : 'row', 
+          overflow: 'hidden',
+          position: 'relative'
+        }}>
           {/* Left Sidebar */}
           <div style={{ 
             width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
@@ -2568,7 +2657,7 @@ const ExpertDashboard: React.FC = () => {
               overflowY: 'auto',
               background: '#ffffff'
             }}>
-              {mockMessages
+              {chatMessages
                 .filter(chat => {
                   if (messageTab === 'unread') return !chat.isRead;
                   return true;
@@ -2662,7 +2751,9 @@ const ExpertDashboard: React.FC = () => {
             flex: 1, 
             display: (!selectedChat && isMobile) ? 'none' : 'flex',
             flexDirection: 'column',
-            background: '#ffffff'
+            background: '#ffffff',
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
             {/* Header */}
             <div style={{
@@ -2748,7 +2839,8 @@ const ExpertDashboard: React.FC = () => {
               flex: 1, 
               overflowY: 'auto',
               padding: isMobile ? '12px' : '20px',
-              background: '#f9fafb'
+              background: '#f9fafb',
+              minHeight: 0
             }}>
               {selectedChat ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
@@ -2791,6 +2883,7 @@ const ExpertDashboard: React.FC = () => {
                       </div>
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
               ) : (
                 <div style={{ 
@@ -2807,9 +2900,10 @@ const ExpertDashboard: React.FC = () => {
 
             {/* Input Area */}
             <div style={{ 
-              padding: isMobile ? '8px 12px' : '16px',
+              padding: isMobile ? '8px 12px 12px 12px' : '16px',
               borderTop: '1px solid #e5e7eb',
-              background: '#ffffff'
+              background: '#ffffff',
+              flexShrink: 0
             }}>
               {fileList.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
@@ -2837,6 +2931,12 @@ const ExpertDashboard: React.FC = () => {
                     borderRadius: 8,
                     border: '1px solid #d1d5db',
                     fontSize: isMobile ? 13 : 14
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
                   }}
                 />
                 <Upload
@@ -2900,14 +3000,7 @@ const ExpertDashboard: React.FC = () => {
                     border: 'none',
                     fontSize: isMobile ? 14 : 16
                   }}
-                  onClick={() => {
-                    if (messageText.trim()) {
-                      // Здесь будет логика отправки сообщения
-                      setMessageText('');
-                      setFileList([]);
-                      message.success('Сообщение отправлено');
-                    }
-                  }}
+                  onClick={sendMessage}
                 />
               </div>
             </div>
@@ -2933,7 +3026,7 @@ const ExpertDashboard: React.FC = () => {
         open={faqModalVisible}
         onCancel={() => setFaqModalVisible(false)}
         footer={null}
-        width={800}
+        width="auto"
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -2941,11 +3034,21 @@ const ExpertDashboard: React.FC = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.3)'
           },
           content: { 
-            borderRadius: 24, 
-            padding: '32px',
+            borderRadius: isMobile ? 0 : 24, 
+            padding: isMobile ? '16px' : '32px',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            margin: isMobile ? 0 : undefined,
+            maxWidth: isMobile ? '100vw' : undefined,
+            top: isMobile ? 0 : '60px',
+            left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
+            right: isMobile ? 0 : '20px',
+            bottom: isMobile ? 0 : '20px',
+            width: isMobile ? '100vw' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+            height: isMobile ? '100vh' : 'calc(100vh - 80px)',
+            transform: 'none',
+            position: 'fixed'
           },
           body: {
             maxHeight: '70vh',
@@ -3384,7 +3487,7 @@ const ExpertDashboard: React.FC = () => {
         open={financeModalVisible}
         onCancel={() => setFinanceModalVisible(false)}
         footer={null}
-        width={isMobile ? '100%' : 1200}
+        width="auto"
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -3399,8 +3502,14 @@ const ExpertDashboard: React.FC = () => {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
             margin: isMobile ? 0 : undefined,
             maxWidth: isMobile ? '100vw' : undefined,
-            top: isMobile ? 0 : undefined,
-            height: isMobile ? '100vh' : undefined
+            top: isMobile ? 0 : '60px',
+            left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
+            right: isMobile ? 0 : '20px',
+            bottom: isMobile ? 0 : '20px',
+            width: isMobile ? '100vw' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+            height: isMobile ? '100vh' : 'calc(100vh - 80px)',
+            transform: 'none',
+            position: 'fixed'
           },
           body: {
             padding: '0',
@@ -3620,13 +3729,7 @@ const ExpertDashboard: React.FC = () => {
         open={notificationsModalVisible}
         onCancel={() => setNotificationsModalVisible(false)}
         footer={null}
-        width={isMobile ? '100%' : 900}
-        style={isMobile ? {
-          top: 0,
-          padding: 0,
-          maxWidth: '100%',
-          margin: 0
-        } : {}}
+        width="auto"
         styles={{
           mask: {
             backdropFilter: 'blur(8px)',
@@ -5171,8 +5274,9 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea 
               rows={6} 
               placeholder="Расскажите о своем опыте, образовании и подходе к работе" 
-              className={styles.textareaField}
+              className={`${styles.textareaField} ${styles.specializationsField}`}
               style={{ fontSize: 15 }}
+              autoSize={{ minRows: 6, maxRows: 10 }}
             />
           </Form.Item>
 
@@ -5184,8 +5288,9 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea 
               rows={3} 
               placeholder="Укажите ваше образование и квалификации" 
-              className={styles.textareaField}
+              className={`${styles.textareaField} ${styles.specializationsField}`}
               style={{ fontSize: 15 }}
+              autoSize={{ minRows: 3, maxRows: 6 }}
             />
           </Form.Item>
 
@@ -5198,8 +5303,9 @@ const ExpertDashboard: React.FC = () => {
             <Input.TextArea 
               rows={3} 
               placeholder="Например: Математический анализ, Python, C++, Физика" 
-              className={styles.textareaField}
+              className={`${styles.textareaField} ${styles.specializationsField}`}
               style={{ fontSize: 15 }}
+              autoSize={{ minRows: 3, maxRows: 8 }}
             />
           </Form.Item>
         </Form>
@@ -5570,6 +5676,8 @@ const ExpertDashboard: React.FC = () => {
           </div>
         )}
       </Modal>
+
+
     </>
   );
 };

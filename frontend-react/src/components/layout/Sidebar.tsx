@@ -107,6 +107,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       onMobileDrawerChange(false);
     }
 
+    if (key === 'dashboard') {
+      navigate('/expert');
+      return;
+    }
     if (key === 'messages') {
       onMessagesClick?.();
       return;
@@ -165,6 +169,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const menuItems = [
+    {
+      key: 'dashboard',
+      icon: <UserOutlined />,
+      label: 'Аккаунт',
+    },
     {
       key: 'messages',
       icon: <MessageOutlined />,
