@@ -23,12 +23,6 @@ export const DEV_ACCOUNTS: DevAccount[] = [
     label: 'Директор',
     email: 'director@test.com',
     password: 'test123'
-  },
-  {
-    role: 'expert',
-    label: 'Эксперт',
-    email: 'expert@test.com',
-    password: 'test123'
   }
 ];
 

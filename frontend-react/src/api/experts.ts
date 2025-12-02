@@ -87,6 +87,7 @@ export const expertsApi = {
   async getMyApplication(): Promise<ExpertApplication | null> {
     try {
       const { data } = await apiClient.get('/experts/applications/my_application/');
+      // Если сервер вернул null, значит анкеты нет
       return data;
     } catch (error: any) {
       // Если анкета не найдена (404), это нормально - значит её ещё нет

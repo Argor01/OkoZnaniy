@@ -2070,7 +2070,7 @@ const ExpertDashboard: React.FC = () => {
         open={applicationModalVisible}
         onCancel={() => setApplicationModalVisible(false)}
         onOk={() => applicationForm.submit()}
-        width={750}
+        width={window.innerWidth <= 480 ? '95%' : 750}
         okText="Отправить"
         cancelText="Отмена"
         okButtonProps={{
@@ -2100,9 +2100,8 @@ const ExpertDashboard: React.FC = () => {
             backgroundColor: 'rgba(0, 0, 0, 0.3)'
           },
           content: { 
-            borderRadius: 24, 
+            borderRadius: window.innerWidth <= 480 ? 12 : 24, 
             padding: 0,
-            overflow: 'hidden',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
@@ -2110,19 +2109,22 @@ const ExpertDashboard: React.FC = () => {
           header: {
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(10px)',
-            padding: '24px 32px',
+            padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
             borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-            borderRadius: '24px 24px 0 0'
+            borderRadius: window.innerWidth <= 480 ? '12px 12px 0 0' : '24px 24px 0 0'
           },
           body: {
-            padding: '32px',
-            background: 'rgba(255, 255, 255, 0.95)'
+            padding: window.innerWidth <= 480 ? '16px' : '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            maxHeight: window.innerWidth <= 480 ? 'calc(100vh - 180px)' : '70vh',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch'
           },
           footer: {
-            padding: '24px 32px',
+            padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
             background: 'rgba(255, 255, 255, 0.95)',
             borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-            borderRadius: '0 0 24px 24px'
+            borderRadius: window.innerWidth <= 480 ? '0 0 12px 12px' : '0 0 24px 24px'
           }
         }}
       >
@@ -2146,9 +2148,11 @@ const ExpertDashboard: React.FC = () => {
               .filter(Boolean)
               .join(' ');
             
+            // Отправляем только нужные поля
             createApplicationMutation.mutate({
-              ...values,
               full_name,
+              work_experience_years: values.work_experience_years,
+              specializations: values.specializations,
               educations
             });
           }}

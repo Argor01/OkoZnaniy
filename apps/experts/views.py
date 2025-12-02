@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, status, serializers
+from rest_framework import viewsets, permissions, status, serializers, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -834,25 +834,46 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_staff:
             return ExpertApplication.objects.select_related('expert', 'reviewed_by').prefetch_related('educations').all()
-        if self.request.user.role == 'expert':
-            return ExpertApplication.objects.filter(expert=self.request.user).select_related('expert', 'reviewed_by').prefetch_related('educations')
-        return ExpertApplication.objects.none()
+        # Любой авторизованный пользователь может видеть свою анкету
+        return ExpertApplication.objects.filter(expert=self.request.user).select_related('expert', 'reviewed_by').prefetch_related('educations')
+    
+    def list(self, request, *args, **kwargs):
+        """Список анкет - для админов все, для пользователей только своя"""
+        try:
+            logger.info(f"Applications list requested by user {request.user.id} (role: {request.user.role})")
+            queryset = self.filter_queryset(self.get_queryset())
+            logger.info(f"Queryset count: {queryset.count()}")
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in applications list for user {request.user.id}: {str(e)}", exc_info=True)
+            return Response(
+                {'detail': f'Ошибка при получении списка анкет: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def get_serializer_class(self):
         if self.action == 'create':
             return ExpertApplicationCreateSerializer
         return ExpertApplicationSerializer
 
+    @action(detail=False, methods=['get'], url_path='my_application')
+    def my_application(self, request):
+        """Получить анкету текущего пользователя"""
+        # Любой авторизованный пользователь может проверить свою анкету
+        try:
+            application = ExpertApplication.objects.select_related('expert', 'reviewed_by').prefetch_related('educations').get(expert=request.user)
+            serializer = self.get_serializer(application)
+            return Response(serializer.data)
+        except ExpertApplication.DoesNotExist:
+            # Возвращаем null вместо 404, чтобы фронтенд мог обработать отсутствие анкеты
+            return Response(None, status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
-        if self.request.user.role != 'expert':
-            raise permissions.PermissionDenied(
-                'Только эксперты могут создавать анкеты'
-            )
-        
         # Проверяем, есть ли уже анкета
         if ExpertApplication.objects.filter(expert=self.request.user).exists():
             raise serializers.ValidationError(
-                'У вас уже есть анкета. Вы можете изменить существующую.'
+                'У вас уже есть анкету. Вы можете изменить существующую.'
             )
         
         # Создаем анкету
@@ -928,20 +949,4 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         
         return Response(ExpertApplicationSerializer(application).data)
 
-    @action(detail=False, methods=['get'])
-    def my_application(self, request):
-        """Получить свою анкету"""
-        if request.user.role != 'expert':
-            return Response(
-                {'detail': 'Только эксперты могут просматривать свои анкеты'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        try:
-            application = ExpertApplication.objects.get(expert=request.user)
-            return Response(ExpertApplicationSerializer(application).data)
-        except ExpertApplication.DoesNotExist:
-            return Response(
-                {'detail': 'Анкета не найдена'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+
