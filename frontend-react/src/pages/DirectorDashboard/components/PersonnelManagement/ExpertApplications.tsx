@@ -56,10 +56,34 @@ const ExpertApplications: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const { data: applications, isLoading } = useQuery({
+  const [statusFilter, setStatusFilter] = useState<string>('pending'); // pending, approved, rejected, all
+
+  const { data: allApplications, isLoading } = useQuery({
     queryKey: ['director-expert-applications'],
     queryFn: getExpertApplications,
   });
+
+  // Фильтруем анкеты по статусу
+  const applications = React.useMemo(() => {
+    if (!allApplications) return [];
+    
+    if (statusFilter === 'all') return allApplications;
+    
+    return allApplications.filter(app => {
+      if (statusFilter === 'pending') {
+        // Показываем только новые и на рассмотрении
+        return app.status === 'new' || app.status === 'under_review' || 
+               (!app.status && !app.application_approved && !app.application_reviewed_at);
+      }
+      if (statusFilter === 'approved') {
+        return app.status === 'approved' || app.application_approved;
+      }
+      if (statusFilter === 'rejected') {
+        return app.status === 'rejected' || app.status === 'deactivated';
+      }
+      return true;
+    });
+  }, [allApplications, statusFilter]);
 
   const approveMutation = useMutation({
     mutationFn: (id: number) => approveApplication(id),
@@ -324,6 +348,35 @@ const ExpertApplications: React.FC = () => {
     <div>
       <Card>
         <Title level={4}>Анкеты экспертов</Title>
+        
+        {/* Фильтры по статусу */}
+        <Space style={{ marginBottom: 16 }} wrap>
+          <Button
+            type={statusFilter === 'pending' ? 'primary' : 'default'}
+            onClick={() => setStatusFilter('pending')}
+          >
+            На рассмотрении
+          </Button>
+          <Button
+            type={statusFilter === 'approved' ? 'primary' : 'default'}
+            onClick={() => setStatusFilter('approved')}
+          >
+            Одобренные
+          </Button>
+          <Button
+            type={statusFilter === 'rejected' ? 'primary' : 'default'}
+            onClick={() => setStatusFilter('rejected')}
+          >
+            Отклоненные
+          </Button>
+          <Button
+            type={statusFilter === 'all' ? 'primary' : 'default'}
+            onClick={() => setStatusFilter('all')}
+          >
+            Все
+          </Button>
+        </Space>
+        
         <Spin spinning={isLoading}>
           {isMobile ? (
             <div>
