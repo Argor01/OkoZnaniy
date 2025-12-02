@@ -90,8 +90,8 @@ export const expertsApi = {
       // Если сервер вернул null, значит анкеты нет
       return data;
     } catch (error: any) {
-      // Если анкета не найдена (404), это нормально - значит её ещё нет
-      if (error.response?.status === 404 || error.response?.status === 403) {
+      // Если анкета не найдена (404 или 400), это нормально - значит её ещё нет
+      if (error.response?.status === 404 || error.response?.status === 403 || error.response?.status === 400) {
         return null;
       }
       throw error;
