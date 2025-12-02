@@ -29,14 +29,19 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         application.reviewed_by = request.user
         application.save(update_fields=['status', 'reviewed_by', 'updated_at'])
 
-        # Синхронизируем флаги пользователя
+        # Синхронизируем флаги пользователя и меняем роль на expert
         User = get_user_model()
         expert = application.expert
         expert.application_approved = True
         expert.application_reviewed_at = application.updated_at
         expert.application_reviewed_by = request.user
         expert.has_submitted_application = True
-        expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
+        # Меняем роль на expert, если она еще не установлена
+        if expert.role != 'expert':
+            expert.role = 'expert'
+            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application', 'role'])
+        else:
+            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
 
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_200_OK)
