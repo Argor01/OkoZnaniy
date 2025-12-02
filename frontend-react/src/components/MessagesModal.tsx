@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Tabs, List, Avatar, Badge, Input, Button, Empty } from 'antd';
-import { MessageOutlined, SearchOutlined, SendOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { MessageOutlined, SendOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import './MessagesModal.css';
 
 interface Message {
@@ -104,22 +104,19 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
       open={open}
       onCancel={onClose}
       footer={null}
-      width={800}
+      width={900}
       className="messages-modal"
-      styles={{
-        body: { padding: 0, height: '70vh', display: 'flex', flexDirection: 'column' },
-      }}
     >
       <div className="messages-container">
         {/* Список чатов */}
         <div className={`chats-list ${isMobile && selectedChat ? 'hidden' : ''}`}>
           <div className="chats-header">
-            <Input
-              placeholder="Поиск..."
-              prefix={<SearchOutlined />}
+            <Input.Search
+              placeholder="Поиск друзей..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="search-input"
+              allowClear
             />
           </div>
 

@@ -1,0 +1,99 @@
+/* Глобальные стили для Avatar компонентов */
+.ant-avatar {
+  width: 100px !important;
+  height: 100px !important;
+  font-size: 50px !important;
+  border: 3px solid rgb(255, 255, 255) !important;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 4px 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.ant-avatar.ant-avatar-icon {
+  font-size: 50px !important;
+}
+
+/* Увеличиваем размер иконки внутри аватара */
+.ant-avatar .anticon {
+  font-size: 50px !important;
+}
+
+.ant-avatar .anticon svg {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+/* Исключение для аватара в сайдбаре - возвращаем нормальный размер */
+.ant-layout-sider .ant-avatar,
+[class*="sidebar"] .ant-avatar,
+[class*="Sidebar"] .ant-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  font-size: 20px !important;
+  border: 2px solid rgb(255, 255, 255) !important;
+}
+
+.ant-layout-sider .ant-avatar.ant-avatar-icon,
+[class*="sidebar"] .ant-avatar.ant-avatar-icon,
+[class*="Sidebar"] .ant-avatar.ant-avatar-icon {
+  font-size: 20px !important;
+}
+
+.ant-layout-sider .ant-avatar .anticon,
+[class*="sidebar"] .ant-avatar .anticon,
+[class*="Sidebar"] .ant-avatar .anticon {
+  font-size: 20px !important;
+}
+
+.ant-layout-sider .ant-avatar .anticon svg,
+[class*="sidebar"] .ant-avatar .anticon svg,
+[class*="Sidebar"] .ant-avatar .anticon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Исключение для аватаров в модальных окнах - возвращаем нормальный размер */
+.ant-modal .ant-avatar,
+.ant-drawer .ant-avatar,
+[class*="modal"] .ant-avatar,
+[class*="Modal"] .ant-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  font-size: 20px !important;
+  border: 2px solid rgb(255, 255, 255) !important;
+}
+
+.ant-modal .ant-avatar.ant-avatar-icon,
+.ant-drawer .ant-avatar.ant-avatar-icon,
+[class*="modal"] .ant-avatar.ant-avatar-icon,
+[class*="Modal"] .ant-avatar.ant-avatar-icon {
+  font-size: 20px !important;
+}
+
+.ant-modal .ant-avatar .anticon,
+.ant-drawer .ant-avatar .anticon,
+[class*="modal"] .ant-avatar .anticon,
+[class*="Modal"] .ant-avatar .anticon {
+  font-size: 20px !important;
+}
+
+.ant-modal .ant-avatar .anticon svg,
+.ant-drawer .ant-avatar .anticon svg,
+[class*="modal"] .ant-avatar .anticon svg,
+[class*="Modal"] .ant-avatar .anticon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+@media (max-width: 840px) {
+  .ant-avatar {
+    /* width: 40px !important; */
+    /* height: 40px !important; */
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-avatar {
+    /* width: 36px !important; */
+    /* height: 36px !important; */
+  }
+}

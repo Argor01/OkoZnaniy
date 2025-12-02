@@ -1,7 +1,34 @@
+/* Стили для модального окна */
+.messages-modal .ant-modal {
+  max-width: 900px !important;
+}
+
+.messages-modal .ant-modal-content {
+  height: 85vh !important;
+  max-height: 850px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.messages-modal .ant-modal-header {
+  flex-shrink: 0 !important;
+}
+
+.messages-modal .ant-modal-body {
+  padding: 0 !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
 .messages-modal .messages-container {
   display: flex;
   height: 100%;
   overflow: hidden;
+  min-height: 0;
+  flex: 1;
 }
 
 .messages-modal .chats-list {
@@ -10,25 +37,72 @@
   display: flex;
   flex-direction: column;
   background: #fafafa;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .messages-modal .chats-header {
   padding: 16px;
   border-bottom: 1px solid #f0f0f0;
   background: #fff;
+  flex-shrink: 0;
 }
 
 .messages-modal .search-input {
   border-radius: 20px;
+  font-size: 14px;
+}
+
+.messages-modal .search-input input {
+  font-size: 14px;
+  height: 40px !important;
+}
+
+.messages-modal .search-input .ant-input {
+  font-size: 14px;
+  height: 40px !important;
+}
+
+.messages-modal .search-input .ant-input-affix-wrapper {
+  border-radius: 20px 0 0 20px;
+  height: 40px !important;
+}
+
+.messages-modal .search-input .ant-input-group-addon {
+  border-radius: 0 20px 20px 0;
+  padding: 0 !important;
+  height: 40px !important;
+}
+
+.messages-modal .search-input .ant-input-group-addon .ant-btn {
+  height: 40px !important;
+  border-radius: 0 20px 20px 0;
+  border-left: 0;
+  min-height: 40px !important;
 }
 
 .messages-modal .chats-tabs {
   padding: 0 16px;
   background: #fff;
+  flex-shrink: 0;
 }
 
 .messages-modal .chats-tabs .ant-tabs-nav {
   margin-bottom: 0;
+}
+
+.messages-modal .chats-tabs .ant-tabs-tab {
+  font-size: 14px;
+}
+
+.messages-modal .chats-tabs .ant-tabs-tab-btn {
+  font-size: 14px;
+}
+
+.messages-modal .ant-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .messages-modal .chat-item {
@@ -53,6 +127,7 @@
 .messages-modal .chat-name {
   font-weight: 500;
   color: #1f2937;
+  font-size: 14px;
 }
 
 .messages-modal .chat-preview {
@@ -60,6 +135,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  margin-top: 4px;
 }
 
 .messages-modal .last-message {
@@ -82,6 +158,8 @@
   display: flex;
   flex-direction: column;
   background: #fff;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .messages-modal .messages-list {
@@ -91,6 +169,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 
 .messages-modal .message {
@@ -147,6 +226,9 @@
   gap: 12px;
   align-items: flex-end;
   background: #fafafa;
+  flex-shrink: 0;
+  min-height: 72px;
+  max-height: 200px;
 }
 
 .messages-modal .message-input {
@@ -189,23 +271,35 @@
     margin: 0 !important;
     top: 0 !important;
     padding: 0 !important;
+    height: 100vh !important;
   }
 
   .messages-modal .ant-modal-content {
-    height: 100vh !important;
     border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .messages-modal .ant-modal-header {
     padding: 12px 16px !important;
+    flex-shrink: 0 !important;
   }
 
   .messages-modal .ant-modal-body {
-    height: calc(100vh - 55px) !important;
+    padding: 0 !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   .messages-modal .messages-container {
     position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
   }
 
   /* Список чатов */
@@ -213,7 +307,11 @@
     width: 100%;
     border-right: none;
     display: flex;
+    flex-direction: column;
     transition: transform 0.3s ease;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .messages-modal .chats-list.hidden {
@@ -230,10 +328,25 @@
     background: #fff;
     z-index: 10;
     display: none;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
   }
 
   .messages-modal .chat-window.visible {
     display: flex;
+  }
+  
+  /* Убеждаемся что окно чата занимает всю высоту */
+  .messages-modal .chat-window.visible .messages-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  
+  .messages-modal .chat-window.visible .message-input-container {
+    flex-shrink: 0;
   }
 
   /* Хедер чата на мобильных */
@@ -244,6 +357,9 @@
     padding: 12px 16px;
     border-bottom: 1px solid #f0f0f0;
     background: #fff;
+    flex-shrink: 0;
+    height: 60px;
+    min-height: 60px;
   }
 
   .messages-modal .back-button {
@@ -266,6 +382,17 @@
 
   .messages-modal .chats-header {
     padding: 12px;
+    flex-shrink: 0;
+  }
+
+  .messages-modal .chats-tabs {
+    flex-shrink: 0;
+  }
+
+  .messages-modal .ant-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
 
   .messages-modal .chat-item {
@@ -286,15 +413,20 @@
   }
 
   .messages-modal .last-message {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .messages-modal .chat-time {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .messages-modal .messages-list {
     padding: 12px;
+    padding-bottom: 20px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 100%;
   }
 
   .messages-modal .message-content {
@@ -303,20 +435,25 @@
   }
 
   .messages-modal .message-sender {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .messages-modal .message-text {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .messages-modal .message-time {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .messages-modal .message-input-container {
     padding: 12px;
     gap: 8px;
+    flex-shrink: 0;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    min-height: 64px;
+    max-height: 200px;
   }
 
   .messages-modal .send-button {

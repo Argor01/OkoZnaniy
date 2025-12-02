@@ -1395,6 +1395,35 @@
   }
 }
 
+/* Адаптивные стили для Avatar */
+:global(.ant-avatar) {
+  width: 100px;
+  height: 100px;
+  font-size: 50px;
+  background-color: rgb(102, 126, 234);
+  border: 3px solid rgb(255, 255, 255);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 4px 12px;
+  flex-shrink: 0;
+}
+
+:global(.ant-avatar.ant-avatar-icon) {
+  font-size: 18px;
+}
+
+@media (max-width: 840px) {
+  :global(.ant-avatar) {
+    /* width: 40px !important; */
+    /* height: 40px !important; */
+  }
+}
+
+@media (max-width: 480px) {
+  :global(.ant-avatar) {
+    /* width: 36px !important; */
+    /* height: 36px !important; */
+  }
+}
+
 /* Landscape режим на мобильных */
 @media (max-width: 840px) and (orientation: landscape) {
   .mainContent {
