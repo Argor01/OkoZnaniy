@@ -894,7 +894,7 @@ const ExpertDashboard: React.FC = () => {
           <div className={styles.profileBlockContent}>
             <div className={styles.profileLeft}>
               <Avatar
-                size={isMobile ? 64 : 80}
+                size={isMobile ? 100 : 80}
                 src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
                 icon={!profile?.avatar && <UserOutlined />}
                 style={{ 
@@ -906,7 +906,7 @@ const ExpertDashboard: React.FC = () => {
               />
               <div className={styles.profileInfo}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-                  <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: isMobile ? 18 : 20 }}>
+                  <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: isMobile ? 20 : 20 }}>
                     {profile?.username || profile?.email || 'Эксперт'}
                   </Title>
                   {isMobile ? (
@@ -1236,9 +1236,9 @@ const ExpertDashboard: React.FC = () => {
                   <div style={{ display: 'grid', gap: 16 }}>
                     <div className={styles.orderCard}>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <Text strong style={{ fontSize: 16 }}>Иван Петров</Text>
-                          <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                        <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 6, marginBottom: 4, flexDirection: isMobile ? 'column' : 'row' }}>
+                          <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>Иван Петров</Text>
+                          <Rate disabled defaultValue={5} style={{ fontSize: isMobile ? 14 : 16 }} />
                         </div>
                         <Text type="secondary" style={{ fontSize: 12 }}>15.11.2024</Text>
                       </div>
@@ -1249,9 +1249,9 @@ const ExpertDashboard: React.FC = () => {
                     </div>
                     <div className={styles.orderCard}>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <Text strong style={{ fontSize: 16 }}>Мария Сидорова</Text>
-                          <Rate disabled defaultValue={5} style={{ fontSize: 16 }} />
+                        <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 6, marginBottom: 4, flexDirection: isMobile ? 'column' : 'row' }}>
+                          <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>Мария Сидорова</Text>
+                          <Rate disabled defaultValue={5} style={{ fontSize: isMobile ? 14 : 16 }} />
                         </div>
                         <Text type="secondary" style={{ fontSize: 12 }}>10.11.2024</Text>
                       </div>
@@ -1262,9 +1262,9 @@ const ExpertDashboard: React.FC = () => {
                     </div>
                     <div className={styles.orderCard}>
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <Text strong style={{ fontSize: 16 }}>Алексей Смирнов</Text>
-                          <Rate disabled defaultValue={4} style={{ fontSize: 16 }} />
+                        <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 6, marginBottom: 4, flexDirection: isMobile ? 'column' : 'row' }}>
+                          <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>Алексей Смирнов</Text>
+                          <Rate disabled defaultValue={4} style={{ fontSize: isMobile ? 14 : 16 }} />
                         </div>
                         <Text type="secondary" style={{ fontSize: 12 }}>05.11.2024</Text>
                       </div>

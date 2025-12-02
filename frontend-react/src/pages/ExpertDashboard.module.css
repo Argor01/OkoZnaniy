@@ -1132,6 +1132,15 @@
 
 /* Мобильные устройства (до 480px) */
 @media (max-width: 480px) {
+  /* Увеличиваем базовый размер текста на мобильных */
+  :global(.ant-typography) {
+    font-size: 15px !important;
+  }
+
+  :global(p), :global(span), :global(div) {
+    font-size: 15px;
+  }
+
   .mainContent {
     padding: 8px;
     height: calc(100vh - 60px);
