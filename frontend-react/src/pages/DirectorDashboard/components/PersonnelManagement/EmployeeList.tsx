@@ -242,6 +242,9 @@ const EmployeeList: React.FC = () => {
       width: 120,
       render: (_: any, record: Employee) => {
         const isActive = record.is_active !== false;
+        // Деактивированный эксперт - это клиент с application_approved = false
+        const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
+        
         return (
           <Space>
             <Tooltip title="Просмотр">
@@ -251,7 +254,28 @@ const EmployeeList: React.FC = () => {
                 onClick={() => handleViewDetails(record)}
               />
             </Tooltip>
-            {isActive ? (
+            {!isActive ? (
+              // Заархивированный сотрудник
+              <Tooltip title="Активировать">
+                <Button
+                  type="text"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleActivate(record)}
+                  style={{ color: '#52c41a' }}
+                />
+              </Tooltip>
+            ) : isDeactivatedExpert ? (
+              // Деактивированный эксперт (можно активировать обратно)
+              <Tooltip title="Активировать как эксперта">
+                <Button
+                  type="text"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleActivate(record)}
+                  style={{ color: '#52c41a' }}
+                />
+              </Tooltip>
+            ) : (
+              // Активный сотрудник
               <>
                 <Tooltip title="Деактивировать">
                   <Button
@@ -269,15 +293,6 @@ const EmployeeList: React.FC = () => {
                   />
                 </Tooltip>
               </>
-            ) : (
-              <Tooltip title="Активировать">
-                <Button
-                  type="text"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => handleActivate(record)}
-                  style={{ color: '#52c41a' }}
-                />
-              </Tooltip>
             )}
           </Space>
         );
