@@ -1,39 +1,42 @@
 import React from 'react';
 
 const PartnerSteps: React.FC = () => {
+  const isMobile = window.innerWidth <= 480;
+  
   return (
     <section className="advantages">
       <div className="mcontainer">
         <div style={{ 
           textAlign: 'center', 
-          marginBottom: '40px',
-          padding: '30px',
+          marginBottom: isMobile ? '24px' : '40px',
+          padding: isMobile ? '20px' : '30px',
           backgroundColor: '#fff3e0',
           borderRadius: '12px',
           border: '2px solid #ff9800'
         }}>
           <h2 style={{ 
-            fontSize: '36px', 
+            fontSize: isMobile ? '24px' : '36px', 
             color: '#e65100', 
             marginBottom: '16px',
             fontFamily: 'var(--font-family-display)',
-            fontWeight: 800
+            fontWeight: 800,
+            lineHeight: 1.3
           }}>
-            Гарантируем <span style={{ whiteSpace: 'nowrap' }}>1 000 000 ₽</span> оборот вашего агентства через 2 месяца!
+            Гарантируем <span style={{ whiteSpace: 'nowrap', fontSize: isMobile ? '28px' : 'inherit' }}>1 000 000 ₽</span> оборот вашего агентства через 2 месяца!
           </h2>
-          <p style={{ fontSize: '18px', marginBottom: '8px', color: '#333' }}>
+          <p style={{ fontSize: isMobile ? '15px' : '18px', marginBottom: '8px', color: '#333' }}>
             ✅ Персональная поддержка от директора биржи на протяжении 1 месяца
           </p>
-          <p style={{ fontSize: '18px', marginBottom: '0', color: '#333' }}>
+          <p style={{ fontSize: isMobile ? '15px' : '18px', marginBottom: '0', color: '#333' }}>
             ✅ Далее персональный менеджер навсегда
           </p>
         </div>
 
         <h2 style={{ 
           textAlign: 'center', 
-          fontSize: '48px', 
+          fontSize: isMobile ? '32px' : '48px', 
           color: '#238ce2', 
-          marginBottom: '40px',
+          marginBottom: isMobile ? '24px' : '40px',
           fontFamily: 'var(--font-family-display)',
           fontWeight: 800
         }}>
