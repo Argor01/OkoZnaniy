@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, Badge, Layout, message, Avatar, Divider } from 'antd';
-import { ClockCircleOutlined, DollarOutlined, SearchOutlined, FilterOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons';
+import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, Layout, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
+import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../api/orders';
@@ -50,10 +50,10 @@ const OrdersFeed: React.FC = () => {
     window.location.reload();
   };
 
-  // Загружаем заказы
+  // Загружаем заказы (все доступные заказы для всех пользователей)
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['orders-feed'],
-    queryFn: () => ordersApi.getMyOrders(),
+    queryFn: () => ordersApi.getAvailableOrders(),
   });
 
   // Загружаем справочники
@@ -92,6 +92,25 @@ const OrdersFeed: React.FC = () => {
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
+
+  // Проверка, является ли пользователь владельцем заказа
+  const isOrderOwner = (order: any) => {
+    return order.client?.id === userProfile?.id || 
+           order.client_id === userProfile?.id;
+  };
+
+  // Удаление заказа
+  const handleDeleteOrder = async (orderId: number) => {
+    try {
+      await ordersApi.deleteOrder(orderId);
+      message.success('Заказ успешно удален');
+      // Обновить список заказов
+      window.location.reload();
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || 'Ошибка при удалении заказа';
+      message.error(errorMessage);
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -356,7 +375,13 @@ const OrdersFeed: React.FC = () => {
         </Empty>
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
-          {filteredOrders.map((order: any) => (
+          {filteredOrders.map((order: any) => {
+            // Логируем данные заказа для отладки
+            if (order.files) {
+              console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
+            }
+            
+            return (
             <Card
               key={order.id}
               hoverable
@@ -373,17 +398,54 @@ const OrdersFeed: React.FC = () => {
                     {order.title}
                   </Title>
                   <Space size={8} wrap>
-                    <Tag color={getStatusColor(order.status)}>
-                      {getStatusText(order.status)}
+                    <Tag 
+                      style={{ 
+                        borderRadius: 16, 
+                        padding: '4px 12px',
+                        border: 'none',
+                        fontWeight: 600,
+                        color: '#fff',
+                        textTransform: 'uppercase',
+                        background: '#52c41a' // Всегда зеленый для новых заказов
+                      }}
+                    >
+                      {getStatusText(order.status) || 'NEW'}
                     </Tag>
-                    {(order.subject?.name || order.subject_name) && (
-                      <Tag color="blue">{order.subject?.name || order.subject_name}</Tag>
+                    {(order.custom_subject || order.subject?.name || order.subject_name) && (
+                      <Tag style={{ 
+                        borderRadius: 16, 
+                        padding: '4px 12px',
+                        border: 'none',
+                        fontWeight: 600,
+                        color: '#fff',
+                        background: '#1890ff'
+                      }}>
+                        {order.custom_subject || order.subject?.name || order.subject_name}
+                      </Tag>
                     )}
-                    {(order.work_type?.name || order.work_type_name) && (
-                      <Tag>{order.work_type?.name || order.work_type_name}</Tag>
+                    {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
+                      <Tag style={{ 
+                        borderRadius: 16, 
+                        padding: '4px 12px',
+                        border: 'none',
+                        fontWeight: 600,
+                        color: '#fff',
+                        background: '#722ed1'
+                      }}>
+                        {order.custom_work_type || order.work_type?.name || order.work_type_name}
+                      </Tag>
                     )}
                     {order.topic?.name && (
-                      <Tag color="purple">Тема: {order.topic.name}</Tag>
+                      <Tag style={{ 
+                        borderRadius: 16, 
+                        padding: '4px 12px',
+                        border: 'none',
+                        fontWeight: 600,
+                        color: '#fff',
+                        background: '#eb2f96'
+                      }}>
+                        Тема: {order.topic.name}
+                      </Tag>
                     )}
                   </Space>
                 </div>
@@ -405,14 +467,42 @@ const OrdersFeed: React.FC = () => {
               {order.files && order.files.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
-                    Прикрепленные файлы:
+                    Прикрепленные файлы ({order.files.length}):
                   </Text>
                   <Space size={8} wrap>
-                    {order.files.map((file: any) => (
-                      <Tag key={file.id} icon={<SearchOutlined />}>
-                        {file.filename}
-                      </Tag>
-                    ))}
+                    {order.files.map((file: any) => {
+                      // Определяем иконку по расширению файла
+                      const getFileIcon = (filename: string) => {
+                        const ext = filename.split('.').pop()?.toLowerCase();
+                        if (ext === 'pdf') return <FilePdfOutlined style={{ color: '#ff4d4f' }} />;
+                        if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined style={{ color: '#1890ff' }} />;
+                        if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext || '')) return <FileImageOutlined style={{ color: '#52c41a' }} />;
+                        if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined style={{ color: '#fa8c16' }} />;
+                        return <FileOutlined style={{ color: '#666' }} />;
+                      };
+
+                      return (
+                        <Tooltip key={file.id} title={`Скачать ${file.filename} (${file.file_size || 'размер неизвестен'})`}>
+                          <Tag 
+                            icon={getFileIcon(file.filename)}
+                            style={{ 
+                              cursor: 'pointer',
+                              padding: '4px 12px',
+                              fontSize: 13
+                            }}
+                            onClick={() => {
+                              if (file.file_url || file.file) {
+                                window.open(file.file_url || file.file, '_blank');
+                              } else {
+                                message.warning('Файл недоступен для скачивания');
+                              }
+                            }}
+                          >
+                            {file.filename} <DownloadOutlined style={{ marginLeft: 4 }} />
+                          </Tag>
+                        </Tooltip>
+                      );
+                    })}
                   </Space>
                 </div>
               )}
@@ -466,21 +556,42 @@ const OrdersFeed: React.FC = () => {
                     </Text>
                   </div>
                 </Space>
-                <Button 
-                  type="primary"
-                  onClick={() => navigate(`/expert`)}
-                  style={{
-                    background: '#52c41a',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontWeight: 500
-                  }}
-                >
-                  Откликнуться
-                </Button>
+                <Space size={8}>
+                  {isOrderOwner(order) ? (
+                    <Button 
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => {
+                        if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                          handleDeleteOrder(order.id);
+                        }
+                      }}
+                      style={{
+                        borderRadius: 8,
+                        fontWeight: 500
+                      }}
+                    >
+                      Удалить
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="primary"
+                      onClick={() => navigate(`/expert`)}
+                      style={{
+                        background: '#52c41a',
+                        border: 'none',
+                        borderRadius: 8,
+                        fontWeight: 500
+                      }}
+                    >
+                      Откликнуться
+                    </Button>
+                  )}
+                </Space>
               </div>
             </Card>
-          ))}
+          );
+          })}
         </div>
       )}
 

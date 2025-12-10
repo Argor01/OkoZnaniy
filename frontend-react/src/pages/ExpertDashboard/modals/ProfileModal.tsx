@@ -118,12 +118,29 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         initialValues={profile || {}}
         onFinish={async (values) => {
           try {
-            // Удаляем поля, которые не нужно отправлять
-            const { avatar, first_name, last_name, telegram_id, ...profileData } = values;
-            // Преобразуем массив навыков обратно в строку
-            if (Array.isArray(profileData.skills)) {
-              profileData.skills = profileData.skills.join(', ');
+            // Подготавливаем данные для отправки
+            const profileData: any = {
+              username: values.username,
+              first_name: values.first_name,
+              last_name: values.last_name,
+              bio: values.bio,
+            };
+
+            // Добавляем поля только для экспертов
+            if (userProfile?.role === 'expert') {
+              profileData.experience_years = values.experience_years;
+              profileData.education = values.education;
+              profileData.hourly_rate = values.hourly_rate;
+              profileData.portfolio_url = values.portfolio_url;
+              
+              // Преобразуем массив навыков в строку
+              if (Array.isArray(values.skills)) {
+                profileData.skills = values.skills.join(', ');
+              } else if (values.skills) {
+                profileData.skills = values.skills;
+              }
             }
+
             console.log('Отправляем данные:', profileData);
             const result = await authApi.updateProfile(profileData);
             console.log('Результат обновления:', result);
@@ -134,7 +151,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             console.log('Кэш обновлен');
           } catch (e: any) {
             console.error('Ошибка:', e);
-            message.error(e?.response?.data?.detail || 'Не удалось обновить профиль');
+            console.error('Детали ошибки:', e?.response?.data);
+            const errorData = e?.response?.data;
+            if (errorData && typeof errorData === 'object') {
+              Object.entries(errorData).forEach(([field, messages]) => {
+                if (Array.isArray(messages)) {
+                  messages.forEach(msg => message.error(`${field}: ${msg}`));
+                } else {
+                  message.error(`${field}: ${messages}`);
+                }
+              });
+            } else {
+              message.error(e?.response?.data?.detail || 'Не удалось обновить профиль');
+            }
           }
         }}
       >
@@ -213,13 +242,23 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           rules={[
             { required: true, message: 'Введите никнейм' },
             { min: 3, message: 'Минимум 3 символа' },
-            { max: 30, message: 'Максимум 30 символов' }
+            { max: 30, message: 'Максимум 30 символов' },
+            { 
+              pattern: /^[a-zA-Z0-9а-яА-ЯёЁ@.+\-_]+$/, 
+              message: 'Никнейм может содержать только буквы, цифры и символы @.+-_' 
+            }
           ]}
+          extra="Используйте подчеркивание вместо пробела"
         >
           <Input 
             className={styles.inputField} 
             size="large" 
-            placeholder="Ваш никнейм"
+            placeholder="Ваш_никнейм"
+            onChange={(e) => {
+              // Автоматически заменяем пробелы на подчеркивания
+              const value = e.target.value.replace(/\s+/g, '_');
+              form.setFieldValue('username', value);
+            }}
           />
         </Form.Item>
         <Form.Item label="О себе" name="bio">

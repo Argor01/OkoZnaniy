@@ -47,19 +47,70 @@ const CreateOrder: React.FC = () => {
         message.error('Файл должен быть меньше 10MB!');
         return false;
       }
-      setFileList([...fileList, file as UploadFile]);
+      
+      // Создаем правильную структуру UploadFile с originFileObj
+      const uploadFile: UploadFile = {
+        uid: file.uid || `${Date.now()}-${file.name}`,
+        name: file.name,
+        status: 'done',
+        size: file.size,
+        type: file.type,
+        originFileObj: file as any, // Сохраняем оригинальный файл!
+      };
+      
+      setFileList((prevList) => {
+        const newList = [...prevList, uploadFile];
+        console.log('📎 Файл добавлен:', file.name, 'originFileObj:', !!uploadFile.originFileObj, 'Всего файлов:', newList.length);
+        return newList;
+      });
       return false; // Предотвращаем автоматическую загрузку
     },
     onRemove: (file) => {
-      setFileList(fileList.filter(f => f.uid !== file.uid));
+      setFileList((prevList) => {
+        const newList = prevList.filter(f => f.uid !== file.uid);
+        console.log('🗑️ Файл удален. Осталось файлов:', newList.length);
+        return newList;
+      });
     },
   };
 
   // Мутация для создания заказа
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: CreateOrderRequest) => ordersApi.createOrder(orderData),
-    onSuccess: () => {
-      message.success('Заказ создан успешно! Он появится в ленте заказов.');
+    onSuccess: async (createdOrder) => {
+      console.log('✅ Заказ создан:', createdOrder);
+      console.log('📎 Файлов в списке для загрузки:', fileList.length);
+      
+      // Если есть файлы, загружаем их
+      if (fileList.length > 0) {
+        message.loading('Загрузка файлов...', 0);
+        let uploadedCount = 0;
+        try {
+          for (const file of fileList) {
+            console.log('📤 Загружаем файл:', file.name, 'originFileObj:', !!file.originFileObj);
+            if (file.originFileObj) {
+              await ordersApi.uploadOrderFile(createdOrder.id, file.originFileObj as File, {
+                file_type: 'task',
+                description: file.name
+              });
+              uploadedCount++;
+              console.log('✅ Файл загружен:', file.name);
+            } else {
+              console.warn('⚠️ Файл не имеет originFileObj:', file.name);
+            }
+          }
+          message.destroy();
+          message.success(`Заказ создан! Загружено файлов: ${uploadedCount}/${fileList.length}`);
+        } catch (error) {
+          console.error('❌ Ошибка загрузки файлов:', error);
+          message.destroy();
+          message.warning(`Заказ создан, но загружено только ${uploadedCount}/${fileList.length} файлов`);
+        }
+      } else {
+        console.log('ℹ️ Файлов для загрузки нет');
+        message.success('Заказ создан успешно!');
+      }
+      
       form.resetFields();
       setFileList([]);
       navigate('/orders-feed');
@@ -88,24 +139,26 @@ const CreateOrder: React.FC = () => {
 
   const onFinish = (values: any) => {
     console.log('📝 Отправка заказа:', values);
+    console.log('📎 Файлов для загрузки:', fileList.length, fileList);
     
     // Формируем данные заказа
-    const orderData: CreateOrderRequest = {
+    const orderData: any = {
       title: values.title,
       description: values.description,
       deadline: values.deadline?.format('YYYY-MM-DD'), // Только дата
-      subject_id: showCustomSubject ? undefined : values.subject_id,
       custom_topic: values.custom_topic,
-      work_type_id: showCustomWorkType ? undefined : values.work_type_id,
       budget: values.budget,
+      // Если выбрано "Другое", используем ID=2, иначе выбранный ID
+      subject_id: showCustomSubject ? 2 : values.subject_id,
+      work_type_id: showCustomWorkType ? 2 : values.work_type_id,
     };
-    
-    // Добавляем кастомные поля если они есть
+
+    // Добавляем кастомные названия если выбрано "Другое"
     if (showCustomSubject && values.custom_subject) {
-      (orderData as any).custom_subject = values.custom_subject;
+      orderData.custom_subject = values.custom_subject;
     }
     if (showCustomWorkType && values.custom_work_type) {
-      (orderData as any).custom_work_type = values.custom_work_type;
+      orderData.custom_work_type = values.custom_work_type;
     }
     
     console.log('📤 Данные для отправки:', orderData);
@@ -170,9 +223,9 @@ const CreateOrder: React.FC = () => {
                 return false;
               }}
               onChange={(value) => {
-                if (value === 'other') {
+                // ID=2 это "Другое" в базе
+                if (value === 2) {
                   setShowCustomSubject(true);
-                  form.setFieldValue('subject_id', undefined);
                 } else {
                   setShowCustomSubject(false);
                 }
@@ -183,7 +236,6 @@ const CreateOrder: React.FC = () => {
                   {subject.name}
                 </Select.Option>
               ))}
-              <Select.Option value="other">Другое</Select.Option>
             </Select>
           </Form.Item>
 
@@ -221,9 +273,9 @@ const CreateOrder: React.FC = () => {
                 return false;
               }}
               onChange={(value) => {
-                if (value === 'other') {
+                // ID=2 это "Другое" в базе
+                if (value === 2) {
                   setShowCustomWorkType(true);
-                  form.setFieldValue('work_type_id', undefined);
                 } else {
                   setShowCustomWorkType(false);
                 }
@@ -234,7 +286,6 @@ const CreateOrder: React.FC = () => {
                   {workType.name}
                 </Select.Option>
               ))}
-              <Select.Option value="other">Другое</Select.Option>
             </Select>
           </Form.Item>
 
