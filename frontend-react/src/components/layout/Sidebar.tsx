@@ -367,9 +367,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{
             background: '#fff',
             boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-            position: 'relative',
+            position: 'fixed',
+            top: 0,
+            left: 0,
             height: '100vh',
             borderRight: '1px solid #f0f0f0',
+            zIndex: 1001,
           }}
         >
           {sidebarContent}

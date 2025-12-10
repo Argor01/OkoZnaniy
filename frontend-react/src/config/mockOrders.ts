@@ -15,7 +15,9 @@ export const MOCK_ORDERS = [
     work_type_id: 2,
     created_at: dayjs().subtract(2, 'hours').toISOString(),
     responses_count: 3,
-    client_name: 'Анна К.'
+    client_name: 'Анна К.',
+    client_avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 5
   },
   {
     id: 1002,
@@ -30,7 +32,9 @@ export const MOCK_ORDERS = [
     work_type_id: 1,
     created_at: dayjs().subtract(5, 'hours').toISOString(),
     responses_count: 7,
-    client_name: 'Дмитрий П.'
+    client_name: 'Дмитрий П.',
+    client_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 12
   },
   {
     id: 1003,
@@ -45,7 +49,9 @@ export const MOCK_ORDERS = [
     work_type_id: 3,
     created_at: dayjs().subtract(1, 'day').toISOString(),
     responses_count: 12,
-    client_name: 'Елена С.'
+    client_name: 'Елена С.',
+    client_avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 3
   },
   {
     id: 1004,
@@ -60,7 +66,9 @@ export const MOCK_ORDERS = [
     work_type_id: 5,
     created_at: dayjs().subtract(3, 'days').toISOString(),
     responses_count: 5,
-    client_name: 'Максим В.'
+    client_name: 'Максим В.',
+    client_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 1
   },
   {
     id: 1005,
@@ -75,7 +83,9 @@ export const MOCK_ORDERS = [
     work_type_id: 4,
     created_at: dayjs().subtract(6, 'hours').toISOString(),
     responses_count: 15,
-    client_name: 'Ольга М.'
+    client_name: 'Ольга М.',
+    client_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 8
   },
   {
     id: 1006,
@@ -90,7 +100,9 @@ export const MOCK_ORDERS = [
     work_type_id: 6,
     created_at: dayjs().subtract(8, 'hours').toISOString(),
     responses_count: 8,
-    client_name: 'Игорь Л.'
+    client_name: 'Игорь Л.',
+    client_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 4
   },
   {
     id: 1007,
@@ -105,7 +117,9 @@ export const MOCK_ORDERS = [
     work_type_id: 7,
     created_at: dayjs().subtract(12, 'hours').toISOString(),
     responses_count: 4,
-    client_name: 'Мария Н.'
+    client_name: 'Мария Н.',
+    client_avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 2
   },
   {
     id: 1008,
@@ -120,7 +134,9 @@ export const MOCK_ORDERS = [
     work_type_id: 8,
     created_at: dayjs().subtract(4, 'hours').toISOString(),
     responses_count: 6,
-    client_name: 'Сергей Б.'
+    client_name: 'Сергей Б.',
+    client_avatar: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 15
   },
   {
     id: 1009,
@@ -135,7 +151,9 @@ export const MOCK_ORDERS = [
     work_type_id: 2,
     created_at: dayjs().subtract(1, 'day').toISOString(),
     responses_count: 9,
-    client_name: 'Татьяна Р.'
+    client_name: 'Татьяна Р.',
+    client_avatar: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 7
   },
   {
     id: 1010,
@@ -150,6 +168,8 @@ export const MOCK_ORDERS = [
     work_type_id: 9,
     created_at: dayjs().subtract(2, 'days').toISOString(),
     responses_count: 2,
-    client_name: 'Алексей Ж.'
+    client_name: 'Алексей Ж.',
+    client_avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
+    client_orders_count: 1
   }
 ];

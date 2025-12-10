@@ -5,6 +5,7 @@ import { ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
+import './utils/clearAuth'; // Утилита для очистки токенов (доступна через window.clearAuth())
 
 // Import styles
 import './styles/page-transitions.css';

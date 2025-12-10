@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, Slider, Badge, Layout, message } from 'antd';
+import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, Badge, Layout, message, Avatar, Divider } from 'antd';
 import { ClockCircleOutlined, DollarOutlined, SearchOutlined, FilterOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,6 @@ import { ordersApi } from '../api/orders';
 import { catalogApi } from '../api/catalog';
 import { authApi } from '../api/auth';
 import Sidebar, { MobileMenuButton } from '../components/layout/Sidebar';
-import { MOCK_ORDERS } from '../config/mockOrders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../config/orderStatuses';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -54,7 +53,7 @@ const OrdersFeed: React.FC = () => {
   // Загружаем заказы
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['orders-feed'],
-    queryFn: () => ordersApi.getClientOrders(),
+    queryFn: () => ordersApi.getMyOrders(),
   });
 
   // Загружаем справочники
@@ -68,8 +67,8 @@ const OrdersFeed: React.FC = () => {
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
-  // Используем тестовые данные вместо реальных
-  const orders = MOCK_ORDERS;
+  // Используем реальные данные с API
+  const orders = ordersData?.results || ordersData || [];
 
   // Фильтрация заказов
   const filteredOrders = orders.filter((order: any) => {
@@ -107,7 +106,11 @@ const OrdersFeed: React.FC = () => {
         onMobileDrawerChange={setMobileMenuVisible}
       />
       
-      <Layout style={{ marginLeft: isMobile ? 0 : 250 }}>
+      <Layout style={{ 
+        marginLeft: isMobile ? 0 : 250,
+        padding: isMobile ? 0 : '24px',
+        background: '#f5f5f5'
+      }}>
         {/* Хедер для мобильных */}
         {isMobile && (
           <Header
@@ -128,19 +131,18 @@ const OrdersFeed: React.FC = () => {
             }}
           >
             <MobileMenuButton onClick={() => setMobileMenuVisible(true)} />
-            <Title level={4} style={{ margin: 0, color: '#1f2937' }}>
-              Лента работ
+            <Title level={4} style={{ margin: 0, color: '#1f2937'}}>
+              Биржа
             </Title>
             <div style={{ width: 44 }} />
           </Header>
         )}
 
         <Content style={{ 
-          padding: isMobile ? '80px 16px 24px' : '24px',
-          background: '#f5f5f5',
-          minHeight: '100vh'
+          padding: isMobile ? '80px 16px 24px' : '0',
+          background: 'transparent',
+          minHeight: isMobile ? '100vh' : 'calc(100vh - 48px)'
         }}>
-          <div>
             {/* Заголовок и кнопка создания */}
             {!isMobile && (
               <div style={{ 
@@ -164,7 +166,7 @@ const OrdersFeed: React.FC = () => {
                   size="large"
                   onClick={() => navigate('/create-order')}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#1E90FF',
                     border: 'none',
                     borderRadius: 12,
                     height: 48,
@@ -257,17 +259,40 @@ const OrdersFeed: React.FC = () => {
           <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
             <Col xs={24} sm={12} md={8}>
               <div style={{ marginBottom: 8 }}>
-                <Text strong>Бюджет: {budgetRange[0]} - {budgetRange[1]} ₽</Text>
+                <Text strong>Бюджет</Text>
               </div>
-              <Slider
-                range
-                min={0}
-                max={30000}
-                step={500}
-                value={budgetRange}
-                onChange={(value) => setBudgetRange(value as [number, number])}
-                tooltip={{ formatter: (value) => `${value} ₽` }}
-              />
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ whiteSpace: 'nowrap' }}>От</Text>
+                  <InputNumber
+                    size="large"
+                    min={0}
+                    max={budgetRange[1]}
+                    value={budgetRange[0]}
+                    onChange={(value) => setBudgetRange([value || 0, budgetRange[1]])}
+                    placeholder="0"
+                    controls={false}
+                    style={{ width: 120 }}
+                    formatter={(value) => `${value} ₽`}
+                    parser={(value) => value?.replace(' ₽', '') as any}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ whiteSpace: 'nowrap' }}>До</Text>
+                  <InputNumber
+                    size="large"
+                    min={budgetRange[0]}
+                    max={100000}
+                    value={budgetRange[1]}
+                    onChange={(value) => setBudgetRange([budgetRange[0], value || 30000])}
+                    placeholder="30000"
+                    controls={false}
+                    style={{ width: 120 }}
+                    formatter={(value) => `${value} ₽`}
+                    parser={(value) => value?.replace(' ₽', '') as any}
+                  />
+                </div>
+              </div>
             </Col>
             <Col xs={24} sm={12} md={8}>
               <div style={{ marginBottom: 8 }}>
@@ -340,22 +365,25 @@ const OrdersFeed: React.FC = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 transition: 'all 0.3s ease',
               }}
-              bodyStyle={{ padding: 24 }}
+              styles={{ body: { padding: 24 } }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                 <div style={{ flex: 1 }}>
-                  <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
+                  <Title level={4} style={{ margin: 0, marginBottom: 12, fontSize: 20, fontWeight: 700 }}>
                     {order.title}
                   </Title>
                   <Space size={8} wrap>
                     <Tag color={getStatusColor(order.status)}>
                       {getStatusText(order.status)}
                     </Tag>
-                    {order.subject_name && (
-                      <Tag color="blue">{order.subject_name}</Tag>
+                    {(order.subject?.name || order.subject_name) && (
+                      <Tag color="blue">{order.subject?.name || order.subject_name}</Tag>
                     )}
-                    {order.work_type_name && (
-                      <Tag>{order.work_type_name}</Tag>
+                    {(order.work_type?.name || order.work_type_name) && (
+                      <Tag>{order.work_type?.name || order.work_type_name}</Tag>
+                    )}
+                    {order.topic?.name && (
+                      <Tag color="purple">Тема: {order.topic.name}</Tag>
                     )}
                   </Space>
                 </div>
@@ -373,42 +401,76 @@ const OrdersFeed: React.FC = () => {
                 {order.description}
               </Paragraph>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <Space size={16} wrap>
-                  <Space size={4}>
-                    <ClockCircleOutlined style={{ color: '#999' }} />
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
-                    </Text>
+              {/* Прикрепленные файлы */}
+              {order.files && order.files.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
+                    Прикрепленные файлы:
+                  </Text>
+                  <Space size={8} wrap>
+                    {order.files.map((file: any) => (
+                      <Tag key={file.id} icon={<SearchOutlined />}>
+                        {file.filename}
+                      </Tag>
+                    ))}
                   </Space>
-                  {order.created_at && (
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      Создан {dayjs(order.created_at).fromNow()}
-                    </Text>
-                  )}
-                  <Badge 
-                    count={order.responses_count} 
-                    showZero
-                    style={{ backgroundColor: order.responses_count > 5 ? '#ff4d4f' : '#52c41a' }}
+                </div>
+              )}
+
+              <Space size={16} wrap style={{ marginBottom: 16 }}>
+                <Space size={4}>
+                  <ClockCircleOutlined style={{ color: '#999' }} />
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
+                  </Text>
+                </Space>
+                {order.created_at && (
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    Создан {dayjs(order.created_at).fromNow()}
+                  </Text>
+                )}
+                <Space size={4}>
+                  <UserOutlined style={{ color: '#999' }} />
+                  <Text 
+                    style={{ 
+                      fontSize: 14, 
+                      fontWeight: 600,
+                      color: (order.bids?.length || order.responses_count || 0) === 0 ? '#999' : 
+                             (order.bids?.length || order.responses_count || 0) > 5 ? '#ff4d4f' : '#52c41a'
+                    }}
                   >
-                    <Space size={4}>
-                      <UserOutlined style={{ color: '#999' }} />
-                      <Text type="secondary" style={{ fontSize: 14 }}>
-                        Откликов
-                      </Text>
-                    </Space>
-                  </Badge>
-                  {order.client_name && (
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      Заказчик: {order.client_name}
+                    {order.bids?.length || order.responses_count || 0}
+                  </Text>
+                </Space>
+              </Space>
+
+              <Divider style={{ margin: '16px 0' }} />
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <Space size={10}>
+                  <Avatar 
+                    size={24}
+                    src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
+                    icon={<UserOutlined />}
+                    style={{ backgroundColor: '#667eea' }}
+                  />
+                  <div>
+                    <Text strong style={{ display: 'block', fontSize: 14 }}>
+                      {order.client?.username || order.client_name || 
+                       (order.client?.first_name && order.client?.last_name 
+                         ? `${order.client.first_name} ${order.client.last_name}` 
+                         : userProfile?.username || 'Заказчик')}
                     </Text>
-                  )}
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Заказов: {order.client_orders_count || 1}
+                    </Text>
+                  </div>
                 </Space>
                 <Button 
                   type="primary"
                   onClick={() => navigate(`/expert`)}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#52c41a',
                     border: 'none',
                     borderRadius: 8,
                     fontWeight: 500
@@ -443,7 +505,6 @@ const OrdersFeed: React.FC = () => {
                 Создать заказ
               </Button>
             )}
-          </div>
         </Content>
       </Layout>
     </Layout>
