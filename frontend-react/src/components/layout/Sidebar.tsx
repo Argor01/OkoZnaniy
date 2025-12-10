@@ -13,6 +13,7 @@ import {
   TrophyOutlined,
   ShopOutlined,
   MenuOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
@@ -159,6 +160,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       navigate('/shop/purchased');
       return;
     }
+    if (key === 'orders-feed') {
+      navigate('/orders-feed');
+      return;
+    }
     if (key.startsWith('orders-') || key === 'orders') {
       navigate('/expert');
       onMenuSelect(key);
@@ -224,6 +229,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: 'Заказы',
     },
     {
+      key: 'orders-feed',
+      icon: <UnorderedListOutlined />,
+      label: 'Лента работ',
+    },
+    {
       key: 'works',
       icon: <FileDoneOutlined />,
       label: 'Мои работы',
@@ -262,8 +272,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className={styles.sidebarProfile}>
       <Avatar
         size={48}
-        src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
-        icon={!userProfile?.avatar && <UserOutlined />}
+        src={userProfile?.avatar || undefined}
+        icon={<UserOutlined />}
         style={{ backgroundColor: '#667eea' }}
       />
       <div style={{ marginLeft: 12, flex: 1 }}>

@@ -62,7 +62,7 @@ import {
 import dayjs from 'dayjs';
 const { RangePicker } = DatePicker;
 import { authApi } from '../api/auth';
-import styles from './ExpertDashboard.module.css';
+import styles from './ExpertDashboard/ExpertDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;

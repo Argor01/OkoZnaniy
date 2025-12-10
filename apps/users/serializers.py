@@ -109,7 +109,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'telegram_id', 'avatar',
+            'username', 'first_name', 'last_name', 'telegram_id', 'avatar',
             'bio', 'experience_years', 'hourly_rate', 
             'education', 'skills', 'portfolio_url'
         ]

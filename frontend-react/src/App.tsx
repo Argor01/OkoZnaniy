@@ -30,7 +30,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
 import CreateOrder from './pages/CreateOrder';
-import ExpertDashboard from './pages/ExpertDashboard';
+import ExpertDashboard from './pages/ExpertDashboard/index';
 import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';
@@ -42,6 +42,7 @@ import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
 import PurchasedWorks from './pages/PurchasedWorks';
+import OrdersFeed from './pages/OrdersFeed';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -88,7 +89,7 @@ const App: React.FC = () => {
                 path="/expert" 
                 element={
                   <ProtectedRoute>
-                    <ExpertDashboard />
+                    <ExpertDashboard/>
                   </ProtectedRoute>
                 } 
               />
@@ -167,6 +168,14 @@ const App: React.FC = () => {
                     <DashboardLayout>
                       <MyWorks />
                     </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders-feed"
+                element={
+                  <ProtectedRoute>
+                    <OrdersFeed />
                   </ProtectedRoute>
                 } 
               />

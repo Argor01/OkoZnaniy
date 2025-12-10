@@ -1,5 +1,3 @@
-// Типы для ExpertDashboard
-
 export interface UserProfile {
   id: number;
   username: string;
@@ -16,7 +14,6 @@ export interface UserProfile {
   skills?: string;
   portfolio_url?: string;
   is_verified?: boolean;
-  balance?: number;
   date_joined?: string;
 }
 
