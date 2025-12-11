@@ -3,11 +3,13 @@ import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, 
 import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi } from '../api/orders';
-import { catalogApi } from '../api/catalog';
-import { authApi } from '../api/auth';
-import Sidebar, { MobileMenuButton } from '../components/layout/Sidebar';
-import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../config/orderStatuses';
+import { ordersApi } from '../../api/orders';
+import { catalogApi } from '../../api/catalog';
+import { authApi } from '../../api/auth';
+import Sidebar, { MobileMenuButton } from '../../components/layout/Sidebar';
+import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../config/orderStatuses';
+import { SUBJECTS } from '../../config/subjects';
+import { WORK_TYPES } from '../../config/workTypes';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
@@ -158,7 +160,7 @@ const OrdersFeed: React.FC = () => {
         )}
 
         <Content style={{ 
-          padding: isMobile ? '80px 16px 24px' : '0',
+          padding: isMobile ? '96px 16px 24px' : '0',
           background: 'transparent',
           minHeight: isMobile ? '100vh' : 'calc(100vh - 48px)'
         }}>
@@ -229,15 +231,11 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              <Select.Option value={1}>Математика</Select.Option>
-              <Select.Option value={2}>Физика</Select.Option>
-              <Select.Option value={3}>Информатика</Select.Option>
-              <Select.Option value={4}>Химия</Select.Option>
-              <Select.Option value={5}>История</Select.Option>
-              <Select.Option value={6}>Английский язык</Select.Option>
-              <Select.Option value={7}>Философия</Select.Option>
-              <Select.Option value={8}>Маркетинг</Select.Option>
-              <Select.Option value={9}>Экономика</Select.Option>
+              {SUBJECTS.map((subject) => (
+                <Select.Option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </Select.Option>
+              ))}
             </Select>
           </Col>
           <Col xs={24} sm={12} md={6} lg={8}>
@@ -250,15 +248,11 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              <Select.Option value={1}>Реферат</Select.Option>
-              <Select.Option value={2}>Курсовая работа</Select.Option>
-              <Select.Option value={3}>Лабораторная работа</Select.Option>
-              <Select.Option value={4}>Контрольная работа</Select.Option>
-              <Select.Option value={5}>Дипломная работа</Select.Option>
-              <Select.Option value={6}>Решение задач</Select.Option>
-              <Select.Option value={7}>Эссе</Select.Option>
-              <Select.Option value={8}>Презентация</Select.Option>
-              <Select.Option value={9}>Отчет</Select.Option>
+              {WORK_TYPES.map((workType) => (
+                <Select.Option key={workType.id} value={workType.id}>
+                  {workType.name}
+                </Select.Option>
+              ))}
             </Select>
           </Col>
         </Row>

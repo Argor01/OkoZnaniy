@@ -31,7 +31,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
 import CreateOrder from './pages/CreateOrder';
-import ExpertDashboard from './pages/ExpertDashboard/index';
+import ExpertDashboard from './pages/ExpertDashboard';
 import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';

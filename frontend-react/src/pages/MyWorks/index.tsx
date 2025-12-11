@@ -5,9 +5,9 @@ import EmojiPicker from 'emoji-picker-react';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '../components/layout/Sidebar';
-import { authApi } from '../api/auth';
-import { ordersApi } from '../api/orders';
+import Sidebar from '../../components/layout/Sidebar';
+import { authApi } from '../../api/auth';
+import { ordersApi } from '../../api/orders';
 import { 
   MessagesModal, 
   NotificationsModal, 
@@ -15,7 +15,7 @@ import {
   FinanceModal, 
   FriendsModal, 
   FaqModal 
-} from '../components/modals';
+} from '../../components/modals';
 import styles from './MyWorks.module.css';
 
 const { Content, Header } = Layout;

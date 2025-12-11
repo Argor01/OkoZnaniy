@@ -4,10 +4,12 @@ import { InboxOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi, type CreateOrderRequest } from '../api/orders';
-import { catalogApi } from '../api/catalog';
-import { SUBJECTS } from '../config/subjects';
-import { WORK_TYPES } from '../config/workTypes';
+import { ordersApi, type CreateOrderRequest } from '../../api/orders';
+import { catalogApi } from '../../api/catalog';
+import { SUBJECTS } from '../../config/subjects';
+import { WORK_TYPES } from '../../config/workTypes';
+import { MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from '../../config/fileUpload';
+import { VALIDATION_MESSAGES } from '../../config/validation';
 import dayjs from 'dayjs';
 
 const { Title } = Typography;
@@ -42,9 +44,9 @@ const CreateOrder: React.FC = () => {
     multiple: true,
     fileList,
     beforeUpload: (file) => {
-      const isLt10M = file.size / 1024 / 1024 < 10;
+      const isLt10M = file.size < MAX_FILE_SIZE_BYTES;
       if (!isLt10M) {
-        message.error('Файл должен быть меньше 10MB!');
+        message.error(VALIDATION_MESSAGES.fileSize(MAX_FILE_SIZE_MB));
         return false;
       }
       
@@ -343,7 +345,7 @@ const CreateOrder: React.FC = () => {
           <Form.Item
             name="files"
             label="Прикрепить файлы"
-            extra="Максимальный размер файла: 10 МБ. Поддерживаются документы, изображения, архивы"
+            extra={`Максимальный размер файла: ${MAX_FILE_SIZE_MB} МБ. Поддерживаются документы, изображения, архивы`}
           >
             <Dragger {...uploadProps}>
               <p className="ant-upload-drag-icon">
