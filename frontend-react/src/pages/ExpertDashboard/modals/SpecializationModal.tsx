@@ -145,44 +145,50 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           }
         }}
       >
-        <Form.Item
-          label="Опыт работы (лет)"
-          name="experience_years"
-          rules={[{ required: true, message: 'Укажите опыт работы' }]}
-        >
-          <AntInputNumber 
-            min={0} 
-            max={90}
-            precision={0}
-            parser={(value) => {
-              const parsed = value?.replace(/\D/g, '');
-              return parsed ? Number(parsed) : 0;
-            }}
-            style={{ width: '100%' }}
-            className={styles.inputField}
-            size="large"
-            placeholder="0"
-          />
-        </Form.Item>
-        <Form.Item
-          label="Часовая ставка (₽)"
-          name="hourly_rate"
-          rules={[{ required: true, message: 'Укажите часовую ставку' }]}
-        >
-          <AntInputNumber 
-            min={0}
-            precision={0}
-            parser={(value) => {
-              const parsed = value?.replace(/\D/g, '');
-              return parsed ? Number(parsed) : 0;
-            }} 
-            step={100}
-            style={{ width: '100%' }}
-            className={styles.inputField}
-            size="large"
-            placeholder="0"
-          />
-        </Form.Item>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Form.Item
+            label="Опыт работы (лет)"
+            name="experience_years"
+            rules={[{ required: true, message: 'Укажите опыт работы' }]}
+          >
+            <AntInputNumber 
+              min={0} 
+              max={90}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              formatter={(value) => value ? String(value) : ''}
+              controls={false}
+              style={{ width: '100%' }}
+              className={styles.inputField}
+              size="large"
+              placeholder="0"
+            />
+          </Form.Item>
+          <Form.Item
+            label="Часовая ставка (₽)"
+            name="hourly_rate"
+            rules={[{ required: true, message: 'Укажите часовую ставку' }]}
+          >
+            <AntInputNumber 
+              min={0}
+              precision={0}
+              parser={(value) => {
+                const parsed = value?.replace(/\D/g, '');
+                return parsed ? Number(parsed) : 0;
+              }}
+              formatter={(value) => value ? String(value) : ''}
+              controls={false}
+              step={100}
+              style={{ width: '100%' }}
+              className={styles.inputField}
+              size="large"
+              placeholder="0"
+            />
+          </Form.Item>
+        </div>
         <Form.Item
           label="Описание"
           name="description"

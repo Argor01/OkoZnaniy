@@ -1,0 +1,47 @@
+/* Стили для ShopReadyWorks */
+
+.layout {
+  min-height: 100vh;
+  background: #3b82f6;
+}
+
+.mainLayout {
+  margin-left: 250px;
+  transition: margin-left 0.3s;
+}
+
+.content {
+  margin: 24px;
+  padding: 24px 24px 24px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  min-height: calc(100vh - 112px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0 !important;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .mainLayout {
+    margin-left: 0;
+  }
+
+  .content {
+    margin: 16px;
+    padding: 16px;
+    border-radius: 8px;
+  }
+}

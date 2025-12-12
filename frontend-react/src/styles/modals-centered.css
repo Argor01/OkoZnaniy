@@ -1,0 +1,61 @@
+/* Центрирование всех модальных окон с учетом сайдбара (250px) */
+
+/* Общий класс для всех модальных окон на страницах с сайдбаром */
+.modal-with-sidebar .ant-modal {
+  left: calc(50% + 125px) !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Специфичные классы для разных модальных окон */
+.notifications-modal,
+.messages-modal,
+.faq-modal,
+.finance-modal,
+.arbitration-modal,
+.friends-modal {
+  left: calc(50% + 125px) !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Адаптив для планшетов (сайдбар 200px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .modal-with-sidebar .ant-modal,
+  .notifications-modal,
+  .messages-modal,
+  .faq-modal,
+  .finance-modal,
+  .arbitration-modal,
+  .friends-modal {
+    left: calc(50% + 100px) !important;
+  }
+}
+
+/* Адаптив для мобильных (без сайдбара) */
+@media (max-width: 768px) {
+  .modal-with-sidebar .ant-modal,
+  .notifications-modal,
+  .messages-modal,
+  .faq-modal,
+  .finance-modal,
+  .arbitration-modal,
+  .friends-modal {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .modal-with-sidebar .ant-modal,
+  .notifications-modal,
+  .messages-modal,
+  .faq-modal,
+  .finance-modal,
+  .arbitration-modal,
+  .friends-modal {
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    margin: 0 auto !important;
+  }
+}

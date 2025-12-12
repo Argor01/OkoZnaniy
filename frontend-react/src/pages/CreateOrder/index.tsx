@@ -11,6 +11,7 @@ import { WORK_TYPES } from '../../config/workTypes';
 import { MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from '../../config/fileUpload';
 import { VALIDATION_MESSAGES } from '../../config/validation';
 import dayjs from 'dayjs';
+import styles from './CreateOrder.module.css';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -127,7 +128,9 @@ const CreateOrder: React.FC = () => {
       if (errorData && typeof errorData === 'object') {
         Object.entries(errorData).forEach(([field, messages]) => {
           if (Array.isArray(messages)) {
-            messages.forEach(msg => message.error(`${field}: ${msg}`));
+            const fieldName = field === 'subject_id' ? 'Предмет' : 
+                            field === 'work_type_id' ? 'Тип работы' : field;
+            messages.forEach(msg => message.error(`${fieldName}: ${msg}`));
           } else {
             message.error(`${field}: ${messages}`);
           }
@@ -147,15 +150,20 @@ const CreateOrder: React.FC = () => {
     const orderData: any = {
       title: values.title,
       description: values.description,
-      deadline: values.deadline?.format('YYYY-MM-DD'), // Только дата
+      deadline: values.deadline?.format('YYYY-MM-DD'),
       custom_topic: values.custom_topic,
       budget: values.budget,
-      // Если выбрано "Другое", используем ID=2, иначе выбранный ID
-      subject_id: showCustomSubject ? 2 : values.subject_id,
-      work_type_id: showCustomWorkType ? 2 : values.work_type_id,
     };
 
-    // Добавляем кастомные названия если выбрано "Другое"
+    // Если НЕ выбрано "Другое", отправляем ID
+    if (!showCustomSubject && values.subject_id) {
+      orderData.subject_id = values.subject_id;
+    }
+    if (!showCustomWorkType && values.work_type_id) {
+      orderData.work_type_id = values.work_type_id;
+    }
+
+    // Если выбрано "Другое", отправляем кастомное название
     if (showCustomSubject && values.custom_subject) {
       orderData.custom_subject = values.custom_subject;
     }
@@ -168,14 +176,14 @@ const CreateOrder: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '800px', margin: '0 auto' }}>
-      <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <Title level={2} style={{ margin: 0 }}>
+    <div className={styles.container}>
+      <Card className={styles.card} bordered={false}>
+        <div className={styles.header}>
+          <Title level={2} className={styles.title}>
             Создать заказ
           </Title>
           <Button 
-            type="default" 
+            className={styles.buttonSecondary}
             onClick={() => navigate('/orders-feed')}
           >
             К ленте заказов
@@ -360,10 +368,18 @@ const CreateOrder: React.FC = () => {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={createOrderMutation.isPending}>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={createOrderMutation.isPending}
+                className={styles.buttonPrimary}
+              >
                 Создать заказ
               </Button>
-              <Button onClick={() => form.resetFields()}>
+              <Button 
+                onClick={() => form.resetFields()}
+                className={styles.buttonSecondary}
+              >
                 Очистить
               </Button>
             </Space>

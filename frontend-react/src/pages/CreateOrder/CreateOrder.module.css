@@ -1,0 +1,87 @@
+/* Стили страницы создания заказа в стиле ExpertDashboard */
+
+.container {
+  padding: 40px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  background: #3b82f6;
+  min-height: 100vh;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  margin: 0 !important;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.buttonPrimary {
+  background: #3b82f6 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  height: 44px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.buttonPrimary:hover {
+  background: #2563eb !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+}
+
+.buttonSecondary {
+  border-radius: 12px !important;
+  height: 44px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  border-color: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+.buttonSecondary:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+}
+
+.inputField {
+  border-radius: 12px !important;
+  font-size: 15px !important;
+}
+
+.textareaField {
+  border-radius: 12px !important;
+  font-size: 15px !important;
+}
+
+.selectField {
+  border-radius: 12px !important;
+}
+
+.uploadArea {
+  border-radius: 16px !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+  background: rgba(102, 126, 234, 0.05) !important;
+}
+
+.uploadArea:hover {
+  border-color: #667eea !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+}

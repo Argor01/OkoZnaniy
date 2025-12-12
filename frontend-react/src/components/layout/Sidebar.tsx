@@ -152,10 +152,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       navigate('/shop/add-work');
       return;
     }
-    if (key === 'shop-my-works') {
-      navigate('/works');
-      return;
-    }
     if (key === 'shop-purchased') {
       navigate('/shop/purchased');
       return;
@@ -245,7 +241,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       children: [
         { key: 'shop-ready-works', label: 'Магазин готовых работ' },
         { key: 'shop-add-work', label: 'Добавить работу в магазин' },
-        { key: 'shop-my-works', label: 'Мои работы' },
         { key: 'shop-purchased', label: 'Купленные работы' },
       ],
     } : null,

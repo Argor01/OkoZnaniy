@@ -3,20 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Button, 
+  Input, 
+  Select, 
   Card, 
   Space, 
   Typography, 
+  Switch, 
+  Row, 
+  Col,
   Avatar,
-  Badge,
+  Tag,
+  Divider,
   Menu,
+  Badge,
   Modal,
-  Input as AntdInput,
   Collapse,
-  message,
   DatePicker,
-  Select
+  message
 } from 'antd';
 import { 
+  SearchOutlined, 
+  PlusOutlined, 
+  FileTextOutlined,
+  ClockCircleOutlined,
+  EyeOutlined,
+  DownOutlined,
+  CodeOutlined,
   UserOutlined,
   SettingOutlined,
   MessageOutlined,
@@ -34,24 +46,24 @@ import {
   PoweroffOutlined,
   QuestionCircleOutlined,
   CheckCircleOutlined,
-  DownloadOutlined,
-  PlusOutlined,
   StarOutlined,
   StarFilled,
+  MobileOutlined,
   SendOutlined,
   SmileOutlined,
   PaperClipOutlined,
-  MobileOutlined,
-  SearchOutlined,
-  CommentOutlined,
-  DownOutlined
+  CommentOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+const { RangePicker } = DatePicker;
 import { authApi } from '../api/auth';
+import Sidebar from '../components/layout/Sidebar';
+import { Layout } from 'antd';
 import styles from './ExpertDashboard/ExpertDashboard.module.css';
 
+const { Content } = Layout;
+
 const { Text, Title } = Typography;
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 interface UserProfile {
@@ -65,12 +77,17 @@ interface UserProfile {
   avatar?: string;
 }
 
-const PurchasedWorks: React.FC = () => {
+const ShopReadyWorks: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('shop-purchased');
+  const [sortBy, setSortBy] = useState<string>('newness');
+  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('shop-ready-works');
   const [openKeys, setOpenKeys] = useState<string[]>([]);
-  
-  // Состояния для модальных окон
+
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+  });
+
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
@@ -81,13 +98,39 @@ const PurchasedWorks: React.FC = () => {
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
 
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
-
-  // Пример данных купленных работ (заглушка)
-  const purchasedWorks: any[] = [];
+  // Пример данных работ (заглушка)
+  const works = [
+    {
+      id: 1,
+      author: 'egoist09',
+      type: 'Практическая работа',
+      title: '(Росдистант) Практическая работа по дисциплине Управление охраной окружающей среды в нефтега...',
+      price: 450,
+      date: '29 октября в 16:44',
+      downloads: 0,
+      views: 2
+    },
+    {
+      id: 2,
+      author: 'egoist09',
+      type: 'Практическая работа',
+      title: '(Росдистант) Практическая работа по дисциплине Анализ и разработка инновационных технических ...',
+      price: 450,
+      date: '29 октября в 16:40',
+      downloads: 0,
+      views: 0
+    },
+    {
+      id: 3,
+      author: 'orlova',
+      type: 'Контрольная работа',
+      title: '(НСПК) Основы обучения лиц с особыми образовательными потребностями (ДО, СпДО) Практическ...',
+      price: 355,
+      date: '29 октября в 02:28',
+      downloads: 0,
+      views: 0
+    }
+  ];
 
   return (
     <div className={styles.container}>
@@ -194,7 +237,7 @@ const PurchasedWorks: React.FC = () => {
                 return;
               }
               if (key === 'shop-ready-works') {
-                navigate('/shop/ready-works');
+                // Уже на этой странице
                 return;
               }
               if (key === 'shop-add-work') {
@@ -206,7 +249,7 @@ const PurchasedWorks: React.FC = () => {
                 return;
               }
               if (key === 'shop-purchased') {
-                // Уже на этой странице
+                navigate('/shop/purchased');
                 return;
               }
               if (key === 'logout') {
@@ -285,75 +328,240 @@ const PurchasedWorks: React.FC = () => {
 
         {/* Main Content */}
         <div className={styles.mainContent}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-            <Title level={2} style={{ margin: 0 }}>
-              Купленные работы
+          <div style={{ 
+            display: 'flex',
+            gap: '24px'
+          }}>
+            {/* Левая боковая панель для поиска */}
+            <div style={{ width: '320px', flexShrink: 0 }}>
+          {/* Поиск работ */}
+          <Card 
+            style={{ 
+              borderRadius: 16, 
+              marginBottom: 16,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <Title level={5} style={{ marginBottom: 16 }}>
+              Поиск работ
             </Title>
-            <Space>
-              <Button 
-                className={styles.buttonSecondary}
-                onClick={() => navigate('/shop/ready-works')}
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+              <Input 
+                placeholder="Текст поиска"
+                style={{ borderRadius: 8 }}
+              />
+              <Select 
+                defaultValue="all" 
+                style={{ width: '100%' }}
+                suffixIcon={<DownOutlined />}
               >
-                Перейти к магазину
+                <Option value="all">Все разделы</Option>
+              </Select>
+              <Select 
+                placeholder="Выбрать предмет"
+                style={{ width: '100%' }}
+                suffixIcon={<DownOutlined />}
+              >
+                <Option value="math">Математика</Option>
+                <Option value="physics">Физика</Option>
+              </Select>
+              <Select 
+                placeholder="Тип работы"
+                style={{ width: '100%' }}
+                suffixIcon={<DownOutlined />}
+              >
+                <Option value="practical">Практическая работа</Option>
+                <Option value="control">Контрольная работа</Option>
+              </Select>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 14 }}>Только без покупок</Text>
+                <Switch size="small" />
+              </div>
+              <Button 
+                type="primary"
+                icon={<SearchOutlined />}
+                block
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                  border: 'none',
+                  borderRadius: 8,
+                  height: 40
+                }}
+              >
+                Поиск
               </Button>
             </Space>
-          </div>
+          </Card>
 
-          {/* Content Area */}
-          {purchasedWorks.length === 0 ? (
-            <div className={styles.card} style={{ textAlign: 'center', padding: '60px 24px' }}>
-              <ShoppingOutlined style={{ fontSize: 64, color: '#d1d5db', marginBottom: 16 }} />
-              <Text style={{ fontSize: 18, color: '#6b7280', display: 'block', marginBottom: 8 }}>
-                У вас пока нет купленных работ
-              </Text>
-              <Text type="secondary" style={{ fontSize: 14, display: 'block', marginBottom: 24 }}>
-                Купленные работы появятся здесь после покупки в магазине
-              </Text>
-              <Button 
-                type="primary" 
-                size="large"
-                onClick={() => navigate('/shop/ready-works')}
-                icon={<ShoppingOutlined />}
-                className={styles.buttonPrimary}
-              >
-                Перейти к магазину
-              </Button>
+          {/* Призыв к действию */}
+          <Card 
+            style={{ 
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+              border: 'none',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <Title level={5} style={{ color: '#ffffff', marginBottom: 8 }}>
+              Здесь вам помогут написать учебную работу.
+            </Title>
+            <Text style={{ color: '#ffffff', display: 'block', marginBottom: 16, fontSize: 14 }}>
+              Размести задание и выбери лучшего специалиста!
+            </Text>
+            <Input 
+              placeholder="Название работы"
+              style={{ borderRadius: 8 }}
+            />
+          </Card>
             </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 16 }}>
-              {purchasedWorks.map((work: any) => (
-                <Card key={work.id} className={styles.orderCard} hoverable>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 24 }}>
-                    <div style={{ flex: 1 }}>
-                      <Title level={5} style={{ margin: '0 0 8px 0', fontSize: 16 }}>
-                        {work.title}
-                      </Title>
-                      <Text type="secondary" style={{ fontSize: 13 }}>
-                        Автор: {work.author}
-                      </Text>
+
+            {/* Основной контент */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Заголовок */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: 24
+              }}>
+                <Title level={2} style={{ margin: 0, color: '#1f2937' }}>
+                  Магазин готовых работ
+                </Title>
+                <Space>
+                  <Text style={{ fontSize: 14, color: '#6b7280' }}>
+                    Всего <Text strong style={{ color: '#3b82f6' }}>2250</Text> работ
+                  </Text>
+                  <Button 
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    style={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                      border: 'none',
+                      borderRadius: 8,
+                      height: 40
+                    }}
+                  >
+                    Добавить работу
+                  </Button>
+                </Space>
+              </div>
+
+              {/* Сортировка */}
+              <div style={{ 
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12
+              }}>
+                <Text style={{ fontSize: 14, color: '#6b7280' }}>Сортировать по:</Text>
+                <Button 
+                  type={sortBy === 'price' ? 'primary' : 'text'}
+                  onClick={() => setSortBy('price')}
+                  style={{ 
+                    color: sortBy === 'price' ? '#ffffff' : '#6b7280',
+                    background: sortBy === 'price' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
+                    border: 'none'
+                  }}
+                >
+                  Цена
+                </Button>
+                <Button 
+                  type={sortBy === 'popularity' ? 'primary' : 'text'}
+                  onClick={() => setSortBy('popularity')}
+                  style={{ 
+                    color: sortBy === 'popularity' ? '#ffffff' : '#6b7280',
+                    background: sortBy === 'popularity' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
+                    border: 'none'
+                  }}
+                >
+                  Популярности
+                </Button>
+                <Button 
+                  type={sortBy === 'newness' ? 'primary' : 'text'}
+                  onClick={() => setSortBy('newness')}
+                  icon={sortBy === 'newness' && <DownOutlined />}
+                  style={{ 
+                    color: sortBy === 'newness' ? '#ffffff' : '#6b7280',
+                    background: sortBy === 'newness' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)' : 'transparent',
+                    border: 'none'
+                  }}
+                >
+                  Новизне
+                </Button>
+              </div>
+
+              {/* Список работ */}
+              <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                {works.map((work) => (
+                  <Card 
+                    key={work.id}
+                    style={{ 
+                      borderRadius: 12,
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                          <Avatar size={32} style={{ backgroundColor: '#667eea' }}>
+                            {work.author.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Text strong style={{ fontSize: 14, color: '#1f2937' }}>
+                            {work.author}
+                          </Text>
+                          <Tag 
+                            icon={work.type === 'Практическая работа' ? <FileTextOutlined /> : <CodeOutlined />}
+                            color="blue"
+                            style={{ borderRadius: 6 }}
+                          >
+                            {work.type}
+                          </Tag>
+                        </div>
+                        <Text style={{ 
+                          fontSize: 15, 
+                          color: '#1f2937',
+                          display: 'block',
+                          marginBottom: 12
+                        }}>
+                          {work.title}
+                        </Text>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <Space>
+                            <ClockCircleOutlined style={{ color: '#6b7280' }} />
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {work.date}
+                            </Text>
+                          </Space>
+                          <Space>
+                            <FileTextOutlined style={{ color: '#6b7280' }} />
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {work.downloads}
+                            </Text>
+                          </Space>
+                          <Space>
+                            <EyeOutlined style={{ color: '#6b7280' }} />
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {work.views}
+                            </Text>
+                          </Space>
+                        </div>
+                      </div>
+                      <div style={{ marginLeft: 24, textAlign: 'right' }}>
+                        <Text strong style={{ fontSize: 20, color: '#1f2937', display: 'block' }}>
+                          {work.price} ₽
+                        </Text>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
-                      <Text strong style={{ fontSize: 20, color: '#10b981' }}>
-                        {work.price} ₽
-                      </Text>
-                      <Button 
-                        type="primary"
-                        icon={<DownloadOutlined />}
-                        className={styles.buttonPrimary}
-                      >
-                        Скачать
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </Space>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Модальные окна */}
-      {/* Модальное окно мессенджера */}
+      {/* Модальные окна - скопированы из ExpertDashboard */}
+      {/* Модальное окно сообщений */}
       <Modal
         open={messageModalVisible}
         onCancel={() => setMessageModalVisible(false)}
@@ -468,7 +676,7 @@ const PurchasedWorks: React.FC = () => {
 
             {/* Search */}
             <div style={{ padding: '12px', background: '#ffffff' }}>
-              <AntdInput
+              <Input
                 prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
                 placeholder="Поиск пользователя"
                 style={{ borderRadius: 8 }}
@@ -569,7 +777,7 @@ const PurchasedWorks: React.FC = () => {
               gap: 8,
               alignItems: 'flex-end'
             }}>
-              <AntdInput.TextArea
+              <Input.TextArea
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Введите сообщение..."
@@ -623,6 +831,7 @@ const PurchasedWorks: React.FC = () => {
           </div>
         </div>
       </Modal>
+
       {/* Модальное окно FAQ */}
       <Modal
         title={
@@ -1073,6 +1282,81 @@ const PurchasedWorks: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Модальное окно Мои друзья */}
+      <Modal
+        title={
+          <div style={{ 
+            fontSize: 24, 
+            fontWeight: 600, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: 8
+          }}>
+            Мои друзья
+          </div>
+        }
+        open={friendsModalVisible}
+        onCancel={() => setFriendsModalVisible(false)}
+        footer={null}
+        width={800}
+        styles={{
+          mask: {
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)'
+          },
+          content: { 
+            borderRadius: 24, 
+            padding: '32px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          },
+          body: {
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            padding: '0'
+          }
+        }}
+      >
+        <div style={{ paddingTop: 16 }}>
+          <Input.Search
+            placeholder="Поиск друзей..."
+            allowClear
+            style={{ marginBottom: 24 }}
+            onSearch={(value) => {
+              // Поиск по работам
+            }}
+          />
+          <div style={{ 
+            minHeight: '400px',
+            background: '#ffffff',
+            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <TeamOutlined style={{ 
+              fontSize: 64, 
+              color: '#d1d5db',
+              marginBottom: 16 
+            }} />
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              У вас пока нет друзей
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
+              Пригласите друзей, чтобы начать общение
+            </Text>
+          </div>
+        </div>
+      </Modal>
+
       {/* Модальное окно Финансы */}
       <Modal
         title={
@@ -1137,7 +1421,7 @@ const PurchasedWorks: React.FC = () => {
                 style={{ width: 280 }}
               />
 
-              <AntdInput
+              <Input
                 placeholder="Поиск по операциям"
                 prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
                 style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
@@ -1273,9 +1557,6 @@ const PurchasedWorks: React.FC = () => {
                     type="text" 
                     block 
                     style={{ textAlign: 'left', height: 36 }}
-                    onClick={() => {
-                      // Переход к истории операций
-                    }}
                   >
                     История операций
                   </Button>
@@ -1283,9 +1564,6 @@ const PurchasedWorks: React.FC = () => {
                     type="text" 
                     block 
                     style={{ textAlign: 'left', height: 36 }}
-                    onClick={() => {
-                      // Переход к заблокированным
-                    }}
                   >
                     Заблокировано
                   </Button>
@@ -1293,9 +1571,6 @@ const PurchasedWorks: React.FC = () => {
                     type="text" 
                     block 
                     style={{ textAlign: 'left', height: 36 }}
-                    onClick={() => {
-                      // Переход к удерживаемым
-                    }}
                   >
                     Удерживается
                   </Button>
@@ -1303,9 +1578,6 @@ const PurchasedWorks: React.FC = () => {
                     type="text" 
                     block 
                     style={{ textAlign: 'left', height: 36 }}
-                    onClick={() => {
-                      // Переход к платным услугам
-                    }}
                   >
                     Платные услуги
                   </Button>
@@ -1315,6 +1587,7 @@ const PurchasedWorks: React.FC = () => {
           </div>
         </div>
       </Modal>
+
       {/* Модальное окно Уведомления */}
       <Modal
         title={null}
@@ -1346,7 +1619,6 @@ const PurchasedWorks: React.FC = () => {
         }}
       >
         <div style={{ padding: '0' }}>
-          {/* Заголовок */}
           <Text strong style={{ fontSize: 24, color: '#1f2937', display: 'block', marginBottom: 24 }}>
             Уведомления
           </Text>
@@ -1520,6 +1792,7 @@ const PurchasedWorks: React.FC = () => {
           </div>
         </div>
       </Modal>
+
       {/* Модальное окно Арбитраж */}
       <Modal
         title={null}
@@ -1555,7 +1828,6 @@ const PurchasedWorks: React.FC = () => {
           minHeight: '400px',
           padding: '0'
         }}>
-          {/* Заголовок */}
           <Text strong style={{ 
             fontSize: 24, 
             color: '#1f2937', 
@@ -1565,7 +1837,6 @@ const PurchasedWorks: React.FC = () => {
             Арбитраж
           </Text>
 
-          {/* Область контента */}
           <div style={{ 
             background: '#ffffff',
             borderRadius: 12,
@@ -1582,50 +1853,10 @@ const PurchasedWorks: React.FC = () => {
           </div>
         </div>
       </Modal>
-      <Modal
-        open={friendsModalVisible}
-        onCancel={() => setFriendsModalVisible(false)}
-        footer={null}
-        title="Мои друзья"
-      >
-        <div style={{ paddingTop: 16 }}>
-          <AntdInput.Search
-            placeholder="Поиск друзей..."
-            allowClear
-            style={{ marginBottom: 24 }}
-            onSearch={(value) => {
-              // Поиск по работам
-            }}
-          />
-          <div style={{ 
-            minHeight: '400px',
-            background: '#ffffff',
-            borderRadius: 12,
-            border: '1px solid #e5e7eb',
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <TeamOutlined style={{ 
-              fontSize: 64, 
-              color: '#d1d5db',
-              marginBottom: 16 
-            }} />
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              У вас пока нет друзей
-            </Text>
-            <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
-              Пригласите друзей, чтобы начать общение
-            </Text>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };
 
-export default PurchasedWorks;
+export default ShopReadyWorks;
 
 

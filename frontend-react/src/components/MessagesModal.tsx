@@ -106,6 +106,9 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
       footer={null}
       width={900}
       className="messages-modal"
+      styles={{
+        body: { padding: 0 }
+      }}
     >
       <div className="messages-container">
         {/* Список чатов */}

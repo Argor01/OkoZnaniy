@@ -1,0 +1,29 @@
+.container {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.filters {
+  width: 100%;
+}
+
+.search {
+  min-width: 300px;
+  border-radius: 8px;
+}
+
+.select {
+  min-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .search {
+    min-width: 100%;
+  }
+
+  .select {
+    min-width: 100%;
+  }
+}

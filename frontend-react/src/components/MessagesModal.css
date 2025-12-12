@@ -1,11 +1,22 @@
 /* Стили для модального окна */
+.messages-modal {
+  left: calc(50% + 125px) !important;
+  transform: translateX(-50%) !important;
+}
+
 .messages-modal .ant-modal {
   max-width: 900px !important;
 }
 
+@media (max-width: 768px) {
+  .messages-modal {
+    left: 50% !important;
+  }
+}
+
 .messages-modal .ant-modal-content {
-  height: 85vh !important;
-  max-height: 850px !important;
+  height: 75vh !important;
+  max-height: 700px !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -220,24 +231,30 @@
 }
 
 .messages-modal .message-input-container {
-  padding: 16px;
+  padding: 6px 16px 6px 16px;
   border-top: 1px solid #f0f0f0;
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
   background: #fafafa;
   flex-shrink: 0;
-  min-height: 72px;
   max-height: 200px;
+  margin-bottom: 0;
 }
 
 .messages-modal .message-input {
   flex: 1;
+  min-height: 36px;
+}
+
+.messages-modal .message-input textarea {
+  min-height: 36px !important;
 }
 
 .messages-modal .send-button {
-  height: 40px;
+  height: 36px;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .messages-modal .no-chat-selected {
@@ -447,12 +464,11 @@
   }
 
   .messages-modal .message-input-container {
-    padding: 12px;
+    padding: 6px 12px;
     gap: 8px;
     flex-shrink: 0;
     background: #fff;
     border-top: 1px solid #f0f0f0;
-    min-height: 64px;
     max-height: 200px;
   }
 

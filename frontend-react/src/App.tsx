@@ -24,6 +24,7 @@ import './styles/tokens.css';
 import './styles/components.css';
 import './styles/messages.css';
 import './styles/modals.css';
+import './styles/modals-centered.css';
 import './styles/avatar.css';
 
 // Import pages

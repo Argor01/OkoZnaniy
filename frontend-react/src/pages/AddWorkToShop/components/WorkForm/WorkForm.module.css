@@ -1,0 +1,200 @@
+/* Стили для WorkForm - улучшенный современный дизайн */
+
+.card {
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+}
+
+.card :global(.ant-card-body) {
+  padding: 32px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+.input {
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  height: 44px;
+}
+
+.input:hover {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  background: #ffffff;
+}
+
+/* Стили для InputNumber */
+.input :global(.ant-input-number-input) {
+  height: 40px;
+}
+
+.input :global(.ant-input-number-group-addon) {
+  border-radius: 0 10px 10px 0;
+  border: 2px solid #e5e7eb;
+  border-left: none;
+  background: #f8fafc;
+  color: #6b7280;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input:hover :global(.ant-input-number-group-addon) {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.input:focus-within :global(.ant-input-number-group-addon) {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.select {
+  width: 100%;
+}
+
+.select :global(.ant-select-selector) {
+  border-radius: 10px !important;
+  border: 2px solid #e5e7eb !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 44px !important;
+  padding: 4px 11px !important;
+}
+
+.select:hover :global(.ant-select-selector) {
+  border-color: #93c5fd !important;
+  background: #f8fafc !important;
+}
+
+.select :global(.ant-select-focused .ant-select-selector) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12) !important;
+  background: #ffffff !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #f1f5f9;
+}
+
+.cancelButton {
+  border-radius: 10px;
+  height: 48px;
+  padding: 0 32px;
+  border: 2px solid #e5e7eb;
+  color: #6b7280;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+}
+
+.cancelButton:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 10px;
+  height: 48px;
+  padding: 0 32px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.saveButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.saveButton:hover::before {
+  left: 100%;
+}
+
+.saveButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.saveButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .card {
+    border-radius: 16px;
+  }
+
+  .card :global(.ant-card-body) {
+    padding: 20px;
+  }
+
+  .label {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .input {
+    height: 42px;
+  }
+
+  .input :global(.ant-input-number-input) {
+    height: 38px;
+  }
+
+  .select :global(.ant-select-selector) {
+    height: 42px !important;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+
+  .cancelButton,
+  .saveButton {
+    width: 100%;
+    height: 46px;
+  }
+}

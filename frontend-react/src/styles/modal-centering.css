@@ -1,0 +1,28 @@
+/* Глобальное центрирование модальных окон с учетом сайдбара */
+
+/* Для модальных окон в дашбордах с сайдбаром */
+.modal-with-sidebar {
+  left: calc(50% + 125px) !important;
+  transform: translateX(-50%) !important;
+}
+
+/* Адаптив для планшетов (узкий сайдбар) */
+@media (max-width: 1024px) {
+  .modal-with-sidebar {
+    left: calc(50% + 100px) !important;
+  }
+}
+
+/* Адаптив для мобильных (без сайдбара) */
+@media (max-width: 768px) {
+  .modal-with-sidebar {
+    left: 50% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-with-sidebar {
+    left: 0 !important;
+    transform: none !important;
+  }
+}
