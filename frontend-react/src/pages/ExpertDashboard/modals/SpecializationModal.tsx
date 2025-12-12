@@ -149,43 +149,62 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
-            rules={[{ required: true, message: 'Укажите опыт работы' }]}
+            rules={[
+              { required: true, message: 'Укажите опыт работы' },
+              { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' }
+            ]}
           >
             <AntInputNumber 
               min={0} 
               max={90}
               precision={0}
               parser={(value) => {
-                const parsed = value?.replace(/\D/g, '');
+                if (!value) return 0;
+                const parsed = value.replace(/\D/g, '');
                 return parsed ? Number(parsed) : 0;
               }}
-              formatter={(value) => value ? String(value) : ''}
+              formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
               controls={false}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
               placeholder="0"
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
             />
           </Form.Item>
           <Form.Item
             label="Часовая ставка (₽)"
             name="hourly_rate"
-            rules={[{ required: true, message: 'Укажите часовую ставку' }]}
+            rules={[
+              { required: true, message: 'Укажите часовую ставку' },
+              { type: 'number', min: 0, message: 'Ставка должна быть положительным числом' }
+            ]}
           >
             <AntInputNumber 
               min={0}
+              max={999999}
               precision={0}
               parser={(value) => {
-                const parsed = value?.replace(/\D/g, '');
+                if (!value) return 0;
+                const parsed = value.replace(/\D/g, '');
                 return parsed ? Number(parsed) : 0;
               }}
-              formatter={(value) => value ? String(value) : ''}
+              formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
               controls={false}
               step={100}
               style={{ width: '100%' }}
               className={styles.inputField}
               size="large"
               placeholder="0"
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
             />
           </Form.Item>
         </div>

@@ -274,34 +274,65 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         {isExpert && (
           <>
             <div style={{ display: 'flex', gap: 16 }}>
-              <Form.Item label="Опыт работы (лет)" name="experience_years" style={{ flex: 1 }}>
+              <Form.Item 
+                label="Опыт работы (лет)" 
+                name="experience_years" 
+                style={{ flex: 1 }}
+                rules={[
+                  { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' }
+                ]}
+              >
                 <AntInputNumber 
                   min={0} 
                   max={90} 
                   precision={0}
                   parser={(value) => {
-                    const parsed = value?.replace(/\D/g, '');
+                    if (!value) return 0;
+                    const parsed = value.replace(/\D/g, '');
                     return parsed ? Number(parsed) : 0;
                   }}
+                  formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+                  controls={false}
                   style={{ width: '100%' }} 
                   className={styles.inputField} 
                   size="large"
                   placeholder="0"
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </Form.Item>
-              <Form.Item label="Почасовая ставка (₽)" name="hourly_rate" style={{ flex: 1 }}>
+              <Form.Item 
+                label="Почасовая ставка (₽)" 
+                name="hourly_rate" 
+                style={{ flex: 1 }}
+                rules={[
+                  { type: 'number', min: 0, max: 100000, message: 'Ставка должна быть от 0 до 100000 ₽' }
+                ]}
+              >
                 <AntInputNumber 
                   min={0} 
+                  max={100000}
                   step={100}
                   precision={0}
                   parser={(value) => {
-                    const parsed = value?.replace(/\D/g, '');
+                    if (!value) return 0;
+                    const parsed = value.replace(/\D/g, '');
                     return parsed ? Number(parsed) : 0;
                   }}
+                  formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+                  controls={false}
                   style={{ width: '100%' }} 
                   className={styles.inputField} 
                   size="large"
                   placeholder="0"
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </Form.Item>
             </div>
