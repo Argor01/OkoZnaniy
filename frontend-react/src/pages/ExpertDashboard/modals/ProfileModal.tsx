@@ -19,6 +19,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
   const queryClient = useQueryClient();
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const isExpert = userProfile?.role === 'expert';
+  const [isMobile] = React.useState(window.innerWidth <= 768);
 
   React.useEffect(() => {
     if (visible && profile) {
@@ -43,7 +44,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
     <Modal
       title={
         <div style={{ 
-          fontSize: 24, 
+          fontSize: isMobile ? 18 : 24, 
           fontWeight: 600, 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
           WebkitBackgroundClip: 'text',
@@ -56,26 +57,26 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       open={visible}
       onCancel={onClose}
       onOk={() => form.submit()}
-      width={750}
+      width={isMobile ? '100%' : 750}
       okText="Сохранить"
       cancelText="Отмена"
       okButtonProps={{
         className: styles.buttonPrimary,
-        size: 'large',
+        size: isMobile ? 'middle' : 'large',
         style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
+          borderRadius: isMobile ? 8 : 12,
+          height: isMobile ? 40 : 44,
+          fontSize: isMobile ? 14 : 16,
           fontWeight: 500
         }
       }}
       cancelButtonProps={{
         className: styles.buttonSecondary,
-        size: 'large',
+        size: isMobile ? 'middle' : 'large',
         style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
+          borderRadius: isMobile ? 8 : 12,
+          height: isMobile ? 40 : 44,
+          fontSize: isMobile ? 14 : 16,
           fontWeight: 500
         }
       }}
@@ -86,29 +87,34 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           backgroundColor: 'rgba(0, 0, 0, 0.3)'
         },
         content: { 
-          borderRadius: 24, 
+          borderRadius: isMobile ? 16 : 24, 
           padding: 0,
           overflow: 'hidden',
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          margin: isMobile ? '16px' : 'auto',
+          maxWidth: isMobile ? 'calc(100% - 32px)' : '750px',
+          maxHeight: isMobile ? 'calc(100vh - 32px)' : 'calc(100vh - 80px)'
         },
         header: {
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          padding: '24px 32px',
+          padding: isMobile ? '16px 20px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: '24px 24px 0 0'
+          borderRadius: isMobile ? '16px 16px 0 0' : '24px 24px 0 0'
         },
         body: {
-          padding: '32px',
-          background: 'rgba(255, 255, 255, 0.95)'
+          padding: isMobile ? '20px' : '32px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          maxHeight: isMobile ? 'calc(100vh - 200px)' : 'calc(100vh - 240px)',
+          overflowY: 'auto'
         },
         footer: {
-          padding: '24px 32px',
+          padding: isMobile ? '16px 20px' : '24px 32px',
           background: 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: '0 0 24px 24px'
+          borderRadius: isMobile ? '0 0 16px 16px' : '0 0 24px 24px'
         }
       }}
     >

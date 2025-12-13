@@ -85,41 +85,91 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
       <div className={styles.sectionCardHeader}>
         <h2 className={styles.sectionTitle}>Мои друзья</h2>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', 
+        gap: isMobile ? 12 : 16 
+      }}>
         {mockFriends.map((friend) => (
-          <div key={friend.id} className={styles.orderCard} style={{ cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Avatar size={64} style={{ backgroundColor: friend.avatarColor }}>
+          <div 
+            key={friend.id} 
+            style={{ 
+              background: '#ffffff',
+              border: '1px solid #e5e7eb',
+              borderRadius: 16,
+              padding: isMobile ? 16 : 20,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isMobile) {
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(102, 126, 234, 0.15)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.borderColor = '#667eea';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isMobile) {
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+              }
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 16 }}>
+              <Avatar 
+                size={isMobile ? 72 : 80} 
+                style={{ 
+                  backgroundColor: friend.avatarColor,
+                  fontSize: isMobile ? 28 : 32,
+                  fontWeight: 600,
+                  marginBottom: 12,
+                  border: '3px solid #fff',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                }}
+              >
                 {friend.avatar}
               </Avatar>
-              <div style={{ flex: 1 }}>
-                <Text strong style={{ fontSize: 16, display: 'block' }}>{friend.name}</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>{friend.specialization}</Text>
-                <div style={{ marginTop: 4 }}>
-                  <Rate disabled defaultValue={friend.rating} style={{ fontSize: 12 }} />
-                  <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                    {friend.worksCount} {friend.worksCount === 1 ? 'работа' : friend.worksCount < 5 ? 'работы' : 'работ'}
-                  </Text>
-                </div>
+              <Text strong style={{ fontSize: isMobile ? 16 : 18, display: 'block', marginBottom: 4, color: '#1f2937' }}>
+                {friend.name}
+              </Text>
+              <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13, display: 'block', marginBottom: 8 }}>
+                {friend.specialization}
+              </Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                <Rate disabled defaultValue={friend.rating} style={{ fontSize: isMobile ? 14 : 16 }} />
+                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                  ({friend.worksCount})
+                </Text>
               </div>
             </div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
               <Button 
                 type="primary" 
-                size="small" 
+                size={isMobile ? 'middle' : 'large'}
                 icon={<MessageOutlined />} 
-                style={{ flex: 1 }}
+                style={{ 
+                  flex: 1,
+                  borderRadius: 10,
+                  fontWeight: 500,
+                  height: isMobile ? 36 : 40
+                }}
                 onClick={() => onOpenChat(friend)}
               >
                 Написать
               </Button>
               <Button 
-                size="small" 
+                size={isMobile ? 'middle' : 'large'}
                 icon={<UserOutlined />}
+                style={{
+                  borderRadius: 10,
+                  fontWeight: 500,
+                  height: isMobile ? 36 : 40,
+                  minWidth: isMobile ? 44 : 48
+                }}
                 onClick={() => onOpenProfile(friend)}
-              >
-                Профиль
-              </Button>
+              />
             </div>
           </div>
         ))}

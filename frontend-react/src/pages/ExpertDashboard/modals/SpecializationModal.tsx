@@ -1,8 +1,10 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber as AntInputNumber, message } from 'antd';
+import { Modal, Form, Input, InputNumber as AntInputNumber, Select, message } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi } from '../../../api/experts';
 import styles from '../ExpertDashboard.module.css';
+
+const { Option } = Select;
 
 interface SpecializationModalProps {
   visible: boolean;
@@ -19,6 +21,18 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const [isMobile] = React.useState(window.innerWidth <= 768);
+
+  // Предопределенные навыки
+  const predefinedSkills = [
+    'C++', 'Python', 'Django', 'MySQL', 'HTML/CSS/JS', 'React', 'Next.js',
+    'NodeJS', 'TypeScript', 'Git / Github', 'React JS', 'Vue.js', 'Angular',
+    'Java', 'C#', '.NET', 'PHP', 'Laravel', 'Ruby', 'Go', 'Rust',
+    'Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения',
+    'Теория вероятностей', 'Статистика', 'Физика', 'Механика', 'Электродинамика',
+    'Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия',
+    'Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ'
+  ];
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: any) => expertsApi.createSpecialization(data),
@@ -48,12 +62,21 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 
   React.useEffect(() => {
     if (visible && editingSpecialization) {
-      form.setFieldsValue({
+      const formValues: any = {
         subject_id: editingSpecialization.subject.id,
         experience_years: editingSpecialization.experience_years,
         hourly_rate: editingSpecialization.hourly_rate,
         description: editingSpecialization.description,
-      });
+      };
+      
+      // Преобразуем строку навыков в массив
+      if (editingSpecialization.skills && typeof editingSpecialization.skills === 'string') {
+        formValues.skills = editingSpecialization.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+      } else if (Array.isArray(editingSpecialization.skills)) {
+        formValues.skills = editingSpecialization.skills;
+      }
+      
+      form.setFieldsValue(formValues);
     } else if (visible) {
       form.resetFields();
     }
@@ -68,7 +91,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
     <Modal
       title={
         <div style={{ 
-          fontSize: 24, 
+          fontSize: isMobile ? 18 : 24, 
           fontWeight: 600,
           color: '#1f2937'
         }}>
@@ -78,26 +101,26 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       open={visible}
       onCancel={handleClose}
       onOk={() => form.submit()}
-      width={600}
+      width={isMobile ? '100%' : 600}
       okText={editingSpecialization ? 'Сохранить' : 'Добавить'}
       cancelText="Отмена"
       okButtonProps={{
         className: styles.buttonPrimary,
-        size: 'large',
+        size: isMobile ? 'middle' : 'large',
         style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
+          borderRadius: isMobile ? 8 : 12,
+          height: isMobile ? 40 : 44,
+          fontSize: isMobile ? 14 : 16,
           fontWeight: 500
         }
       }}
       cancelButtonProps={{
         className: styles.buttonSecondary,
-        size: 'large',
+        size: isMobile ? 'middle' : 'large',
         style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
+          borderRadius: isMobile ? 8 : 12,
+          height: isMobile ? 40 : 44,
+          fontSize: isMobile ? 14 : 16,
           fontWeight: 500
         }
       }}
@@ -108,29 +131,33 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           backgroundColor: 'rgba(0, 0, 0, 0.3)'
         },
         content: { 
-          borderRadius: 24, 
+          borderRadius: isMobile ? 16 : 24, 
           padding: 0,
           overflow: 'hidden',
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          margin: isMobile ? '16px' : 'auto',
+          maxWidth: isMobile ? 'calc(100% - 32px)' : '600px'
         },
         header: {
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          padding: '24px 32px',
+          padding: isMobile ? '16px 20px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: '24px 24px 0 0'
+          borderRadius: isMobile ? '16px 16px 0 0' : '24px 24px 0 0'
         },
         body: {
-          padding: '32px',
-          background: 'rgba(255, 255, 255, 0.95)'
+          padding: isMobile ? '20px' : '32px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          maxHeight: isMobile ? 'calc(100vh - 200px)' : 'auto',
+          overflowY: isMobile ? 'auto' : 'visible'
         },
         footer: {
-          padding: '24px 32px',
+          padding: isMobile ? '16px 20px' : '24px 32px',
           background: 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: '0 0 24px 24px'
+          borderRadius: isMobile ? '0 0 16px 16px' : '0 0 24px 24px'
         }
       }}
     >
@@ -138,14 +165,24 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         form={form}
         layout="vertical"
         onFinish={(values) => {
+          // Преобразуем массив навыков в строку для отправки на сервер
+          const dataToSend = { ...values };
+          if (Array.isArray(values.skills)) {
+            dataToSend.skills = values.skills.join(', ');
+          }
+          
           if (editingSpecialization) {
-            updateSpecializationMutation.mutate({ id: editingSpecialization.id, data: values });
+            updateSpecializationMutation.mutate({ id: editingSpecialization.id, data: dataToSend });
           } else {
-            createSpecializationMutation.mutate(values);
+            createSpecializationMutation.mutate(dataToSend);
           }
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+          gap: isMobile ? 12 : 16 
+        }}>
           <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
@@ -167,7 +204,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               controls={false}
               style={{ width: '100%' }}
               className={styles.inputField}
-              size="large"
+              size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) {
@@ -198,7 +235,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               step={100}
               style={{ width: '100%' }}
               className={styles.inputField}
-              size="large"
+              size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) {
@@ -209,14 +246,40 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           </Form.Item>
         </div>
         <Form.Item
+          label="Навыки"
+          name="skills"
+          extra="Начните вводить навык или выберите из списка. Можно добавить свои навыки."
+        >
+          <Select
+            mode="tags"
+            size={isMobile ? 'middle' : 'large'}
+            placeholder="Начните писать навык"
+            style={{ width: '100%' }}
+            maxTagCount="responsive"
+            maxLength={35}
+            tokenSeparators={[',']}
+            filterOption={(input, option) => {
+              if (!option || !option.children) return false;
+              const children = String(option.children);
+              return children.toLowerCase().includes(input.toLowerCase());
+            }}
+          >
+            {predefinedSkills.map((skill) => (
+              <Option key={skill} value={skill}>
+                {skill}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
           label="Описание"
           name="description"
         >
           <Input.TextArea 
-            rows={4} 
+            rows={isMobile ? 3 : 4} 
             placeholder="Опишите ваш опыт в этой области"
             className={styles.textareaField}
-            style={{ fontSize: 15 }}
+            style={{ fontSize: isMobile ? 14 : 15 }}
           />
         </Form.Item>
       </Form>

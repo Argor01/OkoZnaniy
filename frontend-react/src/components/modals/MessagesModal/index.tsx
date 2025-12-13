@@ -43,6 +43,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
       onCancel={onClose}
       footer={null}
       width={900}
+      zIndex={1050}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',

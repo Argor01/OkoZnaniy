@@ -23,49 +23,49 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile, myCompleted = [], myInPro
       
       {/* Краткая статистика */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={8}>
+        <Col xs={8} sm={8}>
           <div style={{ 
             background: '#f0fdf4', 
-            padding: '16px', 
+            padding: isMobile ? '12px 8px' : '16px', 
             borderRadius: 12, 
             border: '1px solid #bbf7d0',
             textAlign: 'center'
           }}>
-            <CheckCircleOutlined style={{ fontSize: 24, color: '#10b981', marginBottom: 8 }} />
-            <div style={{ fontSize: 20, fontWeight: 600, color: '#10b981' }}>
+            <CheckCircleOutlined style={{ fontSize: isMobile ? 20 : 24, color: '#10b981', marginBottom: isMobile ? 4 : 8 }} />
+            <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 600, color: '#10b981' }}>
               {myCompleted.length || 5}
             </div>
-            <Text type="secondary" style={{ fontSize: 12 }}>Завершенные</Text>
+            <Text type="secondary" style={{ fontSize: isMobile ? 10 : 12 }}>Завершенные</Text>
           </div>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={8} sm={8}>
           <div style={{ 
             background: '#fef3c7', 
-            padding: '16px', 
+            padding: isMobile ? '12px 8px' : '16px', 
             borderRadius: 12, 
             border: '1px solid #fde68a',
             textAlign: 'center'
           }}>
-            <ClockCircleOutlined style={{ fontSize: 24, color: '#f59e0b', marginBottom: 8 }} />
-            <div style={{ fontSize: 20, fontWeight: 600, color: '#f59e0b' }}>
+            <ClockCircleOutlined style={{ fontSize: isMobile ? 20 : 24, color: '#f59e0b', marginBottom: isMobile ? 4 : 8 }} />
+            <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 600, color: '#f59e0b' }}>
               {myInProgress.length || 2}
             </div>
-            <Text type="secondary" style={{ fontSize: 12 }}>В работе</Text>
+            <Text type="secondary" style={{ fontSize: isMobile ? 10 : 12 }}>В работе</Text>
           </div>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={8} sm={8}>
           <div style={{ 
             background: '#eff6ff', 
-            padding: '16px', 
+            padding: isMobile ? '12px 8px' : '16px', 
             borderRadius: 12, 
             border: '1px solid #bfdbfe',
             textAlign: 'center'
           }}>
-            <DollarOutlined style={{ fontSize: 24, color: '#3b82f6', marginBottom: 8 }} />
-            <div style={{ fontSize: 20, fontWeight: 600, color: '#3b82f6' }}>
+            <DollarOutlined style={{ fontSize: isMobile ? 20 : 24, color: '#3b82f6', marginBottom: isMobile ? 4 : 8 }} />
+            <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 600, color: '#3b82f6' }}>
               {(myCompleted.reduce((sum, order) => sum + (Number(order.budget) || 0), 0) || 30800).toLocaleString('ru-RU')} ₽
             </div>
-            <Text type="secondary" style={{ fontSize: 12 }}>Общий доход</Text>
+            <Text type="secondary" style={{ fontSize: isMobile ? 10 : 12 }}>Общий доход</Text>
           </div>
         </Col>
       </Row>

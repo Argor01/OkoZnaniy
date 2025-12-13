@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Typography, message, Layout, Tabs } from 'antd';
-import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MenuOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { expertsApi } from '../../api/experts';
@@ -197,15 +197,30 @@ const ExpertDashboard: React.FC = () => {
                 Личный кабинет
               </Title>
             </div>
-            <Button
-              type="default"
-              danger
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              size={isMobile ? 'middle' : 'middle'}
-            >
-              {!isMobile && 'Выйти'}
-            </Button>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={() => setProfileModalVisible(true)}
+                size={isMobile ? 'middle' : 'middle'}
+                style={{
+                  borderRadius: '8px',
+                  background: '#3b82f6',
+                  border: 'none',
+                }}
+              >
+                {!isMobile && 'Редактировать профиль'}
+              </Button>
+              <Button
+                type="default"
+                danger
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                size={isMobile ? 'middle' : 'middle'}
+              >
+                {!isMobile && 'Выйти'}
+              </Button>
+            </div>
           </Header>
           
           <Content
@@ -224,6 +239,7 @@ const ExpertDashboard: React.FC = () => {
                 expertStats={expertStats}
                 userProfile={userProfile}
                 isMobile={isMobile}
+                onEditProfile={() => setProfileModalVisible(true)}
               />
               
               <ApplicationStatus

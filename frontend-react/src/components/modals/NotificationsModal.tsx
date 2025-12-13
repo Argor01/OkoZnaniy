@@ -123,6 +123,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       footer={null}
       width="auto"
       className="notifications-modal"
+      zIndex={1050}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',

@@ -10,7 +10,9 @@ class SpecializationSerializer(serializers.ModelSerializer):
     subject_id = serializers.PrimaryKeyRelatedField(
         write_only=True,
         source='subject',
-        queryset=Subject.objects.all()
+        queryset=Subject.objects.all(),
+        required=False,
+        allow_null=True
     )
 
     class Meta:

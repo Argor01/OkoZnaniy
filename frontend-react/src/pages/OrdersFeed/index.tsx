@@ -264,7 +264,7 @@ const OrdersFeed: React.FC = () => {
             onClick={() => setShowFilters(!showFilters)}
             style={{ padding: 0, marginBottom: showFilters ? 16 : 0 }}
           >
-            {showFilters ? '▼ Скрыть фильтры' : '▶ Показать больше фильтров'}
+            {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
           </Button>
         </div>
 

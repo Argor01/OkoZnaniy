@@ -1,6 +1,6 @@
 import React from 'react';
-import { Avatar, Typography, Rate, Space } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Typography, Rate, Space, Button } from 'antd';
+import { UserOutlined, EditOutlined } from '@ant-design/icons';
 import { UserProfile } from '../../types';
 import styles from '../../ExpertDashboard.module.css';
 
@@ -11,6 +11,7 @@ export interface ProfileHeaderProps {
   expertStats: any;
   userProfile: any;
   isMobile: boolean;
+  onEditProfile?: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -18,6 +19,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   expertStats,
   userProfile,
   isMobile,
+  onEditProfile,
 }) => {
   return (
     <div className={styles.profileBlock}>
