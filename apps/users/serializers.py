@@ -149,7 +149,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         # Логируем входящие данные для отладки
         logger.info(f"[Login] Attempting login with username: {username}")
-        print(f"[Login] Attempting login with username: {username}")
+        print(f"[Login] ========== LOGIN ATTEMPT ==========")
+        print(f"[Login] Username/Email: {username}")
+        print(f"[Login] Password provided: {'Yes' if password else 'No'}")
+        print(f"[Login] All attrs: {list(attrs.keys())}")
         
         # Проверяем, что username и password не пустые
         if not username or not password:
@@ -204,7 +207,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             # Проверяем пароль
             password_valid = user.check_password(password)
             logger.info(f"[Login] User found: {user.username}, password_valid: {password_valid}")
-            print(f"[Login] User found: {user.username}, password_valid: {password_valid}")
+            print(f"[Login] ========== USER FOUND ==========")
+            print(f"[Login] Username: {user.username}")
+            print(f"[Login] Email: {user.email}")
+            print(f"[Login] Role: {user.role}")
+            print(f"[Login] Email verified: {user.email_verified}")
+            print(f"[Login] Password valid: {password_valid}")
+            print(f"[Login] =====================================")
             
             if password_valid:
                 attrs['username'] = user.username  # Передаем username для JWT
@@ -216,16 +225,24 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                     return data
                 except Exception as e:
                     logger.error(f"[Login] Error in super().validate: {str(e)}")
-                    print(f"[Login] Error in super().validate: {str(e)}")
+                    print(f"[Login] ========== ERROR IN TOKEN CREATION ==========")
+                    print(f"[Login] Error: {str(e)}")
                     import traceback
                     print(traceback.format_exc())
-                    raise serializers.ValidationError('Ошибка при создании токена')
+                    print(f"[Login] ================================================")
+                    # Показываем реальную ошибку для отладки
+                    raise serializers.ValidationError(f'Ошибка при создании токена: {str(e)}')
             else:
                 logger.warning(f"[Login] Invalid password for user: {user.username}")
                 print(f"[Login] Invalid password for user: {user.username}")
         else:
             logger.warning(f"[Login] User not found for username: {username}")
-            print(f"[Login] User not found for username: {username}")
+            print(f"[Login] ========== USER NOT FOUND ==========")
+            print(f"[Login] Searched for: {username}")
+            print(f"[Login] ========================================")
         
         # Если дошли сюда, значит пользователь не найден или пароль неверный
+        print(f"[Login] ========== LOGIN FAILED ==========")
+        print(f"[Login] Raising ValidationError: Неверные учетные данные")
+        print(f"[Login] ======================================")
         raise serializers.ValidationError('Неверные учетные данные') 

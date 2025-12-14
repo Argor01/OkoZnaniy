@@ -26,16 +26,8 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
 
   return (
     <div className={styles.sectionCard}>
-      <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className={styles.sectionCardHeader}>
         <h2 className={styles.sectionTitle}>О себе</h2>
-        <Button 
-          type="primary"
-          icon={<EditOutlined />}
-          className={styles.buttonPrimary}
-          onClick={onEdit}
-        >
-          {!isMobile && 'Редактировать'}
-        </Button>
       </div>
       
       <Paragraph style={{ fontSize: 16, lineHeight: 1.8, color: '#4b5563' }}>

@@ -178,6 +178,43 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           }
         }}
       >
+        <Form.Item
+          label="Название специализации"
+          name="custom_name"
+          rules={[{ required: true, message: 'Введите название специализации' }]}
+        >
+          <Input
+            size={isMobile ? 'middle' : 'large'}
+            placeholder="Например: Высшая математика, Программирование на Python"
+            className={styles.inputField}
+            maxLength={100}
+          />
+        </Form.Item>
+        
+        <Form.Item
+          label="Предмет (категория)"
+          name="subject_id"
+          rules={[{ required: true, message: 'Выберите предмет' }]}
+        >
+          <Select
+            size={isMobile ? 'middle' : 'large'}
+            placeholder="Выберите предмет"
+            showSearch
+            optionFilterProp="children"
+            filterOption={(input, option) => {
+              if (!option || !option.children) return false;
+              const children = String(option.children);
+              return children.toLowerCase().includes(input.toLowerCase());
+            }}
+          >
+            {subjects.map((subject) => (
+              <Option key={subject.id} value={subject.id}>
+                {subject.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+        
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 

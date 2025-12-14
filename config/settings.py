@@ -85,7 +85,7 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'apps.users.backends.EmailOrUsernameBackend',  # Кастомный backend для email/username
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 

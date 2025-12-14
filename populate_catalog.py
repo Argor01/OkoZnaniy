@@ -53,9 +53,12 @@ WORK_TYPES = [
 def populate_subjects():
     """Создать предметы"""
     print('Создание предметов...')
-    for name in SUBJECTS:
+    for i, name in enumerate(SUBJECTS, start=1):
         try:
-            subject, created = Subject.objects.get_or_create(name=name)
+            subject, created = Subject.objects.get_or_create(
+                name=name,
+                defaults={'slug': f'subject-{i}'}
+            )
             if created:
                 print(f'  ✓ Создан предмет: {name} (ID: {subject.id})')
             else:
@@ -66,9 +69,12 @@ def populate_subjects():
 def populate_work_types():
     """Создать типы работ"""
     print('\nСоздание типов работ...')
-    for name in WORK_TYPES:
+    for i, name in enumerate(WORK_TYPES, start=1):
         try:
-            work_type, created = WorkType.objects.get_or_create(name=name)
+            work_type, created = WorkType.objects.get_or_create(
+                name=name,
+                defaults={'slug': f'work-type-{i}'}
+            )
             if created:
                 print(f'  ✓ Создан тип работы: {name} (ID: {work_type.id})')
             else:
