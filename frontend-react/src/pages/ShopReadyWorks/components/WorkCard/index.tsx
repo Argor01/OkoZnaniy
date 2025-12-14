@@ -14,14 +14,22 @@ interface WorkCardProps {
 }
 
 const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase }) => {
+  const [imageError, setImageError] = React.useState(false);
+
   return (
     <Card
       hoverable
       className={styles.card}
       onClick={() => onView(work.id)}
       cover={
-        work.preview ? (
-          <img alt={work.title} src={work.preview} className={styles.preview} />
+        work.preview && !imageError ? (
+          <img 
+            alt={work.title} 
+            src={work.preview} 
+            className={styles.preview}
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
         ) : (
           <div className={styles.noPreview}>Нет превью</div>
         )

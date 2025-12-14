@@ -1,11 +1,11 @@
 import React from 'react';
 import { Row, Col, Empty, Spin } from 'antd';
 import PurchasedWorkCard from '../PurchasedWorkCard';
-import { PurchasedWork } from '../../types';
+import { Work } from '../../types';
 import styles from './WorksList.module.css';
 
 interface WorksListProps {
-  works: PurchasedWork[];
+  works: Work[];
   loading?: boolean;
   onDownload: (id: number) => void;
 }

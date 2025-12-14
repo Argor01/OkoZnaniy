@@ -148,12 +148,12 @@ const ShopReadyWorks: React.FC = () => {
       <Layout className={styles.mainLayout}>
         <Header
           style={{
-            background: '#fff',
+            background: 'white',
             padding: isMobile ? '0 16px' : '0 24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            marginLeft: '-20px'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

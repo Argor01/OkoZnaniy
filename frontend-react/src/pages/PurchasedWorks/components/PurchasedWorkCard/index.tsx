@@ -1,93 +1,100 @@
 import React from 'react';
-import { Card, Button, Tag, Typography, Space } from 'antd';
-import { DownloadOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
-import { PurchasedWork } from '../../types';
-import styles from './PurchasedWorkCard.module.css';
+import { Card, Tag, Button, Space, Typography, Rate } from 'antd';
+import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, StarFilled } from '@ant-design/icons';
+import { Work } from './types';
+import styles from './WorkCard.module.css';
 
 const { Text, Title } = Typography;
 
-interface PurchasedWorkCardProps {
-  work: PurchasedWork;
-  onDownload: (id: number) => void;
+interface WorkCardProps {
+  work: Work;
+  onView: (id: number) => void;
+  onFavorite: (id: number) => void;
+  onPurchase: (id: number) => void;
 }
 
-const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({ work, onDownload }) => {
+const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase }) => {
+  const [imageError, setImageError] = React.useState(false);
+
   return (
-    <Card className={styles.card} hoverable>
-      {/* Заголовок с тегами */}
-      <div className={styles.header}>
-        <Tag color="blue" className={styles.typeTag}>
-          {work.type}
-        </Tag>
-        {work.isDownloaded ? (
-          <Tag icon={<CheckCircleOutlined />} color="success" className={styles.statusTag}>
-            Скачано
-          </Tag>
+    <Card
+      hoverable
+      className={styles.card}
+      onClick={() => onView(work.id)}
+      cover={
+        work.preview && !imageError ? (
+          <img 
+            alt={work.title} 
+            src={work.preview} 
+            className={styles.preview}
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
         ) : (
-          <Tag icon={<ClockCircleOutlined />} color="default" className={styles.statusTag}>
-            Не скачано
-          </Tag>
-        )}
+          <div className={styles.noPreview}>Нет превью</div>
+        )
+      }
+    >
+      <div className={styles.header}>
+        <Tag color="blue">{work.category}</Tag>
+        <Button
+          type="text"
+          icon={work.isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFavorite(work.id);
+          }}
+        />
       </div>
 
-      {/* Название */}
-      <Title level={5} className={styles.title}>
+      <Title level={5} className={styles.title} ellipsis={{ rows: 2 }}>
         {work.title}
       </Title>
 
-      {/* Описание */}
-      <div className={styles.description}>{work.description}</div>
+      <Text type="secondary" className={styles.description} ellipsis={{ rows: 2 }}>
+        {work.description}
+      </Text>
 
-      {/* Информация */}
-      <div className={styles.info}>
-        <div className={styles.infoRow}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            Предмет:
-          </Text>
-          <Text strong style={{ fontSize: 13 }}>
-            {work.subject}
-          </Text>
-        </div>
-        <div className={styles.infoRow}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            Куплено:
-          </Text>
-          <Text strong style={{ fontSize: 13 }}>
-            {dayjs(work.purchaseDate).format('DD.MM.YYYY')}
-          </Text>
-        </div>
-        {work.downloadCount > 0 && (
-          <div className={styles.infoRow}>
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              Скачиваний:
-            </Text>
-            <Text strong style={{ fontSize: 13 }}>
-              {work.downloadCount}
-            </Text>
-          </div>
-        )}
+      <div className={styles.meta}>
+        <Space size={4}>
+          <Rate disabled value={work.rating} style={{ fontSize: 14 }} />
+          <Text type="secondary">({work.reviewsCount})</Text>
+        </Space>
+        <Space size={8}>
+          <EyeOutlined />
+          <Text type="secondary">{work.viewsCount}</Text>
+        </Space>
       </div>
 
-      {/* Футер с ценой и кнопкой */}
       <div className={styles.footer}>
-        <div className={styles.priceBlock}>
-          {work.originalPrice && work.originalPrice > work.price && (
-            <div className={styles.originalPrice}>{work.originalPrice} ₽</div>
+        <div className={styles.price}>
+          {work.discount && (
+            <Text delete type="secondary" className={styles.originalPrice}>
+              {work.originalPrice} ₽
+            </Text>
           )}
-          <div className={styles.currentPrice}>{work.price} ₽</div>
+          <Text strong className={styles.currentPrice}>
+            {work.price} ₽
+          </Text>
+          {work.discount && (
+            <Tag color="red" className={styles.discount}>
+              -{work.discount}%
+            </Tag>
+          )}
         </div>
         <Button
           type="primary"
-          icon={<DownloadOutlined />}
-          onClick={() => onDownload(work.id)}
-          className={styles.downloadButton}
+          icon={<ShoppingCartOutlined />}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPurchase(work.id);
+          }}
         >
-          Скачать
+          Купить
         </Button>
       </div>
     </Card>
   );
 };
 
-export default PurchasedWorkCard;
+export default WorkCard;

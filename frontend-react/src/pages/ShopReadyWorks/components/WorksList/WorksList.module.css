@@ -1,6 +1,7 @@
 .grid {
   margin-top: 24px;
-  justify-content: center;
+  margin-bottom: 24px;
+  justify-content: start;
 }
 
 .loading {
