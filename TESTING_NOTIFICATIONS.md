@@ -66,9 +66,12 @@
 
 - `frontend-react/src/components/notifications/NotificationSystem.module.css` - стили и адаптивность
 - `frontend-react/src/pages/ExpertDashboardRefactored.tsx` - использование хука useNotifications
+- `frontend-react/src/pages/ExpertDashboard.tsx` - добавлена загрузка из БД через useNotifications
 - `NOTIFICATIONS_FIX.md` - документация изменений
 
-## Известные ограничения
+## Статус
 
-- ExpertDashboard.tsx (старая версия) все еще использует локальные данные
-- Рекомендуется мигрировать на ExpertDashboardRefactored.tsx
+✅ Все дашборды теперь используют данные из БД
+✅ Локальные тестовые данные удалены
+✅ Z-index исправлен
+✅ Адаптивность добавлена
