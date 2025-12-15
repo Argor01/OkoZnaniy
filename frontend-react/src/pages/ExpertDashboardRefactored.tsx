@@ -6,7 +6,8 @@ import { ordersApi } from '../api/orders';
 import DashboardHeader from '../components/common/DashboardHeader';
 import OrdersSidebar from '../components/common/OrdersSidebar';
 import ChatSystem, { Chat } from '../components/chat/ChatSystem';
-import NotificationSystem, { Notification, NotificationSettings } from '../components/notifications/NotificationSystem';
+import NotificationSystem, { NotificationSettings } from '../components/notifications/NotificationSystem';
+import { useNotifications } from '../hooks/useNotifications';
 import styles from './ExpertDashboardRefactored.module.css';
 
 const { Content } = Layout;
@@ -63,17 +64,12 @@ const ExpertDashboardRefactored: React.FC = () => {
     },
   ]);
 
-  // Тестовые данные для уведомлений
-  const [notifications] = useState<Notification[]>([
-    {
-      id: 1,
-      type: 'order',
-      title: 'Новый заказ доступен',
-      message: 'Появился новый заказ по математике',
-      timestamp: '2 минуты назад',
-      isRead: false,
-    },
-  ]);
+  // Используем хук для уведомлений из БД
+  const { 
+    notifications, 
+    unreadCount: unreadNotifications,
+    markAsRead 
+  } = useNotifications();
 
   // Настройки уведомлений
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
@@ -102,10 +98,10 @@ const ExpertDashboardRefactored: React.FC = () => {
           username: userProfile?.username || 'Пользователь',
           avatar: userProfile?.avatar,
           role: userProfile?.role || 'expert',
-          balance: userProfile?.balance || 0,
+          balance: typeof userProfile?.balance === 'number' ? userProfile.balance : 0,
         }}
         unreadMessages={chats.filter(c => !c.isRead).length}
-        unreadNotifications={notifications.filter(n => !n.isRead).length}
+        unreadNotifications={unreadNotifications}
         onMessagesClick={() => setChatVisible(true)}
         onNotificationsClick={() => setNotificationsVisible(true)}
         onBalanceClick={() => console.log('Открыть баланс')}
@@ -151,6 +147,13 @@ const ExpertDashboardRefactored: React.FC = () => {
         notifications={notifications}
         settings={notificationSettings}
         onSettingsChange={setNotificationSettings}
+        onNotificationClick={(notification) => {
+          markAsRead(notification.id);
+          // Можно добавить навигацию или другие действия
+          if (notification.actionUrl) {
+            console.log('Переход к:', notification.actionUrl);
+          }
+        }}
         isMobile={isMobile}
       />
     </Layout>
