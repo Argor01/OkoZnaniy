@@ -1,0 +1,50 @@
+import { useState, useEffect, useCallback } from 'react';
+import chatApi, { Chat, ChatMessage } from '../api/chat';
+
+export const useChat = () => {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadChats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const apiChats = await chatApi.getChats();
+      setChats(apiChats);
+      // Подсчитываем общее количество непрочитанных
+      const totalUnread = apiChats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0);
+      setUnreadCount(totalUnread);
+    } catch (error) {
+      console.error('Ошибка загрузки чатов:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const sendMessage = async (chatId: number, text: string): Promise<ChatMessage> => {
+    const message = await chatApi.sendMessage(chatId, text);
+    // Обновляем чаты после отправки
+    await loadChats();
+    return message;
+  };
+
+  const getMessages = async (chatId: number): Promise<ChatMessage[]> => {
+    return await chatApi.getMessages(chatId);
+  };
+
+  useEffect(() => {
+    loadChats();
+    // Обновляем чаты каждые 15 секунд
+    const interval = setInterval(loadChats, 15000);
+    return () => clearInterval(interval);
+  }, [loadChats]);
+
+  return {
+    chats,
+    loading,
+    unreadCount,
+    loadChats,
+    sendMessage,
+    getMessages,
+  };
+};

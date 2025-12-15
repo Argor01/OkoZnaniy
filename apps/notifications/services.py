@@ -310,9 +310,9 @@ class NotificationService:
         )
 
     @staticmethod
-    def notify_application_rejected(application):
+    def notify_application_rejected(application, reason=None):
         """Уведомляет эксперта об отклонении анкеты"""
-        reason = application.rejection_reason or "Не указана"
+        reason = reason or application.rejection_reason or "Не указана"
         NotificationService.create_notification(
             recipient=application.expert,
             type=NotificationType.APPLICATION_REJECTED,
@@ -321,6 +321,20 @@ class NotificationService:
             related_object_id=application.id,
             related_object_type='expert_application',
             data={'application_id': application.id, 'reason': reason}
+        )
+
+    @staticmethod
+    def notify_application_rework(application, comment=None):
+        """Уведомляет эксперта о необходимости доработки анкеты"""
+        comment = comment or application.rejection_reason or "Требуется доработка"
+        NotificationService.create_notification(
+            recipient=application.expert,
+            type=NotificationType.APPLICATION_REJECTED,  # Используем тот же тип
+            title="Требуется доработка анкеты",
+            message=f"Ваша анкета требует доработки. Комментарий: {comment}",
+            related_object_id=application.id,
+            related_object_type='expert_application',
+            data={'application_id': application.id, 'comment': comment, 'status': 'rework'}
         )
 
     @staticmethod

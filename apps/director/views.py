@@ -43,6 +43,10 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
 
+        # Отправляем уведомление пользователю
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_application_approved(application)
+
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -63,6 +67,10 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         expert.has_submitted_application = True
         expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
 
+        # Отправляем уведомление пользователю
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_application_rejected(application, reason)
+
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -82,6 +90,10 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         expert.application_approved = False
         expert.has_submitted_application = True
         expert.save(update_fields=['application_approved', 'has_submitted_application'])
+
+        # Отправляем уведомление пользователю
+        from apps.notifications.services import NotificationService
+        NotificationService.notify_application_rework(application, comment)
 
         serializer = self.get_serializer(application)
         return Response(serializer.data, status=status.HTTP_200_OK)

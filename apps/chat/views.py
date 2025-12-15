@@ -19,7 +19,6 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         chat = serializer.save()
-        # Добавляем участников чата
         order = chat.order
         chat.participants.add(order.client, order.expert)
 

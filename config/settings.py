@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'apps.experts',
     'apps.notifications',
     'apps.director',
+    'apps.chat',
 ]
 
 MIDDLEWARE = [
