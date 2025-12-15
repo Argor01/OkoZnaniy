@@ -29,16 +29,6 @@
   height: 44px;
 }
 
-.input:hover {
-  border-color: #93c5fd;
-  background: #f8fafc;
-}
-
-.input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-  background: #ffffff;
-}
 
 /* Стили для InputNumber */
 .input :global(.ant-input-number-input) {
@@ -55,17 +45,6 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.input:hover :global(.ant-input-number-group-addon) {
-  border-color: #93c5fd;
-  background: #eff6ff;
-  color: #3b82f6;
-}
-
-.input:focus-within :global(.ant-input-number-group-addon) {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #3b82f6;
-}
 
 .select {
   width: 100%;
@@ -82,12 +61,6 @@
 .select:hover :global(.ant-select-selector) {
   border-color: #93c5fd !important;
   background: #f8fafc !important;
-}
-
-.select :global(.ant-select-focused .ant-select-selector) {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12) !important;
-  background: #ffffff !important;
 }
 
 .actions {
@@ -145,6 +118,11 @@
 .saveButton:hover::before {
   left: 100%;
 }
+
+:global(.ant-input-number-input) {
+  height: 40px;
+}
+
 
 .saveButton:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);

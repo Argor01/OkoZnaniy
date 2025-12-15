@@ -1,7 +1,9 @@
+
 import React from 'react';
-import { Input, Select, Space } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Input, Select, Space, Button } from 'antd';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { FiltersState } from '../../types';
+import { mockCategories, mockSubjects } from '../../mockData';
 import styles from './Filters.module.css';
 
 const { Option } = Select;
@@ -13,29 +15,29 @@ interface FiltersProps {
 
 const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
   return (
-    <div className={styles.filters}>
-      <Space size="middle" wrap style={{ width: '100%' }}>
+    <div className={styles.container}>
+      <Space size="middle" wrap className={styles.filters}>
         <Input
-          placeholder="Поиск по названию..."
-          prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+          placeholder="Поиск работ..."
+          prefix={<SearchOutlined />}
           value={filters.search}
           onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
-          className={styles.searchInput}
+          className={styles.search}
           allowClear
         />
 
         <Select
-          placeholder="Тип работы"
-          value={filters.type}
-          onChange={(value) => onFilterChange({ ...filters, type: value })}
+          placeholder="Категория"
+          value={filters.category}
+          onChange={(value) => onFilterChange({ ...filters, category: value })}
           className={styles.select}
           allowClear
         >
-          <Option value="Курсовая работа">Курсовая работа</Option>
-          <Option value="Лабораторная работа">Лабораторная работа</Option>
-          <Option value="Реферат">Реферат</Option>
-          <Option value="Эссе">Эссе</Option>
-          <Option value="Дипломная работа">Дипломная работа</Option>
+          {mockCategories.map((cat) => (
+            <Option key={cat} value={cat}>
+              {cat}
+            </Option>
+          ))}
         </Select>
 
         <Select
@@ -45,34 +47,33 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
           className={styles.select}
           allowClear
         >
-          <Option value="Информатика">Информатика</Option>
-          <Option value="Физика">Физика</Option>
-          <Option value="История">История</Option>
-          <Option value="Математика">Математика</Option>
-          <Option value="Литература">Литература</Option>
+          {mockSubjects.map((subj) => (
+            <Option key={subj} value={subj}>
+              {subj}
+            </Option>
+          ))}
         </Select>
 
         <Select
-          placeholder="Статус"
-          value={filters.status}
-          onChange={(value) => onFilterChange({ ...filters, status: value })}
-          className={styles.select}
-          allowClear
-        >
-          <Option value="all">Все</Option>
-          <Option value="downloaded">Скачанные</Option>
-          <Option value="not-downloaded">Не скачанные</Option>
-        </Select>
-
-        <Select
+          placeholder="Сортировка"
           value={filters.sortBy}
           onChange={(value) => onFilterChange({ ...filters, sortBy: value })}
           className={styles.select}
+          defaultValue="newness"
         >
-          <Option value="date">По дате покупки</Option>
-          <Option value="price-asc">По цене (возр.)</Option>
-          <Option value="price-desc">По цене (убыв.)</Option>
+          <Option value="newness">Новые</Option>
+          <Option value="popular">Популярные</Option>
+          <Option value="price-asc">Цена: по возрастанию</Option>
+          <Option value="price-desc">Цена: по убыванию</Option>
+          <Option value="rating">Рейтинг</Option>
         </Select>
+
+        <Button
+          icon={<FilterOutlined />}
+          onClick={() => onFilterChange({})}
+        >
+          Сбросить
+        </Button>
       </Space>
     </div>
   );

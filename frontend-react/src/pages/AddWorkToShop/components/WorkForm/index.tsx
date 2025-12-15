@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { Card, Space, Row, Col, Input, InputNumber, Select, Typography, Button } from 'antd';
+import React, { useMemo, useState } from 'react';
+import { Card, Space, Row, Col, Input, InputNumber, Select, Typography, Button, Upload, message } from 'antd';
+import type { UploadProps, UploadFile } from 'antd';
+import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { RichTextEditor } from '../../../../components/editor';
 import { WorkFormProps, WorkFormData } from '../../types';
 import styles from './WorkForm.module.css';
+import { useQuery } from '@tanstack/react-query';
+import { catalogApi } from '../../../../api/catalog';
+import { mockSubjects } from '../../../ShopReadyWorks/mockData';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -15,12 +20,26 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     subject: '',
     language: 'russian',
     description: '',
-    tableOfContents: '',
-    bibliography: '',
   });
 
+  const [customSubject, setCustomSubject] = useState('');
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['catalog-subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+  const subjectNames = useMemo(
+    () => subjects.map((s: any) => s?.name).filter((n: string) => !!n),
+    [subjects]
+  );
+  const subjectOptions = useMemo(() => {
+    const base = mockSubjects
+      .filter((s) => s !== 'Все предметы')
+      .filter((s) => !/друг(ое|ие)/i.test(s));
+    const fromApi = subjectNames.filter((s) => !/друг(ое|ие)/i.test(s));
+    return Array.from(new Set([...base, ...fromApi]));
+  }, [subjectNames]);
+
   const handleSubmit = () => {
-    // Простая валидация
     if (!formData.title || !formData.price || !formData.type || !formData.subject) {
       return;
     }
@@ -30,7 +49,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   return (
     <Card className={styles.card}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        {/* Название и цена */}
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Text strong className={styles.label}>
@@ -51,8 +69,8 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               placeholder="Введите стоимость работы"
               value={formData.price}
               onChange={(value) => setFormData({ ...formData, price: value || 0 })}
-              className={styles.input}
-              style={{ width: '100%' }}
+              
+              style={{ width: '120px' }}
               min={0}
               addonAfter="₽"
             />
@@ -84,16 +102,42 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </Text>
             <Select
               placeholder="Выбрать предмет"
-              value={formData.subject}
-              onChange={(value) => setFormData({ ...formData, subject: value })}
+              value={
+                !formData.subject
+                  ? undefined
+                  : subjectOptions.includes(formData.subject)
+                    ? formData.subject
+                    : 'other'
+              }
+              onChange={(value) => {
+                setFormData({ ...formData, subject: value });
+                if (value !== 'other') {
+                  setCustomSubject('');
+                } else {
+                  setCustomSubject('');
+                }
+              }}
               className={styles.select}
             >
-              <Option value="math">Математика</Option>
-              <Option value="physics">Физика</Option>
-              <Option value="chemistry">Химия</Option>
-              <Option value="history">История</Option>
-              <Option value="literature">Литература</Option>
+              {subjectOptions.map((name) => (
+                <Option key={name} value={name}>
+                  {name}
+                </Option>
+              ))}
+              <Option value="other">Другое</Option>
             </Select>
+            {(!subjectOptions.includes(formData.subject) && formData.subject !== '') && (
+              <Input
+                placeholder="Введите свой вариант"
+                value={customSubject}
+                onChange={e => {
+                  setCustomSubject(e.target.value);
+                  setFormData({ ...formData, subject: e.target.value });
+                }}
+                className={styles.input}
+                style={{ marginTop: 20 }}
+              />
+            )}
           </Col>
           <Col xs={24} sm={8}>
             <Text strong className={styles.label}>
@@ -112,7 +156,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           </Col>
         </Row>
 
-        {/* Описание */}
         <div>
           <Text strong className={styles.label}>
             Подробное описание
@@ -124,28 +167,90 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           />
         </div>
 
-        {/* Оглавление */}
         <div>
           <Text strong className={styles.label}>
-            Оглавление
+            Фото для карточки
           </Text>
-          <RichTextEditor
-            value={formData.tableOfContents}
-            onChange={(value) => setFormData({ ...formData, tableOfContents: value })}
-            placeholder="Оглавление работы"
-          />
+          <Upload
+            listType="picture-card"
+            accept="image/*"
+            maxCount={1}
+            beforeUpload={(file) => {
+              const preview = URL.createObjectURL(file);
+              setFormData({ ...formData, coverImage: file, coverImagePreview: preview });
+              return false;
+            }}
+            onRemove={() => {
+              const next = { ...formData };
+              delete next.coverImage;
+              delete next.coverImagePreview;
+              setFormData(next);
+            }}
+            fileList={
+              formData.coverImage
+                ? [
+                    {
+                      uid: 'cover',
+                      name: formData.coverImage.name || 'cover',
+                      status: 'done',
+                      url: formData.coverImagePreview,
+                    } as any,
+                  ]
+                : []
+            }
+          >
+            {!formData.coverImage && (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Загрузить</div>
+              </div>
+            )}
+          </Upload>
         </div>
 
-        {/* Список литературы */}
+        {/* Загрузка файлов (стиль как в CreateOrder) */}
         <div>
           <Text strong className={styles.label}>
-            Список литературы
+            Файлы работы
           </Text>
-          <RichTextEditor
-            value={formData.bibliography}
-            onChange={(value) => setFormData({ ...formData, bibliography: value })}
-            placeholder="Список литературы"
-          />
+          <Upload.Dragger
+            name="files"
+            multiple
+            className={styles.uploadArea}
+            beforeUpload={(file) => {
+              const isLt10M = file.size < 10 * 1024 * 1024;
+              if (!isLt10M) {
+                message.error('Максимальный размер файла: 10 МБ');
+                return Upload.LIST_IGNORE as any;
+              }
+              const uploadFile: UploadFile = {
+                uid: file.uid || `${Date.now()}-${file.name}`,
+                name: file.name,
+                status: 'done',
+                size: file.size,
+                type: file.type,
+                originFileObj: file as any,
+                url: URL.createObjectURL(file),
+              };
+              setFormData({ ...formData, files: [ ...(formData.files as UploadFile[] || []), uploadFile ] });
+              return false;
+            }}
+            onRemove={(file) => {
+              setFormData({
+                ...formData,
+                files: (formData.files as UploadFile[] || []).filter((f) => f.uid !== file.uid),
+              });
+            }}
+            fileList={(formData.files as UploadFile[]) || []}
+          >
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
+            <p className="ant-upload-hint">
+              Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
+            </p>
+          </Upload.Dragger>
         </div>
 
         {/* Кнопки */}

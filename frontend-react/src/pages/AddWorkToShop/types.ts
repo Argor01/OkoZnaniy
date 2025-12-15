@@ -5,8 +5,9 @@ export interface WorkFormData {
   subject: string;
   language: string;
   description: string;
-  tableOfContents: string;
-  bibliography: string;
+  files?: any[];
+  coverImage?: any;
+  coverImagePreview?: string;
 }
 
 export interface WorkFormProps {

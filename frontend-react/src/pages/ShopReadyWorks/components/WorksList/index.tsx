@@ -10,6 +10,8 @@ interface WorksListProps {
   onWorkClick: (id: number) => void;
   onFavorite: (id: number) => void;
   onPurchase: (id: number) => void;
+  onDelete?: (id: number) => void;
+  currentUserId?: number;
 }
 
 const WorksList: React.FC<WorksListProps> = ({
@@ -18,6 +20,8 @@ const WorksList: React.FC<WorksListProps> = ({
   onWorkClick,
   onFavorite,
   onPurchase,
+  onDelete,
+  currentUserId,
 }) => {
   if (loading) {
     return (
@@ -45,6 +49,8 @@ const WorksList: React.FC<WorksListProps> = ({
             onView={onWorkClick}
             onFavorite={onFavorite}
             onPurchase={onPurchase}
+            onDelete={onDelete}
+            allowDelete={!!currentUserId && work.author.id === currentUserId}
           />
         </Col>
       ))}

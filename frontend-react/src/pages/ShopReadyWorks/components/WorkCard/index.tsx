@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Tag, Button, Space, Typography, Rate } from 'antd';
-import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, StarFilled } from '@ant-design/icons';
+import { Card, Tag, Button, Space, Typography, Rate, Popconfirm } from 'antd';
+import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined } from '@ant-design/icons';
 import { Work } from '../../types';
 import styles from './WorkCard.module.css';
 
@@ -11,9 +11,11 @@ interface WorkCardProps {
   onView: (id: number) => void;
   onFavorite: (id: number) => void;
   onPurchase: (id: number) => void;
+  onDelete?: (id: number) => void;
+  allowDelete?: boolean;
 }
 
-const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase }) => {
+const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase, onDelete, allowDelete }) => {
   const [imageError, setImageError] = React.useState(false);
 
   return (
@@ -37,23 +39,42 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
     >
       <div className={styles.header}>
         <Tag color="blue">{work.category}</Tag>
-        <Button
-          type="text"
-          icon={work.isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onFavorite(work.id);
-          }}
-        />
+        <Space size={4}>
+          <Button
+            type="text"
+            icon={work.isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavorite(work.id);
+            }}
+          />
+          {allowDelete && onDelete && (
+            <Popconfirm
+              title="Удалить работу?"
+              okText="Да"
+              cancelText="Нет"
+              onConfirm={() => onDelete(work.id)}
+              onCancel={(e) => e?.stopPropagation()}
+            >
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Popconfirm>
+          )}
+        </Space>
       </div>
 
       <Title level={5} className={styles.title} ellipsis={{ rows: 2 }}>
         {work.title}
       </Title>
 
-      <Text type="secondary" className={styles.description} ellipsis={{ rows: 2 }}>
-        {work.description}
-      </Text>
+      <div
+        className={styles.description}
+        dangerouslySetInnerHTML={{ __html: work.description }}
+      />
 
       <div className={styles.meta}>
         <Space size={4}>

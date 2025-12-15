@@ -5,8 +5,9 @@
 }
 
 .mainLayout {
-  margin-left: 270px;
+  margin-left: 260px;
   margin-right: 10px;
+  margin-bottom: 10px;
   transition: margin-left 0.3s;
 }
 
@@ -23,6 +24,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  margin-left: -20px;
+  background-color: white;
 }
 
 .title {

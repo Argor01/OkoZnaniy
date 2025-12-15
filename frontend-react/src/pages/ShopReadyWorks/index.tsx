@@ -9,6 +9,7 @@ import WorksList from './components/WorksList';
 import { authApi } from '../../api/auth';
 import { Filters as FiltersType, Work } from './types';
 import { mockWorks } from './mockData';
+import { shopApi } from '../../api/shop';
 import styles from './ShopReadyWorks.module.css';
 
 const { Content, Header } = Layout;
@@ -17,9 +18,14 @@ const { Title } = Typography;
 const ShopReadyWorks: React.FC = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
-  const [works, setWorks] = useState<Work[]>(mockWorks);
+  const [works, setWorks] = useState<Work[]>([]);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile] = useState(window.innerWidth <= 768);
+
+  const { data: apiWorks, isLoading: worksLoading } = useQuery({
+    queryKey: ['shop-works'],
+    queryFn: () => shopApi.getWorks(),
+  });
 
   // Загрузка профиля пользователя
   const { data: profile } = useQuery({
@@ -80,6 +86,26 @@ const ShopReadyWorks: React.FC = () => {
     // TODO: Открыть модальное окно покупки
   };
 
+  const handleDelete = (id: number) => {
+    shopApi.deleteWork(id)
+      .then(() => {
+        setWorks((prev) => prev.filter((w) => w.id !== id));
+        message.success('Работа удалена');
+      })
+      .catch(() => {
+        try {
+          const key = 'shop_custom_works';
+          const local: Work[] = JSON.parse(localStorage.getItem(key) || '[]');
+          const nextLocal = local.filter((w) => w.id !== id);
+          localStorage.setItem(key, JSON.stringify(nextLocal));
+          setWorks((prev) => prev.filter((w) => w.id !== id));
+          message.warning('Удалено локально (сервер недоступен)');
+        } catch {
+          message.error('Не удалось удалить работу');
+        }
+      });
+  };
+
   // Фильтрация и сортировка работ
   const filteredWorks = React.useMemo(() => {
     let result = [...works];
@@ -125,6 +151,17 @@ const ShopReadyWorks: React.FC = () => {
 
     return result;
   }, [works, filters]);
+
+  React.useEffect(() => {
+    let local: Work[] = [];
+    try {
+      local = JSON.parse(localStorage.getItem('shop_custom_works') || '[]');
+    } catch {}
+    const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : mockWorks;
+    const all = [...local, ...base];
+    const uniqueById = Array.from(new Map(all.map((w) => [w.id, w])).values());
+    setWorks(uniqueById);
+  }, [apiWorks]);
 
   return (
     <Layout className={styles.layout}>
@@ -179,10 +216,12 @@ const ShopReadyWorks: React.FC = () => {
 
           <WorksList
             works={filteredWorks}
-            loading={false}
+            loading={worksLoading}
             onWorkClick={handleWorkClick}
             onFavorite={handleFavorite}
             onPurchase={handlePurchase}
+            onDelete={handleDelete}
+            currentUserId={profile?.id}
           />
         </Content>
       </Layout>

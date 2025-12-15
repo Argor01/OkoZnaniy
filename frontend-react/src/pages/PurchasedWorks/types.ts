@@ -1,12 +1,12 @@
 // Типы для ShopReadyWorks
 
-export interface Work {
+export interface PurchasedWork {
   id: number;
   title: string;
   description: string;
   price: number;
-  originalPrice?: number;
-  discount?: number;
+  purchaseDate: string; 
+  isDownloaded: boolean; 
   category: string;
   subject: string;
   workType: string;
@@ -20,6 +20,7 @@ export interface Work {
     avatar?: string;
     rating: number;
   };
+
   preview?: string;
   files: WorkFile[];
   tags: string[];
@@ -36,15 +37,11 @@ export interface WorkFile {
   url: string;
 }
 
-export interface Filters {
+export interface FiltersState {
   search?: string;
   category?: string;
   subject?: string;
-  workType?: string;
-  priceMin?: number;
-  priceMax?: number;
-  rating?: number;
-  sortBy?: 'newness' | 'price-asc' | 'price-desc' | 'rating' | 'popular';
+  sortBy?: string;
 }
 
 export interface UserProfile {
@@ -57,3 +54,4 @@ export interface UserProfile {
   phone: string;
   avatar?: string;
 }
+

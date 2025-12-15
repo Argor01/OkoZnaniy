@@ -44,9 +44,32 @@ const PurchasedWorks: React.FC = () => {
     }
   };
 
-  const handleDownload = (id: number) => {
-    message.success('Скачивание начато');
-    // TODO: Реализовать скачивание файла
+  const handleDownload = (workId: number) => {
+    const work = works.find(w => w.id === workId);
+    if (!work || !work.files || work.files.length === 0) return message.error('Файлы не найдены');
+    if (work.files.length === 1) {
+      const file = work.files[0];
+      if (!file.url || file.url === '#') return message.error('Ссылка на файл отсутствует');
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      message.success('Скачивание начато');
+    } else {
+      work.files.forEach(file => {
+        if (file.url && file.url !== '#') {
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.download = file.name;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      });
+      message.success('Скачивание всех файлов начато');
+    }
   };
 
   // Фильтрация и сортировка работ
@@ -60,9 +83,9 @@ const PurchasedWorks: React.FC = () => {
       );
     }
 
-    // Фильтр по типу
-    if (filters.type) {
-      result = result.filter((work) => work.type === filters.type);
+    // Фильтр по категории
+    if (filters.category) {
+      result = result.filter((work) => work.category === filters.category);
     }
 
     // Фильтр по предмету
@@ -70,12 +93,7 @@ const PurchasedWorks: React.FC = () => {
       result = result.filter((work) => work.subject === filters.subject);
     }
 
-    // Фильтр по статусу
-    if (filters.status && filters.status !== 'all') {
-      result = result.filter((work) =>
-        filters.status === 'downloaded' ? work.isDownloaded : !work.isDownloaded
-      );
-    }
+
 
     // Сортировка
     switch (filters.sortBy) {

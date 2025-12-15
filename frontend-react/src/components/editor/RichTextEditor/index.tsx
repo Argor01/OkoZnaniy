@@ -1,9 +1,6 @@
-import React from 'react';
-import { Input } from 'antd';
+import React, { useEffect, useRef } from 'react';
 import EditorToolbar from './EditorToolbar';
 import styles from './RichTextEditor.module.css';
-
-const { TextArea } = Input;
 
 interface RichTextEditorProps {
   value: string;
@@ -18,26 +15,47 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder,
   rows = 8,
 }) => {
+  const editableRef = useRef<HTMLDivElement>(null);
+
   const handleFormat = (format: string) => {
-    // Простая реализация форматирования
-    // В реальном проекте можно использовать document.execCommand или библиотеку
-    console.log('Format:', format);
+    if (!editableRef.current) return;
+    editableRef.current.focus();
+    if (format === 'bold') document.execCommand('bold');
+    if (format === 'italic') document.execCommand('italic');
+    if (format === 'underline') document.execCommand('underline');
+    if (format === 'strikethrough') document.execCommand('strikeThrough');
   };
 
   const handleInsert = (type: 'link' | 'image') => {
-    // Вставка ссылки или изображения
-    console.log('Insert:', type);
+    if (!editableRef.current) return;
+    editableRef.current.focus();
+    if (type === 'link') {
+      const url = window.prompt('Введите ссылку');
+      if (url) document.execCommand('createLink', false, url);
+    }
+    if (type === 'image') {
+      const url = window.prompt('Введите URL изображения');
+      if (url) document.execCommand('insertImage', false, url);
+    }
   };
+
+  useEffect(() => {
+    const el = editableRef.current;
+    if (!el) return;
+    if (el.innerHTML !== value) {
+      el.innerHTML = value || '';
+    }
+  }, [value]);
 
   return (
     <div className={styles.editor}>
       <EditorToolbar onFormat={handleFormat} onInsert={handleInsert} />
-      <TextArea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
+      <div
+        ref={editableRef}
         className={styles.textarea}
+        contentEditable
+        onInput={(e) => onChange((e.target as HTMLDivElement).innerHTML)}
+        data-placeholder={placeholder}
       />
     </div>
   );

@@ -23,13 +23,18 @@ apiClient.interceptors.request.use((config) => {
 
   if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('🔑 Отправка запроса с токеном:', {
-      url: config.url,
-      hasToken: !!token,
-      tokenPreview: token ? `${token.substring(0, 20)}...` : 'нет токена'
-    });
+    if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+      console.log('🔑 Отправка запроса с токеном:', {
+        url: config.url,
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 8)}…` : 'нет токена',
+        method,
+      });
+    }
   } else if (!token && !isAuthEndpoint) {
-    console.warn('⚠️ Запрос без токена:', config.url);
+    if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+      console.warn('⚠️ Запрос без токена:', config.url);
+    }
   }
   return config;
 });

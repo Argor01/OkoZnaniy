@@ -52,58 +52,6 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ onFormat, onInsert }) => 
           onClick={() => onFormat('strikethrough')}
           className={styles.toolbarButton}
         />
-        <div className={styles.divider} />
-        <Button
-          type="text"
-          size="small"
-          icon={<AlignLeftOutlined />}
-          onClick={() => onFormat('alignLeft')}
-          className={styles.toolbarButton}
-        />
-        <Button
-          type="text"
-          size="small"
-          icon={<AlignCenterOutlined />}
-          onClick={() => onFormat('alignCenter')}
-          className={styles.toolbarButton}
-        />
-        <Button
-          type="text"
-          size="small"
-          icon={<AlignRightOutlined />}
-          onClick={() => onFormat('alignRight')}
-          className={styles.toolbarButton}
-        />
-        <div className={styles.divider} />
-        <Button
-          type="text"
-          size="small"
-          icon={<LinkOutlined />}
-          onClick={() => onInsert('link')}
-          className={styles.toolbarButton}
-        />
-        <Button
-          type="text"
-          size="small"
-          icon={<PictureOutlined />}
-          onClick={() => onInsert('image')}
-          className={styles.toolbarButton}
-        />
-        <div className={styles.divider} />
-        <Button
-          type="text"
-          size="small"
-          icon={<UndoOutlined />}
-          onClick={() => onFormat('undo')}
-          className={styles.toolbarButton}
-        />
-        <Button
-          type="text"
-          size="small"
-          icon={<RedoOutlined />}
-          onClick={() => onFormat('redo')}
-          className={styles.toolbarButton}
-        />
       </Space>
     </div>
   );
