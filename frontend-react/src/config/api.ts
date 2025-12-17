@@ -18,6 +18,12 @@ export const API_BASE_URL = getApiBaseUrl();
 // Полный URL для API endpoints
 export const API_URL = `${API_BASE_URL}/api`;
 
+// Выводим информацию о версии и конфигурации
+console.log('🚀 Frontend Version: 2.0.0 (with DB integration)');
+console.log('🔗 API Base URL:', API_BASE_URL);
+console.log('🔗 API URL:', API_URL);
+console.log('📅 Build Date:', new Date().toISOString());
+
 // Вспомогательная функция для получения полного URL медиа файлов
 export const getMediaUrl = (path: string | undefined | null): string | undefined => {
   if (!path) return undefined;
