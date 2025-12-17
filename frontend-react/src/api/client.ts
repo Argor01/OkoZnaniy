@@ -23,6 +23,18 @@ apiClient.interceptors.request.use((config) => {
 
   if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`;
+    if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+      console.log('🔑 Отправка запроса с токеном:', {
+        url: config.url,
+        hasToken: !!token,
+        tokenPreview: token ? `${token.substring(0, 8)}…` : 'нет токена',
+        method,
+      });
+    }
+  } else if (!token && !isAuthEndpoint) {
+    if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+      console.warn('⚠️ Запрос без токена:', config.url);
+    }
   }
   return config;
 });
@@ -30,13 +42,45 @@ apiClient.interceptors.request.use((config) => {
 // Обрабатываем ошибки аутентификации
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Временно отключен редирект на логин для тестирования
-    // if (error.response?.status === 401) {
-    //   localStorage.removeItem('access_token');
-    //   localStorage.removeItem('refresh_token');
-    //   window.location.href = '/login';
-    // }
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Если ошибка 401 и это не повторный запрос
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Пытаемся обновить токен
+        const refreshToken = localStorage.getItem('refresh_token');
+        
+        if (refreshToken) {
+          const response = await axios.post(`${API_URL}/users/token/refresh/`, {
+            refresh: refreshToken,
+          });
+
+          const { access } = response.data;
+          localStorage.setItem('access_token', access);
+
+          // Повторяем оригинальный запрос с новым токеном
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        // Если обновление токена не удалось, очищаем и редиректим
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    // Для других ошибок 401 (например, refresh token истек)
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      window.location.href = '/login';
+    }
+
     return Promise.reject(error);
   }
 );

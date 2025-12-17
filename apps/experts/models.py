@@ -17,7 +17,9 @@ class Specialization(models.Model):
         Subject,
         on_delete=models.CASCADE,
         related_name='experts',
-        verbose_name="Предмет"
+        verbose_name="Предмет",
+        null=True,
+        blank=True
     )
     experience_years = models.PositiveIntegerField(
         default=0,
@@ -57,7 +59,6 @@ class Specialization(models.Model):
     class Meta:
         verbose_name = "Специализация"
         verbose_name_plural = "Специализации"
-        unique_together = ['expert', 'subject']
         ordering = ['-is_verified', '-experience_years']
 
     def __str__(self):

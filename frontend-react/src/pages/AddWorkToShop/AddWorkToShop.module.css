@@ -1,0 +1,90 @@
+/* Стили для AddWorkToShop - улучшенный современный дизайн */
+
+.layout {
+  min-height: 100vh;
+  position: relative;
+}
+
+.layout::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.mainLayout {
+  margin-left: 250px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  background: white;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 72px;
+}
+
+.content {
+  margin: 32px;
+  padding: 40px;
+  background: white;
+  backdrop-filter: blur(20px);
+  min-height: calc(100vh - 136px);
+}
+
+.formContainer {
+  max-width: 1000px;
+  margin-left: 270px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .mainLayout {
+    margin-left: 0;
+  }
+
+  .header {
+    padding: 0 16px;
+    height: 64px;
+  }
+
+  .content {
+    margin: 16px;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .formContainer {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

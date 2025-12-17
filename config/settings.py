@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.experts',
     'apps.notifications',
+    'apps.chat',
     'apps.director',
     'apps.chat',
 ]
@@ -86,7 +87,7 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'apps.users.backends.EmailOrUsernameBackend',  # Кастомный backend для email/username
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 

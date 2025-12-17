@@ -83,9 +83,11 @@ class OrderSerializer(serializers.ModelSerializer):
         source='topic', write_only=True, queryset=Topic.objects.all(), required=False
     )
     custom_topic = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    custom_subject = serializers.CharField(required=False, allow_blank=True)
     work_type_id = serializers.PrimaryKeyRelatedField(
         source='work_type', write_only=True, queryset=WorkType.objects.all()
     )
+    custom_work_type = serializers.CharField(required=False, allow_blank=True)
     complexity_id = serializers.PrimaryKeyRelatedField(
         source='complexity', write_only=True, queryset=Complexity.objects.all(), required=False
     )
@@ -98,7 +100,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'complexity', 'title', 'description', 'deadline', 'budget', 
             'status', 'created_at', 'updated_at', 'files', 'comments', 'bids',
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
-            'custom_topic', 'additional_requirements', 'price_breakdown', 'discount',
+            'custom_topic', 'custom_subject', 'custom_work_type', 
+            'additional_requirements', 'price_breakdown', 'discount',
             'original_price', 'discount_amount', 'final_price'
         ]
         read_only_fields = [

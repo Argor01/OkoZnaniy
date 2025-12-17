@@ -70,6 +70,12 @@ class Order(models.Model):
         null=True,
         verbose_name="Произвольная тема"
     )
+    custom_subject = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name="Произвольный предмет"
+    )
     work_type = models.ForeignKey(
         WorkType,
         on_delete=models.PROTECT,
@@ -77,6 +83,12 @@ class Order(models.Model):
         blank=True,
         related_name='orders',
         verbose_name="Тип работы"
+    )
+    custom_work_type = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name="Произвольный тип работы"
     )
     complexity = models.ForeignKey(
         Complexity,

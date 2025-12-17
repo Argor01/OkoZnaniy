@@ -121,6 +121,12 @@ export const ordersApi = {
     return response.data;
   },
 
+  // Удалить заказ
+  deleteOrder: async (id: number) => {
+    const response = await apiClient.delete(`/orders/orders/${id}/`);
+    return response.data;
+  },
+
   // Взять заказ в работу (для экспертов)
   takeOrder: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/take/`);
@@ -157,15 +163,28 @@ export const ordersApi = {
     file: File,
     options?: { file_type?: 'task' | 'solution' | 'revision'; description?: string }
   ) => {
+    console.log('📤 uploadOrderFile вызван:', {
+      orderId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      options
+    });
+    
     const form = new FormData();
     form.append('file', file);
     form.append('file_type', options?.file_type || 'solution');
     if (options?.description) form.append('description', options.description);
+    
+    console.log('📦 FormData подготовлена, отправляем на сервер...');
+    
     const response = await apiClient.post(
       `/orders/orders/${orderId}/files/`,
       form,
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
+    
+    console.log('✅ Файл успешно загружен на сервер:', response.data);
     return response.data;
   },
 

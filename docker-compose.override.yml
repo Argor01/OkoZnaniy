@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  # Отключаем nginx для локальной разработки
+  nginx:
+    profiles:
+      - production
+  
+  # Отключаем telegram-bot для локальной разработки
+  telegram-bot:
+    profiles:
+      - production

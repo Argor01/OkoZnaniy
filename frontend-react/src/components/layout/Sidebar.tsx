@@ -13,6 +13,7 @@ import {
   TrophyOutlined,
   ShopOutlined,
   MenuOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
@@ -151,12 +152,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       navigate('/shop/add-work');
       return;
     }
-    if (key === 'shop-my-works') {
-      navigate('/works');
-      return;
-    }
     if (key === 'shop-purchased') {
       navigate('/shop/purchased');
+      return;
+    }
+    if (key === 'orders-feed') {
+      navigate('/orders-feed');
       return;
     }
     if (key.startsWith('orders-') || key === 'orders') {
@@ -224,6 +225,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: 'Заказы',
     },
     {
+      key: 'orders-feed',
+      icon: <UnorderedListOutlined />,
+      label: 'Лента работ',
+    },
+    {
       key: 'works',
       icon: <FileDoneOutlined />,
       label: 'Мои работы',
@@ -235,7 +241,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       children: [
         { key: 'shop-ready-works', label: 'Магазин готовых работ' },
         { key: 'shop-add-work', label: 'Добавить работу в магазин' },
-        { key: 'shop-my-works', label: 'Мои работы' },
         { key: 'shop-purchased', label: 'Купленные работы' },
       ],
     } : null,
@@ -262,8 +267,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className={styles.sidebarProfile}>
       <Avatar
         size={48}
-        src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
-        icon={!userProfile?.avatar && <UserOutlined />}
+        src={userProfile?.avatar || undefined}
+        icon={<UserOutlined />}
         style={{ backgroundColor: '#667eea' }}
       />
       <div style={{ marginLeft: 12, flex: 1 }}>
@@ -357,9 +362,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{
             background: '#fff',
             boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-            position: 'relative',
+            position: 'fixed',
+            top: 0,
+            left: 0,
             height: '100vh',
             borderRight: '1px solid #f0f0f0',
+            zIndex: 1001,
           }}
         >
           {sidebarContent}

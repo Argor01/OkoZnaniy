@@ -11,6 +11,7 @@ import {
   TrophyOutlined,
   FileDoneOutlined
 } from '@ant-design/icons';
+import './NotificationsModal.css';
 
 const { Text, Title } = Typography;
 
@@ -121,7 +122,8 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       onCancel={onCancel}
       footer={null}
       width="auto"
-
+      className="notifications-modal"
+      zIndex={1050}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -134,15 +136,16 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-
-          top: isMobile ? 0 : '60px',
-          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
-          right: isMobile ? 0 : '20px',
-          bottom: isMobile ? 0 : '20px',
-          width: isMobile ? '100vw' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)',
-          transform: isMobile ? 'none' : 'none',
-          position: 'fixed'
+          maxWidth: isMobile ? '100vw' : '1200px',
+          width: isMobile ? '100vw' : '90%',
+          margin: isMobile ? 0 : '60px auto 20px',
+          position: isMobile ? 'fixed' : 'relative',
+          top: isMobile ? 0 : 'auto',
+          left: isMobile ? 0 : 'auto',
+          right: isMobile ? 0 : 'auto',
+          bottom: isMobile ? 0 : 'auto',
+          height: isMobile ? '100vh' : 'auto',
+          maxHeight: isMobile ? '100vh' : 'calc(100vh - 80px)',
         },
         body: {
           padding: '0',

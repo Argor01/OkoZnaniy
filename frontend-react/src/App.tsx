@@ -5,6 +5,7 @@ import { ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
+import './utils/clearAuth'; // Утилита для очистки токенов (доступна через window.clearAuth())
 
 // Import styles
 import './styles/page-transitions.css';
@@ -23,6 +24,7 @@ import './styles/tokens.css';
 import './styles/components.css';
 import './styles/messages.css';
 import './styles/modals.css';
+import './styles/modals-centered.css';
 import './styles/avatar.css';
 
 // Import pages
@@ -42,6 +44,7 @@ import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
 import PurchasedWorks from './pages/PurchasedWorks';
+import OrdersFeed from './pages/OrdersFeed';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -88,7 +91,7 @@ const App: React.FC = () => {
                 path="/expert" 
                 element={
                   <ProtectedRoute>
-                    <ExpertDashboard />
+                    <ExpertDashboard/>
                   </ProtectedRoute>
                 } 
               />
@@ -167,6 +170,14 @@ const App: React.FC = () => {
                     <DashboardLayout>
                       <MyWorks />
                     </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders-feed"
+                element={
+                  <ProtectedRoute>
+                    <OrdersFeed />
                   </ProtectedRoute>
                 } 
               />
