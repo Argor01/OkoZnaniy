@@ -3,19 +3,29 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.db.models import Q, Max, Count, Prefetch
 from .models import Chat, Message
-from .serializers import ChatSerializer, MessageSerializer
+from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer
 from apps.orders.models import Order
-from apps.notifications.services import NotificationService
 
 class ChatViewSet(viewsets.ModelViewSet):
-    serializer_class = ChatSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ChatListSerializer
+        return ChatDetailSerializer
+
     def get_queryset(self):
+        user = self.request.user
         return Chat.objects.filter(
-            participants=self.request.user
-        ).prefetch_related('participants', 'messages', 'messages__sender')
+            participants=user
+        ).prefetch_related(
+            'participants',
+            Prefetch('messages', queryset=Message.objects.select_related('sender').order_by('-created_at')[:1])
+        ).annotate(
+            last_message_time=Max('messages__created_at')
+        ).order_by('-last_message_time')
 
     def perform_create(self, serializer):
         chat = serializer.save()
@@ -25,6 +35,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
+        """Отправка сообщения в чат"""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
@@ -32,18 +43,32 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        serializer = MessageSerializer(data=request.data)
+        serializer = MessageSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             message = serializer.save(
                 chat=chat,
                 sender=request.user
             )
-            NotificationService.notify_new_message(message)
-            return Response(MessageSerializer(message).data)
+            
+            # Создаем уведомление для другого участника
+            from apps.notifications.services import NotificationService
+            other_user = chat.participants.exclude(id=request.user.id).first()
+            if other_user:
+                NotificationService.create_notification(
+                    recipient=other_user,
+                    notification_type='new_comment',
+                    title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
+                    message=message.text[:100],
+                    related_object_id=chat.id,
+                    related_object_type='chat'
+                )
+            
+            return Response(MessageSerializer(message, context={'request': request}).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'])
-    def messages(self, request, pk=None):
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        """Отметить все сообщения в чате как прочитанные"""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
@@ -51,12 +76,54 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        messages = chat.messages.select_related('sender').order_by('-created_at')
-        page = self.paginate_queryset(messages)
+        # Отмечаем как прочитанные все сообщения, которые не от текущего пользователя
+        chat.messages.exclude(sender=request.user).update(is_read=True)
         
-        if page is not None:
-            serializer = MessageSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        return Response({'status': 'success'})
+
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Получить общее количество непрочитанных сообщений"""
+        user = request.user
+        count = Message.objects.filter(
+            chat__participants=user
+        ).exclude(
+            sender=user
+        ).filter(
+            is_read=False
+        ).count()
         
-        serializer = MessageSerializer(messages, many=True)
+        return Response({'unread_count': count})
+
+    @action(detail=False, methods=['post'])
+    def get_or_create_by_order(self, request):
+        """Получить или создать чат по ID заказа"""
+        order_id = request.data.get('order_id')
+        if not order_id:
+            return Response(
+                {'detail': 'order_id обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
+            return Response(
+                {'detail': 'Заказ не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Проверяем, что пользователь является участником заказа
+        if request.user not in [order.client, order.expert]:
+            return Response(
+                {'detail': 'Вы не являетесь участником этого заказа'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Получаем или создаем чат
+        chat, created = Chat.objects.get_or_create(order=order)
+        if created:
+            chat.participants.add(order.client, order.expert)
+        
+        serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
