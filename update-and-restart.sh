@@ -23,6 +23,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Устанавливаем npm зависимости (если package.json изменился)
+if [ -f "frontend-react/package.json" ]; then
+    echo "📦 Проверяем npm зависимости..."
+    cd frontend-react
+    npm install
+    cd ..
+fi
+
 # Пересобираем контейнеры без кеша
 echo "🔨 Пересобираем контейнеры..."
 docker-compose build --no-cache
