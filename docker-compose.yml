@@ -41,8 +41,6 @@ services:
       context: ./frontend-react
       dockerfile: Dockerfile
     restart: always
-    environment:
-      - VITE_API_URL=http://localhost:8000
     depends_on:
       - backend
     ports:
