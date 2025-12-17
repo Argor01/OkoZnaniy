@@ -63,7 +63,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   React.useEffect(() => {
     if (visible && editingSpecialization) {
       const formValues: any = {
-        subject_id: editingSpecialization.subject.id,
+        subject_id: editingSpecialization.subject?.id,
         experience_years: editingSpecialization.experience_years,
         hourly_rate: editingSpecialization.hourly_rate,
         description: editingSpecialization.description,

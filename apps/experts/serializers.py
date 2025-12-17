@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import UserSerializer, SimpleUserSerializer
 from apps.catalog.serializers import SubjectSerializer
 from apps.catalog.models import Subject
 
 class SpecializationSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
     subject = SubjectSerializer(read_only=True)
     subject_id = serializers.PrimaryKeyRelatedField(
         write_only=True,

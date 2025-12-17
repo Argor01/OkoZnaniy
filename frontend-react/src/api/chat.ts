@@ -48,7 +48,10 @@ export const chatApi = {
   // Получить список всех чатов
   getAll: async (): Promise<ChatListItem[]> => {
     const response = await apiClient.get('/chat/chats/');
-    return response.data;
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   // Получить детали чата

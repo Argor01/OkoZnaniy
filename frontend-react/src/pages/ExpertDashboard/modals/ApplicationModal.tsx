@@ -37,11 +37,12 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
 
   return (
     <Modal
+      style={window.innerWidth <= 480 ? { top: 0, margin: 0, padding: 0, maxWidth: '100%', height: '100%' } : { top: 20 }}
       title={
         <div style={{ 
           fontSize: 24, 
           fontWeight: 600, 
-          color: '#1890ff'
+          color: '#1890ff',
         }}>
           Заполнение анкеты эксперта
         </div>
@@ -49,7 +50,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       open={visible}
       onCancel={onClose}
       onOk={() => applicationForm.submit()}
-      width={window.innerWidth <= 480 ? '95%' : 750}
+      width={window.innerWidth <= 480 ? '100%' : 750}
       okText="Отправить"
       cancelText="Отмена"
       okButtonProps={{
@@ -79,34 +80,39 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           backgroundColor: 'rgba(0, 0, 0, 0.3)'
         },
         content: { 
-          borderRadius: window.innerWidth <= 480 ? 12 : 24, 
+          borderRadius: window.innerWidth <= 480 ? 0 : 24, 
           padding: 0,
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+          height: window.innerWidth <= 480 ? '100%' : 'auto',
+          display: 'flex',
+          flexDirection: 'column'
         },
         header: {
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
           padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: window.innerWidth <= 480 ? '12px 12px 0 0' : '24px 24px 0 0'
+          borderRadius: window.innerWidth <= 480 ? 0 : '24px 24px 0 0'
         },
         body: {
-          padding: window.innerWidth <= 480 ? '16px' : '32px',
+          padding: window.innerWidth <= 480 ? '20px 24px' : '32px',
           background: 'rgba(255, 255, 255, 0.95)',
-          maxHeight: window.innerWidth <= 480 ? 'calc(100vh - 180px)' : '70vh',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch'
+          flex: 1,
+          overflowY: 'auto'
         },
         footer: {
           padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
           background: 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: window.innerWidth <= 480 ? '0 0 12px 12px' : '0 0 24px 24px'
+          borderRadius: window.innerWidth <= 480 ? 0 : '0 0 24px 24px'
         }
       }}
     >
+      <div style={{
+        padding: 0
+      }}>
       <Form
         form={applicationForm}
         layout="vertical"
@@ -361,6 +367,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           </Form.List>
         </Form.Item>
       </Form>
+      </div>
     </Modal>
   );
 };

@@ -51,7 +51,7 @@ export const useExpertData = () => {
     enabled: !!userProfile?.id,
   });
 
-  const orders = ordersData?.results || ordersData || [];
+  const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
 
   // Подсчет заказов по статусам
   const ordersCount = {

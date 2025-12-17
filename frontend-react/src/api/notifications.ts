@@ -16,7 +16,10 @@ export const notificationsApi = {
   // Получить все уведомления
   getAll: async (): Promise<Notification[]> => {
     const response = await apiClient.get('/notifications/notifications/');
-    return response.data;
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   // Отметить уведомление как прочитанное
@@ -38,7 +41,14 @@ export const notificationsApi = {
   // Получить количество непрочитанных уведомлений
   getUnreadCount: async (): Promise<number> => {
     const response = await apiClient.get('/notifications/notifications/');
-    const notifications: Notification[] = response.data;
+    let notifications: Notification[] = [];
+    
+    if (response.data && Array.isArray(response.data.results)) {
+      notifications = response.data.results;
+    } else if (Array.isArray(response.data)) {
+      notifications = response.data;
+    }
+    
     return notifications.filter(n => !n.is_read).length;
   },
 };

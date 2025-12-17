@@ -82,96 +82,160 @@
   }
 }
 
-/* Мобильные устройства (до 480px) */
-@media (max-width: 480px) {
+/* Мобильные устройства (до 575px) */
+@media (max-width: 575px) {
   /* Модальное окно на весь экран */
   .ant-modal {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 0 !important;
-    top: 0 !important;
-    padding: 0 !important;
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    top: 0;
+    padding: 0;
+    padding-bottom: 0;
   }
 
+  /* Блокируем скролл на обертке модалки и поднимаем z-index */
   .ant-modal-wrap {
     overflow: hidden !important;
+    height: 100dvh !important;
+    z-index: 2000 !important; /* Поверх сайдбара (1001) */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    touch-action: none; /* Запрещаем скролл на обертке */
+  }
+
+  /* Маска тоже должна быть выше */
+  .ant-modal-mask {
+    z-index: 1999 !important;
+    height: 100dvh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
   }
 
   .ant-modal-content {
-    height: 100vh !important;
+    height: 100dvh !important;
     border-radius: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+  }
+
+  .ant-modal {
+    pointer-events: none; /* Пропускаем клики мимо обертки, если она мешает */
+  }
+
+  .ant-modal-content {
+    pointer-events: auto; /* Включаем обратно для контента */
   }
 
   .ant-modal-header {
-    padding: 12px 16px !important;
-    border-radius: 0 !important;
-    flex-shrink: 0 !important;
-    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 12px 16px;
+    border-radius: 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid #f0f0f0;
   }
 
   .ant-modal-title {
-    font-size: 16px !important;
-    font-weight: 600 !important;
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .ant-modal-close {
-    top: 12px !important;
-    right: 12px !important;
+    top: 12px;
+    right: 12px;
   }
 
   .ant-modal-close-x {
-    width: 40px !important;
-    height: 40px !important;
-    line-height: 40px !important;
-    font-size: 16px !important;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
   }
 
   .ant-modal-body {
-    padding: 12px 16px !important;
-    flex: 1 !important;
-    overflow-y: auto !important;
+    padding: 12px 16px;
+    flex: 1 1 auto;
+    overflow-y: auto !important; /* Явный auto лучше для iOS иногда */
+    min-height: 0 !important;
     max-height: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: 100% !important;
+    overscroll-behavior: contain !important; /* Блокируем передачу скролла родителю */
+    touch-action: pan-y !important; /* Разрешаем только вертикальный скролл */
+    position: relative !important;
+    z-index: 2001 !important; /* Чтобы точно ловить тачи */
   }
 
   .ant-modal-footer {
-    padding: 12px 16px !important;
-    border-radius: 0 !important;
-    flex-shrink: 0 !important;
-    border-top: 1px solid #f0f0f0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    padding: 12px 16px;
+    border-radius: 0;
+    flex-shrink: 0;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .ant-modal-footer .ant-btn {
-    width: 100% !important;
-    height: 40px !important;
-    font-size: 14px !important;
-    margin: 0 !important;
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+    margin: 0;
   }
 
   /* Формы в модальных окнах */
-  .ant-form-item {
-    margin-bottom: 12px !important;
+  .ant-modal .ant-form-item {
+    margin-bottom: 12px;
+    padding: 0 10px;
   }
 
-  .ant-form-item-label {
-    padding-bottom: 4px !important;
+  .ant-modal .ant-form-item .ant-form-item-label {
+    padding: 0 0 8px;
+    margin: 0;
+    white-space: initial;
+    text-align: start;
   }
 
-  .ant-form-item-label > label {
-    font-size: 13px !important;
-    height: auto !important;
+  .ant-modal .ant-form-item .ant-form-item-label > label {
+    font-size: 13px;
+    height: auto;
   }
 
-  .ant-input,
-  .ant-input-number,
-  .ant-select-selector,
-  .ant-picker {
-    height: 40px !important;
-    font-size: 14px !important;
+  /* Инпуты в модальных окнах */
+  :where(.ant-modal) .ant-form-item .ant-input,
+  :where(.ant-modal) .ant-form-item .ant-input-number,
+  :where(.ant-modal) .ant-form-item .ant-select-selector,
+  :where(.ant-modal) .ant-form-item .ant-picker {
+    min-height: 40px;
+    height: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  :where(.ant-modal) .ant-form-item .ant-input-number-input {
+    height: 40px;
+    line-height: 40px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  /* Специфично для текстовых инпутов, чтобы поднять текст */
+  :where(.ant-modal) .ant-form-item .ant-input {
+     padding-top: 0;
+     padding-bottom: 8px; /* Отступ снизу поднимает текст */
+     align-items: flex-start; /* Тянет текст наверх, если flex */
+     line-height: 32px; /* 40px высота - 8px отступ снизу */
   }
 
   .ant-input-textarea textarea {

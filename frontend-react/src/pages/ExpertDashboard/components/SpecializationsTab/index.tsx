@@ -48,7 +48,7 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
-                    {spec.subject.name}
+                    {spec.subject?.name || 'Специализация'}
                     {spec.is_verified && (
                       <CheckCircleOutlined style={{ color: '#10b981', marginLeft: 8 }} />
                     )}

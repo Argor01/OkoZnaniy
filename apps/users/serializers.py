@@ -5,6 +5,14 @@ from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
 
+class SimpleUserSerializer(serializers.ModelSerializer):
+    """Упрощенный сериализатор пользователя без вложенных полей, вызывающих рекурсию"""
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'first_name', 'last_name', 'avatar', 'role', 'is_verified'
+        ]
+
 class UserSerializer(serializers.ModelSerializer):
     specializations = serializers.SerializerMethodField()
     
@@ -216,21 +224,29 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             print(f"[Login] =====================================")
             
             if password_valid:
-                attrs['username'] = user.username  # Передаем username для JWT
+                # Генерируем токены вручную, чтобы избежать рекурсии в super().validate()
                 try:
-                    data = super().validate(attrs)
+                    refresh = self.get_token(user)
+                    data = {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
                     data['user'] = UserSerializer(user).data
+                    
+                    # Обновляем last_login вручную если нужно (но simplejwt settings говорят False)
+                    # from django.contrib.auth.models import update_last_login
+                    # update_last_login(None, user)
+                    
                     logger.info(f"[Login] Login successful for user: {user.username}")
                     print(f"[Login] Login successful for user: {user.username}")
                     return data
                 except Exception as e:
-                    logger.error(f"[Login] Error in super().validate: {str(e)}")
+                    logger.error(f"[Login] Error generating tokens: {str(e)}")
                     print(f"[Login] ========== ERROR IN TOKEN CREATION ==========")
                     print(f"[Login] Error: {str(e)}")
                     import traceback
                     print(traceback.format_exc())
                     print(f"[Login] ================================================")
-                    # Показываем реальную ошибку для отладки
                     raise serializers.ValidationError(f'Ошибка при создании токена: {str(e)}')
             else:
                 logger.warning(f"[Login] Invalid password for user: {user.username}")

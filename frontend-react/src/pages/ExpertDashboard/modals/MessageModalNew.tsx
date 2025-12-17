@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin } from 'antd';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
   BellOutlined,
@@ -144,7 +145,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const filteredChats = chatList.filter(chat => {
+  const safeChatList = Array.isArray(chatList) ? chatList : [];
+  const filteredChats = safeChatList.filter(chat => {
     // Фильтр по вкладкам
     if (messageTab === 'unread' && chat.unread_count === 0) return false;
     
@@ -195,12 +197,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           padding: 0,
           margin: 0,
           background: '#ffffff',
-          height: isMobile ? '100vh' : isTablet ? '500px' : '600px',
+          height: '100%',
           display: 'flex',
           overflow: 'hidden'
         }
       }}
     >
+      <ErrorBoundary>
       <div style={{ 
         display: 'flex', 
         height: '100%', 
@@ -543,6 +546,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           )}
         </div>
       </div>
+      </ErrorBoundary>
     </Modal>
   );
 };

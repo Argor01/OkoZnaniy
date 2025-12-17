@@ -276,7 +276,12 @@ const ExpertProfile: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Text>Заработано:</Text>
-                  <Text strong>{expertStats.total_earnings} ₽</Text>
+                  <Text strong>
+                    {expertStats.total_earnings?.toLocaleString('ru-RU', {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2
+                    })} ₽
+                  </Text>
                 </div>
               </div>
             ) : (

@@ -43,7 +43,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     enabled: !!userProfile,
   });
 
-  const orders = ordersData?.results || ordersData || [];
+  const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
   const isClient = userProfile?.role === 'client';
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';

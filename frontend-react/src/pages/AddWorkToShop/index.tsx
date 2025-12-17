@@ -6,11 +6,26 @@ import { MenuOutlined, LogoutOutlined } from '@ant-design/icons';
 import Sidebar from '../../components/layout/Sidebar';
 import WorkForm from './components/WorkForm';
 import { authApi } from '../../api/auth';
+import { catalogApi } from '../../api/catalog';
 import { WorkFormData } from './types';
 import type { UploadFile } from 'antd';
 import type { Work, WorkFile } from '../ShopReadyWorks/types';
 import { shopApi } from '../../api/shop';
 import styles from './AddWorkToShop.module.css';
+
+// Импорт модальных окон
+import ProfileModal from '../ExpertDashboard/modals/ProfileModal';
+import ApplicationModal from '../ExpertDashboard/modals/ApplicationModal';
+import WelcomeModal from '../ExpertDashboard/modals/WelcomeModal';
+import SpecializationModal from '../ExpertDashboard/modals/SpecializationModal';
+import MessageModal from '../ExpertDashboard/modals/MessageModalNew';
+import NotificationsModal from '../ExpertDashboard/modals/NotificationsModalNew';
+import ArbitrationModal from '../ExpertDashboard/modals/ArbitrationModal';
+import FinanceModal from '../ExpertDashboard/modals/FinanceModal';
+import FriendsModal from '../ExpertDashboard/modals/FriendsModal';
+import FaqModal from '../ExpertDashboard/modals/FaqModal';
+import FriendProfileModal from '../ExpertDashboard/modals/FriendProfileModal';
+import { mockNotifications, mockArbitrationCases } from '../ExpertDashboard/mockData';
 
 const { Content, Header } = Layout;
 const { Title } = Typography;
@@ -19,13 +34,44 @@ const { Title } = Typography;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-    const [isMobile] = useState(window.innerWidth <= 768);
+  const [isMobile] = useState(window.innerWidth <= 768);
+
+  // State для модальных окон
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [applicationModalVisible, setApplicationModalVisible] = useState(false);
+  const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
+  const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
+  const [financeModalVisible, setFinanceModalVisible] = useState(false);
+  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+
+  // Дополнительный state
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [editingSpecialization, setEditingSpecialization] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
 
   // Загрузка профиля пользователя
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
+
+  const { data: fetchedSubjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
+  // Обновляем subjects при загрузке
+  React.useEffect(() => {
+    if (fetchedSubjects.length > 0) {
+      setSubjects(fetchedSubjects);
+    }
+  }, [fetchedSubjects]);
 
   // Обработчики навигации
   const handleMenuSelect = (key: string) => {
@@ -142,11 +188,22 @@ const { Title } = Typography;
   };
 
   return (
+    <>
     <Layout className={styles.layout}>
       <Sidebar
         selectedKey="shop-add-work"
         onMenuSelect={handleMenuSelect}
         onLogout={handleLogout}
+        onProfileClick={() => setProfileModalVisible(true)}
+        onSupportClick={() => setApplicationModalVisible(true)}
+        onWelcomeClick={() => setWelcomeModalVisible(true)}
+        onSpecializationClick={() => setSpecializationModalVisible(true)}
+        onMessagesClick={() => setMessageModalVisible(true)}
+        onNotificationsClick={() => setNotificationsModalVisible(true)}
+        onArbitrationClick={() => setArbitrationModalVisible(true)}
+        onFinanceClick={() => setFinanceModalVisible(true)}
+        onFriendsClick={() => setFriendsModalVisible(true)}
+        onFaqClick={() => setFaqModalVisible(true)}
         mobileDrawerOpen={mobileMenuVisible}
         onMobileDrawerChange={setMobileMenuVisible}
         userProfile={
@@ -197,6 +254,96 @@ const { Title } = Typography;
         </Content>
       </Layout>
     </Layout>
+      <ProfileModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
+        profile={profile}
+        userProfile={profile}
+      />
+      
+      <ApplicationModal
+        visible={applicationModalVisible}
+        onClose={() => setApplicationModalVisible(false)}
+      />
+      
+      <WelcomeModal
+        visible={welcomeModalVisible}
+        onClose={() => setWelcomeModalVisible(false)}
+        userProfile={profile}
+      />
+      
+      <SpecializationModal
+        visible={specializationModalVisible}
+        onClose={() => setSpecializationModalVisible(false)}
+        editingSpecialization={editingSpecialization}
+        subjects={subjects}
+      />
+      
+      <MessageModal
+        visible={messageModalVisible}
+        onClose={() => setMessageModalVisible(false)}
+        isMobile={isMobile}
+        isTablet={window.innerWidth > 768 && window.innerWidth <= 1024}
+        isDesktop={window.innerWidth > 1024}
+        onCreateOrder={() => {
+          // Логика создания заказа
+        }}
+      />
+      
+      <NotificationsModal
+        visible={notificationsModalVisible}
+        onClose={() => setNotificationsModalVisible(false)}
+        notifications={mockNotifications}
+        isMobile={isMobile}
+      />
+      
+      <ArbitrationModal
+        visible={arbitrationModalVisible}
+        onClose={() => setArbitrationModalVisible(false)}
+        cases={mockArbitrationCases}
+        isMobile={isMobile}
+      />
+      
+      <FinanceModal
+        visible={financeModalVisible}
+        onClose={() => setFinanceModalVisible(false)}
+        profile={profile}
+        isMobile={isMobile}
+      />
+      
+      <FriendsModal
+        visible={friendsModalVisible}
+        onClose={() => setFriendsModalVisible(false)}
+        onOpenChat={(chat) => {
+          setSelectedChat(chat);
+          setMessageModalVisible(true);
+          setFriendsModalVisible(false);
+        }}
+        onOpenProfile={(friend) => {
+          setSelectedFriend(friend);
+          setFriendProfileModalVisible(true);
+          setFriendsModalVisible(false);
+        }}
+        isMobile={isMobile}
+      />
+      
+      <FaqModal
+        visible={faqModalVisible}
+        onClose={() => setFaqModalVisible(false)}
+        isMobile={isMobile}
+      />
+      
+      <FriendProfileModal
+        visible={friendProfileModalVisible}
+        onClose={() => setFriendProfileModalVisible(false)}
+        friend={selectedFriend}
+        onOpenChat={() => {
+          setFriendProfileModalVisible(false);
+          setMessageModalVisible(true);
+        }}
+        isMobile={isMobile}
+      />
+    </>
   );
 };
 

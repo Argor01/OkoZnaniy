@@ -85,10 +85,12 @@ const ExpertDashboard: React.FC = () => {
     retry: false
   });
 
-  const { data: specializations = [], isLoading: specializationsLoading } = useQuery({
+  const { data: specializationsData, isLoading: specializationsLoading } = useQuery({
     queryKey: ['expert-specializations'],
     queryFn: () => expertsApi.getSpecializations(),
   });
+
+  const specializations = Array.isArray(specializationsData) ? specializationsData : [];
 
   const { data: expertStats } = useQuery({
     queryKey: ['expert-statistics', userProfile?.id],

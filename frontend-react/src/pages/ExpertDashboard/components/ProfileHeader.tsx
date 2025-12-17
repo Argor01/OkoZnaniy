@@ -105,7 +105,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 {' | '}
                 <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
                 {' | '}
-                <span className={styles.statsNumberEarnings}>{expertStats?.total_earnings || 0}</span>₽
+                <span className={styles.statsNumberEarnings}>
+                  {(() => {
+                    const val = expertStats?.total_earnings;
+                    if (!val) return '0 ₽';
+                    const num = typeof val === 'string' ? Number(val.replace(/,/g, '')) : Number(val);
+                    return !isNaN(num) 
+                      ? num.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ₽'
+                      : '0 ₽';
+                  })()}
+                </span>
               </Text>
             </div>
           </div>

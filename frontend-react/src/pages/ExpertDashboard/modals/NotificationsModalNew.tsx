@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Typography, Spin, message as antMessage } from 'antd';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 import { 
   BellOutlined, 
   FileDoneOutlined, 
@@ -119,7 +120,8 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     }
   };
 
-  const filteredNotifications = notifications.filter(notification => {
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+  const filteredNotifications = safeNotifications.filter(notification => {
     if (notificationTab === 'all') return true;
     const category = getNotificationCategory(notification.type);
     return category === notificationTab;
@@ -131,7 +133,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       open={visible}
       onCancel={onClose}
       footer={null}
-      width="auto"
+      width="900px"
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -156,6 +158,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         }
       }}
     >
+      <ErrorBoundary>
       <div style={{ padding: '0' }}>
         {/* Заголовок */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 16 : 24 }}>
@@ -352,6 +355,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           )}
         </div>
       </div>
+      </ErrorBoundary>
     </Modal>
   );
 };

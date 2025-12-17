@@ -14,6 +14,20 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 
+// Импорт модальных окон
+import ProfileModal from '../ExpertDashboard/modals/ProfileModal';
+import ApplicationModal from '../ExpertDashboard/modals/ApplicationModal';
+import WelcomeModal from '../ExpertDashboard/modals/WelcomeModal';
+import SpecializationModal from '../ExpertDashboard/modals/SpecializationModal';
+import MessageModal from '../ExpertDashboard/modals/MessageModalNew';
+import NotificationsModal from '../ExpertDashboard/modals/NotificationsModalNew';
+import ArbitrationModal from '../ExpertDashboard/modals/ArbitrationModal';
+import FinanceModal from '../ExpertDashboard/modals/FinanceModal';
+import FriendsModal from '../ExpertDashboard/modals/FriendsModal';
+import FaqModal from '../ExpertDashboard/modals/FaqModal';
+import FriendProfileModal from '../ExpertDashboard/modals/FriendProfileModal';
+import { mockNotifications, mockArbitrationCases } from '../ExpertDashboard/mockData';
+
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
 
@@ -31,11 +45,51 @@ const OrdersFeed: React.FC = () => {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
 
+  // State для модальных окон
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [applicationModalVisible, setApplicationModalVisible] = useState(false);
+  const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
+  const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
+  const [financeModalVisible, setFinanceModalVisible] = useState(false);
+  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+
+  // Дополнительный state
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [editingSpecialization, setEditingSpecialization] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
+
   // Загружаем профиль пользователя
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
+
+  const { data: fetchedSubjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
+  // Обновляем subjects при загрузке
+  React.useEffect(() => {
+    if (fetchedSubjects.length > 0) {
+      setSubjects(fetchedSubjects);
+    }
+  }, [fetchedSubjects]);
+
+  const handleMenuSelect = (key: string) => {
+    if (key === 'orders') return;
+    if (key === 'shop-ready-works') navigate('/shop/ready-works');
+    if (key === 'shop-add-work') navigate('/shop/add-work');
+    if (key === 'shop-my-works' || key === 'works') navigate('/works');
+    if (key === 'shop-purchased') navigate('/shop/purchased');
+    if (key === 'profile') navigate('/expert');
+  };
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -59,11 +113,6 @@ const OrdersFeed: React.FC = () => {
   });
 
   // Загружаем справочники
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
-
   const { data: workTypes = [] } = useQuery({
     queryKey: ['workTypes'],
     queryFn: () => catalogApi.getWorkTypes(),
@@ -115,16 +164,29 @@ const OrdersFeed: React.FC = () => {
   };
 
   return (
+    <>
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar
-        selectedKey="orders-feed"
-        onMenuSelect={(key) => {}}
-        userProfile={userProfile}
-        unreadMessages={0}
-        unreadNotifications={0}
+        selectedKey="orders"
+        onMenuSelect={handleMenuSelect}
         onLogout={handleLogout}
+        onProfileClick={() => setProfileModalVisible(true)}
+        onSupportClick={() => setApplicationModalVisible(true)}
+        onWelcomeClick={() => setWelcomeModalVisible(true)}
+        onSpecializationClick={() => setSpecializationModalVisible(true)}
+        onMessagesClick={() => setMessageModalVisible(true)}
+        onNotificationsClick={() => setNotificationsModalVisible(true)}
+        onArbitrationClick={() => setArbitrationModalVisible(true)}
+        onFinanceClick={() => setFinanceModalVisible(true)}
+        onFriendsClick={() => setFriendsModalVisible(true)}
+        onFaqClick={() => setFaqModalVisible(true)}
         mobileDrawerOpen={mobileMenuVisible}
         onMobileDrawerChange={setMobileMenuVisible}
+        userProfile={userProfile ? {
+          username: userProfile.username,
+          avatar: userProfile.avatar,
+          role: userProfile.role
+        } : undefined}
       />
       
       <Layout style={{ 
@@ -613,6 +675,96 @@ const OrdersFeed: React.FC = () => {
         </Content>
       </Layout>
     </Layout>
+      <ProfileModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
+        profile={userProfile}
+        userProfile={userProfile}
+      />
+      
+      <ApplicationModal
+        visible={applicationModalVisible}
+        onClose={() => setApplicationModalVisible(false)}
+      />
+      
+      <WelcomeModal
+        visible={welcomeModalVisible}
+        onClose={() => setWelcomeModalVisible(false)}
+        userProfile={userProfile}
+      />
+      
+      <SpecializationModal
+        visible={specializationModalVisible}
+        onClose={() => setSpecializationModalVisible(false)}
+        editingSpecialization={editingSpecialization}
+        subjects={subjects}
+      />
+      
+      <MessageModal
+        visible={messageModalVisible}
+        onClose={() => setMessageModalVisible(false)}
+        isMobile={isMobile}
+        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
+        isDesktop={window.innerWidth > 1024}
+        onCreateOrder={() => {
+          // Логика создания заказа
+        }}
+      />
+      
+      <NotificationsModal
+        visible={notificationsModalVisible}
+        onClose={() => setNotificationsModalVisible(false)}
+        notifications={mockNotifications}
+        isMobile={isMobile}
+      />
+      
+      <ArbitrationModal
+        visible={arbitrationModalVisible}
+        onClose={() => setArbitrationModalVisible(false)}
+        cases={mockArbitrationCases}
+        isMobile={isMobile}
+      />
+      
+      <FinanceModal
+        visible={financeModalVisible}
+        onClose={() => setFinanceModalVisible(false)}
+        profile={userProfile}
+        isMobile={isMobile}
+      />
+      
+      <FriendsModal
+        visible={friendsModalVisible}
+        onClose={() => setFriendsModalVisible(false)}
+        onOpenChat={(chat) => {
+          setSelectedChat(chat);
+          setMessageModalVisible(true);
+          setFriendsModalVisible(false);
+        }}
+        onOpenProfile={(friend) => {
+          setSelectedFriend(friend);
+          setFriendProfileModalVisible(true);
+          setFriendsModalVisible(false);
+        }}
+        isMobile={isMobile}
+      />
+      
+      <FaqModal
+        visible={faqModalVisible}
+        onClose={() => setFaqModalVisible(false)}
+        isMobile={isMobile}
+      />
+      
+      <FriendProfileModal
+        visible={friendProfileModalVisible}
+        onClose={() => setFriendProfileModalVisible(false)}
+        friend={selectedFriend}
+        onOpenChat={() => {
+          setFriendProfileModalVisible(false);
+          setMessageModalVisible(true);
+        }}
+        isMobile={isMobile}
+      />
+    </>
   );
 };
 
