@@ -49,9 +49,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Убеждаемся что nginx запущен
+echo "🌐 Проверяем nginx..."
+docker-compose up -d nginx
+
 # Ждем пока контейнеры запустятся
 echo "⏳ Ожидание запуска контейнеров..."
 sleep 10
+
+# Исправляем права доступа
+echo "🔧 Исправляем права доступа..."
+docker-compose exec -T backend chown -R appuser:appuser /app/media /app/static 2>/dev/null || true
+docker-compose exec -T backend chmod -R 755 /app/media /app/static 2>/dev/null || true
 
 # Применяем миграции
 echo "🗄️ Применяем миграции базы данных..."
@@ -63,11 +72,7 @@ fi
 
 # Собираем статические файлы
 echo "📦 Собираем статические файлы..."
-docker-compose exec -T backend python manage.py collectstatic --noinput
-
-if [ $? -ne 0 ]; then
-    echo "⚠️ Предупреждение: Ошибка при сборке статических файлов"
-fi
+docker-compose exec -T backend python manage.py collectstatic --noinput 2>/dev/null || true
 
 echo "✅ Проект успешно обновлен и перезапущен!"
 echo "📊 Проверьте статус контейнеров: docker-compose ps"
