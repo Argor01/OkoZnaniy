@@ -6,6 +6,7 @@ import { authApi } from '../../../api/auth';
 import { UserProfile } from '../types';
 import SkillsSelect from '../../../components/SkillsSelect';
 import styles from '../ExpertDashboard.module.css';
+import { API_URL } from '../../../config/api';
 
 interface ProfileModalProps {
   visible: boolean;
@@ -206,7 +207,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 const formData = new FormData();
                 formData.append('avatar', file as File);
                 
-                const response = await fetch('http://127.0.0.1:8000/api/users/update_me/', {
+                const response = await fetch(`${API_URL}/users/update_me/`, {
                   method: 'PATCH',
                   headers: {
                     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,

@@ -19,7 +19,7 @@ export const API_BASE_URL = getApiBaseUrl();
 export const API_URL = `${API_BASE_URL}/api`;
 
 // Выводим информацию о версии и конфигурации
-console.log('🚀 Frontend Version: 2.0.0 (with DB integration)');
+console.log('🚀 Frontend Version: 2.1.0 (avatar upload fix)');
 console.log('🔗 API Base URL:', API_BASE_URL);
 console.log('🔗 API URL:', API_URL);
 console.log('📅 Build Date:', new Date().toISOString());
