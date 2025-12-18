@@ -169,6 +169,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     onMenuSelect(key);
   };
 
+  const isExpert = userProfile?.role === 'expert';
+  const isClient = userProfile?.role === 'client';
+
   const menuItems = [
     {
       key: 'dashboard',
@@ -229,12 +232,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <UnorderedListOutlined />,
       label: 'Лента работ',
     },
-    {
+    // "Мои работы" - только для экспертов
+    isExpert ? {
       key: 'works',
       icon: <FileDoneOutlined />,
       label: 'Мои работы',
-    },
-    !isMobile ? {
+    } : null,
+    // "Авторский магазин" - только для экспертов
+    (isExpert && !isMobile) ? {
       key: 'shop',
       icon: <ShopOutlined />,
       label: 'Авторский магазин',
