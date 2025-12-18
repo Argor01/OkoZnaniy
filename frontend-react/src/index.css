@@ -100,3 +100,84 @@ button:focus-visible {
   display: block;
 }
 
+/* Fix modal scroll on mobile devices */
+@media (max-width: 768px) {
+  /* Allow scrolling in modal wrap */
+  .ant-modal-wrap {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: fixed !important;
+    inset: 0 !important;
+  }
+  
+  .ant-modal {
+    top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    position: relative !important;
+  }
+  
+  .ant-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    position: relative !important;
+  }
+  
+  .ant-modal-header {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  .ant-modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 20px !important;
+    min-height: auto !important;
+  }
+  
+  .ant-modal-footer {
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 10 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  /* Prevent body scroll lock on mobile - CRITICAL */
+  body.ant-scrolling-effect,
+  html.ant-scrolling-effect {
+    overflow: visible !important;
+    width: auto !important;
+    position: static !important;
+    height: auto !important;
+  }
+  
+  /* Fix input placeholder alignment on mobile */
+  .ant-input::placeholder,
+  .ant-input-search input::placeholder {
+    line-height: normal !important;
+    transform: translateY(0) !important;
+  }
+  
+  .ant-input,
+  .ant-input-search input {
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  /* Larger font for sidebar menu items on mobile */
+  .ant-menu-item .ant-badge,
+  .ant-menu-title-content .ant-badge {
+    font-size: 16px !important;
+  }
+}

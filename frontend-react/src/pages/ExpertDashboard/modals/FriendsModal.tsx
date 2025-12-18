@@ -154,15 +154,32 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
       }}
     >
       <div style={{ paddingTop: isMobile ? 12 : 16 }}>
-        <Input.Search
-          placeholder="Поиск друзей..."
-          allowClear
-          size={isMobile ? 'middle' : 'large'}
-          style={{ marginBottom: isMobile ? 16 : 24 }}
-          onSearch={(value) => {
-            // Поиск по друзьям
-          }}
-        />
+        <div style={{ display: 'flex', alignItems: 'stretch' }}>
+          <Input.Search
+            placeholder={isMobile ? "Поиск..." : "Поиск друзей..."}
+            allowClear
+            size={isMobile ? 'middle' : 'large'}
+            style={{ 
+              marginBottom: isMobile ? 16 : 24,
+              width: '100%'
+            }}
+            styles={{
+              input: {
+                fontSize: isMobile ? 14 : 16,
+                lineHeight: isMobile ? '1.5' : 'normal',
+                padding: isMobile ? '10px 11px' : undefined,
+                height: isMobile ? '100%' : 'auto'
+              },
+              affixWrapper: {
+                height: isMobile ? 44 : 'auto',
+                alignItems: 'center'
+              }
+            }}
+            onSearch={(value) => {
+              // Поиск по друзьям
+            }}
+          />
+        </div>
         <div style={{ 
           display: 'grid', 
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(340px, 1fr))', 

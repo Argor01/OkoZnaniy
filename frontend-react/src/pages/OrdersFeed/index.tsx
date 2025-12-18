@@ -651,27 +651,7 @@ const OrdersFeed: React.FC = () => {
         </div>
       )}
 
-            {/* Кнопка создания для мобильных */}
-            {isMobile && (
-              <Button 
-                type="primary" 
-                size="large"
-                block
-                onClick={() => navigate('/create-order')}
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  borderRadius: 12,
-                  height: 48,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  marginBottom: 16
-                }}
-              >
-                Создать заказ
-              </Button>
-            )}
+
         </Content>
       </Layout>
     </Layout>

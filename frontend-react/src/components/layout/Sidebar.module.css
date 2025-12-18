@@ -108,4 +108,23 @@
   .sidebar {
     display: none;
   }
+  
+  /* Увеличиваем шрифт для пунктов меню в мобильном меню */
+  .mobileMenu :global(.ant-menu-item),
+  .mobileMenu :global(.ant-menu-submenu-title) {
+    font-size: 16px !important;
+    padding: 12px 16px !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Увеличиваем шрифт для Badge (Сообщения, Уведомления) */
+  .mobileMenu :global(.ant-badge) {
+    font-size: 16px !important;
+  }
+  
+  /* Увеличиваем иконки */
+  .mobileMenu :global(.anticon) {
+    font-size: 18px !important;
+  }
 }

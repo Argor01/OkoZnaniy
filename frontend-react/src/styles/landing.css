@@ -1772,6 +1772,11 @@ img {
   max-width: 277px;
   width: 100%;
 }
+@media (max-width: 768px) {
+  .leave-order__order-button {
+    display: none;
+  }
+}
 
 .faq {
   position: relative;

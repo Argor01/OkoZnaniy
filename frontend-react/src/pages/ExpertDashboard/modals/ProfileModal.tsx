@@ -44,6 +44,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
   return (
     <Modal
       style={isMobile ? { top: 0, margin: 0, padding: 0, maxWidth: '100%', height: '100%' } : { top: 20 }}
+      destroyOnClose={false}
+      maskClosable={true}
+      keyboard={true}
+      centered={!isMobile}
+      getContainer={false}
       title={
         <div style={{ 
           fontSize: isMobile ? 18 : 24, 
@@ -97,8 +102,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           margin: isMobile ? 0 : 'auto',
           maxWidth: '100%',
-          height: isMobile ? '100%' : 'auto',
-          maxHeight: isMobile ? 'none' : 'calc(100vh - 80px)',
+          height: isMobile ? '100vh' : 'auto',
+          maxHeight: isMobile ? '100vh' : 'calc(100vh - 80px)',
           display: 'flex',
           flexDirection: 'column'
         },
@@ -107,19 +112,24 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           backdropFilter: 'blur(10px)',
           padding: isMobile ? '16px 20px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? 0 : '24px 24px 0 0'
+          borderRadius: isMobile ? 0 : '24px 24px 0 0',
+          flexShrink: 0
         },
         body: {
           padding: isMobile ? '20px 24px' : '32px',
           background: 'rgba(255, 255, 255, 0.95)',
           overflowY: 'auto',
-          flex: 1
+          overflowX: 'hidden',
+          flex: '1 1 auto',
+          WebkitOverflowScrolling: 'touch',
+          position: 'relative'
         },
         footer: {
           padding: isMobile ? '16px 20px' : '24px 32px',
           background: 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? 0 : '0 0 24px 24px'
+          borderRadius: isMobile ? 0 : '0 0 24px 24px',
+          flexShrink: 0
         }
       }}
     >
