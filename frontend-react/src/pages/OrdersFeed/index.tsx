@@ -106,14 +106,36 @@ const OrdersFeed: React.FC = () => {
     window.location.reload();
   };
 
+  // Получаем информацию о текущем пользователе
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/users/me/`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        }
+      });
+      return response.json();
+    }
+  });
+
   // Загружаем заказы (все доступные заказы для всех пользователей)
   const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['orders-feed'],
     queryFn: async () => {
       console.log('🔄 Загрузка заказов из API...');
+      console.log('👤 Текущий пользователь:', userProfile);
+      console.log('🎭 Роль пользователя:', userProfile?.role);
       const data = await ordersApi.getAvailableOrders();
       console.log('📦 Получены заказы:', data);
       console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
+      if ((data?.results?.length || data?.length || 0) === 0) {
+        console.warn('⚠️ Заказов нет! Возможные причины:');
+        console.warn('   1. Вы вошли как клиент - клиенты не видят свои заказы в ленте');
+        console.warn('   2. Все заказы уже взяты в работу');
+        console.warn('   3. Нет заказов в статусе "new"');
+        console.warn('💡 Решение: Войдите как эксперт или создайте заказ от другого клиента');
+      }
       return data;
     },
   });
