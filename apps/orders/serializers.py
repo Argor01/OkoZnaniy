@@ -111,6 +111,13 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
+        # Логируем входящие данные для отладки
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"[OrderSerializer] Validating data: {data}")
+        logger.info(f"[OrderSerializer] subject type: {type(data.get('subject'))}, value: {data.get('subject')}")
+        logger.info(f"[OrderSerializer] work_type type: {type(data.get('work_type'))}, value: {data.get('work_type')}")
+        
         # Проверяем, что указан либо предмет из списка, либо произвольный предмет
         if not data.get('subject') and not data.get('custom_subject'):
             raise serializers.ValidationError({
