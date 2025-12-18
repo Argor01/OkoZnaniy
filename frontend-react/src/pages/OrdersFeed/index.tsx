@@ -106,19 +106,6 @@ const OrdersFeed: React.FC = () => {
     window.location.reload();
   };
 
-  // Получаем информацию о текущем пользователе
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || window.location.origin}/api/users/me/`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        }
-      });
-      return response.json();
-    }
-  });
-
   // Загружаем заказы (все доступные заказы для всех пользователей)
   const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['orders-feed'],
