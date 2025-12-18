@@ -107,9 +107,15 @@ const OrdersFeed: React.FC = () => {
   };
 
   // Загружаем заказы (все доступные заказы для всех пользователей)
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery({
     queryKey: ['orders-feed'],
-    queryFn: () => ordersApi.getAvailableOrders(),
+    queryFn: async () => {
+      console.log('🔄 Загрузка заказов из API...');
+      const data = await ordersApi.getAvailableOrders();
+      console.log('📦 Получены заказы:', data);
+      console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
+      return data;
+    },
   });
 
   // Загружаем справочники
@@ -120,6 +126,15 @@ const OrdersFeed: React.FC = () => {
 
   // Используем реальные данные с API
   const orders = ordersData?.results || ordersData || [];
+  
+  // Логируем для отладки
+  React.useEffect(() => {
+    console.log('🎯 OrdersFeed mounted');
+    console.log('📋 ordersData:', ordersData);
+    console.log('📋 orders:', orders);
+    console.log('⏳ ordersLoading:', ordersLoading);
+    console.log('❌ ordersError:', ordersError);
+  }, [ordersData, orders, ordersLoading, ordersError]);
 
   // Фильтрация заказов
   const filteredOrders = orders.filter((order: any) => {
