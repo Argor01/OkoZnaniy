@@ -74,6 +74,10 @@ fi
 echo "📦 Собираем статические файлы..."
 docker-compose exec -T backend python manage.py collectstatic --noinput 2>/dev/null || true
 
+# Заполняем справочники (если они пустые)
+echo "📚 Проверяем справочники..."
+docker-compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
+
 echo "✅ Проект успешно обновлен и перезапущен!"
 echo "📊 Проверьте статус контейнеров: docker-compose ps"
 echo "📝 Просмотр логов: docker-compose logs -f"
