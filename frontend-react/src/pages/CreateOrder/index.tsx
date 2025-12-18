@@ -145,6 +145,10 @@ const CreateOrder: React.FC = () => {
   const onFinish = (values: any) => {
     console.log('📝 Отправка заказа:', values);
     console.log('📎 Файлов для загрузки:', fileList.length, fileList);
+    console.log('🔍 showCustomSubject:', showCustomSubject);
+    console.log('🔍 showCustomWorkType:', showCustomWorkType);
+    console.log('🔍 values.subject_id type:', typeof values.subject_id, values.subject_id);
+    console.log('🔍 values.work_type_id type:', typeof values.work_type_id, values.work_type_id);
     
     // Формируем данные заказа
     const orderData: any = {
@@ -155,12 +159,12 @@ const CreateOrder: React.FC = () => {
       budget: values.budget,
     };
 
-    // Если НЕ выбрано "Другое", отправляем ID
+    // Если НЕ выбрано "Другое", отправляем ID (убеждаемся что это число)
     if (!showCustomSubject && values.subject_id) {
-      orderData.subject_id = values.subject_id;
+      orderData.subject_id = Number(values.subject_id);
     }
     if (!showCustomWorkType && values.work_type_id) {
-      orderData.work_type_id = values.work_type_id;
+      orderData.work_type_id = Number(values.work_type_id);
     }
 
     // Если выбрано "Другое", отправляем кастомное название
@@ -172,6 +176,10 @@ const CreateOrder: React.FC = () => {
     }
     
     console.log('📤 Данные для отправки:', orderData);
+    console.log('📤 Типы полей:', {
+      subject_id: typeof orderData.subject_id,
+      work_type_id: typeof orderData.work_type_id
+    });
     createOrderMutation.mutate(orderData);
   };
 
