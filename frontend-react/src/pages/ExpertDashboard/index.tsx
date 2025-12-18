@@ -151,12 +151,54 @@ const ExpertDashboard: React.FC = () => {
           selectedKey={selectedMenuKey}
           onMenuSelect={handleMenuSelect}
           onLogout={handleLogout}
-          onMessagesClick={() => setMessageModalVisible(true)}
-          onNotificationsClick={() => setNotificationsModalVisible(true)}
-          onArbitrationClick={() => setArbitrationModalVisible(true)}
-          onFinanceClick={() => setFinanceModalVisible(true)}
-          onFriendsClick={() => setFriendsModalVisible(true)}
-          onFaqClick={() => setFaqModalVisible(true)}
+          onMessagesClick={() => {
+            setNotificationsModalVisible(false);
+            setArbitrationModalVisible(false);
+            setFinanceModalVisible(false);
+            setFriendsModalVisible(false);
+            setFaqModalVisible(false);
+            setMessageModalVisible(true);
+          }}
+          onNotificationsClick={() => {
+            setMessageModalVisible(false);
+            setArbitrationModalVisible(false);
+            setFinanceModalVisible(false);
+            setFriendsModalVisible(false);
+            setFaqModalVisible(false);
+            setNotificationsModalVisible(true);
+          }}
+          onArbitrationClick={() => {
+            setMessageModalVisible(false);
+            setNotificationsModalVisible(false);
+            setFinanceModalVisible(false);
+            setFriendsModalVisible(false);
+            setFaqModalVisible(false);
+            setArbitrationModalVisible(true);
+          }}
+          onFinanceClick={() => {
+            setMessageModalVisible(false);
+            setNotificationsModalVisible(false);
+            setArbitrationModalVisible(false);
+            setFriendsModalVisible(false);
+            setFaqModalVisible(false);
+            setFinanceModalVisible(true);
+          }}
+          onFriendsClick={() => {
+            setMessageModalVisible(false);
+            setNotificationsModalVisible(false);
+            setArbitrationModalVisible(false);
+            setFinanceModalVisible(false);
+            setFaqModalVisible(false);
+            setFriendsModalVisible(true);
+          }}
+          onFaqClick={() => {
+            setMessageModalVisible(false);
+            setNotificationsModalVisible(false);
+            setArbitrationModalVisible(false);
+            setFinanceModalVisible(false);
+            setFriendsModalVisible(false);
+            setFaqModalVisible(true);
+          }}
           mobileDrawerOpen={mobileMenuVisible}
           onMobileDrawerChange={setMobileMenuVisible}
           userProfile={profile ? {
