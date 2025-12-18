@@ -20,7 +20,11 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         if obj.avatar:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.avatar.url)
+                url = request.build_absolute_uri(obj.avatar.url)
+                # Принудительно используем HTTPS
+                if url.startswith('http://'):
+                    url = url.replace('http://', 'https://', 1)
+                return url
             return obj.avatar.url
         return None
 
