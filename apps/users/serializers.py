@@ -7,14 +7,26 @@ User = get_user_model()
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор пользователя без вложенных полей, вызывающих рекурсию"""
+    avatar = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
         fields = [
             'id', 'username', 'first_name', 'last_name', 'avatar', 'role', 'is_verified'
         ]
+    
+    def get_avatar(self, obj):
+        """Возвращает полный URL аватарки"""
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
 
 class UserSerializer(serializers.ModelSerializer):
     specializations = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -30,6 +42,16 @@ class UserSerializer(serializers.ModelSerializer):
             'application_submitted_at', 'application_reviewed_at'
         ]
         read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified', 'has_submitted_application', 'application_approved', 'application_submitted_at', 'application_reviewed_at']
+    
+    def get_avatar(self, obj):
+        """Возвращает полный URL аватарки"""
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            # Если нет request в контексте, возвращаем относительный путь
+            return obj.avatar.url
+        return None
     
     def get_specializations(self, obj):
         """Возвращает специализации только для экспертов"""
