@@ -131,10 +131,15 @@ const OrdersFeed: React.FC = () => {
       console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
       if ((data?.results?.length || data?.length || 0) === 0) {
         console.warn('⚠️ Заказов нет! Возможные причины:');
-        console.warn('   1. Вы вошли как клиент - клиенты не видят свои заказы в ленте');
-        console.warn('   2. Все заказы уже взяты в работу');
-        console.warn('   3. Нет заказов в статусе "new"');
-        console.warn('💡 Решение: Войдите как эксперт или создайте заказ от другого клиента');
+        if (userProfile?.role === 'client') {
+          console.warn('   ❗ Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
+          console.warn('   💡 РЕШЕНИЕ: Перейдите на главный дашборд → https://okoznaniy.ru/expert');
+          console.warn('   📋 Там вы увидите все свои созданные заказы во вкладке "Заказы"');
+        } else {
+          console.warn('   1. Все заказы уже взяты в работу');
+          console.warn('   2. Нет заказов в статусе "new"');
+          console.warn('   3. Нет заказов от других клиентов');
+        }
       }
       return data;
     },
@@ -440,6 +445,62 @@ const OrdersFeed: React.FC = () => {
         )}
       </Card>
 
+      {/* Информационное сообщение для клиентов */}
+      {userProfile?.role === 'client' && filteredOrders.length === 0 && !ordersLoading && (
+        <Card 
+          style={{ 
+            marginBottom: 24,
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            border: 'none',
+            color: 'white'
+          }}
+        >
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <Title level={4} style={{ color: 'white', marginBottom: 16 }}>
+              💡 Подсказка: Где найти свои заказы?
+            </Title>
+            <Paragraph style={{ color: 'white', fontSize: 16, marginBottom: 20 }}>
+              Эта страница показывает заказы <strong>других клиентов</strong> для экспертов.<br />
+              Ваши созданные заказы находятся в <strong>главном дашборде</strong>.
+            </Paragraph>
+            <Space size={12}>
+              <Button 
+                type="default"
+                size="large"
+                onClick={() => navigate('/expert')}
+                style={{
+                  background: 'white',
+                  color: '#667eea',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  height: 48,
+                  padding: '0 32px'
+                }}
+              >
+                Перейти в дашборд
+              </Button>
+              <Button 
+                size="large"
+                onClick={() => navigate('/create-order')}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid white',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  height: 48,
+                  padding: '0 32px'
+                }}
+              >
+                Создать заказ
+              </Button>
+            </Space>
+          </div>
+        </Card>
+      )}
+
       {/* Список заказов */}
       {ordersLoading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
@@ -452,19 +513,23 @@ const OrdersFeed: React.FC = () => {
               <Text style={{ fontSize: 16, color: '#999' }}>
                 {searchText || selectedSubject || selectedWorkType 
                   ? 'Заказы не найдены. Попробуйте изменить фильтры.'
-                  : 'Пока нет доступных заказов'}
+                  : userProfile?.role === 'client' 
+                    ? 'В ленте пока нет заказов от других клиентов'
+                    : 'Пока нет доступных заказов'}
               </Text>
             </div>
           }
           style={{ padding: '60px 0' }}
         >
-          <Button 
-            type="primary" 
-            size="large"
-            onClick={() => navigate('/create-order')}
-          >
-            Создать первый заказ
-          </Button>
+          {userProfile?.role !== 'client' && (
+            <Button 
+              type="primary" 
+              size="large"
+              onClick={() => navigate('/create-order')}
+            >
+              Создать первый заказ
+            </Button>
+          )}
         </Empty>
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
