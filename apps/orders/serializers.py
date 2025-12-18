@@ -77,19 +77,19 @@ class OrderSerializer(serializers.ModelSerializer):
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
-        source='subject', write_only=True, queryset=Subject.objects.all()
+        source='subject', write_only=True, queryset=Subject.objects.all(), required=False, allow_null=True
     )
     topic_id = serializers.PrimaryKeyRelatedField(
-        source='topic', write_only=True, queryset=Topic.objects.all(), required=False
+        source='topic', write_only=True, queryset=Topic.objects.all(), required=False, allow_null=True
     )
     custom_topic = serializers.CharField(write_only=True, required=False, allow_blank=True)
     custom_subject = serializers.CharField(required=False, allow_blank=True)
     work_type_id = serializers.PrimaryKeyRelatedField(
-        source='work_type', write_only=True, queryset=WorkType.objects.all()
+        source='work_type', write_only=True, queryset=WorkType.objects.all(), required=False, allow_null=True
     )
     custom_work_type = serializers.CharField(required=False, allow_blank=True)
     complexity_id = serializers.PrimaryKeyRelatedField(
-        source='complexity', write_only=True, queryset=Complexity.objects.all(), required=False
+        source='complexity', write_only=True, queryset=Complexity.objects.all(), required=False, allow_null=True
     )
     additional_requirements = serializers.JSONField(required=False)
 
@@ -111,6 +111,18 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
+        # Проверяем, что указан либо предмет из списка, либо произвольный предмет
+        if not data.get('subject') and not data.get('custom_subject'):
+            raise serializers.ValidationError({
+                'subject_id': 'Укажите предмет из списка или введите произвольный предмет'
+            })
+        
+        # Проверяем, что указан либо тип работы из списка, либо произвольный тип
+        if not data.get('work_type') and not data.get('custom_work_type'):
+            raise serializers.ValidationError({
+                'work_type_id': 'Укажите тип работы из списка или введите произвольный тип'
+            })
+        
         # Проверяем, что указана либо тема из списка, либо произвольная тема
         if not data.get('topic') and not data.get('custom_topic'):
             raise serializers.ValidationError({
@@ -145,6 +157,28 @@ class OrderSerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             validated_data['client'] = request.user
         additional_requirements = validated_data.pop('additional_requirements', None)
+        custom_subject = validated_data.pop('custom_subject', None)
+        custom_work_type = validated_data.pop('custom_work_type', None)
+        
+        # Если указан произвольный предмет, создаем или находим его
+        if custom_subject and not validated_data.get('subject'):
+            subject, _ = Subject.objects.get_or_create(
+                name=custom_subject,
+                defaults={'slug': custom_subject.lower().replace(' ', '-')}
+            )
+            validated_data['subject'] = subject
+        
+        # Если указан произвольный тип работы, создаем или находим его
+        if custom_work_type and not validated_data.get('work_type'):
+            work_type, _ = WorkType.objects.get_or_create(
+                name=custom_work_type,
+                defaults={
+                    'slug': custom_work_type.lower().replace(' ', '-'),
+                    'base_price': 1000,  # Базовая цена по умолчанию
+                    'estimated_time': 7  # 7 дней по умолчанию
+                }
+            )
+            validated_data['work_type'] = work_type
         
         # Проверяем дедлайн еще раз перед расчетом цены
         deadline = validated_data.get('deadline')
