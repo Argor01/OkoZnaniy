@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, Row, Col, message } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +17,26 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
 }) => {
   const [applicationForm] = Form.useForm();
   const queryClient = useQueryClient();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 575);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Блокировка скролла основного контента при открытом модальном окне
+  useEffect(() => {
+    if (visible && isMobile) {
+      document.body.style.overflow = 'hidden';
+      // Убираем position: fixed, так как это может ломать скролл на некоторых устройствах
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [visible, isMobile]);
 
   const createApplicationMutation = useMutation({
     mutationFn: expertsApi.createApplication,
@@ -37,7 +57,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
 
   return (
     <Modal
-      style={window.innerWidth <= 480 ? { top: 0, margin: 0, padding: 0, maxWidth: '100%', height: '100%' } : { top: 20 }}
+      style={isMobile ? { padding: 0 } : { top: 20 }}
       title={
         <div style={{ 
           fontSize: 24, 
@@ -50,7 +70,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       open={visible}
       onCancel={onClose}
       onOk={() => applicationForm.submit()}
-      width={window.innerWidth <= 480 ? '100%' : 750}
+      width={isMobile ? '100%' : 750}
       okText="Отправить"
       cancelText="Отмена"
       okButtonProps={{
@@ -75,36 +95,36 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       }}
       styles={{
         mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backdropFilter: isMobile ? 'none' : 'blur(8px)',
+          WebkitBackdropFilter: isMobile ? 'none' : 'blur(8px)',
           backgroundColor: 'rgba(0, 0, 0, 0.3)'
         },
         content: { 
-          borderRadius: window.innerWidth <= 480 ? 0 : 24, 
+          borderRadius: isMobile ? 0 : 24, 
           padding: 0,
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: isMobile ? 'none' : 'blur(10px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          height: window.innerWidth <= 480 ? '100%' : 'auto',
+          // height и maxHeight теперь управляются через CSS класс .ant-modal-content
           display: 'flex',
           flexDirection: 'column'
         },
         header: {
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: isMobile ? 'none' : 'blur(10px)',
+          padding: isMobile ? '16px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: window.innerWidth <= 480 ? 0 : '24px 24px 0 0'
+          borderRadius: isMobile ? 0 : '24px 24px 0 0'
         },
         body: {
-          padding: window.innerWidth <= 480 ? '20px 24px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          padding: isMobile ? '20px 24px' : '32px',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           flex: 1,
           overflowY: 'auto'
         },
         footer: {
           padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
           borderRadius: window.innerWidth <= 480 ? 0 : '0 0 24px 24px'
         }

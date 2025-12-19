@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, Layout, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
-import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../../api/orders';
@@ -107,7 +107,7 @@ const OrdersFeed: React.FC = () => {
   };
 
   // Загружаем заказы (все доступные заказы для всех пользователей)
-  const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['orders-feed'],
     queryFn: async () => {
       console.log('🔄 Загрузка заказов из API...');
@@ -140,15 +140,6 @@ const OrdersFeed: React.FC = () => {
 
   // Используем реальные данные с API
   const orders = ordersData?.results || ordersData || [];
-  
-  // Логируем для отладки
-  React.useEffect(() => {
-    console.log('🎯 OrdersFeed mounted');
-    console.log('📋 ordersData:', ordersData);
-    console.log('📋 orders:', orders);
-    console.log('⏳ ordersLoading:', ordersLoading);
-    console.log('❌ ordersError:', ordersError);
-  }, [ordersData, orders, ordersLoading, ordersError]);
 
   // Фильтрация заказов
   const filteredOrders = orders.filter((order: any) => {
@@ -246,7 +237,23 @@ const OrdersFeed: React.FC = () => {
             <Title level={4} style={{ margin: 0, color: '#1f2937'}}>
               Биржа
             </Title>
-            <div style={{ width: 44 }} />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/create-order')}
+              size="middle"
+              style={{
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0
+              }}
+            />
           </Header>
         )}
 
@@ -740,7 +747,27 @@ const OrdersFeed: React.FC = () => {
         </div>
       )}
 
-
+            {/* Кнопка создания для мобильных */}
+            {isMobile && (
+              <Button 
+                type="primary" 
+                size="large"
+                block
+                onClick={() => navigate('/create-order')}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  borderRadius: 12,
+                  height: 48,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                  marginBottom: 16
+                }}
+              >
+                Создать заказ
+              </Button>
+            )}
         </Content>
       </Layout>
     </Layout>

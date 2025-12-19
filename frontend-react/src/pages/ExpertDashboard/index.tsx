@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Typography, message, Layout, Tabs } from 'antd';
-import { LogoutOutlined, MenuOutlined, EditOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../../api/auth';
 import { expertsApi } from '../../api/experts';
@@ -66,6 +66,20 @@ const ExpertDashboard: React.FC = () => {
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
+
+  const closeAllModals = () => {
+    setProfileModalVisible(false);
+    setApplicationModalVisible(false);
+    setWelcomeModalVisible(false);
+    setSpecializationModalVisible(false);
+    setMessageModalVisible(false);
+    setNotificationsModalVisible(false);
+    setArbitrationModalVisible(false);
+    setFinanceModalVisible(false);
+    setFriendsModalVisible(false);
+    setFaqModalVisible(false);
+    setFriendProfileModalVisible(false);
+  };
 
   // Загрузка данных
   const { data: userProfile } = useQuery({
@@ -151,54 +165,12 @@ const ExpertDashboard: React.FC = () => {
           selectedKey={selectedMenuKey}
           onMenuSelect={handleMenuSelect}
           onLogout={handleLogout}
-          onMessagesClick={() => {
-            setNotificationsModalVisible(false);
-            setArbitrationModalVisible(false);
-            setFinanceModalVisible(false);
-            setFriendsModalVisible(false);
-            setFaqModalVisible(false);
-            setMessageModalVisible(true);
-          }}
-          onNotificationsClick={() => {
-            setMessageModalVisible(false);
-            setArbitrationModalVisible(false);
-            setFinanceModalVisible(false);
-            setFriendsModalVisible(false);
-            setFaqModalVisible(false);
-            setNotificationsModalVisible(true);
-          }}
-          onArbitrationClick={() => {
-            setMessageModalVisible(false);
-            setNotificationsModalVisible(false);
-            setFinanceModalVisible(false);
-            setFriendsModalVisible(false);
-            setFaqModalVisible(false);
-            setArbitrationModalVisible(true);
-          }}
-          onFinanceClick={() => {
-            setMessageModalVisible(false);
-            setNotificationsModalVisible(false);
-            setArbitrationModalVisible(false);
-            setFriendsModalVisible(false);
-            setFaqModalVisible(false);
-            setFinanceModalVisible(true);
-          }}
-          onFriendsClick={() => {
-            setMessageModalVisible(false);
-            setNotificationsModalVisible(false);
-            setArbitrationModalVisible(false);
-            setFinanceModalVisible(false);
-            setFaqModalVisible(false);
-            setFriendsModalVisible(true);
-          }}
-          onFaqClick={() => {
-            setMessageModalVisible(false);
-            setNotificationsModalVisible(false);
-            setArbitrationModalVisible(false);
-            setFinanceModalVisible(false);
-            setFriendsModalVisible(false);
-            setFaqModalVisible(true);
-          }}
+          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
+          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
+          onArbitrationClick={() => { closeAllModals(); setArbitrationModalVisible(true); }}
+          onFinanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
+          onFriendsClick={() => { closeAllModals(); setFriendsModalVisible(true); }}
+          onFaqClick={() => { closeAllModals(); setFaqModalVisible(true); }}
           mobileDrawerOpen={mobileMenuVisible}
           onMobileDrawerChange={setMobileMenuVisible}
           userProfile={profile ? {
@@ -242,10 +214,23 @@ const ExpertDashboard: React.FC = () => {
               </Title>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              {isMobile && activeTab === 'orders' && (
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => navigate('/create-order')}
+                  size="middle"
+                  style={{
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none',
+                  }}
+                />
+              )}
               <Button
                 type="primary"
                 icon={<EditOutlined />}
-                onClick={() => setProfileModalVisible(true)}
+                onClick={() => { closeAllModals(); setProfileModalVisible(true); }}
                 size={isMobile ? 'middle' : 'middle'}
                 style={{
                   borderRadius: '8px',
@@ -283,7 +268,7 @@ const ExpertDashboard: React.FC = () => {
                 expertStats={expertStats}
                 userProfile={userProfile}
                 isMobile={isMobile}
-                onEditProfile={() => setProfileModalVisible(true)}
+                onEditProfile={() => { closeAllModals(); setProfileModalVisible(true); }}
               />
               
               <ApplicationStatus
@@ -291,7 +276,7 @@ const ExpertDashboard: React.FC = () => {
                 applicationLoading={applicationLoading}
                 userProfile={userProfile}
                 isMobile={isMobile}
-                onOpenApplicationModal={() => setApplicationModalVisible(true)}
+                onOpenApplicationModal={() => { closeAllModals(); setApplicationModalVisible(true); }}
               />
               
               <div ref={tabsRef}>
@@ -306,7 +291,7 @@ const ExpertDashboard: React.FC = () => {
                         <AboutTab
                           profile={profile}
                           isMobile={isMobile}
-                          onEdit={() => setProfileModalVisible(true)}
+                          onEdit={() => { closeAllModals(); setProfileModalVisible(true); }}
                         />
                       ),
                     },
@@ -320,10 +305,12 @@ const ExpertDashboard: React.FC = () => {
                           specializationsLoading={specializationsLoading}
                           isMobile={isMobile}
                           onEdit={(spec) => {
+                            closeAllModals();
                             setEditingSpecialization(spec);
                             setSpecializationModalVisible(true);
                           }}
                           onAdd={() => {
+                            closeAllModals();
                             setEditingSpecialization(null);
                             setSpecializationModalVisible(true);
                           }}
@@ -360,10 +347,12 @@ const ExpertDashboard: React.FC = () => {
                         <FriendsTab 
                           isMobile={isMobile}
                           onOpenChat={(friend) => {
+                            closeAllModals();
                             setSelectedFriend(friend);
                             setMessageModalVisible(true);
                           }}
                           onOpenProfile={(friend) => {
+                            closeAllModals();
                             setSelectedFriend(friend);
                             setFriendProfileModalVisible(true);
                           }}
@@ -418,8 +407,8 @@ const ExpertDashboard: React.FC = () => {
       <NotificationsModal
         visible={notificationsModalVisible}
         onClose={() => setNotificationsModalVisible(false)}
-        notifications={mockNotifications}
         isMobile={isMobile}
+        isDesktop={window.innerWidth > 1024}
       />
       
       <ArbitrationModal
@@ -427,6 +416,7 @@ const ExpertDashboard: React.FC = () => {
         onClose={() => setArbitrationModalVisible(false)}
         cases={mockArbitrationCases}
         isMobile={isMobile}
+        isDesktop={window.innerWidth > 1024}
       />
       
       <FinanceModal
@@ -440,14 +430,14 @@ const ExpertDashboard: React.FC = () => {
         visible={friendsModalVisible}
         onClose={() => setFriendsModalVisible(false)}
         onOpenChat={(chat) => {
+          closeAllModals();
           setSelectedChat(chat);
           setMessageModalVisible(true);
-          setFriendsModalVisible(false);
         }}
         onOpenProfile={(friend) => {
+          closeAllModals();
           setSelectedFriend(friend);
           setFriendProfileModalVisible(true);
-          setFriendsModalVisible(false);
         }}
         isMobile={isMobile}
       />
@@ -463,7 +453,7 @@ const ExpertDashboard: React.FC = () => {
         onClose={() => setFriendProfileModalVisible(false)}
         friend={selectedFriend}
         onOpenChat={() => {
-          setFriendProfileModalVisible(false);
+          closeAllModals();
           setMessageModalVisible(true);
         }}
         isMobile={isMobile}

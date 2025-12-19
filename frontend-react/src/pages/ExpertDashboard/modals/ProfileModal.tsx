@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Upload, message, InputNumber as AntInputNumber } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -6,7 +6,6 @@ import { authApi } from '../../../api/auth';
 import { UserProfile } from '../types';
 import SkillsSelect from '../../../components/SkillsSelect';
 import styles from '../ExpertDashboard.module.css';
-import { API_URL } from '../../../config/api';
 
 interface ProfileModalProps {
   visible: boolean;
@@ -20,9 +19,29 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
   const queryClient = useQueryClient();
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const isExpert = userProfile?.role === 'expert';
-  const [isMobile] = React.useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 575);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Блокировка скролла основного контента при открытом модальном окне
+  useEffect(() => {
+    if (visible && isMobile) {
+      document.body.style.overflow = 'hidden';
+      // Убираем position: fixed, так как это может ломать скролл на некоторых устройствах
+      // и вызывать "прыжок" страницы вверх
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [visible, isMobile]);
+
+  useEffect(() => {
     if (visible && profile) {
       // Преобразуем строку навыков в массив для Select
       const formValues: any = { ...profile };
@@ -43,12 +62,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
   return (
     <Modal
-      style={isMobile ? { top: 0, margin: 0, padding: 0, maxWidth: '100%', height: '100%' } : { top: 20 }}
-      destroyOnClose={false}
-      maskClosable={true}
-      keyboard={true}
-      centered={!isMobile}
-      getContainer={false}
+      style={isMobile ? { padding: 0 } : { top: 20 }}
       title={
         <div style={{ 
           fontSize: isMobile ? 18 : 24, 
@@ -89,47 +103,44 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       }}
       styles={{
         mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backdropFilter: isMobile ? 'none' : 'blur(8px)',
+          WebkitBackdropFilter: isMobile ? 'none' : 'blur(8px)',
           backgroundColor: 'rgba(0, 0, 0, 0.3)'
         },
         content: { 
           borderRadius: isMobile ? 0 : 24, 
           padding: 0,
           overflow: 'hidden',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: isMobile ? 'none' : 'blur(10px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           margin: isMobile ? 0 : 'auto',
           maxWidth: '100%',
-          height: isMobile ? '100vh' : 'auto',
-          maxHeight: isMobile ? '100vh' : 'calc(100vh - 80px)',
+          // height и maxHeight теперь управляются через CSS класс .ant-modal-content
           display: 'flex',
           flexDirection: 'column'
         },
         header: {
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: isMobile ? 'none' : 'blur(10px)',
           padding: isMobile ? '16px 20px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
           borderRadius: isMobile ? 0 : '24px 24px 0 0',
-          flexShrink: 0
+          flexShrink: 0 // Заголовок не должен сжиматься
         },
         body: {
           padding: isMobile ? '20px 24px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           overflowY: 'auto',
-          overflowX: 'hidden',
-          flex: '1 1 auto',
-          WebkitOverflowScrolling: 'touch',
-          position: 'relative'
+          flex: '1 1 auto', // Важно для правильного скролла
+          minHeight: 0 // Критично для Flexbox скролла
         },
         footer: {
           padding: isMobile ? '16px 20px' : '24px 32px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
           borderRadius: isMobile ? 0 : '0 0 24px 24px',
-          flexShrink: 0
+          flexShrink: 0 // Футер не должен сжиматься
         }
       }}
     >
@@ -217,7 +228,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 const formData = new FormData();
                 formData.append('avatar', file as File);
                 
-                const response = await fetch(`${API_URL}/users/update_me/`, {
+                const response = await fetch('http://127.0.0.1:8000/api/users/update_me/', {
                   method: 'PATCH',
                   headers: {
                     'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -292,9 +303,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         </Form.Item>
         
         {/* Поля только для экспертов */}
-        {isExpert && (
-          <>
-            <div style={{ display: 'flex', gap: 16 }}>
+        {isExpert && (          <>
+            <div style={{ display: 'flex', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
               <Form.Item 
                 label="Опыт работы (лет)" 
                 name="experience_years" 
@@ -314,8 +324,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   }}
                   formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
                   controls={false}
-                  style={{ width: '100%' }} 
-                  className={styles.inputField} 
+                  style={{ width: '100%'}} 
+                  className={styles.inputNumberField} 
                   size="large"
                   placeholder="0"
                   onKeyPress={(e) => {
@@ -346,7 +356,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
                   controls={false}
                   style={{ width: '100%' }} 
-                  className={styles.inputField} 
+                  className={styles.inputNumberField} 
                   size="large"
                   placeholder="0"
                   onKeyPress={(e) => {

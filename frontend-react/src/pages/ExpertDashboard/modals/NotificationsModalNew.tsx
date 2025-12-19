@@ -20,6 +20,7 @@ interface NotificationsModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
+  isDesktop?: boolean;
 }
 
 // Маппинг типов уведомлений на иконки
@@ -63,7 +64,8 @@ const getNotificationCategory = (type: string): string => {
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
-  isMobile
+  isMobile,
+  isDesktop = true
 }) => {
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -133,7 +135,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       open={visible}
       onCancel={onClose}
       footer={null}
-      width="900px"
+      width="auto"
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -142,24 +144,43 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         },
         content: { 
           borderRadius: isMobile ? 0 : 24, 
-          padding: isMobile ? '16px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          height: isMobile ? '100vh' : 'auto'
-        },
-        body: {
-          padding: '0',
-          maxHeight: isMobile ? 'calc(100vh - 32px)' : '80vh',
-          overflowY: 'auto'
+          padding: 0,
+          margin: isMobile ? 0 : 'auto',
+          overflow: 'hidden',
+          background: '#ffffff',
+          boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
+          maxHeight: isMobile ? '100vh' : 'auto',
+          top: isMobile ? 0 : '60px',
+          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
+          right: isMobile ? 0 : '20px',
+          bottom: isMobile ? 0 : '20px',
+          width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+          height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
+          transform: 'none',
+          position: 'fixed'
         },
         header: {
           display: 'none'
+        },
+        body: {
+          padding: 0,
+          margin: 0,
+          background: '#ffffff',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
         }
       }}
     >
       <ErrorBoundary>
-      <div style={{ padding: '0' }}>
+      <div style={{ 
+        padding: isMobile ? '16px' : '32px',
+        height: '100%',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {/* Заголовок */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 16 : 24 }}>
           <Text strong style={{ 

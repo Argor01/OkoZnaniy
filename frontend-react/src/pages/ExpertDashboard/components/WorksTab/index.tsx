@@ -63,7 +63,9 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile, myCompleted = [], myInPro
           }}>
             <DollarOutlined style={{ fontSize: isMobile ? 20 : 24, color: '#3b82f6', marginBottom: isMobile ? 4 : 8 }} />
             <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 600, color: '#3b82f6' }}>
-              {(myCompleted.reduce((sum, order) => sum + (Number(order.budget) || 0), 0) || 30800).toLocaleString('ru-RU')} ₽
+              {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(
+                myCompleted.reduce((sum, order) => sum + (Number(order.budget) || 0), 0) || 30800
+              )}
             </div>
             <Text type="secondary" style={{ fontSize: isMobile ? 10 : 12 }}>Общий доход</Text>
           </div>
