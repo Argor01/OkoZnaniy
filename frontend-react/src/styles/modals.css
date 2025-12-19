@@ -69,11 +69,12 @@
     font-size: 14px !important;
   }
 
-  .ant-input,
+  .ant-input:not(textarea),
   .ant-input-number,
   .ant-select-selector,
   .ant-picker {
-    height: 36px !important;
+    height: auto !important;
+    min-height: 36px !important;
     font-size: 14px !important;
   }
 
@@ -84,95 +85,101 @@
 
 /* Мобильные устройства (до 575px) */
 @media (max-width: 575px) {
-  /* Модальное окно на весь экран */
-  .ant-modal {
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    top: 0;
-    padding: 0;
-    padding-bottom: 0;
-  }
-
   /* Блокируем скролл на обертке модалки и поднимаем z-index */
-  .ant-modal-wrap {
+  body .ant-modal-root .ant-modal-wrap {
     overflow: hidden !important;
-    height: 100dvh !important;
-    z-index: 2000 !important; /* Поверх сайдбара (1001) */
+    height: 100dvh;
+    z-index: 2000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    pointer-events: auto;
+    /* Отключаем flex-центрирование от AntD */
+    /* display: block !important; - УБРАЛ, так как перекрывает клики после закрытия */
+    /* Убираем размытие на мобильных, так как оно может застревать */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Маска */
+  body .ant-modal-root .ant-modal-mask {
+    z-index: 1999;
+    height: 100dvh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    touch-action: none;
+    /* Убираем размытие на мобильных */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.45) !important; /* Делаем фон чуть темнее, раз блюра нет */
+  }
+
+  /* Сама модалка - фиксируем на весь экран */
+  body .ant-modal-root .ant-modal-wrap .ant-modal {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    bottom: 0 !important;
     right: 0 !important;
-    touch-action: none; /* Запрещаем скролл на обертке */
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important; /* Для мобильных браузеров */
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    pointer-events: auto !important;
+    transform: none !important; /* Убираем трансформации AntD */
+    padding-bottom: 0 !important;
   }
 
-  /* Маска тоже должна быть выше */
-  .ant-modal-mask {
-    z-index: 1999 !important;
-    height: 100dvh !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    right: 0 !important;
-  }
-
-  .ant-modal-content {
-    height: 100dvh !important;
+  /* Контент модалки - заполняет всю модалку */
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content {
+    height: 100% !important;
+    width: 100% !important;
     border-radius: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     box-shadow: none !important;
+    z-index: 2002;
+    position: static !important;
     pointer-events: auto !important;
   }
 
-  .ant-modal {
-    pointer-events: none; /* Пропускаем клики мимо обертки, если она мешает */
-  }
-
-  .ant-modal-content {
-    pointer-events: auto; /* Включаем обратно для контента */
-  }
-
-  .ant-modal-header {
-    padding: 12px 16px;
-    border-radius: 0;
+  /* Хедер и футер не сжимаются */
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-header,
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer {
     flex-shrink: 0;
-    border-bottom: 1px solid #f0f0f0;
   }
 
-  .ant-modal-title {
-    font-size: 16px;
-    font-weight: 600;
-  }
-
-  .ant-modal-close {
-    top: 12px;
-    right: 12px;
-  }
-
-  .ant-modal-close-x {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    font-size: 16px;
-  }
-
-  .ant-modal-body {
+  /* Тело модалки - единственное место для скролла */
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-body {
     padding: 12px 16px;
-    flex: 1 1 auto;
-    overflow-y: auto !important; /* Явный auto лучше для iOS иногда */
-    min-height: 0 !important;
+    flex: 1 1 auto; /* flex-grow: 1, flex-shrink: 1 */
+    overflow-y: auto !important;
+    min-height: 0; /* Критично для скролла внутри flex */
     max-height: none !important;
-    -webkit-overflow-scrolling: touch !important;
-    height: 100% !important;
-    overscroll-behavior: contain !important; /* Блокируем передачу скролла родителю */
-    touch-action: pan-y !important; /* Разрешаем только вертикальный скролл */
-    position: relative !important;
-    z-index: 2001 !important; /* Чтобы точно ловить тачи */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    transform: translate3d(0,0,0); /* Хардварное ускорение */
+  }
+
+  /* Фикс высоты инпутов и плейсхолдеров на мобильных */
+  .ant-modal .ant-input,
+  .ant-modal .ant-input-number-input,
+  .ant-modal .ant-input-textarea textarea,
+  .ant-modal .ant-select-selector,
+  .ant-modal .ant-picker {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    line-height: 1.5;
+    height: auto;
+    touch-action: pan-y; /* Разрешаем вертикальный скролл на инпутах */
   }
 
   .ant-modal-footer {
@@ -223,11 +230,15 @@
     padding-bottom: 8px;
   }
 
+  /* Removed conflicting styles that forced fixed height/line-height on inputs */
   :where(.ant-modal) .ant-form-item .ant-input-number-input {
-    height: 40px;
-    line-height: 40px;
-    padding-top: 0;
-    padding-bottom: 0;
+    /* height: 40px; */
+    /* line-height: 40px; */
+    /* padding-top: 0; */
+    /* padding-bottom: 0; */
+    height: auto;
+    line-height: 1.5;
+    padding: 8px 11px;
   }
   
   /* Специфично для текстовых инпутов, чтобы поднять текст */
@@ -240,7 +251,8 @@
 
   .ant-input-textarea textarea {
     font-size: 14px !important;
-    min-height: 80px !important;
+    min-height: 120px !important;
+    line-height: 1.5 !important;
   }
 
   .ant-select-dropdown {
@@ -398,6 +410,7 @@
     min-width: 28px !important;
     height: 28px !important;
     line-height: 26px !important;
+    font-size: 12px !important;
   }
 }
 
@@ -428,11 +441,12 @@
     margin-bottom: 10px !important;
   }
 
-  .ant-input,
+  .ant-input:not(textarea),
   .ant-input-number,
   .ant-select-selector,
   .ant-picker {
-    height: 36px !important;
+    height: auto !important;
+    min-height: 36px !important;
     font-size: 13px !important;
   }
 

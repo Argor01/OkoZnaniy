@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Layout, Typography, Modal, Button, Space, Input, Avatar, Badge, Tabs, Select, Rate, Menu, Collapse, DatePicker, Row, Col, Form, InputNumber, Upload, Tag, Popover, Spin, Card, Empty, Statistic } from 'antd';
-import { LogoutOutlined, MenuOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, DollarOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined, UploadOutlined, EyeOutlined, FilterOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MenuOutlined, UserOutlined, PlusOutlined, DeleteOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, EditOutlined, ArrowLeftOutlined, MessageOutlined, TrophyOutlined, LikeOutlined, DislikeOutlined, ShoppingOutlined, FileDoneOutlined, SettingOutlined, BellOutlined, CalendarOutlined, WalletOutlined, ShopOutlined, TeamOutlined, HeartOutlined, GiftOutlined, PoweroffOutlined, SearchOutlined, StarOutlined, StarFilled, MobileOutlined, SendOutlined, SmileOutlined, PaperClipOutlined, QuestionCircleOutlined, DownOutlined, FileTextOutlined, CommentOutlined, UploadOutlined, EyeOutlined, FilterOutlined } from '@ant-design/icons';
 import EmojiPicker from 'emoji-picker-react';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -308,8 +308,8 @@ const MyWorks: React.FC = () => {
                 <Card className={styles.statsCard}>
                   <Statistic
                     title="Общий доход"
-                    value={completedWorks?.reduce((sum: number, work: any) => sum + (work.budget || 0), 0) || 0}
-                    prefix={<DollarOutlined style={{ color: '#3b82f6' }} />}
+                    value={completedWorks?.reduce((sum: number, work: any) => sum + (Number(work.budget) || 0), 0) || 0}
+                    formatter={(value) => new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0 }).format(Number(value))}
                     suffix="₽"
                     valueStyle={{ color: '#3b82f6' }}
                   />
@@ -320,7 +320,7 @@ const MyWorks: React.FC = () => {
                   <Statistic
                     title="Средний рейтинг"
                     value={completedWorks?.length ? 
-                      (completedWorks.reduce((sum: number, work: any) => sum + (work.rating || 0), 0) / completedWorks.length).toFixed(1) : 
+                      (completedWorks.reduce((sum: number, work: any) => sum + (Number(work.rating) || 0), 0) / completedWorks.length).toFixed(1) : 
                       '0.0'
                     }
                     prefix={<StarFilled style={{ color: '#fbbf24' }} />}
@@ -542,8 +542,8 @@ const MyWorks: React.FC = () => {
       <NotificationsModal
         visible={notificationsModalVisible}
         onClose={() => setNotificationsModalVisible(false)}
-        notifications={mockNotifications}
         isMobile={isMobile}
+        isDesktop={window.innerWidth > 1024}
       />
       
       <ArbitrationModal
@@ -551,6 +551,7 @@ const MyWorks: React.FC = () => {
         onClose={() => setArbitrationModalVisible(false)}
         cases={mockArbitrationCases}
         isMobile={isMobile}
+        isDesktop={window.innerWidth > 1024}
       />
       
       <FinanceModal

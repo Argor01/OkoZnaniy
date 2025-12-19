@@ -20,13 +20,15 @@ interface ArbitrationModalProps {
   onClose: () => void;
   cases: ArbitrationCase[];
   isMobile: boolean;
+  isDesktop?: boolean;
 }
 
 const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
   visible,
   onClose,
   cases,
-  isMobile
+  isMobile,
+  isDesktop = true
 }) => {
   const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
 
@@ -36,13 +38,7 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? '100%' : 900}
-      style={isMobile ? {
-        top: 0,
-        padding: 0,
-        maxWidth: '100%',
-        margin: 0
-      } : {}}
+      width="auto"
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -51,28 +47,42 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
         },
         content: { 
           borderRadius: isMobile ? 0 : 24, 
-          padding: isMobile ? '16px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          height: isMobile ? '100vh' : 'auto'
-        },
-        body: {
-          padding: '0',
-          minHeight: isMobile ? 'calc(100vh - 32px)' : '400px',
-          background: '#f3f4f6',
-          maxHeight: isMobile ? 'calc(100vh - 32px)' : '70vh',
-          overflowY: 'auto'
+          padding: 0,
+          margin: isMobile ? 0 : 'auto',
+          overflow: 'hidden',
+          background: '#ffffff',
+          boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
+          maxHeight: isMobile ? '100vh' : 'auto',
+          top: isMobile ? 0 : '60px',
+          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
+          right: isMobile ? 0 : '20px',
+          bottom: isMobile ? 0 : '20px',
+          width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+          height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
+          transform: 'none',
+          position: 'fixed'
         },
         header: {
           display: 'none'
+        },
+        body: {
+          padding: 0,
+          margin: 0,
+          background: '#ffffff',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
         }
       }}
     >
       <div style={{ 
         background: '#f3f4f6',
-        minHeight: isMobile ? 'calc(100vh - 32px)' : '400px',
-        padding: '0'
+        height: '100%',
+        padding: isMobile ? '16px' : '32px',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Заголовок */}
         <Text strong style={{ 

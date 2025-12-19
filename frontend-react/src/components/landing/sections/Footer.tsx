@@ -15,15 +15,6 @@ const Footer: React.FC = () => (
           </a>
         </div>
 
-        <div className="footer__social">
-          <a className="footer__social-link" href="#">
-            <img className="footer__social-link-icon" src="/assets/icons/whatsapp.svg" alt="whatsapp" />
-          </a>
-          <a className="footer__social-link" href="#">
-            <img className="footer__social-link-icon" src="/assets/icons/telegram.svg" alt="telegram" />
-          </a>
-        </div>
-
         <div className="footer__documents">
           <a className="footer__documents-link" href="#">Политика конфиденциальности</a>
           <a className="footer__documents-link" href="#">Пользовательское соглашение</a>

@@ -154,6 +154,7 @@ if DEBUG:
         'http://127.0.0.1:3001',
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://172.16.0.1:5173',
     ]
     # Отключаем CSRF для API endpoints
     CSRF_COOKIE_SECURE = False
@@ -325,7 +326,7 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = False if DEBUG else False
+CORS_ALLOW_ALL_ORIGINS = True if DEBUG else False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -337,6 +338,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://45.12.239.226:80",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
+    "http://172.16.0.1:5173",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

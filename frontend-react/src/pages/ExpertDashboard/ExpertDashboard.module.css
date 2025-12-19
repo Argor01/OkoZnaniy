@@ -101,6 +101,14 @@
   justify-content: flex-start;
 }
 
+@media (max-width: 575px) {
+  .expertDashboardPage :global(.ant-layout-sider),
+  .expertDashboardPage :global(.ant-layout-header) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 .sidebar.collapsed:hover .sidebarProfile > div:not(:first-child) {
   display: block;
 }
@@ -589,6 +597,20 @@
   border: 1px solid rgba(102, 126, 234, 0.2) !important;
   padding: 12px 16px !important;
   transition: all 0.3s ease !important;
+}
+
+.inputNumberField {
+  border-radius: 12px !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+  padding: 8px 11px !important; /* Меньший паддинг для InputNumber */
+}
+
+.inputNumberField:hover, .inputNumberField:focus-within {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+}
   font-size: 15px !important;
 }
 
@@ -598,12 +620,20 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
+.inputField.ant-input-number {
+  padding: 0;
+  height: auto;
+  min-height: 40px;
+}
+
 .inputField :global(.ant-input-number-input) {
-  height: 44px !important;
-  line-height: 44px !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
+  height: auto;
+  line-height: 1.5715;
+  padding: 8px 11px 12px 11px;
+  display: block;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .textareaField {

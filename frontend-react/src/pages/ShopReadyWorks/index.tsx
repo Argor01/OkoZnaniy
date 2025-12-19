@@ -35,7 +35,15 @@ const ShopReadyWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const [isMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // State для модальных окон
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -247,7 +255,7 @@ const ShopReadyWorks: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginLeft: '-20px'
+            width: '100%',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -256,14 +264,36 @@ const ShopReadyWorks: React.FC = () => {
                 type="primary"
                 icon={<MenuOutlined />}
                 onClick={() => setMobileMenuVisible(true)}
-                style={{ borderRadius: '8px' }}
+                style={{ 
+                  borderRadius: '8px',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0
+                }}
               />
             )}
             <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
               Магазин готовых работ
             </Title>
           </div>
-          <Button type="default" danger icon={<LogoutOutlined />} onClick={handleLogout}>
+          <Button 
+            type={isMobile ? "text" : "default"} 
+            danger 
+            icon={<LogoutOutlined style={{ fontSize: isMobile ? '20px' : undefined }} />} 
+            onClick={handleLogout}
+            style={isMobile ? { 
+              minWidth: 'auto', 
+              width: '40px', 
+              height: '40px', 
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            } : undefined}
+          >
             {!isMobile && 'Выйти'}
           </Button>
         </Header>

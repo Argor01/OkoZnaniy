@@ -269,7 +269,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   ].filter(Boolean);
 
   const profileSection = (
-    <div className={styles.sidebarProfile}>
+    <div className={styles.sidebarProfile} style={{ position: 'relative' }}>
       <Avatar
         size={48}
         src={userProfile?.avatar || undefined}
@@ -284,6 +284,29 @@ const Sidebar: React.FC<SidebarProps> = ({
           {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
         </Text>
       </div>
+      {isMobile && (
+        <button
+          onClick={() => onMobileDrawerChange?.(false)}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            background: 'none',
+            border: 'none',
+            color: 'white',
+            fontSize: '24px',
+            cursor: 'pointer',
+            padding: '4px',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0.9,
+          }}
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 
@@ -339,21 +362,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <div style={{ padding: '16px', textAlign: 'right', borderBottom: '1px solid #f0f0f0' }}>
-              <button
-                onClick={() => onMobileDrawerChange?.(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  color: '#666',
-                }}
-              >
-                ✕
-              </button>
-            </div>
             {sidebarContent}
           </div>
         </>
