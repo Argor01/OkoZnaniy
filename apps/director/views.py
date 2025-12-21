@@ -42,15 +42,24 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         # Синхронизируем флаги пользователя и меняем роль на expert
         User = get_user_model()
         expert = application.expert
+        
+        # Логируем текущее состояние
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Approving application {application.id} for user {expert.id} (current role: {expert.role})")
+        
         expert.application_approved = True
         expert.application_reviewed_at = application.updated_at
         expert.application_reviewed_by = request.user
         expert.has_submitted_application = True
+        
         # Меняем роль на expert, если она еще не установлена
         if expert.role != 'expert':
             expert.role = 'expert'
+            logger.info(f"Changed role to expert for user {expert.id}")
             expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application', 'role'])
         else:
+            logger.info(f"User {expert.id} already has expert role")
             expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
 
         # Отправляем уведомление пользователю
