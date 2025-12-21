@@ -140,6 +140,9 @@ class ExpertMatchSerializer(serializers.ModelSerializer):
 
 
 class EducationSerializer(serializers.ModelSerializer):
+    end_year = serializers.IntegerField(required=False, allow_null=True)
+    degree = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    
     class Meta:
         model = Education
         fields = ['id', 'university', 'start_year', 'end_year', 'degree', 'created_at']
