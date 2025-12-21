@@ -104,7 +104,19 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         User = get_user_model()
-        return User.objects.exclude(role='client')
+        from django.db.models import Q
+        
+        # Показываем активных сотрудников (не клиентов и не архивированных)
+        # Исключаем:
+        # 1. Обычных клиентов (role=client без заявки эксперта)
+        # 2. Архивированных (is_active=False)
+        # 3. Деактивированных экспертов (role=client с деактивированной заявкой)
+        return User.objects.filter(
+            is_active=True
+        ).exclude(
+            Q(role='client', has_submitted_application=False) |  # Обычные клиенты
+            Q(role='client', application_approved=False, has_submitted_application=True)  # Деактивированные эксперты
+        )
 
     def get_serializer_class(self):
         return UserSerializer
@@ -188,9 +200,18 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], url_path='archive')
     def get_archive(self, request):
-        """Получить список заархивированных сотрудников"""
+        """Получить список заархивированных сотрудников и деактивированных экспертов"""
         User = get_user_model()
-        archived = User.objects.filter(is_active=False).exclude(role='client')
+        from django.db.models import Q
+        
+        # Включаем:
+        # 1. Неактивных пользователей (кроме обычных клиентов)
+        # 2. Деактивированных экспертов (role=client, application_approved=False, has_submitted_application=True)
+        archived = User.objects.filter(
+            Q(is_active=False) & ~Q(role='client') |  # Архивированные сотрудники
+            Q(role='client', application_approved=False, has_submitted_application=True)  # Деактивированные эксперты
+        ).distinct()
+        
         serializer = UserSerializer(archived, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
