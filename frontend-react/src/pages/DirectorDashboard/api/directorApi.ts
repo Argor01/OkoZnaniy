@@ -77,10 +77,11 @@ export const getPersonnel = async (): Promise<Employee[]> => {
       if (Array.isArray(results)) {
         allEmployees = [...allEmployees, ...results];
       }
-      // Получаем URL следующей страницы (относительный путь)
+      // Получаем URL следующей страницы (убираем /api из пути, т.к. apiClient уже добавляет его)
       if (data?.next) {
         const url = new URL(data.next);
-        nextUrl = url.pathname + url.search;
+        // Убираем /api из начала пути, если он есть
+        nextUrl = url.pathname.replace(/^\/api/, '') + url.search;
       } else {
         nextUrl = null;
       }
