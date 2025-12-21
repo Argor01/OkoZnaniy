@@ -1,29 +1,36 @@
-import React from 'react';
-import { Modal, Input, Button, Avatar, Rate, Typography } from 'antd';
+import React, { useState } from 'react';
+import { Modal, Input, Button, Avatar, Spin, Empty, Typography } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { authApi } from '../../../api/auth';
 
 const { Text } = Typography;
-
-interface Friend {
-  name: string;
-  specialization: string;
-  rating: number;
-  worksCount: number;
-  avatar: string;
-  avatarColor: string;
-  bio?: string;
-  education?: string;
-  experience?: string;
-  skills?: string[];
-}
 
 interface FriendsModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
-  onOpenChat: (friend: Friend) => void;
-  onOpenProfile: (friend: Friend) => void;
+  onOpenChat: (friend: any) => void;
+  onOpenProfile: (friend: any) => void;
 }
+
+// Цвета для аватаров
+const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+
+const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+
+const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  }
+  if (firstName) {
+    return firstName.slice(0, 2).toUpperCase();
+  }
+  if (username) {
+    return username.slice(0, 2).toUpperCase();
+  }
+  return 'U';
+};
 
 const FriendsModal: React.FC<FriendsModalProps> = ({ 
   visible, 
@@ -32,80 +39,22 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   onOpenChat,
   onOpenProfile
 }) => {
-  const friends: Friend[] = [
-    {
-      name: 'Иван Петров',
-      specialization: 'Математика, Физика',
-      rating: 5,
-      worksCount: 127,
-      avatar: 'ИП',
-      avatarColor: '#3b82f6',
-      bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
-      education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
-      experience: '10 лет',
-      skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
-    },
-    {
-      name: 'Мария Сидорова',
-      specialization: 'Экономика, Бухучет',
-      rating: 5,
-      worksCount: 89,
-      avatar: 'МС',
-      avatarColor: '#10b981',
-      bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
-      education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
-      experience: '7 лет',
-      skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
-    },
-    {
-      name: 'Алексей Смирнов',
-      specialization: 'Программирование',
-      rating: 4,
-      worksCount: 156,
-      avatar: 'АС',
-      avatarColor: '#f59e0b',
-      bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
-      education: 'МФТИ, Факультет инноваций и высоких технологий',
-      experience: '8 лет',
-      skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
-    },
-    {
-      name: 'Елена Козлова',
-      specialization: 'Химия, Биология',
-      rating: 5,
-      worksCount: 203,
-      avatar: 'ЕК',
-      avatarColor: '#8b5cf6',
-      bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
-      education: 'МГУ им. М.В. Ломоносова, Химический факультет',
-      experience: '12 лет',
-      skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
-    },
-    {
-      name: 'Дмитрий Новиков',
-      specialization: 'История, Философия',
-      rating: 4,
-      worksCount: 74,
-      avatar: 'ДН',
-      avatarColor: '#ec4899',
-      bio: 'Историк и философ. Помогаю понять сложные исторические процессы и философские концепции.',
-      education: 'СПбГУ, Исторический факультет',
-      experience: '6 лет',
-      skills: ['История России', 'Всемирная история', 'Философия', 'Обществознание']
-    },
-    {
-      name: 'Ольга Васильева',
-      specialization: 'Английский язык',
-      rating: 5,
-      worksCount: 312,
-      avatar: 'ОВ',
-      avatarColor: '#06b6d4',
-      bio: 'Преподаватель английского языка с международными сертификатами. Готовлю к IELTS, TOEFL и ЕГЭ.',
-      education: 'МГЛУ, Факультет английского языка',
-      experience: '15 лет',
-      skills: ['Английский язык', 'IELTS', 'TOEFL', 'Деловой английский', 'Разговорная практика']
-    }
-  ];
+  const [searchText, setSearchText] = useState('');
+  
+  const { data: recentUsers, isLoading } = useQuery({
+    queryKey: ['recent-users'],
+    queryFn: () => authApi.getRecentUsers(),
+    enabled: visible, // Загружаем только когда модалка открыта
+  });
+
+  // Фильтрация по поиску
+  const filteredUsers = recentUsers?.filter((user: any) => {
+    if (!searchText) return true;
+    const search = searchText.toLowerCase();
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+    const username = (user.username || '').toLowerCase();
+    return fullName.includes(search) || username.includes(search);
+  }) || [];
 
   return (
     <Modal
@@ -119,7 +68,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
           backgroundClip: 'text',
           marginBottom: isMobile ? 4 : 8
         }}>
-          Мои друзья
+          Последние пользователи
         </div>
       }
       open={visible}
@@ -156,9 +105,11 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
       <div style={{ paddingTop: isMobile ? 12 : 16 }}>
         <div style={{ display: 'flex', alignItems: 'stretch' }}>
           <Input.Search
-            placeholder={isMobile ? "Поиск..." : "Поиск друзей..."}
+            placeholder={isMobile ? "Поиск..." : "Поиск пользователей..."}
             allowClear
             size={isMobile ? 'middle' : 'large'}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             style={{ 
               marginBottom: isMobile ? 16 : 24,
               width: '100%'
@@ -175,76 +126,94 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                 alignItems: 'center'
               }
             }}
-            onSearch={(value) => {
-              // Поиск по друзьям
-            }}
           />
         </div>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(340px, 1fr))', 
-          gap: isMobile ? 12 : 16, 
-          alignItems: 'stretch' 
-        }}>
-          {friends.map((friend, index) => (
-            <div 
-              key={index}
-              style={{ 
-                background: '#ffffff',
-                borderRadius: isMobile ? 8 : 12,
-                border: '1px solid #e5e7eb',
-                padding: isMobile ? '12px' : '16px',
-                transition: 'all 0.3s',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 10 : 12, flex: 1 }}>
-                <Avatar 
-                  size={isMobile ? 48 : 56} 
-                  style={{ backgroundColor: friend.avatarColor, flexShrink: 0 }}
-                >
-                  {friend.avatar}
-                </Avatar>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <Text strong style={{ fontSize: isMobile ? 15 : 16, display: 'block', lineHeight: '22px' }}>
-                    {friend.name}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>
-                    {friend.specialization}
-                  </Text>
-                  <div style={{ marginTop: isMobile ? 4 : 6, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
-                    <Rate disabled defaultValue={friend.rating} style={{ fontSize: isMobile ? 11 : 12 }} />
-                    <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>
-                      {friend.worksCount} {friend.worksCount === 1 ? 'работа' : friend.worksCount < 5 ? 'работы' : 'работ'}
+        
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <Spin size="large" />
+            <Text style={{ display: 'block', marginTop: 16 }}>Загрузка пользователей...</Text>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <Empty description={searchText ? "Пользователи не найдены" : "Пока нет активных пользователей"} />
+        ) : (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(340px, 1fr))', 
+            gap: isMobile ? 12 : 16, 
+            alignItems: 'stretch' 
+          }}>
+            {filteredUsers.map((user: any) => (
+              <div 
+                key={user.id}
+                style={{ 
+                  background: '#ffffff',
+                  borderRadius: isMobile ? 8 : 12,
+                  border: '1px solid #e5e7eb',
+                  padding: isMobile ? '12px' : '16px',
+                  transition: 'all 0.3s',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 10 : 12, flex: 1 }}>
+                  <Avatar 
+                    size={isMobile ? 48 : 56} 
+                    src={user.avatar}
+                    style={{ 
+                      backgroundColor: getAvatarColor(user.id), 
+                      flexShrink: 0 
+                    }}
+                  >
+                    {!user.avatar && getInitials(user.first_name, user.last_name, user.username)}
+                  </Avatar>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Text strong style={{ fontSize: isMobile ? 15 : 16, display: 'block', lineHeight: '22px' }}>
+                      {user.first_name && user.last_name 
+                        ? `${user.first_name} ${user.last_name}`
+                        : user.username || 'Пользователь'}
                     </Text>
+                    <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>
+                      {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
+                    </Text>
+                    {user.bio && (
+                      <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', marginTop: 4 }}>
+                        {user.bio.length > 60 ? `${user.bio.slice(0, 60)}...` : user.bio}
+                      </Text>
+                    )}
                   </div>
                 </div>
+                <div style={{ marginTop: isMobile ? 10 : 12, display: 'flex', gap: isMobile ? 6 : 8 }}>
+                  <Button 
+                    type="primary" 
+                    size="small" 
+                    icon={<MessageOutlined />} 
+                    style={{ flex: 1, fontSize: isMobile ? 12 : 14 }}
+                    onClick={() => {
+                      onOpenChat(user);
+                      onClose();
+                    }}
+                  >
+                    Написать
+                  </Button>
+                  <Button 
+                    size="small" 
+                    icon={<UserOutlined />}
+                    style={{ fontSize: isMobile ? 12 : 14 }}
+                    onClick={() => {
+                      onOpenProfile(user);
+                      onClose();
+                    }}
+                  >
+                    {!isMobile && 'Профиль'}
+                  </Button>
+                </div>
               </div>
-              <div style={{ marginTop: isMobile ? 10 : 12, display: 'flex', gap: isMobile ? 6 : 8 }}>
-                <Button 
-                  type="primary" 
-                  size="small" 
-                  icon={<MessageOutlined />} 
-                  style={{ flex: 1, fontSize: isMobile ? 12 : 14 }}
-                  onClick={() => onOpenChat(friend)}
-                >
-                  Написать
-                </Button>
-                <Button 
-                  size="small" 
-                  icon={<UserOutlined />}
-                  style={{ fontSize: isMobile ? 12 : 14 }}
-                  onClick={() => onOpenProfile(friend)}
-                >
-                  {!isMobile && 'Профиль'}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </Modal>
   );
