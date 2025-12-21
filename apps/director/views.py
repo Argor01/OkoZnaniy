@@ -176,26 +176,22 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         
         # Если это деактивированный эксперт (client с application_approved=False)
-        # восстанавливаем роль expert
+        # возвращаем заявку на рассмотрение
         if user.role == 'client' and user.application_approved == False:
             try:
                 application = ExpertApplication.objects.get(expert=user)
                 if application.status == 'deactivated':
-                    # Восстанавливаем статус анкеты и роль
-                    application.status = 'approved'
-                    application.reviewed_by = request.user
-                    application.reviewed_at = timezone.now()
-                    application.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'updated_at'])
+                    # Возвращаем заявку на рассмотрение
+                    application.status = 'pending'
+                    application.rejection_reason = ''  # Очищаем причину деактивации
+                    application.reviewed_by = None
+                    application.reviewed_at = None
+                    application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
                     
-                    user.role = 'expert'
-                    user.application_approved = True
-                    user.application_reviewed_at = timezone.now()
-                    user.application_reviewed_by = request.user
-                    user.save(update_fields=['role', 'application_approved', 'application_reviewed_at', 'application_reviewed_by'])
-                    
-                    # Отправляем уведомление о восстановлении статуса эксперта
-                    from apps.notifications.services import NotificationService
-                    NotificationService.notify_application_approved(application)
+                    # Пользователь остается клиентом до одобрения заявки
+                    user.application_approved = False
+                    user.has_submitted_application = True
+                    user.save(update_fields=['application_approved', 'has_submitted_application'])
             except ExpertApplication.DoesNotExist:
                 pass
         else:
@@ -250,27 +246,23 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         
         # Если это деактивированный эксперт (client с application_approved=False)
-        # восстанавливаем роль expert
+        # возвращаем заявку на рассмотрение
         if user.role == 'client' and user.application_approved == False and user.has_submitted_application:
             try:
                 application = ExpertApplication.objects.get(expert=user)
                 if application.status == 'deactivated':
-                    # Восстанавливаем статус анкеты и роль
-                    application.status = 'approved'
-                    application.reviewed_by = request.user
-                    application.reviewed_at = timezone.now()
-                    application.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'updated_at'])
+                    # Возвращаем заявку на рассмотрение
+                    application.status = 'pending'
+                    application.rejection_reason = ''  # Очищаем причину деактивации
+                    application.reviewed_by = None
+                    application.reviewed_at = None
+                    application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
                     
-                    user.role = 'expert'
-                    user.application_approved = True
-                    user.application_reviewed_at = timezone.now()
-                    user.application_reviewed_by = request.user
+                    # Пользователь остается клиентом до одобрения заявки
+                    user.application_approved = False
+                    user.has_submitted_application = True
                     user.is_active = True
-                    user.save(update_fields=['role', 'application_approved', 'application_reviewed_at', 'application_reviewed_by', 'is_active'])
-                    
-                    # Отправляем уведомление о восстановлении статуса эксперта
-                    from apps.notifications.services import NotificationService
-                    NotificationService.notify_application_approved(application)
+                    user.save(update_fields=['application_approved', 'has_submitted_application', 'is_active'])
             except ExpertApplication.DoesNotExist:
                 pass
         else:
