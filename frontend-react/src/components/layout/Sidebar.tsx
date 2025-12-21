@@ -189,12 +189,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       key: 'notifications',
-      icon: <BellOutlined />,
-      label: (
-        <Badge dot={unreadNotifications > 0} offset={[10, 0]}>
-          Уведомления
+      icon: unreadNotifications > 0 ? (
+        <Badge dot>
+          <BellOutlined style={{ color: '#ff4d4f' }} />
         </Badge>
+      ) : (
+        <BellOutlined />
       ),
+      label: 'Уведомления',
     },
     {
       key: 'arbitration',
