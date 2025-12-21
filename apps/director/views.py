@@ -172,16 +172,14 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 Q(role='client', has_submitted_application=False)  # Обычные клиенты
             )
         
-        # Показываем активных сотрудников (не клиентов и не архивированных)
-        # Исключаем:
-        # 1. Обычных клиентов (role=client без заявки эксперта)
-        # 2. Архивированных (is_active=False)
-        # 3. Деактивированных экспертов (role=client с деактивированной заявкой)
+        # Показываем активных сотрудников:
+        # - Все роли кроме client (admin, expert, partner, arbitrator)
+        # - Исключаем только обычных клиентов (role=client)
+        # - Архивированные (is_active=False) не показываем
         return User.objects.filter(
             is_active=True
         ).exclude(
-            Q(role='client', has_submitted_application=False) |  # Обычные клиенты
-            Q(role='client', application_approved=False, has_submitted_application=True)  # Деактивированные эксперты
+            role='client'  # Исключаем всех клиентов (обычных и деактивированных экспертов)
         )
 
     def get_serializer_class(self):
