@@ -183,10 +183,15 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 if application.status == 'deactivated':
                     # Восстанавливаем статус анкеты и роль
                     application.status = 'approved'
-                    application.save(update_fields=['status', 'updated_at'])
+                    application.reviewed_by = request.user
+                    application.reviewed_at = timezone.now()
+                    application.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'updated_at'])
+                    
                     user.role = 'expert'
                     user.application_approved = True
-                    user.save(update_fields=['role', 'application_approved'])
+                    user.application_reviewed_at = timezone.now()
+                    user.application_reviewed_by = request.user
+                    user.save(update_fields=['role', 'application_approved', 'application_reviewed_at', 'application_reviewed_by'])
                     
                     # Отправляем уведомление о восстановлении статуса эксперта
                     from apps.notifications.services import NotificationService
@@ -252,11 +257,16 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 if application.status == 'deactivated':
                     # Восстанавливаем статус анкеты и роль
                     application.status = 'approved'
-                    application.save(update_fields=['status', 'updated_at'])
+                    application.reviewed_by = request.user
+                    application.reviewed_at = timezone.now()
+                    application.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'updated_at'])
+                    
                     user.role = 'expert'
                     user.application_approved = True
+                    user.application_reviewed_at = timezone.now()
+                    user.application_reviewed_by = request.user
                     user.is_active = True
-                    user.save(update_fields=['role', 'application_approved', 'is_active'])
+                    user.save(update_fields=['role', 'application_approved', 'application_reviewed_at', 'application_reviewed_by', 'is_active'])
                     
                     # Отправляем уведомление о восстановлении статуса эксперта
                     from apps.notifications.services import NotificationService
