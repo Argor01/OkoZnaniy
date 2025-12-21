@@ -140,9 +140,14 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         User = get_user_model()
         from django.db.models import Q
         
-        # Для действия restore разрешаем доступ к архивированным пользователям
+        # Для действия restore разрешаем доступ к архивированным пользователям И деактивированным экспертам
         if self.action == 'restore':
-            return User.objects.filter(is_active=False).exclude(role='client')
+            return User.objects.filter(
+                Q(is_active=False) |  # Архивированные
+                Q(role='client', application_approved=False, has_submitted_application=True)  # Деактивированные эксперты
+            ).exclude(
+                Q(role='client', has_submitted_application=False)  # Обычные клиенты
+            )
         
         # Для действия activate разрешаем доступ к деактивированным экспертам
         if self.action == 'activate':
@@ -236,10 +241,33 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def restore(self, request, pk=None):
-        """Восстановление сотрудника из архива"""
+        """Восстановление сотрудника из архива или деактивированного эксперта"""
         user = self.get_object()
-        user.is_active = True
-        user.save(update_fields=['is_active'])
+        
+        # Если это деактивированный эксперт (client с application_approved=False)
+        # восстанавливаем роль expert
+        if user.role == 'client' and user.application_approved == False and user.has_submitted_application:
+            try:
+                application = ExpertApplication.objects.get(expert=user)
+                if application.status == 'deactivated':
+                    # Восстанавливаем статус анкеты и роль
+                    application.status = 'approved'
+                    application.save(update_fields=['status', 'updated_at'])
+                    user.role = 'expert'
+                    user.application_approved = True
+                    user.is_active = True
+                    user.save(update_fields=['role', 'application_approved', 'is_active'])
+                    
+                    # Отправляем уведомление о восстановлении статуса эксперта
+                    from apps.notifications.services import NotificationService
+                    NotificationService.notify_application_approved(application)
+            except ExpertApplication.DoesNotExist:
+                pass
+        else:
+            # Обычное восстановление архивированного аккаунта
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+        
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'], url_path='archive')
