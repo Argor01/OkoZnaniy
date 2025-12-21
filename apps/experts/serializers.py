@@ -140,7 +140,24 @@ class ExpertMatchSerializer(serializers.ModelSerializer):
 
 
 class EducationSerializer(serializers.ModelSerializer):
-    end_year = serializers.IntegerField(required=False, allow_null=True)
+    start_year = serializers.IntegerField(
+        min_value=1950, 
+        max_value=2100,
+        error_messages={
+            'min_value': 'Год начала обучения должен быть не раньше 1950',
+            'max_value': 'Год начала обучения должен быть не позже 2100'
+        }
+    )
+    end_year = serializers.IntegerField(
+        required=False, 
+        allow_null=True,
+        min_value=1950,
+        max_value=2100,
+        error_messages={
+            'min_value': 'Год окончания обучения должен быть не раньше 1950',
+            'max_value': 'Год окончания обучения должен быть не позже 2100'
+        }
+    )
     degree = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     class Meta:
