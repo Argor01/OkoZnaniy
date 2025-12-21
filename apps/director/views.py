@@ -207,6 +207,10 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                     user.application_approved = False
                     user.has_submitted_application = True
                     user.save(update_fields=['application_approved', 'has_submitted_application'])
+                    
+                    # Отправляем уведомление пользователю о восстановлении
+                    from apps.notifications.services import NotificationService
+                    NotificationService.notify_application_restored(application)
             except ExpertApplication.DoesNotExist:
                 pass
         else:
@@ -278,6 +282,10 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                     user.has_submitted_application = True
                     user.is_active = True
                     user.save(update_fields=['application_approved', 'has_submitted_application', 'is_active'])
+                    
+                    # Отправляем уведомление пользователю о восстановлении
+                    from apps.notifications.services import NotificationService
+                    NotificationService.notify_application_restored(application)
             except ExpertApplication.DoesNotExist:
                 pass
         else:

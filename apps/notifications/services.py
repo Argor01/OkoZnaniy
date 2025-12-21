@@ -335,6 +335,18 @@ class NotificationService:
         )
 
     @staticmethod
+    def notify_application_restored(application):
+        """Уведомляет эксперта о восстановлении анкеты на рассмотрение"""
+        NotificationService.create_notification(
+            recipient=application.expert,
+            type=NotificationType.APPLICATION_APPROVED,  # Используем тот же тип
+            title="Анкета восстановлена",
+            message=f"Ваша анкета эксперта была восстановлена и отправлена на повторное рассмотрение.",
+            related_object_id=application.id,
+            related_object_type='expert_application'
+        )
+
+    @staticmethod
     def notify_document_uploaded(document):
         """Уведомляет администраторов о загрузке нового документа экспертом"""
         admins = User.objects.filter(is_staff=True)
