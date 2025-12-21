@@ -52,15 +52,10 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         expert.application_reviewed_at = application.updated_at
         expert.application_reviewed_by = request.user
         expert.has_submitted_application = True
+        expert.role = 'expert'  # Всегда устанавливаем роль expert при одобрении
         
-        # Меняем роль на expert, если она еще не установлена
-        if expert.role != 'expert':
-            expert.role = 'expert'
-            logger.info(f"Changed role to expert for user {expert.id}")
-            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application', 'role'])
-        else:
-            logger.info(f"User {expert.id} already has expert role")
-            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
+        logger.info(f"Set role to expert for user {expert.id}")
+        expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application', 'role'])
 
         # Отправляем уведомление пользователю
         from apps.notifications.services import NotificationService
@@ -94,13 +89,26 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         application.reviewed_at = timezone.now()
         application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
 
-        # Синхронизируем флаги пользователя
+        # Синхронизируем флаги пользователя и возвращаем роль client
         expert = application.expert
+        
+        # Логируем текущее состояние
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Rejecting application {application.id} for user {expert.id} (current role: {expert.role})")
+        
         expert.application_approved = False
         expert.application_reviewed_at = application.updated_at
         expert.application_reviewed_by = request.user
         expert.has_submitted_application = True
-        expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
+        
+        # Если пользователь был экспертом, возвращаем роль client
+        if expert.role == 'expert':
+            expert.role = 'client'
+            logger.info(f"Changed role back to client for user {expert.id}")
+            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application', 'role'])
+        else:
+            expert.save(update_fields=['application_approved', 'application_reviewed_at', 'application_reviewed_by', 'has_submitted_application'])
 
         # Отправляем уведомление пользователю
         from apps.notifications.services import NotificationService
