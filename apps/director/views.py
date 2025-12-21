@@ -126,6 +126,10 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                     user.role = 'expert'
                     user.application_approved = True
                     user.save(update_fields=['role', 'application_approved'])
+                    
+                    # Отправляем уведомление о восстановлении статуса эксперта
+                    from apps.notifications.services import NotificationService
+                    NotificationService.notify_application_approved(application)
             except ExpertApplication.DoesNotExist:
                 pass
         else:
@@ -153,6 +157,10 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 application.rejection_reason = 'Деактивирован администратором'
                 application.reviewed_by = request.user
                 application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'updated_at'])
+                
+                # Отправляем уведомление пользователю о деактивации
+                from apps.notifications.services import NotificationService
+                NotificationService.notify_application_rejected(application, 'Ваш статус эксперта был деактивирован администратором')
             except ExpertApplication.DoesNotExist:
                 pass
         else:
