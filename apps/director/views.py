@@ -106,6 +106,16 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         User = get_user_model()
         from django.db.models import Q
         
+        # Для действия restore разрешаем доступ к архивированным пользователям
+        if self.action == 'restore':
+            return User.objects.filter(is_active=False).exclude(role='client')
+        
+        # Для действия activate разрешаем доступ к деактивированным экспертам
+        if self.action == 'activate':
+            return User.objects.all().exclude(
+                Q(role='client', has_submitted_application=False)  # Обычные клиенты
+            )
+        
         # Показываем активных сотрудников (не клиентов и не архивированных)
         # Исключаем:
         # 1. Обычных клиентов (role=client без заявки эксперта)
