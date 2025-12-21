@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from apps.experts.models import ExpertApplication
 from apps.experts.serializers import ExpertApplicationSerializer
@@ -25,9 +26,18 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         application = self.get_object()
+        
+        # Проверяем, что заявка еще не одобрена
+        if application.status == 'approved':
+            return Response(
+                {'detail': 'Заявка уже одобрена'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         application.status = 'approved'
         application.reviewed_by = request.user
-        application.save(update_fields=['status', 'reviewed_by', 'updated_at'])
+        application.reviewed_at = timezone.now()
+        application.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'updated_at'])
 
         # Синхронизируем флаги пользователя и меняем роль на expert
         User = get_user_model()
@@ -53,11 +63,27 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         reason = request.data.get('reason', '')
+        
+        if not reason:
+            return Response(
+                {'detail': 'Укажите причину отклонения'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         application = self.get_object()
+        
+        # Проверяем, что заявка еще не отклонена
+        if application.status == 'rejected':
+            return Response(
+                {'detail': 'Заявка уже отклонена'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         application.status = 'rejected'
         application.rejection_reason = reason
         application.reviewed_by = request.user
-        application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'updated_at'])
+        application.reviewed_at = timezone.now()
+        application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
 
         # Синхронизируем флаги пользователя
         expert = application.expert
@@ -77,13 +103,21 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def rework(self, request, pk=None):
         comment = request.data.get('comment', '')
+        
+        if not comment:
+            return Response(
+                {'detail': 'Укажите комментарий для доработки'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         application = self.get_object()
+        
         # Возвращаем в рассмотрение (pending) и сохраняем комментарий в поле причины
         application.status = 'pending'
-        if comment:
-            application.rejection_reason = f"Требуется доработка: {comment}"
+        application.rejection_reason = f"Требуется доработка: {comment}"
         application.reviewed_by = request.user
-        application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'updated_at'])
+        application.reviewed_at = timezone.now()
+        application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
 
         # Флаги пользователя остаются как подана, но не одобрена
         expert = application.expert
