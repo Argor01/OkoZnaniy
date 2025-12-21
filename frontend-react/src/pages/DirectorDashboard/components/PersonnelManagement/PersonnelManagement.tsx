@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, Tabs, Typography, Alert } from 'antd';
 import { TeamOutlined, UserAddOutlined, FileTextOutlined, InboxOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { useQueryClient } from '@tanstack/react-query';
 import EmployeeRegistration from './EmployeeRegistration';
 import ExpertApplications from './ExpertApplications';
 import EmployeeList from './EmployeeList';
@@ -9,6 +10,23 @@ import EmployeeArchive from './EmployeeArchive';
 const { Title } = Typography;
 
 const PersonnelManagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('list');
+  const queryClient = useQueryClient();
+
+  // Обновляем данные при переключении табов
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    
+    // Обновляем данные в зависимости от таба
+    if (key === 'list') {
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+    } else if (key === 'applications') {
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
+    } else if (key === 'archive') {
+      queryClient.invalidateQueries({ queryKey: ['director-personnel-archive'] });
+    }
+  };
+
   const items = [
     {
       key: 'registration',
@@ -78,6 +96,8 @@ const PersonnelManagement: React.FC = () => {
         }}
       >
         <Tabs 
+          activeKey={activeTab}
+          onChange={handleTabChange}
           defaultActiveKey="list" 
           items={items}
           size={isMobile ? 'middle' : 'large'}
