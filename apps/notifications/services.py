@@ -305,8 +305,7 @@ class NotificationService:
             title="Анкета одобрена",
             message=f"Ваша анкета эксперта была одобрена! Теперь вы можете брать заказы в работу.",
             related_object_id=application.id,
-            related_object_type='expert_application',
-            data={'application_id': application.id}
+            related_object_type='expert_application'
         )
 
     @staticmethod
@@ -319,8 +318,7 @@ class NotificationService:
             title="Анкета отклонена",
             message=f"К сожалению, ваша анкета эксперта была отклонена. Причина: {reason}",
             related_object_id=application.id,
-            related_object_type='expert_application',
-            data={'application_id': application.id, 'reason': reason}
+            related_object_type='expert_application'
         )
 
     @staticmethod
@@ -333,8 +331,7 @@ class NotificationService:
             title="Требуется доработка анкеты",
             message=f"Ваша анкета требует доработки. Комментарий: {comment}",
             related_object_id=application.id,
-            related_object_type='expert_application',
-            data={'application_id': application.id, 'comment': comment, 'status': 'rework'}
+            related_object_type='expert_application'
         )
 
     @staticmethod
@@ -348,8 +345,7 @@ class NotificationService:
                 title="Загружен новый документ эксперта",
                 message=f"Эксперт {document.expert.username} загрузил документ '{document.title}' для проверки",
                 related_object_id=document.id,
-                related_object_type='expert_document',
-                data={'document_id': document.id, 'expert_id': document.expert.id}
+                related_object_type='expert_document'
             )
 
     @staticmethod
