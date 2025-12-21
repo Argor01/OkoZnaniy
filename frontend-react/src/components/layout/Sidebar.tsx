@@ -191,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       key: 'notifications',
       icon: <BellOutlined />,
       label: (
-        <Badge count={unreadNotifications} offset={[10, 0]}>
+        <Badge dot={unreadNotifications > 0} offset={[10, 0]}>
           Уведомления
         </Badge>
       ),
