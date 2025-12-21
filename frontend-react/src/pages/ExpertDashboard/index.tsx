@@ -7,6 +7,7 @@ import { authApi } from '../../api/auth';
 import { expertsApi } from '../../api/experts';
 import { catalogApi } from '../../api/catalog';
 import { ordersApi } from '../../api/orders';
+import { useNotifications } from '../../hooks/useNotifications';
 import Sidebar from '../../components/layout/Sidebar';
 import ProfileHeader from './components/ProfileHeader/index';
 import ApplicationStatus from './components/ApplicationStatus/index';
@@ -40,6 +41,9 @@ const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Загружаем уведомления
+  const { unreadCount: unreadNotifications } = useNotifications();
   
   // State для модальных окон
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -173,6 +177,7 @@ const ExpertDashboard: React.FC = () => {
           onFaqClick={() => { closeAllModals(); setFaqModalVisible(true); }}
           mobileDrawerOpen={mobileMenuVisible}
           onMobileDrawerChange={setMobileMenuVisible}
+          unreadNotifications={unreadNotifications}
           userProfile={profile ? {
             username: profile.username,
             avatar: profile.avatar,
