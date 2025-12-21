@@ -1,6 +1,8 @@
 import React from 'react';
-import { Button, Typography, Avatar, Rate } from 'antd';
+import { Button, Typography, Avatar, Rate, Spin, Empty } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import { authApi } from '../../../../api/auth';
 import styles from '../../ExpertDashboard.module.css';
 
 const { Text } = Typography;
@@ -11,88 +13,66 @@ interface FriendsTabProps {
   onOpenProfile: (friend: any) => void;
 }
 
-const mockFriends = [
-  {
-    id: 1,
-    name: 'Иван Петров',
-    specialization: 'Математика, Физика',
-    rating: 5,
-    worksCount: 127,
-    avatar: 'ИП',
-    avatarColor: '#3b82f6',
-    bio: 'Опытный преподаватель математики и физики с 10-летним стажем. Специализируюсь на подготовке к ЕГЭ и олимпиадам.',
-    education: 'МГУ им. М.В. Ломоносова, Механико-математический факультет',
-    experience: '10 лет',
-    skills: ['Высшая математика', 'Физика', 'Подготовка к ЕГЭ', 'Олимпиадная математика']
-  },
-  {
-    id: 2,
-    name: 'Мария Сидорова',
-    specialization: 'Экономика, Бухучет',
-    rating: 5,
-    worksCount: 89,
-    avatar: 'МС',
-    avatarColor: '#10b981',
-    bio: 'Экономист с опытом работы в крупных компаниях. Помогаю студентам разобраться в сложных экономических концепциях.',
-    education: 'РЭУ им. Г.В. Плеханова, Экономический факультет',
-    experience: '7 лет',
-    skills: ['Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ']
-  },
-  {
-    id: 3,
-    name: 'Алексей Смирнов',
-    specialization: 'Программирование',
-    rating: 4,
-    worksCount: 156,
-    avatar: 'АС',
-    avatarColor: '#f59e0b',
-    bio: 'Разработчик с опытом в веб-разработке и мобильных приложениях. Помогаю студентам освоить программирование с нуля.',
-    education: 'МФТИ, Факультет инноваций и высоких технологий',
-    experience: '8 лет',
-    skills: ['Python', 'JavaScript', 'React', 'Node.js', 'Алгоритмы']
-  },
-  {
-    id: 4,
-    name: 'Елена Козлова',
-    specialization: 'Химия, Биология',
-    rating: 5,
-    worksCount: 203,
-    avatar: 'ЕК',
-    avatarColor: '#8b5cf6',
-    bio: 'Кандидат химических наук. Специализируюсь на органической химии и биохимии. Готовлю к ЕГЭ и вступительным экзаменам.',
-    education: 'МГУ им. М.В. Ломоносова, Химический факультет',
-    experience: '12 лет',
-    skills: ['Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия']
-  },
-  {
-    id: 5,
-    name: 'Дмитрий Новиков',
-    specialization: 'История, Философия',
-    rating: 4,
-    worksCount: 74,
-    avatar: 'ДН',
-    avatarColor: '#ec4899',
-    bio: 'Историк и философ. Помогаю студентам понять исторические процессы и философские концепции.',
-    education: 'МГУ им. М.В. Ломоносова, Исторический факультет',
-    experience: '6 лет',
-    skills: ['История России', 'Всемирная история', 'Философия', 'Культурология']
+// Цвета для аватаров
+const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+
+const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+
+const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
   }
-];
+  if (firstName) {
+    return firstName.slice(0, 2).toUpperCase();
+  }
+  if (username) {
+    return username.slice(0, 2).toUpperCase();
+  }
+  return 'U';
+};
 
 const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenProfile }) => {
+  const { data: recentUsers, isLoading } = useQuery({
+    queryKey: ['recent-users'],
+    queryFn: () => authApi.getRecentUsers(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className={styles.sectionCard} style={{ textAlign: 'center', padding: 40 }}>
+        <Spin size="large" />
+        <Text style={{ display: 'block', marginTop: 16 }}>Загрузка пользователей...</Text>
+      </div>
+    );
+  }
+
+  if (!recentUsers || recentUsers.length === 0) {
+    return (
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionCardHeader}>
+          <h2 className={styles.sectionTitle}>Последние пользователи</h2>
+        </div>
+        <Empty description="Пока нет активных пользователей" />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionCardHeader}>
-        <h2 className={styles.sectionTitle}>Мои друзья</h2>
+        <h2 className={styles.sectionTitle}>Последние пользователи</h2>
+        <Text type="secondary" style={{ fontSize: 14 }}>
+          Пользователи, которые недавно заходили на сайт
+        </Text>
       </div>
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', 
         gap: isMobile ? 12 : 16 
       }}>
-        {mockFriends.map((friend) => (
+        {recentUsers.map((user: any) => (
           <div 
-            key={friend.id} 
+            key={user.id} 
             style={{ 
               background: '#ffffff',
               border: '1px solid #e5e7eb',
@@ -120,8 +100,9 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 16 }}>
               <Avatar 
                 size={isMobile ? 72 : 80} 
+                src={user.avatar}
                 style={{ 
-                  backgroundColor: friend.avatarColor,
+                  backgroundColor: getAvatarColor(user.id),
                   fontSize: isMobile ? 28 : 32,
                   fontWeight: 600,
                   marginBottom: 12,
@@ -129,20 +110,21 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                 }}
               >
-                {friend.avatar}
+                {!user.avatar && getInitials(user.first_name, user.last_name, user.username)}
               </Avatar>
               <Text strong style={{ fontSize: isMobile ? 16 : 18, display: 'block', marginBottom: 4, color: '#1f2937' }}>
-                {friend.name}
+                {user.first_name && user.last_name 
+                  ? `${user.first_name} ${user.last_name}`
+                  : user.username || 'Пользователь'}
               </Text>
               <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13, display: 'block', marginBottom: 8 }}>
-                {friend.specialization}
+                {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
               </Text>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                <Rate disabled defaultValue={friend.rating} style={{ fontSize: isMobile ? 14 : 16 }} />
-                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
-                  ({friend.worksCount})
+              {user.bio && (
+                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                  {user.bio.length > 50 ? `${user.bio.slice(0, 50)}...` : user.bio}
                 </Text>
-              </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <Button 
@@ -155,7 +137,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
                   fontWeight: 500,
                   height: isMobile ? 36 : 40
                 }}
-                onClick={() => onOpenChat(friend)}
+                onClick={() => onOpenChat(user)}
               >
                 Написать
               </Button>
@@ -168,7 +150,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
                   height: isMobile ? 36 : 40,
                   minWidth: isMobile ? 44 : 48
                 }}
-                onClick={() => onOpenProfile(friend)}
+                onClick={() => onOpenProfile(user)}
               />
             </div>
           </div>

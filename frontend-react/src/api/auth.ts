@@ -79,6 +79,12 @@ export const authApi = {
     return response.data;
   },
 
+  // Получить последних активных пользователей
+  getRecentUsers: async (): Promise<User[]> => {
+    const response = await apiClient.get('/users/recent_users/');
+    return response.data;
+  },
+
   // Обновить токен
   refreshToken: async (): Promise<{ access: string }> => {
     const refresh = localStorage.getItem('refresh_token');

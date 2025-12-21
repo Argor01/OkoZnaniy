@@ -649,6 +649,21 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(arbitrators, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def recent_users(self, request):
+        """Получение последних активных пользователей для раздела 'Мои друзья'"""
+        # Получаем последних 20 пользователей, которые заходили на сайт
+        # Исключаем текущего пользователя и показываем только активных
+        recent = User.objects.filter(
+            is_active=True,
+            last_login__isnull=False
+        ).exclude(
+            id=request.user.id
+        ).order_by('-last_login')[:20]
+        
+        serializer = self.get_serializer(recent, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def submit_expert_application(self, request):
         """Подача анкеты экспертом"""
