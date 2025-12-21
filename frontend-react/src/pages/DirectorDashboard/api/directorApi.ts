@@ -66,11 +66,28 @@ export const getPersonnel = async (): Promise<Employee[]> => {
     return mockEmployees.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
   }
   try {
-    const response = await apiClient.get('/director/personnel/');
-    const raw = (response.data && (response.data.results || response.data)) || [];
-    const list: Employee[] = Array.isArray(raw) ? raw : [];
+    // Загружаем все страницы пагинации
+    let allEmployees: Employee[] = [];
+    let nextUrl: string | null = '/director/personnel/';
+    
+    while (nextUrl) {
+      const response = await apiClient.get(nextUrl);
+      const data = response.data;
+      const results = data?.results || data || [];
+      if (Array.isArray(results)) {
+        allEmployees = [...allEmployees, ...results];
+      }
+      // Получаем URL следующей страницы (относительный путь)
+      if (data?.next) {
+        const url = new URL(data.next);
+        nextUrl = url.pathname + url.search;
+      } else {
+        nextUrl = null;
+      }
+    }
+    
     const ids = getDeactivatedEmployeeIds();
-    return list.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
+    return allEmployees.map(e => ({ ...e, is_active: ids.has(e.id) ? false : e.is_active }));
   } catch (error) {
     console.error('Error fetching personnel:', error);
     // Пытаемся получить список пользователей как резервный источник
