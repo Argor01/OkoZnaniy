@@ -22,7 +22,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             participants=user
         ).prefetch_related(
             'participants',
-            Prefetch('messages', queryset=Message.objects.select_related('sender').order_by('-created_at')[:1])
+            'messages__sender'
         ).annotate(
             last_message_time=Max('messages__created_at')
         ).order_by('-last_message_time')
