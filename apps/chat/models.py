@@ -6,11 +6,13 @@ from rest_framework.exceptions import ValidationError
 from apps.orders.models import Order
 
 class Chat(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, null=True, blank=True)
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     def __str__(self):
-        return f"Чат по заказу #{self.order.id}"
+        if self.order:
+            return f"Чат по заказу #{self.order.id}"
+        return f"Чат #{self.id}"
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")

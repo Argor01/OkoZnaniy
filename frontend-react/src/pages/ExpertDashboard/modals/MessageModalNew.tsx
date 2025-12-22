@@ -24,6 +24,7 @@ interface MessageModalProps {
   isTablet: boolean;
   isDesktop: boolean;
   onCreateOrder?: () => void;
+  selectedUserId?: number; // ID пользователя для открытия чата
 }
 
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
@@ -32,7 +33,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   isMobile,
   isTablet,
   isDesktop,
-  onCreateOrder
+  onCreateOrder,
+  selectedUserId
 }) => {
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
@@ -45,9 +47,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   useEffect(() => {
     if (visible) {
+      console.log('MessageModal opened, selectedUserId:', selectedUserId);
       loadChats();
+      // Если передан selectedUserId, автоматически открываем чат с этим пользователем
+      if (selectedUserId) {
+        console.log('Loading chat with user:', selectedUserId);
+        loadOrCreateChatWithUser(selectedUserId);
+      }
     }
-  }, [visible]);
+  }, [visible, selectedUserId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -81,6 +89,25 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch (error) {
       console.error('Ошибка загрузки чата:', error);
       antMessage.error('Не удалось загрузить чат');
+    }
+  };
+
+  const loadOrCreateChatWithUser = async (userId: number) => {
+    console.log('loadOrCreateChatWithUser called with userId:', userId);
+    setLoading(true);
+    try {
+      console.log('Calling chatApi.getOrCreateByUser...');
+      const chatData = await chatApi.getOrCreateByUser(userId);
+      console.log('Chat data received:', chatData);
+      setSelectedChat(chatData);
+      // Обновляем список чатов
+      await loadChats();
+      antMessage.success('Чат открыт');
+    } catch (error) {
+      console.error('Ошибка создания/загрузки чата:', error);
+      antMessage.error('Не удалось открыть чат с пользователем');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -415,9 +442,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500 }}>
                       {selectedChat.other_user?.username || 'Пользователь'}
                     </Text>
-                    <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
-                      Заказ #{selectedChat.order_id}
-                    </Text>
+                    {selectedChat.order_id && (
+                      <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                        Заказ #{selectedChat.order_id}
+                      </Text>
+                    )}
                   </div>
                 </Space>
               </>

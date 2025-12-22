@@ -68,6 +68,14 @@ export const chatApi = {
     return response.data;
   },
 
+  // Получить или создать чат с конкретным пользователем
+  getOrCreateByUser: async (userId: number): Promise<ChatDetail> => {
+    const response = await apiClient.post('/chat/chats/get_or_create_by_user/', {
+      user_id: userId,
+    });
+    return response.data;
+  },
+
   // Отправить сообщение
   sendMessage: async (chatId: number, text: string): Promise<Message> => {
     const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, {

@@ -126,3 +126,46 @@ class ChatViewSet(viewsets.ModelViewSet):
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def get_or_create_by_user(self, request):
+        """Получить или создать чат с конкретным пользователем"""
+        from apps.users.models import User
+        
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response(
+                {'detail': 'user_id обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            other_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Нельзя создать чат с самим собой
+        if other_user.id == request.user.id:
+            return Response(
+                {'detail': 'Нельзя создать чат с самим собой'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Ищем существующий чат между этими двумя пользователями (без привязки к заказу)
+        chat = Chat.objects.filter(
+            participants=request.user,
+            order__isnull=True
+        ).filter(
+            participants=other_user
+        ).first()
+        
+        # Если чат не найден, создаем новый
+        if not chat:
+            chat = Chat.objects.create(order=None)
+            chat.participants.add(request.user, other_user)
+        
+        serializer = ChatDetailSerializer(chat, context={'request': request})
+        return Response(serializer.data)

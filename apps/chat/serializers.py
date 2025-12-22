@@ -25,12 +25,15 @@ class ChatListSerializer(serializers.ModelSerializer):
     last_message_time = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
-    order_id = serializers.IntegerField(source='order.id', read_only=True)
+    order_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
         fields = ['id', 'order', 'order_id', 'participants', 'other_user', 'last_message', 'last_message_time', 'unread_count']
         read_only_fields = ['participants', 'order']
+
+    def get_order_id(self, obj):
+        return obj.order.id if obj.order else None
 
     def get_last_message(self, obj):
         last_message = obj.messages.order_by('-created_at').first()
@@ -44,7 +47,10 @@ class ChatListSerializer(serializers.ModelSerializer):
 
     def get_last_message_time(self, obj):
         last_message = obj.messages.order_by('-created_at').first()
-        return last_message.created_at if last_message else obj.order.created_at
+        if last_message:
+            return last_message.created_at
+        # Если нет сообщений, возвращаем время создания заказа или None
+        return obj.order.created_at if obj.order else None
 
     def get_unread_count(self, obj):
         user = self.context.get('request').user
@@ -65,12 +71,15 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     messages = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
-    order_id = serializers.IntegerField(source='order.id', read_only=True)
+    order_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
         fields = ['id', 'order', 'order_id', 'participants', 'other_user', 'messages', 'unread_count']
         read_only_fields = ['participants', 'order']
+
+    def get_order_id(self, obj):
+        return obj.order.id if obj.order else None
 
     def get_messages(self, obj):
         messages = obj.messages.select_related('sender').order_by('created_at')

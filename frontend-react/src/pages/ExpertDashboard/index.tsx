@@ -57,6 +57,7 @@ const ExpertDashboard: React.FC = () => {
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+  const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
   
   // Остальной state
   const [activeTab, setActiveTab] = useState<string>('about');
@@ -83,6 +84,7 @@ const ExpertDashboard: React.FC = () => {
     setFriendsModalVisible(false);
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
+    setSelectedUserIdForChat(undefined);
   };
 
   // Загрузка данных
@@ -352,8 +354,10 @@ const ExpertDashboard: React.FC = () => {
                         <FriendsTab 
                           isMobile={isMobile}
                           onOpenChat={(friend) => {
+                            console.log('FriendsTab onOpenChat called with friend:', friend);
                             closeAllModals();
-                            setSelectedFriend(friend);
+                            setSelectedUserIdForChat(friend.id);
+                            console.log('Setting selectedUserIdForChat to:', friend.id);
                             setMessageModalVisible(true);
                           }}
                           onOpenProfile={(friend) => {
@@ -400,10 +404,14 @@ const ExpertDashboard: React.FC = () => {
       
       <MessageModal
         visible={messageModalVisible}
-        onClose={() => setMessageModalVisible(false)}
+        onClose={() => {
+          setMessageModalVisible(false);
+          setSelectedUserIdForChat(undefined);
+        }}
         isMobile={isMobile}
         isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
         isDesktop={window.innerWidth > 1024}
+        selectedUserId={selectedUserIdForChat}
         onCreateOrder={() => {
           // Логика создания заказа
         }}
@@ -434,9 +442,11 @@ const ExpertDashboard: React.FC = () => {
       <FriendsModal
         visible={friendsModalVisible}
         onClose={() => setFriendsModalVisible(false)}
-        onOpenChat={(chat) => {
+        onOpenChat={(friend) => {
+          console.log('FriendsModal onOpenChat called with friend:', friend);
           closeAllModals();
-          setSelectedChat(chat);
+          setSelectedUserIdForChat(friend.id);
+          console.log('Setting selectedUserIdForChat to:', friend.id);
           setMessageModalVisible(true);
         }}
         onOpenProfile={(friend) => {
