@@ -55,7 +55,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             if other_user:
                 NotificationService.create_notification(
                     recipient=other_user,
-                    notification_type='new_comment',
+                    type='new_comment',
                     title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
                     message=message.text[:100],
                     related_object_id=chat.id,
