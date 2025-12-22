@@ -57,6 +57,7 @@ const OrdersFeed: React.FC = () => {
   const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+  const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
 
   // Дополнительный state
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
@@ -728,7 +729,14 @@ const OrdersFeed: React.FC = () => {
                   ) : (
                     <Button 
                       type="primary"
-                      onClick={() => navigate(`/expert`)}
+                      onClick={() => {
+                        if (order.client?.id) {
+                          setSelectedUserIdForChat(order.client.id);
+                          setMessageModalVisible(true);
+                        } else {
+                          message.error('Не удалось определить клиента');
+                        }
+                      }}
                       style={{
                         background: '#52c41a',
                         border: 'none',
@@ -798,10 +806,14 @@ const OrdersFeed: React.FC = () => {
       
       <MessageModal
         visible={messageModalVisible}
-        onClose={() => setMessageModalVisible(false)}
+        onClose={() => {
+          setMessageModalVisible(false);
+          setSelectedUserIdForChat(undefined);
+        }}
         isMobile={isMobile}
         isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
         isDesktop={window.innerWidth > 1024}
+        selectedUserId={selectedUserIdForChat}
         onCreateOrder={() => {
           // Логика создания заказа
         }}
