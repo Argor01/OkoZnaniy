@@ -1,0 +1,49 @@
+/* CSS Variables for Landing Page */
+
+:root {
+  /* Typography */
+  --font-family-sans: "Jost", sans-serif;
+  --font-family-display: "Alegreya", serif;
+  
+  /* Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-grey-900: #1f2937;
+  --color-grey-700: #374151;
+  --color-grey-600: #464646;
+  --color-brand-blue-500: #238ce2;
+  --color-brand-blue-600: #1e7cc8;
+  --color-brand-blue-400: #97d0ff;
+  --color-brand-blue-300: #b9e0ff;
+  --color-brand-blue-200: #a5d5fc;
+  --color-brand-blue-100: #d6ecfe;
+  --color-brand-blue-50: #8cc9fb;
+  --color-brand-orange-400: #ffb34a;
+  --color-brand-orange-500: #ffb34a;
+  --color-brand-orange-600: #e6a142;
+  --color-brand-purple-500: #a855f7;
+  --color-brand-purple-600: #b77dff;
+  --color-brand-purple-700: #7c2d12;
+  --color-brand-purple-800: #8d31ff;
+  --color-footer-bg: #151b32;
+  --color-faq-bg: #edf7ff;
+  --color-faq-hover: #bae0ff;
+  --color-faq-active: #0f7fda;
+  --color-border: #ededed;
+  
+  /* Layout */
+  --container-max-width: 1320px;
+  --container-padding: 20px;
+  
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Breakpoints */
+  --breakpoint-mobile: 576px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-large: 1320px;
+}

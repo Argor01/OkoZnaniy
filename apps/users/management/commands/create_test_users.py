@@ -31,6 +31,22 @@ class Command(BaseCommand):
                 'first_name': 'Партнер',
                 'last_name': 'Тестовый',
             },
+            {
+                'username': 'AnitaM',
+                'email': 'amuhaceva3@gmail.com',
+                'password': '12345678',
+                'role': 'expert',
+                'first_name': 'Анита',
+                'last_name': 'Мухачева',
+            },
+            {
+                'username': 'expert',
+                'email': 'expert@test.com',
+                'password': 'test123',
+                'role': 'expert',
+                'first_name': 'Эксперт',
+                'last_name': 'Тестовый',
+            },
         ]
 
         for user_data in test_users:

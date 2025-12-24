@@ -1,0 +1,50 @@
+/* Button Components */
+
+.button {
+  display: inline-block;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  padding: 21px 42px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  font-family: var(--font-family-sans);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 141%;
+  text-align: center;
+  color: var(--color-grey-700);
+  border: none;
+  border-radius: var(--radius-xl);
+  outline: none;
+  background-color: var(--color-brand-orange-500);
+  -webkit-transition-property: color, background-color;
+  transition-property: color, background-color;
+  -webkit-transition-timing-function: ease-out;
+          transition-timing-function: ease-out;
+  -webkit-transition-duration: 0.2s;
+          transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .button {
+    padding: 16px 32px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .button {
+    padding: 14px 28px;
+    font-size: 14px;
+  }
+}
+
+.button:hover {
+  background-color: var(--color-brand-orange-400);
+}
+
+.button:active {
+  background-color: var(--color-brand-orange-600);
+}

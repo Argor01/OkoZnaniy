@@ -35,7 +35,15 @@ const ShopReadyWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const [isMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // State для модальных окон
   const [profileModalVisible, setProfileModalVisible] = useState(false);

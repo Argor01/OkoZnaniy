@@ -180,4 +180,15 @@ button:focus-visible {
   .ant-menu-title-content .ant-badge {
     font-size: 16px !important;
   }
+  
+  /* Increase search input height on mobile */
+  .ant-input-affix-wrapper.ant-input-outlined {
+    min-height: 44px !important;
+  }
+  
+  .ant-input-affix-wrapper .ant-input {
+    min-height: 42px !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
 }
