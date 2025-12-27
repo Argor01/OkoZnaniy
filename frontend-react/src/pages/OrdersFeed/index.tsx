@@ -542,12 +542,24 @@ const OrdersFeed: React.FC = () => {
                 borderRadius: 16,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 transition: 'all 0.3s ease',
+                cursor: 'pointer',
               }}
               styles={{ body: { padding: 24 } }}
+              onClick={() => navigate(`/orders/${order.id}`)}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                 <div style={{ flex: 1 }}>
-                  <Title level={4} style={{ margin: 0, marginBottom: 12, fontSize: 20, fontWeight: 700 }}>
+                  <Title 
+                    level={4} 
+                    style={{ 
+                      margin: 0, 
+                      marginBottom: 12, 
+                      fontSize: 20, 
+                      fontWeight: 700,
+                      color: '#1890ff',
+                      cursor: 'pointer',
+                    }}
+                  >
                     {order.title}
                   </Title>
                   <Space size={8} wrap>
@@ -714,7 +726,8 @@ const OrdersFeed: React.FC = () => {
                     <Button 
                       danger
                       icon={<DeleteOutlined />}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation(); // Предотвращаем переход к деталям
                         if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
                           handleDeleteOrder(order.id);
                         }
@@ -729,7 +742,8 @@ const OrdersFeed: React.FC = () => {
                   ) : userProfile?.role === 'expert' ? (
                     <Button 
                       type="primary"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation(); // Предотвращаем переход к деталям
                         if (order.client?.id) {
                           setSelectedUserIdForChat(order.client.id);
                           setMessageModalVisible(true);

@@ -28,6 +28,7 @@ import './styles/modals-centered.css';
 import './styles/avatar.css';
 
 // Import pages
+import OrderDetail from './pages/OrderDetail';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
@@ -80,6 +81,14 @@ const App: React.FC = () => {
                     <DashboardLayout>
                       <CreateOrder />
                     </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders/:orderId" 
+                element={
+                  <ProtectedRoute>
+                    <OrderDetail />
                   </ProtectedRoute>
                 } 
               />
