@@ -726,7 +726,7 @@ const OrdersFeed: React.FC = () => {
                     >
                       Удалить
                     </Button>
-                  ) : (
+                  ) : userProfile?.role === 'expert' ? (
                     <Button 
                       type="primary"
                       onClick={() => {
@@ -746,7 +746,7 @@ const OrdersFeed: React.FC = () => {
                     >
                       Откликнуться
                     </Button>
-                  )}
+                  ) : null}
                 </Space>
               </div>
             </Card>
