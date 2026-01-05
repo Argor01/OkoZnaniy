@@ -21,23 +21,19 @@ const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [showCustomSubject, setShowCustomSubject] = useState<boolean>(false);
-  const [showCustomWorkType, setShowCustomWorkType] = useState<boolean>(false);
+  const [customSubject, setCustomSubject] = useState<string>('');
+  const [customWorkType, setCustomWorkType] = useState<string>('');
 
-  // Загружаем данные с API, используем константы как fallback
-  const { data: apiSubjects, isLoading: subjectsLoading } = useQuery({
+  // Загружаем данные с API
+  const { data: apiSubjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: catalogApi.getSubjects,
   });
 
-  const { data: apiWorkTypes, isLoading: workTypesLoading } = useQuery({
+  const { data: apiWorkTypes = [], isLoading: workTypesLoading } = useQuery({
     queryKey: ['workTypes'],
     queryFn: catalogApi.getWorkTypes,
   });
-
-  // Используем данные с API если есть, иначе константы
-  const subjects = apiSubjects && apiSubjects.length > 0 ? apiSubjects : SUBJECTS;
-  const workTypes = apiWorkTypes && apiWorkTypes.length > 0 ? apiWorkTypes : WORK_TYPES;
 
   // Обработчик загрузки файлов
   const uploadProps: UploadProps = {
@@ -144,11 +140,6 @@ const CreateOrder: React.FC = () => {
 
   const onFinish = (values: any) => {
     console.log('📝 Отправка заказа:', values);
-    console.log('📎 Файлов для загрузки:', fileList.length, fileList);
-    console.log('🔍 showCustomSubject:', showCustomSubject);
-    console.log('🔍 showCustomWorkType:', showCustomWorkType);
-    console.log('🔍 values.subject_id type:', typeof values.subject_id, values.subject_id);
-    console.log('🔍 values.work_type_id type:', typeof values.work_type_id, values.work_type_id);
     
     // Формируем данные заказа
     const orderData: any = {
@@ -159,27 +150,24 @@ const CreateOrder: React.FC = () => {
       budget: values.budget,
     };
 
-    // Если НЕ выбрано "Другое", отправляем ID (убеждаемся что это число)
-    if (!showCustomSubject && values.subject_id) {
-      orderData.subject_id = Number(values.subject_id);
-    }
-    if (!showCustomWorkType && values.work_type_id) {
-      orderData.work_type_id = Number(values.work_type_id);
+    // Если выбран существующий предмет из списка
+    if (values.subject_id && typeof values.subject_id === 'number') {
+      orderData.subject_id = values.subject_id;
+    } 
+    // Если введен новый предмет (строка)
+    else if (values.subject_id && typeof values.subject_id === 'string') {
+      orderData.custom_subject = values.subject_id;
     }
 
-    // Если выбрано "Другое", отправляем кастомное название
-    if (showCustomSubject && values.custom_subject) {
-      orderData.custom_subject = values.custom_subject;
-    }
-    if (showCustomWorkType && values.custom_work_type) {
-      orderData.custom_work_type = values.custom_work_type;
+    // Аналогично для типа работы
+    if (values.work_type_id && typeof values.work_type_id === 'number') {
+      orderData.work_type_id = values.work_type_id;
+    } 
+    else if (values.work_type_id && typeof values.work_type_id === 'string') {
+      orderData.custom_work_type = values.work_type_id;
     }
     
     console.log('📤 Данные для отправки:', orderData);
-    console.log('📤 Типы полей:', {
-      subject_id: typeof orderData.subject_id,
-      work_type_id: typeof orderData.work_type_id
-    });
     createOrderMutation.mutate(orderData);
   };
 
@@ -228,11 +216,13 @@ const CreateOrder: React.FC = () => {
           <Form.Item
             name="subject_id"
             label="Предмет"
-            rules={[{ required: !showCustomSubject, message: 'Выберите предмет' }]}
+            rules={[{ required: true, message: 'Выберите или введите предмет' }]}
           >
             <Select
-              placeholder="Выберите предмет"
+              placeholder="Выберите или введите предмет"
               showSearch
+              mode="tags"
+              maxCount={1}
               optionFilterProp="label"
               filterOption={(input, option) => {
                 if (option && 'label' in option && typeof option.label === 'string') {
@@ -241,31 +231,19 @@ const CreateOrder: React.FC = () => {
                 return false;
               }}
               onChange={(value) => {
-                // ID=2 это "Другое" в базе
-                if (value === 2) {
-                  setShowCustomSubject(true);
-                } else {
-                  setShowCustomSubject(false);
+                // value будет массивом из-за mode="tags"
+                if (Array.isArray(value) && value.length > 0) {
+                  form.setFieldValue('subject_id', value[0]);
                 }
               }}
             >
-              {subjects.map((subject) => (
-                <Select.Option key={subject.id} value={subject.id}>
+              {apiSubjects.map((subject) => (
+                <Select.Option key={subject.id} value={subject.id} label={subject.name}>
                   {subject.name}
                 </Select.Option>
               ))}
             </Select>
           </Form.Item>
-
-          {showCustomSubject && (
-            <Form.Item
-              name="custom_subject"
-              label="Укажите свой предмет"
-              rules={[{ required: true, message: 'Введите название предмета' }]}
-            >
-              <Input placeholder="Введите название предмета" />
-            </Form.Item>
-          )}
 
           <Form.Item
             name="custom_topic"
@@ -278,11 +256,13 @@ const CreateOrder: React.FC = () => {
           <Form.Item
             name="work_type_id"
             label="Тип работы"
-            rules={[{ required: !showCustomWorkType, message: 'Выберите тип работы' }]}
+            rules={[{ required: true, message: 'Выберите или введите тип работы' }]}
           >
             <Select
-              placeholder="Выберите тип работы"
+              placeholder="Выберите или введите тип работы"
               showSearch
+              mode="tags"
+              maxCount={1}
               optionFilterProp="label"
               filterOption={(input, option) => {
                 if (option && 'label' in option && typeof option.label === 'string') {
@@ -291,31 +271,19 @@ const CreateOrder: React.FC = () => {
                 return false;
               }}
               onChange={(value) => {
-                // ID=2 это "Другое" в базе
-                if (value === 2) {
-                  setShowCustomWorkType(true);
-                } else {
-                  setShowCustomWorkType(false);
+                // value будет массивом из-за mode="tags"
+                if (Array.isArray(value) && value.length > 0) {
+                  form.setFieldValue('work_type_id', value[0]);
                 }
               }}
             >
-              {workTypes.map((workType) => (
-                <Select.Option key={workType.id} value={workType.id}>
+              {apiWorkTypes.map((workType) => (
+                <Select.Option key={workType.id} value={workType.id} label={workType.name}>
                   {workType.name}
                 </Select.Option>
               ))}
             </Select>
           </Form.Item>
-
-          {showCustomWorkType && (
-            <Form.Item
-              name="custom_work_type"
-              label="Укажите свой тип работы"
-              rules={[{ required: true, message: 'Введите тип работы' }]}
-            >
-              <Input placeholder="Введите тип работы" />
-            </Form.Item>
-          )}
 
           <Form.Item
             name="budget"

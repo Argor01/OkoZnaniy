@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { ordersApi, Bid } from '../api/orders';
+import { chatApi } from '../api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -220,7 +221,14 @@ const OrderDetail: React.FC = () => {
                             <Button
                               size={isMobile ? 'small' : 'middle'}
                               icon={<MessageOutlined />}
-                              onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                              onClick={async () => {
+                                try {
+                                  const chat = await chatApi.getOrCreateByOrder(order.id);
+                                  navigate(`/messages?chat=${chat.id}`);
+                                } catch (error) {
+                                  message.error('Не удалось открыть чат');
+                                }
+                              }}
                             >
                               Написать
                             </Button>
