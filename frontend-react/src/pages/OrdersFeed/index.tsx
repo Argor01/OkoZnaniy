@@ -26,6 +26,7 @@ import FinanceModal from '../ExpertDashboard/modals/FinanceModal';
 import FriendsModal from '../ExpertDashboard/modals/FriendsModal';
 import FaqModal from '../ExpertDashboard/modals/FaqModal';
 import FriendProfileModal from '../ExpertDashboard/modals/FriendProfileModal';
+import BidModal from './BidModal';
 import { mockNotifications, mockArbitrationCases } from '../ExpertDashboard/mockData';
 
 dayjs.extend(relativeTime);
@@ -58,6 +59,8 @@ const OrdersFeed: React.FC = () => {
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
+  const [bidModalVisible, setBidModalVisible] = useState(false);
+  const [selectedOrderForBid, setSelectedOrderForBid] = useState<any>(null);
 
   // Дополнительный state
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
@@ -744,12 +747,8 @@ const OrdersFeed: React.FC = () => {
                       type="primary"
                       onClick={(e) => {
                         e.stopPropagation(); // Предотвращаем переход к деталям
-                        if (order.client?.id) {
-                          setSelectedUserIdForChat(order.client.id);
-                          setMessageModalVisible(true);
-                        } else {
-                          message.error('Не удалось определить клиента');
-                        }
+                        setSelectedOrderForBid(order);
+                        setBidModalVisible(true);
                       }}
                       style={{
                         background: '#52c41a',
@@ -885,6 +884,17 @@ const OrdersFeed: React.FC = () => {
           setMessageModalVisible(true);
         }}
         isMobile={isMobile}
+      />
+
+      <BidModal
+        visible={bidModalVisible}
+        onClose={() => {
+          setBidModalVisible(false);
+          setSelectedOrderForBid(null);
+        }}
+        orderId={selectedOrderForBid?.id}
+        orderTitle={selectedOrderForBid?.title}
+        orderBudget={selectedOrderForBid?.budget}
       />
     </>
   );
