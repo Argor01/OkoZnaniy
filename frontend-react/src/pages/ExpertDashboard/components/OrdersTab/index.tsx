@@ -48,6 +48,73 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
   const isClient = userProfile?.role === 'client';
 
+  // Добавляем тестовые данные для проверки модального окна
+  const testOrders = [
+    {
+      id: 1,
+      title: "Курсовая работа по экономике",
+      description: "Необходимо написать курсовую работу на тему 'Анализ финансового состояния предприятия'. Объем работы 30-40 страниц. Требуется провести анализ конкретного предприятия, использовать актуальные данные за последние 3 года.",
+      budget: 5000,
+      deadline: "2026-01-20T23:59:00Z",
+      status: "new",
+      subject_name: "Экономика",
+      work_type_name: "Курсовая работа",
+      custom_topic: "Анализ финансового состояния предприятия ООО 'Рога и копыта'",
+      responses_count: 3,
+      created_at: "2026-01-09T10:00:00Z",
+      files: [
+        { name: "Техническое задание.pdf", size: 1024000 },
+        { name: "Данные предприятия.xlsx", size: 512000 }
+      ]
+    },
+    {
+      id: 2,
+      title: "Реферат по истории",
+      description: "Написать реферат на тему 'Великая Отечественная война: основные этапы и значение'. Объем 15-20 страниц, не менее 10 источников.",
+      budget: 2000,
+      deadline: "2026-01-15T18:00:00Z",
+      status: "in_progress",
+      subject_name: "История",
+      work_type_name: "Реферат",
+      custom_topic: "Великая Отечественная война: основные этапы и значение",
+      responses_count: 1,
+      created_at: "2026-01-08T14:30:00Z",
+      files: []
+    },
+    {
+      id: 3,
+      title: "Дипломная работа по программированию",
+      description: "Разработка веб-приложения для управления заказами. Необходимо создать полнофункциональное приложение с базой данных, API и пользовательским интерфейсом.",
+      budget: 25000,
+      deadline: "2026-02-28T23:59:00Z",
+      status: "completed",
+      subject_name: "Информатика",
+      work_type_name: "Дипломная работа",
+      custom_topic: "Разработка системы управления заказами",
+      responses_count: 8,
+      created_at: "2026-01-05T09:15:00Z",
+      files: [
+        { name: "Техническое задание.docx", size: 2048000 },
+        { name: "Макеты интерфейса.zip", size: 5120000 },
+        { name: "База данных схема.sql", size: 256000 }
+      ]
+    }
+  ];
+
+  // Используем тестовые данные для демонстрации модального окна
+  const displayOrders = testOrders;
+
+  // Отладочная информация
+  console.log('OrdersTab Debug:', {
+    userProfile: userProfile?.role,
+    ordersData,
+    orders: orders.length,
+    displayOrders: displayOrders.length,
+    isLoading,
+    hasToken: !!localStorage.getItem('access_token'),
+    tokenPreview: localStorage.getItem('access_token')?.substring(0, 10) + '...'
+  });
+
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
 
@@ -93,7 +160,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           )}
         </div>
 
-        {orders.length === 0 ? (
+        {displayOrders.length === 0 ? (
           <Empty
             description={
               <div>
@@ -109,7 +176,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           </Empty>
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>
-            {orders.map((order: any) => (
+            {displayOrders.map((order: any) => (
               <Card
                 key={order.id}
                 hoverable
