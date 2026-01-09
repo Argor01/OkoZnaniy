@@ -349,7 +349,7 @@ const ExpertDashboard: React.FC = () => {
                     }] : []),
                     {
                       key: 'friends',
-                      label: 'Мои друзья 5',
+                      label: 'Мои друзья',
                       children: (
                         <FriendsTab 
                           isMobile={isMobile}

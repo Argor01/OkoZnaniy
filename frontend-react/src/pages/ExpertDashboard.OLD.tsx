@@ -1511,7 +1511,7 @@ const ExpertDashboard: React.FC = () => {
             },
             {
               key: 'friends',
-              label: `Мои друзья 5`,
+              label: `Мои друзья`,
               children: (
                 <div className={styles.sectionCard}>
                   <div className={styles.sectionCardHeader}>
