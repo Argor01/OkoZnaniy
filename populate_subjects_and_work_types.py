@@ -154,15 +154,27 @@ def populate_work_types():
     """Создаёт базовые типы работ"""
     work_types_data = [
         {'name': 'Курсовая работа', 'slug': 'kursovaya-rabota', 'base_price': 3000, 'estimated_time': 14},
-        {'name': 'Другое', 'slug': 'drugoe', 'base_price': 1000, 'estimated_time': 7},
-        {'name': 'Дипломная работа', 'slug': 'diplomnaya-rabota', 'base_price': 15000, 'estimated_time': 30},
+        {'name': 'Дипломная работа (ВКР – выпускная квалификационная работа)', 'slug': 'diplomnaya-rabota-vkr', 'base_price': 15000, 'estimated_time': 30},
         {'name': 'Реферат', 'slug': 'referat', 'base_price': 500, 'estimated_time': 3},
+        {'name': 'Доклад', 'slug': 'doklad', 'base_price': 600, 'estimated_time': 2},
         {'name': 'Эссе', 'slug': 'esse', 'base_price': 800, 'estimated_time': 3},
-        {'name': 'Контрольная работа', 'slug': 'kontrolnaya-rabota', 'base_price': 1000, 'estimated_time': 5},
         {'name': 'Лабораторная работа', 'slug': 'laboratornaya-rabota', 'base_price': 1500, 'estimated_time': 7},
-        {'name': 'Решение задач', 'slug': 'reshenie-zadach', 'base_price': 500, 'estimated_time': 2},
+        {'name': 'Практическое задание', 'slug': 'prakticheskoe-zadanie', 'base_price': 1200, 'estimated_time': 5},
+        {'name': 'Контрольная работа', 'slug': 'kontrolnaya-rabota', 'base_price': 1000, 'estimated_time': 5},
+        {'name': 'Тест', 'slug': 'test', 'base_price': 300, 'estimated_time': 1},
+        {'name': 'Зачётная работа', 'slug': 'zachyotnaya-rabota', 'base_price': 1500, 'estimated_time': 7},
+        {'name': 'Проектная работа', 'slug': 'proektnaya-rabota', 'base_price': 4000, 'estimated_time': 21},
+        {'name': 'Отчёт по практике (учебной, производственной, преддипломной)', 'slug': 'otchet-po-praktike', 'base_price': 2000, 'estimated_time': 7},
+        {'name': 'Расчётно-графическая работа', 'slug': 'raschyotno-graficheskaya-rabota', 'base_price': 2500, 'estimated_time': 10},
+        {'name': 'Домашняя работа', 'slug': 'domashnyaya-rabota', 'base_price': 400, 'estimated_time': 2},
+        {'name': 'Индивидуальное задание', 'slug': 'individualnoe-zadanie', 'base_price': 800, 'estimated_time': 3},
         {'name': 'Презентация', 'slug': 'prezentaciya', 'base_price': 1000, 'estimated_time': 3},
-        {'name': 'Отчёт по практике', 'slug': 'otchet-po-praktike', 'base_price': 2000, 'estimated_time': 7},
+        {'name': 'Модульная работа', 'slug': 'modulnaya-rabota', 'base_price': 1200, 'estimated_time': 5},
+        {'name': 'Бизнес-план', 'slug': 'biznes-plan', 'base_price': 5000, 'estimated_time': 14},
+        {'name': 'Чертёж или графическое задание', 'slug': 'chertyozh-ili-graficheskoe-zadanie', 'base_price': 2000, 'estimated_time': 7},
+        {'name': 'Компьютерное моделирование', 'slug': 'kompyuternoe-modelirovanie', 'base_price': 3500, 'estimated_time': 10},
+        {'name': 'Социальный или творческий проект', 'slug': 'socialnyy-ili-tvorcheskiy-proekt', 'base_price': 3000, 'estimated_time': 14},
+        {'name': 'Другое', 'slug': 'drugoe', 'base_price': 1000, 'estimated_time': 7},
     ]
     
     created_count = 0
