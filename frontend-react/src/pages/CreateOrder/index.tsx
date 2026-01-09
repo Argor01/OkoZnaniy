@@ -33,15 +33,11 @@ const CreateOrder: React.FC = () => {
   const { data: apiSubjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: catalogApi.getSubjects,
-    staleTime: 0, // Принудительно обновляем данные
-    cacheTime: 0, // Не кешируем
   });
 
   const { data: apiWorkTypes = [], isLoading: workTypesLoading } = useQuery({
     queryKey: ['workTypes'],
     queryFn: catalogApi.getWorkTypes,
-    staleTime: 0, // Принудительно обновляем данные
-    cacheTime: 0, // Не кешируем
   });
 
   // Отладочная информация
