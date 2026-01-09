@@ -94,14 +94,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
             }
             style={{ padding: '60px 0' }}
           >
-            {isClient && (
-              <Button 
-                type="primary" 
-                onClick={() => navigate('/create-order')}
-              >
-                Создать первый заказ
-              </Button>
-            )}
           </Empty>
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>

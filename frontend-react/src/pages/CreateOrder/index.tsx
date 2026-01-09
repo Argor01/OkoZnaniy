@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Space, InputNumber, Upload } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
+import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Space, InputNumber, Upload, Checkbox, TimePicker, Divider } from 'antd';
+import { InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,7 @@ const CreateOrder: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [customSubject, setCustomSubject] = useState<string>('');
   const [customWorkType, setCustomWorkType] = useState<string>('');
+  const [showPromoCode, setShowPromoCode] = useState<boolean>(false);
 
   // Загружаем данные с API
   const { data: apiSubjects = [], isLoading: subjectsLoading } = useQuery({
@@ -146,9 +147,21 @@ const CreateOrder: React.FC = () => {
       title: values.title,
       description: values.description,
       deadline: values.deadline?.format('YYYY-MM-DD'),
-      custom_topic: values.custom_topic,
       budget: values.budget,
+      payment_lock_days: values.payment_lock_days,
+      plagiarism_check: values.plagiarism_check,
+      uniqueness_percentage: values.uniqueness_percentage,
+      private_notes: values.private_notes,
+      promo_code: values.promo_code,
     };
+
+    // Добавляем время к дедлайну если указано
+    if (values.deadline_time) {
+      const deadlineWithTime = values.deadline
+        .hour(values.deadline_time.hour())
+        .minute(values.deadline_time.minute());
+      orderData.deadline = deadlineWithTime.format('YYYY-MM-DD HH:mm:ss');
+    }
 
     // Если выбран существующий предмет из списка
     if (values.subject_id && typeof values.subject_id === 'number') {
@@ -192,174 +205,344 @@ const CreateOrder: React.FC = () => {
           onFinish={onFinish}
           initialValues={{
             deadline: dayjs().add(7, 'day'),
+            deadline_time: dayjs().hour(23).minute(59),
+            payment_lock_days: 10,
+            plagiarism_check: false,
+            uniqueness_percentage: 70,
           }}
         >
-          <Form.Item
-            name="title"
-            label="Название заказа"
-            rules={[{ required: true, message: 'Введите название заказа' }]}
-          >
-            <Input placeholder="Например: Курсовая работа по экономике" />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Описание задания"
-            rules={[{ required: true, message: 'Введите описание задания' }]}
-          >
-            <TextArea
-              rows={4}
-              placeholder="Подробно опишите задание, требования, объем работы..."
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="subject_id"
-            label="Предмет"
-            rules={[{ required: true, message: 'Выберите или введите предмет' }]}
-          >
-            <Select
-              placeholder="Выберите или введите предмет"
-              showSearch
-              mode="tags"
-              maxCount={1}
-              optionFilterProp="label"
-              filterOption={(input, option) => {
-                if (option && 'label' in option && typeof option.label === 'string') {
-                  return option.label.toLowerCase().includes(input.toLowerCase());
+          {/* Секция стоимости и параметров */}
+          <div className={styles.priceSection}>
+            <div className={styles.priceRow}>
+              <Form.Item
+                name="budget"
+                label={
+                  <div className={styles.priceLabel}>
+                    <span className={styles.rubleIcon}>₽</span>
+                    <span>Стоимость</span>
+                  </div>
                 }
-                return false;
-              }}
-              onChange={(value) => {
-                // value будет массивом из-за mode="tags"
-                if (Array.isArray(value) && value.length > 0) {
-                  form.setFieldValue('subject_id', value[0]);
-                }
-              }}
-            >
-              {apiSubjects.map((subject) => (
-                <Select.Option key={subject.id} value={subject.id} label={subject.name}>
-                  {subject.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+                rules={[
+                  { required: true, message: 'Укажите стоимость' },
+                  { type: 'number', min: 1, message: 'Стоимость должна быть больше 0' }
+                ]}
+                className={styles.priceInput}
+              >
+                <InputNumber
+                  placeholder="Введите сумму"
+                  min={1}
+                  step={100}
+                  precision={0}
+                  className={styles.priceField}
+                />
+              </Form.Item>
+              
+              <div className={styles.priceDescription}>
+                Сумма, которую вы готовы заплатить эксперту
+              </div>
+            </div>
 
-          <Form.Item
-            name="custom_topic"
-            label="Тема"
-            rules={[{ required: true, message: 'Введите тему' }]}
-          >
-            <Input placeholder="Введите тему работы" />
-          </Form.Item>
-
-          <Form.Item
-            name="work_type_id"
-            label="Тип работы"
-            rules={[{ required: true, message: 'Выберите или введите тип работы' }]}
-          >
-            <Select
-              placeholder="Выберите или введите тип работы"
-              showSearch
-              mode="tags"
-              maxCount={1}
-              optionFilterProp="label"
-              filterOption={(input, option) => {
-                if (option && 'label' in option && typeof option.label === 'string') {
-                  return option.label.toLowerCase().includes(input.toLowerCase());
-                }
-                return false;
-              }}
-              onChange={(value) => {
-                // value будет массивом из-за mode="tags"
-                if (Array.isArray(value) && value.length > 0) {
-                  form.setFieldValue('work_type_id', value[0]);
-                }
-              }}
-            >
-              {apiWorkTypes.map((workType) => (
-                <Select.Option key={workType.id} value={workType.id} label={workType.name}>
-                  {workType.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="budget"
-            label="Желаемая цена (₽)"
-            rules={[
-              { required: true, message: 'Укажите желаемую цену' },
-              { type: 'number', min: 1, message: 'Цена должна быть больше 0' }
-            ]}
-          >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="Введите желаемую цену"
-              min={1}
-              step={100}
-              precision={0}
-            />
-          </Form.Item>
-
-
-          <Form.Item
-            name="deadline"
-            label="Срок выполнения"
-            rules={[
-              { required: true, message: 'Выберите срок выполнения' },
-              {
-                validator: (_, value) => {
-                  if (value && value.isBefore(dayjs(), 'day')) {
-                    return Promise.reject(new Error('Дедлайн не может быть в прошлом'));
+            <div className={styles.parametersRow}>
+              <div className={styles.parameterGroup}>
+                <Form.Item
+                  name="payment_lock_days"
+                  label={
+                    <div className={styles.labelWithIcon}>
+                      Срок блокировки оплаты
+                      <InfoCircleOutlined className={styles.infoIcon} />
+                    </div>
                   }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <DatePicker
-              style={{ width: '100%' }}
-              format="DD.MM.YYYY"
-              placeholder="Выберите дату"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
-            />
-          </Form.Item>
+                >
+                  <Select className={styles.selectField}>
+                    <Select.Option value={3}>3 дня</Select.Option>
+                    <Select.Option value={5}>5 дней</Select.Option>
+                    <Select.Option value={7}>7 дней</Select.Option>
+                    <Select.Option value={10}>10 дней</Select.Option>
+                    <Select.Option value={14}>14 дней</Select.Option>
+                  </Select>
+                </Form.Item>
+              </div>
 
-          <Form.Item
-            name="files"
-            label="Прикрепить файлы"
-            extra={`Максимальный размер файла: ${MAX_FILE_SIZE_MB} МБ. Поддерживаются документы, изображения, архивы`}
-          >
-            <Dragger {...uploadProps}>
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
-              <p className="ant-upload-hint">
-                Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
-              </p>
-            </Dragger>
-          </Form.Item>
+              <div className={styles.parameterGroup}>
+                <Form.Item
+                  name="plagiarism_check"
+                  valuePropName="checked"
+                  className={styles.checkboxField}
+                >
+                  <Checkbox>Проверка на плагиат</Checkbox>
+                </Form.Item>
+                
+                <Form.Item
+                  name="uniqueness_percentage"
+                  className={styles.uniquenessField}
+                >
+                  <Select 
+                    className={styles.selectField}
+                    suffixIcon={<span className={styles.uniquenessLabel}>уникальность текста</span>}
+                  >
+                    <Select.Option value={60}>60%</Select.Option>
+                    <Select.Option value={70}>70%</Select.Option>
+                    <Select.Option value={80}>80%</Select.Option>
+                    <Select.Option value={90}>90%</Select.Option>
+                    <Select.Option value={95}>95%</Select.Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            </div>
 
-          <Form.Item>
-            <Space>
+            <div className={styles.promoSection}>
+              <Button 
+                type="link" 
+                className={styles.promoLink}
+                onClick={() => setShowPromoCode(!showPromoCode)}
+              >
+                Есть промокод на скидку?
+              </Button>
+              
+              {showPromoCode && (
+                <Form.Item name="promo_code" className={styles.promoInput}>
+                  <Input placeholder="Введите промокод" />
+                </Form.Item>
+              )}
+            </div>
+          </div>
+
+          <Divider className={styles.sectionDivider} />
+
+          {/* Секция деталей заказа */}
+          <div className={styles.orderSection}>
+            <Title level={3} className={styles.sectionTitle}>
+              Разместить заказ
+            </Title>
+
+            <Form.Item
+              name="title"
+              rules={[{ required: true, message: 'Введите название работы' }]}
+            >
+              <Input 
+                placeholder="Введите название работы" 
+                className={styles.titleInput}
+              />
+            </Form.Item>
+
+            <div className={styles.typeRow}>
+              <Form.Item
+                name="work_type_id"
+                rules={[{ required: true, message: 'Выберите тип работы' }]}
+                className={styles.typeField}
+              >
+                <Select
+                  placeholder="Тип работы"
+                  showSearch
+                  mode="tags"
+                  maxCount={1}
+                  optionFilterProp="label"
+                  filterOption={(input, option) => {
+                    if (option && 'label' in option && typeof option.label === 'string') {
+                      return option.label.toLowerCase().includes(input.toLowerCase());
+                    }
+                    return false;
+                  }}
+                  onChange={(value) => {
+                    if (Array.isArray(value) && value.length > 0) {
+                      form.setFieldValue('work_type_id', value[0]);
+                    }
+                  }}
+                  className={styles.selectField}
+                >
+                  {apiWorkTypes.map((workType) => (
+                    <Select.Option key={workType.id} value={workType.id} label={workType.name}>
+                      {workType.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name="subject_id"
+                rules={[{ required: true, message: 'Выберите предмет' }]}
+                className={styles.subjectField}
+              >
+                <Select
+                  placeholder="Введите название предмета"
+                  showSearch
+                  mode="tags"
+                  maxCount={1}
+                  optionFilterProp="label"
+                  filterOption={(input, option) => {
+                    if (option && 'label' in option && typeof option.label === 'string') {
+                      return option.label.toLowerCase().includes(input.toLowerCase());
+                    }
+                    return false;
+                  }}
+                  onChange={(value) => {
+                    if (Array.isArray(value) && value.length > 0) {
+                      form.setFieldValue('subject_id', value[0]);
+                    }
+                  }}
+                  className={styles.selectField}
+                >
+                  {apiSubjects.map((subject) => (
+                    <Select.Option key={subject.id} value={subject.id} label={subject.name}>
+                      {subject.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
+
+            <div className={styles.deadlineRow}>
+              <Form.Item
+                name="deadline"
+                rules={[
+                  { required: true, message: 'Выберите дату сдачи' },
+                  {
+                    validator: (_, value) => {
+                      if (value && value.isBefore(dayjs(), 'day')) {
+                        return Promise.reject(new Error('Дедлайн не может быть в прошлом'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+                className={styles.dateField}
+              >
+                <DatePicker
+                  placeholder="Дата сдачи"
+                  format="DD.MM.YYYY"
+                  disabledDate={(current) => current && current < dayjs().startOf('day')}
+                  className={styles.dateInput}
+                />
+              </Form.Item>
+
+              <div className={styles.timeGroup}>
+                <span className={styles.timeLabel}>Время сдачи</span>
+                <div className={styles.timeInputs}>
+                  <Form.Item name="deadline_time" className={styles.timeField}>
+                    <TimePicker
+                      format="HH:mm"
+                      placeholder="ЧЧ:ММ"
+                      className={styles.timeInput}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.templatesSection}>
+              <Button className={styles.templatesButton}>
+                ШАБЛОНЫ
+              </Button>
+            </div>
+
+            <Form.Item
+              name="description"
+              rules={[{ required: true, message: 'Введите описание работы' }]}
+              className={styles.descriptionField}
+            >
+              <div className={styles.editorContainer}>
+                <div className={styles.editorToolbar}>
+                  <Button type="text" className={styles.toolbarButton}><strong>B</strong></Button>
+                  <Button type="text" className={styles.toolbarButton}><em>I</em></Button>
+                  <Button type="text" className={styles.toolbarButton}>•</Button>
+                  <Button type="text" className={styles.toolbarButton}>1.</Button>
+                  <Button type="text" className={styles.toolbarButton}>H₁</Button>
+                  <Button type="text" className={styles.toolbarButton}>🔗</Button>
+                  <Button type="text" className={styles.toolbarButton}>Tₓ</Button>
+                </div>
+                <Input.TextArea
+                  placeholder="Описание работы"
+                  rows={8}
+                  className={styles.descriptionTextarea}
+                />
+              </div>
+            </Form.Item>
+
+            <Form.Item
+              name="private_notes"
+              className={styles.privateNotesField}
+            >
+              <Input.TextArea
+                placeholder="Поле, видимое только для вас"
+                rows={3}
+                className={styles.privateNotesTextarea}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="files"
+              className={styles.filesField}
+            >
+              <div className={styles.fileUploadSection}>
+                <Button 
+                  icon={<InboxOutlined />} 
+                  className={styles.addFilesButton}
+                  onClick={() => {
+                    // Trigger file input
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.multiple = true;
+                    input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar';
+                    input.onchange = (e) => {
+                      const files = (e.target as HTMLInputElement).files;
+                      if (files) {
+                        Array.from(files).forEach(file => {
+                          const isLt10M = file.size < MAX_FILE_SIZE_BYTES;
+                          if (!isLt10M) {
+                            message.error(VALIDATION_MESSAGES.fileSize(MAX_FILE_SIZE_MB));
+                            return;
+                          }
+                          
+                          const uploadFile: UploadFile = {
+                            uid: `${Date.now()}-${file.name}`,
+                            name: file.name,
+                            status: 'done',
+                            size: file.size,
+                            type: file.type,
+                            originFileObj: file as any,
+                          };
+                          
+                          setFileList(prev => [...prev, uploadFile]);
+                        });
+                      }
+                    };
+                    input.click();
+                  }}
+                >
+                  Добавить файлы
+                </Button>
+                
+                {fileList.length > 0 && (
+                  <div className={styles.filesList}>
+                    {fileList.map(file => (
+                      <div key={file.uid} className={styles.fileItem}>
+                        <span>{file.name}</span>
+                        <Button 
+                          type="text" 
+                          size="small"
+                          onClick={() => setFileList(prev => prev.filter(f => f.uid !== file.uid))}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Form.Item>
+
+            <Form.Item className={styles.submitSection}>
               <Button 
                 type="primary" 
                 htmlType="submit" 
                 loading={createOrderMutation.isPending}
-                className={styles.buttonPrimary}
+                className={styles.submitButton}
+                size="large"
               >
                 Создать заказ
               </Button>
-              <Button 
-                onClick={() => form.resetFields()}
-                className={styles.buttonSecondary}
-              >
-                Очистить
-              </Button>
-            </Space>
-          </Form.Item>
+            </Form.Item>
+          </div>
         </Form>
       </Card>
     </div>

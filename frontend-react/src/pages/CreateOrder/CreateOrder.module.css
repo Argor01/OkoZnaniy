@@ -1,19 +1,20 @@
-/* Стили страницы создания заказа в стиле ExpertDashboard */
+/* Стили страницы создания заказа в темном стиле */
 
 .container {
   padding: 40px 20px;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
-  background: #f9fafb;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   min-height: 100vh;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(30, 41, 59, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   padding: 32px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .header {
@@ -25,25 +26,443 @@
 
 .title {
   margin: 0 !important;
-  color: #1f2937;
+  color: #f8fafc !important;
   font-weight: 600;
 }
 
-.buttonPrimary {
+/* Секция стоимости */
+.priceSection {
+  background: rgba(51, 65, 85, 0.5);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.priceRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.priceLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.rubleIcon {
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.priceInput {
+  flex: 0 0 200px;
+}
+
+.priceField {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  height: 48px !important;
+  font-size: 16px !important;
+}
+
+.priceField:hover,
+.priceField:focus {
+  border-color: #3b82f6 !important;
+  background: rgba(30, 41, 59, 0.9) !important;
+}
+
+.priceDescription {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.parametersRow {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 16px;
+}
+
+.parameterGroup {
+  flex: 1;
+}
+
+.labelWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.infoIcon {
+  color: #64748b;
+}
+
+.checkboxField {
+  margin-bottom: 16px;
+}
+
+.checkboxField .ant-checkbox-wrapper {
+  color: #cbd5e1 !important;
+}
+
+.checkboxField .ant-checkbox-inner {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+.checkboxField .ant-checkbox-checked .ant-checkbox-inner {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.uniquenessField {
+  margin-bottom: 0;
+}
+
+.uniquenessLabel {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+.promoSection {
+  margin-top: 16px;
+}
+
+.promoLink {
+  color: #3b82f6 !important;
+  text-decoration: underline;
+  padding: 0 !important;
+  height: auto !important;
+  font-size: 14px;
+}
+
+.promoLink:hover {
+  color: #2563eb !important;
+}
+
+.promoInput {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.sectionDivider {
+  border-color: rgba(148, 163, 184, 0.1) !important;
+  margin: 32px 0 !important;
+}
+
+/* Секция заказа */
+.orderSection {
+  background: rgba(51, 65, 85, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.sectionTitle {
+  color: #f8fafc !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  margin-bottom: 24px !important;
+}
+
+.titleInput {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  height: 48px !important;
+  font-size: 16px !important;
+  margin-bottom: 16px;
+}
+
+.titleInput:hover,
+.titleInput:focus {
+  border-color: #3b82f6 !important;
+  background: rgba(30, 41, 59, 0.9) !important;
+}
+
+.titleInput::placeholder {
+  color: #64748b !important;
+}
+
+.typeRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.typeField,
+.subjectField {
+  flex: 1;
+}
+
+.deadlineRow {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.dateField {
+  flex: 0 0 200px;
+}
+
+.dateInput {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  height: 48px !important;
+}
+
+.dateInput:hover,
+.dateInput:focus {
+  border-color: #3b82f6 !important;
+}
+
+.timeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeLabel {
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.timeInputs {
+  display: flex;
+  gap: 8px;
+}
+
+.timeField {
+  margin-bottom: 0;
+}
+
+.timeInput {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  width: 80px !important;
+  height: 48px !important;
+}
+
+.timeInput:hover,
+.timeInput:focus {
+  border-color: #3b82f6 !important;
+}
+
+.templatesSection {
+  margin-bottom: 16px;
+}
+
+.templatesButton {
+  background: rgba(100, 116, 139, 0.3) !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 8px !important;
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  height: 32px !important;
+  padding: 0 16px !important;
+}
+
+.templatesButton:hover {
+  background: rgba(100, 116, 139, 0.5) !important;
+  border-color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.descriptionField {
+  margin-bottom: 16px;
+}
+
+.editorContainer {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.editorToolbar {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(51, 65, 85, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.toolbarButton {
+  color: #94a3b8 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 4px 8px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+}
+
+.toolbarButton:hover {
+  background: rgba(148, 163, 184, 0.1) !important;
+  color: #cbd5e1 !important;
+}
+
+.descriptionTextarea {
+  background: transparent !important;
+  border: none !important;
+  color: #f8fafc !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  resize: none !important;
+}
+
+.descriptionTextarea:focus {
+  box-shadow: none !important;
+}
+
+.descriptionTextarea::placeholder {
+  color: #64748b !important;
+}
+
+.privateNotesField {
+  margin-bottom: 24px;
+}
+
+.privateNotesTextarea {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  font-size: 15px !important;
+}
+
+.privateNotesTextarea:hover,
+.privateNotesTextarea:focus {
+  border-color: #3b82f6 !important;
+  background: rgba(30, 41, 59, 0.9) !important;
+}
+
+.privateNotesTextarea::placeholder {
+  color: #64748b !important;
+}
+
+.filesField {
+  margin-bottom: 32px;
+}
+
+.fileUploadSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.addFilesButton {
+  background: transparent !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 12px !important;
+  color: #94a3b8 !important;
+  height: 48px !important;
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  align-self: flex-start;
+}
+
+.addFilesButton:hover {
+  border-color: #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+.filesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fileItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(51, 65, 85, 0.5);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.submitSection {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.submitButton {
   background: #3b82f6 !important;
   border: none !important;
   border-radius: 12px !important;
-  height: 44px !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
+  height: 56px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  padding: 0 48px !important;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
   transition: all 0.3s ease !important;
 }
 
-.buttonPrimary:hover {
+.submitButton:hover {
   background: #2563eb !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Общие стили для полей */
+.selectField {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-radius: 12px !important;
+  height: 48px !important;
+}
+
+.selectField .ant-select-selector {
+  background: transparent !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
+  color: #f8fafc !important;
+  height: 48px !important;
+  padding: 0 16px !important;
+}
+
+.selectField .ant-select-selector:hover,
+.selectField.ant-select-focused .ant-select-selector {
+  border-color: #3b82f6 !important;
+}
+
+.selectField .ant-select-selection-placeholder {
+  color: #64748b !important;
+}
+
+.selectField .ant-select-selection-item {
+  color: #f8fafc !important;
+}
+
+.selectField .ant-select-arrow {
+  color: #94a3b8 !important;
 }
 
 .buttonSecondary {
@@ -53,6 +472,7 @@
   font-weight: 500 !important;
   border-color: #3b82f6 !important;
   color: #3b82f6 !important;
+  background: transparent !important;
 }
 
 .buttonSecondary:hover {
@@ -61,27 +481,63 @@
   color: #2563eb !important;
 }
 
-.inputField {
-  border-radius: 12px !important;
-  font-size: 15px !important;
+/* Переопределение стилей Ant Design для темной темы */
+.ant-form-item-label > label {
+  color: #cbd5e1 !important;
+  font-weight: 500;
 }
 
-.textareaField {
-  border-radius: 12px !important;
-  font-size: 15px !important;
+.ant-form-item-explain-error {
+  color: #ef4444 !important;
 }
 
-.selectField {
-  border-radius: 12px !important;
+.ant-picker-dropdown {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 
-.uploadArea {
-  border-radius: 16px !important;
-  border-color: rgba(102, 126, 234, 0.3) !important;
-  background: rgba(102, 126, 234, 0.05) !important;
+.ant-picker-cell-inner {
+  color: #f8fafc !important;
 }
 
-.uploadArea:hover {
-  border-color: #667eea !important;
-  background: rgba(102, 126, 234, 0.1) !important;
+.ant-picker-cell:hover .ant-picker-cell-inner {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ant-picker-cell-selected .ant-picker-cell-inner {
+  background: #3b82f6 !important;
+}
+
+.ant-select-dropdown {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+.ant-select-item {
+  color: #f8fafc !important;
+}
+
+.ant-select-item:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ant-select-item-option-selected {
+  background: rgba(59, 130, 246, 0.3) !important;
+}
+
+.ant-time-picker-dropdown {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+.ant-time-picker-panel-column li {
+  color: #f8fafc !important;
+}
+
+.ant-time-picker-panel-column li:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+}
+
+.ant-time-picker-panel-column li.ant-time-picker-panel-column-active {
+  background: rgba(59, 130, 246, 0.3) !important;
 }
