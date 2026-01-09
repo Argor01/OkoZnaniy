@@ -24,17 +24,68 @@ const CreateOrder: React.FC = () => {
   const [customSubject, setCustomSubject] = useState<string>('');
   const [customWorkType, setCustomWorkType] = useState<string>('');
   const [showPromoCode, setShowPromoCode] = useState<boolean>(false);
+  
+  // Локальные списки для управления динамически добавляемыми элементами
+  const [localSubjects, setLocalSubjects] = useState<any[]>([]);
+  const [localWorkTypes, setLocalWorkTypes] = useState<any[]>([]);
 
   // Загружаем данные с API
   const { data: apiSubjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: catalogApi.getSubjects,
+    staleTime: 0, // Принудительно обновляем данные
+    cacheTime: 0, // Не кешируем
   });
 
   const { data: apiWorkTypes = [], isLoading: workTypesLoading } = useQuery({
     queryKey: ['workTypes'],
     queryFn: catalogApi.getWorkTypes,
+    staleTime: 0, // Принудительно обновляем данные
+    cacheTime: 0, // Не кешируем
   });
+
+  // Отладочная информация
+  console.log('CreateOrder Debug:', {
+    apiSubjects: apiSubjects.length,
+    apiWorkTypes: apiWorkTypes.length,
+    subjectsLoading,
+    workTypesLoading,
+    firstFewSubjects: apiSubjects.slice(0, 5).map(s => s.name)
+  });
+
+  // Объединяем API данные с локально созданными
+  const allSubjects = [...apiSubjects, ...localSubjects];
+  const allWorkTypes = [...apiWorkTypes, ...localWorkTypes];
+
+  // Функция для создания нового предмета
+  const handleCreateSubject = async (name: string) => {
+    try {
+      console.log('🆕 Создаем новый предмет:', name);
+      const newSubject = await catalogApi.createSubject(name);
+      setLocalSubjects(prev => [...prev, newSubject]);
+      message.success(`Предмет "${name}" добавлен`);
+      return newSubject;
+    } catch (error) {
+      console.error('❌ Ошибка создания предмета:', error);
+      message.error('Ошибка при создании предмета');
+      throw error;
+    }
+  };
+
+  // Функция для создания нового типа работы
+  const handleCreateWorkType = async (name: string) => {
+    try {
+      console.log('🆕 Создаем новый тип работы:', name);
+      const newWorkType = await catalogApi.createWorkType(name);
+      setLocalWorkTypes(prev => [...prev, newWorkType]);
+      message.success(`Тип работы "${name}" добавлен`);
+      return newWorkType;
+    } catch (error) {
+      console.error('❌ Ошибка создания типа работы:', error);
+      message.error('Ошибка при создании типа работы');
+      throw error;
+    }
+  };
 
   // Обработчик загрузки файлов
   const uploadProps: UploadProps = {
@@ -334,8 +385,7 @@ const CreateOrder: React.FC = () => {
                 <Select
                   placeholder="Тип работы"
                   showSearch
-                  mode="tags"
-                  maxCount={1}
+                  allowClear
                   optionFilterProp="label"
                   filterOption={(input, option) => {
                     if (option && 'label' in option && typeof option.label === 'string') {
@@ -343,14 +393,47 @@ const CreateOrder: React.FC = () => {
                     }
                     return false;
                   }}
-                  onChange={(value) => {
-                    if (Array.isArray(value) && value.length > 0) {
-                      form.setFieldValue('work_type_id', value[0]);
+                  onSelect={async (value, option) => {
+                    // Если выбрали существующий тип работы
+                    if (typeof value === 'number') {
+                      form.setFieldValue('work_type_id', value);
                     }
                   }}
+                  onDeselect={() => {
+                    form.setFieldValue('work_type_id', undefined);
+                  }}
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <div style={{ padding: '8px', borderTop: '1px solid #f0f0f0' }}>
+                        <Input.Search
+                          placeholder="Добавить новый тип работы"
+                          enterButton="Добавить"
+                          onSearch={async (value) => {
+                            if (value && value.trim()) {
+                              const trimmedValue = value.trim();
+                              // Проверяем, что такого типа работы еще нет
+                              const exists = allWorkTypes.find(wt => wt.name.toLowerCase() === trimmedValue.toLowerCase());
+                              if (!exists) {
+                                try {
+                                  const newWorkType = await handleCreateWorkType(trimmedValue);
+                                  form.setFieldValue('work_type_id', newWorkType.id);
+                                } catch (error) {
+                                  console.error('Ошибка создания типа работы:', error);
+                                }
+                              } else {
+                                message.info('Такой тип работы уже существует');
+                                form.setFieldValue('work_type_id', exists.id);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   className={styles.selectField}
                 >
-                  {apiWorkTypes.map((workType) => (
+                  {allWorkTypes.map((workType) => (
                     <Select.Option key={workType.id} value={workType.id} label={workType.name}>
                       {workType.name}
                     </Select.Option>
@@ -366,8 +449,7 @@ const CreateOrder: React.FC = () => {
                 <Select
                   placeholder="Введите название предмета"
                   showSearch
-                  mode="tags"
-                  maxCount={1}
+                  allowClear
                   optionFilterProp="label"
                   filterOption={(input, option) => {
                     if (option && 'label' in option && typeof option.label === 'string') {
@@ -375,14 +457,53 @@ const CreateOrder: React.FC = () => {
                     }
                     return false;
                   }}
-                  onChange={(value) => {
-                    if (Array.isArray(value) && value.length > 0) {
-                      form.setFieldValue('subject_id', value[0]);
+                  onSearch={async (value) => {
+                    // Если пользователь ввел текст, которого нет в списке
+                    if (value && value.trim() && !allSubjects.find(s => s.name.toLowerCase() === value.toLowerCase())) {
+                      console.log('🔍 Поиск предмета:', value);
                     }
                   }}
+                  onSelect={async (value, option) => {
+                    // Если выбрали существующий предмет
+                    if (typeof value === 'number') {
+                      form.setFieldValue('subject_id', value);
+                    }
+                  }}
+                  onDeselect={() => {
+                    form.setFieldValue('subject_id', undefined);
+                  }}
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <div style={{ padding: '8px', borderTop: '1px solid #f0f0f0' }}>
+                        <Input.Search
+                          placeholder="Добавить новый предмет"
+                          enterButton="Добавить"
+                          onSearch={async (value) => {
+                            if (value && value.trim()) {
+                              const trimmedValue = value.trim();
+                              // Проверяем, что такого предмета еще нет
+                              const exists = allSubjects.find(s => s.name.toLowerCase() === trimmedValue.toLowerCase());
+                              if (!exists) {
+                                try {
+                                  const newSubject = await handleCreateSubject(trimmedValue);
+                                  form.setFieldValue('subject_id', newSubject.id);
+                                } catch (error) {
+                                  console.error('Ошибка создания предмета:', error);
+                                }
+                              } else {
+                                message.info('Такой предмет уже существует');
+                                form.setFieldValue('subject_id', exists.id);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   className={styles.selectField}
                 >
-                  {apiSubjects.map((subject) => (
+                  {allSubjects.map((subject) => (
                     <Select.Option key={subject.id} value={subject.id} label={subject.name}>
                       {subject.name}
                     </Select.Option>

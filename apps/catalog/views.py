@@ -36,7 +36,7 @@ class SubjectCategoryViewSet(viewsets.ModelViewSet):
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]  # Временно разрешаем всем
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'is_active']
     search_fields = ['name', 'description', 'keywords']
@@ -286,7 +286,7 @@ class DiscountRuleViewSet(viewsets.ModelViewSet):
 class WorkTypeViewSet(viewsets.ModelViewSet):
     queryset = WorkType.objects.all()
     serializer_class = WorkTypeSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]  # Временно разрешаем всем
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active']
     search_fields = ['name', 'description']
