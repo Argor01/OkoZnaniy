@@ -1,20 +1,23 @@
-/* Стили страницы создания заказа в темном стиле */
+/* Стили страницы создания заказа в стиле проекта */
 
 .container {
-  padding: 40px 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  min-height: 100vh;
+  height: 100vh;
+  background: #f3f4f6;
+  padding: 0;
+  display: flex;
+  overflow: hidden;
 }
 
 .card {
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 32px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  margin: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 48px);
 }
 
 .header {
@@ -22,21 +25,29 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .title {
+  font-size: 32px;
+  font-weight: 700;
   margin: 0 !important;
-  color: #f8fafc !important;
-  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Секция стоимости */
 .priceSection {
-  background: rgba(51, 65, 85, 0.5);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .priceRow {
@@ -50,17 +61,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #cbd5e1;
+  color: #1f2937;
   font-size: 16px;
   font-weight: 500;
 }
 
 .rubleIcon {
-  background: rgba(59, 130, 246, 0.2);
-  border: 2px solid #3b82f6;
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px solid #667eea;
   border-radius: 8px;
   padding: 8px 12px;
-  color: #3b82f6;
+  color: #667eea;
   font-weight: 600;
   font-size: 18px;
 }
@@ -70,22 +81,21 @@
 }
 
 .priceField {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   height: 48px !important;
   font-size: 16px !important;
 }
 
 .priceField:hover,
 .priceField:focus {
-  border-color: #3b82f6 !important;
-  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .priceDescription {
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 14px;
   line-height: 1.5;
   margin-top: 8px;
@@ -105,12 +115,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #cbd5e1;
+  color: #1f2937;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .infoIcon {
-  color: #64748b;
+  color: #6b7280;
 }
 
 .checkboxField {
@@ -118,17 +129,17 @@
 }
 
 .checkboxField .ant-checkbox-wrapper {
-  color: #cbd5e1 !important;
+  color: #1f2937 !important;
+  font-weight: 500;
 }
 
 .checkboxField .ant-checkbox-inner {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border-color: rgba(148, 163, 184, 0.3) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
 }
 
 .checkboxField .ant-checkbox-checked .ant-checkbox-inner {
-  background: #3b82f6 !important;
-  border-color: #3b82f6 !important;
+  background: #667eea !important;
+  border-color: #667eea !important;
 }
 
 .uniquenessField {
@@ -136,7 +147,7 @@
 }
 
 .uniquenessLabel {
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 14px;
   margin-left: 8px;
 }
@@ -146,7 +157,7 @@
 }
 
 .promoLink {
-  color: #3b82f6 !important;
+  color: #667eea !important;
   text-decoration: underline;
   padding: 0 !important;
   height: auto !important;
@@ -154,7 +165,7 @@
 }
 
 .promoLink:hover {
-  color: #2563eb !important;
+  color: #5a67d8 !important;
 }
 
 .promoInput {
@@ -163,30 +174,31 @@
 }
 
 .sectionDivider {
-  border-color: rgba(148, 163, 184, 0.1) !important;
+  border-color: rgba(102, 126, 234, 0.1) !important;
   margin: 32px 0 !important;
 }
 
 /* Секция заказа */
 .orderSection {
-  background: rgba(51, 65, 85, 0.3);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .sectionTitle {
-  color: #f8fafc !important;
   font-size: 24px !important;
   font-weight: 600 !important;
   margin-bottom: 24px !important;
+  color: #1f2937 !important;
 }
 
 .titleInput {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   height: 48px !important;
   font-size: 16px !important;
   margin-bottom: 16px;
@@ -194,12 +206,12 @@
 
 .titleInput:hover,
 .titleInput:focus {
-  border-color: #3b82f6 !important;
-  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .titleInput::placeholder {
-  color: #64748b !important;
+  color: #9ca3af !important;
 }
 
 .typeRow {
@@ -225,16 +237,16 @@
 }
 
 .dateInput {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   height: 48px !important;
 }
 
 .dateInput:hover,
 .dateInput:focus {
-  border-color: #3b82f6 !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .timeGroup {
@@ -244,8 +256,9 @@
 }
 
 .timeLabel {
-  color: #cbd5e1;
+  color: #1f2937;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .timeInputs {
@@ -258,17 +271,17 @@
 }
 
 .timeInput {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   width: 80px !important;
   height: 48px !important;
 }
 
 .timeInput:hover,
 .timeInput:focus {
-  border-color: #3b82f6 !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .templatesSection {
@@ -276,19 +289,20 @@
 }
 
 .templatesButton {
-  background: rgba(100, 116, 139, 0.3) !important;
-  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
   border-radius: 8px !important;
-  color: #cbd5e1 !important;
+  color: #667eea !important;
   font-weight: 600 !important;
   font-size: 12px !important;
   height: 32px !important;
   padding: 0 16px !important;
+  transition: all 0.3s ease !important;
 }
 
 .templatesButton:hover {
-  background: rgba(100, 116, 139, 0.5) !important;
-  border-color: rgba(148, 163, 184, 0.5) !important;
+  background: rgba(102, 126, 234, 0.2) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
 }
 
 .descriptionField {
@@ -296,39 +310,46 @@
 }
 
 .editorContainer {
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.2);
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(30, 41, 59, 0.8);
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.editorContainer:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .editorToolbar {
   display: flex;
   gap: 4px;
   padding: 12px 16px;
-  background: rgba(51, 65, 85, 0.5);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: #f9fafb;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .toolbarButton {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
   border: none !important;
   background: transparent !important;
   padding: 4px 8px !important;
   height: 28px !important;
   border-radius: 6px !important;
   font-size: 14px !important;
+  transition: all 0.2s ease !important;
 }
 
 .toolbarButton:hover {
-  background: rgba(148, 163, 184, 0.1) !important;
-  color: #cbd5e1 !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
 }
 
 .descriptionTextarea {
   background: transparent !important;
   border: none !important;
-  color: #f8fafc !important;
+  color: #1f2937 !important;
   font-size: 15px !important;
   line-height: 1.6 !important;
   resize: none !important;
@@ -339,7 +360,7 @@
 }
 
 .descriptionTextarea::placeholder {
-  color: #64748b !important;
+  color: #9ca3af !important;
 }
 
 .privateNotesField {
@@ -347,21 +368,20 @@
 }
 
 .privateNotesTextarea {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   font-size: 15px !important;
 }
 
 .privateNotesTextarea:hover,
 .privateNotesTextarea:focus {
-  border-color: #3b82f6 !important;
-  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .privateNotesTextarea::placeholder {
-  color: #64748b !important;
+  color: #9ca3af !important;
 }
 
 .filesField {
@@ -375,21 +395,22 @@
 }
 
 .addFilesButton {
-  background: transparent !important;
-  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
   border-radius: 12px !important;
-  color: #94a3b8 !important;
+  color: #667eea !important;
   height: 48px !important;
   font-size: 16px !important;
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
   align-self: flex-start;
+  transition: all 0.3s ease !important;
 }
 
 .addFilesButton:hover {
-  border-color: #3b82f6 !important;
-  color: #3b82f6 !important;
+  border-color: #667eea !important;
+  background: rgba(102, 126, 234, 0.2) !important;
 }
 
 .filesList {
@@ -403,10 +424,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: rgba(51, 65, 85, 0.5);
+  background: #f9fafb;
   border-radius: 8px;
-  color: #cbd5e1;
+  color: #1f2937;
   font-size: 14px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .submitSection {
@@ -415,75 +437,74 @@
 }
 
 .submitButton {
-  background: #3b82f6 !important;
+  background: #1890ff !important;
   border: none !important;
   border-radius: 12px !important;
   height: 56px !important;
   font-size: 18px !important;
   font-weight: 600 !important;
   padding: 0 48px !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3) !important;
   transition: all 0.3s ease !important;
 }
 
 .submitButton:hover {
-  background: #2563eb !important;
+  background: #40a9ff !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
 }
 
 /* Общие стили для полей */
 .selectField {
-  background: rgba(30, 41, 59, 0.8) !important;
   border-radius: 12px !important;
   height: 48px !important;
 }
 
 .selectField .ant-select-selector {
-  background: transparent !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
   border-radius: 12px !important;
-  color: #f8fafc !important;
   height: 48px !important;
   padding: 0 16px !important;
+  transition: all 0.3s ease !important;
 }
 
 .selectField .ant-select-selector:hover,
 .selectField.ant-select-focused .ant-select-selector {
-  border-color: #3b82f6 !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .selectField .ant-select-selection-placeholder {
-  color: #64748b !important;
+  color: #9ca3af !important;
 }
 
 .selectField .ant-select-selection-item {
-  color: #f8fafc !important;
+  color: #1f2937 !important;
 }
 
 .selectField .ant-select-arrow {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
 }
 
 .buttonSecondary {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
   border-radius: 12px !important;
   height: 44px !important;
   font-size: 16px !important;
   font-weight: 500 !important;
-  border-color: #3b82f6 !important;
-  color: #3b82f6 !important;
-  background: transparent !important;
+  color: #667eea !important;
+  transition: all 0.3s ease !important;
 }
 
 .buttonSecondary:hover {
-  background: rgba(59, 130, 246, 0.1) !important;
-  border-color: #2563eb !important;
-  color: #2563eb !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-color: rgba(102, 126, 234, 0.4) !important;
 }
 
-/* Переопределение стилей Ant Design для темной темы */
+/* Переопределение стилей Ant Design */
 .ant-form-item-label > label {
-  color: #cbd5e1 !important;
+  color: #1f2937 !important;
   font-weight: 500;
 }
 
@@ -492,52 +513,158 @@
 }
 
 .ant-picker-dropdown {
-  background: rgba(30, 41, 59, 0.95) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
-}
-
-.ant-picker-cell-inner {
-  color: #f8fafc !important;
-}
-
-.ant-picker-cell:hover .ant-picker-cell-inner {
-  background: rgba(59, 130, 246, 0.2) !important;
-}
-
-.ant-picker-cell-selected .ant-picker-cell-inner {
-  background: #3b82f6 !important;
+  border-radius: 12px !important;
 }
 
 .ant-select-dropdown {
-  background: rgba(30, 41, 59, 0.95) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
-}
-
-.ant-select-item {
-  color: #f8fafc !important;
-}
-
-.ant-select-item:hover {
-  background: rgba(59, 130, 246, 0.2) !important;
-}
-
-.ant-select-item-option-selected {
-  background: rgba(59, 130, 246, 0.3) !important;
+  border-radius: 12px !important;
 }
 
 .ant-time-picker-dropdown {
-  background: rgba(30, 41, 59, 0.95) !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 12px !important;
 }
 
-.ant-time-picker-panel-column li {
-  color: #f8fafc !important;
+/* Адаптивные стили */
+@media (max-width: 1024px) {
+  .card {
+    margin: 16px;
+    padding: 24px;
+    height: calc(100vh - 32px);
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .priceSection,
+  .orderSection {
+    padding: 20px;
+  }
 }
 
-.ant-time-picker-panel-column li:hover {
-  background: rgba(59, 130, 246, 0.2) !important;
+@media (max-width: 840px) {
+  .container {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .card {
+    margin: 12px;
+    padding: 20px;
+    height: auto;
+    min-height: calc(100vh - 24px);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .priceRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .priceInput {
+    flex: 1;
+  }
+
+  .parametersRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .typeRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .deadlineRow {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .dateField {
+    flex: 1;
+    width: 100%;
+  }
+
+  .priceSection,
+  .orderSection {
+    padding: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 20px !important;
+  }
 }
 
-.ant-time-picker-panel-column li.ant-time-picker-panel-column-active {
-  background: rgba(59, 130, 246, 0.3) !important;
+@media (max-width: 480px) {
+  .card {
+    margin: 8px;
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .header {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .priceSection,
+  .orderSection {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 18px !important;
+  }
+
+  .submitButton {
+    height: 48px !important;
+    font-size: 16px !important;
+    padding: 0 32px !important;
+  }
+
+  .priceField,
+  .titleInput,
+  .dateInput,
+  .timeInput {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .selectField {
+    height: 44px !important;
+  }
+
+  .selectField .ant-select-selector {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .addFilesButton {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .buttonSecondary {
+    height: 40px !important;
+    font-size: 15px !important;
+  }
 }
