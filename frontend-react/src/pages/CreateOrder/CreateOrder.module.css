@@ -185,28 +185,6 @@
   margin-bottom: 0;
 }
 
-.lockPeriodRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.lockPeriodLabel {
-  color: #1f2937;
-  font-size: 16px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.lockPeriodField {
-  margin-bottom: 0;
-}
-
-.lockPeriodField .ant-select {
-  width: 120px !important;
-}
-
 .sectionDivider {
   border-color: rgba(102, 126, 234, 0.1) !important;
   margin: 32px 0 !important;

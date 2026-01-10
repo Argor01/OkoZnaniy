@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Upload, Checkbox } from 'antd';
+import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -145,8 +145,6 @@ const CreateOrder: React.FC = () => {
       description: values.description,
       deadline: values.deadline?.format('YYYY-MM-DD'),
       budget: values.budget,
-      payment_lock_days: values.payment_lock_days,
-      plagiarism_check: values.plagiarism_check,
       private_notes: values.private_notes,
       promo_code: values.promo_code,
     };
@@ -190,8 +188,6 @@ const CreateOrder: React.FC = () => {
           onFinish={onFinish}
           initialValues={{
             deadline: dayjs().add(7, 'day'),
-            payment_lock_days: 10,
-            plagiarism_check: false,
           }}
         >
           {/* Основная секция заказа */}
@@ -452,35 +448,6 @@ const CreateOrder: React.FC = () => {
                 Сумма, которую вы готовы заплатить эксперту
               </div>
             </div>
-
-            {/* Срок блокировки оплаты */}
-            <div className={styles.lockPeriodRow}>
-              <div className={styles.lockPeriodLabel}>
-                Срок блокировки оплаты
-              </div>
-              <Form.Item
-                name="payment_lock_days"
-                className={styles.lockPeriodField}
-              >
-                <Select className={styles.selectField}>
-                  <Select.Option value={1}>1 день</Select.Option>
-                  <Select.Option value={3}>3 дня</Select.Option>
-                  <Select.Option value={5}>5 дней</Select.Option>
-                  <Select.Option value={7}>7 дней</Select.Option>
-                  <Select.Option value={10}>10 дней</Select.Option>
-                  <Select.Option value={14}>14 дней</Select.Option>
-                </Select>
-              </Form.Item>
-            </div>
-
-            {/* Проверка на плагиат */}
-            <Form.Item
-              name="plagiarism_check"
-              valuePropName="checked"
-              className={styles.plagiarismField}
-            >
-              <Checkbox>Проверка на плагиат</Checkbox>
-            </Form.Item>
 
             {/* Промокод */}
             <div className={styles.promoSection}>
