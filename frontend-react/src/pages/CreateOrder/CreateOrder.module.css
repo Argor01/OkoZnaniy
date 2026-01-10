@@ -1,11 +1,11 @@
 /* Стили страницы создания заказа в стиле проекта */
 
 .container {
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
   background: #f3f4f6;
-  padding: 0;
-  display: flex;
-  overflow: hidden;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
 .card {
@@ -15,9 +15,9 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 32px;
-  margin: 24px;
-  overflow-y: auto;
-  height: calc(100vh - 48px);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .header {
@@ -45,6 +45,7 @@
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 24px;
+  margin-top: 32px;
   margin-bottom: 24px;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
   border: 1px solid rgba(102, 126, 234, 0.1);
@@ -77,7 +78,18 @@
 }
 
 .priceInput {
-  flex: 0 0 200px;
+  flex: 0 0 300px;
+  border-radius: 12px !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
+  height: 48px !important;
+  font-size: 16px !important;
+}
+
+.priceInput:hover,
+.priceInput:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .priceField {
@@ -173,6 +185,28 @@
   margin-bottom: 0;
 }
 
+.lockPeriodRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lockPeriodLabel {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lockPeriodField {
+  margin-bottom: 0;
+}
+
+.lockPeriodField .ant-select {
+  width: 120px !important;
+}
+
 .sectionDivider {
   border-color: rgba(102, 126, 234, 0.1) !important;
   margin: 32px 0 !important;
@@ -214,15 +248,33 @@
   color: #9ca3af !important;
 }
 
-.typeRow {
+.typeSubjectDateRow {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
 }
 
-.typeField,
+.typeField {
+  flex: 1;
+}
+
 .subjectField {
   flex: 1;
+}
+
+.dateField {
+  flex: 0 0 180px;
+}
+
+.descriptionSection {
+  margin-bottom: 16px;
+}
+
+.descriptionLabel {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .deadlineRow {
@@ -309,54 +361,21 @@
   margin-bottom: 16px;
 }
 
-.editorContainer {
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  overflow: hidden;
-  background: #ffffff;
-  transition: all 0.3s ease;
-}
-
-.editorContainer:hover {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.editorToolbar {
-  display: flex;
-  gap: 4px;
-  padding: 12px 16px;
-  background: #f9fafb;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-}
-
-.toolbarButton {
-  color: #6b7280 !important;
-  border: none !important;
-  background: transparent !important;
-  padding: 4px 8px !important;
-  height: 28px !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
-  transition: all 0.2s ease !important;
-}
-
-.toolbarButton:hover {
-  background: rgba(102, 126, 234, 0.1) !important;
-  color: #667eea !important;
-}
 
 .descriptionTextarea {
-  background: transparent !important;
-  border: none !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  transition: all 0.3s ease !important;
   color: #1f2937 !important;
   font-size: 15px !important;
   line-height: 1.6 !important;
   resize: none !important;
 }
 
+.descriptionTextarea:hover,
 .descriptionTextarea:focus {
-  box-shadow: none !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 .descriptionTextarea::placeholder {
@@ -584,7 +603,7 @@
     gap: 16px;
   }
 
-  .typeRow {
+  .typeSubjectDateRow {
     flex-direction: column;
     gap: 16px;
   }
