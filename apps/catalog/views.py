@@ -22,6 +22,7 @@ class SubjectCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubjectCategory.objects.all()
     serializer_class = SubjectCategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Отключаем пагинацию для выпадающих списков
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'order']
@@ -37,6 +38,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Отключаем пагинацию для выпадающих списков
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'is_active']
     search_fields = ['name', 'description', 'keywords']
@@ -287,6 +289,7 @@ class WorkTypeViewSet(viewsets.ModelViewSet):
     queryset = WorkType.objects.all()
     serializer_class = WorkTypeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Отключаем пагинацию для выпадающих списков
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active']
     search_fields = ['name', 'description']
@@ -338,6 +341,7 @@ class ComplexityViewSet(viewsets.ModelViewSet):
     queryset = Complexity.objects.all()
     serializer_class = ComplexitySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Отключаем пагинацию для выпадающих списков
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active']
     search_fields = ['name', 'description']

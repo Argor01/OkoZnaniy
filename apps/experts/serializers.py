@@ -3,6 +3,12 @@ from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatisti
 from apps.users.serializers import UserSerializer, SimpleUserSerializer
 from apps.catalog.serializers import SubjectSerializer
 from apps.catalog.models import Subject
+from apps.orders.models import Order
+
+class SimpleOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'title']
 
 class SpecializationSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)
@@ -44,12 +50,20 @@ class ExpertDocumentSerializer(serializers.ModelSerializer):
 class ExpertReviewSerializer(serializers.ModelSerializer):
     expert = UserSerializer(read_only=True)
     client = UserSerializer(read_only=True)
+    # Используем PrimaryKeyRelatedField для записи, чтобы валидация работала корректно
+    order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
 
     class Meta:
         model = ExpertReview
         fields = ['id', 'expert', 'order', 'client', 'rating', 
                  'comment', 'created_at']
         read_only_fields = ['expert', 'client', 'created_at']
+
+    def to_representation(self, instance):
+        # При чтении заменяем ID заказа на объект с деталями
+        ret = super().to_representation(instance)
+        ret['order'] = SimpleOrderSerializer(instance.order).data
+        return ret
 
     def validate(self, data):
         order = data.get('order')

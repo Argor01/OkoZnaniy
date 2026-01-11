@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
+import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, type CreateOrderRequest } from '../../api/orders';
 import { catalogApi } from '../../api/catalog';
-import { SUBJECTS } from '../../config/subjects';
-import { WORK_TYPES } from '../../config/workTypes';
 import { MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from '../../config/fileUpload';
 import { VALIDATION_MESSAGES } from '../../config/validation';
 import dayjs from 'dayjs';
@@ -432,15 +430,22 @@ const CreateOrder: React.FC = () => {
                 name="budget"
                 rules={[
                   { required: true, message: 'Укажите стоимость' },
-                  { type: 'number', min: 1, message: 'Стоимость должна быть больше 0' }
+                  { 
+                    validator: (_, value) => {
+                      if (value !== undefined && value !== null && Number(value) <= 0) {
+                        return Promise.reject(new Error('Стоимость должна быть больше 0'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
                 ]}
                 className={styles.priceFieldContainer}
               >
-                <Input
+                <InputNumber
                   placeholder="Стоимость"
-                  type="number"
                   min={1}
                   className={styles.priceInput}
+                  style={{ width: '100%' }}
                 />
               </Form.Item>
               

@@ -12,7 +12,7 @@ interface BidModalProps {
   orderId: number;
   orderTitle: string;
   orderBudget?: number;
-  onOpenChat?: (orderId: number) => void;
+  onOpenChat?: (chatId: number) => void;
 }
 
 const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget, onOpenChat }) => {
@@ -44,20 +44,6 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
     onClose();
   };
 
-  const handleOpenChat = async () => {
-    try {
-      // Создаем или получаем чат по заказу
-      const chat = await chatApi.getOrCreateByOrder(orderId);
-      handleClose();
-      if (onOpenChat) {
-        onOpenChat(orderId);
-      }
-      message.success('Чат открыт');
-    } catch (error) {
-      message.error('Не удалось открыть чат');
-    }
-  };
-
   return (
     <Modal
       title={bidSuccess ? 'Отклик отправлен!' : 'Откликнуться на заказ'}
@@ -72,10 +58,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
           title="Ваш отклик успешно отправлен!"
           subTitle="Заказчик получит уведомление и сможет связаться с вами"
           extra={[
-            <Button type="primary" key="chat" onClick={handleOpenChat}>
-              Написать заказчику
-            </Button>,
-            <Button key="close" onClick={handleClose}>
+            <Button type="primary" key="close" onClick={handleClose}>
               Закрыть
             </Button>,
           ]}
@@ -102,7 +85,12 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
               label="Ваша цена"
               rules={[
                 { required: true, message: 'Укажите цену' },
-                { type: 'number', min: 1, message: 'Цена должна быть больше 0' }
+                { 
+                  type: 'number', 
+                  min: 1, 
+                  message: 'Цена должна быть больше 0',
+                  transform: (value) => Number(value)
+                }
               ]}
             >
               <InputNumber

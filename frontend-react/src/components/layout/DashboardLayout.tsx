@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Badge, Typography, Button, Modal, message, Spin } from 'antd';
+import { Layout, Typography, Modal, message, Spin } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -20,7 +20,21 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from '../../api/auth';
 import { ordersApi } from '../../api/orders';
+import DashboardHeader from '../common/DashboardHeader';
+import Sidebar from './Sidebar';
+import { useNotifications } from '../../hooks/useNotifications';
+import { DashboardContext } from '../../contexts/DashboardContext';
 import styles from './DashboardLayout.module.css';
+
+// Импорт модальных окон
+import ProfileModal from '../../pages/ExpertDashboard/modals/ProfileModal';
+import MessageModal from '../../pages/ExpertDashboard/modals/MessageModalNew';
+import NotificationsModal from '../../pages/ExpertDashboard/modals/NotificationsModalNew';
+import ArbitrationModal from '../../pages/ExpertDashboard/modals/ArbitrationModal';
+import FinanceModal from '../../pages/ExpertDashboard/modals/FinanceModal';
+import FriendsModal from '../../pages/ExpertDashboard/modals/FriendsModal';
+import FaqModal from '../../pages/ExpertDashboard/modals/FaqModal';
+import FriendProfileModal from '../../pages/ExpertDashboard/modals/FriendProfileModal';
 
 const { Sider, Content } = Layout;
 const { Title } = Typography;
@@ -33,7 +47,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  
+  // State для модальных окон
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
+  const [financeModalVisible, setFinanceModalVisible] = useState(false);
+  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
+  
+  const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+
+  const { unreadCount: unreadNotifications } = useNotifications();
 
   // Загружаем профиль пользователя
   const { data: userProfile, isLoading } = useQuery({
@@ -95,15 +124,66 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     });
   };
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 840);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const closeAllModals = () => {
+    setProfileModalVisible(false);
+    setMessageModalVisible(false);
+    setNotificationsModalVisible(false);
+    setArbitrationModalVisible(false);
+    setFinanceModalVisible(false);
+    setFriendsModalVisible(false);
+    setFaqModalVisible(false);
+    setFriendProfileModalVisible(false);
+    setSelectedUserIdForChat(undefined);
+  };
+
+  const contextValue = {
+    openProfileModal: () => { closeAllModals(); setProfileModalVisible(true); },
+    openMessageModal: (userId?: number) => { 
+        closeAllModals(); 
+        if (userId) setSelectedUserIdForChat(userId);
+        setMessageModalVisible(true); 
+    },
+    openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
+    openArbitrationModal: () => { closeAllModals(); setArbitrationModalVisible(true); },
+    openFinanceModal: () => { closeAllModals(); setFinanceModalVisible(true); },
+    openFriendsModal: () => { closeAllModals(); setFriendsModalVisible(true); },
+    openFaqModal: () => { closeAllModals(); setFaqModalVisible(true); },
+    openFriendProfileModal: (friend: any) => {
+        closeAllModals();
+        setSelectedFriend(friend);
+        setFriendProfileModalVisible(true);
+    },
+    closeAllModals,
+  };
+
+  const handleMenuSelect = (key: string) => {
+    if (key.startsWith('orders-') || key === 'orders') {
+      navigate('/expert?tab=orders');
+      return;
+    }
+    // Other navigation is handled by Sidebar's navigate calls or simple links
+  };
+
   const getSelectedKey = () => {
     const path = location.pathname;
-    if (path === '/expert') return 'expert';
+    if (path === '/expert') return 'dashboard';
     if (path === '/create-order') return 'create-order';
+    if (path === '/orders-feed') return 'orders-feed';
     if (path.startsWith('/shop/ready-works')) return 'shop-ready-works';
     if (path.startsWith('/shop/add-work')) return 'shop-add-work';
     if (path.startsWith('/works')) return 'works';
     if (path.startsWith('/shop/purchased')) return 'shop-purchased';
-    return 'expert';
+    return '';
   };
 
   if (isLoading) {
@@ -118,11 +198,94 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isClient = userProfile?.role === 'client';
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Layout>
-        <Content className={styles.mainContent}>{children}</Content>
+    <DashboardContext.Provider value={contextValue}>
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sidebar
+          selectedKey={getSelectedKey()}
+          onMenuSelect={handleMenuSelect}
+          onLogout={handleLogout}
+          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
+          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
+          onArbitrationClick={() => { closeAllModals(); setArbitrationModalVisible(true); }}
+          onFinanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
+          onFriendsClick={() => { closeAllModals(); setFriendsModalVisible(true); }}
+          onFaqClick={() => { closeAllModals(); setFaqModalVisible(true); }}
+          mobileDrawerOpen={mobileMenuVisible}
+          onMobileDrawerChange={setMobileMenuVisible}
+          unreadNotifications={unreadNotifications}
+          userProfile={userProfile ? {
+            username: userProfile.username,
+            avatar: userProfile.avatar,
+            role: userProfile.role
+          } : undefined}
+        />
+        
+        <Layout style={{ 
+          marginLeft: isMobile ? 0 : 250, 
+          background: '#f5f5f5',
+          transition: 'all 0.2s'
+        }}>
+          <Content className={styles.mainContent} style={{ 
+            padding: isMobile ? '16px' : '24px', 
+            minHeight: 'calc(100vh - 64px)' 
+          }}>
+            {children}
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+
+      {/* Modals */}
+      <ProfileModal 
+        visible={profileModalVisible} 
+        onClose={() => setProfileModalVisible(false)} 
+        user={userProfile}
+      />
+      <MessageModal 
+        visible={messageModalVisible} 
+        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); }}
+        selectedUserId={selectedUserIdForChat}
+      />
+      <NotificationsModal 
+        visible={notificationsModalVisible} 
+        onClose={() => setNotificationsModalVisible(false)} 
+      />
+      <ArbitrationModal 
+        visible={arbitrationModalVisible} 
+        onClose={() => setArbitrationModalVisible(false)} 
+      />
+      <FinanceModal 
+        visible={financeModalVisible} 
+        onClose={() => setFinanceModalVisible(false)} 
+      />
+      <FriendsModal 
+        visible={friendsModalVisible} 
+        onClose={() => setFriendsModalVisible(false)} 
+        onOpenChat={(friend) => {
+            setFriendsModalVisible(false);
+            setSelectedUserIdForChat(friend.id);
+            setMessageModalVisible(true);
+        }}
+        onOpenProfile={(friend) => {
+            setFriendsModalVisible(false);
+            setSelectedFriend(friend);
+            setFriendProfileModalVisible(true);
+        }}
+      />
+      <FaqModal 
+        visible={faqModalVisible} 
+        onClose={() => setFaqModalVisible(false)} 
+      />
+      <FriendProfileModal
+        visible={friendProfileModalVisible}
+        onClose={() => setFriendProfileModalVisible(false)}
+        friend={selectedFriend}
+        onOpenChat={() => {
+            setFriendProfileModalVisible(false);
+            setMessageModalVisible(true);
+            if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
+        }}
+      />
+    </DashboardContext.Provider>
   );
 };
 

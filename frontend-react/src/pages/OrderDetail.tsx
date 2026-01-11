@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Tabs, Rate } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { ordersApi, Bid } from '../api/orders';
 import { chatApi } from '../api/chat';
+import { authApi } from '../api/auth';
+import BidModal from './OrdersFeed/BidModal';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -15,6 +17,13 @@ const OrderDetail: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [activeTab, setActiveTab] = useState('active');
+  const [bidModalVisible, setBidModalVisible] = useState(false);
+
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+  });
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -34,6 +43,10 @@ const OrderDetail: React.FC = () => {
     enabled: !!orderId,
   });
 
+  const userHasBid = React.useMemo(() => {
+    return bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
+  }, [bids, userProfile]);
+
   const acceptBidMutation = useMutation({
     mutationFn: ({ orderId, bidId }: { orderId: number; bidId: number }) => 
       ordersApi.acceptBid(orderId, bidId),
@@ -44,6 +57,18 @@ const OrderDetail: React.FC = () => {
     },
     onError: () => {
       message.error('Не удалось принять отклик');
+    },
+  });
+
+  const rejectBidMutation = useMutation({
+    mutationFn: ({ orderId, bidId }: { orderId: number; bidId: number }) => 
+      ordersApi.rejectBid(orderId, bidId),
+    onSuccess: () => {
+      message.success('Отклик отклонен');
+      queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
+    },
+    onError: () => {
+      message.error('Не удалось отклонить отклик');
     },
   });
 
@@ -182,6 +207,28 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
+            {/* Кнопка отклика для эксперта */}
+            {userProfile?.role === 'expert' && !order.expert && !userHasBid && (
+                <div style={{ marginTop: 24 }}>
+                    <Button 
+                        type="primary" 
+                        size="large" 
+                        onClick={() => setBidModalVisible(true)}
+                        style={{ width: isMobile ? '100%' : 'auto' }}
+                    >
+                        Откликнуться на заказ
+                    </Button>
+                </div>
+            )}
+            
+            {userHasBid && (
+                 <div style={{ marginTop: 24 }}>
+                    <Tag color="success" style={{ fontSize: 16, padding: '8px 16px' }}>
+                        Вы уже откликнулись на этот заказ
+                    </Tag>
+                </div>
+            )}
+
             {/* Отклики экспертов */}
             {bids.length > 0 && (
               <div>
@@ -191,11 +238,23 @@ const OrderDetail: React.FC = () => {
                     <span style={{ marginRight: 8 }}>Отклики экспертов</span>
                   </Badge>
                 </Title>
+
+                <Tabs 
+                  activeKey={activeTab} 
+                  onChange={setActiveTab}
+                  items={[
+                    { key: 'active', label: 'Активные' },
+                    { key: 'rejected', label: 'Отклоненные' },
+                    { key: 'cancelled', label: 'Отмененные' },
+                  ]}
+                  style={{ marginBottom: 16 }}
+                />
+
                 {bidsLoading ? (
                   <Spin />
                 ) : (
                   <List
-                    dataSource={bids}
+                    dataSource={bids.filter((bid: Bid) => (bid.status || 'active') === activeTab)}
                     renderItem={(bid: Bid) => (
                       <List.Item
                         key={bid.id}
@@ -231,8 +290,19 @@ const OrderDetail: React.FC = () => {
                               }}
                             >
                               Написать
-                            </Button>
-                          ]
+                            </Button>,
+                            activeTab === 'active' && (
+                              <Button
+                                danger
+                                size={isMobile ? 'small' : 'middle'}
+                                icon={<CloseCircleOutlined />}
+                                onClick={() => rejectBidMutation.mutate({ orderId: order.id, bidId: bid.id })}
+                                loading={rejectBidMutation.isPending}
+                              >
+                                Отклонить
+                              </Button>
+                            )
+                          ].filter(Boolean)
                         }
                       >
                         <List.Item.Meta
@@ -245,13 +315,19 @@ const OrderDetail: React.FC = () => {
                           }
                           title={
                             <Space direction="vertical" size={4}>
-                              <Button 
-                                type="link" 
-                                onClick={() => navigate(`/expert/${bid.expert.id}`)}
-                                style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
-                              >
-                                <Text strong>{bid.expert.username}</Text>
-                              </Button>
+                              <Space>
+                                <Button 
+                                  type="link" 
+                                  onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                                  style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
+                                >
+                                  <Text strong>{bid.expert.username}</Text>
+                                </Button>
+                                <Space size={4}>
+                                    <StarOutlined style={{ color: '#faad14' }} />
+                                    <Text>{bid.expert_rating || 0}</Text>
+                                </Space>
+                              </Space>
                               {bid.expert.bio && (
                                 <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13 }}>
                                   {bid.expert.bio}
@@ -318,6 +394,15 @@ const OrderDetail: React.FC = () => {
           </Space>
         </Card>
       </div>
+      
+      <BidModal
+         visible={bidModalVisible}
+         onClose={() => setBidModalVisible(false)}
+         orderId={order.id}
+         orderTitle={order.title}
+         orderBudget={order.budget ? Number(order.budget) : undefined}
+         onOpenChat={(chatId) => navigate(`/messages?chat=${chatId}`)}
+       />
     </div>
   );
 };

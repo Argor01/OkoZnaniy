@@ -71,10 +71,19 @@ export interface CreateOrderRequest {
 export interface Bid {
   id: number;
   order: number;
-  expert: { id: number; username: string };
+  expert: { 
+    id: number; 
+    username: string;
+    avatar?: string;
+    bio?: string;
+    first_name?: string;
+    last_name?: string;
+  };
   amount: string;
   comment?: string;
   created_at: string;
+  status: 'active' | 'rejected' | 'cancelled';
+  expert_rating: number;
 }
 
 export interface OrderComment {
@@ -203,6 +212,18 @@ export const ordersApi = {
   // Клиент принимает ставку
   acceptBid: async (orderId: number, bidId: number) => {
     const response = await apiClient.post(`/orders/orders/${orderId}/accept_bid/`, { bid_id: bidId });
+    return response.data;
+  },
+
+  // Клиент отклоняет ставку
+  rejectBid: async (orderId: number, bidId: number) => {
+    const response = await apiClient.post(`/orders/orders/${orderId}/reject_bid/`, { bid_id: bidId });
+    return response.data;
+  },
+
+  // Эксперт отменяет ставку
+  cancelBid: async (orderId: number) => {
+    const response = await apiClient.post(`/orders/orders/${orderId}/cancel_bid/`);
     return response.data;
   },
 

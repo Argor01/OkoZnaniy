@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '../api/partners';
+import DashboardHeader from '../components/common/DashboardHeader';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -328,6 +329,11 @@ const PartnerDashboard: React.FC = () => {
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
 
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+  });
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['partner-dashboard'],
     queryFn: () => partnersApi.getDashboard(),
@@ -488,41 +494,13 @@ const PartnerDashboard: React.FC = () => {
       </Drawer>
 
       <Layout>
-        <Header
-          style={{
-            background: '#fff',
-            padding: isMobile ? '0 16px' : '0 24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Space>
-            {isMobile && (
-              <Button
-                type="text"
-                icon={<MenuOutlined />}
-                onClick={() => setDrawerVisible(true)}
-                style={{ fontSize: '18px' }}
-              />
-            )}
-            <Title level={isMobile ? 5 : 3} style={{ margin: 0 }}>
-              {isMobile 
-                ? currentMenuItem?.label?.split(' ')[0] || 'Партнер'
-                : currentMenuItem?.label || 'Партнерский кабинет'}
-            </Title>
-          </Space>
-          <Button
-            type="default"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            size={isMobile ? 'small' : 'middle'}
-          >
-            {!isMobile && 'Выйти'}
-          </Button>
-        </Header>
+        <DashboardHeader
+            userProfile={userProfile}
+            onMenuClick={() => setDrawerVisible(true)}
+            onLogout={handleLogout}
+            onProfileClick={() => {}}
+            isMobile={isMobile}
+        />
         <Content
           style={{
             margin: isMobile ? '12px' : isTablet ? '16px' : '24px',

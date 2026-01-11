@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider } from 'antd';
-import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider, message, List, Avatar } from 'antd';
+import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, TeamOutlined, StarOutlined } from '@ant-design/icons';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi } from '../../../../api/orders';
+import { ordersApi, Bid } from '../../../../api/orders';
 import { authApi } from '../../../../api/auth';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../../../config/orderStatuses';
 import dayjs from 'dayjs';
@@ -22,6 +22,7 @@ interface OrdersTabProps {
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -31,6 +32,43 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     queryFn: () => authApi.getCurrentUser(),
   });
 
+  // Удаление заказа
+  const deleteOrderMutation = useMutation({
+    mutationFn: ordersApi.deleteOrder,
+    onSuccess: () => {
+      message.success('Заказ успешно удален');
+      setIsModalVisible(false);
+      setSelectedOrder(null);
+      queryClient.invalidateQueries({ queryKey: ['user-orders'] });
+    },
+    onError: () => {
+      message.error('Не удалось удалить заказ');
+    },
+  });
+
+  // Загружаем отклики для выбранного заказа (если клиент)
+  const { data: bids, isLoading: bidsLoading } = useQuery({
+    queryKey: ['order-bids', selectedOrder?.id],
+    queryFn: () => ordersApi.getBids(selectedOrder.id),
+    enabled: !!selectedOrder?.id && (userProfile?.role === 'client') && isModalVisible,
+  });
+
+  const handleDeleteOrder = () => {
+    Modal.confirm({
+      title: 'Вы уверены, что хотите удалить этот заказ?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Это действие нельзя отменить.',
+      okText: 'Да, удалить',
+      okType: 'danger',
+      cancelText: 'Отмена',
+      onOk() {
+        if (selectedOrder?.id) {
+          deleteOrderMutation.mutate(selectedOrder.id);
+        }
+      },
+    });
+  };
+
   // Загружаем заказы
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ['user-orders', userProfile?.role],
@@ -38,7 +76,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
       if (userProfile?.role === 'client') {
         return ordersApi.getClientOrders();
       } else if (userProfile?.role === 'expert') {
-        return ordersApi.getMyOrders({});
+        // Для экспертов показываем доступные заказы (лента)
+        return ordersApi.getAvailableOrders();
       }
       return null;
     },
@@ -48,61 +87,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
   const isClient = userProfile?.role === 'client';
 
-  // Добавляем тестовые данные для проверки модального окна
-  const testOrders = [
-    {
-      id: 1,
-      title: "Курсовая работа по экономике",
-      description: "Необходимо написать курсовую работу на тему 'Анализ финансового состояния предприятия'. Объем работы 30-40 страниц. Требуется провести анализ конкретного предприятия, использовать актуальные данные за последние 3 года.",
-      budget: 5000,
-      deadline: "2026-01-20T23:59:00Z",
-      status: "new",
-      subject_name: "Экономика",
-      work_type_name: "Курсовая работа",
-      custom_topic: "Анализ финансового состояния предприятия ООО 'Рога и копыта'",
-      responses_count: 3,
-      created_at: "2026-01-09T10:00:00Z",
-      files: [
-        { name: "Техническое задание.pdf", size: 1024000 },
-        { name: "Данные предприятия.xlsx", size: 512000 }
-      ]
-    },
-    {
-      id: 2,
-      title: "Реферат по истории",
-      description: "Написать реферат на тему 'Великая Отечественная война: основные этапы и значение'. Объем 15-20 страниц, не менее 10 источников.",
-      budget: 2000,
-      deadline: "2026-01-15T18:00:00Z",
-      status: "in_progress",
-      subject_name: "История",
-      work_type_name: "Реферат",
-      custom_topic: "Великая Отечественная война: основные этапы и значение",
-      responses_count: 1,
-      created_at: "2026-01-08T14:30:00Z",
-      files: []
-    },
-    {
-      id: 3,
-      title: "Дипломная работа по программированию",
-      description: "Разработка веб-приложения для управления заказами. Необходимо создать полнофункциональное приложение с базой данных, API и пользовательским интерфейсом.",
-      budget: 25000,
-      deadline: "2026-02-28T23:59:00Z",
-      status: "completed",
-      subject_name: "Информатика",
-      work_type_name: "Дипломная работа",
-      custom_topic: "Разработка системы управления заказами",
-      responses_count: 8,
-      created_at: "2026-01-05T09:15:00Z",
-      files: [
-        { name: "Техническое задание.docx", size: 2048000 },
-        { name: "Макеты интерфейса.zip", size: 5120000 },
-        { name: "База данных схема.sql", size: 256000 }
-      ]
-    }
-  ];
-
-  // Используем тестовые данные для демонстрации модального окна
-  const displayOrders = testOrders;
+  // Используем реальные данные
+  const displayOrders = orders;
 
   // Отладочная информация
   console.log('OrdersTab Debug:', {
@@ -266,18 +252,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           <Button key="close" onClick={handleCloseModal}>
             Закрыть
           </Button>,
-          isClient && selectedOrder && (
-            <Button 
-              key="edit" 
-              type="primary"
-              onClick={() => {
-                handleCloseModal();
-                navigate(`/orders/${selectedOrder.id}/edit`);
-              }}
-            >
-              Редактировать
-            </Button>
-          ),
           !isClient && selectedOrder && (
             <Button 
               key="respond" 
@@ -439,11 +413,10 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               </>
             )}
 
-            {/* Дополнительная информация для клиентов */}
             {isClient && (
               <>
                 <Divider orientation="left">Управление заказом</Divider>
-                <Space wrap>
+                <Space wrap style={{ marginBottom: 24 }}>
                   <Button 
                     icon={<EyeOutlined />}
                     onClick={() => {
@@ -451,20 +424,90 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       navigate(`/orders/${selectedOrder.id}`);
                     }}
                   >
-                    Открыть страницу заказа
+                    Перейти к выбору исполнителя
                   </Button>
-                  {selectedOrder.status === 'new' && (
-                    <Button 
-                      type="primary"
-                      onClick={() => {
-                        handleCloseModal();
-                        navigate(`/orders/${selectedOrder.id}/edit`);
-                      }}
-                    >
-                      Редактировать заказ
-                    </Button>
-                  )}
+
+                  <Button 
+                    type="primary"
+                    icon={<EditOutlined />}
+                    onClick={() => {
+                      handleCloseModal();
+                      navigate(`/orders/${selectedOrder.id}/edit`);
+                    }}
+                  >
+                    Редактировать заказ
+                  </Button>
+
+                  <Button 
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={handleDeleteOrder}
+                    loading={deleteOrderMutation.isPending}
+                  >
+                    Удалить заказ
+                  </Button>
                 </Space>
+
+                <Divider orientation="left">Отклики экспертов {bids && bids.length > 0 ? `(${bids.length})` : ''}</Divider>
+                
+                {bidsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <Spin />
+                  </div>
+                ) : bids && bids.length > 0 ? (
+                  <List
+                    loading={bidsLoading}
+                    itemLayout="vertical"
+                    dataSource={bids}
+                    renderItem={(bid: Bid) => (
+                      <List.Item
+                        key={bid.id}
+                        style={{
+                          background: '#f9f9f9',
+                          borderRadius: 8,
+                          marginBottom: 12,
+                          padding: 16,
+                          border: '1px solid #f0f0f0'
+                        }}
+                      >
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar src={bid.expert.avatar} icon={<UserOutlined />} size={48} />
+                          }
+                          title={
+                            <Space>
+                              <Text strong>{bid.expert.username}</Text>
+                              <Space size={4}>
+                                <StarOutlined style={{ color: '#faad14' }} />
+                                <Text>{bid.expert_rating || 0}</Text>
+                              </Space>
+                            </Space>
+                          }
+                          description={
+                            <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                              <Space>
+                                <Tag color="blue">{bid.amount} ₽</Tag>
+                                <Text type="secondary">
+                                  {dayjs(bid.created_at).fromNow()}
+                                </Text>
+                              </Space>
+                              {bid.comment && (
+                                <Paragraph 
+                                  ellipsis={{ rows: 3, expandable: true, symbol: 'развернуть' }}
+                                  style={{ margin: 0, whiteSpace: 'pre-wrap' }}
+                                >
+                                  {bid.comment}
+                                </Paragraph>
+                              )}
+                            </Space>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <Empty description="Пока нет откликов от экспертов" />
+                )}
               </>
             )}
           </div>
