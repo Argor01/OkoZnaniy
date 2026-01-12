@@ -87,27 +87,7 @@ const MyWorks: React.FC = () => {
     queryFn: async () => {
       try {
         const data = await ordersApi.getMyOrders({ status: 'completed' });
-        if (!data || data.length === 0) {
-          // Возвращаем тестовые данные если нет данных с сервера
-          return [
-            {
-              id: 1001,
-              title: 'Решение задач по высшей математике',
-              description: 'Выполнено 15 задач по математическому анализу, включая пределы, производные и интегралы. Все решения оформлены с подробными пояснениями.',
-              budget: 3500,
-              status: 'completed',
-              subject: { id: 1, name: 'Математика' },
-              work_type: { id: 1, name: 'Контрольная работа' },
-              deadline: '2024-11-20',
-              created_at: '2024-11-15',
-              completed_at: '2024-11-19',
-              client: { id: 101, username: 'student_ivan', first_name: 'Иван', last_name: 'Петров' },
-              rating: 5,
-              review: 'Отличная работа! Все выполнено качественно и в срок. Решения подробно расписаны, все понятно. Рекомендую этого исполнителя!'
-            }
-          ] as any;
-        }
-        return data;
+        return data || [];
       } catch (error) {
         console.error('Error loading completed works:', error);
         return [];

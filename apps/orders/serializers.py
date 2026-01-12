@@ -49,11 +49,18 @@ class OrderCommentSerializer(serializers.ModelSerializer):
 
 class BidSerializer(serializers.ModelSerializer):
     expert = UserSerializer(read_only=True)
+    expert_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Bid
-        fields = ['id', 'order', 'expert', 'amount', 'comment', 'created_at']
-        read_only_fields = ['id', 'expert', 'created_at', 'order']
+        fields = ['id', 'order', 'expert', 'amount', 'comment', 'created_at', 'status', 'expert_rating']
+        read_only_fields = ['id', 'expert', 'created_at', 'order', 'status', 'expert_rating']
+
+    def get_expert_rating(self, obj):
+        try:
+            return obj.expert.statistics.average_rating
+        except Exception:
+            return 0
 
 class OrderPriceBreakdownSerializer(serializers.Serializer):
     base_price = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -131,10 +138,11 @@ class OrderSerializer(serializers.ModelSerializer):
             })
         
         # Проверяем, что указана либо тема из списка, либо произвольная тема
-        if not data.get('topic') and not data.get('custom_topic'):
-            raise serializers.ValidationError({
-                'topic': 'Укажите тему из списка или введите произвольную тему'
-            })
+        # if not data.get('topic') and not data.get('custom_topic'):
+        #     raise serializers.ValidationError({
+        #         'topic': 'Укажите тему из списка или введите произвольную тему'
+        #     })
+
         
         # Проверяем, что тема принадлежит выбранному предмету (если выбрана из списка)
         if data.get('topic') and data.get('subject'):

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Avatar, Badge, Button, Space, Typography, Dropdown } from 'antd';
+import { Layout, Avatar, Badge, Button, Space, Typography, Dropdown, Menu } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -7,8 +7,13 @@ import {
   WalletOutlined,
   LogoutOutlined,
   MenuOutlined,
+  UnorderedListOutlined,
+  ShopOutlined,
+  FileDoneOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './DashboardHeader.module.css';
 
 const { Header } = Layout;
@@ -44,7 +49,63 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onMenuClick,
   isMobile = false,
 }) => {
-  const balance = userProfile?.balance || 0;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const rawBalance = userProfile?.balance;
+  const balance = rawBalance ? Number(rawBalance) : 0;
+  const isExpert = userProfile?.role === 'expert';
+  const isClient = userProfile?.role === 'client';
+
+  const navItems: MenuProps['items'] = [
+    {
+      key: '/orders-feed',
+      label: 'Лента заказов',
+      icon: <UnorderedListOutlined />,
+    },
+  ];
+
+  if (isExpert) {
+    navItems.push({
+      key: '/works',
+      label: 'Мои работы',
+      icon: <FileDoneOutlined />,
+    });
+    navItems.push({
+      key: 'shop-menu',
+      label: 'Магазин',
+      icon: <ShopOutlined />,
+      children: [
+        {
+          key: '/shop/ready-works',
+          label: 'Магазин готовых работ',
+        },
+        {
+          key: '/shop/add-work',
+          label: 'Добавить работу',
+        },
+        {
+          key: '/shop/purchased',
+          label: 'Купленные работы',
+        },
+      ],
+    });
+  } else if (isClient) {
+    navItems.push({
+      key: '/create-order',
+      label: 'Создать заказ',
+      icon: <PlusOutlined />,
+    });
+    navItems.push({
+      key: '/shop/ready-works',
+      label: 'Магазин работ',
+      icon: <ShopOutlined />,
+    });
+    navItems.push({
+      key: '/shop/purchased',
+      label: 'Купленные работы',
+      icon: <FileDoneOutlined />,
+    });
+  }
 
   const profileMenuItems: MenuProps['items'] = [
     {
@@ -74,6 +135,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             icon={<MenuOutlined />}
             onClick={onMenuClick}
             className={styles.menuButton}
+          />
+        )}
+        {!isMobile && (
+          <Menu
+            mode="horizontal"
+            selectedKeys={[location.pathname]}
+            items={navItems}
+            className={styles.navMenu}
+            onClick={({ key }) => {
+              if (key !== 'shop-menu') {
+                navigate(key);
+              }
+            }}
           />
         )}
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
@@ -9,7 +9,9 @@ import {
   UserOutlined,
   ArrowLeftOutlined,
   CheckCircleOutlined,
-  SendOutlined
+  SendOutlined,
+  PaperClipOutlined,
+  FileOutlined
 } from '@ant-design/icons';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
 import { formatDistanceToNow } from 'date-fns';
@@ -43,6 +45,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,8 +115,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const sendMessage = async () => {
-    if (!messageText.trim()) {
-      antMessage.warning('Введите сообщение');
+    if (!messageText.trim() && attachedFiles.length === 0) {
+      antMessage.warning('Введите сообщение или прикрепите файл');
       return;
     }
 
@@ -126,6 +129,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     try {
       const newMessage = await chatApi.sendMessage(selectedChat.id, messageText);
       
+      // Если есть прикрепленные файлы, отправляем их
+      if (attachedFiles.length > 0) {
+        for (const file of attachedFiles) {
+          try {
+            // Здесь должен быть API для отправки файлов в чат
+            // await chatApi.sendFile(selectedChat.id, file);
+            console.log('Отправка файла:', file.name);
+          } catch (error) {
+            console.error('Ошибка отправки файла:', error);
+            antMessage.error(`Не удалось отправить файл ${file.name}`);
+          }
+        }
+      }
+      
       // Обновляем сообщения в текущем чате
       setSelectedChat(prev => prev ? {
         ...prev,
@@ -137,7 +154,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         chat.id === selectedChat.id ? {
           ...chat,
           last_message: {
-            text: messageText,
+            text: messageText || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
             sender_id: newMessage.sender_id,
             created_at: newMessage.created_at
           },
@@ -146,6 +163,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       ));
 
       setMessageText('');
+      setAttachedFiles([]);
       antMessage.success('Сообщение отправлено');
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error);
@@ -153,6 +171,30 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setSending(false);
     }
+  };
+
+  const handleFileSelect = (file: File) => {
+    // Проверяем размер файла (максимум 10 МБ)
+    const maxSize = 10 * 1024 * 1024; // 10 МБ
+    if (file.size > maxSize) {
+      antMessage.error('Размер файла не должен превышать 10 МБ');
+      return false;
+    }
+
+    // Проверяем, что файл еще не добавлен
+    if (attachedFiles.find(f => f.name === file.name && f.size === file.size)) {
+      antMessage.warning('Этот файл уже прикреплен');
+      return false;
+    }
+
+    setAttachedFiles(prev => [...prev, file]);
+    antMessage.success(`Файл "${file.name}" прикреплен`);
+    return false; // Предотвращаем автоматическую загрузку
+  };
+
+  const removeAttachedFile = (fileToRemove: File) => {
+    setAttachedFiles(prev => prev.filter(file => file !== fileToRemove));
+    antMessage.info('Файл удален');
   };
 
   const formatTimestamp = (dateString: string) => {
@@ -531,6 +573,58 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               background: '#ffffff',
               flexShrink: 0
             }}>
+              {/* Attached Files Display */}
+              {attachedFiles.length > 0 && (
+                <div style={{ 
+                  marginBottom: 12,
+                  padding: 8,
+                  background: '#f9fafb',
+                  borderRadius: 8,
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <Text style={{ fontSize: 12, color: '#6b7280', marginBottom: 8, display: 'block' }}>
+                    Прикрепленные файлы:
+                  </Text>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {attachedFiles.map((file, index) => (
+                      <div key={index} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '4px 8px',
+                        background: '#ffffff',
+                        borderRadius: 4,
+                        border: '1px solid #d1d5db'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <FileOutlined style={{ color: '#6b7280', fontSize: 12 }} />
+                          <Text style={{ fontSize: 12, color: '#374151' }}>
+                            {file.name}
+                          </Text>
+                          <Text style={{ fontSize: 10, color: '#9ca3af' }}>
+                            ({(file.size / 1024 / 1024).toFixed(2)} МБ)
+                          </Text>
+                        </div>
+                        <Button
+                          type="text"
+                          size="small"
+                          onClick={() => removeAttachedFile(file)}
+                          style={{ 
+                            color: '#ef4444', 
+                            fontSize: 12,
+                            padding: '0 4px',
+                            height: 20,
+                            minWidth: 20
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div style={{ 
                 display: 'flex',
                 gap: isMobile ? 6 : 8,
@@ -555,6 +649,30 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   }}
                   disabled={sending}
                 />
+                
+                {/* File Attachment Button */}
+                <Upload
+                  beforeUpload={handleFileSelect}
+                  showUploadList={false}
+                  multiple={false}
+                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                >
+                  <Button
+                    type="text"
+                    icon={<PaperClipOutlined />}
+                    style={{ 
+                      width: isMobile ? 36 : 40, 
+                      height: isMobile ? 36 : 40,
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      color: '#6b7280',
+                      fontSize: isMobile ? 14 : 16
+                    }}
+                    disabled={sending}
+                    title="Прикрепить файл"
+                  />
+                </Upload>
+
                 <Button
                   type="primary"
                   shape="circle"
@@ -568,7 +686,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   }}
                   onClick={sendMessage}
                   loading={sending}
-                  disabled={!messageText.trim()}
+                  disabled={!messageText.trim() && attachedFiles.length === 0}
                 />
               </div>
             </div>

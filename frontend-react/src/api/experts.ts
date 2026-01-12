@@ -73,7 +73,31 @@ export interface CreateSpecializationRequest {
   description?: string;
 }
 
+export interface ExpertReview {
+  id: number;
+  expert: number;
+  client: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    avatar?: string;
+  };
+  order: {
+    id: number;
+    title: string;
+  };
+  rating: number;
+  text: string;
+  created_at: string;
+}
+
 export const expertsApi = {
+  async getReviews(expertId?: number): Promise<ExpertReview[]> {
+    const params = expertId ? { expert: expertId } : {};
+    const { data } = await apiClient.get('/experts/reviews/', { params });
+    return data.results || data;
+  },
+
   async rateExpert(payload: CreateExpertRatingRequest) {
     const { data } = await apiClient.post('/experts/ratings/', payload);
     return data;

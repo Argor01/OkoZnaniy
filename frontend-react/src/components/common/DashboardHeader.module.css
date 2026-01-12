@@ -14,11 +14,24 @@
 .headerLeft {
   display: flex;
   align-items: center;
+  gap: 24px;
+  flex: 1;
+  min-width: 0;
+}
+
+.navMenu {
+  flex: 1;
+  border-bottom: none !important;
+  background: transparent !important;
+  margin-left: 24px;
+  line-height: 64px;
+  min-width: 0;
 }
 
 .headerRight {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .menuButton {
@@ -96,29 +109,10 @@
 
 .avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .username {
-  font-weight: 500;
-  color: #1f2937;
+  font-weight: 600;
   font-size: 14px;
-}
-
-/* Mobile styles */
-@media (max-width: 840px) {
-  .dashboardHeader {
-    padding: 0 16px;
-    height: 56px;
-  }
-
-  .balanceButton {
-    padding: 8px 12px;
-  }
-
-  .iconButton {
-    font-size: 18px;
-    width: 36px;
-    height: 36px;
-  }
+  color: #333;
 }

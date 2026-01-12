@@ -8,6 +8,7 @@ import { expertsApi } from '../../api/experts';
 import { catalogApi } from '../../api/catalog';
 import { ordersApi } from '../../api/orders';
 import { useNotifications } from '../../hooks/useNotifications';
+import DashboardHeader from '../../components/common/DashboardHeader';
 import Sidebar from '../../components/layout/Sidebar';
 import ProfileHeader from './components/ProfileHeader/index';
 import ApplicationStatus from './components/ApplicationStatus/index';
@@ -188,76 +189,17 @@ const ExpertDashboard: React.FC = () => {
         />
         
         <Layout style={{ marginLeft: isMobile ? 0 : 250 }}>
-          <Header
-            style={{
-              background: '#fff',
-              padding: isMobile ? '0 16px' : '0 24px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              position: 'relative',
-              zIndex: 100,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {isMobile && (
-                <Button
-                  type="primary"
-                  icon={<MenuOutlined />}
-                  onClick={() => setMobileMenuVisible(true)}
-                  style={{
-                    borderRadius: '8px',
-                    height: '40px',
-                    width: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                />
-              )}
-              <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
-                Личный кабинет
-              </Title>
-            </div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              {isMobile && activeTab === 'orders' && (
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => navigate('/create-order')}
-                  size="middle"
-                  style={{
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none',
-                  }}
-                />
-              )}
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={() => { closeAllModals(); setProfileModalVisible(true); }}
-                size={isMobile ? 'middle' : 'middle'}
-                style={{
-                  borderRadius: '8px',
-                  background: '#3b82f6',
-                  border: 'none',
-                }}
-              >
-                {!isMobile && 'Редактировать профиль'}
-              </Button>
-              <Button
-                type="default"
-                danger
-                icon={<LogoutOutlined />}
-                onClick={handleLogout}
-                size={isMobile ? 'middle' : 'middle'}
-              >
-                {!isMobile && 'Выйти'}
-              </Button>
-            </div>
-          </Header>
+          <DashboardHeader
+            userProfile={userProfile}
+            unreadNotifications={unreadNotifications}
+            onMenuClick={() => setMobileMenuVisible(true)}
+            onLogout={handleLogout}
+            onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
+            onMessagesClick={() => setMessageModalVisible(true)}
+            onNotificationsClick={() => setNotificationsModalVisible(true)}
+            onBalanceClick={() => setFinanceModalVisible(true)}
+            isMobile={isMobile}
+          />
           
           <Content
             style={{
@@ -349,7 +291,7 @@ const ExpertDashboard: React.FC = () => {
                     }] : []),
                     {
                       key: 'friends',
-                      label: 'Мои друзья 5',
+                      label: 'Мои друзья',
                       children: (
                         <FriendsTab 
                           isMobile={isMobile}

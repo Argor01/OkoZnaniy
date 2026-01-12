@@ -7,6 +7,8 @@ import { ordersApi } from '../../api/orders';
 import { catalogApi } from '../../api/catalog';
 import { authApi } from '../../api/auth';
 import Sidebar, { MobileMenuButton } from '../../components/layout/Sidebar';
+import DashboardHeader from '../../components/common/DashboardHeader';
+import { useNotifications } from '../../hooks/useNotifications';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../config/orderStatuses';
 import { SUBJECTS } from '../../config/subjects';
 import { WORK_TYPES } from '../../config/workTypes';
@@ -45,6 +47,7 @@ const OrdersFeed: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const { unreadCount: unreadNotifications } = useNotifications();
 
   // State для модальных окон
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -215,56 +218,24 @@ const OrdersFeed: React.FC = () => {
       
       <Layout style={{ 
         marginLeft: isMobile ? 0 : 250,
-        padding: isMobile ? 0 : '24px',
         background: '#f5f5f5'
       }}>
-        {/* Хедер для мобильных */}
-        {isMobile && (
-          <Header
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1000,
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              padding: '0 16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              height: 64,
-            }}
-          >
-            <MobileMenuButton onClick={() => setMobileMenuVisible(true)} />
-            <Title level={4} style={{ margin: 0, color: '#1f2937'}}>
-              Биржа
-            </Title>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => navigate('/create-order')}
-              size="middle"
-              style={{
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                width: 40,
-                height: 40,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0
-              }}
-            />
-          </Header>
-        )}
+        <DashboardHeader
+            userProfile={userProfile}
+            unreadNotifications={unreadNotifications}
+            onMenuClick={() => setMobileMenuVisible(true)}
+            onLogout={handleLogout}
+            onProfileClick={() => setProfileModalVisible(true)}
+            onMessagesClick={() => setMessageModalVisible(true)}
+            onNotificationsClick={() => setNotificationsModalVisible(true)}
+            onBalanceClick={() => setFinanceModalVisible(true)}
+            isMobile={isMobile}
+        />
 
         <Content style={{ 
-          padding: isMobile ? '96px 16px 24px' : '0',
+          padding: isMobile ? '16px' : '24px',
           background: 'transparent',
-          minHeight: isMobile ? '100vh' : 'calc(100vh - 48px)'
+          minHeight: isMobile ? 'calc(100vh - 64px)' : 'calc(100vh - 64px)'
         }}>
             {/* Заголовок и кнопка создания */}
             {!isMobile && (

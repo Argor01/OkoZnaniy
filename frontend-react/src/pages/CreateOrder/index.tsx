@@ -1,28 +1,27 @@
 import React, { useState } from 'react';
-import { Form, Input, Select, Button, Card, Typography, message, DatePicker, Space, InputNumber, Upload } from 'antd';
+import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
-import type { UploadFile, UploadProps } from 'antd';
+import type { UploadFile } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, type CreateOrderRequest } from '../../api/orders';
 import { catalogApi } from '../../api/catalog';
-import { SUBJECTS } from '../../config/subjects';
-import { WORK_TYPES } from '../../config/workTypes';
 import { MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES } from '../../config/fileUpload';
 import { VALIDATION_MESSAGES } from '../../config/validation';
 import dayjs from 'dayjs';
 import styles from './CreateOrder.module.css';
 
 const { Title } = Typography;
-const { TextArea } = Input;
-const { Dragger } = Upload;
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [customSubject, setCustomSubject] = useState<string>('');
-  const [customWorkType, setCustomWorkType] = useState<string>('');
+  const [showPromoCode, setShowPromoCode] = useState<boolean>(false);
+  
+  // Локальные списки для управления динамически добавляемыми элементами
+  const [localSubjects, setLocalSubjects] = useState<any[]>([]);
+  const [localWorkTypes, setLocalWorkTypes] = useState<any[]>([]);
 
   // Загружаем данные с API
   const { data: apiSubjects = [], isLoading: subjectsLoading } = useQuery({
@@ -35,42 +34,49 @@ const CreateOrder: React.FC = () => {
     queryFn: catalogApi.getWorkTypes,
   });
 
-  // Обработчик загрузки файлов
-  const uploadProps: UploadProps = {
-    name: 'file',
-    multiple: true,
-    fileList,
-    beforeUpload: (file) => {
-      const isLt10M = file.size < MAX_FILE_SIZE_BYTES;
-      if (!isLt10M) {
-        message.error(VALIDATION_MESSAGES.fileSize(MAX_FILE_SIZE_MB));
-        return false;
-      }
-      
-      // Создаем правильную структуру UploadFile с originFileObj
-      const uploadFile: UploadFile = {
-        uid: file.uid || `${Date.now()}-${file.name}`,
-        name: file.name,
-        status: 'done',
-        size: file.size,
-        type: file.type,
-        originFileObj: file as any, // Сохраняем оригинальный файл!
-      };
-      
-      setFileList((prevList) => {
-        const newList = [...prevList, uploadFile];
-        console.log('📎 Файл добавлен:', file.name, 'originFileObj:', !!uploadFile.originFileObj, 'Всего файлов:', newList.length);
-        return newList;
-      });
-      return false; // Предотвращаем автоматическую загрузку
-    },
-    onRemove: (file) => {
-      setFileList((prevList) => {
-        const newList = prevList.filter(f => f.uid !== file.uid);
-        console.log('🗑️ Файл удален. Осталось файлов:', newList.length);
-        return newList;
-      });
-    },
+  // Отладочная информация
+  console.log('CreateOrder Debug:', {
+    apiSubjects: apiSubjects.length,
+    apiWorkTypes: apiWorkTypes.length,
+    subjectsLoading,
+    workTypesLoading,
+    firstFewSubjects: apiSubjects.slice(0, 5).map(s => s.name),
+    hasToken: !!localStorage.getItem('access_token'),
+    tokenPreview: localStorage.getItem('access_token')?.substring(0, 10) + '...'
+  });
+
+  // Объединяем API данные с локально созданными
+  const allSubjects = [...apiSubjects, ...localSubjects];
+  const allWorkTypes = [...apiWorkTypes, ...localWorkTypes];
+
+  // Функция для создания нового предмета
+  const handleCreateSubject = async (name: string) => {
+    try {
+      console.log('🆕 Создаем новый предмет:', name);
+      const newSubject = await catalogApi.createSubject(name);
+      setLocalSubjects(prev => [...prev, newSubject]);
+      message.success(`Предмет "${name}" добавлен`);
+      return newSubject;
+    } catch (error) {
+      console.error('❌ Ошибка создания предмета:', error);
+      message.error('Ошибка при создании предмета');
+      throw error;
+    }
+  };
+
+  // Функция для создания нового типа работы
+  const handleCreateWorkType = async (name: string) => {
+    try {
+      console.log('🆕 Создаем новый тип работы:', name);
+      const newWorkType = await catalogApi.createWorkType(name);
+      setLocalWorkTypes(prev => [...prev, newWorkType]);
+      message.success(`Тип работы "${name}" добавлен`);
+      return newWorkType;
+    } catch (error) {
+      console.error('❌ Ошибка создания типа работы:', error);
+      message.error('Ошибка при создании типа работы');
+      throw error;
+    }
   };
 
   // Мутация для создания заказа
@@ -78,7 +84,6 @@ const CreateOrder: React.FC = () => {
     mutationFn: async (orderData: CreateOrderRequest) => ordersApi.createOrder(orderData),
     onSuccess: async (createdOrder) => {
       console.log('✅ Заказ создан:', createdOrder);
-      console.log('📎 Файлов в списке для загрузки:', fileList.length);
       
       // Если есть файлы, загружаем их
       if (fileList.length > 0) {
@@ -86,16 +91,12 @@ const CreateOrder: React.FC = () => {
         let uploadedCount = 0;
         try {
           for (const file of fileList) {
-            console.log('📤 Загружаем файл:', file.name, 'originFileObj:', !!file.originFileObj);
             if (file.originFileObj) {
               await ordersApi.uploadOrderFile(createdOrder.id, file.originFileObj as File, {
                 file_type: 'task',
                 description: file.name
               });
               uploadedCount++;
-              console.log('✅ Файл загружен:', file.name);
-            } else {
-              console.warn('⚠️ Файл не имеет originFileObj:', file.name);
             }
           }
           message.destroy();
@@ -106,7 +107,6 @@ const CreateOrder: React.FC = () => {
           message.warning(`Заказ создан, но загружено только ${uploadedCount}/${fileList.length} файлов`);
         }
       } else {
-        console.log('ℹ️ Файлов для загрузки нет');
         message.success('Заказ создан успешно!');
       }
       
@@ -116,11 +116,8 @@ const CreateOrder: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('❌ Ошибка создания заказа:', error);
-      console.error('📋 Детали ошибки:', error?.response?.data);
-      
       const errorData = error?.response?.data;
       
-      // Если есть детальные ошибки по полям
       if (errorData && typeof errorData === 'object') {
         Object.entries(errorData).forEach(([field, messages]) => {
           if (Array.isArray(messages)) {
@@ -141,29 +138,26 @@ const CreateOrder: React.FC = () => {
   const onFinish = (values: any) => {
     console.log('📝 Отправка заказа:', values);
     
-    // Формируем данные заказа
     const orderData: any = {
       title: values.title,
       description: values.description,
       deadline: values.deadline?.format('YYYY-MM-DD'),
-      custom_topic: values.custom_topic,
       budget: values.budget,
+      private_notes: values.private_notes,
+      promo_code: values.promo_code,
     };
 
-    // Если выбран существующий предмет из списка
+    // Обработка предмета
     if (values.subject_id && typeof values.subject_id === 'number') {
       orderData.subject_id = values.subject_id;
-    } 
-    // Если введен новый предмет (строка)
-    else if (values.subject_id && typeof values.subject_id === 'string') {
+    } else if (values.subject_id && typeof values.subject_id === 'string') {
       orderData.custom_subject = values.subject_id;
     }
 
-    // Аналогично для типа работы
+    // Обработка типа работы
     if (values.work_type_id && typeof values.work_type_id === 'number') {
       orderData.work_type_id = values.work_type_id;
-    } 
-    else if (values.work_type_id && typeof values.work_type_id === 'string') {
+    } else if (values.work_type_id && typeof values.work_type_id === 'string') {
       orderData.custom_work_type = values.work_type_id;
     }
     
@@ -194,171 +188,301 @@ const CreateOrder: React.FC = () => {
             deadline: dayjs().add(7, 'day'),
           }}
         >
-          <Form.Item
-            name="title"
-            label="Название заказа"
-            rules={[{ required: true, message: 'Введите название заказа' }]}
-          >
-            <Input placeholder="Например: Курсовая работа по экономике" />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Описание задания"
-            rules={[{ required: true, message: 'Введите описание задания' }]}
-          >
-            <TextArea
-              rows={4}
-              placeholder="Подробно опишите задание, требования, объем работы..."
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="subject_id"
-            label="Предмет"
-            rules={[{ required: true, message: 'Выберите или введите предмет' }]}
-          >
-            <Select
-              placeholder="Выберите или введите предмет"
-              showSearch
-              mode="tags"
-              maxCount={1}
-              optionFilterProp="label"
-              filterOption={(input, option) => {
-                if (option && 'label' in option && typeof option.label === 'string') {
-                  return option.label.toLowerCase().includes(input.toLowerCase());
-                }
-                return false;
-              }}
-              onChange={(value) => {
-                // value будет массивом из-за mode="tags"
-                if (Array.isArray(value) && value.length > 0) {
-                  form.setFieldValue('subject_id', value[0]);
-                }
-              }}
+          {/* Основная секция заказа */}
+          <div className={styles.orderSection}>
+            {/* Название работы - большое поле */}
+            <Form.Item
+              name="title"
+              rules={[{ required: true, message: 'Введите название работы' }]}
+              className={styles.titleField}
             >
-              {apiSubjects.map((subject) => (
-                <Select.Option key={subject.id} value={subject.id} label={subject.name}>
-                  {subject.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+              <Input 
+                placeholder="Введите название работы" 
+                className={styles.titleInput}
+              />
+            </Form.Item>
 
-          <Form.Item
-            name="custom_topic"
-            label="Тема"
-            rules={[{ required: true, message: 'Введите тему' }]}
-          >
-            <Input placeholder="Введите тему работы" />
-          </Form.Item>
+            {/* Тип работы, предмет и дата в одной строке */}
+            <div className={styles.typeSubjectDateRow}>
+              <Form.Item
+                name="work_type_id"
+                rules={[{ required: true, message: 'Выберите тип работы' }]}
+                className={styles.typeField}
+              >
+                <Select
+                  placeholder="Тип работы"
+                  showSearch
+                  allowClear
+                  optionFilterProp="label"
+                  filterOption={(input, option) => {
+                    if (option && 'label' in option && typeof option.label === 'string') {
+                      return option.label.toLowerCase().includes(input.toLowerCase());
+                    }
+                    return false;
+                  }}
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <div style={{ padding: '8px', borderTop: '1px solid #f0f0f0' }}>
+                        <Input.Search
+                          placeholder="Добавить новый тип работы"
+                          enterButton="Добавить"
+                          onSearch={async (value) => {
+                            if (value && value.trim()) {
+                              const trimmedValue = value.trim();
+                              const exists = allWorkTypes.find(wt => wt.name.toLowerCase() === trimmedValue.toLowerCase());
+                              if (!exists) {
+                                try {
+                                  const newWorkType = await handleCreateWorkType(trimmedValue);
+                                  form.setFieldValue('work_type_id', newWorkType.id);
+                                } catch (error) {
+                                  console.error('Ошибка создания типа работы:', error);
+                                }
+                              } else {
+                                message.info('Такой тип работы уже существует');
+                                form.setFieldValue('work_type_id', exists.id);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  className={styles.selectField}
+                >
+                  {allWorkTypes.map((workType) => (
+                    <Select.Option key={workType.id} value={workType.id} label={workType.name}>
+                      {workType.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-          <Form.Item
-            name="work_type_id"
-            label="Тип работы"
-            rules={[{ required: true, message: 'Выберите или введите тип работы' }]}
-          >
-            <Select
-              placeholder="Выберите или введите тип работы"
-              showSearch
-              mode="tags"
-              maxCount={1}
-              optionFilterProp="label"
-              filterOption={(input, option) => {
-                if (option && 'label' in option && typeof option.label === 'string') {
-                  return option.label.toLowerCase().includes(input.toLowerCase());
-                }
-                return false;
-              }}
-              onChange={(value) => {
-                // value будет массивом из-за mode="tags"
-                if (Array.isArray(value) && value.length > 0) {
-                  form.setFieldValue('work_type_id', value[0]);
-                }
-              }}
-            >
-              {apiWorkTypes.map((workType) => (
-                <Select.Option key={workType.id} value={workType.id} label={workType.name}>
-                  {workType.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+              <Form.Item
+                name="subject_id"
+                rules={[{ required: true, message: 'Выберите предмет' }]}
+                className={styles.subjectField}
+              >
+                <Select
+                  placeholder="Предмет"
+                  showSearch
+                  allowClear
+                  optionFilterProp="label"
+                  filterOption={(input, option) => {
+                    if (option && 'label' in option && typeof option.label === 'string') {
+                      return option.label.toLowerCase().includes(input.toLowerCase());
+                    }
+                    return false;
+                  }}
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <div style={{ padding: '8px', borderTop: '1px solid #f0f0f0' }}>
+                        <Input.Search
+                          placeholder="Добавить новый предмет"
+                          enterButton="Добавить"
+                          onSearch={async (value) => {
+                            if (value && value.trim()) {
+                              const trimmedValue = value.trim();
+                              const exists = allSubjects.find(s => s.name.toLowerCase() === trimmedValue.toLowerCase());
+                              if (!exists) {
+                                try {
+                                  const newSubject = await handleCreateSubject(trimmedValue);
+                                  form.setFieldValue('subject_id', newSubject.id);
+                                } catch (error) {
+                                  console.error('Ошибка создания предмета:', error);
+                                }
+                              } else {
+                                message.info('Такой предмет уже существует');
+                                form.setFieldValue('subject_id', exists.id);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  className={styles.selectField}
+                >
+                  {allSubjects.map((subject) => (
+                    <Select.Option key={subject.id} value={subject.id} label={subject.name}>
+                      {subject.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
 
-          <Form.Item
-            name="budget"
-            label="Желаемая цена (₽)"
-            rules={[
-              { required: true, message: 'Укажите желаемую цену' },
-              { type: 'number', min: 1, message: 'Цена должна быть больше 0' }
-            ]}
-          >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="Введите желаемую цену"
-              min={1}
-              step={100}
-              precision={0}
-            />
-          </Form.Item>
-
-
-          <Form.Item
-            name="deadline"
-            label="Срок выполнения"
-            rules={[
-              { required: true, message: 'Выберите срок выполнения' },
-              {
-                validator: (_, value) => {
-                  if (value && value.isBefore(dayjs(), 'day')) {
-                    return Promise.reject(new Error('Дедлайн не может быть в прошлом'));
+              <Form.Item
+                name="deadline"
+                rules={[
+                  { required: true, message: 'Выберите дату сдачи' },
+                  {
+                    validator: (_, value) => {
+                      if (value && value.isBefore(dayjs(), 'day')) {
+                        return Promise.reject(new Error('Дедлайн не может быть в прошлом'));
+                      }
+                      return Promise.resolve();
+                    }
                   }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <DatePicker
-              style={{ width: '100%' }}
-              format="DD.MM.YYYY"
-              placeholder="Выберите дату"
-              disabledDate={(current) => current && current < dayjs().startOf('day')}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="files"
-            label="Прикрепить файлы"
-            extra={`Максимальный размер файла: ${MAX_FILE_SIZE_MB} МБ. Поддерживаются документы, изображения, архивы`}
-          >
-            <Dragger {...uploadProps}>
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
-              <p className="ant-upload-hint">
-                Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
-              </p>
-            </Dragger>
-          </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                loading={createOrderMutation.isPending}
-                className={styles.buttonPrimary}
+                ]}
+                className={styles.dateField}
               >
-                Создать заказ
-              </Button>
-              <Button 
-                onClick={() => form.resetFields()}
-                className={styles.buttonSecondary}
+                <DatePicker
+                  placeholder="Дата сдачи"
+                  format="DD.MM.YYYY"
+                  disabledDate={(current) => current && current < dayjs().startOf('day')}
+                  className={styles.dateInput}
+                />
+              </Form.Item>
+            </div>
+
+            {/* Описание работы */}
+            <div className={styles.descriptionSection}>
+              <div className={styles.descriptionLabel}>Описание работы</div>
+              <Form.Item
+                name="description"
+                rules={[{ required: true, message: 'Введите описание работы' }]}
+                className={styles.descriptionField}
               >
-                Очистить
+                <Input.TextArea
+                  placeholder="Введите описание работы"
+                  rows={6}
+                  className={styles.descriptionTextarea}
+                />
+              </Form.Item>
+            </div>
+
+            {/* Приватные заметки */}
+            <Form.Item
+              name="private_notes"
+              className={styles.privateNotesField}
+            >
+              <Input.TextArea
+                placeholder="Поле, видимое только для вас"
+                rows={3}
+                className={styles.privateNotesTextarea}
+              />
+            </Form.Item>
+
+            {/* Добавить файлы */}
+            <Form.Item className={styles.filesField}>
+              <Button 
+                icon={<InboxOutlined />} 
+                className={styles.addFilesButton}
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.multiple = true;
+                  input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar';
+                  input.onchange = (e) => {
+                    const files = (e.target as HTMLInputElement).files;
+                    if (files) {
+                      Array.from(files).forEach(file => {
+                        const isLt10M = file.size < MAX_FILE_SIZE_BYTES;
+                        if (!isLt10M) {
+                          message.error(VALIDATION_MESSAGES.fileSize(MAX_FILE_SIZE_MB));
+                          return;
+                        }
+                        
+                        const uploadFile: UploadFile = {
+                          uid: `${Date.now()}-${file.name}`,
+                          name: file.name,
+                          status: 'done',
+                          size: file.size,
+                          type: file.type,
+                          originFileObj: file as any,
+                        };
+                        
+                        setFileList(prev => [...prev, uploadFile]);
+                      });
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                Добавить файлы
               </Button>
-            </Space>
+              
+              {fileList.length > 0 && (
+                <div className={styles.filesList}>
+                  {fileList.map(file => (
+                    <div key={file.uid} className={styles.fileItem}>
+                      <span>{file.name}</span>
+                      <Button 
+                        type="text" 
+                        size="small"
+                        onClick={() => setFileList(prev => prev.filter(f => f.uid !== file.uid))}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Form.Item>
+          </div>
+
+          {/* Секция стоимости и параметров */}
+          <div className={styles.priceSection}>
+            {/* Стоимость и описание в одной строке */}
+            <div className={styles.priceRow}>
+              <Form.Item
+                name="budget"
+                rules={[
+                  { required: true, message: 'Укажите стоимость' },
+                  { 
+                    validator: (_, value) => {
+                      if (value !== undefined && value !== null && Number(value) <= 0) {
+                        return Promise.reject(new Error('Стоимость должна быть больше 0'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+                className={styles.priceFieldContainer}
+              >
+                <InputNumber
+                  placeholder="Стоимость"
+                  min={1}
+                  className={styles.priceInput}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+              
+              <div className={styles.priceDescription}>
+                Сумма, которую вы готовы заплатить эксперту
+              </div>
+            </div>
+
+            {/* Промокод */}
+            <div className={styles.promoSection}>
+              <Button 
+                type="link" 
+                className={styles.promoLink}
+                onClick={() => setShowPromoCode(!showPromoCode)}
+              >
+                Есть промокод на скидку?
+              </Button>
+              
+              {showPromoCode && (
+                <Form.Item name="promo_code" className={styles.promoInput}>
+                  <Input placeholder="Введите промокод" className={styles.promoInputField} />
+                </Form.Item>
+              )}
+            </div>
+          </div>
+
+          {/* Кнопка отправки */}
+          <Form.Item className={styles.submitSection}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={createOrderMutation.isPending}
+              className={styles.submitButton}
+              size="large"
+            >
+              Создать заказ
+            </Button>
           </Form.Item>
         </Form>
       </Card>

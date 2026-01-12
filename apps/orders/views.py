@@ -42,7 +42,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 'deadline': 'Дедлайн не может быть в прошлом'
             })
         
-        order = serializer.save()
+        order = serializer.save(client=self.request.user)
         # Автоматически применяем лучшую доступную скидку
         DiscountService.apply_best_discount(order)
 
@@ -50,7 +50,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     def available(self, request):
         """Список доступных заказов для исполнителя (новые, без назначенного эксперта)."""
         user = request.user
-        queryset = self.queryset.filter(status='new', expert__isnull=True).exclude(client=user).prefetch_related('bids__expert', 'files', 'comments')
+        # Убрали exclude(client=user), чтобы клиент видел свой заказ в общей ленте
+        queryset = self.queryset.filter(status='new', expert__isnull=True).prefetch_related('bids__expert', 'files', 'comments')
         
         try:
             page = self.paginate_queryset(queryset)
@@ -150,6 +151,42 @@ class OrderViewSet(viewsets.ModelViewSet):
             NotificationService.notify_status_changed(order, old_status)
         else:
             order.save(update_fields=['expert', 'budget', 'updated_at'])
+        return Response(OrderSerializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def reject_bid(self, request, pk=None):
+        """Клиент отклоняет ставку."""
+        order = self.get_object()
+        user = request.user
+        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        bid_id = request.data.get('bid_id')
+        if not bid_id:
+            return Response({'bid_id': 'Не указан ID ставки'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            bid = Bid.objects.get(id=bid_id, order=order)
+        except Bid.DoesNotExist:
+            return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        
+        bid.status = 'rejected'
+        bid.save(update_fields=['status'])
+        return Response(OrderSerializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def cancel_bid(self, request, pk=None):
+        """Эксперт отменяет свою ставку."""
+        order = self.get_object()
+        user = request.user
+        if getattr(user, 'role', None) != 'expert':
+             return Response({'detail': 'Только эксперт может отменять ставку.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            bid = Bid.objects.get(order=order, expert=user)
+        except Bid.DoesNotExist:
+             return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
+
+        bid.status = 'cancelled'
+        bid.save(update_fields=['status'])
         return Response(OrderSerializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
