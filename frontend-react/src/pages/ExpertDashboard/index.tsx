@@ -269,7 +269,7 @@ const ExpertDashboard: React.FC = () => {
                     // Отзывы только для экспертов
                     ...(userProfile?.role === 'expert' ? [{
                       key: 'reviews',
-                      label: 'Отзывы 3',
+                      label: 'Отзывы',
                       children: <ReviewsTab isMobile={isMobile} />,
                     }] : []),
                     {
@@ -280,7 +280,7 @@ const ExpertDashboard: React.FC = () => {
                     // Работы только для экспертов
                     ...(userProfile?.role === 'expert' ? [{
                       key: 'works',
-                      label: 'Работы 0',
+                      label: 'Работы',
                       children: (
                         <WorksTab 
                           isMobile={isMobile}
