@@ -192,7 +192,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
             <div className={styles.profileSection}>
               <Avatar
-                size={isMobile ? 32 : 40}
+                size={isMobile ? 28 : 32}
                 src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
                 icon={!userProfile?.avatar && <UserOutlined />}
                 className={styles.avatar}
