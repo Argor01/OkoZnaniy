@@ -78,6 +78,10 @@ docker-compose exec -T backend python manage.py collectstatic --noinput 2>/dev/n
 echo "📚 Проверяем справочники..."
 docker-compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
 
+# Создаем тестовые аккаунты администраторов
+echo "👑 Создаем тестовые аккаунты администраторов..."
+docker-compose exec -T backend python manage.py create_admin_accounts 2>/dev/null || true
+
 # Создаем тестовые аккаунты с чатами
 echo "👥 Создаем тестовые аккаунты с чатами..."
 docker-compose exec -T backend python setup_test_chats.py 2>/dev/null || true
@@ -87,5 +91,10 @@ echo "📊 Проверьте статус контейнеров: docker-compos
 echo "📝 Просмотр логов: docker-compose logs -f"
 echo ""
 echo "🧪 Тестовые аккаунты:"
-echo "   Клиенты: client1@test.com / test123, client2@test.com / test123"
-echo "   Эксперты: expert1@test.com / test123, expert2@test.com / test123"
+echo "   👑 Администраторы:"
+echo "      Директор: director@test.com / test123"
+echo "      Партнер: partner@test.com / test123"
+echo "      Админ: admin@test.com / test123"
+echo "   👥 Пользователи:"
+echo "      Клиенты: client1@test.com / test123, client2@test.com / test123"
+echo "      Эксперты: expert1@test.com / test123, expert2@test.com / test123"
