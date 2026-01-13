@@ -1,23 +1,23 @@
 /* Стили для ShopReadyWorks */
 
-.layout {
-  min-height: 100vh;
+/* Контейнер для контента с отступами как в MyWorks */
+.container {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
-.mainLayout {
-  margin-left: 270px;
-  margin-right: 10px;
-  transition: margin-left 0.3s;
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+  }
 }
 
-.content {
-  margin: 24px;
-  padding: 24px 24px 24px 40px;
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  min-height: calc(100vh - 112px);
-}
-
+/* Стили для заголовка */
 .header {
   display: flex;
   justify-content: space-between;
@@ -28,17 +28,46 @@
 .title {
   color: #1f2937;
   font-weight: 600;
+  margin: 0 !important;
 }
 
-/* Адаптив для мобильных */
-@media (max-width: 768px) {
-  .mainLayout {
-    margin-left: 0;
-  }
+/* Стили для карточек работ */
+.workCard {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
 
-  .content {
-    margin: 16px;
-    padding: 16px;
-    border-radius: 8px;
-  }
+.workCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Стили для фильтров */
+.filterCard {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  padding: 24px;
+}
+
+/* Стили для пустого состояния */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+/* Стили для загрузки */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
 }

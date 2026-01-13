@@ -39,8 +39,8 @@ const ShopReadyWorks: React.FC = () => {
 
   const handlePurchase = async (id: number) => {
     try {
-      await shopApi.purchaseWork(id);
-      // Обновить список работ
+      // TODO: Реализовать покупку работы
+      console.log('Purchase work:', id);
     } catch (error) {
       console.error('Error purchasing work:', error);
     }
@@ -120,18 +120,18 @@ const ShopReadyWorks: React.FC = () => {
       
       <Filters
         filters={filters}
-        onFiltersChange={setFilters}
-        subjects={subjects}
-        categories={categories}
+        onFilterChange={setFilters}
       />
       
       <WorksList
         works={filteredWorks}
+        onWorkClick={(id) => console.log('Work clicked:', id)}
+        onFavorite={(id) => console.log('Favorite:', id)}
         onPurchase={handlePurchase}
         onDelete={handleDelete}
-        userProfile={profile}
       />
     </div>
   );
+};
 
 export default ShopReadyWorks;

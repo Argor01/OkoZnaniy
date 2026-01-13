@@ -13,6 +13,7 @@ import { WORK_TYPES } from '../../config/workTypes';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
+import styles from './OrdersFeed.module.css';
 
 // Импорт модальных окон
 import ProfileModal from '../ExpertDashboard/modals/ProfileModal';
@@ -188,18 +189,11 @@ const OrdersFeed: React.FC = () => {
   };
 
   return (
-    <>
+    <div className={styles.contentContainer}>
       {/* Заголовок и кнопка создания */}
       {!isMobile && (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: 24,
-          flexWrap: 'wrap',
-          gap: 16
-        }}>
-          <div>
+        <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
             <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
               Лента работ
             </Title>
@@ -211,16 +205,7 @@ const OrdersFeed: React.FC = () => {
             type="primary" 
             size="large"
             onClick={() => navigate('/create-order')}
-            style={{
-              background: '#1E90FF',
-              border: 'none',
-              borderRadius: 12,
-              height: 48,
-              padding: '0 32px',
-              fontSize: 16,
-              fontWeight: 500,
-              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-            }}
+            className={styles.primaryButton}
           >
             Создать заказ
           </Button>
@@ -229,11 +214,7 @@ const OrdersFeed: React.FC = () => {
 
       {/* Фильтры */}
       <Card 
-        style={{ 
-          marginBottom: 24,
-          borderRadius: 16,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-        }}
+        className={styles.filterCard}
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={12} lg={8}>
@@ -369,13 +350,7 @@ const OrdersFeed: React.FC = () => {
       {/* Информационное сообщение для клиентов */}
       {userProfile?.role === 'client' && filteredOrders.length === 0 && !ordersLoading && (
         <Card 
-          style={{ 
-            marginBottom: 24,
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            border: 'none',
-            color: 'white'
-          }}
+          className={styles.infoCard}
         >
           <div style={{ textAlign: 'center', padding: '20px' }}>
             <Title level={4} style={{ color: 'white', marginBottom: 16 }}>
@@ -464,12 +439,7 @@ const OrdersFeed: React.FC = () => {
             <Card
               key={order.id}
               hoverable
-              style={{
-                borderRadius: 16,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-              }}
+              className={styles.orderCard}
               styles={{ body: { padding: 24 } }}
               onClick={() => navigate(`/orders/${order.id}`)}
             >
@@ -490,58 +460,30 @@ const OrdersFeed: React.FC = () => {
                   </Title>
                   <Space size={8} wrap>
                     <Tag 
-                      style={{ 
-                        borderRadius: 16, 
-                        padding: '4px 12px',
-                        border: 'none',
-                        fontWeight: 600,
-                        color: '#fff',
-                        textTransform: 'uppercase',
-                        background: '#52c41a' // Всегда зеленый для новых заказов
-                      }}
+                      className={styles.statusTag}
+                      style={{ background: '#52c41a' }}
                     >
                       {getStatusText(order.status) || 'NEW'}
                     </Tag>
                     {(order.custom_subject || order.subject?.name || order.subject_name) && (
-                      <Tag style={{ 
-                        borderRadius: 16, 
-                        padding: '4px 12px',
-                        border: 'none',
-                        fontWeight: 600,
-                        color: '#fff',
-                        background: '#1890ff'
-                      }}>
+                      <Tag className={styles.subjectTag}>
                         {order.custom_subject || order.subject?.name || order.subject_name}
                       </Tag>
                     )}
                     {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
-                      <Tag style={{ 
-                        borderRadius: 16, 
-                        padding: '4px 12px',
-                        border: 'none',
-                        fontWeight: 600,
-                        color: '#fff',
-                        background: '#722ed1'
-                      }}>
+                      <Tag className={styles.workTypeTag}>
                         {order.custom_work_type || order.work_type?.name || order.work_type_name}
                       </Tag>
                     )}
                     {order.topic?.name && (
-                      <Tag style={{ 
-                        borderRadius: 16, 
-                        padding: '4px 12px',
-                        border: 'none',
-                        fontWeight: 600,
-                        color: '#fff',
-                        background: '#eb2f96'
-                      }}>
+                      <Tag className={styles.topicTag}>
                         Тема: {order.topic.name}
                       </Tag>
                     )}
                   </Space>
                 </div>
                 <div style={{ textAlign: 'right', marginLeft: 16 }}>
-                  <div style={{ fontSize: 24, fontWeight: 600, color: '#667eea' }}>
+                  <div className={styles.budgetText}>
                     {order.budget ? `${order.budget} ₽` : 'Договорная'}
                   </div>
                 </div>
@@ -576,11 +518,7 @@ const OrdersFeed: React.FC = () => {
                         <Tooltip key={file.id} title={`Скачать ${file.filename} (${file.file_size || 'размер неизвестен'})`}>
                           <Tag 
                             icon={getFileIcon(file.filename)}
-                            style={{ 
-                              cursor: 'pointer',
-                              padding: '4px 12px',
-                              fontSize: 13
-                            }}
+                            className={styles.fileTag}
                             onClick={() => {
                               if (file.file_url || file.file) {
                                 window.open(file.file_url || file.file, '_blank');
@@ -652,15 +590,12 @@ const OrdersFeed: React.FC = () => {
                     <Button 
                       danger
                       icon={<DeleteOutlined />}
+                      className={`${styles.actionButton} ${styles.deleteButton}`}
                       onClick={(e) => {
                         e.stopPropagation(); // Предотвращаем переход к деталям
                         if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
                           handleDeleteOrder(order.id);
                         }
-                      }}
-                      style={{
-                        borderRadius: 8,
-                        fontWeight: 500
                       }}
                     >
                       Удалить
@@ -668,16 +603,11 @@ const OrdersFeed: React.FC = () => {
                   ) : userProfile?.role === 'expert' ? (
                     <Button 
                       type="primary"
+                      className={`${styles.actionButton} ${styles.bidButton}`}
                       onClick={(e) => {
                         e.stopPropagation(); // Предотвращаем переход к деталям
                         setSelectedOrderForBid(order);
                         setBidModalVisible(true);
-                      }}
-                      style={{
-                        background: '#52c41a',
-                        border: 'none',
-                        borderRadius: 8,
-                        fontWeight: 500
                       }}
                     >
                       Откликнуться
@@ -817,7 +747,7 @@ const OrdersFeed: React.FC = () => {
         orderTitle={selectedOrderForBid?.title}
         orderBudget={selectedOrderForBid?.budget}
       />
-    </>
+    </div>
   );
 };
 

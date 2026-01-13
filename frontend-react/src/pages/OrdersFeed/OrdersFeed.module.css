@@ -1,0 +1,210 @@
+/* OrdersFeed Page Styles */
+
+/* Контейнер для контента с отступами как в MyWorks */
+.contentContainer {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+
+/* Стили для карточек заказов */
+.orderCard {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Стили для фильтров */
+.filterCard {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+/* Стили для заголовка */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.headerContent h2 {
+  margin: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Стили для кнопок */
+.primaryButton {
+  background: #1E90FF;
+  border: none;
+  border-radius: 12px;
+  height: 48px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.primaryButton:hover {
+  background: #1c7ed6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .filterCard {
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .orderCard {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+}
+
+/* Стили для пустого состояния */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+/* Стили для загрузки */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+/* Стили для информационных карточек */
+.infoCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.infoCard .ant-card-body {
+  padding: 20px;
+}
+
+/* Стили для тегов */
+.statusTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.subjectTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 600;
+  color: #fff;
+  background: #1890ff;
+}
+
+.workTypeTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 600;
+  color: #fff;
+  background: #722ed1;
+}
+
+.topicTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 600;
+  color: #fff;
+  background: #eb2f96;
+}
+
+/* Стили для файлов */
+.fileTag {
+  cursor: pointer;
+  padding: 4px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.fileTag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для бюджета */
+.budgetText {
+  font-size: 24px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* Стили для действий */
+.actionButton {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bidButton {
+  background: #52c41a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.bidButton:hover {
+  background: #389e0d;
+}
+
+.deleteButton {
+  border-radius: 8px;
+  font-weight: 500;
+}
