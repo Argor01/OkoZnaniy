@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider, message, List, Avatar } from 'antd';
-import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, TeamOutlined, StarOutlined } from '@ant-design/icons';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider, message, List, Avatar, Radio } from 'antd';
+import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, TeamOutlined, StarOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, Bid } from '../../../../api/orders';
@@ -25,6 +25,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my'); // Новый state для фильтра
 
   // Загружаем профиль пользователя
   const { data: userProfile } = useQuery({
@@ -46,11 +47,11 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     },
   });
 
-  // Загружаем отклики для выбранного заказа (если клиент)
+  // Загружаем отклики для выбранного заказа (только для размещенных заказов)
   const { data: bids, isLoading: bidsLoading } = useQuery({
     queryKey: ['order-bids', selectedOrder?.id],
     queryFn: () => ordersApi.getBids(selectedOrder.id),
-    enabled: !!selectedOrder?.id && (userProfile?.role === 'client') && isModalVisible,
+    enabled: !!selectedOrder?.id && orderFilter === 'my' && isModalVisible,
   });
 
   const handleDeleteOrder = () => {
@@ -69,22 +70,25 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     });
   };
 
-  // Загружаем заказы
-  const { data: ordersData, isLoading } = useQuery({
-    queryKey: ['user-orders', userProfile?.role],
-    queryFn: () => {
-      if (userProfile?.role === 'client') {
-        return ordersApi.getClientOrders();
-      } else if (userProfile?.role === 'expert') {
-        // Для экспертов показываем доступные заказы (лента)
-        return ordersApi.getAvailableOrders();
-      }
-      return null;
-    },
+  // Загружаем размещенные заказы пользователя
+  const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
+    queryKey: ['user-orders'],
+    queryFn: () => ordersApi.getClientOrders(),
     enabled: !!userProfile,
   });
 
-  const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
+  // Загружаем доступные заказы (лента)
+  const { data: availableOrdersData, isLoading: availableOrdersLoading } = useQuery({
+    queryKey: ['available-orders'],
+    queryFn: () => ordersApi.getAvailableOrders(),
+    enabled: !!userProfile,
+  });
+
+  // Определяем какие данные показывать в зависимости от фильтра
+  const currentOrdersData = orderFilter === 'my' ? myOrdersData : availableOrdersData;
+  const isLoading = orderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
+  
+  const orders = Array.isArray(currentOrdersData?.results) ? currentOrdersData.results : (Array.isArray(currentOrdersData) ? currentOrdersData : []);
   const isClient = userProfile?.role === 'client';
 
   // Используем реальные данные
@@ -93,7 +97,10 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   // Отладочная информация
   console.log('OrdersTab Debug:', {
     userProfile: userProfile?.role,
-    ordersData,
+    orderFilter,
+    myOrdersData,
+    availableOrdersData,
+    currentOrdersData,
     orders: orders.length,
     displayOrders: displayOrders.length,
     isLoading,
@@ -127,23 +134,59 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   return (
     <div>
       <div className={styles.sectionCard}>
-        <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 className={styles.sectionTitle}>
-            {isClient ? 'Мои заказы' : 'Доступные заказы'}
+            Заказы
           </h2>
-          {isClient && (
-            <Button 
-              type="primary"
-              onClick={() => navigate('/create-order')}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                borderRadius: 8,
+          <Button 
+            type="primary"
+            onClick={() => navigate('/create-order')}
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              border: 'none',
+              borderRadius: 8,
+            }}
+          >
+            Создать заказ
+          </Button>
+        </div>
+
+        {/* Фильтр заказов */}
+        <div style={{ marginBottom: 24 }}>
+          <Radio.Group 
+            value={orderFilter} 
+            onChange={(e) => setOrderFilter(e.target.value)}
+            style={{ width: '100%' }}
+          >
+            <Radio.Button 
+              value="my" 
+              style={{ 
+                borderRadius: '8px 0 0 8px',
+                fontWeight: 500,
+                minWidth: isMobile ? 'auto' : 150,
+                textAlign: 'center'
               }}
             >
-              Создать заказ
-            </Button>
-          )}
+              <Space>
+                <UserOutlined />
+                Размещенные заказы
+              </Space>
+            </Radio.Button>
+            <Radio.Button 
+              value="available" 
+              style={{ 
+                borderRadius: '0 8px 8px 0',
+                fontWeight: 500,
+                minWidth: isMobile ? 'auto' : 150,
+                textAlign: 'center'
+              }}
+            >
+              <Space>
+                <FilterOutlined />
+                Доступные заказы
+              </Space>
+            </Radio.Button>
+          </Radio.Group>
         </div>
 
         {displayOrders.length === 0 ? (
@@ -151,14 +194,27 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
             description={
               <div>
                 <Text style={{ fontSize: 16, color: '#999' }}>
-                  {isClient 
-                    ? 'У вас пока нет заказов'
-                    : 'Нет доступных заказов'}
+                  {orderFilter === 'my' 
+                    ? 'У вас пока нет размещенных заказов'
+                    : 'Нет доступных заказов для отклика'}
                 </Text>
               </div>
             }
             style={{ padding: '60px 0' }}
           >
+            {orderFilter === 'my' && (
+              <Button 
+                type="primary"
+                onClick={() => navigate('/create-order')}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  borderRadius: 8,
+                }}
+              >
+                Создать первый заказ
+              </Button>
+            )}
           </Empty>
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>
@@ -231,6 +287,21 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   >
                     Подробнее
                   </Button>
+                  {orderFilter === 'available' && userProfile?.role === 'expert' && (
+                    <Button 
+                      type="primary"
+                      size="small"
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                      style={{
+                        background: '#52c41a',
+                        border: 'none',
+                        borderRadius: 6,
+                        marginLeft: 8
+                      }}
+                    >
+                      Откликнуться
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}
@@ -252,7 +323,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           <Button key="close" onClick={handleCloseModal}>
             Закрыть
           </Button>,
-          !isClient && selectedOrder && (
+          orderFilter === 'available' && selectedOrder && (
             <Button 
               key="respond" 
               type="primary"
@@ -413,7 +484,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               </>
             )}
 
-            {isClient && (
+            {orderFilter === 'my' && (
               <>
                 <Divider orientation="left">Управление заказом</Divider>
                 <Space wrap style={{ marginBottom: 24 }}>
