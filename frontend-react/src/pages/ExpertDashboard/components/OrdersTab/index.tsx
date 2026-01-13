@@ -201,21 +201,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               </div>
             }
             style={{ padding: '60px 0' }}
-          >
-            {orderFilter === 'my' && (
-              <Button 
-                type="primary"
-                onClick={() => navigate('/create-order')}
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  borderRadius: 8,
-                }}
-              >
-                Создать первый заказ
-              </Button>
-            )}
-          </Empty>
+          />
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>
             {displayOrders.map((order: any) => (
