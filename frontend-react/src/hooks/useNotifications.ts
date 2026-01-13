@@ -39,7 +39,7 @@ export const useNotifications = () => {
   const loadNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const apiNotifications = await notificationsApi.getNotifications();
+      const apiNotifications = await notificationsApi.getAll();
       const formatted = apiNotifications.map(formatNotification);
       setNotifications(formatted);
       setUnreadCount(formatted.filter(n => !n.isRead).length);

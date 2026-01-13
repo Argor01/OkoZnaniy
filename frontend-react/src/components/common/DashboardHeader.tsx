@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Avatar, Badge, Button, Space, Typography, Dropdown, Menu } from 'antd';
+import { Layout, Badge, Button, Space, Typography, Dropdown, Menu } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -110,7 +110,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const profileMenuItems: MenuProps['items'] = [
     {
       key: 'profile',
-      label: 'Мой профиль',
+      label: 'Редактировать профиль',
       icon: <UserOutlined />,
       onClick: onProfileClick,
     },
@@ -191,12 +191,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Профиль */}
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
             <div className={styles.profileSection}>
-              <Avatar
-                size={isMobile ? 28 : 32}
-                src={userProfile?.avatar ? `http://localhost:8000${userProfile.avatar}` : undefined}
-                icon={!userProfile?.avatar && <UserOutlined />}
-                className={styles.avatar}
-              />
               {!isMobile && (
                 <Text className={styles.username}>
                   {userProfile?.username || 'Пользователь'}

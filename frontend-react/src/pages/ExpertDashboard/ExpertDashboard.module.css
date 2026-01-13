@@ -10,10 +10,10 @@
 /* Фиксированная навигация для ExpertDashboard */
 .expertDashboardPage :global(.ant-layout-sider) {
   position: fixed !important;
-  top: 0 !important;
+  top: 64px !important; /* Начинается под хедером (высота хедера 64px) */
   left: 0 !important;
-  height: 100vh !important;
-  z-index: 1001 !important; /* Выше хедера */
+  height: calc(100vh - 64px) !important; /* Высота минус высота хедера */
+  z-index: 999 !important; /* Ниже хедера */
   backdrop-filter: blur(8px);
   background: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
@@ -22,14 +22,14 @@
 /* Фиксированный хедер - на всю ширину */
 .expertDashboardPage :global(.ant-layout-header) {
   margin: 0 !important;
-  padding-left: 24px !important;
+  padding-left: 24px !important; /* Обычный отступ слева */
   padding-right: 24px !important;
   width: 100% !important; /* Полная ширина */
   max-width: 100% !important;
   position: fixed !important;
   top: 0 !important;
   left: 0 !important; /* Начинается с левого края */
-  z-index: 998 !important; /* Ниже сайдбара */
+  z-index: 1000 !important; /* Выше сайдбара */
   box-sizing: border-box !important;
   backdrop-filter: blur(8px);
   background: rgba(255, 255, 255, 0.95) !important;
@@ -1564,6 +1564,15 @@
   flex-shrink: 0;
 }
 
+/* Исключение для аватарки в хедере - оставляем размер по умолчанию */
+:global(.ant-layout-header .ant-avatar) {
+  width: auto !important;
+  height: auto !important;
+  font-size: inherit !important;
+  border: 2px solid #667eea !important;
+  box-shadow: none !important;
+}
+
 :global(.ant-avatar.ant-avatar-icon) {
   font-size: 18px;
 }
@@ -1887,6 +1896,7 @@
     width: 100% !important; /* На мобильных хедер на всю ширину */
     max-width: 100% !important;
     left: 0 !important; /* Начинается с левого края */
+    z-index: 1000 !important; /* Выше сайдбара на мобильных тоже */
   }
   
   /* На мобильных сайдбар не фиксированный */

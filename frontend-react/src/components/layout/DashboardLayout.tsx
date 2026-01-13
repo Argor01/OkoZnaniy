@@ -200,6 +200,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <DashboardContext.Provider value={contextValue}>
       <Layout style={{ minHeight: '100vh' }}>
+        {/* Header */}
+        <DashboardHeader
+          userProfile={userProfile ? {
+            username: userProfile.username,
+            avatar: userProfile.avatar,
+            role: userProfile.role,
+            balance: balance
+          } : undefined}
+          unreadMessages={0}
+          unreadNotifications={unreadNotifications}
+          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
+          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
+          onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
+          onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
+          onLogout={handleLogout}
+          onMenuClick={() => setMobileMenuVisible(true)}
+          isMobile={isMobile}
+        />
+        
         <Sidebar
           selectedKey={getSelectedKey()}
           onMenuSelect={handleMenuSelect}
@@ -222,6 +241,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         <Layout style={{ 
           marginLeft: isMobile ? 0 : 250, 
+          marginTop: 64, // Отступ для хедера
           background: '#f5f5f5',
           transition: 'all 0.2s'
         }}>
@@ -247,19 +267,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       />
       <NotificationsModal 
         visible={notificationsModalVisible} 
-        onClose={() => setNotificationsModalVisible(false)} 
+        onClose={() => setNotificationsModalVisible(false)}
+        isMobile={isMobile}
+        isDesktop={!isMobile}
       />
       <ArbitrationModal 
         visible={arbitrationModalVisible} 
-        onClose={() => setArbitrationModalVisible(false)} 
+        onClose={() => setArbitrationModalVisible(false)}
+        cases={[]} 
+        isMobile={isMobile}
+        isDesktop={!isMobile}
       />
       <FinanceModal 
         visible={financeModalVisible} 
-        onClose={() => setFinanceModalVisible(false)} 
+        onClose={() => setFinanceModalVisible(false)}
+        profile={userProfile}
+        isMobile={isMobile}
       />
       <FriendsModal 
         visible={friendsModalVisible} 
-        onClose={() => setFriendsModalVisible(false)} 
+        onClose={() => setFriendsModalVisible(false)}
+        isMobile={isMobile}
         onOpenChat={(friend) => {
             setFriendsModalVisible(false);
             setSelectedUserIdForChat(friend.id);
@@ -273,12 +301,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       />
       <FaqModal 
         visible={faqModalVisible} 
-        onClose={() => setFaqModalVisible(false)} 
+        onClose={() => setFaqModalVisible(false)}
+        isMobile={isMobile}
       />
       <FriendProfileModal
         visible={friendProfileModalVisible}
         onClose={() => setFriendProfileModalVisible(false)}
         friend={selectedFriend}
+        isMobile={isMobile}
         onOpenChat={() => {
             setFriendProfileModalVisible(false);
             setMessageModalVisible(true);

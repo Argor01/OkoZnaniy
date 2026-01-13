@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, message, Layout, Tabs } from 'antd';
+import { Button, Typography, message, Tabs } from 'antd';
 import { LogoutOutlined, MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../../api/auth';
@@ -8,8 +8,6 @@ import { expertsApi } from '../../api/experts';
 import { catalogApi } from '../../api/catalog';
 import { ordersApi } from '../../api/orders';
 import { useNotifications } from '../../hooks/useNotifications';
-import DashboardHeader from '../../components/common/DashboardHeader';
-import Sidebar from '../../components/layout/Sidebar';
 import ProfileHeader from './components/ProfileHeader/index';
 import ApplicationStatus from './components/ApplicationStatus/index';
 import AboutTab from './components/AboutTab';
@@ -36,7 +34,6 @@ import FaqModal from './modals/FaqModal';
 import FriendProfileModal from './modals/FriendProfileModal';
 
 const { Title } = Typography;
-const { Header, Content } = Layout;
 
 const ExpertDashboard: React.FC = () => {
   const queryClient = useQueryClient();
@@ -167,156 +164,109 @@ const ExpertDashboard: React.FC = () => {
 
   return (
     <>
-      <Layout style={{ minHeight: '100vh' }} className={styles.expertDashboardPage}>
-        <Sidebar
-          selectedKey={selectedMenuKey}
-          onMenuSelect={handleMenuSelect}
-          onLogout={handleLogout}
-          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
-          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
-          onArbitrationClick={() => { closeAllModals(); setArbitrationModalVisible(true); }}
-          onFinanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
-          onFriendsClick={() => { closeAllModals(); setFriendsModalVisible(true); }}
-          onFaqClick={() => { closeAllModals(); setFaqModalVisible(true); }}
-          mobileDrawerOpen={mobileMenuVisible}
-          onMobileDrawerChange={setMobileMenuVisible}
-          unreadNotifications={unreadNotifications}
-          userProfile={profile ? {
-            username: profile.username,
-            avatar: profile.avatar,
-            role: profile.role
-          } : undefined}
+      <div className={styles.expertContentContainer}>
+        <ProfileHeader
+          profile={profile}
+          expertStats={expertStats}
+          userProfile={userProfile}
+          isMobile={isMobile}
+          onEditProfile={() => { closeAllModals(); setProfileModalVisible(true); }}
         />
         
-        <Layout style={{ marginLeft: isMobile ? 0 : 250 }}>
-          <DashboardHeader
-            userProfile={userProfile}
-            unreadNotifications={unreadNotifications}
-            onMenuClick={() => setMobileMenuVisible(true)}
-            onLogout={handleLogout}
-            onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
-            onMessagesClick={() => setMessageModalVisible(true)}
-            onNotificationsClick={() => setNotificationsModalVisible(true)}
-            onBalanceClick={() => setFinanceModalVisible(true)}
-            isMobile={isMobile}
+        <ApplicationStatus
+          application={application || null}
+          applicationLoading={applicationLoading}
+          userProfile={userProfile}
+          isMobile={isMobile}
+          onOpenApplicationModal={() => { closeAllModals(); setApplicationModalVisible(true); }}
+        />
+        
+        <div ref={tabsRef}>
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: 'about',
+                label: 'О себе',
+                children: (
+                  <AboutTab
+                    profile={profile}
+                    isMobile={isMobile}
+                    onEdit={() => { closeAllModals(); setProfileModalVisible(true); }}
+                  />
+                ),
+              },
+              // Специализации только для экспертов
+              ...(userProfile?.role === 'expert' ? [{
+                key: 'specializations',
+                label: `Специализации ${specializations.length || 0}`,
+                children: (
+                  <SpecializationsTab
+                    specializations={specializations}
+                    specializationsLoading={specializationsLoading}
+                    isMobile={isMobile}
+                    onEdit={(spec) => {
+                      closeAllModals();
+                      setEditingSpecialization(spec);
+                      setSpecializationModalVisible(true);
+                    }}
+                    onAdd={() => {
+                      closeAllModals();
+                      setEditingSpecialization(null);
+                      setSpecializationModalVisible(true);
+                    }}
+                  />
+                ),
+              }] : []),
+              // Отзывы только для экспертов
+              ...(userProfile?.role === 'expert' ? [{
+                key: 'reviews',
+                label: 'Отзывы',
+                children: <ReviewsTab isMobile={isMobile} />,
+              }] : []),
+              {
+                key: 'orders',
+                label: 'Заказы',
+                children: <OrdersTab isMobile={isMobile} />,
+              },
+              // Работы только для экспертов
+              ...(userProfile?.role === 'expert' ? [{
+                key: 'works',
+                label: 'Работы',
+                children: (
+                  <WorksTab 
+                    isMobile={isMobile}
+                    myCompleted={[]}
+                    myInProgress={[]}
+                  />
+                ),
+              }] : []),
+              {
+                key: 'friends',
+                label: 'Мои друзья',
+                children: (
+                  <FriendsTab 
+                    isMobile={isMobile}
+                    onOpenChat={(friend) => {
+                      console.log('FriendsTab onOpenChat called with friend:', friend);
+                      closeAllModals();
+                      setSelectedUserIdForChat(friend.id);
+                      console.log('Setting selectedUserIdForChat to:', friend.id);
+                      setMessageModalVisible(true);
+                    }}
+                    onOpenProfile={(friend) => {
+                      closeAllModals();
+                      setSelectedFriend(friend);
+                      setFriendProfileModalVisible(true);
+                    }}
+                  />
+                ),
+              },
+            ]}
           />
-          
-          <Content
-            style={{
-              margin: isMobile ? '0' : '24px',
-              padding: isMobile ? '16px' : '24px',
-              background: '#fff',
-              borderRadius: isMobile ? '0' : '8px',
-              minHeight: 'calc(100vh - 112px)',
-              marginBottom: isMobile ? '80px' : '24px',
-            }}
-          >
-            <div className={styles.expertContentContainer}>
-              <ProfileHeader
-                profile={profile}
-                expertStats={expertStats}
-                userProfile={userProfile}
-                isMobile={isMobile}
-                onEditProfile={() => { closeAllModals(); setProfileModalVisible(true); }}
-              />
-              
-              <ApplicationStatus
-                application={application || null}
-                applicationLoading={applicationLoading}
-                userProfile={userProfile}
-                isMobile={isMobile}
-                onOpenApplicationModal={() => { closeAllModals(); setApplicationModalVisible(true); }}
-              />
-              
-              <div ref={tabsRef}>
-                <Tabs
-                  activeKey={activeTab}
-                  onChange={setActiveTab}
-                  items={[
-                    {
-                      key: 'about',
-                      label: 'О себе',
-                      children: (
-                        <AboutTab
-                          profile={profile}
-                          isMobile={isMobile}
-                          onEdit={() => { closeAllModals(); setProfileModalVisible(true); }}
-                        />
-                      ),
-                    },
-                    // Специализации только для экспертов
-                    ...(userProfile?.role === 'expert' ? [{
-                      key: 'specializations',
-                      label: `Специализации ${specializations.length || 0}`,
-                      children: (
-                        <SpecializationsTab
-                          specializations={specializations}
-                          specializationsLoading={specializationsLoading}
-                          isMobile={isMobile}
-                          onEdit={(spec) => {
-                            closeAllModals();
-                            setEditingSpecialization(spec);
-                            setSpecializationModalVisible(true);
-                          }}
-                          onAdd={() => {
-                            closeAllModals();
-                            setEditingSpecialization(null);
-                            setSpecializationModalVisible(true);
-                          }}
-                        />
-                      ),
-                    }] : []),
-                    // Отзывы только для экспертов
-                    ...(userProfile?.role === 'expert' ? [{
-                      key: 'reviews',
-                      label: 'Отзывы',
-                      children: <ReviewsTab isMobile={isMobile} />,
-                    }] : []),
-                    {
-                      key: 'orders',
-                      label: 'Заказы',
-                      children: <OrdersTab isMobile={isMobile} />,
-                    },
-                    // Работы только для экспертов
-                    ...(userProfile?.role === 'expert' ? [{
-                      key: 'works',
-                      label: 'Работы',
-                      children: (
-                        <WorksTab 
-                          isMobile={isMobile}
-                          myCompleted={[]}
-                          myInProgress={[]}
-                        />
-                      ),
-                    }] : []),
-                    {
-                      key: 'friends',
-                      label: 'Мои друзья',
-                      children: (
-                        <FriendsTab 
-                          isMobile={isMobile}
-                          onOpenChat={(friend) => {
-                            console.log('FriendsTab onOpenChat called with friend:', friend);
-                            closeAllModals();
-                            setSelectedUserIdForChat(friend.id);
-                            console.log('Setting selectedUserIdForChat to:', friend.id);
-                            setMessageModalVisible(true);
-                          }}
-                          onOpenProfile={(friend) => {
-                            closeAllModals();
-                            setSelectedFriend(friend);
-                            setFriendProfileModalVisible(true);
-                          }}
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              </div>
-            </div>
-          </Content>
-        </Layout>
-      </Layout>
+        </div>
+      </div>
 
       {/* Модальные окна */}
       <ProfileModal

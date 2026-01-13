@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, Layout, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
+import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
 import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../../api/orders';
 import { catalogApi } from '../../api/catalog';
 import { authApi } from '../../api/auth';
-import Sidebar, { MobileMenuButton } from '../../components/layout/Sidebar';
-import DashboardHeader from '../../components/common/DashboardHeader';
 import { useNotifications } from '../../hooks/useNotifications';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../config/orderStatuses';
 import { SUBJECTS } from '../../config/subjects';
@@ -35,7 +33,6 @@ dayjs.extend(relativeTime);
 dayjs.locale('ru');
 
 const { Title, Text, Paragraph } = Typography;
-const { Header, Content } = Layout;
 
 const OrdersFeed: React.FC = () => {
   const navigate = useNavigate();
@@ -192,88 +189,43 @@ const OrdersFeed: React.FC = () => {
 
   return (
     <>
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sidebar
-        selectedKey="orders"
-        onMenuSelect={handleMenuSelect}
-        onLogout={handleLogout}
-        onProfileClick={() => setProfileModalVisible(true)}
-        onSupportClick={() => setApplicationModalVisible(true)}
-        onWelcomeClick={() => setWelcomeModalVisible(true)}
-        onSpecializationClick={() => setSpecializationModalVisible(true)}
-        onMessagesClick={() => setMessageModalVisible(true)}
-        onNotificationsClick={() => setNotificationsModalVisible(true)}
-        onArbitrationClick={() => setArbitrationModalVisible(true)}
-        onFinanceClick={() => setFinanceModalVisible(true)}
-        onFriendsClick={() => setFriendsModalVisible(true)}
-        onFaqClick={() => setFaqModalVisible(true)}
-        mobileDrawerOpen={mobileMenuVisible}
-        onMobileDrawerChange={setMobileMenuVisible}
-        userProfile={userProfile ? {
-          username: userProfile.username,
-          avatar: userProfile.avatar,
-          role: userProfile.role
-        } : undefined}
-      />
-      
-      <Layout style={{ 
-        marginLeft: isMobile ? 0 : 250,
-        background: '#f5f5f5'
-      }}>
-        <DashboardHeader
-            userProfile={userProfile}
-            unreadNotifications={unreadNotifications}
-            onMenuClick={() => setMobileMenuVisible(true)}
-            onLogout={handleLogout}
-            onProfileClick={() => setProfileModalVisible(true)}
-            onMessagesClick={() => setMessageModalVisible(true)}
-            onNotificationsClick={() => setNotificationsModalVisible(true)}
-            onBalanceClick={() => setFinanceModalVisible(true)}
-            isMobile={isMobile}
-        />
-
-        <Content style={{ 
-          padding: isMobile ? '16px' : '24px',
-          background: 'transparent',
-          minHeight: isMobile ? 'calc(100vh - 64px)' : 'calc(100vh - 64px)'
+      {/* Заголовок и кнопка создания */}
+      {!isMobile && (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: 24,
+          flexWrap: 'wrap',
+          gap: 16
         }}>
-            {/* Заголовок и кнопка создания */}
-            {!isMobile && (
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                marginBottom: 24,
-                flexWrap: 'wrap',
-                gap: 16
-              }}>
-                <div>
-                  <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
-                    Лента работ
-                  </Title>
-                  <Text type="secondary">
-                    Найдите подходящий заказ или создайте свой
-                  </Text>
-                </div>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  onClick={() => navigate('/create-order')}
-                  style={{
-                    background: '#1E90FF',
-                    border: 'none',
-                    borderRadius: 12,
-                    height: 48,
-                    padding: '0 32px',
-                    fontSize: 16,
-                    fontWeight: 500,
-                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                  }}
-                >
-                  Создать заказ
-                </Button>
-              </div>
-            )}
+          <div>
+            <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
+              Лента работ
+            </Title>
+            <Text type="secondary">
+              Найдите подходящий заказ или создайте свой
+            </Text>
+          </div>
+          <Button 
+            type="primary" 
+            size="large"
+            onClick={() => navigate('/create-order')}
+            style={{
+              background: '#1E90FF',
+              border: 'none',
+              borderRadius: 12,
+              height: 48,
+              padding: '0 32px',
+              fontSize: 16,
+              fontWeight: 500,
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+            }}
+          >
+            Создать заказ
+          </Button>
+        </div>
+      )}
 
       {/* Фильтры */}
       <Card 
@@ -760,9 +712,7 @@ const OrdersFeed: React.FC = () => {
                 Создать заказ
               </Button>
             )}
-        </Content>
-      </Layout>
-    </Layout>
+
       <ProfileModal
         visible={profileModalVisible}
         onClose={() => setProfileModalVisible(false)}

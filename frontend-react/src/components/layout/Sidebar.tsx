@@ -378,11 +378,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             background: '#fff',
             boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
             position: 'fixed',
-            top: 0,
+            top: 64, // Под хедером
             left: 0,
-            height: '100vh',
+            height: 'calc(100vh - 64px)', // Высота минус высота хедера
             borderRight: '1px solid #f0f0f0',
-            zIndex: 1001,
+            zIndex: 999,
           }}
         >
           {sidebarContent}

@@ -261,12 +261,12 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
           padding: '16px',
           minHeight: '350px'
         }}>
-          {cases.filter(arbitration => {
+          {(cases || []).filter(arbitration => {
             if (arbitrationStatusFilter === 'all') return true;
             return arbitration.status === arbitrationStatusFilter;
           }).length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {cases
+              {(cases || [])
                 .filter(arbitration => {
                   if (arbitrationStatusFilter === 'all') return true;
                   return arbitration.status === arbitrationStatusFilter;

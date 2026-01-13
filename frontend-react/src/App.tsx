@@ -88,7 +88,9 @@ const App: React.FC = () => {
                 path="/orders/:orderId" 
                 element={
                   <ProtectedRoute>
-                    <OrderDetail />
+                    <DashboardLayout>
+                      <OrderDetail />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -100,7 +102,9 @@ const App: React.FC = () => {
                 path="/expert" 
                 element={
                   <ProtectedRoute>
-                    <ExpertDashboard/>
+                    <DashboardLayout>
+                      <ExpertDashboard/>
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -108,7 +112,9 @@ const App: React.FC = () => {
                 path="/expert-application" 
                 element={
                   <ProtectedRoute>
-                    <ExpertApplication />
+                    <DashboardLayout>
+                      <ExpertApplication />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -122,19 +128,29 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/expert/:expertId" 
-                element={<ExpertProfile />} 
+                element={
+                  <DashboardLayout>
+                    <ExpertProfile />
+                  </DashboardLayout>
+                } 
               />
               <Route 
                 path="/partner" 
                 element={
                   <ProtectedRoute>
-                    <PartnerDashboard />
+                    <DashboardLayout>
+                      <PartnerDashboard />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
               <Route 
                 path="/admin" 
-                element={<AdminDashboard />} 
+                element={
+                  <DashboardLayout>
+                    <AdminDashboard />
+                  </DashboardLayout>
+                } 
               />
               <Route 
                 path="/ADMIN" 
@@ -148,7 +164,9 @@ const App: React.FC = () => {
                 path="/director"
                 element={
                   <ProtectedRoute>
-                    <DirectorDashboard />
+                    <DashboardLayout>
+                      <DirectorDashboard />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -186,7 +204,9 @@ const App: React.FC = () => {
                 path="/orders-feed"
                 element={
                   <ProtectedRoute>
-                    <OrdersFeed />
+                    <DashboardLayout>
+                      <OrdersFeed />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
