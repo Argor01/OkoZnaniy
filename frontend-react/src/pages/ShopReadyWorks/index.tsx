@@ -15,52 +15,18 @@ const { Title } = Typography;
 const ShopReadyWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
-  const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
-  const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
-  const [messageModalVisible, setMessageModalVisible] = useState(false);
-  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
-  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
-  const [financeModalVisible, setFinanceModalVisible] = useState(false);
-  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
-  const [faqModalVisible, setFaqModalVisible] = useState(false);
-  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
 
-  // Дополнительный state
-  const [selectedFriend, setSelectedFriend] = useState<any>(null);
-  const [selectedChat, setSelectedChat] = useState<any>(null);
-  const [editingSpecialization, setEditingSpecialization] = useState<any>(null);
-  const [subjects, setSubjects] = useState<any[]>([]);
-
-  const { data: apiWorks, isLoading: worksLoading } = useQuery({
-    queryKey: ['shop-works'],
-    queryFn: () => shopApi.getWorks(),
-  });
-
-  const { data: fetchedSubjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
-
-  // Обновляем subjects при загрузке
-  React.useEffect(() => {
-    if (fetchedSubjects.length > 0) {
-      setSubjects(fetchedSubjects);
-    }
-  }, [fetchedSubjects]);
-
-  // Загрузка профиля пользователя
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
-
-  // Загрузка работ из API
+  // Загрузка данных
   const { data: apiWorks } = useQuery({
     queryKey: ['shop-works'],
     queryFn: () => shopApi.getWorks(),
   });
 
-  // Загрузка справочников
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+  });
+
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
@@ -87,34 +53,6 @@ const ShopReadyWorks: React.FC = () => {
     } catch (error) {
       console.error('Error deleting work:', error);
     }
-  };
-    );
-    message.success('Добавлено в избранное');
-  };
-
-  const handlePurchase = (id: number) => {
-    message.info(`Купить работу ${id}`);
-    // TODO: Открыть модальное окно покупки
-  };
-
-  const handleDelete = (id: number) => {
-    shopApi.deleteWork(id)
-      .then(() => {
-        setWorks((prev) => prev.filter((w) => w.id !== id));
-        message.success('Работа удалена');
-      })
-      .catch(() => {
-        try {
-          const key = 'shop_custom_works';
-          const local: Work[] = JSON.parse(localStorage.getItem(key) || '[]');
-          const nextLocal = local.filter((w) => w.id !== id);
-          localStorage.setItem(key, JSON.stringify(nextLocal));
-          setWorks((prev) => prev.filter((w) => w.id !== id));
-          message.warning('Удалено локально (сервер недоступен)');
-        } catch {
-          message.error('Не удалось удалить работу');
-        }
-      });
   };
 
   // Фильтрация и сортировка работ
