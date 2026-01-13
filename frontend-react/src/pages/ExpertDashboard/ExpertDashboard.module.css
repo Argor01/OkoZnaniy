@@ -50,7 +50,7 @@
   max-width: none; /* Убираем ограничение ширины */
   margin: 0; /* Убираем центрирование */
   width: 100%;
-  padding: 64px 24px 24px 24px; /* Отступы со всех сторон */
+  padding: 24px; /* Убираем отступ сверху */
   box-sizing: border-box;
 }
 
@@ -58,7 +58,7 @@
   .expertContentContainer {
     width: 100%;
     max-width: 100%;
-    padding: 80px 16px 16px 16px; /* Добавляем отступ сверху для хедера */
+    padding: 16px; /* Убираем отступ сверху для мобильных */
   }
 }
 
