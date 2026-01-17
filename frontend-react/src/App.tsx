@@ -146,11 +146,7 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/admin" 
-                element={
-                  <DashboardLayout>
-                    <AdminDashboard />
-                  </DashboardLayout>
-                } 
+                element={<AdminDashboard />} 
               />
               <Route 
                 path="/ADMIN" 

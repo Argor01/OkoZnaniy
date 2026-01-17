@@ -69,7 +69,11 @@ apiClient.interceptors.response.use(
         // Если обновление токена не удалось, очищаем и редиректим
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        
+        // Не делаем редирект, если мы на админ-странице - пусть AdminDashboard покажет форму входа
+        if (window.location.pathname !== '/admin') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
@@ -78,7 +82,11 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      window.location.href = '/login';
+      
+      // Не делаем редирект, если мы на админ-странице - пусть AdminDashboard покажет форму входа
+      if (window.location.pathname !== '/admin') {
+        window.location.href = '/login';
+      }
     }
 
     return Promise.reject(error);

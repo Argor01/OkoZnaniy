@@ -25,7 +25,16 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my'); // Новый state для фильтра
+  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('available'); // По умолчанию доступные заказы
+
+  // Устанавливаем правильный фильтр в зависимости от роли пользователя
+  React.useEffect(() => {
+    if (userProfile?.role === 'client') {
+      setOrderFilter('my');
+    } else if (userProfile?.role === 'expert') {
+      setOrderFilter('available');
+    }
+  }, [userProfile?.role]);
 
   // Загружаем профиль пользователя
   const { data: userProfile } = useQuery({
@@ -70,11 +79,11 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     });
   };
 
-  // Загружаем размещенные заказы пользователя
+  // Загружаем размещенные заказы пользователя (только для клиентов)
   const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
     queryKey: ['user-orders'],
     queryFn: () => ordersApi.getClientOrders(),
-    enabled: !!userProfile,
+    enabled: !!userProfile && userProfile.role === 'client',
   });
 
   // Загружаем доступные заказы (лента)

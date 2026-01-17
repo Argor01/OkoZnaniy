@@ -83,6 +83,9 @@ const AdminDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
+  
+  // Сразу проверяем наличие токена
+  const hasToken = !!localStorage.getItem('access_token');
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<string>('overview');
@@ -105,6 +108,7 @@ const AdminDashboard: React.FC = () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
       setLoading(false);
+      setUser(null);
       return;
     }
     
@@ -127,8 +131,8 @@ const AdminDashboard: React.FC = () => {
     setLoading(false);
   };
 
-  // Определяем, можно ли загружать данные (только для admin)
-  const canLoadData = !!user && user.role === 'admin';
+  // Определяем, можно ли загружать данные (только для admin с валидным токеном)
+  const canLoadData = hasToken && !!user && user.role === 'admin';
 
   // Получение данных партнеров (только если пользователь авторизован и имеет нужную роль)
   const { data: partners, isLoading: partnersLoading, error: partnersError } = useQuery({
@@ -1639,8 +1643,8 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // Если пользователь не авторизован - показываем форму входа
-  if (!user) {
+  // Если нет токена или пользователь не авторизован - показываем форму входа
+  if (!hasToken || !user) {
     return <AdminLogin onSuccess={handleLoginSuccess} />;
   }
 
