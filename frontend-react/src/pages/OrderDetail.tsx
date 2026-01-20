@@ -44,7 +44,7 @@ const OrderDetail: React.FC = () => {
   });
 
   const userHasBid = React.useMemo(() => {
-    return bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
+    return Array.isArray(bids) && bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
   }, [bids, userProfile]);
 
   const acceptBidMutation = useMutation({
@@ -230,7 +230,7 @@ const OrderDetail: React.FC = () => {
             )}
 
             {/* Отклики экспертов */}
-            {bids.length > 0 && (
+            {Array.isArray(bids) && bids.length > 0 && (
               <div>
                 <Divider />
                 <Title level={4}>
@@ -254,7 +254,7 @@ const OrderDetail: React.FC = () => {
                   <Spin />
                 ) : (
                   <List
-                    dataSource={bids.filter((bid: Bid) => (bid.status || 'active') === activeTab)}
+                    dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === activeTab) : []}
                     renderItem={(bid: Bid) => (
                       <List.Item
                         key={bid.id}

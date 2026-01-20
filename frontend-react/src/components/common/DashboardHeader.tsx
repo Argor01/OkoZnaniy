@@ -157,12 +157,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Баланс */}
           <Button
             type="text"
-            icon={<WalletOutlined />}
+            icon={<WalletOutlined style={{ color: 'white' }} />}
             onClick={onBalanceClick}
-            className={styles.balanceButton}
+            className={`${styles.balanceButton} balanceButton`}
+            style={{ color: 'white' }}
           >
             {!isMobile && (
-              <Text className={styles.balanceText}>
+              <Text className={`${styles.balanceText} balanceText`} style={{ color: 'white' }}>
                 {balance.toFixed(2)} ₽
               </Text>
             )}

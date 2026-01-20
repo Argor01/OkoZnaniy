@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider, message, List, Avatar, Radio } from 'antd';
-import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, TeamOutlined, StarOutlined, FilterOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, StarOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, Bid } from '../../../../api/orders';
@@ -27,6 +27,12 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('available'); // По умолчанию доступные заказы
 
+  // Загружаем профиль пользователя
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+  });
+
   // Устанавливаем правильный фильтр в зависимости от роли пользователя
   React.useEffect(() => {
     if (userProfile?.role === 'client') {
@@ -35,12 +41,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
       setOrderFilter('available');
     }
   }, [userProfile?.role]);
-
-  // Загружаем профиль пользователя
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
 
   // Удаление заказа
   const deleteOrderMutation = useMutation({
@@ -98,7 +98,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const isLoading = orderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
   
   const orders = Array.isArray(currentOrdersData?.results) ? currentOrdersData.results : (Array.isArray(currentOrdersData) ? currentOrdersData : []);
-  const isClient = userProfile?.role === 'client';
 
   // Используем реальные данные
   const displayOrders = orders;
@@ -220,8 +219,10 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                 style={{
                   borderRadius: 12,
                   border: '1px solid #e5e7eb',
+                  cursor: 'pointer',
                 }}
-                bodyStyle={{ padding: 20 }}
+                styles={{ body: { padding: 20 } }}
+                onClick={() => navigate(`/orders/${order.id}`)}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 12 }}>
                   <div style={{ flex: 1 }}>
@@ -278,7 +279,10 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   <Button 
                     type="link"
                     icon={<EyeOutlined />}
-                    onClick={() => handleShowOrderDetails(order)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowOrderDetails(order);
+                    }}
                   >
                     Подробнее
                   </Button>
@@ -286,7 +290,10 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                     <Button 
                       type="primary"
                       size="small"
-                      onClick={() => navigate(`/orders/${order.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/orders/${order.id}`);
+                      }}
                       style={{
                         background: '#52c41a',
                         border: 'none',

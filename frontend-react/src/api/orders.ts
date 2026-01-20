@@ -119,6 +119,12 @@ export const ordersApi = {
   },
 
   // Получить заказ по ID
+  getById: async (id: number) => {
+    const response = await apiClient.get(`/orders/orders/${id}/`);
+    return response.data;
+  },
+
+  // Получить заказ по ID (альтернативное название)
   getOrder: async (id: number) => {
     const response = await apiClient.get(`/orders/orders/${id}/`);
     return response.data;
@@ -200,7 +206,7 @@ export const ordersApi = {
   // Ставки экспертов: получить список
   getBids: async (orderId: number): Promise<Bid[]> => {
     const response = await apiClient.get(`/orders/orders/${orderId}/bids/`);
-    return response.data;
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   // Ставка эксперта: создать/обновить
