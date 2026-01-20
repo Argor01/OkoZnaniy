@@ -140,26 +140,27 @@ const Sidebar: React.FC<SidebarProps> = ({
       onLogout();
       return;
     }
-    if (key === 'works') {
-      navigate('/works');
-      return;
-    }
-    if (key === 'shop-ready-works') {
-      navigate('/shop/ready-works');
-      return;
-    }
-    if (key === 'shop-add-work') {
-      navigate('/shop/add-work');
-      return;
-    }
-    if (key === 'shop-purchased') {
-      navigate('/shop/purchased');
-      return;
-    }
-    if (key === 'orders-feed') {
-      navigate('/orders-feed');
-      return;
-    }
+    // Убранные пункты меню для экспертов
+    // if (key === 'works') {
+    //   navigate('/works');
+    //   return;
+    // }
+    // if (key === 'shop-ready-works') {
+    //   navigate('/shop/ready-works');
+    //   return;
+    // }
+    // if (key === 'shop-add-work') {
+    //   navigate('/shop/add-work');
+    //   return;
+    // }
+    // if (key === 'shop-purchased') {
+    //   navigate('/shop/purchased');
+    //   return;
+    // }
+    // if (key === 'orders-feed') {
+    //   navigate('/orders-feed');
+    //   return;
+    // }
     if (key.startsWith('orders-') || key === 'orders') {
       navigate('/expert');
       onMenuSelect(key);
@@ -229,28 +230,29 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <ShoppingOutlined />,
       label: 'Заказы',
     },
-    {
-      key: 'orders-feed',
-      icon: <UnorderedListOutlined />,
-      label: 'Лента работ',
-    },
-    // "Мои работы" - только для экспертов
-    isExpert ? {
-      key: 'works',
-      icon: <FileDoneOutlined />,
-      label: 'Мои работы',
-    } : null,
-    // "Авторский магазин" - только для экспертов
-    (isExpert && !isMobile) ? {
-      key: 'shop',
-      icon: <ShopOutlined />,
-      label: 'Авторский магазин',
-      children: [
-        { key: 'shop-ready-works', label: 'Магазин готовых работ' },
-        { key: 'shop-add-work', label: 'Добавить работу в магазин' },
-        { key: 'shop-purchased', label: 'Купленные работы' },
-      ],
-    } : null,
+    // Убираем "Лента работ", "Мои работы" и "Авторский магазин" для экспертов
+    // {
+    //   key: 'orders-feed',
+    //   icon: <UnorderedListOutlined />,
+    //   label: 'Лента работ',
+    // },
+    // "Мои работы" - убрано для экспертов
+    // isExpert ? {
+    //   key: 'works',
+    //   icon: <FileDoneOutlined />,
+    //   label: 'Мои работы',
+    // } : null,
+    // "Авторский магазин" - убрано для экспертов
+    // (isExpert && !isMobile) ? {
+    //   key: 'shop',
+    //   icon: <ShopOutlined />,
+    //   label: 'Авторский магазин',
+    //   children: [
+    //     { key: 'shop-ready-works', label: 'Магазин готовых работ' },
+    //     { key: 'shop-add-work', label: 'Добавить работу в магазин' },
+    //     { key: 'shop-purchased', label: 'Купленные работы' },
+    //   ],
+    // } : null,
     {
       key: 'friends',
       icon: <TeamOutlined />,
