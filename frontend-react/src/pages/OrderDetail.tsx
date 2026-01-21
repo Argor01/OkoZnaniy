@@ -167,7 +167,7 @@ const OrderDetail: React.FC = () => {
                     />
                     <Button 
                       type="link" 
-                      onClick={() => navigate(`/expert/${order.client?.id}`)}
+                      onClick={() => navigate(`/user/${order.client?.id}`)}
                       style={{ 
                         padding: 0, 
                         height: 'auto',
@@ -191,7 +191,7 @@ const OrderDetail: React.FC = () => {
                   borderRadius: 12,
                   padding: '8px 12px'
                 }}
-                bodyStyle={{ padding: '8px 0' }}
+                styles={{ body: { padding: '8px 0' } }}
               >
                 <Space direction="vertical" size={2} style={{ width: '100%' }}>
                   <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>

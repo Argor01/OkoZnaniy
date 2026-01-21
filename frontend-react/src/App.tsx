@@ -31,6 +31,7 @@ import './styles/avatar.css';
 import OrderDetail from './pages/OrderDetail';
 import WorkDetail from './pages/WorkDetail';
 import ShopWorkDetail from './pages/ShopWorkDetail';
+import UserProfile from './pages/UserProfile';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
@@ -153,6 +154,14 @@ const App: React.FC = () => {
                 element={
                   <DashboardLayout>
                     <ExpertProfile />
+                  </DashboardLayout>
+                } 
+              />
+              <Route 
+                path="/user/:userId" 
+                element={
+                  <DashboardLayout>
+                    <UserProfile />
                   </DashboardLayout>
                 } 
               />

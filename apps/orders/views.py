@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db import models
 from django.utils import timezone
@@ -479,7 +480,7 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         order = Order.objects.get(id=self.kwargs['order_pk'])
         if not (self.request.user == order.client or self.request.user == order.expert):
-            raise permissions.PermissionDenied(
+            raise PermissionDenied(
                 'Только клиент и эксперт могут добавлять файлы'
             )
         order_file = serializer.save(
@@ -522,7 +523,7 @@ class OrderCommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         order = Order.objects.get(id=self.kwargs['order_pk'])
         if not (self.request.user == order.client or self.request.user == order.expert):
-            raise permissions.PermissionDenied(
+            raise PermissionDenied(
                 'Только клиент и эксперт могут оставлять комментарии'
             )
         comment = serializer.save(
@@ -553,17 +554,17 @@ class BidViewSet(viewsets.ModelViewSet):
         # Проверяем права
         user = self.request.user
         if getattr(user, 'role', None) != 'expert':
-            raise permissions.PermissionDenied('Только эксперт может делать ставку.')
+            raise PermissionDenied('Только эксперт может делать ставку.')
         
         if order.client_id == user.id:
-            raise permissions.PermissionDenied('Нельзя ставить на свой заказ.')
+            raise PermissionDenied('Нельзя ставить на свой заказ.')
         
         if order.status not in ['new', 'in_progress', 'revision', 'review']:
-            raise permissions.PermissionDenied('Нельзя сделать ставку для текущего статуса заказа.')
+            raise PermissionDenied('Нельзя сделать ставку для текущего статуса заказа.')
         
         # Если эксперт уже назначен и это не он
         if order.expert_id and order.expert_id != user.id:
-            raise permissions.PermissionDenied('У заказа уже есть назначенный эксперт.')
+            raise PermissionDenied('У заказа уже есть назначенный эксперт.')
         
         # Создаем или обновляем ставку
         bid, created = Bid.objects.get_or_create(

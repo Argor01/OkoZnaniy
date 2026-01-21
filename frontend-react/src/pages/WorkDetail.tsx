@@ -127,7 +127,7 @@ const WorkDetail: React.FC = () => {
                     />
                     <Button 
                       type="link" 
-                      onClick={() => navigate(`/expert/${work.client?.id}`)}
+                      onClick={() => navigate(`/user/${work.client?.id}`)}
                       style={{ 
                         padding: 0, 
                         height: 'auto',
