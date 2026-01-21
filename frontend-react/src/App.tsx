@@ -29,6 +29,8 @@ import './styles/avatar.css';
 
 // Import pages
 import OrderDetail from './pages/OrderDetail';
+import WorkDetail from './pages/WorkDetail';
+import ShopWorkDetail from './pages/ShopWorkDetail';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
@@ -90,6 +92,26 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <OrderDetail />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/works/:workId" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <WorkDetail />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/shop/works/:workId" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ShopWorkDetail />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

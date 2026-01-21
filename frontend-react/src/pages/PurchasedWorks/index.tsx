@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
 import EmptyState from './components/EmptyState';
@@ -13,6 +14,7 @@ import styles from './PurchasedWorks.module.css';
 const { Title } = Typography;
 
 const PurchasedWorks: React.FC = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<FiltersState>({ sortBy: 'date' });
 
   // Загрузка профиля пользователя
@@ -90,8 +92,7 @@ const PurchasedWorks: React.FC = () => {
   };
 
   const handleViewDetails = (workId: number) => {
-    // TODO: Реализовать просмотр деталей работы
-    console.log('View details:', workId);
+    navigate(`/shop/works/${workId}`);
   };
 
   return (

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Typography, Input, Select, Row, Col, Card, Empty, Statistic, Tabs } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, SearchOutlined, StarFilled, FilterOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../../api/orders';
 import styles from './MyWorks.module.css';
 
 const { Title } = Typography;
 
 const MyWorks: React.FC = () => {
+  const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('completed');
@@ -176,6 +178,8 @@ const MyWorks: React.FC = () => {
                           <Card
                             hoverable
                             className={styles.workCard}
+                            onClick={() => navigate(`/works/${work.id}`)}
+                            style={{ cursor: 'pointer' }}
                           >
                             <Title level={5} style={{ margin: 0, marginBottom: 8 }}>
                               {work.title}
@@ -213,6 +217,8 @@ const MyWorks: React.FC = () => {
                           <Card
                             hoverable
                             className={styles.workCard}
+                            onClick={() => navigate(`/works/${work.id}`)}
+                            style={{ cursor: 'pointer' }}
                           >
                             <Title level={5} style={{ margin: 0, marginBottom: 8 }}>
                               {work.title}

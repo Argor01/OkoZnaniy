@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Typography } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
 import { authApi } from '../../api/auth';
@@ -13,6 +14,7 @@ import styles from './ShopReadyWorks.module.css';
 const { Title } = Typography;
 
 const ShopReadyWorks: React.FC = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
 
@@ -125,7 +127,7 @@ const ShopReadyWorks: React.FC = () => {
       
       <WorksList
         works={filteredWorks}
-        onWorkClick={(id) => console.log('Work clicked:', id)}
+        onWorkClick={(id) => navigate(`/shop/works/${id}`)}
         onFavorite={(id) => console.log('Favorite:', id)}
         onPurchase={handlePurchase}
         onDelete={handleDelete}
