@@ -140,45 +140,151 @@ const OrderDetail: React.FC = () => {
             </div>
 
             {/* Основная информация */}
-            <Descriptions bordered column={isMobile ? 1 : 2} size={isMobile ? 'small' : 'default'}>
-              <Descriptions.Item label="Предмет">
-                {order.subject_name || 'Не указан'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Тип работы">
-                {order.work_type_name || 'Не указан'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Бюджет">
-                <Space>
-                  <DollarOutlined />
-                  <Text strong>{order.budget} ₽</Text>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+              gap: 16 
+            }}>
+              {/* Заказчик */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f9f0ff', 
+                  border: '1px solid #efdbff',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Заказчик
+                  </Text>
+                  <Space align="center">
+                    <Avatar 
+                      size={32} 
+                      src={order.client?.avatar} 
+                      icon={<UserOutlined />}
+                      style={{ border: '2px solid #d3adf7' }}
+                    />
+                    <Button 
+                      type="link" 
+                      onClick={() => navigate(`/expert/${order.client?.id}`)}
+                      style={{ 
+                        padding: 0, 
+                        height: 'auto',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#722ed1'
+                      }}
+                    >
+                      {order.client?.username || order.client_name || 'Неизвестен'}
+                    </Button>
+                  </Space>
                 </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Дедлайн">
-                <Space>
-                  <CalendarOutlined />
-                  {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+              </Card>
+
+              {/* Дедлайн */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#fff7e6', 
+                  border: '1px solid #ffd591',
+                  borderRadius: 12,
+                  padding: '8px 12px'
+                }}
+                bodyStyle={{ padding: '8px 0' }}
+              >
+                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Дедлайн
+                  </Text>
+                  <Space align="center">
+                    <CalendarOutlined style={{ color: '#fa8c16', fontSize: 14 }} />
+                    <Text style={{ fontSize: 13, fontWeight: 600, color: '#d46b08' }}>
+                      {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                    </Text>
+                  </Space>
                 </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Создан">
-                {formatDistanceToNow(new Date(order.created_at), { addSuffix: true, locale: ru })}
-              </Descriptions.Item>
-              <Descriptions.Item label="Заказчик">
-                <Space>
-                  <Avatar 
-                    size="small" 
-                    src={order.client?.avatar} 
-                    icon={<UserOutlined />}
-                  />
-                  <Button 
-                    type="link" 
-                    onClick={() => navigate(`/expert/${order.client?.id}`)}
-                    style={{ padding: 0 }}
-                  >
-                    {order.client?.username || order.client_name || 'Неизвестен'}
-                  </Button>
+              </Card>
+
+              {/* Предмет */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f8f9ff', 
+                  border: '1px solid #e6f0ff',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Предмет
+                  </Text>
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                    {order.subject?.name || 'Не указан'}
+                  </Text>
                 </Space>
-              </Descriptions.Item>
-            </Descriptions>
+              </Card>
+
+              {/* Бюджет */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f0f9f0', 
+                  border: '1px solid #d9f7be',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Цена
+                  </Text>
+                  <Space align="center">
+                    <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                    <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
+                      {order.budget} ₽
+                    </Text>
+                  </Space>
+                </Space>
+              </Card>
+
+              {/* Тип работы */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f8f9ff', 
+                  border: '1px solid #e6f0ff',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Тип работы
+                  </Text>
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                    {order.work_type?.name || 'Не указан'}
+                  </Text>
+                </Space>
+              </Card>
+
+              {/* Создан */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f6f6f6', 
+                  border: '1px solid #d9d9d9',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Размещен
+                  </Text>
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#595959' }}>
+                    {formatDistanceToNow(new Date(order.created_at), { addSuffix: true, locale: ru })}
+                  </Text>
+                </Space>
+              </Card>
+            </div>
 
             {/* Описание */}
             <div>
