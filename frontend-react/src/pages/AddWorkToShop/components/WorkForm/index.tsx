@@ -1,46 +1,25 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Card, Space, Row, Col, Input, InputNumber, Select, Typography, Button, Upload, message } from 'antd';
-import type { UploadProps, UploadFile } from 'antd';
-import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
+import { InboxOutlined } from '@ant-design/icons';
 import { RichTextEditor } from '../../../../components/editor';
 import { WorkFormProps, WorkFormData } from '../../types';
 import styles from './WorkForm.module.css';
-import { useQuery } from '@tanstack/react-query';
-import { catalogApi } from '../../../../api/catalog';
-import { mockSubjects } from '../../../ShopReadyWorks/mockData';
 
 const { Text } = Typography;
 const { Option } = Select;
 
-const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
+const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel, subjects = [], workTypes = [] }) => {
   const [formData, setFormData] = useState<WorkFormData>({
     title: '',
-    price: 0,
-    type: '',
-    subject: '',
-    language: 'russian',
     description: '',
+    price: 0,
+    subject: '',
+    workType: '',
   });
-
-  const [customSubject, setCustomSubject] = useState('');
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['catalog-subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
-  const subjectNames = useMemo(
-    () => subjects.map((s: any) => s?.name).filter((n: string) => !!n),
-    [subjects]
-  );
-  const subjectOptions = useMemo(() => {
-    const base = mockSubjects
-      .filter((s) => s !== 'Все предметы')
-      .filter((s) => !/друг(ое|ие)/i.test(s));
-    const fromApi = subjectNames.filter((s) => !/друг(ое|ие)/i.test(s));
-    return Array.from(new Set([...base, ...fromApi]));
-  }, [subjectNames]);
 
   const handleSubmit = () => {
-    if (!formData.title || !formData.price || !formData.type || !formData.subject) {
+    if (!formData.title || !formData.price || !formData.workType || !formData.subject) {
+      message.error('Заполните все обязательные поля');
       return;
     }
     onSave(formData);
@@ -77,81 +56,44 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           </Col>
         </Row>
 
-        {/* Тип, предмет, язык */}
+        {/* Тип и предмет */}
         <Row gutter={16}>
-          <Col xs={24} sm={8}>
+          <Col xs={24} sm={12}>
             <Text strong className={styles.label}>
-              Выбрать тип
+              Тип работы
             </Text>
             <Select
-              placeholder="Выбрать тип"
-              value={formData.type}
-              onChange={(value) => setFormData({ ...formData, type: value })}
+              placeholder="Выберите тип работы"
+              value={formData.workType}
+              onChange={(value) => setFormData({ ...formData, workType: value })}
               className={styles.select}
             >
-              <Option value="practical">Практическая работа</Option>
-              <Option value="control">Контрольная работа</Option>
-              <Option value="essay">Эссе</Option>
-              <Option value="coursework">Курсовая работа</Option>
-              <Option value="thesis">Дипломная работа</Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Text strong className={styles.label}>
-              Выбрать предмет
-            </Text>
-            <Select
-              placeholder="Выбрать предмет"
-              value={
-                !formData.subject
-                  ? undefined
-                  : subjectOptions.includes(formData.subject)
-                    ? formData.subject
-                    : 'other'
-              }
-              onChange={(value) => {
-                setFormData({ ...formData, subject: value });
-                if (value !== 'other') {
-                  setCustomSubject('');
-                } else {
-                  setCustomSubject('');
-                }
-              }}
-              className={styles.select}
-            >
-              {subjectOptions.map((name) => (
-                <Option key={name} value={name}>
-                  {name}
+              {workTypes.map((type: any) => (
+                <Option key={type.id} value={type.id}>
+                  {type.name}
                 </Option>
               ))}
-              <Option value="other">Другое</Option>
             </Select>
-            {(!subjectOptions.includes(formData.subject) && formData.subject !== '') && (
-              <Input
-                placeholder="Введите свой вариант"
-                value={customSubject}
-                onChange={e => {
-                  setCustomSubject(e.target.value);
-                  setFormData({ ...formData, subject: e.target.value });
-                }}
-                className={styles.input}
-                style={{ marginTop: 20 }}
-              />
-            )}
           </Col>
-          <Col xs={24} sm={8}>
+          <Col xs={24} sm={12}>
             <Text strong className={styles.label}>
-              Язык
+              Предмет
             </Text>
             <Select
-              value={formData.language}
-              onChange={(value) => setFormData({ ...formData, language: value })}
+              placeholder="Выберите предмет"
+              value={formData.subject}
+              onChange={(value) => setFormData({ ...formData, subject: value })}
               className={styles.select}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+              }
             >
-              <Option value="russian">Русский</Option>
-              <Option value="english">English</Option>
-              <Option value="german">Deutsch</Option>
-              <Option value="french">Français</Option>
+              {subjects.map((subject: any) => (
+                <Option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </Option>
+              ))}
             </Select>
           </Col>
         </Row>
@@ -169,49 +111,20 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
         <div>
           <Text strong className={styles.label}>
-            Фото для карточки
+            Превью работы (необязательно)
           </Text>
-          <Upload
-            listType="picture-card"
-            accept="image/*"
-            maxCount={1}
-            beforeUpload={(file) => {
-              const preview = URL.createObjectURL(file);
-              setFormData({ ...formData, coverImage: file, coverImagePreview: preview });
-              return false;
-            }}
-            onRemove={() => {
-              const next = { ...formData };
-              delete next.coverImage;
-              delete next.coverImagePreview;
-              setFormData(next);
-            }}
-            fileList={
-              formData.coverImage
-                ? [
-                    {
-                      uid: 'cover',
-                      name: formData.coverImage.name || 'cover',
-                      status: 'done',
-                      url: formData.coverImagePreview,
-                    } as any,
-                  ]
-                : []
-            }
-          >
-            {!formData.coverImage && (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить</div>
-              </div>
-            )}
-          </Upload>
+          <Input.TextArea
+            placeholder="Краткое описание или превью работы"
+            value={formData.preview}
+            onChange={(e) => setFormData({ ...formData, preview: e.target.value })}
+            rows={3}
+          />
         </div>
 
-        {/* Загрузка файлов (стиль как в CreateOrder) */}
+        {/* Загрузка файлов */}
         <div>
           <Text strong className={styles.label}>
-            Файлы работы
+            Файлы работы (необязательно)
           </Text>
           <Upload.Dragger
             name="files"
@@ -223,25 +136,25 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
                 message.error('Максимальный размер файла: 10 МБ');
                 return Upload.LIST_IGNORE as any;
               }
-              const uploadFile: UploadFile = {
-                uid: file.uid || `${Date.now()}-${file.name}`,
+              
+              const fileData = {
                 name: file.name,
-                status: 'done',
+                type: file.type || '',
                 size: file.size,
-                type: file.type,
-                originFileObj: file as any,
-                url: URL.createObjectURL(file),
               };
-              setFormData({ ...formData, files: [ ...(formData.files as UploadFile[] || []), uploadFile ] });
+              
+              setFormData({ 
+                ...formData, 
+                files: [...(formData.files || []), fileData] 
+              });
               return false;
             }}
             onRemove={(file) => {
               setFormData({
                 ...formData,
-                files: (formData.files as UploadFile[] || []).filter((f) => f.uid !== file.uid),
+                files: (formData.files || []).filter((f, index) => index !== (formData.files || []).findIndex(item => item.name === file.name)),
               });
             }}
-            fileList={(formData.files as UploadFile[]) || []}
           >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
@@ -251,6 +164,11 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
             </p>
           </Upload.Dragger>
+          {formData.files && formData.files.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <Text type="secondary">Загружено файлов: {formData.files.length}</Text>
+            </div>
+          )}
         </div>
 
         {/* Кнопки */}

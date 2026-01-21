@@ -6,7 +6,7 @@ export interface CreateWorkPayload {
   description: string;
   price: number;
   subject: string;
-  workType: string;
+  work_type: string;
   preview?: string;
   files?: Array<{
     name: string;

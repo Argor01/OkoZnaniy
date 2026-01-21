@@ -6,6 +6,9 @@
   background: #f3f4f6;
   padding: 24px;
   box-sizing: border-box;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .card {
@@ -18,6 +21,9 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .header {

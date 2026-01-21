@@ -140,27 +140,27 @@ const Sidebar: React.FC<SidebarProps> = ({
       onLogout();
       return;
     }
-    // Убранные пункты меню для экспертов
-    // if (key === 'works') {
-    //   navigate('/works');
-    //   return;
-    // }
-    // if (key === 'shop-ready-works') {
-    //   navigate('/shop/ready-works');
-    //   return;
-    // }
-    // if (key === 'shop-add-work') {
-    //   navigate('/shop/add-work');
-    //   return;
-    // }
-    // if (key === 'shop-purchased') {
-    //   navigate('/shop/purchased');
-    //   return;
-    // }
-    // if (key === 'orders-feed') {
-    //   navigate('/orders-feed');
-    //   return;
-    // }
+    // Безопасные обработчики для удаленных пунктов меню
+    if (key === 'works') {
+      console.log('Works navigation disabled');
+      return;
+    }
+    if (key === 'shop-ready-works') {
+      console.log('Shop ready works navigation disabled');
+      return;
+    }
+    if (key === 'shop-add-work') {
+      console.log('Shop add work navigation disabled');
+      return;
+    }
+    if (key === 'shop-purchased') {
+      console.log('Shop purchased navigation disabled');
+      return;
+    }
+    if (key === 'orders-feed') {
+      console.log('Orders feed navigation disabled');
+      return;
+    }
     if (key.startsWith('orders-') || key === 'orders') {
       navigate('/expert');
       onMenuSelect(key);

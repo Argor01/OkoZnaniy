@@ -247,7 +247,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         }}>
           <Content className={styles.mainContent} style={{ 
             padding: isMobile ? '16px' : '24px', 
-            minHeight: 'calc(100vh - 64px)' 
+            minHeight: 'calc(100vh - 64px)',
+            display: 'block',
+            visibility: 'visible',
+            opacity: 1
           }}>
             {children}
           </Content>

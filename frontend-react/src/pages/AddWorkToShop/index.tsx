@@ -46,7 +46,14 @@ const AddWorkToShop: React.FC = () => {
   });
 
   const handleSubmit = (formData: WorkFormData) => {
-    createWorkMutation.mutate(formData);
+    // Преобразуем данные для API
+    const apiData = {
+      ...formData,
+      work_type: formData.workType
+    };
+    delete (apiData as any).workType;
+    
+    createWorkMutation.mutate(apiData);
   };
 
   const handleCancel = () => {
@@ -60,11 +67,10 @@ const AddWorkToShop: React.FC = () => {
       </Title>
       
       <WorkForm
-        onSubmit={handleSubmit}
+        onSave={handleSubmit}
         onCancel={handleCancel}
         subjects={subjects}
         workTypes={workTypes}
-        loading={createWorkMutation.isPending}
       />
     </div>
   );

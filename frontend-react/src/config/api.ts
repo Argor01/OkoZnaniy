@@ -3,14 +3,24 @@
  * Централизованная конфигурация для API endpoints
  */
 
+console.log('🔍 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+console.log('🔍 All env vars:', import.meta.env);
+console.log('🔍 NODE_ENV:', import.meta.env.NODE_ENV);
+console.log('🔍 DEV mode:', import.meta.env.DEV);
+
 // Получаем базовый URL API из переменной окружения или используем текущий origin
 // Всегда используем тот же протокол что и сайт (http/https)
 const getApiBaseUrl = () => {
+  console.log('🔍 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+  console.log('🔍 All env vars:', import.meta.env);
+  
   if (import.meta.env.VITE_API_URL) {
+    console.log('✅ Using VITE_API_URL:', import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
-  // Используем текущий origin (автоматически будет https если сайт на https)
-  return window.location.origin;
+  // Принудительно используем localhost:8000 для разработки
+  console.log('⚠️ Using fallback URL: http://localhost:8000');
+  return 'http://localhost:8000';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
