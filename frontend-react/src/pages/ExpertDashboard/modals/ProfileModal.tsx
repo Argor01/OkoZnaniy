@@ -178,6 +178,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             console.log('Результат обновления:', result);
             message.success('Профиль обновлен');
             onClose();
+            queryClient.setQueryData(['user-profile'], result);
             await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
             await queryClient.refetchQueries({ queryKey: ['user-profile'] });
             console.log('Кэш обновлен');
@@ -242,6 +243,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   onSuccess?.(result);
                   message.success('Аватар обновлен!');
                   // Инвалидируем кэш и принудительно перезапрашиваем данные
+                  queryClient.setQueryData(['user-profile'], result);
                   await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
                   await queryClient.refetchQueries({ queryKey: ['user-profile'] });
                 } else {

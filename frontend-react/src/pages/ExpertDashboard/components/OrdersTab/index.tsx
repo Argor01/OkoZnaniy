@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Modal, Descriptions, Divider, message, List, Avatar, Radio } from 'antd';
-import { ClockCircleOutlined, UserOutlined, EyeOutlined, FileTextOutlined, CalendarOutlined, DollarOutlined, DeleteOutlined, ExclamationCircleOutlined, EditOutlined, StarOutlined, FilterOutlined } from '@ant-design/icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio } from 'antd';
+import { ClockCircleOutlined, UserOutlined, FilterOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, Bid } from '../../../../api/orders';
 import { authApi } from '../../../../api/auth';
@@ -22,9 +22,6 @@ interface OrdersTabProps {
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('available'); // По умолчанию доступные заказы
 
   // Загружаем профиль пользователя
@@ -42,43 +39,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     }
   }, [userProfile?.role]);
 
-  // Удаление заказа
-  const deleteOrderMutation = useMutation({
-    mutationFn: ordersApi.deleteOrder,
-    onSuccess: () => {
-      message.success('Заказ успешно удален');
-      setIsModalVisible(false);
-      setSelectedOrder(null);
-      queryClient.invalidateQueries({ queryKey: ['user-orders'] });
-    },
-    onError: () => {
-      message.error('Не удалось удалить заказ');
-    },
-  });
-
-  // Загружаем отклики для выбранного заказа (только для размещенных заказов)
-  const { data: bids, isLoading: bidsLoading } = useQuery({
-    queryKey: ['order-bids', selectedOrder?.id],
-    queryFn: () => ordersApi.getBids(selectedOrder.id),
-    enabled: !!selectedOrder?.id && orderFilter === 'my' && isModalVisible,
-  });
-
-  const handleDeleteOrder = () => {
-    Modal.confirm({
-      title: 'Вы уверены, что хотите удалить этот заказ?',
-      icon: <ExclamationCircleOutlined />,
-      content: 'Это действие нельзя отменить.',
-      okText: 'Да, удалить',
-      okType: 'danger',
-      cancelText: 'Отмена',
-      onOk() {
-        if (selectedOrder?.id) {
-          deleteOrderMutation.mutate(selectedOrder.id);
-        }
-      },
-    });
-  };
-
   // Загружаем размещенные заказы пользователя (только для клиентов)
   const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
     queryKey: ['user-orders'],
@@ -89,7 +49,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   // Загружаем доступные заказы (лента)
   const { data: availableOrdersData, isLoading: availableOrdersLoading } = useQuery({
     queryKey: ['available-orders'],
-    queryFn: () => ordersApi.getAvailableOrders(),
+    queryFn: () => ordersApi.getAvailableOrders({ ordering: '-created_at' }),
     enabled: !!userProfile,
   });
 
@@ -99,35 +59,17 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   
   const orders = Array.isArray(currentOrdersData?.results) ? currentOrdersData.results : (Array.isArray(currentOrdersData) ? currentOrdersData : []);
 
-  // Используем реальные данные
-  const displayOrders = orders;
+  const availableOrders = Array.isArray(availableOrdersData?.results)
+    ? availableOrdersData.results
+    : (Array.isArray(availableOrdersData) ? availableOrdersData : []);
 
-  // Отладочная информация
-  console.log('OrdersTab Debug:', {
-    userProfile: userProfile?.role,
-    orderFilter,
-    myOrdersData,
-    availableOrdersData,
-    currentOrdersData,
-    orders: orders.length,
-    displayOrders: displayOrders.length,
-    isLoading,
-    hasToken: !!localStorage.getItem('access_token'),
-    tokenPreview: localStorage.getItem('access_token')?.substring(0, 10) + '...'
-  });
+  const freshOrders = availableOrders.slice(0, 5);
+
+  // Используем реальные данные
+  const displayOrders = orderFilter === 'available' ? freshOrders : orders;
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
-
-  const handleShowOrderDetails = (order: any) => {
-    setSelectedOrder(order);
-    setIsModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    setSelectedOrder(null);
-  };
 
   if (isLoading) {
     return (
@@ -177,7 +119,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
             >
               <Space>
                 <UserOutlined />
-                Размещенные заказы
+                Мои размещенные заказы
               </Space>
             </Radio.Button>
             <Radio.Button 
@@ -276,16 +218,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       </Space>
                     )}
                   </Space>
-                  <Button 
-                    type="link"
-                    icon={<EyeOutlined />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShowOrderDetails(order);
-                    }}
-                  >
-                    Подробнее
-                  </Button>
                   {orderFilter === 'available' && userProfile?.role === 'expert' && (
                     <Button 
                       type="primary"
@@ -310,282 +242,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           </div>
         )}
       </div>
-
-      {/* Модальное окно с подробной информацией о заказе */}
-      <Modal
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <FileTextOutlined style={{ color: '#667eea' }} />
-            <span>Подробная информация о заказе</span>
-          </div>
-        }
-        open={isModalVisible}
-        onCancel={handleCloseModal}
-        footer={[
-          <Button key="close" onClick={handleCloseModal}>
-            Закрыть
-          </Button>,
-          orderFilter === 'available' && selectedOrder && (
-            <Button 
-              key="respond" 
-              type="primary"
-              onClick={() => {
-                handleCloseModal();
-                navigate(`/orders/${selectedOrder.id}`);
-              }}
-            >
-              Откликнуться
-            </Button>
-          ),
-        ].filter(Boolean)}
-        width={800}
-        style={{ top: 20 }}
-      >
-        {selectedOrder && (
-          <div>
-            <Descriptions
-              title={selectedOrder.title}
-              bordered
-              column={1}
-              size="middle"
-              style={{ marginBottom: 24 }}
-            >
-              <Descriptions.Item 
-                label={
-                  <Space>
-                    <Tag icon={<DollarOutlined />} color="green">Бюджет</Tag>
-                  </Space>
-                }
-              >
-                <Text strong style={{ fontSize: 18, color: '#667eea' }}>
-                  {selectedOrder.budget ? `${selectedOrder.budget} ₽` : 'Договорная'}
-                </Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item 
-                label={
-                  <Space>
-                    <Tag color={getStatusColor(selectedOrder.status)}>Статус</Tag>
-                  </Space>
-                }
-              >
-                <Tag color={getStatusColor(selectedOrder.status)} style={{ fontSize: 14 }}>
-                  {getStatusText(selectedOrder.status)}
-                </Tag>
-              </Descriptions.Item>
-
-              {selectedOrder.subject_name && (
-                <Descriptions.Item label="Предмет">
-                  <Tag color="blue">{selectedOrder.subject_name}</Tag>
-                </Descriptions.Item>
-              )}
-
-              {selectedOrder.work_type_name && (
-                <Descriptions.Item label="Тип работы">
-                  <Tag>{selectedOrder.work_type_name}</Tag>
-                </Descriptions.Item>
-              )}
-
-              {selectedOrder.deadline && (
-                <Descriptions.Item 
-                  label={
-                    <Space>
-                      <CalendarOutlined />
-                      <span>Срок выполнения</span>
-                    </Space>
-                  }
-                >
-                  <Space direction="vertical" size={4}>
-                    <Text>{dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      ({dayjs(selectedOrder.deadline).fromNow()})
-                    </Text>
-                  </Space>
-                </Descriptions.Item>
-              )}
-
-              {selectedOrder.created_at && (
-                <Descriptions.Item label="Дата создания">
-                  {dayjs(selectedOrder.created_at).format('DD.MM.YYYY HH:mm')}
-                </Descriptions.Item>
-              )}
-
-              {selectedOrder.responses_count !== undefined && (
-                <Descriptions.Item 
-                  label={
-                    <Space>
-                      <UserOutlined />
-                      <span>Отклики</span>
-                    </Space>
-                  }
-                >
-                  <Text strong>{selectedOrder.responses_count} откликов</Text>
-                </Descriptions.Item>
-              )}
-            </Descriptions>
-
-            {selectedOrder.description && (
-              <>
-                <Divider orientation="left">Описание задания</Divider>
-                <Card 
-                  size="small" 
-                  style={{ 
-                    background: '#f8f9fa', 
-                    border: '1px solid #e9ecef',
-                    marginBottom: 16 
-                  }}
-                >
-                  <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                    {selectedOrder.description}
-                  </Paragraph>
-                </Card>
-              </>
-            )}
-
-            {selectedOrder.custom_topic && (
-              <>
-                <Divider orientation="left">Тема работы</Divider>
-                <Card 
-                  size="small" 
-                  style={{ 
-                    background: '#f0f8ff', 
-                    border: '1px solid #d1ecf1',
-                    marginBottom: 16 
-                  }}
-                >
-                  <Text>{selectedOrder.custom_topic}</Text>
-                </Card>
-              </>
-            )}
-
-            {selectedOrder.files && selectedOrder.files.length > 0 && (
-              <>
-                <Divider orientation="left">Прикрепленные файлы</Divider>
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  {selectedOrder.files.map((file: any, index: number) => (
-                    <Card 
-                      key={index}
-                      size="small"
-                      style={{ 
-                        background: '#fff3cd', 
-                        border: '1px solid #ffeaa7' 
-                      }}
-                    >
-                      <Space>
-                        <FileTextOutlined />
-                        <Text>{file.name || `Файл ${index + 1}`}</Text>
-                        {file.size && (
-                          <Text type="secondary">
-                            ({(file.size / 1024 / 1024).toFixed(2)} МБ)
-                          </Text>
-                        )}
-                      </Space>
-                    </Card>
-                  ))}
-                </Space>
-              </>
-            )}
-
-            {orderFilter === 'my' && (
-              <>
-                <Divider orientation="left">Управление заказом</Divider>
-                <Space wrap style={{ marginBottom: 24 }}>
-                  <Button 
-                    icon={<EyeOutlined />}
-                    onClick={() => {
-                      handleCloseModal();
-                      navigate(`/orders/${selectedOrder.id}`);
-                    }}
-                  >
-                    Перейти к выбору исполнителя
-                  </Button>
-
-                  <Button 
-                    type="primary"
-                    icon={<EditOutlined />}
-                    onClick={() => {
-                      handleCloseModal();
-                      navigate(`/orders/${selectedOrder.id}/edit`);
-                    }}
-                  >
-                    Редактировать заказ
-                  </Button>
-
-                  <Button 
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={handleDeleteOrder}
-                    loading={deleteOrderMutation.isPending}
-                  >
-                    Удалить заказ
-                  </Button>
-                </Space>
-
-                <Divider orientation="left">Отклики экспертов {bids && bids.length > 0 ? `(${bids.length})` : ''}</Divider>
-                
-                {bidsLoading ? (
-                  <div style={{ textAlign: 'center', padding: '20px' }}>
-                    <Spin />
-                  </div>
-                ) : bids && bids.length > 0 ? (
-                  <List
-                    loading={bidsLoading}
-                    itemLayout="vertical"
-                    dataSource={bids}
-                    renderItem={(bid: Bid) => (
-                      <List.Item
-                        key={bid.id}
-                        style={{
-                          background: '#f9f9f9',
-                          borderRadius: 8,
-                          marginBottom: 12,
-                          padding: 16,
-                          border: '1px solid #f0f0f0'
-                        }}
-                      >
-                        <List.Item.Meta
-                          avatar={
-                            <Avatar src={bid.expert.avatar} icon={<UserOutlined />} size={48} />
-                          }
-                          title={
-                            <Space>
-                              <Text strong>{bid.expert.username}</Text>
-                              <Space size={4}>
-                                <StarOutlined style={{ color: '#faad14' }} />
-                                <Text>{bid.expert_rating || 0}</Text>
-                              </Space>
-                            </Space>
-                          }
-                          description={
-                            <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                              <Space>
-                                <Tag color="blue">{bid.amount} ₽</Tag>
-                                <Text type="secondary">
-                                  {dayjs(bid.created_at).fromNow()}
-                                </Text>
-                              </Space>
-                              {bid.comment && (
-                                <Paragraph 
-                                  ellipsis={{ rows: 3, expandable: true, symbol: 'развернуть' }}
-                                  style={{ margin: 0, whiteSpace: 'pre-wrap' }}
-                                >
-                                  {bid.comment}
-                                </Paragraph>
-                              )}
-                            </Space>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                ) : (
-                  <Empty description="Пока нет откликов от экспертов" />
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Typography, Spin, Space } from 'antd';
+import { Button, Typography, Spin, Space, Popconfirm } from 'antd';
 import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import styles from '../../ExpertDashboard.module.css';
 
@@ -11,6 +11,7 @@ interface SpecializationsTabProps {
   isMobile: boolean;
   onEdit: (spec: any) => void;
   onAdd: () => void;
+  onDelete: (spec: any) => void;
 }
 
 const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
@@ -19,6 +20,7 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
   isMobile,
   onEdit,
   onAdd,
+  onDelete,
 }) => {
   return (
     <div className={styles.sectionCard}>
@@ -48,7 +50,7 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
-                    {spec.subject?.name || 'Специализация'}
+                    {spec.custom_name || spec.subject?.name || 'Специализация'}
                     {spec.is_verified && (
                       <CheckCircleOutlined style={{ color: '#10b981', marginLeft: 8 }} />
                     )}
@@ -69,6 +71,12 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                   >
                     Изменить
                   </Button>
+                    <Button
+                      size="small"
+                      danger
+                    >
+                      Удалить
+                    </Button>
                 </Space>
               </div>
             </div>

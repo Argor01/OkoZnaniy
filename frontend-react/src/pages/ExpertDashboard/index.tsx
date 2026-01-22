@@ -108,6 +108,17 @@ const ExpertDashboard: React.FC = () => {
     queryFn: () => expertsApi.getSpecializations(),
   });
 
+  const deleteSpecializationMutation = useMutation({
+    mutationFn: (id: number) => expertsApi.deleteSpecialization(id),
+    onSuccess: () => {
+      message.success('Специализация удалена');
+      queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
+    },
+    onError: (err: any) => {
+      message.error(err?.response?.data?.detail || 'Не удалось удалить специализацию');
+    },
+  });
+
   const specializations = Array.isArray(specializationsData) ? specializationsData : [];
 
   const { data: expertStats } = useQuery({
@@ -215,6 +226,10 @@ const ExpertDashboard: React.FC = () => {
                       closeAllModals();
                       setEditingSpecialization(null);
                       setSpecializationModalVisible(true);
+                    }}
+                    onDelete={(spec) => {
+                      if (!spec?.id) return;
+                      deleteSpecializationMutation.mutate(spec.id);
                     }}
                   />
                 ),

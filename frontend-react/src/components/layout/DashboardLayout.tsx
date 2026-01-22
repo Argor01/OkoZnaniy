@@ -261,11 +261,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <ProfileModal 
         visible={profileModalVisible} 
         onClose={() => setProfileModalVisible(false)} 
-        user={userProfile}
+        profile={userProfile}
+        userProfile={userProfile}
       />
       <MessageModal 
         visible={messageModalVisible} 
         onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); }}
+        isMobile={isMobile}
+        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
+        isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
       />
       <NotificationsModal 

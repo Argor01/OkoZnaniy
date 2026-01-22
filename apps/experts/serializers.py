@@ -24,7 +24,7 @@ class SpecializationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specialization
         fields = ['id', 'expert', 'subject', 'subject_id', 'experience_years', 
-                 'hourly_rate', 'description', 'is_verified']
+                 'hourly_rate', 'description', 'is_verified', 'custom_name']
         read_only_fields = ['expert', 'is_verified']
 
 class ExpertDocumentSerializer(serializers.ModelSerializer):

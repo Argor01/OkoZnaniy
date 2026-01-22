@@ -13,6 +13,13 @@ class Specialization(models.Model):
         related_name='specializations',
         verbose_name="Эксперт"
     )
+    custom_name = models.CharField(
+    max_length=255,
+    verbose_name="Название специализации",
+    blank=True,
+    null=True,
+    help_text="Укажите название специализации, если оно отличается от названия предмета"
+    )
     subject = models.ForeignKey(
         Subject,
         on_delete=models.CASCADE,
