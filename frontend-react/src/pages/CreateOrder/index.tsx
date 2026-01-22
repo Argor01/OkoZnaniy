@@ -62,7 +62,7 @@ const CreateOrder: React.FC = () => {
                 rules={[{ required: true, message: 'Выберите тип работы' }]}
                 className={styles.typeField}
               >
-                <Select placeholder="Тип работы">
+                <Select placeholder="Тип работы" className={styles.selectField}>
                   <Select.Option value="essay">Эссе</Select.Option>
                   <Select.Option value="coursework">Курсовая работа</Select.Option>
                   <Select.Option value="diploma">Дипломная работа</Select.Option>
@@ -76,7 +76,7 @@ const CreateOrder: React.FC = () => {
                 rules={[{ required: true, message: 'Выберите предмет' }]}
                 className={styles.subjectField}
               >
-                <Select placeholder="Предмет">
+                <Select placeholder="Предмет" className={styles.selectField}>
                   <Select.Option value="math">Математика</Select.Option>
                   <Select.Option value="physics">Физика</Select.Option>
                   <Select.Option value="chemistry">Химия</Select.Option>
