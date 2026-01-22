@@ -303,7 +303,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         </Form.Item>
         
         {/* Поля только для экспертов */}
-        {isExpert && (          <>
+        {isExpert && (
+          <>
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: '#f0f9ff', 
+              borderRadius: '8px', 
+              marginBottom: '16px',
+              border: '1px solid #0ea5e9'
+            }}>
+              <h4 style={{ margin: '0 0 8px 0', color: '#0369a1' }}>Профессиональная информация</h4>
+              <p style={{ margin: 0, fontSize: '14px', color: '#0369a1' }}>
+                Заполните дополнительные поля для экспертов
+              </p>
+            </div>
             <div style={{ display: 'flex', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
               <Form.Item 
                 label="Опыт работы (лет)" 
