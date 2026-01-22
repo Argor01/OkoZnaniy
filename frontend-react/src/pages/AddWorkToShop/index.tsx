@@ -1,10 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Typography, message } from 'antd';
 import WorkForm from './components/WorkForm';
-import { authApi } from '../../api/auth';
-import { catalogApi } from '../../api/catalog';
 import { WorkFormData } from './types';
 import { shopApi } from '../../api/shop';
 import styles from './AddWorkToShop.module.css';
@@ -15,26 +13,9 @@ const AddWorkToShop: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Загрузка профиля пользователя
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
-
-  // Загрузка справочников
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
-
-  const { data: workTypes = [] } = useQuery({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
-
   // Мутация для создания работы
   const createWorkMutation = useMutation({
-    mutationFn: (data: WorkFormData) => shopApi.createWork(data),
+    mutationFn: (data: any) => shopApi.createWork(data),
     onSuccess: () => {
       message.success('Работа успешно добавлена!');
       queryClient.invalidateQueries({ queryKey: ['shop-works'] });
@@ -48,10 +29,14 @@ const AddWorkToShop: React.FC = () => {
   const handleSubmit = (formData: WorkFormData) => {
     // Преобразуем данные для API
     const apiData = {
-      ...formData,
-      work_type: formData.workType
+      title: formData.title,
+      description: formData.description,
+      price: formData.price,
+      subject: formData.subject,
+      work_type: formData.workType,
+      preview: formData.preview,
+      files: formData.files
     };
-    delete (apiData as any).workType;
     
     createWorkMutation.mutate(apiData);
   };
@@ -69,8 +54,6 @@ const AddWorkToShop: React.FC = () => {
       <WorkForm
         onSave={handleSubmit}
         onCancel={handleCancel}
-        subjects={subjects}
-        workTypes={workTypes}
       />
     </div>
   );

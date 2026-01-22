@@ -11,6 +11,4 @@ export interface WorkFormData {
 export interface WorkFormProps {
   onSave: (data: WorkFormData) => void;
   onCancel: () => void;
-  subjects?: any[];
-  workTypes?: any[];
 }
