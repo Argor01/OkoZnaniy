@@ -43,8 +43,23 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             return CreateReadyWorkSerializer
         return ReadyWorkSerializer
     
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Обрабатываем множественные файлы
+        work_files = request.FILES.getlist('work_files')
+        
+        # Добавляем файлы в validated_data
+        if work_files:
+            serializer.validated_data['work_files'] = work_files
+        
+        work = serializer.save(author=request.user)
+        
+        # Возвращаем полные данные работы с файлами
+        response_serializer = ReadyWorkSerializer(work, context={'request': request})
+        headers = self.get_success_headers(response_serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     @action(detail=False, methods=['get'])
     def my_works(self, request):

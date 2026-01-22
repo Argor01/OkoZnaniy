@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Space, Row, Col, Input, InputNumber, Select, Typography, Button, Upload, message } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
+import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { RichTextEditor } from '../../../../components/editor';
 import { WorkFormProps, WorkFormData } from '../../types';
 import styles from './WorkForm.module.css';
@@ -15,6 +15,8 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel, subjects = [], wo
     price: 0,
     subject: '',
     workType: '',
+    preview: null,
+    files: [],
   });
 
   const handleSubmit = () => {
@@ -111,17 +113,55 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel, subjects = [], wo
 
         <div>
           <Text strong className={styles.label}>
-            Превью работы (необязательно)
+            Превью работы (изображение)
           </Text>
-          <Input.TextArea
-            placeholder="Краткое описание или превью работы"
-            value={formData.preview}
-            onChange={(e) => setFormData({ ...formData, preview: e.target.value })}
-            rows={3}
-          />
+          <Upload
+            name="preview"
+            listType="picture-card"
+            className={styles.previewUpload}
+            showUploadList={false}
+            beforeUpload={(file) => {
+              const isImage = file.type.startsWith('image/');
+              if (!isImage) {
+                message.error('Можно загружать только изображения!');
+                return Upload.LIST_IGNORE as any;
+              }
+              
+              const isLt5M = file.size < 5 * 1024 * 1024;
+              if (!isLt5M) {
+                message.error('Максимальный размер изображения: 5 МБ');
+                return Upload.LIST_IGNORE as any;
+              }
+              
+              setFormData({ ...formData, preview: file });
+              return false;
+            }}
+          >
+            {formData.preview ? (
+              <img 
+                src={URL.createObjectURL(formData.preview)} 
+                alt="preview" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Загрузить</div>
+              </div>
+            )}
+          </Upload>
+          {formData.preview && (
+            <Button 
+              type="link" 
+              onClick={() => setFormData({ ...formData, preview: null })}
+              style={{ marginTop: 8 }}
+            >
+              Удалить изображение
+            </Button>
+          )}
         </div>
 
-        {/* Загрузка файлов */}
+        {/* Загрузка файлов работы */}
         <div>
           <Text strong className={styles.label}>
             Файлы работы (необязательно)
@@ -130,6 +170,12 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel, subjects = [], wo
             name="files"
             multiple
             className={styles.uploadArea}
+            fileList={formData.files?.map((file, index) => ({
+              uid: `${index}`,
+              name: file.name,
+              status: 'done' as const,
+              size: file.size,
+            })) || []}
             beforeUpload={(file) => {
               const isLt10M = file.size < 10 * 1024 * 1024;
               if (!isLt10M) {
@@ -137,22 +183,44 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel, subjects = [], wo
                 return Upload.LIST_IGNORE as any;
               }
               
-              const fileData = {
-                name: file.name,
-                type: file.type || '',
-                size: file.size,
-              };
+              // Проверяем допустимые типы файлов
+              const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain',
+                'application/rtf',
+                'image/jpeg',
+                'image/jpg',
+                'image/png',
+                'image/gif',
+                'application/zip',
+                'application/x-rar-compressed',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'text/csv'
+              ];
+              
+              if (!allowedTypes.includes(file.type)) {
+                message.error('Неподдерживаемый тип файла');
+                return Upload.LIST_IGNORE as any;
+              }
               
               setFormData({ 
                 ...formData, 
-                files: [...(formData.files || []), fileData] 
+                files: [...(formData.files || []), file] 
               });
               return false;
             }}
             onRemove={(file) => {
+              const index = parseInt(file.uid);
+              const newFiles = [...(formData.files || [])];
+              newFiles.splice(index, 1);
               setFormData({
                 ...formData,
-                files: (formData.files || []).filter((f, index) => index !== (formData.files || []).findIndex(item => item.name === file.name)),
+                files: newFiles,
               });
             }}
           >

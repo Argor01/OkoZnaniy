@@ -403,9 +403,5 @@ PAYMENT_NOTIFICATION_URL = 'https://your-domain.com/api/payments/callback/'  # �
 # Настройки шифрования платежных данных
 PAYMENT_ENCRYPTION_KEY = os.getenv('PAYMENT_ENCRYPTION_KEY', Fernet.generate_key().decode())
 
-# Настройки медиа файлов
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Telegram Bot settings
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')

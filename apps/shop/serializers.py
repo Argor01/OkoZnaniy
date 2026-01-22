@@ -14,6 +14,7 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     work_type_name = serializers.CharField(source='work_type.name', read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    preview = serializers.SerializerMethodField()
     
     class Meta:
         model = ReadyWork
@@ -24,14 +25,23 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
     
+    def get_preview(self, obj):
+        if obj.preview:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.preview.url)
+            return obj.preview.url
+        return None
+    
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
 
 
 class CreateReadyWorkSerializer(serializers.ModelSerializer):
-    files = serializers.ListField(
-        child=serializers.DictField(),
+    preview = serializers.ImageField(required=False)
+    work_files = serializers.ListField(
+        child=serializers.FileField(),
         required=False,
         write_only=True
     )
@@ -40,22 +50,23 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
         model = ReadyWork
         fields = [
             'title', 'description', 'price', 'subject', 'work_type',
-            'preview', 'files'
+            'preview', 'work_files'
         ]
     
     def create(self, validated_data):
-        files_data = validated_data.pop('files', [])
+        work_files = validated_data.pop('work_files', [])
         validated_data['author'] = self.context['request'].user
         
         work = ReadyWork.objects.create(**validated_data)
         
-        # Создаем файлы (пока без реальной загрузки)
-        for file_data in files_data:
+        # Создаем файлы работы
+        for file in work_files:
             ReadyWorkFile.objects.create(
                 work=work,
-                name=file_data.get('name', ''),
-                file_type=file_data.get('type', ''),
-                file_size=file_data.get('size', 0)
+                name=file.name,
+                file=file,
+                file_type=file.content_type or '',
+                file_size=file.size
             )
         
         return work

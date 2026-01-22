@@ -7,13 +7,8 @@ export interface CreateWorkPayload {
   price: number;
   subject: string;
   work_type: string;
-  preview?: string;
-  files?: Array<{
-    name: string;
-    type: string;
-    size: number;
-    url?: string;
-  }>;
+  preview?: File | null;
+  files?: File[];
 }
 
 export const shopApi = {
@@ -23,7 +18,30 @@ export const shopApi = {
   },
 
   createWork: async (data: CreateWorkPayload): Promise<Work> => {
-    const response = await apiClient.post('/shop/works/', data);
+    const formData = new FormData();
+    
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('price', data.price.toString());
+    formData.append('subject', data.subject);
+    formData.append('work_type', data.work_type);
+    
+    if (data.preview) {
+      formData.append('preview', data.preview);
+    }
+    
+    // Добавляем файлы работы
+    if (data.files && data.files.length > 0) {
+      data.files.forEach((file) => {
+        formData.append(`work_files`, file);
+      });
+    }
+    
+    const response = await apiClient.post('/shop/works/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

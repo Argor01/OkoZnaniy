@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Rate } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined, ShoppingCartOutlined, EyeOutlined } from '@ant-design/icons';
+import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Rate, List, Popconfirm } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined, ShoppingCartOutlined, EyeOutlined, FileOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import { shopApi } from '../api/shop';
 import { authApi } from '../api/auth';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 const { Title, Text, Paragraph } = Typography;
@@ -38,18 +38,15 @@ const ShopWorkDetail: React.FC = () => {
     return works.find((w: any) => w.id === Number(workId));
   }, [works, workId]);
 
-  const purchaseMutation = useMutation({
-    mutationFn: (workId: number) => {
-      // TODO: Реализовать API для покупки
-      return Promise.resolve({ success: true });
-    },
+  const deleteMutation = useMutation({
+    mutationFn: (workId: number) => shopApi.deleteWork(workId),
     onSuccess: () => {
-      message.success('Работа успешно куплена!');
-      queryClient.invalidateQueries({ queryKey: ['purchased-works'] });
-      navigate('/shop/purchased');
+      message.success('Работа успешно удалена!');
+      queryClient.invalidateQueries({ queryKey: ['shop-works'] });
+      navigate('/shop/ready-works');
     },
     onError: () => {
-      message.error('Ошибка при покупке работы');
+      message.error('Ошибка при удалении работы');
     },
   });
 
@@ -72,8 +69,21 @@ const ShopWorkDetail: React.FC = () => {
     );
   }
 
+  const handleDelete = () => {
+    deleteMutation.mutate(work.id);
+  };
+
   const handlePurchase = () => {
-    purchaseMutation.mutate(work.id);
+    // TODO: Реализовать покупку
+    message.info('Функция покупки будет реализована позже');
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
@@ -95,7 +105,7 @@ const ShopWorkDetail: React.FC = () => {
               <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{work.title}</Title>
                 <Tag color="blue" style={{ fontSize: isMobile ? 12 : 14, padding: isMobile ? '2px 8px' : '4px 12px' }}>
-                  {work.category}
+                  {work.work_type_name || work.workType || work.category || 'Тип работы'}
                 </Tag>
               </Space>
             </div>
@@ -147,7 +157,7 @@ const ShopWorkDetail: React.FC = () => {
                       fontWeight: 600,
                       color: '#722ed1'
                     }}>
-                      {work.author?.name || work.author?.username || 'Автор'}
+                      {work.author_name || work.author?.name || work.author?.username || 'Автор'}
                     </Text>
                   </Space>
                 </Space>
@@ -191,7 +201,7 @@ const ShopWorkDetail: React.FC = () => {
                     Предмет
                   </Text>
                   <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
-                    {work.subject || 'Не указан'}
+                    {work.subject_name || work.subject || 'Не указан'}
                   </Text>
                 </Space>
               </Card>
@@ -269,7 +279,7 @@ const ShopWorkDetail: React.FC = () => {
                   <Space align="center">
                     <CalendarOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
                     <Text style={{ fontSize: 13, fontWeight: 600, color: '#595959' }}>
-                      {work.createdAt ? formatDistanceToNow(new Date(work.createdAt), { addSuffix: true, locale: ru }) : 'Недавно'}
+                      {work.created_at || work.createdAt ? format(new Date(work.created_at || work.createdAt), 'dd.MM.yyyy', { locale: ru }) : 'Недавно'}
                     </Text>
                   </Space>
                 </Space>
@@ -290,15 +300,73 @@ const ShopWorkDetail: React.FC = () => {
               />
             </div>
 
-            {/* Кнопка покупки */}
-            {userProfile?.id !== work.author?.id && (
-              <div style={{ textAlign: 'center', marginTop: 24 }}>
+            {/* Прикрепленные файлы */}
+            {work.files && work.files.length > 0 && (
+              <div>
+                <Title level={4}>Прикрепленные файлы</Title>
+                <Card style={{ background: '#fafafa' }}>
+                  <List
+                    dataSource={work.files}
+                    renderItem={(file: any) => (
+                      <List.Item
+                        actions={[
+                          <Button
+                            type="link"
+                            icon={<DownloadOutlined />}
+                            onClick={() => {
+                              if (file.file) {
+                                window.open(file.file, '_blank');
+                              }
+                            }}
+                          >
+                            Скачать
+                          </Button>
+                        ]}
+                      >
+                        <List.Item.Meta
+                          avatar={<FileOutlined style={{ fontSize: 20, color: '#1890ff' }} />}
+                          title={file.name}
+                          description={`${file.file_type || 'Неизвестный тип'} • ${formatFileSize(file.file_size || 0)}`}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </div>
+            )}
+
+            {/* Кнопки действий */}
+            <div style={{ textAlign: 'center', marginTop: 24 }}>
+              {userProfile?.id === work.author?.id ? (
+                // Если это работа текущего пользователя - показываем кнопку удаления
+                <Popconfirm
+                  title="Удалить работу?"
+                  description="Вы уверены, что хотите удалить эту работу? Это действие нельзя отменить."
+                  onConfirm={handleDelete}
+                  okText="Да"
+                  cancelText="Нет"
+                >
+                  <Button 
+                    danger
+                    size="large" 
+                    icon={<DeleteOutlined />}
+                    loading={deleteMutation.isPending}
+                    style={{ 
+                      minWidth: isMobile ? '100%' : 200,
+                      height: 48,
+                      fontSize: 16
+                    }}
+                  >
+                    Удалить работу
+                  </Button>
+                </Popconfirm>
+              ) : (
+                // Если это чужая работа - показываем кнопку покупки
                 <Button 
                   type="primary" 
                   size="large" 
                   icon={<ShoppingCartOutlined />}
                   onClick={handlePurchase}
-                  loading={purchaseMutation.isPending}
                   style={{ 
                     minWidth: isMobile ? '100%' : 200,
                     height: 48,
@@ -307,16 +375,8 @@ const ShopWorkDetail: React.FC = () => {
                 >
                   Купить за {work.price} ₽
                 </Button>
-              </div>
-            )}
-
-            {userProfile?.id === work.author?.id && (
-              <div style={{ textAlign: 'center', marginTop: 24 }}>
-                <Tag color="blue" style={{ fontSize: 14, padding: '8px 16px' }}>
-                  Это ваша работа
-                </Tag>
-              </div>
-            )}
+              )}
+            </div>
           </Space>
         </Card>
       </div>

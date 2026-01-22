@@ -4,13 +4,8 @@ export interface WorkFormData {
   price: number;
   subject: string;
   workType: string;
-  preview?: string;
-  files?: Array<{
-    name: string;
-    type: string;
-    size: number;
-    url?: string;
-  }>;
+  preview?: File | null;
+  files?: File[];
 }
 
 export interface WorkFormProps {

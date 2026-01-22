@@ -29,7 +29,6 @@
   height: 44px;
 }
 
-
 /* Стили для InputNumber */
 .input :global(.ant-input-number-input) {
   height: 40px;
@@ -44,7 +43,6 @@
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 .select {
   width: 100%;
@@ -123,7 +121,6 @@
   height: 40px;
 }
 
-
 .saveButton:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
@@ -135,6 +132,63 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
+/* Стили для загрузки превью */
+.previewUpload {
+  width: 200px;
+  height: 200px;
+}
+
+.previewUpload :global(.ant-upload) {
+  width: 200px !important;
+  height: 200px !important;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.previewUpload :global(.ant-upload:hover) {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.previewUpload :global(.ant-upload-select) {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+}
+
+.uploadArea {
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafbfc;
+}
+
+.uploadArea:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.uploadArea :global(.ant-upload-drag-icon) {
+  color: #6b7280;
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.uploadArea :global(.ant-upload-text) {
+  color: #374151;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.uploadArea :global(.ant-upload-hint) {
+  color: #6b7280;
+  font-size: 14px;
+}
 
 /* Адаптив для мобильных */
 @media (max-width: 768px) {
@@ -174,5 +228,15 @@
   .saveButton {
     width: 100%;
     height: 46px;
+  }
+
+  .previewUpload {
+    width: 150px;
+    height: 150px;
+  }
+
+  .previewUpload :global(.ant-upload) {
+    width: 150px !important;
+    height: 150px !important;
   }
 }

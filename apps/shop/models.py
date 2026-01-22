@@ -30,8 +30,8 @@ class ReadyWork(models.Model):
         related_name="ready_works"
     )
     
-    # Превью работы
-    preview = models.TextField("Превью работы", blank=True)
+    # Превью работы (изображение)
+    preview = models.ImageField("Превью работы", upload_to="ready_works/previews/", blank=True, null=True)
     
     # Статус
     is_active = models.BooleanField("Активна", default=True)
