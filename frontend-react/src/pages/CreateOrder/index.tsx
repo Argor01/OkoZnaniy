@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
+import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker, Upload, Modal } from 'antd';
+import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { catalogApi } from '../../api/catalog';
 import dayjs from 'dayjs';
 import styles from './CreateOrder.module.css';
 
@@ -9,8 +11,51 @@ const { Title } = Typography;
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<any[]>([]);
+  const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
+  const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
+  const [newWorkTypeName, setNewWorkTypeName] = useState('');
+  const [newSubjectName, setNewSubjectName] = useState('');
+
+  // Загрузка данных из API
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
+  const { data: workTypes = [] } = useQuery({
+    queryKey: ['workTypes'],
+    queryFn: () => catalogApi.getWorkTypes(),
+  });
+
+  // Мутации для создания новых типов работ и предметов
+  const createWorkTypeMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createWorkType(name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workTypes'] });
+      setNewWorkTypeModalVisible(false);
+      setNewWorkTypeName('');
+      message.success('Новый тип работы добавлен');
+    },
+    onError: () => {
+      message.error('Ошибка при добавлении типа работы');
+    },
+  });
+
+  const createSubjectMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createSubject(name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      setNewSubjectModalVisible(false);
+      setNewSubjectName('');
+      message.success('Новый предмет добавлен');
+    },
+    onError: () => {
+      message.error('Ошибка при добавлении предмета');
+    },
+  });
 
   console.log('CreateOrder component rendering');
 
@@ -69,11 +114,30 @@ const CreateOrder: React.FC = () => {
                 rules={[{ required: true, message: 'Выберите тип работы' }]}
                 className={styles.typeField}
               >
-                <Select placeholder="Тип работы" className={styles.selectField}>
-                  <Select.Option value="essay">Эссе</Select.Option>
-                  <Select.Option value="coursework">Курсовая работа</Select.Option>
-                  <Select.Option value="diploma">Дипломная работа</Select.Option>
-                  <Select.Option value="report">Отчет</Select.Option>
+                <Select 
+                  placeholder="Тип работы" 
+                  className={styles.selectField}
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={() => setNewWorkTypeModalVisible(true)}
+                          style={{ width: '100%', textAlign: 'left' }}
+                        >
+                          Добавить новый тип работы
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                >
+                  {workTypes.map((type: any) => (
+                    <Select.Option key={type.id} value={type.id}>
+                      {type.name}
+                    </Select.Option>
+                  ))}
                 </Select>
               </Form.Item>
 
@@ -83,11 +147,31 @@ const CreateOrder: React.FC = () => {
                 rules={[{ required: true, message: 'Выберите предмет' }]}
                 className={styles.subjectField}
               >
-                <Select placeholder="Предмет" className={styles.selectField}>
-                  <Select.Option value="math">Математика</Select.Option>
-                  <Select.Option value="physics">Физика</Select.Option>
-                  <Select.Option value="chemistry">Химия</Select.Option>
-                  <Select.Option value="history">История</Select.Option>
+                <Select 
+                  placeholder="Предмет" 
+                  className={styles.selectField}
+                  showSearch
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                        <Button
+                          type="text"
+                          icon={<PlusOutlined />}
+                          onClick={() => setNewSubjectModalVisible(true)}
+                          style={{ width: '100%', textAlign: 'left' }}
+                        >
+                          Добавить новый предмет
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                >
+                  {subjects.map((subject: any) => (
+                    <Select.Option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </Select.Option>
+                  ))}
                 </Select>
               </Form.Item>
 
@@ -209,6 +293,64 @@ const CreateOrder: React.FC = () => {
           </Form.Item>
         </Form>
       </Card>
+
+      {/* Модальное окно для добавления нового типа работы */}
+      <Modal
+        title="Добавить новый тип работы"
+        open={newWorkTypeModalVisible}
+        onOk={() => {
+          if (newWorkTypeName.trim()) {
+            createWorkTypeMutation.mutate(newWorkTypeName.trim());
+          } else {
+            message.error('Введите название типа работы');
+          }
+        }}
+        onCancel={() => {
+          setNewWorkTypeModalVisible(false);
+          setNewWorkTypeName('');
+        }}
+        confirmLoading={createWorkTypeMutation.isPending}
+      >
+        <Input
+          placeholder="Название типа работы"
+          value={newWorkTypeName}
+          onChange={(e) => setNewWorkTypeName(e.target.value)}
+          onPressEnter={() => {
+            if (newWorkTypeName.trim()) {
+              createWorkTypeMutation.mutate(newWorkTypeName.trim());
+            }
+          }}
+        />
+      </Modal>
+
+      {/* Модальное окно для добавления нового предмета */}
+      <Modal
+        title="Добавить новый предмет"
+        open={newSubjectModalVisible}
+        onOk={() => {
+          if (newSubjectName.trim()) {
+            createSubjectMutation.mutate(newSubjectName.trim());
+          } else {
+            message.error('Введите название предмета');
+          }
+        }}
+        onCancel={() => {
+          setNewSubjectModalVisible(false);
+          setNewSubjectName('');
+        }}
+        confirmLoading={createSubjectMutation.isPending}
+      >
+        <Input
+          placeholder="Название предмета"
+          value={newSubjectName}
+          onChange={(e) => setNewSubjectName(e.target.value)}
+          onPressEnter={() => {
+            if (newSubjectName.trim()) {
+              createSubjectMutation.mutate(newSubjectName.trim());
+            }
+          }}
+        />
+      </Modal>
     </div>
   );
 };
