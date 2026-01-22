@@ -387,15 +387,22 @@
   margin-bottom: 32px;
 }
 
-.filesField {
-  margin-bottom: 32px;
-}
-
 .uploadArea {
   border-radius: 12px !important;
   border: 2px dashed rgba(102, 126, 234, 0.3) !important;
   transition: all 0.3s ease !important;
   background: rgba(102, 126, 234, 0.02) !important;
+}
+
+.uploadArea .ant-upload {
+  border: none !important;
+  background: transparent !important;
+}
+
+.uploadArea .ant-upload-btn {
+  border: none !important;
+  background: transparent !important;
+  padding: 24px !important;
 }
 
 .uploadArea:hover {
@@ -419,6 +426,21 @@
 .uploadArea .ant-upload-hint {
   color: #6b7280 !important;
   font-size: 14px !important;
+}
+
+/* Переопределение стилей Ant Design Upload */
+.uploadArea .ant-upload-drag {
+  border: none !important;
+  background: transparent !important;
+}
+
+.uploadArea .ant-upload-drag-container {
+  border: none !important;
+}
+
+.uploadArea::before,
+.uploadArea::after {
+  display: none !important;
 }
 
 .fileUploadSection {
