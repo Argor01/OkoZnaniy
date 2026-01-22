@@ -314,7 +314,10 @@ const OrderDetail: React.FC = () => {
             )}
 
             {/* Кнопка отклика для эксперта */}
-            {userProfile?.role === 'expert' && !order.expert && !userHasBid && (
+            {userProfile?.role === 'expert' && 
+             !order.expert && 
+             !userHasBid && 
+             order.client?.id !== userProfile?.id && (
                 <div style={{ marginTop: 24 }}>
                     <Button 
                         type="primary" 
@@ -324,6 +327,15 @@ const OrderDetail: React.FC = () => {
                     >
                         Откликнуться на заказ
                     </Button>
+                </div>
+            )}
+            
+            {/* Сообщение для автора заказа */}
+            {order.client?.id === userProfile?.id && (
+                <div style={{ marginTop: 24 }}>
+                    <Tag color="blue" style={{ fontSize: 16, padding: '8px 16px' }}>
+                        Это ваш заказ
+                    </Tag>
                 </div>
             )}
             
@@ -374,7 +386,7 @@ const OrderDetail: React.FC = () => {
                         actions={
                           order.expert?.id === bid.expert.id ? [
                             <Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>
-                          ] : order.expert ? [] : [
+                          ] : order.expert ? [] : order.client?.id === userProfile?.id ? [
                             <Button
                               type="primary"
                               size={isMobile ? 'small' : 'middle'}
@@ -408,7 +420,22 @@ const OrderDetail: React.FC = () => {
                                 Отклонить
                               </Button>
                             )
-                          ].filter(Boolean)
+                          ].filter(Boolean) : [
+                            <Button
+                              size={isMobile ? 'small' : 'middle'}
+                              icon={<MessageOutlined />}
+                              onClick={async () => {
+                                try {
+                                  const chat = await chatApi.getOrCreateByOrder(order.id);
+                                  navigate(`/messages?chat=${chat.id}`);
+                                } catch (error) {
+                                  message.error('Не удалось открыть чат');
+                                }
+                              }}
+                            >
+                              Написать
+                            </Button>
+                          ]
                         }
                       >
                         <List.Item.Meta
