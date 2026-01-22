@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker } from 'antd';
+import { Form, Input, InputNumber, Select, Button, Card, Typography, message, DatePicker, Upload } from 'antd';
+import { InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import styles from './CreateOrder.module.css';
@@ -9,11 +10,17 @@ const { Title } = Typography;
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [fileList, setFileList] = useState<any[]>([]);
 
   console.log('CreateOrder component rendering');
 
   const onFinish = (values: any) => {
-    console.log('Form values:', values);
+    const formData = {
+      ...values,
+      files: fileList
+    };
+    console.log('Form values:', formData);
+    console.log('Files:', fileList);
     message.success('Форма отправлена (тестовый режим)');
   };
 
@@ -134,6 +141,58 @@ const CreateOrder: React.FC = () => {
                 style={{ width: '100%' }}
                 className={styles.priceInput}
               />
+            </Form.Item>
+
+            {/* Загрузка файлов */}
+            <Form.Item
+              name="files"
+              label="Прикрепить файлы (необязательно)"
+            >
+              <Upload.Dragger
+                name="files"
+                multiple
+                fileList={fileList}
+                beforeUpload={(file) => {
+                  const isLt10M = file.size < 10 * 1024 * 1024;
+                  if (!isLt10M) {
+                    message.error('Максимальный размер файла: 10 МБ');
+                    return Upload.LIST_IGNORE as any;
+                  }
+                  
+                  // Проверяем допустимые типы файлов
+                  const allowedTypes = [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'text/plain',
+                    'image/jpeg',
+                    'image/jpg',
+                    'image/png',
+                    'application/zip',
+                    'application/x-rar-compressed',
+                  ];
+                  
+                  if (!allowedTypes.includes(file.type)) {
+                    message.error('Неподдерживаемый тип файла');
+                    return Upload.LIST_IGNORE as any;
+                  }
+                  
+                  setFileList(prev => [...prev, file]);
+                  return false; // Предотвращаем автоматическую загрузку
+                }}
+                onRemove={(file) => {
+                  setFileList(prev => prev.filter(f => f.uid !== file.uid));
+                }}
+                className={styles.uploadArea}
+              >
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
+                <p className="ant-upload-hint">
+                  Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
+                </p>
+              </Upload.Dragger>
             </Form.Item>
           </div>
 
