@@ -91,27 +91,31 @@ const UserProfile: React.FC = () => {
         </Button>
       </div>
 
-      {/* Основная информация о пользователе и статистика */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '1fr 300px', 
-        gap: 24, 
-        marginBottom: 24,
-        alignItems: 'start'
-      }}>
-        {/* Информация о пользователе */}
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      {/* Основная информация о пользователе */}
+      <div style={{ marginBottom: 24 }}>
+        {/* Аватар и ник - выделенный блок */}
+        <Card 
+          style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            border: '2px solid #667eea',
+            borderRadius: 16,
+            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
+            marginBottom: 16
+          }}
+          styles={{ body: { padding: '24px 32px' } }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
             {userData.avatar ? (
               <img 
                 src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
                 alt="Аватар" 
                 style={{ 
-                  width: 60, 
-                  height: 60, 
+                  width: 80, 
+                  height: 80, 
                   borderRadius: '50%', 
                   objectFit: 'cover',
-                  border: '2px solid #f0f0f0'
+                  border: '4px solid white',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
                 }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -124,100 +128,142 @@ const UserProfile: React.FC = () => {
             <div 
               className="avatar-fallback"
               style={{ 
-                width: 60, 
-                height: 60, 
+                width: 80, 
+                height: 80, 
                 borderRadius: '50%', 
-                backgroundColor: '#f0f0f0',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 display: userData.avatar ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 24,
-                color: '#999'
+                fontSize: 32,
+                color: '#667eea',
+                border: '4px solid white',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
               }}
             >
               <UserOutlined />
             </div>
             <div>
-              <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Title level={1} style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: 12 }}>
                 {userData.first_name && userData.last_name 
                   ? `${userData.first_name} ${userData.last_name}`
                   : userData.username
                 }
-                {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 28 }} />}
               </Title>
-              <Text type="secondary">@{userData.username}</Text>
+              <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.8)' }}>@{userData.username}</Text>
+              <div style={{ marginTop: 8 }}>
+                <Tag color="rgba(255, 255, 255, 0.2)" style={{ color: 'white', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+                  {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+                </Tag>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* Рейтинг и статистика */}
-        <div>
-          <Card title="Рейтинг и статистика">
-            {(statsLoading || expertStatsLoading) ? (
-              <Spin />
-            ) : userData.role === 'expert' && expertStats ? (
-              <div>
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
-                    {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
-                  </div>
-                  <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 16 }} />
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-                    на основе {expertStats.completed_orders} заказов
-                  </div>
+        {/* Рейтинг и статистика - блок на всю ширину */}
+        <Card 
+          title={
+            <Text style={{ fontSize: 18, fontWeight: 600, color: '#1f2937' }}>
+              РЕЙТИНГ И СТАТИСТИКА
+            </Text>
+          }
+          style={{ 
+            borderRadius: 12,
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+          }}
+        >
+          {(statsLoading || expertStatsLoading) ? (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <Spin size="large" />
+            </div>
+          ) : userData.role === 'expert' && expertStats ? (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: 24 
+            }}>
+              {/* Рейтинг */}
+              <div style={{ textAlign: 'center', padding: '16px' }}>
+                <div style={{ fontSize: 48, fontWeight: 'bold', color: '#faad14', marginBottom: 8 }}>
+                  {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
                 </div>
-                <Divider />
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Всего заказов:</Text>
-                  <Text strong>{expertStats.total_orders}</Text>
+                <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 20, marginBottom: 8 }} />
+                <div style={{ fontSize: 14, color: '#666' }}>
+                  Средний рейтинг
+                </div>
+                <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+                  на основе {expertStats.completed_orders} заказов
+                </div>
+              </div>
+
+              {/* Статистика заказов */}
+              <div style={{ padding: '16px' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
+                    {expertStats.total_orders}
+                  </div>
+                  <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <Text>Завершено:</Text>
-                  <Text strong>{expertStats.completed_orders}</Text>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Успешность:</Text>
-                  <Text strong>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
+                  <Text strong style={{ color: '#52c41a' }}>{expertStats.completed_orders}</Text>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>Заработано:</Text>
-                  <Text strong>
-                    {expertStats.total_earnings?.toLocaleString('ru-RU', {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2
-                    })} ₽
-                  </Text>
+                  <Text>Успешность:</Text>
+                  <Text strong style={{ color: '#52c41a' }}>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
                 </div>
               </div>
-            ) : ordersStats ? (
-              <div>
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
+
+              {/* Заработок */}
+              <div style={{ textAlign: 'center', padding: '16px' }}>
+                <div style={{ fontSize: 32, fontWeight: 'bold', color: '#52c41a', marginBottom: 8 }}>
+                  {expertStats.total_earnings?.toLocaleString('ru-RU', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  })} ₽
+                </div>
+                <div style={{ fontSize: 14, color: '#666' }}>
+                  Общий заработок
+                </div>
+              </div>
+            </div>
+          ) : ordersStats ? (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: 24 
+            }}>
+              {/* Успешность */}
+              <div style={{ textAlign: 'center', padding: '16px' }}>
+                <div style={{ fontSize: 48, fontWeight: 'bold', color: '#1890ff', marginBottom: 8 }}>
+                  {ordersStats.success_rate.toFixed(1)}%
+                </div>
+                <div style={{ fontSize: 14, color: '#666' }}>
+                  Успешность заказов
+                </div>
+              </div>
+
+              {/* Статистика заказов */}
+              <div style={{ padding: '16px' }}>
+                <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
-                    {ordersStats.success_rate.toFixed(1)}%
+                    {ordersStats.total}
                   </div>
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-                    успешность заказов
-                  </div>
-                </div>
-                <Divider />
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Всего заказов:</Text>
-                  <Text strong>{ordersStats.total}</Text>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Завершено:</Text>
-                  <Text strong>{ordersStats.completed}</Text>
+                  <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>Успешность:</Text>
-                  <Text strong>{ordersStats.success_rate.toFixed(1)}%</Text>
+                  <Text>Завершено:</Text>
+                  <Text strong style={{ color: '#52c41a' }}>{ordersStats.completed}</Text>
                 </div>
               </div>
-            ) : (
-              <Text type="secondary">Статистика недоступна</Text>
-            )}
-          </Card>
-        </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <Text type="secondary" style={{ fontSize: 16 }}>Статистика недоступна</Text>
+            </div>
+          )}
+        </Card>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
