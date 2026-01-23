@@ -71,9 +71,11 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                   >
                     Изменить
                   </Button>
+
                     <Button
                       size="small"
                       danger
+                       onClick={() => onDelete(spec)}
                     >
                       Удалить
                     </Button>
