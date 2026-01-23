@@ -102,148 +102,154 @@ const WorkDetail: React.FC = () => {
             {/* Основная информация */}
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+              gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', 
               gap: 16 
             }}>
-              {/* Заказчик */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#f9f0ff', 
-                  border: '1px solid #efdbff',
-                  borderRadius: 12
-                }}
-              >
-                <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Заказчик
-                  </Text>
-                  <Space align="center">
-                    <Avatar 
-                      size={32} 
-                      src={work.client?.avatar} 
-                      icon={<UserOutlined />}
-                      style={{ border: '2px solid #d3adf7' }}
-                    />
-                    <Button 
-                      type="link" 
-                      onClick={() => navigate(`/user/${work.client?.id}`)}
-                      style={{ 
-                        padding: 0, 
-                        height: 'auto',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: '#722ed1'
-                      }}
-                    >
-                      {work.client?.username || work.client_name || 'Неизвестен'}
-                    </Button>
+              {/* Левая колонка - Заказчик и Дедлайн */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Заказчик */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#f9f0ff', 
+                    border: '1px solid #efdbff',
+                    borderRadius: 12
+                  }}
+                >
+                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Заказчик
+                    </Text>
+                    <Space align="center">
+                      <Avatar 
+                        size={32} 
+                        src={work.client?.avatar} 
+                        icon={<UserOutlined />}
+                        style={{ border: '2px solid #d3adf7' }}
+                      />
+                      <Button 
+                        type="link" 
+                        onClick={() => navigate(`/user/${work.client?.id}`)}
+                        style={{ 
+                          padding: 0, 
+                          height: 'auto',
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: '#722ed1'
+                        }}
+                      >
+                        {work.client?.username || work.client_name || 'Неизвестен'}
+                      </Button>
+                    </Space>
                   </Space>
-                </Space>
-              </Card>
+                </Card>
 
-              {/* Дедлайн */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#fff7e6', 
-                  border: '1px solid #ffd591',
-                  borderRadius: 12,
-                  padding: '8px 12px'
-                }}
-                bodyStyle={{ padding: '8px 0' }}
-              >
-                <Space direction="vertical" size={2} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Дедлайн
-                  </Text>
-                  <Space align="center">
-                    <CalendarOutlined style={{ color: '#fa8c16', fontSize: 14 }} />
-                    <Text style={{ fontSize: 13, fontWeight: 600, color: '#d46b08' }}>
-                      {work.deadline ? new Date(work.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                {/* Дедлайн */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#fff7e6', 
+                    border: '1px solid #ffd591',
+                    borderRadius: 12,
+                    padding: '8px 12px'
+                  }}
+                  bodyStyle={{ padding: '8px 0' }}
+                >
+                  <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Дедлайн
+                    </Text>
+                    <Space align="center">
+                      <CalendarOutlined style={{ color: '#fa8c16', fontSize: 14 }} />
+                      <Text style={{ fontSize: 13, fontWeight: 600, color: '#d46b08' }}>
+                        {work.deadline ? new Date(work.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                      </Text>
+                    </Space>
+                  </Space>
+                </Card>
+              </div>
+
+              {/* Правая колонка - остальные карточки */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Предмет */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#f8f9ff', 
+                    border: '1px solid #e6f0ff',
+                    borderRadius: 12
+                  }}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Предмет
+                    </Text>
+                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                      {work.subject?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Space>
-              </Card>
+                </Card>
 
-              {/* Предмет */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#f8f9ff', 
-                  border: '1px solid #e6f0ff',
-                  borderRadius: 12
-                }}
-              >
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Предмет
-                  </Text>
-                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
-                    {work.subject?.name || 'Не указан'}
-                  </Text>
-                </Space>
-              </Card>
+                {/* Стоимость */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#f0f9f0', 
+                    border: '1px solid #d9f7be',
+                    borderRadius: 12
+                  }}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Стоимость
+                    </Text>
+                    <Space align="center">
+                      <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                      <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
+                        {work.budget} ₽
+                      </Text>
+                    </Space>
+                  </Space>
+                </Card>
 
-              {/* Стоимость */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#f0f9f0', 
-                  border: '1px solid #d9f7be',
-                  borderRadius: 12
-                }}
-              >
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Стоимость
-                  </Text>
-                  <Space align="center">
-                    <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                    <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
-                      {work.budget} ₽
+                {/* Тип работы */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#f8f9ff', 
+                    border: '1px solid #e6f0ff',
+                    borderRadius: 12
+                  }}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Тип работы
+                    </Text>
+                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                      {work.work_type?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Space>
-              </Card>
+                </Card>
 
-              {/* Тип работы */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#f8f9ff', 
-                  border: '1px solid #e6f0ff',
-                  borderRadius: 12
-                }}
-              >
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Тип работы
-                  </Text>
-                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
-                    {work.work_type?.name || 'Не указан'}
-                  </Text>
-                </Space>
-              </Card>
-
-              {/* Выполнена */}
-              <Card 
-                size="small" 
-                style={{ 
-                  background: '#f6f6f6', 
-                  border: '1px solid #d9d9d9',
-                  borderRadius: 12
-                }}
-              >
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Выполнена
-                  </Text>
-                  <Text style={{ fontSize: 14, fontWeight: 600, color: '#595959' }}>
-                    {formatDistanceToNow(new Date(work.updated_at || work.created_at), { addSuffix: true, locale: ru })}
-                  </Text>
-                </Space>
-              </Card>
+                {/* Выполнена */}
+                <Card 
+                  size="small" 
+                  style={{ 
+                    background: '#f6f6f6', 
+                    border: '1px solid #d9d9d9',
+                    borderRadius: 12
+                  }}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      Выполнена
+                    </Text>
+                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#595959' }}>
+                      {formatDistanceToNow(new Date(work.updated_at || work.created_at), { addSuffix: true, locale: ru })}
+                    </Text>
+                  </Space>
+                </Card>
+              </div>
             </div>
 
             {/* Описание */}
