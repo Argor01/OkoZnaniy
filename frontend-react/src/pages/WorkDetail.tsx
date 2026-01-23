@@ -100,50 +100,50 @@ const WorkDetail: React.FC = () => {
             </div>
 
             {/* Основная информация */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', 
-              gap: 16 
-            }}>
-              {/* Левая колонка - Заказчик и Дедлайн */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Заказчик */}
-                <Card 
-                  size="small" 
-                  style={{ 
-                    background: '#f9f0ff', 
-                    border: '1px solid #efdbff',
-                    borderRadius: 12
-                  }}
-                >
-                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                      Заказчик
-                    </Text>
-                    <Space align="center">
-                      <Avatar 
-                        size={32} 
-                        src={work.client?.avatar} 
-                        icon={<UserOutlined />}
-                        style={{ border: '2px solid #d3adf7' }}
-                      />
-                      <Button 
-                        type="link" 
-                        onClick={() => navigate(`/user/${work.client?.id}`)}
-                        style={{ 
-                          padding: 0, 
-                          height: 'auto',
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: '#722ed1'
-                        }}
-                      >
-                        {work.client?.username || work.client_name || 'Неизвестен'}
-                      </Button>
-                    </Space>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Заказчик - большая плашка на всю ширину */}
+              <Card 
+                size="small" 
+                style={{ 
+                  background: '#f9f0ff', 
+                  border: '1px solid #efdbff',
+                  borderRadius: 12
+                }}
+              >
+                <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                    Заказчик
+                  </Text>
+                  <Space align="center">
+                    <Avatar 
+                      size={32} 
+                      src={work.client?.avatar} 
+                      icon={<UserOutlined />}
+                      style={{ border: '2px solid #d3adf7' }}
+                    />
+                    <Button 
+                      type="link" 
+                      onClick={() => navigate(`/user/${work.client?.id}`)}
+                      style={{ 
+                        padding: 0, 
+                        height: 'auto',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#722ed1'
+                      }}
+                    >
+                      {work.client?.username || work.client_name || 'Неизвестен'}
+                    </Button>
                   </Space>
-                </Card>
+                </Space>
+              </Card>
 
+              {/* Остальные плашки в сетке */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
+                gap: 16 
+              }}>
                 {/* Дедлайн */}
                 <Card 
                   size="small" 
@@ -167,10 +167,7 @@ const WorkDetail: React.FC = () => {
                     </Space>
                   </Space>
                 </Card>
-              </div>
 
-              {/* Правая колонка - остальные карточки */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* Предмет */}
                 <Card 
                   size="small" 
