@@ -103,37 +103,47 @@ const WorkDetail: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Заказчик - большая плашка на всю ширину */}
               <Card 
-                size="small" 
                 style={{ 
-                  background: '#f9f0ff', 
-                  border: '1px solid #efdbff',
-                  borderRadius: 12
+                  background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
+                  border: '2px solid #d3adf7',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
+                  padding: '8px 16px'
                 }}
+                bodyStyle={{ padding: '16px 20px' }}
               >
-                <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
-                    Заказчик
+                <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                  <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                    ЗАКАЗЧИК
                   </Text>
-                  <Space align="center">
+                  <Space align="center" size={16}>
                     <Avatar 
-                      size={32} 
+                      size={48} 
                       src={work.client?.avatar} 
                       icon={<UserOutlined />}
-                      style={{ border: '2px solid #d3adf7' }}
-                    />
-                    <Button 
-                      type="link" 
-                      onClick={() => navigate(`/user/${work.client?.id}`)}
                       style={{ 
-                        padding: 0, 
-                        height: 'auto',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: '#722ed1'
+                        border: '3px solid #722ed1',
+                        boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
                       }}
-                    >
-                      {work.client?.username || work.client_name || 'Неизвестен'}
-                    </Button>
+                    />
+                    <div>
+                      <Button 
+                        type="link" 
+                        onClick={() => navigate(`/user/${work.client?.id}`)}
+                        style={{ 
+                          padding: 0, 
+                          height: 'auto',
+                          fontSize: 18,
+                          fontWeight: 700,
+                          color: '#722ed1'
+                        }}
+                      >
+                        {work.client?.username || work.client_name || 'Неизвестен'}
+                      </Button>
+                      <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 2 }}>
+                        Нажмите, чтобы посмотреть профиль
+                      </div>
+                    </div>
                   </Space>
                 </Space>
               </Card>
