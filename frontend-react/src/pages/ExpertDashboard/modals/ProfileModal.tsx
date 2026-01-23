@@ -3,6 +3,7 @@ import { Modal, Form, Input, Upload, message, InputNumber as AntInputNumber } fr
 import { UserOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../../../api/auth';
+import apiClient from '../../../api/client';
 import { UserProfile } from '../types';
 import SkillsSelect from '../../../components/SkillsSelect';
 import styles from '../ExpertDashboard.module.css';
@@ -228,17 +229,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               try {
                 const formData = new FormData();
                 formData.append('avatar', file as File);
-                
-                const response = await fetch('http://127.0.0.1:8000/api/users/update_me/', {
-                  method: 'PATCH',
+
+                const { data: result } = await apiClient.patch('/users/update_me/', formData, {
                   headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    'Content-Type': 'multipart/form-data',
                   },
-                  body: formData,
                 });
-                
-                if (response.ok) {
-                  const result = await response.json();
+
+                if (result) {
                   form.setFieldsValue({ avatar: result.avatar });
                   onSuccess?.(result);
                   message.success('Аватар обновлен!');
