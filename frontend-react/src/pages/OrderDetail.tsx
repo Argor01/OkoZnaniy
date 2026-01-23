@@ -198,10 +198,7 @@ const OrderDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#fff7e6', 
-                    border: '1px solid #ffd591',
-                    borderRadius: 12,
-                    padding: '8px 12px'
+                    borderRadius: 12
                   }}
                   styles={{ body: { padding: '8px 0' } }}
                 >
@@ -222,8 +219,6 @@ const OrderDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f8f9ff', 
-                    border: '1px solid #e6f0ff',
                     borderRadius: 12
                   }}
                 >
@@ -241,8 +236,6 @@ const OrderDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f0f9f0', 
-                    border: '1px solid #d9f7be',
                     borderRadius: 12
                   }}
                 >
@@ -263,8 +256,6 @@ const OrderDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f8f9ff', 
-                    border: '1px solid #e6f0ff',
                     borderRadius: 12
                   }}
                 >
@@ -282,8 +273,6 @@ const OrderDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f6f6f6', 
-                    border: '1px solid #d9d9d9',
                     borderRadius: 12
                   }}
                 >

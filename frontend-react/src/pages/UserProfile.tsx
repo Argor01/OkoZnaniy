@@ -186,9 +186,7 @@ const UserProfile: React.FC = () => {
           }
           style={{ 
             borderRadius: 12,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-            background: '#f0f9ff', 
-            border: '1px solid #c7d2fe'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
           }}
         >
           {(statsLoading || expertStatsLoading) ? (
@@ -293,8 +291,6 @@ const UserProfile: React.FC = () => {
               title="О себе" 
               style={{ 
                 marginBottom: 16,
-                background: '#f8f9ff', 
-                border: '1px solid #e6f0ff',
                 borderRadius: 12
               }}
             >
@@ -308,8 +304,6 @@ const UserProfile: React.FC = () => {
               title="Образование" 
               style={{ 
                 marginBottom: 16,
-                background: '#fff7e6', 
-                border: '1px solid #ffd591',
                 borderRadius: 12
               }}
             >
@@ -323,8 +317,6 @@ const UserProfile: React.FC = () => {
               title="Навыки" 
               style={{ 
                 marginBottom: 16,
-                background: '#f6ffed', 
-                border: '1px solid #b7eb8f',
                 borderRadius: 12
               }}
             >
@@ -344,8 +336,6 @@ const UserProfile: React.FC = () => {
               title="Портфолио" 
               style={{ 
                 marginBottom: 16,
-                background: '#fff1f0', 
-                border: '1px solid #ffccc7',
                 borderRadius: 12
               }}
             >
@@ -374,8 +364,6 @@ const UserProfile: React.FC = () => {
           <Card 
             title="Специализации" 
             style={{ 
-              background: '#f0f9f0', 
-              border: '1px solid #d9f7be',
               borderRadius: 12
             }}
           >
@@ -393,8 +381,6 @@ const UserProfile: React.FC = () => {
         <Card 
           title="Контактная информация"
           style={{ 
-            background: '#e6f7ff', 
-            border: '1px solid #91d5ff',
             borderRadius: 12
           }}
         >
@@ -428,8 +414,6 @@ const UserProfile: React.FC = () => {
           title={`Отзывы (${reviews.length})`} 
           style={{ 
             marginTop: 24,
-            background: '#fffbe6', 
-            border: '1px solid #ffe58f',
             borderRadius: 12
           }}
         >

@@ -165,10 +165,7 @@ const WorkDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#fff7e6', 
-                    border: '1px solid #ffd591',
-                    borderRadius: 12,
-                    padding: '8px 12px'
+                    borderRadius: 12
                   }}
                   bodyStyle={{ padding: '8px 0' }}
                 >
@@ -189,8 +186,6 @@ const WorkDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f8f9ff', 
-                    border: '1px solid #e6f0ff',
                     borderRadius: 12
                   }}
                 >
@@ -208,8 +203,6 @@ const WorkDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f0f9f0', 
-                    border: '1px solid #d9f7be',
                     borderRadius: 12
                   }}
                 >
@@ -230,8 +223,6 @@ const WorkDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f8f9ff', 
-                    border: '1px solid #e6f0ff',
                     borderRadius: 12
                   }}
                 >
@@ -249,8 +240,6 @@ const WorkDetail: React.FC = () => {
                 <Card 
                   size="small" 
                   style={{ 
-                    background: '#f6f6f6', 
-                    border: '1px solid #d9d9d9',
                     borderRadius: 12
                   }}
                 >
@@ -270,8 +259,6 @@ const WorkDetail: React.FC = () => {
             <Card 
               title="Описание работы"
               style={{ 
-                background: '#f8f9ff', 
-                border: '1px solid #e6f0ff',
                 borderRadius: 12,
                 marginBottom: 24
               }}
@@ -286,8 +273,6 @@ const WorkDetail: React.FC = () => {
               <Card 
                 title="Прикрепленные файлы"
                 style={{ 
-                  background: '#fff7e6', 
-                  border: '1px solid #ffd591',
                   borderRadius: 12,
                   marginBottom: 24
                 }}
@@ -312,8 +297,6 @@ const WorkDetail: React.FC = () => {
               <Card 
                 title="Оценка работы"
                 style={{ 
-                  background: '#fffbe6', 
-                  border: '1px solid #ffe58f',
                   borderRadius: 12
                 }}
               >
@@ -326,7 +309,7 @@ const WorkDetail: React.FC = () => {
                   </Space>
                   {work.expert_rating.comment && (
                     <Paragraph style={{ 
-                      background: 'rgba(255, 255, 255, 0.5)', 
+                      background: '#f9f9f9', 
                       padding: 16, 
                       borderRadius: 8,
                       margin: 0 
