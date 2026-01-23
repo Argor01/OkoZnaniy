@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Divider, Rate, Tag } from 'antd';
+import { Card, Typography, Spin, Alert, Button, Divider, Rate, Tag, Space } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { expertsApi } from '../api/experts';
 import { apiClient } from '../api/client';
@@ -96,69 +96,85 @@ const UserProfile: React.FC = () => {
         {/* Аватар и ник - выделенный блок */}
         <Card 
           style={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-            border: '2px solid #667eea',
+            background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
+            border: '2px solid #d3adf7',
             borderRadius: 16,
-            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
+            boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
             marginBottom: 16
           }}
-          styles={{ body: { padding: '24px 32px' } }}
+          styles={{ body: { padding: '20px 24px' } }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            {userData.avatar ? (
-              <img 
-                src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
-                alt="Аватар" 
+          <Space direction="vertical" size={12} style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
+              </Text>
+              <Tag 
                 style={{ 
-                  width: 80, 
-                  height: 80, 
+                  fontSize: 11, 
+                  padding: '2px 8px',
+                  backgroundColor: 'rgba(114, 46, 209, 0.1)',
+                  color: '#722ed1',
+                  border: '1px solid rgba(114, 46, 209, 0.2)',
+                  borderRadius: 12
+                }}
+              >
+                {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+              </Tag>
+            </div>
+            <Space align="center" size={20}>
+              {userData.avatar ? (
+                <img 
+                  src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
+                  alt="Аватар" 
+                  style={{ 
+                    width: 72, 
+                    height: 72, 
+                    borderRadius: '50%', 
+                    objectFit: 'cover',
+                    border: '3px solid #722ed1',
+                    boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="avatar-fallback"
+                style={{ 
+                  width: 72, 
+                  height: 72, 
                   borderRadius: '50%', 
-                  objectFit: 'cover',
-                  border: '4px solid white',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                  backgroundColor: 'white',
+                  display: userData.avatar ? 'none' : 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 28,
+                  color: '#722ed1',
+                  border: '3px solid #722ed1',
+                  boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
                 }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
-                  if (fallback) fallback.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div 
-              className="avatar-fallback"
-              style={{ 
-                width: 80, 
-                height: 80, 
-                borderRadius: '50%', 
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                display: userData.avatar ? 'none' : 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 32,
-                color: '#667eea',
-                border: '4px solid white',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-              }}
-            >
-              <UserOutlined />
-            </div>
-            <div>
-              <Title level={1} style={{ margin: 0, color: 'white', display: 'flex', alignItems: 'center', gap: 12 }}>
-                {userData.first_name && userData.last_name 
-                  ? `${userData.first_name} ${userData.last_name}`
-                  : userData.username
-                }
-                {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 28 }} />}
-              </Title>
-              <Text style={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.8)' }}>@{userData.username}</Text>
-              <div style={{ marginTop: 8 }}>
-                <Tag color="rgba(255, 255, 255, 0.2)" style={{ color: 'white', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
-                  {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-                </Tag>
+              >
+                <UserOutlined />
               </div>
-            </div>
-          </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <Text style={{ fontSize: 20, fontWeight: 700, color: '#722ed1', margin: 0 }}>
+                    {userData.first_name && userData.last_name 
+                      ? `${userData.first_name} ${userData.last_name}`
+                      : userData.username
+                    }
+                  </Text>
+                  {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
+                </div>
+                <Text style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 6 }}>@{userData.username}</Text>
+              </div>
+            </Space>
+          </Space>
         </Card>
 
         {/* Рейтинг и статистика - блок на всю ширину */}
@@ -185,7 +201,7 @@ const UserProfile: React.FC = () => {
             }}>
               {/* Рейтинг */}
               <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 48, fontWeight: 'bold', color: '#faad14', marginBottom: 8 }}>
+                <div style={{ fontSize: 48, fontWeight: 600, color: '#faad14', marginBottom: 8 }}>
                   {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
                 </div>
                 <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 20, marginBottom: 8 }} />
@@ -200,7 +216,7 @@ const UserProfile: React.FC = () => {
               {/* Статистика заказов */}
               <div style={{ padding: '16px' }}>
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
+                  <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
                     {expertStats.total_orders}
                   </div>
                   <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
@@ -217,7 +233,7 @@ const UserProfile: React.FC = () => {
 
               {/* Заработок */}
               <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 32, fontWeight: 'bold', color: '#52c41a', marginBottom: 8 }}>
+                <div style={{ fontSize: 32, fontWeight: 600, color: '#52c41a', marginBottom: 8 }}>
                   {expertStats.total_earnings?.toLocaleString('ru-RU', {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0
@@ -236,7 +252,7 @@ const UserProfile: React.FC = () => {
             }}>
               {/* Успешность */}
               <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 48, fontWeight: 'bold', color: '#1890ff', marginBottom: 8 }}>
+                <div style={{ fontSize: 48, fontWeight: 600, color: '#1890ff', marginBottom: 8 }}>
                   {ordersStats.success_rate.toFixed(1)}%
                 </div>
                 <div style={{ fontSize: 14, color: '#666' }}>
@@ -247,7 +263,7 @@ const UserProfile: React.FC = () => {
               {/* Статистика заказов */}
               <div style={{ padding: '16px' }}>
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
+                  <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
                     {ordersStats.total}
                   </div>
                   <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
