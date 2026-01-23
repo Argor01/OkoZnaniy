@@ -267,17 +267,31 @@ const WorkDetail: React.FC = () => {
             </div>
 
             {/* Описание */}
-            <div>
-              <Title level={4}>Описание работы</Title>
-              <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
+            <Card 
+              title="Описание работы"
+              style={{ 
+                background: '#f8f9ff', 
+                border: '1px solid #e6f0ff',
+                borderRadius: 12,
+                marginBottom: 24
+              }}
+            >
+              <Paragraph style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
                 {work.description || 'Описание отсутствует'}
               </Paragraph>
-            </div>
+            </Card>
 
             {/* Файлы */}
             {work.files && work.files.length > 0 && (
-              <div>
-                <Title level={4}>Прикрепленные файлы</Title>
+              <Card 
+                title="Прикрепленные файлы"
+                style={{ 
+                  background: '#fff7e6', 
+                  border: '1px solid #ffd591',
+                  borderRadius: 12,
+                  marginBottom: 24
+                }}
+              >
                 <Space direction="vertical">
                   {work.files.map((file: any, index: number) => (
                     <a 
@@ -290,14 +304,19 @@ const WorkDetail: React.FC = () => {
                     </a>
                   ))}
                 </Space>
-              </div>
+              </Card>
             )}
 
             {/* Рейтинг работы */}
             {work.expert_rating && (
-              <div>
-                <Divider />
-                <Title level={4}>Оценка работы</Title>
+              <Card 
+                title="Оценка работы"
+                style={{ 
+                  background: '#fffbe6', 
+                  border: '1px solid #ffe58f',
+                  borderRadius: 12
+                }}
+              >
                 <Space direction="vertical" size={12}>
                   <Space align="center">
                     <StarOutlined style={{ color: '#faad14', fontSize: 18 }} />
@@ -307,7 +326,7 @@ const WorkDetail: React.FC = () => {
                   </Space>
                   {work.expert_rating.comment && (
                     <Paragraph style={{ 
-                      background: '#f9f9f9', 
+                      background: 'rgba(255, 255, 255, 0.5)', 
                       padding: 16, 
                       borderRadius: 8,
                       margin: 0 
@@ -319,7 +338,7 @@ const WorkDetail: React.FC = () => {
                     Оценка от {formatDistanceToNow(new Date(work.expert_rating.created_at), { addSuffix: true, locale: ru })}
                   </Text>
                 </Space>
-              </div>
+              </Card>
             )}
           </Space>
         </Card>
