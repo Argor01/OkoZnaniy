@@ -129,7 +129,14 @@ const WorkDetail: React.FC = () => {
                     <div>
                       <Button 
                         type="link" 
-                        onClick={() => navigate(`/user/${work.client?.id}`)}
+                        onClick={() => {
+                          console.log('Navigating to user profile:', work.client?.id);
+                          if (work.client?.id) {
+                            navigate(`/user/${work.client.id}`);
+                          } else {
+                            console.error('Client ID is not available');
+                          }
+                        }}
                         style={{ 
                           padding: 0, 
                           height: 'auto',
