@@ -186,7 +186,9 @@ const UserProfile: React.FC = () => {
           }
           style={{ 
             borderRadius: 12,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+            background: '#f0f9ff', 
+            border: '1px solid #c7d2fe'
           }}
         >
           {(statsLoading || expertStatsLoading) ? (
@@ -282,39 +284,50 @@ const UserProfile: React.FC = () => {
         </Card>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
         {/* Основная информация */}
         <div>
           {/* О себе */}
           {userData.bio && (
-            <Card title="О себе" style={{ marginBottom: 16 }}>
+            <Card 
+              title="О себе" 
+              style={{ 
+                marginBottom: 16,
+                background: '#f8f9ff', 
+                border: '1px solid #e6f0ff',
+                borderRadius: 12
+              }}
+            >
               <Paragraph>{userData.bio}</Paragraph>
             </Card>
           )}
 
           {/* Образование (для экспертов) */}
           {userData.role === 'expert' && userData.education && (
-            <Card title="Образование" style={{ marginBottom: 16 }}>
+            <Card 
+              title="Образование" 
+              style={{ 
+                marginBottom: 16,
+                background: '#fff7e6', 
+                border: '1px solid #ffd591',
+                borderRadius: 12
+              }}
+            >
               <Paragraph>{userData.education}</Paragraph>
-            </Card>
-          )}
-
-          {/* Специализации (для экспертов) */}
-          {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
-            <Card title="Специализации" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {userData.specializations.map((spec: any, index: number) => (
-                  <Tag key={index} color="blue">
-                    {typeof spec === 'string' ? spec : (spec?.name || spec?.subject?.name || 'Специализация')}
-                  </Tag>
-                ))}
-              </div>
             </Card>
           )}
 
           {/* Навыки (для экспертов) */}
           {userData.role === 'expert' && userData.skills && (
-            <Card title="Навыки" style={{ marginBottom: 16 }}>
+            <Card 
+              title="Навыки" 
+              style={{ 
+                marginBottom: 16,
+                background: '#f6ffed', 
+                border: '1px solid #b7eb8f',
+                borderRadius: 12
+              }}
+            >
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {userData.skills.split(',').map((skill: string, index: number) => (
                   <Tag key={index} color="green">
@@ -327,7 +340,15 @@ const UserProfile: React.FC = () => {
 
           {/* Портфолио (для экспертов) */}
           {userData.role === 'expert' && userData.portfolio_url && (
-            <Card title="Портфолио" style={{ marginBottom: 16 }}>
+            <Card 
+              title="Портфолио" 
+              style={{ 
+                marginBottom: 16,
+                background: '#fff1f0', 
+                border: '1px solid #ffccc7',
+                borderRadius: 12
+              }}
+            >
               <Button 
                 type="link" 
                 href={userData.portfolio_url} 
@@ -338,114 +359,80 @@ const UserProfile: React.FC = () => {
               </Button>
             </Card>
           )}
-
-          {/* Информация о пользователе */}
-          <Card title="Информация" style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <Text strong>Роль:</Text>
-                <br />
-                <Text>{userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}</Text>
-              </div>
-              <div>
-                <Text strong>На платформе с:</Text>
-                <br />
-                <Text>{dayjs(userData.date_joined).format('DD.MM.YYYY')}</Text>
-              </div>
-              {userData.last_login && (
-                <div>
-                  <Text strong>Последний вход:</Text>
-                  <br />
-                  <Text>{dayjs(userData.last_login).format('DD.MM.YYYY HH:mm')}</Text>
-                </div>
-              )}
-              {userData.role === 'expert' && userData.experience_years && (
-                <div>
-                  <Text strong>Опыт работы:</Text>
-                  <br />
-                  <Text>{userData.experience_years} лет</Text>
-                </div>
-              )}
-              {userData.role === 'expert' && userData.hourly_rate && (
-                <div>
-                  <Text strong>Почасовая ставка:</Text>
-                  <br />
-                  <Text>{userData.hourly_rate} ₽/час</Text>
-                </div>
-              )}
-            </div>
-          </Card>
         </div>
+      </div>
 
-        {/* Боковая панель */}
-        <div>
-          {/* Контактная информация */}
-          <Card title="Контактная информация">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div>
-                <Text strong>Email:</Text>
-                <br />
-                <Text copyable>{userData.email}</Text>
-              </div>
-              {userData.phone && (
-                <div>
-                  <Text strong>Телефон:</Text>
-                  <br />
-                  <Text copyable>{userData.phone}</Text>
-                </div>
-              )}
-              {userData.telegram_id && (
-                <div>
-                  <Text strong>Telegram:</Text>
-                  <br />
-                  <Text>@{userData.telegram_id}</Text>
-                </div>
-              )}
+      {/* Блоки специализации и контактной информации */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 ? '1fr 1fr' : '1fr', 
+        gap: 24,
+        marginTop: 24
+      }}>
+        {/* Специализации (для экспертов) */}
+        {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
+          <Card 
+            title="Специализации" 
+            style={{ 
+              background: '#f0f9f0', 
+              border: '1px solid #d9f7be',
+              borderRadius: 12
+            }}
+          >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {userData.specializations.map((spec: any, index: number) => (
+                <Tag key={index} color="blue">
+                  {typeof spec === 'string' ? spec : (spec?.name || spec?.subject?.name || 'Специализация')}
+                </Tag>
+              ))}
             </div>
           </Card>
+        )}
 
-          {/* Дополнительная информация */}
-          <Card title="Дополнительно" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div>
-                <Text strong>Роль:</Text>
-                <br />
-                <Text>{userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}</Text>
-              </div>
-              <div>
-                <Text strong>На платформе с:</Text>
-                <br />
-                <Text>{dayjs(userData.date_joined).format('DD.MM.YYYY')}</Text>
-              </div>
-              {userData.last_login && (
-                <div>
-                  <Text strong>Последний вход:</Text>
-                  <br />
-                  <Text>{dayjs(userData.last_login).format('DD.MM.YYYY HH:mm')}</Text>
-                </div>
-              )}
-              {userData.role === 'expert' && userData.experience_years && (
-                <div>
-                  <Text strong>Опыт работы:</Text>
-                  <br />
-                  <Text>{userData.experience_years} лет</Text>
-                </div>
-              )}
-              {userData.role === 'expert' && userData.hourly_rate && (
-                <div>
-                  <Text strong>Почасовая ставка:</Text>
-                  <br />
-                  <Text>{userData.hourly_rate} ₽/час</Text>
-                </div>
-              )}
+        {/* Контактная информация */}
+        <Card 
+          title="Контактная информация"
+          style={{ 
+            background: '#e6f7ff', 
+            border: '1px solid #91d5ff',
+            borderRadius: 12
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div>
+              <Text strong>Email:</Text>
+              <br />
+              <Text copyable>{userData.email}</Text>
             </div>
-          </Card>
-        </div>
+            {userData.phone && (
+              <div>
+                <Text strong>Телефон:</Text>
+                <br />
+                <Text copyable>{userData.phone}</Text>
+              </div>
+            )}
+            {userData.telegram_id && (
+              <div>
+                <Text strong>Telegram:</Text>
+                <br />
+                <Text>@{userData.telegram_id}</Text>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Отзывы (только для экспертов) */}
       {userData.role === 'expert' && (
-        <Card title={`Отзывы (${reviews.length})`} style={{ marginTop: 24 }}>
+        <Card 
+          title={`Отзывы (${reviews.length})`} 
+          style={{ 
+            marginTop: 24,
+            background: '#fffbe6', 
+            border: '1px solid #ffe58f',
+            borderRadius: 12
+          }}
+        >
           {reviewsLoading ? (
             <div style={{ textAlign: 'center', padding: '20px' }}>
               <Spin />
