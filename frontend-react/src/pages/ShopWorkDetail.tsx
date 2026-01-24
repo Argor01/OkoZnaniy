@@ -157,11 +157,20 @@ const ShopWorkDetail: React.FC = () => {
                       <Button 
                         type="link" 
                         onClick={() => {
-                          console.log('Navigating to user profile:', work.author?.id);
-                          if (work.author?.id) {
-                            navigate(`/user/${work.author.id}`);
+                          console.log('Full work object:', work);
+                          console.log('Author object:', work.author);
+                          console.log('Author ID:', work.author?.id);
+                          console.log('Author user_id:', work.author?.user_id);
+                          console.log('Author user:', work.author?.user);
+                          
+                          // Попробуем разные варианты ID
+                          const authorId = work.author?.id || work.author?.user_id || work.author?.user?.id || work.author_id;
+                          console.log('Trying author ID:', authorId);
+                          
+                          if (authorId) {
+                            navigate(`/user/${authorId}`);
                           } else {
-                            console.error('Author ID is not available');
+                            console.error('Author ID is not available in any format');
                           }
                         }}
                         style={{ 
