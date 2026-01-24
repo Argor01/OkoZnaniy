@@ -156,23 +156,7 @@ const ShopWorkDetail: React.FC = () => {
                     <div>
                       <Button 
                         type="link" 
-                        onClick={() => {
-                          console.log('Full work object:', work);
-                          console.log('Author object:', work.author);
-                          console.log('Author ID:', work.author?.id);
-                          console.log('Author user_id:', work.author?.user_id);
-                          console.log('Author user:', work.author?.user);
-                          
-                          // Попробуем разные варианты ID
-                          const authorId = work.author?.id || work.author?.user_id || work.author?.user?.id || work.author_id;
-                          console.log('Trying author ID:', authorId);
-                          
-                          if (authorId) {
-                            navigate(`/user/${authorId}`);
-                          } else {
-                            console.error('Author ID is not available in any format');
-                          }
-                        }}
+                        onClick={() => navigate(`/user/${work.author?.id}`)}
                         style={{ 
                           padding: 0, 
                           height: 'auto',
