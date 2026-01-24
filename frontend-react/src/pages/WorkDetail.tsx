@@ -167,7 +167,7 @@ const WorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
-                  bodyStyle={{ padding: '8px 0' }}
+                  bodyStyle={{ padding: '12px 16px' }}
                 >
                   <Space direction="vertical" size={2} style={{ width: '100%' }}>
                     <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
@@ -188,6 +188,7 @@ const WorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
+                  bodyStyle={{ padding: '12px 16px' }}
                 >
                   <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
@@ -205,6 +206,7 @@ const WorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
+                  bodyStyle={{ padding: '12px 16px' }}
                 >
                   <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
@@ -225,6 +227,7 @@ const WorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
+                  bodyStyle={{ padding: '12px 16px' }}
                 >
                   <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
@@ -242,6 +245,7 @@ const WorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
+                  bodyStyle={{ padding: '12px 16px' }}
                 >
                   <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
