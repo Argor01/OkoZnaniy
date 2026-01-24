@@ -182,19 +182,19 @@ const ShopWorkDetail: React.FC = () => {
                   style={{ 
                     borderRadius: 12
                   }}
-                  styles={{ body: { padding: '8px 0' } }}
+                  styles={{ body: { padding: '12px' } }}
                 >
-                  <Space direction="vertical" size={2} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <div style={{ textAlign: 'center', width: '100%' }}>
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500, display: 'block', marginBottom: 4 }}>
                       Просмотры
                     </Text>
-                    <Space align="center">
+                    <Space align="center" style={{ justifyContent: 'center', width: '100%' }}>
                       <EyeOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
                       <Text style={{ fontSize: 13, fontWeight: 600, color: '#595959' }}>
                         {work.viewsCount || 0}
                       </Text>
                     </Space>
-                  </Space>
+                  </div>
                 </Card>
 
                 {/* Предмет */}
@@ -344,7 +344,7 @@ const ShopWorkDetail: React.FC = () => {
             )}
 
             {/* Кнопки действий */}
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
               {userProfile?.id === work.author?.id ? (
                 // Если это работа текущего пользователя - показываем кнопку удаления
                 <Popconfirm
