@@ -3,6 +3,21 @@ from .models import ReadyWork, ReadyWorkFile, Purchase
 from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 
 
+class AuthorSerializer(serializers.ModelSerializer):
+    """Сериализатор для автора работы"""
+    from apps.users.models import User
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'avatar']
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Добавляем полное имя
+        data['name'] = instance.get_full_name() if hasattr(instance, 'get_full_name') else data['username']
+        return data
+
+
 class ReadyWorkFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadyWorkFile
@@ -14,6 +29,7 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     work_type_name = serializers.CharField(source='work_type.name', read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    author = AuthorSerializer(read_only=True)
     preview = serializers.SerializerMethodField()
     
     class Meta:
