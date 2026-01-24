@@ -3,6 +3,25 @@ from .models import ReadyWork, ReadyWorkFile, Purchase
 from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 
 
+class AuthorSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
+    
+    class Meta:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        model = User
+        fields = ['id', 'username', 'name', 'rating']
+    
+    def get_name(self, obj):
+        return obj.get_full_name() or obj.username
+    
+    def get_rating(self, obj):
+        # Здесь можно добавить логику для расчета рейтинга автора
+        # Пока возвращаем 0 по умолчанию
+        return 0
+
+
 class ReadyWorkFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadyWorkFile
@@ -14,6 +33,7 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     work_type_name = serializers.CharField(source='work_type.name', read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    author = AuthorSerializer(read_only=True)
     preview = serializers.SerializerMethodField()
     
     class Meta:

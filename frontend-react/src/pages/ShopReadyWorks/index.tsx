@@ -109,7 +109,29 @@ const ShopReadyWorks: React.FC = () => {
       local = JSON.parse(localStorage.getItem('shop_custom_works') || '[]');
     } catch {}
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : mockWorks;
-    const all = [...local, ...base];
+    
+    // Преобразуем данные из API в нужный формат
+    const transformedBase = base.map((work: any) => ({
+      ...work,
+      // Обеспечиваем совместимость полей
+      createdAt: work.created_at || work.createdAt,
+      updatedAt: work.updated_at || work.updatedAt,
+      category: work.work_type_name || work.category || 'Другое',
+      workType: work.work_type_name || work.workType || 'Другое',
+      rating: work.rating || 0,
+      reviewsCount: work.reviewsCount || 0,
+      viewsCount: work.viewsCount || 0,
+      purchasesCount: work.purchasesCount || 0,
+      // Обеспечиваем правильную структуру автора
+      author: work.author || {
+        id: 0,
+        name: work.author_name || 'Неизвестен',
+        username: work.author_name || 'Неизвестен',
+        rating: 0
+      }
+    }));
+    
+    const all = [...local, ...transformedBase];
     const uniqueById = Array.from(new Map(all.map((w) => [w.id, w])).values());
     setWorks(uniqueById);
   }, [apiWorks]);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Tag, Button, Space, Typography, Rate, Popconfirm } from 'antd';
-import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined } from '@ant-design/icons';
+import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { Work } from '../../types';
 import styles from './WorkCard.module.css';
 
@@ -17,6 +18,7 @@ interface WorkCardProps {
 
 const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase, onDelete, allowDelete }) => {
   const [imageError, setImageError] = React.useState(false);
+  const navigate = useNavigate();
 
   return (
     <Card
@@ -75,6 +77,30 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         className={styles.description}
         dangerouslySetInnerHTML={{ __html: work.description }}
       />
+
+      {/* Автор работы */}
+      {work.author && (
+        <div className={styles.author}>
+          <Space size={8}>
+            <UserOutlined style={{ color: '#8c8c8c' }} />
+            <Button 
+              type="link" 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/user/${work.author.id}`);
+              }}
+              style={{ 
+                padding: 0, 
+                height: 'auto',
+                fontSize: 13,
+                color: '#1890ff'
+              }}
+            >
+              {work.author.name || work.author.username || work.author_name || 'Неизвестен'}
+            </Button>
+          </Space>
+        </div>
+      )}
 
       <div className={styles.meta}>
         <Space size={4}>
