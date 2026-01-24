@@ -154,15 +154,28 @@ const ShopWorkDetail: React.FC = () => {
                       }}
                     />
                     <div>
-                      <Text style={{ 
-                        fontSize: 18,
-                        fontWeight: 700,
-                        color: '#722ed1'
-                      }}>
+                      <Button 
+                        type="link" 
+                        onClick={() => {
+                          console.log('Navigating to user profile:', work.author?.id);
+                          if (work.author?.id) {
+                            navigate(`/user/${work.author.id}`);
+                          } else {
+                            console.error('Author ID is not available');
+                          }
+                        }}
+                        style={{ 
+                          padding: 0, 
+                          height: 'auto',
+                          fontSize: 18,
+                          fontWeight: 700,
+                          color: '#722ed1'
+                        }}
+                      >
                         {work.author_name || work.author?.name || work.author?.username || 'Автор'}
-                      </Text>
+                      </Button>
                       <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 2 }}>
-                        Автор работы
+                        Нажмите, чтобы посмотреть профиль
                       </div>
                     </div>
                   </Space>
