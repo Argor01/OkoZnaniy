@@ -4,8 +4,9 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Subject, Topic, WorkType, Complexity, SubjectCategory, DiscountRule
+from .models import Subject, Topic, WorkType, Complexity, SubjectCategory, DiscountRule, Skill
 from .serializers import (
+    SkillSerializer,
     SubjectSerializer, TopicSerializer,
     SubjectDetailSerializer, TopicDetailSerializer,
     WorkTypeSerializer, ComplexitySerializer,
@@ -17,6 +18,33 @@ from .discount_notifications import DiscountNotificationService
 from django.utils import timezone
 
 # Create your views here.
+
+
+class SkillViewSet(viewsets.ModelViewSet):
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = None
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']
+
+    def create(self, request, *args, **kwargs):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'name': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = Skill.objects.filter(name__iexact=name).first()
+        if existing:
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = self.get_serializer(data={'name': name})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class SubjectCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubjectCategory.objects.all()

@@ -14,11 +14,11 @@ class Specialization(models.Model):
         verbose_name="Эксперт"
     )
     custom_name = models.CharField(
-    max_length=255,
-    verbose_name="Название специализации",
-    blank=True,
-    null=True,
-    help_text="Укажите название специализации, если оно отличается от названия предмета"
+        max_length=255,
+        verbose_name="Название специализации",
+        blank=True,
+        null=True,
+        help_text="Укажите название специализации, если оно отличается от названия предмета"
     )
     subject = models.ForeignKey(
         Subject,
@@ -41,6 +41,11 @@ class Specialization(models.Model):
     description = models.TextField(
         blank=True,
         verbose_name="Описание опыта"
+    )
+    skills = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Навыки"
     )
     is_verified = models.BooleanField(
         default=False,

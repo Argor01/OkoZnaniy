@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Subject, Topic, WorkType, Complexity, SubjectCategory, DiscountRule
+from .models import Subject, Topic, WorkType, Complexity, SubjectCategory, DiscountRule, Skill
 from django.utils import timezone
+
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ['id', 'name']
 
 class SubjectCategorySerializer(serializers.ModelSerializer):
     subjects_count = serializers.IntegerField(read_only=True)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Typography, Spin, Space, Popconfirm } from 'antd';
+import { Button, Typography, Spin, Space, Popconfirm, Tag } from 'antd';
 import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import styles from '../../ExpertDashboard.module.css';
 
@@ -62,6 +62,20 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                     <Paragraph style={{ marginTop: 8, color: '#6b7280' }}>
                       {spec.description}
                     </Paragraph>
+                  )}
+                  {spec.skills && (
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {spec.skills.split(',').map((skill: string, index: number) => {
+                          const trimmedSkill = skill.trim();
+                          return trimmedSkill ? (
+                            <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 13 }}>
+                              {trimmedSkill}
+                            </Tag>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
                 <Space>

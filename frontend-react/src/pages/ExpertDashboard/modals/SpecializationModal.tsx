@@ -1,10 +1,9 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber as AntInputNumber, Select, message } from 'antd';
+import { Modal, Form, Input, InputNumber as AntInputNumber, message } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi } from '../../../api/experts';
+import SkillsSelect from '../../../components/SkillsSelect';
 import styles from '../ExpertDashboard.module.css';
-
-const { Option } = Select;
 
 interface SpecializationModalProps {
   visible: boolean;
@@ -22,17 +21,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isMobile] = React.useState(window.innerWidth <= 768);
-
-  // Предопределенные навыки
-  const predefinedSkills = [
-    'C++', 'Python', 'Django', 'MySQL', 'HTML/CSS/JS', 'React', 'Next.js',
-    'NodeJS', 'TypeScript', 'Git / Github', 'React JS', 'Vue.js', 'Angular',
-    'Java', 'C#', '.NET', 'PHP', 'Laravel', 'Ruby', 'Go', 'Rust',
-    'Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения',
-    'Теория вероятностей', 'Статистика', 'Физика', 'Механика', 'Электродинамика',
-    'Органическая химия', 'Неорганическая химия', 'Биология', 'Биохимия',
-    'Микроэкономика', 'Макроэкономика', 'Бухгалтерский учет', 'Финансовый анализ'
-  ];
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: any) => expertsApi.createSpecialization(data),
@@ -62,10 +50,17 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 
   React.useEffect(() => {
     if (visible && editingSpecialization) {
+      const toNumberOrUndefined = (value: any) => {
+        if (value === null || value === undefined || value === '') return undefined;
+        if (typeof value === 'number') return value;
+        const num = Number(value);
+        return Number.isFinite(num) ? num : undefined;
+      };
+
       const formValues: any = {
         subject_id: editingSpecialization.subject?.id,
-        experience_years: editingSpecialization.experience_years,
-        hourly_rate: editingSpecialization.hourly_rate,
+        experience_years: toNumberOrUndefined(editingSpecialization.experience_years),
+        hourly_rate: toNumberOrUndefined(editingSpecialization.hourly_rate),
         description: editingSpecialization.description,
       };
       
@@ -263,26 +258,10 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           name="skills"
           extra="Начните вводить навык или выберите из списка. Можно добавить свои навыки."
         >
-          <Select
-            mode="tags"
+          <SkillsSelect
             size={isMobile ? 'middle' : 'large'}
             placeholder="Начните писать навык"
-            style={{ width: '100%' }}
-            maxTagCount="responsive"
-            maxLength={35}
-            tokenSeparators={[',']}
-            filterOption={(input, option) => {
-              if (!option || !option.children) return false;
-              const children = String(option.children);
-              return children.toLowerCase().includes(input.toLowerCase());
-            }}
-          >
-            {predefinedSkills.map((skill) => (
-              <Option key={skill} value={skill}>
-                {skill}
-              </Option>
-            ))}
-          </Select>
+          />
         </Form.Item>
         <Form.Item
           label="Описание"

@@ -23,6 +23,8 @@ class SubjectCategory(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.strip()
         if not self.slug:
             base_slug = slugify(self.name, allow_unicode=True)
             slug = base_slug
@@ -83,13 +85,25 @@ class Subject(models.Model):
     def get_absolute_url(self):
         return reverse('catalog:subject-detail', kwargs={'slug': self.slug})
 
-    @property
-    def active_topics_count(self):
-        return self.topics.filter(is_active=True).count()
 
-    @property
-    def verified_experts_count(self):
-        return self.experts.filter(is_verified=True).count()
+class Skill(models.Model):
+    """Навык (используется как справочник для тегов)"""
+    name = models.CharField("Название", max_length=100, unique=True)
+    created_at = models.DateTimeField("Дата создания", default=timezone.now)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
+
+    class Meta:
+        verbose_name = "Навык"
+        verbose_name_plural = "Навыки"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.strip()
+        super().save(*args, **kwargs)
 
 
 class Topic(models.Model):

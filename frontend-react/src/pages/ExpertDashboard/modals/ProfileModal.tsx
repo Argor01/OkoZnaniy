@@ -44,8 +44,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
   useEffect(() => {
     if (visible && profile) {
+      const toNumberOrUndefined = (value: any) => {
+        if (value === null || value === undefined || value === '') return undefined;
+        if (typeof value === 'number') return value;
+        const num = Number(value);
+        return Number.isFinite(num) ? num : undefined;
+      };
+
       // Преобразуем строку навыков в массив для Select
       const formValues: any = { ...profile };
+      formValues.experience_years = toNumberOrUndefined((profile as any).experience_years);
+      formValues.hourly_rate = toNumberOrUndefined((profile as any).hourly_rate);
       if (profile.skills && typeof profile.skills === 'string') {
         formValues.skills = profile.skills.split(',').map(s => s.trim()).filter(s => s);
       }

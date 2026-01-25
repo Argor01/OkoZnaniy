@@ -61,7 +61,9 @@ export interface Specialization {
   experience_years: number;
   hourly_rate: number;
   description?: string;
+  skills?: string;
   is_verified: boolean;
+  custom_name?: string;
   created_at?: string;
   updated_at?: string;
 }

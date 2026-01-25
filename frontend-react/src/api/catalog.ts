@@ -45,7 +45,22 @@ export interface Complexity {
   is_active: boolean;
 }
 
+export interface Skill {
+  id: number;
+  name: string;
+}
+
 export const catalogApi = {
+  getSkills: async (): Promise<Skill[]> => {
+    const response = await apiClient.get('/catalog/skills/');
+    return response.data.results || response.data;
+  },
+
+  createSkill: async (name: string): Promise<Skill> => {
+    const response = await apiClient.post('/catalog/skills/', { name: name.trim() });
+    return response.data;
+  },
+
   // Получить все предметы
   getSubjects: async (): Promise<Subject[]> => {
     console.log('🔍 Запрос предметов...');
