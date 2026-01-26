@@ -493,12 +493,45 @@ const PartnerDashboard: React.FC = () => {
       </Drawer>
 
       <Layout>
+        <Header
+          style={{
+            background: '#fff',
+            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerVisible(true)}
+              />
+            )}
+            <Title level={4} style={{ margin: 0 }}>
+              Партнерский кабинет
+            </Title>
+          </div>
+
+          <Button
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+          >
+            Выйти
+          </Button>
+        </Header>
         <Content
           style={{
             margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
             padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
             borderRadius: '8px',
-            minHeight: '100vh',
+            minHeight: 'calc(100vh - 64px)',
           }}
         >
           {!isMobile && (
