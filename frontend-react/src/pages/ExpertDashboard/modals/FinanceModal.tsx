@@ -32,9 +32,10 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
         </div>
       }
       open={visible}
+      centered
       onCancel={onClose}
       footer={null}
-      width="auto"
+      width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -49,14 +50,8 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           margin: isMobile ? 0 : undefined,
           maxWidth: isMobile ? '100vw' : undefined,
-          top: isMobile ? 0 : '60px',
-          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
-          right: isMobile ? 0 : '20px',
-          bottom: isMobile ? 0 : '20px',
-          width: isMobile ? '100vw' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)',
-          transform: 'none',
-          position: 'fixed'
+          width: isMobile ? '100vw' : undefined,
+          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
         },
         body: {
           padding: '0',

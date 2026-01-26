@@ -20,7 +20,6 @@ interface NotificationsModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
-  isDesktop?: boolean;
 }
 
 // Маппинг типов уведомлений на иконки
@@ -64,8 +63,7 @@ const getNotificationCategory = (type: string): string => {
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
-  isMobile,
-  isDesktop = true
+  isMobile
 }) => {
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -133,9 +131,10 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     <Modal
       title={null}
       open={visible}
+      centered
       onCancel={onClose}
       footer={null}
-      width="auto"
+      width={isMobile ? '100%' : 'calc(100vw - 300px)'}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -149,15 +148,8 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           overflow: 'hidden',
           background: '#ffffff',
           boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-          maxHeight: isMobile ? '100vh' : 'auto',
-          top: isMobile ? 0 : '60px',
-          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
-          right: isMobile ? 0 : '20px',
-          bottom: isMobile ? 0 : '20px',
-          width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
-          height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
-          transform: 'none',
-          position: 'fixed'
+          width: isMobile ? '100vw' : undefined,
+          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
         },
         header: {
           display: 'none'
@@ -239,13 +231,15 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                 minWidth: isMobile ? 'auto' : 0
               }}
             >
-              {React.cloneElement(tab.icon as React.ReactElement, {
-                style: { 
-                  fontSize: isMobile ? 16 : 18, 
-                  color: notificationTab === tab.key ? '#3b82f6' : '#6b7280',
-                  flexShrink: 0
-                }
-              })}
+              {React.isValidElement(tab.icon)
+                ? React.cloneElement(tab.icon as React.ReactElement<any>, {
+                    style: {
+                      fontSize: isMobile ? 16 : 18,
+                      color: notificationTab === tab.key ? '#3b82f6' : '#6b7280',
+                      flexShrink: 0
+                    }
+                  })
+                : tab.icon}
               <Text style={{ 
                 fontSize: isMobile ? 13 : 14, 
                 color: notificationTab === tab.key ? '#1f2937' : '#6b7280',

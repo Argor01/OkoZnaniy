@@ -20,15 +20,13 @@ interface ArbitrationModalProps {
   onClose: () => void;
   cases: ArbitrationCase[];
   isMobile: boolean;
-  isDesktop?: boolean;
 }
 
 const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
   visible,
   onClose,
   cases,
-  isMobile,
-  isDesktop = true
+  isMobile
 }) => {
   const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
 
@@ -36,9 +34,10 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
     <Modal
       title={null}
       open={visible}
+      centered
       onCancel={onClose}
       footer={null}
-      width="auto"
+      width={isMobile ? '100%' : 'calc(100vw - 300px)'}
       styles={{
         mask: {
           backdropFilter: 'blur(8px)',
@@ -52,15 +51,8 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
           overflow: 'hidden',
           background: '#ffffff',
           boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-          maxHeight: isMobile ? '100vh' : 'auto',
-          top: isMobile ? 0 : '60px',
-          left: isMobile ? 0 : (isDesktop ? '280px' : '250px'),
-          right: isMobile ? 0 : '20px',
-          bottom: isMobile ? 0 : '20px',
-          width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
-          height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
-          transform: 'none',
-          position: 'fixed'
+          width: isMobile ? '100vw' : undefined,
+          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
         },
         header: {
           display: 'none'
