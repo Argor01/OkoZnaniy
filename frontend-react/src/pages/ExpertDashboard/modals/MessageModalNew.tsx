@@ -500,9 +500,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500 }}>
                       {selectedChat.other_user?.username || 'Пользователь'}
                     </Text>
-                    {selectedChat.order_id && (
+                    {selectedChat.order_id ? (
                       <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
                         {selectedChat.order_title || `Заказ #${selectedChat.order_id}`}
+                      </Text>
+                    ) : (
+                      <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                        Заказ удалён
                       </Text>
                     )}
                   </div>

@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from apps.orders.models import Order
 
 class Chat(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='chats')
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name='chats')
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='client_chats')
     expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='expert_chats')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
