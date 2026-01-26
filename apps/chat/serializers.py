@@ -26,14 +26,18 @@ class ChatListSerializer(serializers.ModelSerializer):
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
     order_id = serializers.SerializerMethodField()
+    order_title = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'order_id', 'participants', 'other_user', 'last_message', 'last_message_time', 'unread_count']
+        fields = ['id', 'order', 'order_id', 'order_title', 'participants', 'other_user', 'last_message', 'last_message_time', 'unread_count']
         read_only_fields = ['participants', 'order']
 
     def get_order_id(self, obj):
         return obj.order.id if obj.order else None
+
+    def get_order_title(self, obj):
+        return obj.order.title if obj.order else None
 
     def get_last_message(self, obj):
         last_message = obj.messages.order_by('-created_at').first()
@@ -72,14 +76,18 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
     order_id = serializers.SerializerMethodField()
+    order_title = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'order_id', 'participants', 'other_user', 'messages', 'unread_count']
+        fields = ['id', 'order', 'order_id', 'order_title', 'participants', 'other_user', 'messages', 'unread_count']
         read_only_fields = ['participants', 'order']
 
     def get_order_id(self, obj):
         return obj.order.id if obj.order else None
+
+    def get_order_title(self, obj):
+        return obj.order.title if obj.order else None
 
     def get_messages(self, obj):
         messages = obj.messages.select_related('sender').order_by('created_at')

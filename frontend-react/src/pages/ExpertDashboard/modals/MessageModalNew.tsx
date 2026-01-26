@@ -502,7 +502,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     </Text>
                     {selectedChat.order_id && (
                       <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
-                        Заказ #{selectedChat.order_id}
+                        {selectedChat.order_title || `Заказ #${selectedChat.order_id}`}
                       </Text>
                     )}
                   </div>

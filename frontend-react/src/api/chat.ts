@@ -23,6 +23,7 @@ export interface ChatListItem {
   id: number;
   order: number;
   order_id: number;
+  order_title?: string | null;
   participants: User[];
   other_user: User;
   last_message: {
@@ -38,6 +39,7 @@ export interface ChatDetail {
   id: number;
   order: number;
   order_id: number;
+  order_title?: string | null;
   participants: User[];
   other_user: User;
   messages: Message[];
