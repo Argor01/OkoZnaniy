@@ -204,28 +204,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
+  const shouldShowHeader = isExpert || isClient;
 
   return (
     <DashboardContext.Provider value={contextValue}>
       <Layout style={{ minHeight: '100vh' }}>
         {/* Header */}
-        <DashboardHeader
-          userProfile={userProfile ? {
-            username: userProfile.username,
-            avatar: userProfile.avatar,
-            role: userProfile.role,
-            balance: balance
-          } : undefined}
-          unreadMessages={0}
-          unreadNotifications={unreadNotifications}
-          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
-          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
-          onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
-          onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
-          onLogout={handleLogout}
-          onMenuClick={() => setMobileMenuVisible(true)}
-          isMobile={isMobile}
-        />
+        {shouldShowHeader && (
+          <DashboardHeader
+            userProfile={userProfile ? {
+              username: userProfile.username,
+              avatar: userProfile.avatar,
+              role: userProfile.role,
+              balance: balance
+            } : undefined}
+            unreadMessages={0}
+            unreadNotifications={unreadNotifications}
+            onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
+            onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
+            onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
+            onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
+            onLogout={handleLogout}
+            onMenuClick={() => setMobileMenuVisible(true)}
+            isMobile={isMobile}
+          />
+        )}
         
         <Sidebar
           selectedKey={getSelectedKey()}
@@ -249,13 +252,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         <Layout style={{ 
           marginLeft: isMobile ? 0 : 250, 
-          marginTop: 64, // Отступ для хедера
+          marginTop: shouldShowHeader ? 64 : 0, // Отступ для хедера
           background: '#f5f5f5',
           transition: 'all 0.2s'
         }}>
           <Content className={styles.mainContent} style={{ 
             padding: isMobile ? '16px' : '24px', 
-            minHeight: 'calc(100vh - 64px)',
+            minHeight: shouldShowHeader ? 'calc(100vh - 64px)' : '100vh',
             display: 'block',
             visibility: 'visible',
             opacity: 1

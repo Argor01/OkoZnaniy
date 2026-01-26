@@ -17,7 +17,6 @@ import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '../api/partners';
-import DashboardHeader from '../components/common/DashboardHeader';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -494,19 +493,12 @@ const PartnerDashboard: React.FC = () => {
       </Drawer>
 
       <Layout>
-        <DashboardHeader
-            userProfile={userProfile}
-            onMenuClick={() => setDrawerVisible(true)}
-            onLogout={handleLogout}
-            onProfileClick={() => {}}
-            isMobile={isMobile}
-        />
         <Content
           style={{
             margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
             padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
             borderRadius: '8px',
-            minHeight: 'calc(100vh - 112px)',
+            minHeight: '100vh',
           }}
         >
           {!isMobile && (
