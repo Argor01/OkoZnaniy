@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
-import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, PlusOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../../api/orders';
@@ -484,6 +484,25 @@ const OrdersFeed: React.FC = () => {
                   </Space>
                 </div>
                 <div style={{ textAlign: 'right', marginLeft: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                    <Tooltip title="Скопировать ссылку на заказ">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ShareAltOutlined />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/orders/${order.id}`;
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            message.success('Ссылка скопирована');
+                          } catch {
+                            message.error('Не удалось скопировать ссылку');
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
                   <div className={styles.budgetText}>
                     {order.budget ? formatCurrency(order.budget) : 'Договорная'}
                   </div>

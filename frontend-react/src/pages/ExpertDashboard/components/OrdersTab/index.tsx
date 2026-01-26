@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio } from 'antd';
-import { ClockCircleOutlined, UserOutlined, FilterOutlined } from '@ant-design/icons';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message } from 'antd';
+import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi, Bid } from '../../../../api/orders';
@@ -184,6 +184,25 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                     </Space>
                   </div>
                   <div style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                      <Tooltip title="Скопировать ссылку на заказ">
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<ShareAltOutlined />}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const url = `${window.location.origin}/orders/${order.id}`;
+                            try {
+                              await navigator.clipboard.writeText(url);
+                              message.success('Ссылка скопирована');
+                            } catch {
+                              message.error('Не удалось скопировать ссылку');
+                            }
+                          }}
+                        />
+                      </Tooltip>
+                    </div>
                     <div style={{ fontSize: 20, fontWeight: 600, color: '#667eea' }}>
                       {order.budget ? `${order.budget} ₽` : 'Договорная'}
                     </div>
