@@ -4,6 +4,7 @@ import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { catalogApi } from '../../api/catalog';
+import { ordersApi } from '../../api/orders';
 import dayjs from 'dayjs';
 import styles from './CreateOrder.module.css';
 
@@ -57,16 +58,59 @@ const CreateOrder: React.FC = () => {
     },
   });
 
+  // Мутация для создания заказа
+  const createOrderMutation = useMutation({
+    mutationFn: (data: any) => ordersApi.createOrder(data),
+    onSuccess: (data) => {
+      message.success('Заказ успешно создан!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      navigate(`/orders/${data.id}`);
+    },
+    onError: (error: any) => {
+      console.error('Ошибка создания заказа:', error);
+      message.error('Ошибка при создании заказа. Попробуйте еще раз.');
+    },
+  });
+
   console.log('CreateOrder component rendering');
 
-  const onFinish = (values: any) => {
-    const formData = {
-      ...values,
-      files: fileList
-    };
-    console.log('Form values:', formData);
-    console.log('Files:', fileList);
-    message.success('Форма отправлена (тестовый режим)');
+  const onFinish = async (values: any) => {
+    try {
+      // Подготавливаем данные для отправки
+      const orderData = {
+        title: values.title,
+        description: values.description,
+        deadline: values.deadline.format('YYYY-MM-DD'),
+        subject_id: values.subject,
+        work_type_id: values.work_type,
+        budget: values.budget,
+        custom_topic: values.title, // Используем название как тему
+      };
+
+      console.log('Создание заказа с данными:', orderData);
+      
+      // Создаем заказ
+      const createdOrder = await createOrderMutation.mutateAsync(orderData);
+      
+      // Если есть файлы, загружаем их
+      if (fileList.length > 0) {
+        console.log('Загрузка файлов к заказу...');
+        for (const file of fileList) {
+          try {
+            await ordersApi.uploadOrderFile(createdOrder.id, file, {
+              file_type: 'task',
+              description: 'Файл задания'
+            });
+          } catch (error) {
+            console.error('Ошибка загрузки файла:', error);
+            message.warning(`Не удалось загрузить файл ${file.name}`);
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.error('Ошибка при создании заказа:', error);
+    }
   };
 
   return (
@@ -287,8 +331,10 @@ const CreateOrder: React.FC = () => {
               htmlType="submit" 
               className={styles.submitButton}
               size="large"
+              loading={createOrderMutation.isPending}
+              disabled={createOrderMutation.isPending}
             >
-              Создать заказ
+              {createOrderMutation.isPending ? 'Создание заказа...' : 'Создать заказ'}
             </Button>
           </Form.Item>
         </Form>
