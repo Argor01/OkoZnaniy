@@ -169,9 +169,7 @@ const App: React.FC = () => {
                 path="/partner" 
                 element={
                   <ProtectedRoute>
-                    <DashboardLayout>
-                      <PartnerDashboard />
-                    </DashboardLayout>
+                    <PartnerDashboard />
                   </ProtectedRoute>
                 } 
               />
@@ -191,9 +189,7 @@ const App: React.FC = () => {
                 path="/director"
                 element={
                   <ProtectedRoute>
-                    <DashboardLayout>
-                      <DirectorDashboard />
-                    </DashboardLayout>
+                    <DirectorDashboard />
                   </ProtectedRoute>
                 } 
               />
