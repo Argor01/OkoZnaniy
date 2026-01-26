@@ -83,385 +83,353 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '24px auto', padding: '0 24px' }}>
-      {/* Кнопка назад */}
-      <div style={{ marginBottom: 24 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+    <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: '24px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        {/* Кнопка назад */}
+        <Button 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate(-1)}
+          style={{ marginBottom: 16 }}
+          size="large"
+        >
           Назад
         </Button>
-      </div>
 
-      {/* Основная информация о пользователе */}
-      <div style={{ marginBottom: 24 }}>
-        {/* Аватар и ник - выделенный блок */}
-        <Card 
-          style={{ 
-            background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
-            border: '2px solid #d3adf7',
-            borderRadius: 16,
-            boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
-            marginBottom: 16
-          }}
-          styles={{ body: { padding: '20px 24px' } }}
-        >
-          <Space direction="vertical" size={12} style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
-                ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
-              </Text>
-              <Tag 
+        <Card>
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            {/* Основная информация о пользователе */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Аватар и ник - большая плашка на всю ширину */}
+              <Card 
                 style={{ 
-                  fontSize: 11, 
-                  padding: '2px 8px',
-                  backgroundColor: 'rgba(114, 46, 209, 0.1)',
-                  color: '#722ed1',
-                  border: '1px solid rgba(114, 46, 209, 0.2)',
+                  background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
+                  border: '2px solid #d3adf7',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
+                  padding: '8px 16px'
+                }}
+                styles={{ body: { padding: '16px 20px' } }}
+              >
+                <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                      ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
+                    </Text>
+                    <Tag 
+                      style={{ 
+                        fontSize: 11, 
+                        padding: '2px 8px',
+                        backgroundColor: 'rgba(114, 46, 209, 0.1)',
+                        color: '#722ed1',
+                        border: '1px solid rgba(114, 46, 209, 0.2)',
+                        borderRadius: 12
+                      }}
+                    >
+                      {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+                    </Tag>
+                  </div>
+                  <Space align="center" size={20}>
+                    {userData.avatar ? (
+                      <img 
+                        src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
+                        alt="Аватар" 
+                        style={{ 
+                          width: 72, 
+                          height: 72, 
+                          borderRadius: '50%', 
+                          objectFit: 'cover',
+                          border: '3px solid #722ed1',
+                          boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
+                        }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="avatar-fallback"
+                      style={{ 
+                        width: 72, 
+                        height: 72, 
+                        borderRadius: '50%', 
+                        backgroundColor: 'white',
+                        display: userData.avatar ? 'none' : 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 28,
+                        color: '#722ed1',
+                        border: '3px solid #722ed1',
+                        boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
+                      }}
+                    >
+                      <UserOutlined />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <Text style={{ fontSize: 20, fontWeight: 700, color: '#722ed1', margin: 0 }}>
+                          {userData.first_name && userData.last_name 
+                            ? `${userData.first_name} ${userData.last_name}`
+                            : userData.username
+                          }
+                        </Text>
+                        {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
+                      </div>
+                      <Text style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 6 }}>@{userData.username}</Text>
+                    </div>
+                  </Space>
+                </Space>
+              </Card>
+
+              {/* Рейтинг и статистика - блок на всю ширину */}
+              <Card 
+                title={
+                  <Text style={{ fontSize: 18, fontWeight: 600, color: '#1f2937' }}>
+                    РЕЙТИНГ И СТАТИСТИКА
+                  </Text>
+                }
+                style={{ 
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
+                }}
+              >
+                {(statsLoading || expertStatsLoading) ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <Spin size="large" />
+                  </div>
+                ) : userData.role === 'expert' && expertStats ? (
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: 24 
+                  }}>
+                    {/* Рейтинг */}
+                    <div style={{ textAlign: 'center', padding: '16px' }}>
+                      <div style={{ fontSize: 48, fontWeight: 600, color: '#faad14', marginBottom: 8 }}>
+                        {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
+                      </div>
+                      <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 20, marginBottom: 8 }} />
+                      <div style={{ fontSize: 14, color: '#666' }}>
+                        Средний рейтинг
+                      </div>
+                      <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+                        на основе {expertStats.completed_orders} заказов
+                      </div>
+                    </div>
+
+                    {/* Статистика заказов */}
+                    <div style={{ padding: '16px' }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
+                          {expertStats.total_orders}
+                        </div>
+                        <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <Text>Завершено:</Text>
+                        <Text strong style={{ color: '#52c41a' }}>{expertStats.completed_orders}</Text>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Text>Успешность:</Text>
+                        <Text strong style={{ color: '#52c41a' }}>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
+                      </div>
+                    </div>
+
+                    {/* Заработок */}
+                    <div style={{ textAlign: 'center', padding: '16px' }}>
+                      <div style={{ fontSize: 32, fontWeight: 600, color: '#52c41a', marginBottom: 8 }}>
+                        {expertStats.total_earnings?.toLocaleString('ru-RU', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0
+                        })} ₽
+                      </div>
+                      <div style={{ fontSize: 14, color: '#666' }}>
+                        Общий заработок
+                      </div>
+                    </div>
+                  </div>
+                ) : ordersStats ? (
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: 24 
+                  }}>
+                    {/* Успешность */}
+                    <div style={{ textAlign: 'center', padding: '16px' }}>
+                      <div style={{ fontSize: 48, fontWeight: 600, color: '#1890ff', marginBottom: 8 }}>
+                        {ordersStats.success_rate.toFixed(1)}%
+                      </div>
+                      <div style={{ fontSize: 14, color: '#666' }}>
+                        Успешность заказов
+                      </div>
+                    </div>
+
+                    {/* Статистика заказов */}
+                    <div style={{ padding: '16px' }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
+                          {ordersStats.total}
+                        </div>
+                        <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Text>Завершено:</Text>
+                        <Text strong style={{ color: '#52c41a' }}>{ordersStats.completed}</Text>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <Text type="secondary" style={{ fontSize: 16 }}>Статистика недоступна</Text>
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            {/* Описание и дополнительная информация */}
+            <div>
+              {/* О себе */}
+              {userData.bio && (
+                <Card 
+                  title="О себе" 
+                  style={{ 
+                    marginBottom: 16,
+                    borderRadius: 12
+                  }}
+                >
+                  <Paragraph>{userData.bio}</Paragraph>
+                </Card>
+              )}
+
+              {/* Образование (для экспертов) */}
+              {userData.role === 'expert' && userData.education && (
+                <Card 
+                  title="Образование" 
+                  style={{ 
+                    marginBottom: 16,
+                    borderRadius: 12
+                  }}
+                >
+                  <Paragraph>{userData.education}</Paragraph>
+                </Card>
+              )}
+
+              {/* Навыки (для экспертов) */}
+              {userData.role === 'expert' && userData.skills && (
+                <Card 
+                  title="Навыки" 
+                  style={{ 
+                    marginBottom: 16,
+                    borderRadius: 12
+                  }}
+                >
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {userData.skills.split(',').map((skill: string, index: number) => (
+                      <Tag key={index} color="green">
+                        {skill.trim()}
+                      </Tag>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Портфолио (для экспертов) */}
+              {userData.role === 'expert' && userData.portfolio_url && (
+                <Card 
+                  title="Портфолио" 
+                  style={{ 
+                    marginBottom: 16,
+                    borderRadius: 12
+                  }}
+                >
+                  <Button 
+                    type="link" 
+                    href={userData.portfolio_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Посмотреть портфолио
+                  </Button>
+                </Card>
+              )}
+            </div>
+
+            {/* Блок специализации */}
+            {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
+              <Card 
+                title="Специализации" 
+                style={{ 
                   borderRadius: 12
                 }}
               >
-                {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-              </Tag>
-            </div>
-            <Space align="center" size={20}>
-              {userData.avatar ? (
-                <img 
-                  src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
-                  alt="Аватар" 
-                  style={{ 
-                    width: 72, 
-                    height: 72, 
-                    borderRadius: '50%', 
-                    objectFit: 'cover',
-                    border: '3px solid #722ed1',
-                    boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div 
-                className="avatar-fallback"
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {userData.specializations.map((spec: any, index: number) => (
+                    <Tag key={index} color="blue">
+                      {spec?.custom_name || spec?.subject?.name || 'Специализация не указана'}
+                    </Tag>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Отзывы (только для экспертов) */}
+            {userData.role === 'expert' && (
+              <Card 
+                title={`Отзывы (${reviews.length})`} 
                 style={{ 
-                  width: 72, 
-                  height: 72, 
-                  borderRadius: '50%', 
-                  backgroundColor: 'white',
-                  display: userData.avatar ? 'none' : 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 28,
-                  color: '#722ed1',
-                  border: '3px solid #722ed1',
-                  boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
+                  borderRadius: 12
                 }}
               >
-                <UserOutlined />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <Text style={{ fontSize: 20, fontWeight: 700, color: '#722ed1', margin: 0 }}>
-                    {userData.first_name && userData.last_name 
-                      ? `${userData.first_name} ${userData.last_name}`
-                      : userData.username
-                    }
-                  </Text>
-                  {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
-                </div>
-                <Text style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 6 }}>@{userData.username}</Text>
-              </div>
-            </Space>
+                {reviewsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <Spin />
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                    Нет отзывов
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {reviews.map((review: any) => (
+                      <div 
+                        key={review.id}
+                        style={{
+                          padding: 16,
+                          background: '#fafafa',
+                          borderRadius: 8,
+                          border: '1px solid #f0f0f0'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                          <div>
+                            <Text strong style={{ fontSize: 15 }}>{review.client?.first_name} {review.client?.last_name}</Text>
+                            <br />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {review.order?.title || review.order_title}
+                            </Text>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
+                            <br />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {dayjs(review.created_at).format('DD.MM.YYYY')}
+                            </Text>
+                          </div>
+                        </div>
+                        <Paragraph style={{ margin: 0, fontSize: 14 }}>
+                          {review.text || review.comment}
+                        </Paragraph>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
           </Space>
         </Card>
-
-        {/* Рейтинг и статистика - блок на всю ширину */}
-        <Card 
-          title={
-            <Text style={{ fontSize: 18, fontWeight: 600, color: '#1f2937' }}>
-              РЕЙТИНГ И СТАТИСТИКА
-            </Text>
-          }
-          style={{ 
-            borderRadius: 12,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
-          }}
-        >
-          {(statsLoading || expertStatsLoading) ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <Spin size="large" />
-            </div>
-          ) : userData.role === 'expert' && expertStats ? (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: 24 
-            }}>
-              {/* Рейтинг */}
-              <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 48, fontWeight: 600, color: '#faad14', marginBottom: 8 }}>
-                  {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
-                </div>
-                <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 20, marginBottom: 8 }} />
-                <div style={{ fontSize: 14, color: '#666' }}>
-                  Средний рейтинг
-                </div>
-                <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-                  на основе {expertStats.completed_orders} заказов
-                </div>
-              </div>
-
-              {/* Статистика заказов */}
-              <div style={{ padding: '16px' }}>
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
-                    {expertStats.total_orders}
-                  </div>
-                  <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <Text>Завершено:</Text>
-                  <Text strong style={{ color: '#52c41a' }}>{expertStats.completed_orders}</Text>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>Успешность:</Text>
-                  <Text strong style={{ color: '#52c41a' }}>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
-                </div>
-              </div>
-
-              {/* Заработок */}
-              <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 32, fontWeight: 600, color: '#52c41a', marginBottom: 8 }}>
-                  {expertStats.total_earnings?.toLocaleString('ru-RU', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  })} ₽
-                </div>
-                <div style={{ fontSize: 14, color: '#666' }}>
-                  Общий заработок
-                </div>
-              </div>
-            </div>
-          ) : ordersStats ? (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: 24 
-            }}>
-              {/* Успешность */}
-              <div style={{ textAlign: 'center', padding: '16px' }}>
-                <div style={{ fontSize: 48, fontWeight: 600, color: '#1890ff', marginBottom: 8 }}>
-                  {ordersStats.success_rate.toFixed(1)}%
-                </div>
-                <div style={{ fontSize: 14, color: '#666' }}>
-                  Успешность заказов
-                </div>
-              </div>
-
-              {/* Статистика заказов */}
-              <div style={{ padding: '16px' }}>
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
-                    {ordersStats.total}
-                  </div>
-                  <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>Завершено:</Text>
-                  <Text strong style={{ color: '#52c41a' }}>{ordersStats.completed}</Text>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <Text type="secondary" style={{ fontSize: 16 }}>Статистика недоступна</Text>
-            </div>
-          )}
-        </Card>
       </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }}>
-        {/* Основная информация */}
-        <div>
-          {/* О себе */}
-          {userData.bio && (
-            <Card 
-              title="О себе" 
-              style={{ 
-                marginBottom: 16,
-                borderRadius: 12
-              }}
-            >
-              <Paragraph>{userData.bio}</Paragraph>
-            </Card>
-          )}
-
-          {/* Образование (для экспертов) */}
-          {userData.role === 'expert' && userData.education && (
-            <Card 
-              title="Образование" 
-              style={{ 
-                marginBottom: 16,
-                borderRadius: 12
-              }}
-            >
-              <Paragraph>{userData.education}</Paragraph>
-            </Card>
-          )}
-
-          {/* Навыки (для экспертов) */}
-          {userData.role === 'expert' && userData.skills && (
-            <Card 
-              title="Навыки" 
-              style={{ 
-                marginBottom: 16,
-                borderRadius: 12
-              }}
-            >
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {userData.skills.split(',').map((skill: string, index: number) => (
-                  <Tag key={index} color="green">
-                    {skill.trim()}
-                  </Tag>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Портфолио (для экспертов) */}
-          {userData.role === 'expert' && userData.portfolio_url && (
-            <Card 
-              title="Портфолио" 
-              style={{ 
-                marginBottom: 16,
-                borderRadius: 12
-              }}
-            >
-              <Button 
-                type="link" 
-                href={userData.portfolio_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                Посмотреть портфолио
-              </Button>
-            </Card>
-          )}
-        </div>
-      </div>
-
-      {/* Блоки специализации и контактной информации */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 ? '1fr 1fr' : '1fr', 
-        gap: 24,
-        marginTop: 24
-      }}>
-        {/* Специализации (для экспертов) */}
-        {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
-          <Card 
-            title="Специализации" 
-            style={{ 
-              borderRadius: 12
-            }}
-          >
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {userData.specializations.map((spec: any, index: number) => (
-                <Tag key={index} color="blue">
-                  {typeof spec === 'string' ? spec : (spec?.name || spec?.subject?.name || 'Специализация')}
-                </Tag>
-              ))}
-            </div>
-          </Card>
-        )}
-
-        {/* Контактная информация */}
-        <Card 
-          title="Контактная информация"
-          style={{ 
-            borderRadius: 12
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div>
-              <Text strong>Email:</Text>
-              <br />
-              <Text copyable>{userData.email}</Text>
-            </div>
-            {userData.phone && (
-              <div>
-                <Text strong>Телефон:</Text>
-                <br />
-                <Text copyable>{userData.phone}</Text>
-              </div>
-            )}
-            {userData.telegram_id && (
-              <div>
-                <Text strong>Telegram:</Text>
-                <br />
-                <Text>@{userData.telegram_id}</Text>
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* Отзывы (только для экспертов) */}
-      {userData.role === 'expert' && (
-        <Card 
-          title={`Отзывы (${reviews.length})`} 
-          style={{ 
-            marginTop: 24,
-            borderRadius: 12
-          }}
-        >
-          {reviewsLoading ? (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <Spin />
-            </div>
-          ) : reviews.length === 0 ? (
-            <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
-              Нет отзывов
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {reviews.map((review: any) => (
-                <div 
-                  key={review.id}
-                  style={{
-                    padding: 16,
-                    background: '#fafafa',
-                    borderRadius: 8,
-                    border: '1px solid #f0f0f0'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <div>
-                      <Text strong style={{ fontSize: 15 }}>{review.client?.first_name} {review.client?.last_name}</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {review.order?.title || review.order_title}
-                      </Text>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {dayjs(review.created_at).format('DD.MM.YYYY')}
-                      </Text>
-                    </div>
-                  </div>
-                  <Paragraph style={{ margin: 0, fontSize: 14 }}>
-                    {review.text || review.comment}
-                  </Paragraph>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      )}
     </div>
   );
 };
