@@ -31,11 +31,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return queryset
         # Клиент видит свои заказы, эксперт — назначенные заказы.
-        # Дополнительно эксперт может просматривать доступные заказы (new + без назначенного эксперта),
-        # чтобы работал переход из ленты заказов на страницу заказа.
-        base_filter = models.Q(client=user) | models.Q(expert=user)
-        if getattr(user, 'role', None) == 'expert':
-            base_filter = base_filter | models.Q(status='new', expert__isnull=True)
+        # Дополнительно любой авторизованный пользователь может просматривать доступные заказы
+        # (new + без назначенного эксперта), чтобы работал переход из ленты заказов на страницу заказа
+        # без 404 для других клиентов.
+        base_filter = models.Q(client=user) | models.Q(expert=user) | models.Q(status='new', expert__isnull=True)
         return queryset.filter(base_filter)
 
     def perform_create(self, serializer):
