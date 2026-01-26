@@ -68,6 +68,15 @@ export const chatApi = {
     return response.data;
   },
 
+  // Получить или создать чат по ID заказа и ID пользователя (эксперт/клиент)
+  getOrCreateByOrderAndUser: async (orderId: number, userId: number): Promise<ChatDetail> => {
+    const response = await apiClient.post('/chat/chats/get_or_create_by_order_and_user/', {
+      order_id: orderId,
+      user_id: userId,
+    });
+    return response.data;
+  },
+
   // Получить или создать чат с конкретным пользователем
   getOrCreateByUser: async (userId: number): Promise<ChatDetail> => {
     const response = await apiClient.post('/chat/chats/get_or_create_by_user/', {

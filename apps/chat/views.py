@@ -30,7 +30,10 @@ class ChatViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         chat = serializer.save()
         order = chat.order
-        chat.participants.add(order.client, order.expert)
+        if order and order.client:
+            chat.participants.add(order.client)
+        if order and order.expert:
+            chat.participants.add(order.expert)
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -112,6 +115,14 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        # Этот endpoint поддерживает только чат между клиентом и назначенным экспертом.
+        # Для чатов по откликам используйте get_or_create_by_order_and_user.
+        if not order.expert_id:
+            return Response(
+                {'detail': 'У заказа еще нет назначенного эксперта. Используйте get_or_create_by_order_and_user.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Проверяем, что пользователь является участником заказа
         if request.user not in [order.client, order.expert]:
             return Response(
@@ -120,10 +131,59 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # Получаем или создаем чат
-        chat, created = Chat.objects.get_or_create(order=order)
+        chat, created = Chat.objects.get_or_create(
+            order=order,
+            client=order.client,
+            expert=order.expert
+        )
         if created:
             chat.participants.add(order.client, order.expert)
         
+        serializer = ChatDetailSerializer(chat, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def get_or_create_by_order_and_user(self, request):
+        """Получить или создать чат по ID заказа и ID пользователя (для переписки по отклику)."""
+        from apps.users.models import User
+
+        order_id = request.data.get('order_id')
+        user_id = request.data.get('user_id')
+        if not order_id or not user_id:
+            return Response(
+                {'detail': 'order_id и user_id обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order = get_object_or_404(Order, id=order_id)
+        other_user = get_object_or_404(User, id=user_id)
+
+        # Инициатором переписки по отклику может быть только заказчик
+        if request.user.id != order.client_id and not request.user.is_staff:
+            return Response(
+                {'detail': 'Только заказчик может инициировать чат по отклику'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Нельзя создать чат с самим собой
+        if other_user.id == request.user.id:
+            return Response(
+                {'detail': 'Нельзя создать чат с самим собой'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Чат по заказу всегда между клиентом заказа и конкретным экспертом
+        client = order.client
+        expert = other_user
+
+        chat, created = Chat.objects.get_or_create(
+            order=order,
+            client=client,
+            expert=expert
+        )
+        if created:
+            chat.participants.add(client, expert)
+
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
 

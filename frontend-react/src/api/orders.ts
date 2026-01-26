@@ -206,6 +206,9 @@ export const ordersApi = {
   // Ставки экспертов: получить список
   getBids: async (orderId: number): Promise<Bid[]> => {
     const response = await apiClient.get(`/orders/orders/${orderId}/bids/`);
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
     return Array.isArray(response.data) ? response.data : [];
   },
 

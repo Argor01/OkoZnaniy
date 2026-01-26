@@ -6,8 +6,19 @@ from rest_framework.exceptions import ValidationError
 from apps.orders.models import Order
 
 class Chat(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True, blank=True, related_name='chats')
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='client_chats')
+    expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='expert_chats')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['order', 'client', 'expert'],
+                condition=models.Q(order__isnull=False, client__isnull=False, expert__isnull=False),
+                name='unique_chat_per_order_client_expert'
+            )
+        ]
 
     def __str__(self):
         if self.order:

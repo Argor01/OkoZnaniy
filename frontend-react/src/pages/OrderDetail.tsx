@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Tabs, Rate } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Rate } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { ordersApi, Bid } from '../api/orders';
-import { chatApi } from '../api/chat';
 import { authApi } from '../api/auth';
 import BidModal from './OrdersFeed/BidModal';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useDashboard } from '../contexts/DashboardContext';
+import { formatCurrency } from '../utils/formatters';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -16,8 +17,8 @@ const OrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const dashboard = useDashboard();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [activeTab, setActiveTab] = useState('active');
   const [bidModalVisible, setBidModalVisible] = useState(false);
 
   const { data: userProfile } = useQuery({
@@ -47,30 +48,7 @@ const OrderDetail: React.FC = () => {
     return Array.isArray(bids) && bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
   }, [bids, userProfile]);
 
-  const acceptBidMutation = useMutation({
-    mutationFn: ({ orderId, bidId }: { orderId: number; bidId: number }) => 
-      ordersApi.acceptBid(orderId, bidId),
-    onSuccess: () => {
-      message.success('Отклик принят! Эксперт назначен на заказ');
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
-      queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
-    },
-    onError: () => {
-      message.error('Не удалось принять отклик');
-    },
-  });
-
-  const rejectBidMutation = useMutation({
-    mutationFn: ({ orderId, bidId }: { orderId: number; bidId: number }) => 
-      ordersApi.rejectBid(orderId, bidId),
-    onSuccess: () => {
-      message.success('Отклик отклонен');
-      queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
-    },
-    onError: () => {
-      message.error('Не удалось отклонить отклик');
-    },
-  });
+  
 
   if (isLoading) {
     return (
@@ -114,6 +92,8 @@ const OrderDetail: React.FC = () => {
     };
     return texts[status] || status;
   };
+
+  const isOrderOwner = order.client?.id === userProfile?.id;
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: isMobile ? '16px' : '24px' }}>
@@ -248,7 +228,7 @@ const OrderDetail: React.FC = () => {
                     <Space align="center">
                       <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
                       <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
-                        {order.budget} ₽
+                        {formatCurrency(order.budget)}
                       </Text>
                     </Space>
                   </Space>
@@ -354,153 +334,121 @@ const OrderDetail: React.FC = () => {
             )}
 
             {/* Отклики экспертов */}
-            {Array.isArray(bids) && bids.length > 0 && (
+            {isOrderOwner && Array.isArray(bids) && (
               <div>
                 <Divider />
                 <Title level={4}>
-                  <Badge count={bids.length} style={{ backgroundColor: '#52c41a' }}>
+                  <Badge
+                    count={bids.length}
+                    size="small"
+                    style={{
+                      backgroundColor: '#52c41a',
+                      fontSize: 10,
+                      height: 16,
+                      minWidth: 16,
+                      lineHeight: '16px'
+                    }}
+                  >
                     <span style={{ marginRight: 8 }}>Отклики экспертов</span>
                   </Badge>
                 </Title>
 
-                <Tabs 
-                  activeKey={activeTab} 
-                  onChange={setActiveTab}
-                  items={[
-                    { key: 'active', label: 'Активные' },
-                    { key: 'rejected', label: 'Отклоненные' },
-                    { key: 'cancelled', label: 'Отмененные' },
-                  ]}
-                  style={{ marginBottom: 16 }}
-                />
-
                 {bidsLoading ? (
                   <Spin />
+                ) : bids.length === 0 ? (
+                  <Empty description="Пока нет откликов" />
                 ) : (
-                  <List
-                    dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === activeTab) : []}
-                    renderItem={(bid: Bid) => (
-                      <List.Item
-                        key={bid.id}
-                        style={{
-                          background: order.expert?.id === bid.expert.id ? '#f6ffed' : '#fff',
-                          border: order.expert?.id === bid.expert.id ? '2px solid #52c41a' : '1px solid #f0f0f0',
-                          borderRadius: 8,
-                          padding: isMobile ? 12 : 16,
-                          marginBottom: 12
-                        }}
-                        actions={
-                          order.expert?.id === bid.expert.id ? [
-                            <Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>
-                          ] : order.expert ? [] : order.client?.id === userProfile?.id ? [
-                            <Button
-                              type="primary"
-                              size={isMobile ? 'small' : 'middle'}
-                              onClick={() => acceptBidMutation.mutate({ orderId: order.id, bidId: bid.id })}
-                              loading={acceptBidMutation.isPending}
-                            >
-                              Принять
-                            </Button>,
-                            <Button
-                              size={isMobile ? 'small' : 'middle'}
-                              icon={<MessageOutlined />}
-                              onClick={async () => {
-                                try {
-                                  const chat = await chatApi.getOrCreateByOrder(order.id);
-                                  navigate(`/messages?chat=${chat.id}`);
-                                } catch (error) {
-                                  message.error('Не удалось открыть чат');
-                                }
-                              }}
-                            >
-                              Написать
-                            </Button>,
-                            activeTab === 'active' && (
-                              <Button
-                                danger
-                                size={isMobile ? 'small' : 'middle'}
-                                icon={<CloseCircleOutlined />}
-                                onClick={() => rejectBidMutation.mutate({ orderId: order.id, bidId: bid.id })}
-                                loading={rejectBidMutation.isPending}
-                              >
-                                Отклонить
-                              </Button>
-                            )
-                          ].filter(Boolean) : [
-                            <Button
-                              size={isMobile ? 'small' : 'middle'}
-                              icon={<MessageOutlined />}
-                              onClick={async () => {
-                                try {
-                                  const chat = await chatApi.getOrCreateByOrder(order.id);
-                                  navigate(`/messages?chat=${chat.id}`);
-                                } catch (error) {
-                                  message.error('Не удалось открыть чат');
-                                }
-                              }}
-                            >
-                              Написать
-                            </Button>
-                          ]
-                        }
-                      >
-                        <List.Item.Meta
-                          avatar={
-                            <Avatar 
-                              size={isMobile ? 48 : 64} 
-                              src={bid.expert.avatar} 
-                              icon={<UserOutlined />}
-                            />
+                  <>
+                    <List
+                      dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
+                      renderItem={(bid: Bid) => (
+                        <List.Item
+                          key={bid.id}
+                          style={{
+                            background: order.expert?.id === bid.expert.id ? '#f6ffed' : '#fff',
+                            border: order.expert?.id === bid.expert.id ? '2px solid #52c41a' : '1px solid #f0f0f0',
+                            borderRadius: 8,
+                            padding: isMobile ? 12 : 16,
+                            marginBottom: 12
+                          }}
+                          actions={
+                            order.expert?.id === bid.expert.id
+                              ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
+                              : isOrderOwner
+                                ? [
+                                    <Button
+                                      size={isMobile ? 'small' : 'middle'}
+                                      icon={<MessageOutlined />}
+                                      onClick={async () => {
+                                        dashboard.openOrderChat(order.id, bid.expert.id);
+                                      }}
+                                    >
+                                      Написать
+                                    </Button>
+                                  ]
+                                : []
                           }
-                          title={
-                            <Space direction="vertical" size={4}>
-                              <Space>
-                                <Button 
-                                  type="link" 
-                                  onClick={() => navigate(`/expert/${bid.expert.id}`)}
-                                  style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
-                                >
-                                  <Text strong>{bid.expert.username}</Text>
-                                </Button>
-                                <Space size={4}>
-                                    <StarOutlined style={{ color: '#faad14' }} />
-                                    <Text>{bid.expert_rating || 0}</Text>
+                        >
+                          <List.Item.Meta
+                            avatar={
+                              <Avatar 
+                                size={isMobile ? 48 : 64} 
+                                src={bid.expert.avatar} 
+                                icon={<UserOutlined />}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                              />
+                            }
+                            title={
+                              <Space direction="vertical" size={4}>
+                                <Space>
+                                  <Button 
+                                    type="link" 
+                                    onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                                    style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
+                                  >
+                                    <Text strong>{bid.expert.username}</Text>
+                                  </Button>
+                                  <Space size={4}>
+                                      <StarOutlined style={{ color: '#faad14' }} />
+                                      <Text>{bid.expert_rating || 0}</Text>
+                                  </Space>
                                 </Space>
+                                {bid.expert.bio && (
+                                  <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13 }}>
+                                    {bid.expert.bio}
+                                  </Text>
+                                )}
                               </Space>
-                              {bid.expert.bio && (
-                                <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13 }}>
-                                  {bid.expert.bio}
-                                </Text>
-                              )}
-                            </Space>
-                          }
-                          description={
-                            <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                              <Space wrap>
-                                <Tag color="blue" style={{ fontSize: isMobile ? 11 : 13 }}>
-                                  <DollarOutlined /> {bid.amount} ₽
-                                </Tag>
-                                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
-                                  {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
-                                </Text>
+                            }
+                            description={
+                              <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                                <Space wrap>
+                                  <Tag color="blue" style={{ fontSize: isMobile ? 11 : 13 }}>
+                                    <DollarOutlined /> {formatCurrency(bid.amount)}
+                                  </Tag>
+                                  <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                                    {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
+                                  </Text>
+                                </Space>
+                                {bid.comment && (
+                                  <Paragraph 
+                                    style={{ 
+                                      margin: 0, 
+                                      fontSize: isMobile ? 12 : 14,
+                                      whiteSpace: 'pre-wrap' 
+                                    }}
+                                  >
+                                    {bid.comment}
+                                  </Paragraph>
+                                )}
                               </Space>
-                              {bid.comment && (
-                                <Paragraph 
-                                  style={{ 
-                                    margin: 0, 
-                                    fontSize: isMobile ? 12 : 14,
-                                    whiteSpace: 'pre-wrap' 
-                                  }}
-                                >
-                                  {bid.comment}
-                                </Paragraph>
-                              )}
-                            </Space>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </>
                 )}
               </div>
             )}

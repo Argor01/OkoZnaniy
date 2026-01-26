@@ -3,6 +3,7 @@ import React, { createContext, useContext } from 'react';
 interface DashboardContextType {
   openProfileModal: () => void;
   openMessageModal: (userId?: number) => void;
+  openOrderChat: (orderId: number, userId: number) => void;
   openNotificationsModal: () => void;
   openArbitrationModal: () => void;
   openFinanceModal: () => void;
@@ -15,6 +16,7 @@ interface DashboardContextType {
 export const DashboardContext = createContext<DashboardContextType>({
   openProfileModal: () => {},
   openMessageModal: () => {},
+  openOrderChat: () => {},
   openNotificationsModal: () => {},
   openArbitrationModal: () => {},
   openFinanceModal: () => {},

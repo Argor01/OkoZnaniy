@@ -7,14 +7,15 @@ User = get_user_model()
 
 class NotificationService:
     @staticmethod
-    def create_notification(recipient, type, title, message, related_object_id=None, related_object_type=None, expires_in=None):
+    def create_notification(recipient, type, title, message, related_object_id=None, related_object_type=None, expires_in=None, data=None):
         notification = Notification.objects.create(
             recipient=recipient,
             type=type,
             title=title,
             message=message,
             related_object_id=related_object_id,
-            related_object_type=related_object_type
+            related_object_type=related_object_type,
+            data=data or {}
         )
         
         if expires_in:

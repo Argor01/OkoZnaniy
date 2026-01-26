@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Badge, Button, Space, Typography, Dropdown, Menu } from 'antd';
+import { Badge, Button, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -15,6 +15,7 @@ import {
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './DashboardHeader.module.css';
+import { formatCurrency } from '../../utils/formatters';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -164,7 +165,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           >
             {!isMobile && (
               <Text className={`${styles.balanceText} balanceText`} style={{ color: 'white' }}>
-                {balance.toFixed(2)} ₽
+                {formatCurrency(balance)}
               </Text>
             )}
           </Button>

@@ -3,8 +3,11 @@
 /**
  * Форматирует число как валюту
  */
-export const formatCurrency = (amount: number, currency: string = '₽'): string => {
-  return `${amount.toLocaleString('ru-RU')} ${currency}`;
+export const formatCurrency = (amount: number | string, currency: string = '₽'): string => {
+  const numeric = typeof amount === 'number' ? amount : Number(String(amount).replace(',', '.'));
+  const safe = Number.isFinite(numeric) ? numeric : 0;
+  const rounded = Math.round(safe);
+  return `${rounded.toLocaleString('ru-RU')} ${currency}`;
 };
 
 /**

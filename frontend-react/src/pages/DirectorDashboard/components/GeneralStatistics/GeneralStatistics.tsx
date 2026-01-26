@@ -351,7 +351,7 @@ const GeneralStatistics: React.FC = () => {
               title="Общий оборот"
               value={kpiData.totalTurnover}
               prefix="₽"
-              precision={2}
+              precision={0}
               valueStyle={{ 
                 color: '#1890ff',
                 fontSize: isMobile ? 20 : 24,
@@ -380,7 +380,7 @@ const GeneralStatistics: React.FC = () => {
               title="Чистая прибыль"
               value={kpiData.netProfit}
               prefix="₽"
-              precision={2}
+              precision={0}
               valueStyle={{ 
                 color: '#3f8600',
                 fontSize: isMobile ? 20 : 24,
@@ -439,7 +439,7 @@ const GeneralStatistics: React.FC = () => {
               title="Средний чек"
               value={kpiData.averageCheck}
               prefix="₽"
-              precision={2}
+              precision={0}
               valueStyle={{ 
                 color: '#13c2c2',
                 fontSize: isMobile ? 22 : 24,

@@ -5,6 +5,7 @@ from django.utils import timezone
 
 class NotificationType(models.TextChoices):
     NEW_ORDER = 'new_order', 'Новый заказ'
+    NEW_BID = 'new_bid', 'Новый отклик'
     ORDER_TAKEN = 'order_taken', 'Заказ принят'
     ORDER_ASSIGNED = 'order_assigned', 'Заказ назначен'
     FILE_UPLOADED = 'file_uploaded', 'Загружен файл'

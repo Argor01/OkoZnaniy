@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Modal, Form, InputNumber, Input, Button, message, Result } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '../../api/orders';
-import { chatApi } from '../../api/chat';
 
 const { TextArea } = Input;
 

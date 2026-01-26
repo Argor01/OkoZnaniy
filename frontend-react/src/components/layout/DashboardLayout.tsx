@@ -60,6 +60,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   
   const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
+  const [selectedOrderIdForChat, setSelectedOrderIdForChat] = useState<number | undefined>(undefined);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
 
   const { unreadCount: unreadNotifications } = useNotifications();
@@ -144,6 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
     setSelectedUserIdForChat(undefined);
+    setSelectedOrderIdForChat(undefined);
   };
 
   const contextValue = {
@@ -152,6 +154,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         closeAllModals(); 
         if (userId) setSelectedUserIdForChat(userId);
         setMessageModalVisible(true); 
+    },
+    openOrderChat: (orderId: number, userId: number) => {
+        closeAllModals();
+        setSelectedOrderIdForChat(orderId);
+        setSelectedUserIdForChat(userId);
+        setMessageModalVisible(true);
     },
     openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
     openArbitrationModal: () => { closeAllModals(); setArbitrationModalVisible(true); },
@@ -266,24 +274,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       />
       <MessageModal 
         visible={messageModalVisible} 
-        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); }}
+        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); }}
         isMobile={isMobile}
         isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
         isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
+        selectedOrderId={selectedOrderIdForChat}
       />
       <NotificationsModal 
         visible={notificationsModalVisible} 
         onClose={() => setNotificationsModalVisible(false)}
         isMobile={isMobile}
-        isDesktop={!isMobile}
       />
       <ArbitrationModal 
         visible={arbitrationModalVisible} 
         onClose={() => setArbitrationModalVisible(false)}
         cases={[]} 
         isMobile={isMobile}
-        isDesktop={!isMobile}
       />
       <FinanceModal 
         visible={financeModalVisible} 

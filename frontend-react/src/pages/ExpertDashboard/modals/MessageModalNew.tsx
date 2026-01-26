@@ -16,6 +16,7 @@ import {
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { getMediaUrl } from '../../../config/api';
 
 const { Text } = Typography;
 
@@ -27,6 +28,7 @@ interface MessageModalProps {
   isDesktop: boolean;
   onCreateOrder?: () => void;
   selectedUserId?: number; // ID пользователя для открытия чата
+  selectedOrderId?: number; // ID заказа для открытия чата (чат по заказу+пользователю)
 }
 
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
@@ -36,7 +38,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   isTablet,
   isDesktop,
   onCreateOrder,
-  selectedUserId
+  selectedUserId,
+  selectedOrderId
 }) => {
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
@@ -52,13 +55,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (visible) {
       console.log('MessageModal opened, selectedUserId:', selectedUserId);
       loadChats();
+      // Если передан orderId+userId, открываем чат по заказу (важно для откликов)
+      if (selectedOrderId && selectedUserId) {
+        loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
+        return;
+      }
       // Если передан selectedUserId, автоматически открываем чат с этим пользователем
       if (selectedUserId) {
         console.log('Loading chat with user:', selectedUserId);
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId]);
+  }, [visible, selectedUserId, selectedOrderId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -74,6 +82,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch (error) {
       console.error('Ошибка загрузки чатов:', error);
       antMessage.error('Не удалось загрузить чаты');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOrCreateChatByOrderAndUser = async (orderId: number, userId: number) => {
+    setLoading(true);
+    try {
+      const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
+      setSelectedChat(chatData);
+      await loadChats();
+    } catch (error) {
+      console.error('Ошибка создания/загрузки чата по заказу:', error);
+      antMessage.error('Не удалось открыть чат по заказу');
     } finally {
       setLoading(false);
     }
@@ -390,7 +412,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   <Avatar
                     size={isMobile ? 36 : 40}
                     icon={<UserOutlined />}
-                    src={chat.other_user?.avatar}
+                    src={getMediaUrl(chat.other_user?.avatar)}
                     style={{ backgroundColor: '#6b7280' }}
                   />
                   <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
@@ -471,7 +493,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   <Avatar
                     size={isMobile ? 32 : 36}
                     icon={<UserOutlined />}
-                    src={selectedChat.other_user?.avatar}
+                    src={getMediaUrl(selectedChat.other_user?.avatar)}
                     style={{ backgroundColor: '#6b7280' }}
                   />
                   <div>

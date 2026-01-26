@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
+import { formatCurrency } from '../../utils/formatters';
 
 // Импорт модальных окон
 import ProfileModal from '../ExpertDashboard/modals/ProfileModal';
@@ -484,7 +485,7 @@ const OrdersFeed: React.FC = () => {
                 </div>
                 <div style={{ textAlign: 'right', marginLeft: 16 }}>
                   <div className={styles.budgetText}>
-                    {order.budget ? `${order.budget} ₽` : 'Договорная'}
+                    {order.budget ? formatCurrency(order.budget) : 'Договорная'}
                   </div>
                 </div>
               </div>
@@ -686,7 +687,6 @@ const OrdersFeed: React.FC = () => {
       <NotificationsModal
         visible={notificationsModalVisible}
         onClose={() => setNotificationsModalVisible(false)}
-        notifications={mockNotifications}
         isMobile={isMobile}
       />
       

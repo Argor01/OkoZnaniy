@@ -30,9 +30,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         if user.is_staff:
             return queryset
-        return queryset.filter(
-            models.Q(client=user) | models.Q(expert=user)
-        )
+        # Клиент видит свои заказы, эксперт — назначенные заказы.
+        # Дополнительно эксперт может просматривать доступные заказы (new + без назначенного эксперта),
+        # чтобы работал переход из ленты заказов на страницу заказа.
+        base_filter = models.Q(client=user) | models.Q(expert=user)
+        if getattr(user, 'role', None) == 'expert':
+            base_filter = base_filter | models.Q(status='new', expert__isnull=True)
+        return queryset.filter(base_filter)
 
     def perform_create(self, serializer):
         # Дополнительная валидация дедлайна
@@ -540,12 +544,18 @@ class BidViewSet(viewsets.ModelViewSet):
         order_id = self.kwargs['order_pk']
         order = get_object_or_404(Order, id=order_id)
         user = self.request.user
-        
-        # Проверяем права доступа - клиент может видеть ставки по своим заказам
-        if order.client_id != user.id and getattr(user, 'role', None) != 'expert' and not user.is_staff:
-            return Bid.objects.none()
-        
-        return Bid.objects.filter(order_id=order_id).select_related('expert', 'order')
+
+        # Доступ к откликам:
+        # - клиент (автор заказа) видит все отклики
+        # - staff видит все
+        # - эксперт видит только свой отклик
+        if user.is_staff or order.client_id == user.id:
+            return Bid.objects.filter(order_id=order_id).select_related('expert', 'order')
+
+        if getattr(user, 'role', None) == 'expert':
+            return Bid.objects.filter(order_id=order_id, expert_id=user.id).select_related('expert', 'order')
+
+        return Bid.objects.none()
 
     def perform_create(self, serializer):
         order_id = self.kwargs['order_pk']
@@ -576,5 +586,25 @@ class BidViewSet(viewsets.ModelViewSet):
             for attr, value in serializer.validated_data.items():
                 setattr(bid, attr, value)
             bid.save()
+
+        # Уведомляем клиента о новом отклике
+        if created:
+            try:
+                from apps.notifications.models import NotificationType
+
+                NotificationService.create_notification(
+                    recipient=order.client,
+                    type=NotificationType.NEW_BID,
+                    title=f"Новый отклик на заказ: {order.title or 'Без названия'}",
+                    message=(
+                        f"Эксперт {user.get_full_name() or user.username} откликнулся на ваш заказ. "
+                        f"Ставка: {bid.amount} ₽"
+                    ),
+                    related_object_id=order.id,
+                    related_object_type='order'
+                )
+            except Exception:
+                # Не блокируем создание отклика из-за проблем с уведомлениями
+                pass
         
         return bid

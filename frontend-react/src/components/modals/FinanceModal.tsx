@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Typography, Button, Space, Input, Select, DatePicker } from 'antd';
 import { SearchOutlined, DownOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { formatCurrency } from '../../utils/formatters';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -164,7 +165,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({
                 Текущий баланс:
               </Text>
               <Text strong style={{ fontSize: isMobile ? 28 : 32, color: '#1f2937', display: 'block', marginBottom: isMobile ? 12 : 16 }}>
-                0.00 ₽
+                {formatCurrency(0)}
               </Text>
               <Button 
                 type="primary"
@@ -191,7 +192,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Доступно к выводу:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                0.00 ₽
+                {formatCurrency(0)}
               </Text>
 
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
@@ -205,7 +206,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Заблокировано:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                0.00 ₽
+                {formatCurrency(0)}
               </Text>
 
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
@@ -219,7 +220,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Удерживается:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                0.00 ₽
+                {formatCurrency(0)}
               </Text>
             </div>
 

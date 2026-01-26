@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../utils/formatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Rate, List, Popconfirm } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined, ShoppingCartOutlined, EyeOutlined, FileOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -236,11 +237,11 @@ const ShopWorkDetail: React.FC = () => {
                       <Space direction="vertical" size={0}>
                         {work.discount && work.originalPrice && (
                           <Text delete type="secondary" style={{ fontSize: 12 }}>
-                            {work.originalPrice} ₽
+                            {formatCurrency(work.originalPrice)}
                           </Text>
                         )}
                         <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
-                          {work.price} ₽
+                          {formatCurrency(work.price)}
                         </Text>
                       </Space>
                       {work.discount && (
@@ -387,7 +388,7 @@ const ShopWorkDetail: React.FC = () => {
                     fontSize: 16
                   }}
                 >
-                  Купить за {work.price} ₽
+                  Купить за {formatCurrency(work.price)}
                 </Button>
               )}
             </div>
