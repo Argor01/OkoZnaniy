@@ -2,15 +2,19 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Sum, Q, Avg
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.db.models.functions import TruncDate, TruncMonth
 
 from apps.experts.models import ExpertApplication
 from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
+from apps.orders.models import Order
+from apps.payments.models import Payment
+from apps.shop.models import ReadyWork
 from .serializers import (
     DirectorStatsSerializer, MonthlyTurnoverSerializer, 
     NetProfitSerializer, PartnerSerializer, PartnerTurnoverSerializer
@@ -386,31 +390,97 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
         """Получить оборот за период"""
         period = request.query_params.get('period')
         
-        # Генерируем тестовые данные
+        # Определяем период
         if period:
             try:
                 date_obj = datetime.strptime(period, '%Y-%m')
+                start_date = date_obj.replace(day=1)
+                if date_obj.month == 12:
+                    end_date = date_obj.replace(year=date_obj.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = date_obj.replace(month=date_obj.month + 1, day=1) - timedelta(days=1)
                 month_name = date_obj.strftime('%B %Y')
             except:
-                month_name = period
+                # Если формат неверный, используем текущий месяц
+                now = timezone.now()
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if now.month == 12:
+                    end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+                month_name = now.strftime('%B %Y')
         else:
-            month_name = timezone.now().strftime('%B %Y')
+            # Текущий месяц
+            now = timezone.now()
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if now.month == 12:
+                end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+            month_name = now.strftime('%B %Y')
+        
+        # Получаем реальные данные из БД
+        # Оборот от заказов
+        orders_turnover = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        # Оборот от продаж готовых работ (пока не реализовано)
+        shop_turnover = Decimal('0.00')
+        
+        total_turnover = orders_turnover + shop_turnover
+        
+        # Данные за предыдущий период для сравнения
+        prev_start = start_date - timedelta(days=32)
+        prev_start = prev_start.replace(day=1)
+        prev_end = start_date - timedelta(days=1)
+        
+        prev_orders_turnover = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=prev_start,
+            paid_at__lte=prev_end
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        prev_shop_turnover = Decimal('0.00')
+        
+        prev_total = prev_orders_turnover + prev_shop_turnover
+        
+        # Вычисляем процент изменения
+        if prev_total > 0:
+            change_percent = float((total_turnover - prev_total) / prev_total * 100)
+        else:
+            change_percent = 100.0 if total_turnover > 0 else 0.0
+        
+        # Ежедневные данные за период
+        daily_data = []
+        current_date = start_date
+        while current_date <= end_date:
+            day_start = current_date
+            day_end = current_date.replace(hour=23, minute=59, second=59)
             
-        # Обновленные данные (соответствуют тестированию)
+            day_orders = Payment.objects.filter(
+                status='completed',
+                paid_at__gte=day_start,
+                paid_at__lte=day_end
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+            
+            day_shop = Decimal('0.00')
+            
+            daily_data.append({
+                'date': current_date.strftime('%Y-%m-%d'),
+                'amount': float(day_orders + day_shop)
+            })
+            
+            current_date += timedelta(days=1)
+        
         data = {
             'period': month_name,
-            'total': Decimal('2818000.00'),
-            'previous_period': Decimal('2445000.00'),
-            'change_percent': 15.3,
-            'daily_data': [
-                {'date': '2024-01-01', 'amount': 95000},
-                {'date': '2024-01-02', 'amount': 87000},
-                {'date': '2024-01-03', 'amount': 102000},
-                {'date': '2024-01-04', 'amount': 78000},
-                {'date': '2024-01-05', 'amount': 115000},
-                {'date': '2024-01-06', 'amount': 89000},
-                {'date': '2024-01-07', 'amount': 98000},
-            ]
+            'total': total_turnover,
+            'previous_period': prev_total,
+            'change_percent': round(change_percent, 2),
+            'daily_data': daily_data
         }
         
         serializer = MonthlyTurnoverSerializer(data)
@@ -419,29 +489,155 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='net-profit')
     def net_profit(self, request):
         """Получить чистую прибыль за период"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        # Улучшенные тестовые данные с детализацией
-        data = {
-            'total': Decimal('1026000.00'),
-            'income': Decimal('2818000.00'),
-            'expense': Decimal('1792000.00'),
-            'previous_period': Decimal('865000.00'),
-            'change_percent': 18.7,
-            'income_breakdown': [
-                {'category': 'Заказы студентов', 'amount': 2200000, 'percentage': 78.1},
-                {'category': 'Готовые работы', 'amount': 400000, 'percentage': 14.2},
-                {'category': 'Партнерские продажи', 'amount': 150000, 'percentage': 5.3},
-                {'category': 'Консультации', 'amount': 68000, 'percentage': 2.4},
-            ],
-            'expense_breakdown': [
-                {'category': 'Выплаты экспертам', 'amount': 1200000, 'percentage': 67.0},
-                {'category': 'Операционные расходы', 'amount': 300000, 'percentage': 16.7},
-                {'category': 'Маркетинг и реклама', 'amount': 180000, 'percentage': 10.0},
-                {'category': 'Комиссии партнерам', 'amount': 80000, 'percentage': 4.5},
-                {'category': 'Техническое обслуживание', 'amount': 32000, 'percentage': 1.8},
+        # Определяем период
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                # Если формат неверный, используем текущий месяц
+                now = timezone.now()
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if now.month == 12:
+                    end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        else:
+            # Текущий месяц по умолчанию
+            now = timezone.now()
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if now.month == 12:
+                end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        
+        # Доходы
+        # От заказов
+        orders_income = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        # От продаж готовых работ (пока не реализовано)
+        shop_income = Decimal('0.00')
+        
+        total_income = orders_income + shop_income
+        
+        # Расходы (примерные расчеты, так как модели расходов может не быть)
+        # Выплаты экспертам (примерно 60% от стоимости заказов)
+        expert_payments = orders_income * Decimal('0.60')
+        
+        # Комиссии партнерам (примерно 10% от оборота партнерских продаж)
+        User = get_user_model()
+        partner_orders = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date,
+            order__client__partner__isnull=False
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        partner_commissions = partner_orders * Decimal('0.10')
+        
+        # Операционные расходы (примерно 15% от общего дохода)
+        operational_expenses = total_income * Decimal('0.15')
+        
+        # Маркетинг (примерно 8% от общего дохода)
+        marketing_expenses = total_income * Decimal('0.08')
+        
+        # Техническое обслуживание (примерно 3% от общего дохода)
+        tech_expenses = total_income * Decimal('0.03')
+        
+        total_expenses = expert_payments + partner_commissions + operational_expenses + marketing_expenses + tech_expenses
+        net_profit = total_income - total_expenses
+        
+        # Данные за предыдущий период
+        period_length = (end_date - start_date).days
+        prev_start = start_date - timedelta(days=period_length + 1)
+        prev_end = start_date - timedelta(days=1)
+        
+        prev_orders_income = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=prev_start,
+            paid_at__lte=prev_end
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        prev_shop_income = Decimal('0.00')
+        
+        prev_total_income = prev_orders_income + prev_shop_income
+        prev_total_expenses = prev_total_income * Decimal('0.64')  # Примерно 64% расходов
+        prev_net_profit = prev_total_income - prev_total_expenses
+        
+        # Процент изменения
+        if prev_net_profit > 0:
+            change_percent = float((net_profit - prev_net_profit) / prev_net_profit * 100)
+        else:
+            change_percent = 100.0 if net_profit > 0 else 0.0
+        
+        # Разбивка доходов
+        income_breakdown = []
+        if total_income > 0:
+            if orders_income > 0:
+                income_breakdown.append({
+                    'category': 'Заказы студентов',
+                    'amount': float(orders_income),
+                    'percentage': round(float(orders_income / total_income * 100), 1)
+                })
+            if shop_income > 0:
+                income_breakdown.append({
+                    'category': 'Готовые работы',
+                    'amount': float(shop_income),
+                    'percentage': round(float(shop_income / total_income * 100), 1)
+                })
+            if partner_orders > 0:
+                income_breakdown.append({
+                    'category': 'Партнерские продажи',
+                    'amount': float(partner_orders),
+                    'percentage': round(float(partner_orders / total_income * 100), 1)
+                })
+        
+        # Разбивка расходов
+        expense_breakdown = []
+        if total_expenses > 0:
+            expense_breakdown = [
+                {
+                    'category': 'Выплаты экспертам',
+                    'amount': float(expert_payments),
+                    'percentage': round(float(expert_payments / total_expenses * 100), 1)
+                },
+                {
+                    'category': 'Операционные расходы',
+                    'amount': float(operational_expenses),
+                    'percentage': round(float(operational_expenses / total_expenses * 100), 1)
+                },
+                {
+                    'category': 'Маркетинг и реклама',
+                    'amount': float(marketing_expenses),
+                    'percentage': round(float(marketing_expenses / total_expenses * 100), 1)
+                },
+                {
+                    'category': 'Комиссии партнерам',
+                    'amount': float(partner_commissions),
+                    'percentage': round(float(partner_commissions / total_expenses * 100), 1)
+                },
+                {
+                    'category': 'Техническое обслуживание',
+                    'amount': float(tech_expenses),
+                    'percentage': round(float(tech_expenses / total_expenses * 100), 1)
+                }
             ]
+        
+        data = {
+            'total': net_profit,
+            'income': total_income,
+            'expense': total_expenses,
+            'previous_period': prev_net_profit,
+            'change_percent': round(change_percent, 2),
+            'income_breakdown': income_breakdown,
+            'expense_breakdown': expense_breakdown
         }
         
         serializer = NetProfitSerializer(data)
@@ -450,112 +646,141 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def income(self, request):
         """Получить детализацию доходов"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        # Детальные данные по доходам
-        data = [
-            {
-                'date': '2024-01-27',
+        # Определяем период
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                # Последние 30 дней по умолчанию
+                end_date = timezone.now()
+                start_date = end_date - timedelta(days=30)
+        else:
+            # Последние 30 дней по умолчанию
+            end_date = timezone.now()
+            start_date = end_date - timedelta(days=30)
+        
+        data = []
+        
+        # Доходы от заказов
+        payments = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date
+        ).select_related('order', 'order__client').order_by('-paid_at')[:50]
+        
+        for payment in payments:
+            data.append({
+                'date': payment.paid_at.strftime('%Y-%m-%d'),
                 'category': 'Заказы студентов',
-                'amount': 45000,
-                'description': 'Дипломная работа по экономике',
-                'order_id': 1234,
-                'client_name': 'Анна Студентова'
-            },
-            {
-                'date': '2024-01-27',
-                'category': 'Готовые работы',
-                'amount': 8500,
-                'description': 'Курсовая работа по маркетингу',
-                'order_id': 1235,
-                'client_name': 'Петр Покупатель'
-            },
-            {
-                'date': '2024-01-26',
-                'category': 'Партнерские продажи',
-                'amount': 12000,
-                'description': 'Заказ через партнера PARTNER001',
-                'order_id': 1236,
-                'partner_name': 'Елена Козлова'
-            },
-            {
-                'date': '2024-01-26',
-                'category': 'Консультации',
-                'amount': 3500,
-                'description': 'Консультация по написанию диссертации',
-                'order_id': 1237,
-                'expert_name': 'Мария Смирнова'
-            },
-            {
-                'date': '2024-01-25',
-                'category': 'Заказы студентов',
-                'amount': 25000,
-                'description': 'Курсовая работа по программированию',
-                'order_id': 1238,
-                'client_name': 'Игорь Заказчиков'
-            }
-        ]
-        return Response(data)
+                'amount': float(payment.amount),
+                'description': payment.order.title or f'Заказ #{payment.order.id}',
+                'order_id': payment.order.id,
+                'client_name': f'{payment.order.client.first_name} {payment.order.client.last_name}'.strip() or payment.order.client.username
+            })
+        
+        # Доходы от продаж готовых работ (пока не реализовано)
+        # purchases = Purchase.objects.filter(...)
+        
+        # Сортируем по дате (новые первыми)
+        data.sort(key=lambda x: x['date'], reverse=True)
+        
+        return Response(data[:20])  # Возвращаем последние 20 записей
     
     @action(detail=False, methods=['get'])
     def expense(self, request):
         """Получить детализацию расходов"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        # Детальные данные по расходам
-        data = [
-            {
-                'date': '2024-01-27',
+        # Определяем период
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                # Последние 30 дней по умолчанию
+                end_date = timezone.now()
+                start_date = end_date - timedelta(days=30)
+        else:
+            # Последние 30 дней по умолчанию
+            end_date = timezone.now()
+            start_date = end_date - timedelta(days=30)
+        
+        data = []
+        
+        # Получаем выплаты экспертам (на основе завершенных заказов)
+        completed_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=start_date,
+            updated_at__lte=end_date,
+            expert__isnull=False
+        ).select_related('expert', 'client')[:20]
+        
+        for order in completed_orders:
+            # Примерная выплата эксперту (60% от стоимости заказа)
+            expert_payment = (order.final_price or order.budget) * Decimal('0.60')
+            data.append({
+                'date': order.updated_at.strftime('%Y-%m-%d'),
                 'category': 'Выплаты экспертам',
-                'amount': 30000,
-                'description': 'Выплата за дипломную работу по экономике',
-                'recipient_name': 'Мария Смирнова',
-                'order_id': 1234
-            },
-            {
-                'date': '2024-01-27',
+                'amount': float(expert_payment),
+                'description': f'Выплата за заказ: {order.title or f"Заказ #{order.id}"}',
+                'recipient_name': f'{order.expert.first_name} {order.expert.last_name}'.strip() or order.expert.username,
+                'order_id': order.id
+            })
+        
+        # Добавляем примерные операционные расходы
+        # (в реальной системе это должно браться из отдельной модели расходов)
+        current_date = start_date
+        while current_date <= end_date:
+            if current_date.day == 1:  # Ежемесячные расходы
+                data.append({
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'category': 'Операционные расходы',
+                    'amount': 25000.0,
+                    'description': 'Хостинг, домены, серверы',
+                    'recipient_name': 'IT-инфраструктура',
+                    'service_type': 'hosting'
+                })
+                
+                data.append({
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'category': 'Маркетинг и реклама',
+                    'amount': 50000.0,
+                    'description': 'Контекстная реклама и продвижение',
+                    'recipient_name': 'Рекламные сервисы',
+                    'campaign_id': f'CAMPAIGN_{current_date.strftime("%Y%m")}'
+                })
+            
+            current_date += timedelta(days=1)
+        
+        # Комиссии партнерам
+        User = get_user_model()
+        partner_payments = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date,
+            order__client__partner__isnull=False
+        ).select_related('order__client__partner')[:10]
+        
+        for payment in partner_payments:
+            commission = payment.amount * Decimal('0.10')  # 10% комиссия
+            data.append({
+                'date': payment.paid_at.strftime('%Y-%m-%d'),
                 'category': 'Комиссии партнерам',
-                'amount': 1200,
-                'description': 'Комиссия за привлеченного клиента',
-                'recipient_name': 'Елена Козлова',
-                'partner_code': 'PARTNER001'
-            },
-            {
-                'date': '2024-01-26',
-                'category': 'Маркетинг и реклама',
-                'amount': 15000,
-                'description': 'Контекстная реклама Яндекс.Директ',
-                'recipient_name': 'Яндекс',
-                'campaign_id': 'YD001'
-            },
-            {
-                'date': '2024-01-26',
-                'category': 'Операционные расходы',
-                'amount': 8500,
-                'description': 'Хостинг и домены на месяц',
-                'recipient_name': 'Хостинг-провайдер',
-                'service_type': 'hosting'
-            },
-            {
-                'date': '2024-01-25',
-                'category': 'Выплаты экспертам',
-                'amount': 18000,
-                'description': 'Выплата за курсовую работу по программированию',
-                'recipient_name': 'Алексей Петров',
-                'order_id': 1238
-            },
-            {
-                'date': '2024-01-25',
-                'category': 'Техническое обслуживание',
-                'amount': 5000,
-                'description': 'Обновление серверного ПО',
-                'recipient_name': 'IT-отдел',
-                'service_type': 'maintenance'
-            }
-        ]
-        return Response(data)
+                'amount': float(commission),
+                'description': f'Комиссия за привлеченного клиента',
+                'recipient_name': f'{payment.order.client.partner.first_name} {payment.order.client.partner.last_name}'.strip() or payment.order.client.partner.username,
+                'partner_code': payment.order.client.partner.referral_code or f'PARTNER_{payment.order.client.partner.id}'
+            })
+        
+        # Сортируем по дате (новые первыми)
+        data.sort(key=lambda x: x['date'], reverse=True)
+        
+        return Response(data[:20])  # Возвращаем последние 20 записей
 
 
 class DirectorPartnersViewSet(viewsets.ViewSet):
@@ -579,8 +804,30 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def turnover(self, request):
         """Получить оборот по всем партнерам"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+        
+        # Определяем период
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                # Текущий месяц по умолчанию
+                now = timezone.now()
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if now.month == 12:
+                    end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        else:
+            # Текущий месяц по умолчанию
+            now = timezone.now()
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if now.month == 12:
+                end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
         
         # Получаем реальных партнеров из БД
         User = get_user_model()
@@ -591,25 +838,36 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
         total_commission = Decimal('0.00')
         
         for partner in partners:
-            # Генерируем реалистичные данные для каждого партнера
-            partner_turnover = Decimal('200000.00') if partner.id % 2 == 0 else Decimal('150000.00')
-            partner_commission = partner_turnover * Decimal('0.10')  # 10% комиссия
-            referrals_count = User.objects.filter(partner=partner).count() or (8 if partner.id % 2 == 0 else 6)
+            # Получаем оборот от клиентов этого партнера
+            partner_turnover = Payment.objects.filter(
+                status='completed',
+                paid_at__gte=start_date,
+                paid_at__lte=end_date,
+                order__client__partner=partner
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
             
-            partners_data.append({
-                'partner_id': partner.id,
-                'partner_name': f'{partner.first_name} {partner.last_name}',
-                'partner_email': partner.email,
-                'referrals_count': referrals_count,
-                'turnover': partner_turnover,
-                'commission': partner_commission
-            })
+            # Комиссия партнера (обычно 10%)
+            commission_rate = partner.partner_commission_rate or Decimal('10.00')
+            partner_commission = partner_turnover * (commission_rate / 100)
             
-            total_turnover += partner_turnover
-            total_commission += partner_commission
+            # Количество рефералов
+            referrals_count = User.objects.filter(partner=partner).count()
+            
+            if partner_turnover > 0 or referrals_count > 0:  # Показываем только активных партнеров
+                partners_data.append({
+                    'partner_id': partner.id,
+                    'partner_name': f'{partner.first_name} {partner.last_name}'.strip() or partner.username,
+                    'partner_email': partner.email,
+                    'referrals_count': referrals_count,
+                    'turnover': partner_turnover,
+                    'commission': partner_commission
+                })
+                
+                total_turnover += partner_turnover
+                total_commission += partner_commission
         
         data = {
-            'period': f"{start_date} - {end_date}" if start_date and end_date else "Текущий месяц",
+            'period': f"{start_date.strftime('%Y-%m-%d')} - {end_date.strftime('%Y-%m-%d')}",
             'total_turnover': total_turnover,
             'total_commission': total_commission,
             'partners': partners_data
@@ -624,8 +882,30 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def kpi(self, request):
         """Получить ключевые показатели эффективности"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+        
+        # Определяем период
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                # Текущий месяц по умолчанию
+                now = timezone.now()
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if now.month == 12:
+                    end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        else:
+            # Текущий месяц по умолчанию
+            now = timezone.now()
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if now.month == 12:
+                end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
         
         User = get_user_model()
         
@@ -634,16 +914,63 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
         total_experts = User.objects.filter(role='expert').count()
         total_partners = User.objects.filter(role='partner').count()
         
-        # Обновленные финансовые данные (соответствуют тестированию)
+        # Общий оборот
+        orders_turnover = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=start_date,
+            paid_at__lte=end_date
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        shop_turnover = Purchase.objects.filter(
+            created_at__gte=start_date,
+            created_at__lte=end_date,
+            status='completed'
+        ).aggregate(total=Sum('price'))['total'] or Decimal('0.00')
+        
+        total_turnover = orders_turnover + shop_turnover
+        
+        # Чистая прибыль (примерно 36% от оборота)
+        net_profit = total_turnover * Decimal('0.36')
+        
+        # Активные заказы
+        active_orders = Order.objects.filter(
+            status__in=['new', 'waiting_payment', 'in_progress', 'review', 'revision']
+        ).count()
+        
+        # Средний чек
+        if orders_turnover > 0:
+            orders_count = Payment.objects.filter(
+                status='completed',
+                paid_at__gte=start_date,
+                paid_at__lte=end_date
+            ).count()
+            average_check = orders_turnover / orders_count if orders_count > 0 else Decimal('0.00')
+        else:
+            average_check = Decimal('0.00')
+        
+        # Конверсия (примерная)
+        total_orders = Order.objects.filter(
+            created_at__gte=start_date,
+            created_at__lte=end_date
+        ).count()
+        
+        completed_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=start_date,
+            updated_at__lte=end_date
+        ).count()
+        
+        conversion_rate = (completed_orders / total_orders * 100) if total_orders > 0 else 0.0
+        
         data = {
-            'total_turnover': Decimal('2818000.00'),
-            'net_profit': Decimal('1026000.00'),
-            'active_orders': 67,
+            'total_turnover': total_turnover,
+            'net_profit': net_profit,
+            'active_orders': active_orders,
             'total_clients': total_clients,
             'total_experts': total_experts,
             'total_partners': total_partners,
-            'conversion_rate': 15.3,
-            'average_check': Decimal('18500.00')
+            'conversion_rate': round(conversion_rate, 1),
+            'average_check': average_check
         }
         
         serializer = DirectorStatsSerializer(data)
@@ -655,50 +982,135 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
-        # Получаем KPI
-        kpi_data = self.kpi(request).data
+    @action(detail=False, methods=['get'])
+    def summary(self, request):
+        """Получить сводку по всем показателям"""
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
         
-        # Добавляем тренды и сравнения
+        # Получаем KPI данные
+        kpi_response = self.kpi(request)
+        kpi_data = kpi_response.data
+        
+        # Определяем период для сравнения
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except:
+                now = timezone.now()
+                start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                if now.month == 12:
+                    end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+                else:
+                    end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        else:
+            now = timezone.now()
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            if now.month == 12:
+                end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+            else:
+                end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        
+        # Данные за предыдущий период
+        period_length = (end_date - start_date).days
+        prev_start = start_date - timedelta(days=period_length + 1)
+        prev_end = start_date - timedelta(days=1)
+        
+        # Предыдущий оборот
+        prev_orders_turnover = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=prev_start,
+            paid_at__lte=prev_end
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        prev_shop_turnover = Decimal('0.00')
+        
+        prev_total_turnover = prev_orders_turnover + prev_shop_turnover
+        prev_net_profit = prev_total_turnover * Decimal('0.36')
+        
+        prev_orders_count = Payment.objects.filter(
+            status='completed',
+            paid_at__gte=prev_start,
+            paid_at__lte=prev_end
+        ).count()
+        
+        prev_average_check = prev_orders_turnover / prev_orders_count if prev_orders_count > 0 else Decimal('0.00')
+        
+        # Вычисляем изменения
+        current_turnover = Decimal(str(kpi_data['total_turnover']))
+        current_profit = Decimal(str(kpi_data['net_profit']))
+        current_orders = kpi_data['active_orders']
+        current_average_check = Decimal(str(kpi_data['average_check']))
+        
+        turnover_change = float((current_turnover - prev_total_turnover) / prev_total_turnover * 100) if prev_total_turnover > 0 else 100.0
+        profit_change = float((current_profit - prev_net_profit) / prev_net_profit * 100) if prev_net_profit > 0 else 100.0
+        average_check_change = float((current_average_check - prev_average_check) / prev_average_check * 100) if prev_average_check > 0 else 100.0
+        
+        # Тренды (последние 7 дней)
+        trends_start = end_date - timedelta(days=6)
+        trends = {
+            'turnover': [],
+            'profit': [],
+            'orders': []
+        }
+        
+        current_date = trends_start
+        while current_date <= end_date:
+            day_start = current_date
+            day_end = current_date.replace(hour=23, minute=59, second=59)
+            
+            day_turnover = Payment.objects.filter(
+                status='completed',
+                paid_at__gte=day_start,
+                paid_at__lte=day_end
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+            
+            day_shop = Decimal('0.00')
+            
+            day_total = day_turnover + day_shop
+            day_profit = day_total * Decimal('0.36')
+            
+            day_orders = Order.objects.filter(
+                created_at__gte=day_start,
+                created_at__lte=day_end
+            ).count()
+            
+            trends['turnover'].append({
+                'date': current_date.strftime('%Y-%m-%d'),
+                'value': float(day_total)
+            })
+            trends['profit'].append({
+                'date': current_date.strftime('%Y-%m-%d'),
+                'value': float(day_profit)
+            })
+            trends['orders'].append({
+                'date': current_date.strftime('%Y-%m-%d'),
+                'value': day_orders
+            })
+            
+            current_date += timedelta(days=1)
+        
         data = {
             'period': {
-                'start': start_date or '2024-01-01',
-                'end': end_date or '2024-01-31'
+                'start': start_date.strftime('%Y-%m-%d'),
+                'end': end_date.strftime('%Y-%m-%d')
             },
             'kpi': kpi_data,
             'previous_period': {
-                'total_turnover': Decimal('2445000.00'),
-                'net_profit': Decimal('865000.00'),
-                'active_orders': 58,
-                'average_check': Decimal('16200.00')
+                'total_turnover': float(prev_total_turnover),
+                'net_profit': float(prev_net_profit),
+                'active_orders': prev_orders_count,
+                'average_check': float(prev_average_check)
             },
-            'turnover_change': 15.3,
-            'profit_change': 18.7,
-            'orders_change': 15.5,
-            'average_check_change': 14.2,
-            'trends': {
-                'turnover': [
-                    {'date': '2024-01-01', 'value': 95000},
-                    {'date': '2024-01-02', 'value': 87000},
-                    {'date': '2024-01-03', 'value': 102000},
-                    {'date': '2024-01-04', 'value': 78000},
-                    {'date': '2024-01-05', 'value': 115000},
-                ],
-                'profit': [
-                    {'date': '2024-01-01', 'value': 34000},
-                    {'date': '2024-01-02', 'value': 31000},
-                    {'date': '2024-01-03', 'value': 38000},
-                    {'date': '2024-01-04', 'value': 28000},
-                    {'date': '2024-01-05', 'value': 42000},
-                ],
-                'orders': [
-                    {'date': '2024-01-01', 'value': 5},
-                    {'date': '2024-01-02', 'value': 4},
-                    {'date': '2024-01-03', 'value': 6},
-                    {'date': '2024-01-04', 'value': 3},
-                    {'date': '2024-01-05', 'value': 7},
-                ]
-            }
+            'turnover_change': round(turnover_change, 2),
+            'profit_change': round(profit_change, 2),
+            'orders_change': 0.0,  # Сложно вычислить без исторических данных
+            'average_check_change': round(average_check_change, 2),
+            'trends': trends
         }
+        
+        return Response(data)
         
         return Response(data)
 

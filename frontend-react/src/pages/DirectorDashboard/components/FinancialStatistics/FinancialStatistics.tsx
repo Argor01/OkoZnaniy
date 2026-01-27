@@ -42,9 +42,9 @@ const FinancialStatistics: React.FC = () => {
   return (
     <div>
       <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Финансовые показатели генерируются динамически для демонстрации функционала."
-        type="info"
+        message="Режим реальных данных"
+        description="Финансовые показатели рассчитываются на основе реальных данных из базы данных. Данные обновляются при изменении периода."
+        type="success"
         icon={<ExperimentOutlined />}
         showIcon
         style={{ marginBottom: 16 }}

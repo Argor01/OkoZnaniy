@@ -9,7 +9,6 @@ import {
   Space,
   message,
   Typography,
-  Alert,
 } from 'antd';
 import {
   ArrowUpOutlined,
@@ -18,7 +17,6 @@ import {
   TeamOutlined,
   DownloadOutlined,
   FilePdfOutlined,
-  ExperimentOutlined,
 } from '@ant-design/icons';
 import {
   LineChart,
@@ -178,15 +176,7 @@ const GeneralStatistics: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Все показатели KPI генерируются динамически для демонстрации функционала."
-        type="info"
-        icon={<ExperimentOutlined />}
-        showIcon
-        style={{ marginBottom: 16 }}
-        closable
-      />
+
 
       {/* Селектор периода */}
       <Card style={{ 

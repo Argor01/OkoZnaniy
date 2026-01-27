@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, DatePicker, Space, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin, message, Table, Tabs } from 'antd';
 import {
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,6 +15,8 @@ import {
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
+import { getNetProfit, getIncomeDetail, getExpenseDetail } from '../../api/directorApi';
+import type { NetProfit, IncomeDetail, ExpenseDetail } from '../../api/types';
 
 const { RangePicker } = DatePicker;
 
@@ -39,12 +44,44 @@ const IncomeExpenseDetail: React.FC = () => {
     dayjs().startOf('month'),
     dayjs().endOf('month'),
   ]);
+  const [loading, setLoading] = useState(false);
+  const [profitData, setProfitData] = useState<NetProfit | null>(null);
+  const [incomeDetails, setIncomeDetails] = useState<IncomeDetail[]>([]);
+  const [expenseDetails, setExpenseDetails] = useState<ExpenseDetail[]>([]);
 
   const isMobile = window.innerWidth <= 840;
 
-  const totalIncome = incomeExpenseData.reduce((sum, item) => sum + item.income, 0);
-  const totalExpense = incomeExpenseData.reduce((sum, item) => sum + item.expense, 0);
-  const netProfit = totalIncome - totalExpense;
+  // Загружаем данные при изменении периода
+  useEffect(() => {
+    loadData();
+  }, [dateRange]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const startDate = dateRange[0].format('YYYY-MM-DD');
+      const endDate = dateRange[1].format('YYYY-MM-DD');
+      
+      const [profit, income, expense] = await Promise.all([
+        getNetProfit(startDate, endDate),
+        getIncomeDetail(startDate, endDate),
+        getExpenseDetail(startDate, endDate)
+      ]);
+      
+      setProfitData(profit);
+      setIncomeDetails(income);
+      setExpenseDetails(expense);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      message.error('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalIncome = profitData?.income || 0;
+  const totalExpense = profitData?.expense || 0;
+  const netProfit = profitData?.total || 0;
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -74,7 +111,8 @@ const IncomeExpenseDetail: React.FC = () => {
   };
 
   return (
-    <div>
+    <Spin spinning={loading}>
+      <div>
       <Card style={{ 
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
@@ -215,60 +253,166 @@ const IncomeExpenseDetail: React.FC = () => {
         </Col>
       </Row>
 
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} lg={12}>
+          <Card 
+            title="Разбивка доходов"
+            style={{ borderRadius: isMobile ? 8 : 12 }}
+          >
+            <div style={{ height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={profitData?.income_breakdown || profitData?.incomeBreakdown || []}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="amount"
+                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                  >
+                    {(profitData?.income_breakdown || profitData?.incomeBreakdown || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#1890ff', '#52c41a', '#722ed1', '#fa8c16'][index % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card 
+            title="Разбивка расходов"
+            style={{ borderRadius: isMobile ? 8 : 12 }}
+          >
+            <div style={{ height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={profitData?.expense_breakdown || profitData?.expenseBreakdown || []}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="amount"
+                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                  >
+                    {(profitData?.expense_breakdown || profitData?.expenseBreakdown || []).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#ff4d4f', '#fa8c16', '#722ed1', '#13c2c2'][index % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
       <Card 
-        title="Доходы и расходы"
-        style={{ 
-          borderRadius: isMobile ? 8 : 12
-        }}
-        headStyle={{
-          fontSize: isMobile ? 16 : 18,
-          fontWeight: 600
-        }}
+        title="Детализация операций"
+        style={{ borderRadius: isMobile ? 8 : 12 }}
       >
-        <div style={{ 
-          width: '100%', 
-          height: isMobile ? 300 : 400,
-          overflowX: isMobile ? 'auto' : 'visible'
-        }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart 
-              data={incomeExpenseData}
-              margin={{
-                top: 20,
-                right: isMobile ? 10 : 30,
-                left: isMobile ? 10 : 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                fontSize={isMobile ? 10 : 12}
-                interval={isMobile ? 1 : 0}
-              />
-              <YAxis 
-                fontSize={isMobile ? 10 : 12}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-              />
-              <Tooltip 
-                formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-                contentStyle={{
-                  fontSize: isMobile ? 12 : 14,
-                  borderRadius: 8
-                }}
-              />
-              <Legend 
-                wrapperStyle={{
-                  fontSize: isMobile ? 12 : 14
-                }}
-              />
-              <Bar dataKey="income" fill="#52c41a" name="Доход" />
-              <Bar dataKey="expense" fill="#ff4d4f" name="Расход" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <Tabs
+          items={[
+            {
+              key: 'income',
+              label: 'Доходы',
+              children: (
+                <Table
+                  dataSource={incomeDetails}
+                  rowKey="order_id"
+                  size="small"
+                  scroll={{ x: 800 }}
+                  columns={[
+                    {
+                      title: 'Дата',
+                      dataIndex: 'date',
+                      key: 'date',
+                      width: 100,
+                    },
+                    {
+                      title: 'Категория',
+                      dataIndex: 'category',
+                      key: 'category',
+                      width: 150,
+                    },
+                    {
+                      title: 'Описание',
+                      dataIndex: 'description',
+                      key: 'description',
+                      ellipsis: true,
+                    },
+                    {
+                      title: 'Клиент',
+                      dataIndex: 'client_name',
+                      key: 'client_name',
+                      width: 120,
+                    },
+                    {
+                      title: 'Сумма',
+                      dataIndex: 'amount',
+                      key: 'amount',
+                      width: 120,
+                      render: (value: number) => `${value.toLocaleString('ru-RU')} ₽`,
+                      align: 'right',
+                    },
+                  ]}
+                />
+              ),
+            },
+            {
+              key: 'expense',
+              label: 'Расходы',
+              children: (
+                <Table
+                  dataSource={expenseDetails}
+                  rowKey={(record, index) => `${record.date}-${index}`}
+                  size="small"
+                  scroll={{ x: 800 }}
+                  columns={[
+                    {
+                      title: 'Дата',
+                      dataIndex: 'date',
+                      key: 'date',
+                      width: 100,
+                    },
+                    {
+                      title: 'Категория',
+                      dataIndex: 'category',
+                      key: 'category',
+                      width: 150,
+                    },
+                    {
+                      title: 'Описание',
+                      dataIndex: 'description',
+                      key: 'description',
+                      ellipsis: true,
+                    },
+                    {
+                      title: 'Получатель',
+                      dataIndex: 'recipient_name',
+                      key: 'recipient_name',
+                      width: 120,
+                    },
+                    {
+                      title: 'Сумма',
+                      dataIndex: 'amount',
+                      key: 'amount',
+                      width: 120,
+                      render: (value: number) => `${value.toLocaleString('ru-RU')} ₽`,
+                      align: 'right',
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]}
+        />
       </Card>
     </div>
+    </Spin>
   );
 };
 

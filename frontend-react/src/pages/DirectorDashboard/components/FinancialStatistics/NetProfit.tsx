@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic, Row, Col, DatePicker, Space, Button } from 'antd';
-import { ArrowUpOutlined } from '@ant-design/icons';
+import { Card, Statistic, Row, Col, DatePicker, Space, Button, Spin, message } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import {
   AreaChart,
   Area,
@@ -13,6 +13,8 @@ import {
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
+import { getNetProfit } from '../../api/directorApi';
+import type { NetProfit as NetProfitType } from '../../api/types';
 
 const { RangePicker } = DatePicker;
 
@@ -41,6 +43,8 @@ const NetProfit: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [profitData, setProfitData] = useState<NetProfitType | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,7 +56,30 @@ const NetProfit: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const totalProfit = profitData.reduce((sum, item) => sum + item.profit, 0);
+  // Загружаем данные при изменении периода
+  useEffect(() => {
+    loadProfitData();
+  }, [dateRange]);
+
+  const loadProfitData = async () => {
+    setLoading(true);
+    try {
+      const startDate = dateRange[0].format('YYYY-MM-DD');
+      const endDate = dateRange[1].format('YYYY-MM-DD');
+      const data = await getNetProfit(startDate, endDate);
+      setProfitData(data);
+    } catch (error) {
+      console.error('Error loading profit data:', error);
+      message.error('Ошибка загрузки данных прибыли');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalProfit = profitData?.total || 0;
+  const totalIncome = profitData?.income || 0;
+  const totalExpense = profitData?.expense || 0;
+  const changePercent = profitData?.change_percent || 0;
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -82,7 +109,8 @@ const NetProfit: React.FC = () => {
   };
 
   return (
-    <div>
+    <Spin spinning={loading}>
+      <div>
       <Card style={{ 
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
@@ -186,16 +214,55 @@ const NetProfit: React.FC = () => {
           }}>
             <Statistic
               title="Изменение к предыдущему периоду"
-              value={18.7}
-              prefix={<ArrowUpOutlined />}
+              value={Math.abs(changePercent)}
+              prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
               valueStyle={{ 
-                color: '#3f8600',
+                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
                 fontSize: isMobile ? 22 : 24,
                 fontWeight: 700
               }}
               style={{
                 padding: isMobile ? '12px 0' : '12px 0'
+              }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
+            <Statistic
+              title="Общий доход"
+              value={totalIncome}
+              prefix="₽"
+              precision={0}
+              valueStyle={{ 
+                color: '#1890ff',
+                fontSize: isMobile ? 18 : 20,
+                fontWeight: 600
+              }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Card style={{ 
+            borderRadius: isMobile ? 8 : 12,
+            textAlign: 'center'
+          }}>
+            <Statistic
+              title="Общий расход"
+              value={totalExpense}
+              prefix="₽"
+              precision={0}
+              valueStyle={{ 
+                color: '#ff4d4f',
+                fontSize: isMobile ? 18 : 20,
+                fontWeight: 600
               }}
             />
           </Card>
@@ -219,7 +286,7 @@ const NetProfit: React.FC = () => {
         }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
-              data={profitData}
+              data={profitData?.daily_data || profitData?.dailyData || []}
               margin={{
                 top: 20,
                 right: isMobile ? 10 : 30,
@@ -256,6 +323,7 @@ const NetProfit: React.FC = () => {
         </div>
       </Card>
     </div>
+    </Spin>
   );
 };
 
