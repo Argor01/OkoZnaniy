@@ -1,3 +1,44 @@
+/* Основной контейнер с отступами */
+.container {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Обеспечиваем правильные отступы от краев */
+.container > * {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Исправляем отступы для Row компонентов */
+.container :global(.ant-row) {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Исправляем отступы для Col компонентов */
+.container :global(.ant-col) {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Исправляем отступы для Card компонентов */
+.container :global(.ant-card) {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Мобильные отступы */
+@media screen and (max-width: 840px) {
+  .container :global(.ant-col) {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+}
+
 /* Специальные стили для календаря в GeneralStatistics с увеличенными кнопками месяца/года */
 .datePickerContainer {
   width: 100%;

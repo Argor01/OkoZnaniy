@@ -177,7 +177,7 @@ const GeneralStatistics: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <Alert
         message="Режим тестовых данных"
         description="В данный момент используется режим тестовых данных. Все показатели KPI генерируются динамически для демонстрации функционала."
