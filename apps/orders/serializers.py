@@ -81,6 +81,7 @@ class OrderSerializer(serializers.ModelSerializer):
     bids = BidSerializer(many=True, read_only=True)
     price_breakdown = OrderPriceBreakdownSerializer(read_only=True)
     discount = DiscountRuleSerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
@@ -109,7 +110,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'discount',
-            'original_price', 'discount_amount', 'final_price'
+            'original_price', 'discount_amount', 'final_price', 'rating'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -279,6 +280,15 @@ class OrderSerializer(serializers.ModelSerializer):
         
         return data
 
+    def get_rating(self, obj):
+        """Получаем рейтинг заказа, если он есть"""
+        try:
+            if hasattr(obj, 'expert_rating') and obj.expert_rating:
+                return obj.expert_rating.rating
+        except Exception:
+            pass
+        return None
+
 class TransactionSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
@@ -309,4 +319,4 @@ class DisputeSerializer(serializers.ModelSerializer):
                 'id': obj.order.expert.id,
                 'username': obj.order.expert.username
             } if obj.order.expert else None
-        } 
+        }

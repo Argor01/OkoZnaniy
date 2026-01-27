@@ -26,16 +26,28 @@ class OrderViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = self.queryset.prefetch_related(
             'bids__expert', 'files', 'comments', 'subject', 'topic', 'work_type', 'complexity'
-        ).select_related('client', 'expert')
+        ).select_related('client', 'expert', 'expert_rating')
         
         if user.is_staff:
-            return queryset
-        # Клиент видит свои заказы, эксперт — назначенные заказы.
-        # Дополнительно любой авторизованный пользователь может просматривать доступные заказы
-        # (new + без назначенного эксперта), чтобы работал переход из ленты заказов на страницу заказа
-        # без 404 для других клиентов.
-        base_filter = models.Q(client=user) | models.Q(expert=user) | models.Q(status='new', expert__isnull=True)
-        return queryset.filter(base_filter)
+            base_queryset = queryset
+        else:
+            # Клиент видит свои заказы, эксперт — назначенные заказы.
+            # Дополнительно любой авторизованный пользователь может просматривать доступные заказы
+            # (new + без назначенного эксперта), чтобы работал переход из ленты заказов на страницу заказа
+            # без 404 для других клиентов.
+            base_filter = models.Q(client=user) | models.Q(expert=user) | models.Q(status='new', expert__isnull=True)
+            base_queryset = queryset.filter(base_filter)
+        
+        # Добавляем фильтрацию по статусу
+        status = self.request.query_params.get('status')
+        if status:
+            base_queryset = base_queryset.filter(status=status)
+        
+        # Добавляем сортировку
+        ordering = self.request.query_params.get('ordering', '-created_at')
+        base_queryset = base_queryset.order_by(ordering)
+        
+        return base_queryset
 
     def perform_create(self, serializer):
         # Дополнительная валидация дедлайна
