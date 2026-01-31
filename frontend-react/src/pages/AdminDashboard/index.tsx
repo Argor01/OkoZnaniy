@@ -1,17 +1,18 @@
 import React from 'react';
 import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
+import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations, useSupportRequests } from './hooks';
 import { AdminLayout } from './components/Layout';
 import { 
   OverviewSection, 
   PartnersSection, 
   EarningsSection, 
-  DisputesSection 
+  DisputesSection,
+  SupportRequestsSection
 } from './components/Sections';
-import { PartnerModal, DisputeModal } from './components/Modals';
+import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
-import type { MenuKey } from './types';
+import type { MenuKey, SupportStatus } from './types';
 
 const { Content } = Layout;
 
@@ -61,6 +62,9 @@ const AdminDashboard: React.FC = () => {
     isUpdatingPartner,
     isAssigningArbitrator 
   } = useAdminMutations();
+
+  // Хук для поддержки
+  const supportData = useSupportRequests();
 
   // Показываем спиннер во время загрузки
   if (loading) {
@@ -162,6 +166,21 @@ const AdminDashboard: React.FC = () => {
           />
         );
       
+      // Новые секции поддержки
+      case 'support_open':
+      case 'support_in_progress':
+      case 'support_completed':
+        return (
+          <SupportRequestsSection
+            requests={supportData.requests}
+            loading={supportData.loading}
+            selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
+            onStatusChange={(status) => supportData.handleStatusChange(status)}
+            onRequestClick={supportData.handleRequestSelect}
+            onTakeRequest={supportData.takeRequest}
+          />
+        );
+      
       default:
         return (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -213,6 +232,17 @@ const AdminDashboard: React.FC = () => {
           // Логика назначения арбитра уже в DisputesSection
           closeDisputeModals();
         }}
+      />
+      
+      {/* Модальное окно поддержки */}
+      <SupportRequestModal
+        request={supportData.selectedRequest}
+        messages={supportData.requestMessages}
+        isOpen={!!supportData.selectedRequest}
+        onClose={supportData.handleRequestClose}
+        onTakeRequest={supportData.takeRequest}
+        onCompleteRequest={supportData.completeRequest}
+        onSendMessage={supportData.sendMessage}
       />
     </AdminLayout>
   );

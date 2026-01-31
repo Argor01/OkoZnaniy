@@ -78,7 +78,11 @@ export type MenuKey =
   | 'completed_claims'
   | 'pending_approval'
   | 'claims_processing'
-  | 'communication';
+  | 'communication'
+  | 'support_open'
+  | 'support_in_progress'
+  | 'support_completed'
+  | 'admin_chats';
 
 // Типы для таблиц
 export interface TableColumn {

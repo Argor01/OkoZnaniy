@@ -27,6 +27,18 @@ export type {
   DirectorMessage,
 } from './claims.types';
 
+// Типы для поддержки
+export type {
+  SupportRequest,
+  SupportMessage,
+  AdminChat,
+  ChatMessage,
+  SupportStats,
+  SupportStatus,
+  SupportPriority,
+  SupportCategory,
+} from './support.types';
+
 export {
   ClaimStatus,
   ClaimType,

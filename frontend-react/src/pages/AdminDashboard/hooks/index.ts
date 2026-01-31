@@ -8,3 +8,4 @@ export { useAdminData } from './useAdminData';
 export { useAdminMutations } from './useAdminMutations';
 export { useAdminUI } from './useAdminUI';
 export { useConfirmModal } from './useConfirmModal';
+export { useSupportRequests } from './useSupportRequests';

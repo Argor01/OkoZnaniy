@@ -8,6 +8,9 @@ import {
   CheckCircleOutlined,
   HourglassOutlined,
   MessageOutlined,
+  InboxOutlined,
+  CustomerServiceOutlined,
+  CommentOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '../types/admin.types';
 
@@ -81,6 +84,34 @@ export const menuItems: MenuItem[] = [
     icon: MessageOutlined,
     label: 'Коммуникация с дирекцией',
   },
+  // Новый раздел поддержки
+  {
+    key: 'support' as MenuKey,
+    icon: CustomerServiceOutlined,
+    label: 'Поддержка клиентов',
+    children: [
+      {
+        key: 'support_open',
+        icon: InboxOutlined,
+        label: 'Открытые запросы',
+      },
+      {
+        key: 'support_in_progress',
+        icon: ClockCircleOutlined,
+        label: 'В процессе решения',
+      },
+      {
+        key: 'support_completed',
+        icon: CheckCircleOutlined,
+        label: 'Выполненные',
+      },
+    ],
+  },
+  {
+    key: 'admin_chats',
+    icon: CommentOutlined,
+    label: 'Чаты администраторов',
+  },
 ];
 
 export const titleMap: Record<MenuKey, string> = {
@@ -94,6 +125,10 @@ export const titleMap: Record<MenuKey, string> = {
   pending_approval: 'Ожидают решения',
   claims_processing: 'Обработка претензий',
   communication: 'Коммуникация с дирекцией',
+  support_open: 'Открытые запросы',
+  support_in_progress: 'В процессе решения',
+  support_completed: 'Выполненные',
+  admin_chats: 'Чаты администраторов',
 };
 
 // Маппинг для определения родительского меню
@@ -103,6 +138,9 @@ export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
     in_progress_claims: 'claims' as MenuKey,
     completed_claims: 'claims' as MenuKey,
     pending_approval: 'claims' as MenuKey,
+    support_open: 'support' as MenuKey,
+    support_in_progress: 'support' as MenuKey,
+    support_completed: 'support' as MenuKey,
   };
   
   return childToParent[menuKey] || null;
