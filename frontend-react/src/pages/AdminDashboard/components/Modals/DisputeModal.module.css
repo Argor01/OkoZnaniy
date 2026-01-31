@@ -1,0 +1,248 @@
+/* Модальное окно спора */
+.disputeModal :global(.ant-modal-header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.disputeModal :global(.ant-modal-title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.disputeModal :global(.ant-modal-body) {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.disputeModal :global(.ant-modal-footer) {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.modalContent {
+  padding: 0;
+}
+
+.statusSection {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.statusTag {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h4 {
+  margin-bottom: 16px !important;
+  color: #262626;
+  font-weight: 600;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  border-left: 3px solid #1890ff;
+}
+
+.infoItem span:first-child {
+  font-size: 12px;
+}
+
+.infoItem span:last-child {
+  font-size: 14px;
+}
+
+.participantCard {
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border: 1px solid #e6f7ff;
+}
+
+.participantHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.participantIcon {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.participantInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.participantEmail {
+  font-size: 12px;
+}
+
+.reasonContainer {
+  padding: 16px;
+  background: #fff2e8;
+  border-radius: 8px;
+  border-left: 4px solid #faad14;
+}
+
+.reasonText {
+  margin: 0 !important;
+  color: #262626;
+  line-height: 1.6;
+}
+
+.arbitratorCard {
+  padding: 16px;
+  background: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #d9f7be;
+}
+
+.arbitratorInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arbitratorIcon {
+  color: #52c41a;
+  font-size: 20px;
+}
+
+.resultContainer {
+  padding: 16px;
+  background: #f6ffed;
+  border-radius: 8px;
+  border-left: 4px solid #52c41a;
+}
+
+.resultText {
+  margin: 0 !important;
+  color: #262626;
+  line-height: 1.6;
+}
+
+.timeline {
+  margin-top: 16px;
+}
+
+.timeline :global(.ant-timeline-item-content) {
+  margin-left: 16px;
+}
+
+.timeline :global(.ant-timeline-item-tail) {
+  border-left: 2px solid #f0f0f0;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .disputeModal :global(.ant-modal-body) {
+    padding: 20px;
+    max-height: 60vh;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+  }
+  
+  .participantCard {
+    padding: 12px;
+  }
+  
+  .arbitratorCard {
+    padding: 12px;
+  }
+  
+  .reasonContainer {
+    padding: 12px;
+  }
+  
+  .resultContainer {
+    padding: 12px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .disputeModal :global(.ant-modal-body) {
+    padding: 16px;
+    max-height: 50vh;
+  }
+  
+  .section {
+    margin-bottom: 16px;
+  }
+  
+  .section h4 {
+    font-size: 16px;
+    margin-bottom: 12px !important;
+  }
+  
+  .statusTag {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .infoItem {
+    padding: 8px;
+  }
+  
+  .infoItem span:first-child {
+    font-size: 11px;
+  }
+  
+  .infoItem span:last-child {
+    font-size: 13px;
+  }
+  
+  .participantCard {
+    padding: 8px;
+  }
+  
+  .participantIcon {
+    font-size: 14px;
+  }
+  
+  .participantEmail {
+    font-size: 11px;
+  }
+  
+  .arbitratorCard {
+    padding: 8px;
+  }
+  
+  .arbitratorIcon {
+    font-size: 18px;
+  }
+  
+  .reasonContainer {
+    padding: 8px;
+  }
+  
+  .resultContainer {
+    padding: 8px;
+  }
+  
+  .timeline :global(.ant-timeline-item-content) {
+    margin-left: 12px;
+  }
+}

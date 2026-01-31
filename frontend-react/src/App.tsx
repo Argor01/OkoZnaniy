@@ -42,7 +42,9 @@ import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';
 import BecomePartner from './pages/BecomePartner';
 import PartnerDashboard from './pages/PartnerDashboard';
+// Новая модульная версия AdminDashboard
 import AdminDashboard from './pages/AdminDashboard';
+// Старая версия остается как резервная копия: './pages/AdminDashboard.tsx'
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';

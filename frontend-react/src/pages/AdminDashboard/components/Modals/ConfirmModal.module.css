@@ -1,0 +1,128 @@
+/* Модальное окно подтверждения */
+.confirmModal :global(.ant-modal-header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.confirmModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+.confirmModal :global(.ant-modal-footer) {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.modalContent {
+  padding: 0;
+}
+
+.contentAlert {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.contentAlert :global(.ant-alert-message) {
+  color: #262626;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Иконки для разных типов */
+.infoIcon {
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.successIcon {
+  color: #52c41a;
+  font-size: 20px;
+}
+
+.warningIcon {
+  color: #faad14;
+  font-size: 20px;
+}
+
+.errorIcon {
+  color: #ff4d4f;
+  font-size: 20px;
+}
+
+/* Стили для разных типов модалок */
+.confirmModal.info :global(.ant-modal-header) {
+  background: #f0f9ff;
+  border-bottom-color: #e6f7ff;
+}
+
+.confirmModal.success :global(.ant-modal-header) {
+  background: #f6ffed;
+  border-bottom-color: #d9f7be;
+}
+
+.confirmModal.warning :global(.ant-modal-header) {
+  background: #fffbe6;
+  border-bottom-color: #fff1b8;
+}
+
+.confirmModal.error :global(.ant-modal-header) {
+  background: #fff2f0;
+  border-bottom-color: #ffccc7;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .confirmModal :global(.ant-modal-body) {
+    padding: 20px;
+  }
+  
+  .titleText {
+    font-size: 15px;
+  }
+  
+  .infoIcon,
+  .successIcon,
+  .warningIcon,
+  .errorIcon {
+    font-size: 18px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .confirmModal :global(.ant-modal-body) {
+    padding: 16px;
+  }
+  
+  .titleContainer {
+    gap: 8px;
+  }
+  
+  .titleText {
+    font-size: 14px;
+  }
+  
+  .infoIcon,
+  .successIcon,
+  .warningIcon,
+  .errorIcon {
+    font-size: 16px;
+  }
+  
+  .contentAlert :global(.ant-alert-message) {
+    font-size: 13px;
+  }
+}

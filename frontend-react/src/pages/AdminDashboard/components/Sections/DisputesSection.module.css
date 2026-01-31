@@ -1,0 +1,269 @@
+/* Секция споров */
+.disputesContainer {
+  padding: 0;
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statCard :global(.ant-card-body) {
+  padding: 16px;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.resolvedValue {
+  color: #52c41a;
+}
+
+.pendingValue {
+  color: #faad14;
+}
+
+.unassignedValue {
+  color: #ff4d4f;
+}
+
+.disputesCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.disputesCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.disputesTable {
+  border-radius: 8px;
+}
+
+/* Стили для ячеек таблицы */
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orderId {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.orderTitle {
+  font-size: 12px;
+  color: #666;
+}
+
+.participants {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.participant {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reasonContainer {
+  max-width: 200px;
+}
+
+.reason {
+  color: #262626;
+  line-height: 1.4;
+}
+
+.arbitrator {
+  color: #666;
+  font-style: italic;
+}
+
+.statusTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeInfo {
+  font-size: 11px;
+  color: #999;
+}
+
+.actionButton {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  transform: scale(1.05);
+}
+
+.assignButton {
+  border-radius: 4px;
+  font-size: 11px;
+  height: 28px;
+  padding: 0 8px;
+}
+
+/* Стили для модальных окон */
+.disputeModal {
+  line-height: 1.6;
+}
+
+.disputeReason {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #1890ff;
+  margin: 8px 0;
+}
+
+.disputeResult {
+  background: #f6ffed;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #52c41a;
+  margin-top: 16px;
+}
+
+.assignModal p {
+  margin-bottom: 8px;
+}
+
+/* Кастомизация таблицы */
+.disputesTable :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.disputesTable :global(.ant-table-tbody > tr:hover > td) {
+  background: #f0f9ff;
+}
+
+.disputesTable :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 12px 16px;
+}
+
+.disputesTable :global(.ant-pagination) {
+  margin: 16px;
+  text-align: right;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .statsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .statCard :global(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .statValue {
+    font-size: 20px;
+  }
+  
+  .disputesTable :global(.ant-table-tbody > tr > td) {
+    padding: 8px 12px;
+  }
+  
+  .reasonContainer {
+    max-width: 150px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .statsContainer {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .statCard :global(.ant-card-body) {
+    padding: 8px;
+  }
+  
+  .statLabel {
+    font-size: 11px;
+  }
+  
+  .statValue {
+    font-size: 18px;
+  }
+  
+  .disputesTable :global(.ant-table-tbody > tr > td) {
+    padding: 6px 8px;
+  }
+  
+  .orderTitle {
+    font-size: 11px;
+  }
+  
+  .participant {
+    font-size: 11px;
+  }
+  
+  .reasonContainer {
+    max-width: 120px;
+  }
+  
+  .statusTag {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  
+  .assignButton {
+    font-size: 10px;
+    height: 24px;
+    padding: 0 6px;
+  }
+}

@@ -1,0 +1,94 @@
+/* Карточки статистики */
+.statisticsContainer {
+  margin-bottom: 24px;
+}
+
+.row {
+  margin-bottom: 16px;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+/* Кастомизация Ant Design Statistic */
+.card :global(.ant-statistic-title) {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.card :global(.ant-statistic-content) {
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.card :global(.ant-statistic-content-value) {
+  font-size: 28px;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .statisticsContainer {
+    margin-bottom: 20px;
+  }
+  
+  .row {
+    margin-bottom: 12px;
+  }
+  
+  .card :global(.ant-statistic-content-value) {
+    font-size: 24px;
+  }
+  
+  .icon {
+    font-size: 18px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .statisticsContainer {
+    margin-bottom: 16px;
+  }
+  
+  .row {
+    margin-bottom: 8px;
+  }
+  
+  .card {
+    border-radius: 6px;
+  }
+  
+  .card :global(.ant-statistic-content-value) {
+    font-size: 20px;
+  }
+  
+  .card :global(.ant-statistic-title) {
+    font-size: 12px;
+  }
+  
+  .icon {
+    font-size: 16px;
+  }
+}
