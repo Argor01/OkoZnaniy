@@ -50,12 +50,12 @@ const EmployeeList: React.FC = () => {
   });
 
   const deactivateMutation = useMutation({
-    mutationFn: (payload: { id: number; employee: Employee }) => deactivateEmployee(payload.id, payload.employee),
+    mutationFn: (id: number) => deactivateEmployee(id),
     onSuccess: (updated: Employee) => {
       message.success('Сотрудник деактивирован');
       queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
         if (!prev) return prev;
-        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: false } : e));
+        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: false, role: updated.role, application_approved: updated.application_approved } : e));
       });
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
       queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
@@ -128,7 +128,7 @@ const EmployeeList: React.FC = () => {
       okText: 'Деактивировать',
       cancelText: 'Отмена',
       onOk: () => {
-        deactivateMutation.mutate({ id: employee.id, employee });
+        deactivateMutation.mutate(employee.id);
       },
     });
   };
