@@ -9,9 +9,11 @@ import {
   Space,
   message,
   Typography,
+  Spin,
 } from 'antd';
 import {
   ArrowUpOutlined,
+  ArrowDownOutlined,
   ShoppingOutlined,
   UserOutlined,
   TeamOutlined,
@@ -36,68 +38,12 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getKPI, exportFinancialData } from '../../api/directorApi';
 import styles from './GeneralStatistics.module.css';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
-
-// Тестовые данные для графиков
-const ordersChartData = [
-  { date: '01.11', orders: 45, completed: 38, cancelled: 7 },
-  { date: '02.11', orders: 52, completed: 45, cancelled: 7 },
-  { date: '03.11', orders: 48, completed: 42, cancelled: 6 },
-  { date: '04.11', orders: 61, completed: 54, cancelled: 7 },
-  { date: '05.11', orders: 55, completed: 48, cancelled: 7 },
-  { date: '06.11', orders: 67, completed: 59, cancelled: 8 },
-  { date: '07.11', orders: 58, completed: 51, cancelled: 7 },
-  { date: '08.11', orders: 72, completed: 65, cancelled: 7 },
-  { date: '09.11', orders: 69, completed: 62, cancelled: 7 },
-  { date: '10.11', orders: 75, completed: 68, cancelled: 7 },
-  { date: '11.11', orders: 82, completed: 74, cancelled: 8 },
-  { date: '12.11', orders: 78, completed: 71, cancelled: 7 },
-  { date: '13.11', orders: 85, completed: 77, cancelled: 8 },
-  { date: '14.11', orders: 91, completed: 83, cancelled: 8 },
-  { date: '15.11', orders: 88, completed: 80, cancelled: 8 },
-];
-
-const revenueChartData = [
-  { date: '01.11', revenue: 125000, profit: 45000 },
-  { date: '02.11', revenue: 142000, profit: 52000 },
-  { date: '03.11', revenue: 138000, profit: 48000 },
-  { date: '04.11', revenue: 165000, profit: 61000 },
-  { date: '05.11', revenue: 155000, profit: 55000 },
-  { date: '06.11', revenue: 178000, profit: 67000 },
-  { date: '07.11', revenue: 162000, profit: 58000 },
-  { date: '08.11', revenue: 195000, profit: 72000 },
-  { date: '09.11', revenue: 188000, profit: 69000 },
-  { date: '10.11', revenue: 205000, profit: 75000 },
-  { date: '11.11', revenue: 225000, profit: 82000 },
-  { date: '12.11', revenue: 215000, profit: 78000 },
-  { date: '13.11', revenue: 235000, profit: 85000 },
-  { date: '14.11', revenue: 248000, profit: 91000 },
-  { date: '15.11', revenue: 242000, profit: 88000 },
-];
-
-const categoryData = [
-  { name: 'Математика', value: 450, color: '#1890ff' },
-  { name: 'Физика', value: 320, color: '#52c41a' },
-  { name: 'Программирование', value: 280, color: '#722ed1' },
-  { name: 'Химия', value: 180, color: '#fa8c16' },
-  { name: 'История', value: 150, color: '#eb2f96' },
-  { name: 'Другое', value: 220, color: '#13c2c2' },
-];
-
-const usersOnlineData = [
-  { time: '00:00', users: 12 },
-  { time: '03:00', users: 8 },
-  { time: '06:00', users: 15 },
-  { time: '09:00', users: 35 },
-  { time: '12:00', users: 52 },
-  { time: '15:00', users: 47 },
-  { time: '18:00', users: 38 },
-  { time: '21:00', users: 28 },
-  { time: '24:00', users: 18 },
-];
 
 const GeneralStatistics: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -105,6 +51,12 @@ const GeneralStatistics: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Получаем данные из API
+  const { data: kpiData, isLoading } = useQuery({
+    queryKey: ['kpi', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getKPI(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -116,20 +68,26 @@ const GeneralStatistics: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Тестовые данные KPI
-  const kpiData = {
-    totalTurnover: 3250000,
-    turnoverChange: 15.3,
-    netProfit: 1180000,
-    profitChange: 18.7,
-    activeOrders: 156,
-    ordersChange: 12.5,
-    averageCheck: 20833,
-    averageCheckChange: 8.2,
-    totalClients: 1247,
-    totalExperts: 89,
-    totalPartners: 23,
-  };
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  // Извлекаем данные из API
+  const totalTurnover = kpiData?.kpi?.total_turnover || 0;
+  const turnoverChange = kpiData?.changes?.turnover_change || 0;
+  const netProfit = kpiData?.kpi?.net_profit || 0;
+  const profitChange = kpiData?.changes?.profit_change || 0;
+  const activeOrders = kpiData?.kpi?.active_orders || 0;
+  const ordersChange = kpiData?.changes?.orders_change || 0;
+  const averageCheck = kpiData?.kpi?.average_check || 0;
+  const averageCheckChange = kpiData?.changes?.average_check_change || 0;
+  const totalClients = kpiData?.kpi?.total_clients || 0;
+  const totalExperts = kpiData?.kpi?.total_experts || 0;
+  const totalPartners = kpiData?.kpi?.total_partners || 0;
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
