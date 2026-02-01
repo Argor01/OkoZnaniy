@@ -565,8 +565,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
             'expert_payments': float(expert_payments),
             'partner_payments': float(partner_payments),
             'change_percent': round(change_percent, 2),
-            'daily_data': daily_data
-        })
+            'daily_data': daily_data,
             'profit_margin': float((net_profit / total_income * 100) if total_income > 0 else 0)
         })
 
