@@ -382,7 +382,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def turnover(self, request):
-        """Общий оборот за месяц"""
+        """Общий оборот за месяц с детализацией по дням"""
         period = request.query_params.get('period')
         
         if period:
@@ -418,12 +418,52 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
         orders_count = completed_orders.count()
         
+        # Получаем данные по дням
+        daily_data = []
+        current_date = start_date
+        while current_date <= end_date:
+            day_start = current_date
+            day_end = current_date + timedelta(days=1)
+            
+            day_orders = completed_orders.filter(
+                updated_at__gte=day_start,
+                updated_at__lt=day_end
+            )
+            
+            day_turnover = day_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+            
+            daily_data.append({
+                'date': current_date.strftime('%d.%m'),
+                'amount': float(day_turnover)
+            })
+            
+            current_date += timedelta(days=1)
+        
+        # Рассчитываем изменение к предыдущему периоду
+        prev_start = start_date - timedelta(days=(end_date - start_date).days + 1)
+        prev_end = start_date - timedelta(days=1)
+        
+        prev_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=prev_start,
+            updated_at__lte=prev_end
+        )
+        
+        prev_turnover = prev_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+        
+        if prev_turnover > 0:
+            change_percent = float(((total_turnover - prev_turnover) / prev_turnover) * 100)
+        else:
+            change_percent = 0.0
+        
         return Response({
             'period': period or start_date.strftime('%Y-%m'),
             'total_turnover': float(total_turnover),
             'orders_count': orders_count,
             'start_date': start_date.date(),
-            'end_date': end_date.date()
+            'end_date': end_date.date(),
+            'change_percent': round(change_percent, 2),
+            'daily_data': daily_data
         })
 
     @action(detail=False, methods=['get'])
