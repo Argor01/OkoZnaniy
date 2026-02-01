@@ -77,6 +77,10 @@ fi
 echo "📦 Собираем статические файлы..."
 docker-compose exec -T backend python manage.py collectstatic --noinput 2>/dev/null || true
 
+# Настраиваем Google OAuth
+echo "🔐 Настраиваем Google OAuth..."
+docker-compose exec -T backend python setup_google_oauth.py 2>/dev/null || true
+
 # Заполняем справочники (если они пустые)
 echo "📚 Проверяем справочники..."
 docker-compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
