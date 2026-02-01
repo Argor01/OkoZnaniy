@@ -397,18 +397,62 @@ export const exportStatisticsReport = async (
 
 // Коммуникация с арбитрами (заглушки для совместимости)
 export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
-  // Заглушка - возвращаем пустой список
-  return {
-    count: 0,
-    next: null,
-    previous: null,
-    results: [],
-  };
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    
+    if (params?.page_size) {
+      queryParams.append('page_size', params.page_size.toString());
+    }
+    
+    if (params?.claim_id) {
+      queryParams.append('claim_id', params.claim_id.toString());
+    }
+    
+    if (params?.unread_only) {
+      queryParams.append('unread_only', params.unread_only.toString());
+    }
+    
+    const response = await apiClient.get(`/director/messages/?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    throw error;
+  }
 };
 
 export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
-  // Заглушка
-  throw new Error('Not implemented');
+  try {
+    const formData = new FormData();
+    formData.append('text', data.text);
+    
+    if (data.claim_id) {
+      formData.append('claim_id', data.claim_id.toString());
+    }
+    
+    if (data.priority) {
+      formData.append('priority', data.priority);
+    }
+    
+    if (data.attachments && data.attachments.length > 0) {
+      data.attachments.forEach((file) => {
+        formData.append('attachments', file);
+      });
+    }
+    
+    const response = await apiClient.post('/director/messages/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
 };
 
 export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
@@ -417,11 +461,21 @@ export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
 };
 
 export const markMessageAsRead = async (id: number): Promise<void> => {
-  // Заглушка
+  try {
+    await apiClient.post(`/director/messages/${id}/mark_as_read/`);
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    throw error;
+  }
 };
 
 export const deleteMessage = async (id: number): Promise<void> => {
-  // Заглушка
+  try {
+    await apiClient.delete(`/director/messages/${id}/`);
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    throw error;
+  }
 };
 
 // Экспорт всех функций в виде объекта

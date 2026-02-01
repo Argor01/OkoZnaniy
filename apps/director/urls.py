@@ -6,7 +6,8 @@ from .views import (
     DirectorPersonnelViewSet,
     DirectorFinanceViewSet,
     DirectorPartnersViewSet,
-    DirectorStatisticsViewSet
+    DirectorStatisticsViewSet,
+    InternalMessageViewSet,
 )
 
 router = DefaultRouter()
@@ -15,6 +16,7 @@ router.register(r'personnel', DirectorPersonnelViewSet, basename='director-perso
 router.register(r'finance', DirectorFinanceViewSet, basename='director-finance')
 router.register(r'partners', DirectorPartnersViewSet, basename='director-partners')
 router.register(r'statistics', DirectorStatisticsViewSet, basename='director-statistics')
+router.register(r'messages', InternalMessageViewSet, basename='director-messages')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -14,6 +15,11 @@ from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.users.models import User, PartnerEarning
+from .models import InternalMessage, InternalMessageAttachment
+from .serializers import (
+    InternalMessageSerializer,
+    InternalMessageCreateSerializer,
+)
 
 
 class IsDirector(permissions.BasePermission):
@@ -1071,3 +1077,103 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
             'previous_period_dates': f"{prev_start_dt.strftime('%Y-%m-%d')} - {prev_end_dt.strftime('%Y-%m-%d')}"
         })
 
+
+
+
+class InternalMessagePagination(PageNumberPagination):
+    """Пагинация для внутренних сообщений"""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class IsDirectorOrArbitrator(permissions.BasePermission):
+    """Доступ только для директоров и арбитров"""
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(
+            user and user.is_authenticated and 
+            (user.is_staff or getattr(user, 'role', None) in ['admin', 'arbitrator'])
+        )
+
+
+class InternalMessageViewSet(viewsets.ModelViewSet):
+    """ViewSet для внутренних сообщений между директором и арбитрами"""
+    permission_classes = [permissions.IsAuthenticated, IsDirectorOrArbitrator]
+    pagination_class = InternalMessagePagination
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return InternalMessageCreateSerializer
+        return InternalMessageSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        queryset = InternalMessage.objects.select_related(
+            'sender', 'recipient', 'order'
+        ).prefetch_related('attachments')
+        
+        # Фильтрация по claim_id если указан
+        claim_id = self.request.query_params.get('claim_id')
+        if claim_id:
+            queryset = queryset.filter(claim_id=claim_id)
+        
+        # Фильтрация по непрочитанным
+        unread_only = self.request.query_params.get('unread_only')
+        if unread_only and unread_only.lower() == 'true':
+            queryset = queryset.filter(is_read=False, recipient=user)
+        
+        # Директор видит все сообщения
+        # Арбитр видит только свои сообщения и сообщения без получателя
+        if user.role == 'arbitrator':
+            queryset = queryset.filter(
+                Q(sender=user) | 
+                Q(recipient=user) | 
+                Q(recipient__isnull=True)
+            )
+        
+        return queryset.order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        # Устанавливаем отправителя
+        serializer.save(sender=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """Пометить сообщение как прочитанное"""
+        message = self.get_object()
+        
+        # Только получатель может пометить как прочитанное
+        if message.recipient and message.recipient != request.user:
+            return Response(
+                {'detail': 'Вы не можете пометить это сообщение как прочитанное'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        message.is_read = True
+        message.read_at = timezone.now()
+        message.save(update_fields=['is_read', 'read_at'])
+        
+        serializer = self.get_serializer(message)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Получить количество непрочитанных сообщений"""
+        count = InternalMessage.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).count()
+        return Response({'count': count})
+    
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        """Пометить все сообщения как прочитанные"""
+        updated = InternalMessage.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).update(
+            is_read=True,
+            read_at=timezone.now()
+        )
+        return Response({'updated': updated})
