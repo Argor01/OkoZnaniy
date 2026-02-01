@@ -9,7 +9,6 @@ import {
   Space,
   message,
   Typography,
-  Alert,
 } from 'antd';
 import {
   ArrowUpOutlined,

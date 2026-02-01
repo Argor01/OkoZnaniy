@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Tabs, Alert } from 'antd';
+import { Card, Tabs } from 'antd';
 import { UserAddOutlined, DollarOutlined } from '@ant-design/icons';
 import PartnerList from './PartnerList';
 import PartnerTurnover from './PartnerTurnover';

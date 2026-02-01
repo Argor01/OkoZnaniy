@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Tabs, Alert } from 'antd';
+import { Card, Tabs } from 'antd';
 import { DollarOutlined, LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
 import MonthlyTurnover from './MonthlyTurnover';
 import NetProfit from './NetProfit';

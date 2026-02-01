@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Tabs, Typography, Alert } from 'antd';
+import { Card, Tabs, Typography } from 'antd';
 import { TeamOutlined, UserAddOutlined, FileTextOutlined, InboxOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import EmployeeRegistration from './EmployeeRegistration';
