@@ -296,7 +296,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Общий оборот"
-              value={kpiData.totalTurnover}
+              value={totalTurnover}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -306,9 +306,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.turnoverChange.toFixed(2)}%
+                  {turnoverChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: turnoverChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(turnoverChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -325,7 +329,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Чистая прибыль"
-              value={kpiData.netProfit}
+              value={netProfit}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -335,9 +339,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.profitChange.toFixed(2)}%
+                  {profitChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: profitChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(profitChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -354,7 +362,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Активные заказы"
-              value={kpiData.activeOrders}
+              value={activeOrders}
               prefix={<ShoppingOutlined />}
               valueStyle={{ 
                 color: '#722ed1',
@@ -363,9 +371,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.ordersChange.toFixed(2)}%
+                  {ordersChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: ordersChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(ordersChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -384,7 +396,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Средний чек"
-              value={kpiData.averageCheck}
+              value={averageCheck}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -394,9 +406,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.averageCheckChange.toFixed(2)}%
+                  {averageCheckChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: averageCheckChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(averageCheckChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -469,7 +485,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Клиентов"
-              value={kpiData.totalClients}
+              value={totalClients}
               prefix={<UserOutlined />}
               valueStyle={{ 
                 color: '#fa8c16',
@@ -491,7 +507,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Экспертов"
-              value={kpiData.totalExperts}
+              value={totalExperts}
               prefix={<TeamOutlined />}
               valueStyle={{ 
                 color: '#52c41a',
