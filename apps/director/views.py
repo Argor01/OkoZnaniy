@@ -468,7 +468,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def net_profit(self, request):
-        """Чистая прибыль за период"""
+        """Чистая прибыль за период с детализацией по дням"""
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -506,18 +506,67 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                 is_paid=True
             ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
         except Exception:
-            # Таблица может не существовать
             pass
 
         # Чистая прибыль
         net_profit = total_income - expert_payments - partner_payments
+        total_expense = expert_payments + partner_payments
+
+        # Данные по дням
+        daily_data = []
+        current_date = start_dt
+        while current_date <= end_dt:
+            day_start = current_date
+            day_end = current_date + timedelta(days=1)
+            
+            day_orders = completed_orders.filter(
+                updated_at__gte=day_start,
+                updated_at__lt=day_end
+            )
+            
+            day_income = day_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+            day_expense = day_income * Decimal('0.7')
+            day_profit = day_income - day_expense
+            
+            daily_data.append({
+                'date': current_date.strftime('%d.%m'),
+                'profit': float(day_profit),
+                'income': float(day_income),
+                'expense': float(day_expense)
+            })
+            
+            current_date += timedelta(days=1)
+
+        # Рассчитываем изменение к предыдущему периоду
+        days_diff = (end_dt - start_dt).days + 1
+        prev_start = start_dt - timedelta(days=days_diff)
+        prev_end = start_dt - timedelta(days=1)
+        
+        prev_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=prev_start,
+            updated_at__lte=prev_end
+        )
+        
+        prev_income = prev_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+        prev_expense = prev_income * Decimal('0.7')
+        prev_profit = prev_income - prev_expense
+        
+        if prev_profit > 0:
+            change_percent = float(((net_profit - prev_profit) / prev_profit) * 100)
+        else:
+            change_percent = 0.0
 
         return Response({
             'period': f"{start_date} - {end_date}",
-            'total_income': float(total_income),
+            'total': float(net_profit),
+            'income': float(total_income),
+            'expense': float(total_expense),
             'expert_payments': float(expert_payments),
             'partner_payments': float(partner_payments),
-            'net_profit': float(net_profit),
+            'change_percent': round(change_percent, 2),
+            'daily_data': daily_data
+        })
             'profit_margin': float((net_profit / total_income * 100) if total_income > 0 else 0)
         })
 

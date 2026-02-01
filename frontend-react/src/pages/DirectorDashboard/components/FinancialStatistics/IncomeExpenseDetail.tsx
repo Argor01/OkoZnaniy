@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, DatePicker, Space, Button } from 'antd';
+import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin } from 'antd';
 import {
   BarChart,
   Bar,
@@ -11,28 +11,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getIncomeDetail, getExpenseDetail } from '../../api/directorApi';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
-
-// Тестовые данные
-const incomeExpenseData = [
-  { date: '01.11', income: 125000, expense: 80000 },
-  { date: '02.11', income: 142000, expense: 90000 },
-  { date: '03.11', income: 138000, expense: 90000 },
-  { date: '04.11', income: 165000, expense: 104000 },
-  { date: '05.11', income: 155000, expense: 100000 },
-  { date: '06.11', income: 178000, expense: 111000 },
-  { date: '07.11', income: 162000, expense: 104000 },
-  { date: '08.11', income: 195000, expense: 123000 },
-  { date: '09.11', income: 188000, expense: 119000 },
-  { date: '10.11', income: 205000, expense: 130000 },
-  { date: '11.11', income: 225000, expense: 143000 },
-  { date: '12.11', income: 215000, expense: 137000 },
-  { date: '13.11', income: 235000, expense: 150000 },
-  { date: '14.11', income: 248000, expense: 157000 },
-  { date: '15.11', income: 242000, expense: 154000 },
-];
 
 const IncomeExpenseDetail: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -42,9 +25,55 @@ const IncomeExpenseDetail: React.FC = () => {
 
   const isMobile = window.innerWidth <= 840;
 
-  const totalIncome = incomeExpenseData.reduce((sum, item) => sum + item.income, 0);
-  const totalExpense = incomeExpenseData.reduce((sum, item) => sum + item.expense, 0);
+  // Получаем данные из API
+  const { data: incomeData, isLoading: incomeLoading } = useQuery({
+    queryKey: ['income-detail', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getIncomeDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
+
+  const { data: expenseData, isLoading: expenseLoading } = useQuery({
+    queryKey: ['expense-detail', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getExpenseDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
+
+  const isLoading = incomeLoading || expenseLoading;
+
+  // Группируем данные по дням для графика
+  const chartData = React.useMemo(() => {
+    if (!incomeData || !expenseData) return [];
+    
+    const dataByDate: Record<string, { date: string; income: number; expense: number }> = {};
+    
+    incomeData.forEach(item => {
+      const date = dayjs(item.date).format('DD.MM');
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, income: 0, expense: 0 };
+      }
+      dataByDate[date].income += item.amount;
+    });
+    
+    expenseData.forEach(item => {
+      const date = dayjs(item.date).format('DD.MM');
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, income: 0, expense: 0 };
+      }
+      dataByDate[date].expense += item.amount;
+    });
+    
+    return Object.values(dataByDate).sort((a, b) => a.date.localeCompare(b.date));
+  }, [incomeData, expenseData]);
+
+  const totalIncome = incomeData?.reduce((sum, item) => sum + item.amount, 0) || 0;
+  const totalExpense = expenseData?.reduce((sum, item) => sum + item.amount, 0) || 0;
   const netProfit = totalIncome - totalExpense;
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -232,7 +261,7 @@ const IncomeExpenseDetail: React.FC = () => {
         }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
-              data={incomeExpenseData}
+              data={chartData}
               margin={{
                 top: 20,
                 right: isMobile ? 10 : 30,

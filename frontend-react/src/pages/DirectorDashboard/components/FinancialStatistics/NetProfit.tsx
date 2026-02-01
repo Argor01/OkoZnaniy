@@ -164,7 +164,7 @@ const NetProfit: React.FC = () => {
           }}>
             <Statistic
               title="Чистая прибыль за период"
-              value={totalProfit}
+              value={totalProfitValue}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -182,16 +182,16 @@ const NetProfit: React.FC = () => {
           <Card style={{ 
             borderRadius: isMobile ? 8 : 12,
             textAlign: 'center',
-            background: isMobile ? '#f6ffed' : '#fff',
-            border: isMobile ? '2px solid #52c41a' : '1px solid #d9d9d9'
+            background: isMobile ? (changePercent >= 0 ? '#f6ffed' : '#fff1f0') : '#fff',
+            border: isMobile ? `2px solid ${changePercent >= 0 ? '#52c41a' : '#ff4d4f'}` : '1px solid #d9d9d9'
           }}>
             <Statistic
               title="Изменение к предыдущему периоду"
-              value={18.7}
-              prefix={<ArrowUpOutlined />}
+              value={Math.abs(changePercent)}
+              prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
               valueStyle={{ 
-                color: '#3f8600',
+                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
                 fontSize: isMobile ? 22 : 24,
                 fontWeight: 700
               }}
@@ -220,7 +220,7 @@ const NetProfit: React.FC = () => {
         }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
-              data={profitData}
+              data={chartData}
               margin={{
                 top: 20,
                 right: isMobile ? 10 : 30,
