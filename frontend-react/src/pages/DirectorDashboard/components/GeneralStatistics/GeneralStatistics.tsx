@@ -89,6 +89,46 @@ const GeneralStatistics: React.FC = () => {
   const totalExperts = kpiData?.kpi?.total_experts || 0;
   const totalPartners = kpiData?.kpi?.total_partners || 0;
 
+  // Временные данные для графиков (TODO: заменить на API)
+  const ordersChartData = [
+    { date: '01.02', orders: 45, completed: 38, cancelled: 7 },
+    { date: '02.02', orders: 52, completed: 44, cancelled: 8 },
+    { date: '03.02', orders: 48, completed: 41, cancelled: 7 },
+    { date: '04.02', orders: 61, completed: 53, cancelled: 8 },
+    { date: '05.02', orders: 55, completed: 48, cancelled: 7 },
+    { date: '06.02', orders: 67, completed: 59, cancelled: 8 },
+    { date: '07.02', orders: 58, completed: 51, cancelled: 7 },
+  ];
+
+  const revenueChartData = [
+    { date: '01.02', revenue: 125000, profit: 37500 },
+    { date: '02.02', revenue: 148000, profit: 44400 },
+    { date: '03.02', revenue: 132000, profit: 39600 },
+    { date: '04.02', revenue: 167000, profit: 50100 },
+    { date: '05.02', revenue: 155000, profit: 46500 },
+    { date: '06.02', revenue: 189000, profit: 56700 },
+    { date: '07.02', revenue: 172000, profit: 51600 },
+  ];
+
+  const categoryData = [
+    { name: 'Математика', value: 450, color: '#1890ff' },
+    { name: 'Физика', value: 320, color: '#52c41a' },
+    { name: 'Химия', value: 280, color: '#faad14' },
+    { name: 'Биология', value: 210, color: '#f5222d' },
+    { name: 'История', value: 180, color: '#722ed1' },
+    { name: 'Другое', value: 160, color: '#13c2c2' },
+  ];
+
+  const usersOnlineData = [
+    { time: '00:00', users: 12 },
+    { time: '04:00', users: 8 },
+    { time: '08:00', users: 25 },
+    { time: '12:00', users: 47 },
+    { time: '16:00', users: 52 },
+    { time: '20:00', users: 38 },
+    { time: '23:59', users: 18 },
+  ];
+
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
     let start: Dayjs, end: Dayjs;
