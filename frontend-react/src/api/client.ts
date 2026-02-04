@@ -11,6 +11,15 @@ export const apiClient = axios.create({
 
 // Добавляем токен к каждому запросу, кроме auth/регистрации
 apiClient.interceptors.request.use((config) => {
+  // Если отправляем FormData (multipart), нельзя форсировать application/json.
+  // Иначе браузер/axios не выставит boundary, и файл не попадёт в request.FILES на бэке.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers) {
+      delete (config.headers as any)['Content-Type'];
+      delete (config.headers as any)['content-type'];
+    }
+  }
+
   const token = localStorage.getItem('access_token');
   const url = config.url || '';
   const method = (config.method || 'get').toLowerCase();

@@ -145,7 +145,15 @@ const OrdersFeed: React.FC = () => {
   });
 
   // Используем реальные данные с API
-  const orders = ordersData?.results || ordersData || [];
+  const ordersRaw = ordersData?.results || ordersData || [];
+  const orders = Array.isArray(ordersRaw)
+    ? ordersRaw.filter((order: any) => {
+        if (!order) return false;
+        if (order.is_active === false) return false;
+        if (order.deleted === true) return false;
+        return !!order.id && !!order.title;
+      })
+    : [];
 
   // Фильтрация заказов
   const filteredOrders = orders.filter((order: any) => {
@@ -188,6 +196,40 @@ const OrdersFeed: React.FC = () => {
       message.error(errorMessage);
     }
   };
+
+  const handleDownloadOrderFile = React.useCallback(async (orderId: number, file: any) => {
+    try {
+      const fileIdNum = Number(file?.id);
+      const filename = file?.filename || file?.file_name || 'file';
+
+      if (!fileIdNum || Number.isNaN(fileIdNum)) {
+        const url = file?.view_url || file?.file_url || file?.file;
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        message.error('Не удалось скачать файл');
+        return;
+      }
+
+      const blob = await (ordersApi as any).downloadOrderFile(orderId, fileIdNum);
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e: any) {
+      const status = e?.response?.status;
+      if (status === 401) {
+        message.error('Не авторизовано для скачивания файла');
+      } else {
+        message.error('Ошибка при скачивании файла');
+      }
+    }
+  }, []);
 
   return (
     <div className={styles.contentContainer}>
@@ -540,12 +582,7 @@ const OrdersFeed: React.FC = () => {
                             icon={getFileIcon(file.filename)}
                             className={styles.fileTag}
                             onClick={() => {
-                              const url = file.view_url || file.file_url || file.file;
-                              if (url) {
-                                window.open(url, '_blank');
-                              } else {
-                                message.warning('Файл недоступен для просмотра');
-                              }
+                              handleDownloadOrderFile(order.id, file);
                             }}
                           >
                             {file.filename} <DownloadOutlined style={{ marginLeft: 4 }} />

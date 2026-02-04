@@ -45,7 +45,14 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            try:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning('[ReadyWorkViewSet.create] Validation errors: %s', serializer.errors)
+            except Exception:
+                pass
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         # Обрабатываем множественные файлы
         work_files = request.FILES.getlist('work_files')

@@ -6,17 +6,26 @@ class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
     sender_id = serializers.IntegerField(source='sender.id', read_only=True)
     is_mine = serializers.SerializerMethodField()
-    
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'sender_id', 'text', 'is_read', 'is_mine', 'created_at']
-        read_only_fields = ['sender', 'sender_id', 'is_mine', 'created_at']
+        fields = ['id', 'sender', 'sender_id', 'text', 'file_name', 'file_url', 'is_read', 'is_mine', 'created_at']
+        read_only_fields = ['sender', 'sender_id', 'is_mine', 'file_url', 'created_at']
 
     def get_is_mine(self, obj):
         request = self.context.get('request')
         if request and request.user:
             return obj.sender.id == request.user.id
         return False
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 class ChatListSerializer(serializers.ModelSerializer):
     """Сериализатор для списка чатов (без всех сообщений)"""
@@ -42,10 +51,14 @@ class ChatListSerializer(serializers.ModelSerializer):
     def get_last_message(self, obj):
         last_message = obj.messages.order_by('-created_at').first()
         if last_message:
+            request = self.context.get('request')
+            file_url = request.build_absolute_uri(last_message.file.url) if request and last_message.file else None
             return {
-                'text': last_message.text,
+                'text': last_message.text or (f"[Файл: {last_message.file_name}]" if last_message.file_name else ''),
                 'sender_id': last_message.sender.id,
-                'created_at': last_message.created_at
+                'created_at': last_message.created_at,
+                'file_name': last_message.file_name or None,
+                'file_url': file_url,
             }
         return None
 

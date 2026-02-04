@@ -22,6 +22,15 @@ export interface Order {
   budget: string;
   deadline: string;
   status: string;
+  client?: {
+    id: number;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    avatar?: string;
+  };
+  client_id?: number;
+  client_name?: string;
   subject: {
     id: number;
     name: string;
@@ -43,6 +52,7 @@ export interface Order {
     username: string;
     first_name: string;
     last_name: string;
+    avatar?: string;
   };
   created_at: string;
   updated_at: string;
@@ -198,8 +208,7 @@ export const ordersApi = {
     
     const response = await apiClient.post(
       `/orders/orders/${orderId}/files/`,
-      form,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      form
     );
     
     console.log('✅ Файл успешно загружен на сервер:', response.data);
@@ -248,6 +257,13 @@ export const ordersApi = {
   // Комментарии (чат): отправить сообщение
   addComment: async (orderId: number, text: string): Promise<OrderComment> => {
     const response = await apiClient.post(`/orders/orders/${orderId}/comments/`, { text });
+    return response.data;
+  },
+
+  downloadOrderFile: async (orderId: number, fileId: number): Promise<Blob> => {
+    const response = await apiClient.get(`/orders/orders/${orderId}/files/${fileId}/download/`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };

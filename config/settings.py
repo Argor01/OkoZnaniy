@@ -373,13 +373,15 @@ ALLOWED_EXTENSIONS = [
     # Документы
     'pdf', 'doc', 'docx', 'txt', 'rtf', 'odt',
     # Изображения
-    'jpg', 'jpeg', 'png', 'gif',
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg',
     # Архивы
     'zip', 'rar', '7z',
     # Презентации
     'ppt', 'pptx',
     # Таблицы
     'xls', 'xlsx', 'csv',
+    # Чертежи и КОМПАС
+    'dwg', 'dxf', 'cdr', 'cdw', 'bak',
 ]
 MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50MB
 

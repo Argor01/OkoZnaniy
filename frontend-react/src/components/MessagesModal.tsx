@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Tabs, List, Avatar, Badge, Input, Button, Empty, message as antMessage, Spin } from 'antd';
-import { MessageOutlined, SendOutlined, ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
+import { MessageOutlined, SendOutlined, ArrowLeftOutlined, UserOutlined, PaperClipOutlined } from '@ant-design/icons';
 import './MessagesModal.css';
-import chatApi, { Chat as ApiChat, ChatMessage } from '../api/chat';
+import chatApi, { ChatListItem as ApiChat, Message as ApiMessage } from '../api/chat';
 
 interface Chat {
   id: number;
@@ -20,6 +20,8 @@ interface Message {
   text: string;
   time: string;
   isMine: boolean;
+  file_name?: string | null;
+  file_url?: string | null;
 }
 
 interface MessagesModalProps {
@@ -37,6 +39,8 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const currentUserId = parseInt(localStorage.getItem('user_id') || '0');
 
   useEffect(() => {
@@ -66,18 +70,18 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
     try {
       const apiChats = await chatApi.getChats();
       const formattedChats: Chat[] = apiChats.map((chat: ApiChat) => {
-        const otherParticipant = chat.participants.find((p: any) => p.id !== currentUserId);
-        const participantName = otherParticipant 
-          ? `${otherParticipant.first_name} ${otherParticipant.last_name}`.trim() || otherParticipant.username
+        const other = chat.other_user;
+        const participantName = other
+          ? `${other.first_name || ''} ${other.last_name || ''}`.trim() || other.username
           : 'Неизвестный';
-        
+        const lastText = chat.last_message?.text || 'Нет сообщений';
         return {
           id: chat.id,
           name: participantName,
-          lastMessage: chat.last_message?.text || 'Нет сообщений',
+          lastMessage: lastText,
           time: formatTime(chat.last_message?.created_at),
           unreadCount: chat.unread_count || 0,
-          orderId: chat.order,
+          orderId: chat.order_id ?? chat.order,
         };
       });
       setChats(formattedChats);
@@ -93,14 +97,16 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
     setLoading(true);
     try {
       const apiMessages = await chatApi.getMessages(chatId);
-      const formattedMessages: Message[] = apiMessages.map((msg: ChatMessage) => ({
+      const formattedMessages: Message[] = apiMessages.map((msg: ApiMessage) => ({
         id: msg.id,
-        sender: msg.sender.id === currentUserId 
-          ? 'Вы' 
-          : `${msg.sender.first_name} ${msg.sender.last_name}`.trim() || msg.sender.username,
-        text: msg.text,
+        sender: msg.sender_id === currentUserId
+          ? 'Вы'
+          : `${msg.sender?.first_name || ''} ${msg.sender?.last_name || ''}`.trim() || msg.sender?.username || '',
+        text: msg.text || '',
         time: formatTime(msg.created_at),
-        isMine: msg.sender.id === currentUserId,
+        isMine: msg.sender_id === currentUserId,
+        file_name: msg.file_name ?? undefined,
+        file_url: msg.file_url ?? undefined,
       }));
       setMessages(formattedMessages.reverse());
     } catch (error) {
@@ -130,15 +136,15 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
   };
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedChat) return;
-    
+    if ((!messageText.trim() && !attachedFile) || !selectedChat) return;
+
     setSending(true);
     try {
-      await chatApi.sendMessage(selectedChat, messageText.trim());
+      await chatApi.sendMessage(selectedChat, messageText.trim(), attachedFile ?? undefined);
       setMessageText('');
-      // Перезагружаем сообщения
+      setAttachedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       await loadMessages(selectedChat);
-      // Обновляем список чатов
       await loadChats();
     } catch (error) {
       console.error('Ошибка отправки сообщения:', error);
@@ -259,7 +265,19 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
                     >
                       <div className="message-content">
                         <div className="message-sender">{msg.sender}</div>
-                        <div className="message-text">{msg.text}</div>
+                        {msg.text ? <div className="message-text">{msg.text}</div> : null}
+                        {msg.file_url && msg.file_name ? (
+                          <div className="message-file" style={{ marginTop: msg.text ? 8 : 0 }}>
+                            <a
+                              href={msg.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: '#1890ff' }}
+                            >
+                              📎 {msg.file_name}
+                            </a>
+                          </div>
+                        ) : null}
                         <div className="message-time">{msg.time}</div>
                       </div>
                     </div>
@@ -268,29 +286,56 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose }) => {
               </div>
 
               <div className="message-input-container">
-                <Input.TextArea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: 4 }}
-                  onPressEnter={(e) => {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) setAttachedFile(f);
                   }}
-                  className="message-input"
                 />
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim() || sending}
-                  loading={sending}
-                  className="send-button"
-                >
-                  Отправить
-                </Button>
+                {attachedFile && (
+                  <div style={{ marginBottom: 8, fontSize: 13, color: '#666' }}>
+                    📎 {attachedFile.name}
+                    <Button type="link" size="small" onClick={() => { setAttachedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}>
+                      Убрать
+                    </Button>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                  <Input.TextArea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Введите сообщение..."
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="message-input"
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    type="default"
+                    icon={<PaperClipOutlined />}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="attach-button"
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={handleSendMessage}
+                    disabled={(!messageText.trim() && !attachedFile) || sending}
+                    loading={sending}
+                    className="send-button"
+                  >
+                    Отправить
+                  </Button>
+                </div>
               </div>
             </>
           ) : (

@@ -21,9 +21,8 @@ export const useChat = () => {
     }
   }, []);
 
-  const sendMessage = async (chatId: number, text: string): Promise<ChatMessage> => {
-    const message = await chatApi.sendMessage(chatId, text);
-    // Обновляем чаты после отправки
+  const sendMessage = async (chatId: number, text: string, file?: File): Promise<ChatMessage> => {
+    const message = await chatApi.sendMessage(chatId, text, file);
     await loadChats();
     return message;
   };

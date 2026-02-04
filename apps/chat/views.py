@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -37,7 +38,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
-        """Отправка сообщения в чат"""
+        """Отправка сообщения в чат (текст и/или файл). Для файла — multipart/form-data: text, file."""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
@@ -45,28 +46,72 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        serializer = MessageSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            message = serializer.save(
-                chat=chat,
-                sender=request.user
+        # Поддержка JSON (только текст) и multipart (текст + файл)
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            text = (request.POST.get('text') or '').strip()
+            uploaded_file = request.FILES.get('file')
+        else:
+            text = (request.data.get('text') or '').strip()
+            uploaded_file = None
+
+        if not text and not uploaded_file:
+            return Response(
+                {'detail': 'Укажите текст сообщения или прикрепите файл.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-            
-            # Создаем уведомление для другого участника
-            from apps.notifications.services import NotificationService
-            other_user = chat.participants.exclude(id=request.user.id).first()
-            if other_user:
-                NotificationService.create_notification(
-                    recipient=other_user,
-                    type='new_comment',
-                    title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
-                    message=message.text[:100],
-                    related_object_id=chat.id,
-                    related_object_type='chat'
+
+        file_name = ''
+        if uploaded_file:
+            allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [
+                'pdf', 'doc', 'docx', 'txt', 'rtf', 'odt',
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg',
+                'zip', 'rar', '7z', 'ppt', 'pptx', 'xls', 'xlsx', 'csv',
+                'dwg', 'dxf', 'cdr',
+            ])
+            max_size = getattr(settings, 'MAX_UPLOAD_SIZE', 50 * 1024 * 1024)
+            ext = (uploaded_file.name.split('.')[-1].lower() if '.' in uploaded_file.name else '') or ''
+            if ext not in allowed_extensions:
+                return Response(
+                    {'detail': f'Недопустимый тип файла. Разрешены: {", ".join(allowed_extensions)}'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            return Response(MessageSerializer(message, context={'request': request}).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if uploaded_file.size > max_size:
+                return Response(
+                    {'detail': f'Размер файла не должен превышать {max_size // (1024*1024)} МБ.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            file_name = uploaded_file.name[:255] if len(uploaded_file.name) > 255 else uploaded_file.name
+
+        try:
+            message = Message(
+                chat=chat,
+                sender=request.user,
+                text=text or '',
+                file=uploaded_file or None,
+                file_name=file_name,
+            )
+            message.full_clean()
+            message.save()
+        except Exception as e:
+            return Response(
+                {'detail': getattr(e, 'message', None) or str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from apps.notifications.services import NotificationService
+        other_user = chat.participants.exclude(id=request.user.id).first()
+        if other_user:
+            notification_text = (message.text or f'Файл: {message.file_name}')[:100]
+            NotificationService.create_notification(
+                recipient=other_user,
+                type='new_comment',
+                title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
+                message=notification_text,
+                related_object_id=chat.id,
+                related_object_type='chat'
+            )
+
+        return Response(MessageSerializer(message, context={'request': request}).data)
 
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):

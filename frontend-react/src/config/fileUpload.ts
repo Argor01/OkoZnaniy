@@ -13,6 +13,8 @@ export const SUPPORTED_FILE_TYPES = {
   archives: ['.zip', '.rar', '.7z', '.tar', '.gz'],
   spreadsheets: ['.xls', '.xlsx', '.csv'],
   presentations: ['.ppt', '.pptx'],
+  // Чертежи и работы (КОМПАС, AutoCAD, резервные копии)
+  drawings: ['.dwg', '.dxf', '.cdr', '.cdw', '.bak'],
 };
 
 // Все поддерживаемые расширения
@@ -22,6 +24,7 @@ export const ALL_SUPPORTED_EXTENSIONS = [
   ...SUPPORTED_FILE_TYPES.archives,
   ...SUPPORTED_FILE_TYPES.spreadsheets,
   ...SUPPORTED_FILE_TYPES.presentations,
+  ...SUPPORTED_FILE_TYPES.drawings,
 ];
 
 // MIME типы для валидации

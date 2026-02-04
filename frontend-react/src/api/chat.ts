@@ -14,6 +14,9 @@ export interface Message {
   sender: User;
   sender_id: number;
   text: string;
+  file?: string | null;
+  file_name?: string | null;
+  file_url?: string | null;
   is_read: boolean;
   is_mine: boolean;
   created_at: string;
@@ -22,7 +25,7 @@ export interface Message {
 export interface ChatListItem {
   id: number;
   order: number;
-  order_id: number;
+  order_id?: number;
   order_title?: string | null;
   participants: User[];
   other_user: User;
@@ -30,6 +33,8 @@ export interface ChatListItem {
     text: string;
     sender_id: number;
     created_at: string;
+    file_name?: string | null;
+    file_url?: string | null;
   } | null;
   last_message_time: string;
   unread_count: number;
@@ -56,10 +61,16 @@ export const chatApi = {
     return Array.isArray(response.data) ? response.data : [];
   },
 
-  // Получить детали чата
+  getChats: async (): Promise<ChatListItem[]> => chatApi.getAll(),
+
   getById: async (id: number): Promise<ChatDetail> => {
     const response = await apiClient.get(`/chat/chats/${id}/`);
     return response.data;
+  },
+
+  getMessages: async (chatId: number): Promise<Message[]> => {
+    const chat = await chatApi.getById(chatId);
+    return chat.messages ?? [];
   },
 
   // Получить или создать чат по ID заказа
@@ -87,12 +98,33 @@ export const chatApi = {
     return response.data;
   },
 
-  // Отправить сообщение
-  sendMessage: async (chatId: number, text: string): Promise<Message> => {
-    const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, {
-      text,
-    });
+  // Отправить сообщение (текст и/или файл)
+  sendMessage: async (chatId: number, text: string, file?: File): Promise<Message> => {
+    if (file) {
+      const formData = new FormData();
+      formData.append('text', text);
+      formData.append('file', file);
+      const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, formData);
+      return response.data;
+    }
+    const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, { text });
     return response.data;
+  },
+
+  // Отправить группу файлов одним действием (создаёт несколько сообщений на бэке)
+  sendMessageWithFiles: async (chatId: number, text: string, files: File[]): Promise<Message[]> => {
+    const filesToSend = Array.isArray(files) ? files : [];
+    const results: Message[] = [];
+
+    for (let i = 0; i < filesToSend.length; i++) {
+      const file = filesToSend[i];
+      const textForThis = i === 0 ? text : '';
+      // Используем существующую реализацию, чтобы гарантировать multipart
+      const msg = await chatApi.sendMessage(chatId, textForThis, file);
+      results.push(msg);
+    }
+
+    return results;
   },
 
   // Отметить все сообщения в чате как прочитанные

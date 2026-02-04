@@ -8,7 +8,10 @@ export interface Work {
   originalPrice?: number;
   discount?: number;
   category?: string;
-  subject: string;
+  subject: number;
+  work_type: number;
+  subjectId?: number;
+  workTypeId?: number;
   subject_name?: string; // Название предмета из API
   workType: string;
   work_type_name?: string; // Название типа работы из API
@@ -48,8 +51,8 @@ export interface WorkFile {
 
 export interface Filters {
   search?: string;
-  category?: string;
-  subject?: string;
+  category?: number;
+  subject?: number;
   workType?: string;
   priceMin?: number;
   priceMax?: number;

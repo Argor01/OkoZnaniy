@@ -2,7 +2,6 @@ import React from 'react';
 import { Input, Select, Space, Button } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { Filters as FiltersType } from '../../types';
-import { mockCategories, mockSubjects } from '../../mockData';
 import styles from './Filters.module.css';
 
 const { Option } = Select;
@@ -10,9 +9,11 @@ const { Option } = Select;
 interface FiltersProps {
   filters: FiltersType;
   onFilterChange: (filters: FiltersType) => void;
+  subjects: Array<{ id: number; name: string }>;
+  workTypes: Array<{ id: number; name: string }>;
 }
 
-const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
+const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, workTypes }) => {
   return (
     <div className={styles.container}>
       <Space size="middle" wrap className={styles.filters}>
@@ -26,15 +27,15 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
         />
 
         <Select
-          placeholder="Категория"
+          placeholder="Тип работы"
           value={filters.category}
-          onChange={(value) => onFilterChange({ ...filters, category: value })}
+          onChange={(value) => onFilterChange({ ...filters, category: value as number })}
           className={styles.select}
           allowClear
         >
-          {mockCategories.map((cat) => (
-            <Option key={cat} value={cat}>
-              {cat}
+          {workTypes.map((wt) => (
+            <Option key={wt.id} value={wt.id}>
+              {wt.name}
             </Option>
           ))}
         </Select>
@@ -42,13 +43,13 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
         <Select
           placeholder="Предмет"
           value={filters.subject}
-          onChange={(value) => onFilterChange({ ...filters, subject: value })}
+          onChange={(value) => onFilterChange({ ...filters, subject: value as number })}
           className={styles.select}
           allowClear
         >
-          {mockSubjects.map((subj) => (
-            <Option key={subj} value={subj}>
-              {subj}
+          {subjects.map((subj) => (
+            <Option key={subj.id} value={subj.id}>
+              {subj.name}
             </Option>
           ))}
         </Select>
@@ -56,7 +57,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
         <Select
           placeholder="Сортировка"
           value={filters.sortBy}
-          onChange={(value) => onFilterChange({ ...filters, sortBy: value })}
+          onChange={(value) => onFilterChange({ ...filters, sortBy: value as FiltersType['sortBy'] })}
           className={styles.select}
           defaultValue="newness"
         >
@@ -69,7 +70,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange }) => {
 
         <Button
           icon={<FilterOutlined />}
-          onClick={() => onFilterChange({})}
+          onClick={() => onFilterChange({ sortBy: 'newness' })}
         >
           Сбросить
         </Button>

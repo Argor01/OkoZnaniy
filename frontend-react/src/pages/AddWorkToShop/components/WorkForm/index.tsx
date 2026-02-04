@@ -10,6 +10,14 @@ import styles from './WorkForm.module.css';
 const { Text } = Typography;
 const { Option } = Select;
 
+const ALLOWED_FILE_EXTENSIONS = [
+  'doc', 'docx', 'pdf', 'rtf', 'txt',
+  'ppt', 'pptx',
+  'xls', 'xlsx', 'csv',
+  'dwg', 'dxf', 'cdr', 'cdw', 'bak',
+  'jpg', 'jpeg', 'png', 'bmp', 'svg',
+];
+
 const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<WorkFormData>({
@@ -255,28 +263,9 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
                 return Upload.LIST_IGNORE as any;
               }
               
-              // Проверяем допустимые типы файлов
-              const allowedTypes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain',
-                'application/rtf',
-                'image/jpeg',
-                'image/jpg',
-                'image/png',
-                'image/gif',
-                'application/zip',
-                'application/x-rar-compressed',
-                'application/vnd.ms-powerpoint',
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'text/csv'
-              ];
-              
-              if (!allowedTypes.includes(file.type)) {
-                message.error('Неподдерживаемый тип файла');
+              const ext = file.name.split('.').pop()?.toLowerCase() || '';
+              if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
+                message.error('Неподдерживаемый формат файла');
                 return Upload.LIST_IGNORE as any;
               }
               
@@ -301,7 +290,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </p>
             <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
             <p className="ant-upload-hint">
-              Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
+              Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .jpeg, .png, .bmp, .svg
             </p>
           </Upload.Dragger>
           {formData.files && formData.files.length > 0 && (

@@ -56,14 +56,26 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   // Определяем какие данные показывать в зависимости от фильтра
   const currentOrdersData = orderFilter === 'my' ? myOrdersData : availableOrdersData;
   const isLoading = orderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
-  
-  const orders = Array.isArray(currentOrdersData?.results) ? currentOrdersData.results : (Array.isArray(currentOrdersData) ? currentOrdersData : []);
+
+  const sanitizeOrders = (items: any) => {
+    const raw = Array.isArray(items?.results) ? items.results : (Array.isArray(items) ? items : []);
+    return raw.filter((order: any) => {
+      if (!order) return false;
+      if (order.is_active === false) return false;
+      if (order.deleted === true) return false;
+      return !!order.id && !!order.title;
+    });
+  };
+
+  const orders = sanitizeOrders(currentOrdersData);
 
   const availableOrders = Array.isArray(availableOrdersData?.results)
     ? availableOrdersData.results
     : (Array.isArray(availableOrdersData) ? availableOrdersData : []);
 
-  const freshOrders = availableOrders.slice(0, 5);
+  const availableOrdersSanitized = sanitizeOrders(availableOrders);
+
+  const freshOrders = availableOrdersSanitized.slice(0, 5);
 
   // Используем реальные данные
   const displayOrders = orderFilter === 'available' ? freshOrders : orders;

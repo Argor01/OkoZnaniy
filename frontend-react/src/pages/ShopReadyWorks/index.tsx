@@ -70,13 +70,13 @@ const ShopReadyWorks: React.FC = () => {
       );
     }
 
-    // Фильтр по категории
-    if (filters.category && filters.category !== 'Все категории') {
-      result = result.filter((work) => work.category === filters.category);
+    // Фильтр по типу работы
+    if (filters.category) {
+      result = result.filter((work) => work.work_type === filters.category);
     }
 
     // Фильтр по предмету
-    if (filters.subject && filters.subject !== 'Все предметы') {
+    if (filters.subject) {
       result = result.filter((work) => work.subject === filters.subject);
     }
 
@@ -118,6 +118,8 @@ const ShopReadyWorks: React.FC = () => {
       updatedAt: work.updated_at || work.updatedAt,
       category: work.work_type_name || work.category || 'Другое',
       workType: work.work_type_name || work.workType || 'Другое',
+      subject: Number(work.subject ?? work.subjectId ?? work.subject_id ?? 0),
+      work_type: Number(work.work_type ?? work.workTypeId ?? work.work_type_id ?? 0),
       rating: work.rating || 0,
       reviewsCount: work.reviewsCount || 0,
       viewsCount: work.viewsCount || 0,
@@ -145,6 +147,8 @@ const ShopReadyWorks: React.FC = () => {
       <Filters
         filters={filters}
         onFilterChange={setFilters}
+        subjects={subjects}
+        workTypes={categories}
       />
       
       <WorksList

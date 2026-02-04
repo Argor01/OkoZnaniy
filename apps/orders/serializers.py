@@ -13,8 +13,11 @@ class OrderFileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     view_url = serializers.SerializerMethodField()
     download_url = serializers.SerializerMethodField()
-    filename = serializers.CharField(read_only=True)
+    filename = serializers.SerializerMethodField()
     file_size = serializers.SerializerMethodField()
+
+    def get_filename(self, obj):
+        return obj.filename() if obj.file else ''
 
     class Meta:
         model = OrderFile

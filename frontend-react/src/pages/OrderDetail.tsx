@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Rate } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { ordersApi, Bid } from '../api/orders';
+import { ordersApi, Bid, Order } from '../api/orders';
 import { authApi } from '../api/auth';
 import BidModal from './OrdersFeed/BidModal';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,15 +11,31 @@ import { ru } from 'date-fns/locale';
 import { useDashboard } from '../contexts/DashboardContext';
 import { formatCurrency } from '../utils/formatters';
 
+const ALLOWED_FORMATS_TEXT = 'Текстовые документы: .doc, .docx, .pdf, .rtf, .txt\nПрезентации: .ppt, .pptx, .pdf\nТаблицы: .xls, .xlsx, .csv\nЧертежи и работы: .dwg, .dxf, .cdr, .cdw, .bak, .pdf\nГрафика/изображения: .jpg, .png, .bmp, .svg';
+
 const { Title, Text, Paragraph } = Typography;
 
 const OrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const dashboard = useDashboard();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [bidModalVisible, setBidModalVisible] = useState(false);
+
+  const removeOrderFromCaches = React.useCallback((id: number) => {
+    const filterOut = (data: any) => {
+      if (!data) return data;
+      if (Array.isArray(data)) return data.filter((o) => o?.id !== id);
+      if (Array.isArray(data.results)) return { ...data, results: data.results.filter((o: any) => o?.id !== id) };
+      return data;
+    };
+
+    queryClient.setQueryData(['orders-feed'], filterOut);
+    queryClient.setQueryData(['available-orders'], filterOut);
+    queryClient.setQueryData(['user-orders'], filterOut);
+  }, [queryClient]);
 
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
@@ -32,11 +48,28 @@ const OrderDetail: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading, error: orderError } = useQuery<Order, any>({
     queryKey: ['order', orderId],
     queryFn: () => ordersApi.getById(Number(orderId)),
     enabled: !!orderId,
+    retry: (failureCount: number, error: any) => {
+      const status = error?.response?.status;
+      if (status === 404) return false;
+      return failureCount < 2;
+    },
   });
+
+  React.useEffect(() => {
+    const status = orderError?.response?.status;
+    if (status === 404 && orderId) {
+      const idNum = Number(orderId);
+      if (!Number.isNaN(idNum)) {
+        removeOrderFromCaches(idNum);
+      }
+      message.warning('Заказ был удалён и больше недоступен');
+      navigate('/orders-feed');
+    }
+  }, [orderError, orderId, navigate, removeOrderFromCaches]);
 
   const { data: bids = [], isLoading: bidsLoading } = useQuery({
     queryKey: ['order-bids', orderId],
@@ -47,6 +80,41 @@ const OrderDetail: React.FC = () => {
   const userHasBid = React.useMemo(() => {
     return Array.isArray(bids) && bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
   }, [bids, userProfile]);
+
+  const handleDownloadFile = React.useCallback(async (file: any) => {
+    try {
+      const orderIdNum = Number(orderId);
+      const fileIdNum = Number(file?.id);
+      const filename = file?.filename || file?.file_name || 'file';
+
+      if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
+        const url = file?.view_url || file?.file_url;
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        message.error('Не удалось скачать файл');
+        return;
+      }
+
+      const blob = await (ordersApi as any).downloadOrderFile(orderIdNum, fileIdNum);
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e: any) {
+      const status = e?.response?.status;
+      if (status === 401) {
+        message.error('Не авторизовано для скачивания файла');
+      } else {
+        message.error('Ошибка при скачивании файла');
+      }
+    }
+  }, [orderId]);
 
   
 
@@ -100,7 +168,14 @@ const OrderDetail: React.FC = () => {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <Button 
           icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            const from = (location.state as any)?.from;
+            if (typeof from === 'string' && from.length > 0) {
+              navigate(from);
+              return;
+            }
+            navigate(-1);
+          }}
           style={{ marginBottom: 16 }}
           size={isMobile ? 'middle' : 'large'}
         >
@@ -286,18 +361,26 @@ const OrderDetail: React.FC = () => {
                 <Title level={4}>Прикрепленные файлы</Title>
                 <Space direction="vertical">
                   {order.files.map((file: any, index: number) => (
-                    <a 
-                      key={index} 
-                      href={file.view_url || file.file_url || file.file || file} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                    <a
+                      key={file.id ?? index}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDownloadFile(file);
+                      }}
                     >
-                      Файл {index + 1}
+                      {file.filename || `Файл ${index + 1}`}
                     </a>
                   ))}
                 </Space>
               </div>
             )}
+
+            <Card title="Допустимые форматы файлов" style={{ borderRadius: 12 }}>
+              <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>
+                {ALLOWED_FORMATS_TEXT}
+              </Paragraph>
+            </Card>
 
             {/* Кнопка отклика для эксперта */}
             {userProfile?.role === 'expert' && 

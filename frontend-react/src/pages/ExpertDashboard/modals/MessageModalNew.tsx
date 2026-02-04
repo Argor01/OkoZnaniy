@@ -149,40 +149,46 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     setSending(true);
     try {
-      const newMessage = await chatApi.sendMessage(selectedChat.id, messageText);
-      
-      // Если есть прикрепленные файлы, отправляем их
-      if (attachedFiles.length > 0) {
-        for (const file of attachedFiles) {
-          try {
-            // Здесь должен быть API для отправки файлов в чат
-            // await chatApi.sendFile(selectedChat.id, file);
-            console.log('Отправка файла:', file.name);
-          } catch (error) {
-            console.error('Ошибка отправки файла:', error);
-            antMessage.error(`Не удалось отправить файл ${file.name}`);
-          }
+      const textForFirst = messageText.trim();
+      const filesToSend = [...attachedFiles].filter((f) => {
+        if (!f) return false;
+        if (typeof f.size === 'number' && f.size <= 0) {
+          antMessage.error(`Файл "${f.name}" пустой и не будет отправлен`);
+          return false;
         }
-      }
-      
-      // Обновляем сообщения в текущем чате
-      setSelectedChat(prev => prev ? {
-        ...prev,
-        messages: [...prev.messages, newMessage]
-      } : null);
+        return true;
+      });
 
-      // Обновляем список чатов
-      setChatList(prev => prev.map(chat => 
-        chat.id === selectedChat.id ? {
-          ...chat,
-          last_message: {
-            text: messageText || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
-            sender_id: newMessage.sender_id,
-            created_at: newMessage.created_at
-          },
-          last_message_time: newMessage.created_at
-        } : chat
-      ));
+      let createdMessages: Message[] = [];
+      if (filesToSend.length > 0) {
+        createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, textForFirst, filesToSend);
+      } else {
+        const msg = await chatApi.sendMessage(selectedChat.id, textForFirst);
+        createdMessages = msg ? [msg] : [];
+      }
+
+      if (createdMessages.length > 0) {
+        const lastMessage = createdMessages[createdMessages.length - 1];
+
+        setSelectedChat(prev => prev ? {
+          ...prev,
+          messages: [...prev.messages, ...createdMessages]
+        } : null);
+
+        setChatList(prev => prev.map(chat =>
+          chat.id === selectedChat.id
+            ? {
+                ...chat,
+                last_message: {
+                  text: messageText.trim() || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
+                  sender_id: lastMessage.sender_id,
+                  created_at: lastMessage.created_at
+                },
+                last_message_time: lastMessage.created_at
+              }
+            : chat
+        ));
+      }
 
       setMessageText('');
       setAttachedFiles([]);
@@ -196,6 +202,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const handleFileSelect = (file: File) => {
+    if (typeof file.size === 'number' && file.size <= 0) {
+      antMessage.error('Передаваемый файл пуст');
+      return false;
+    }
+
     // Проверяем размер файла (максимум 10 МБ)
     const maxSize = 10 * 1024 * 1024; // 10 МБ
     if (file.size > maxSize) {
@@ -550,14 +561,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         border: msg.is_mine ? 'none' : '1px solid #e5e7eb'
                       }}
                     >
-                      <Text style={{ 
-                        fontSize: isMobile ? 13 : 14, 
-                        color: msg.is_mine ? '#ffffff' : '#1f2937',
-                        display: 'block',
-                        marginBottom: 4
-                      }}>
-                        {msg.text}
-                      </Text>
+                      {msg.text ? (
+                        <Text style={{ 
+                          fontSize: isMobile ? 13 : 14, 
+                          color: msg.is_mine ? '#ffffff' : '#1f2937',
+                          display: 'block',
+                          marginBottom: 4
+                        }}>
+                          {msg.text}
+                        </Text>
+                      ) : null}
+                      {msg.file_url && msg.file_name ? (
+                        <div style={{ marginTop: msg.text ? 8 : 0, marginBottom: 4 }}>
+                          <a
+                            href={msg.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ 
+                              color: msg.is_mine ? '#fff' : '#1890ff',
+                              fontSize: isMobile ? 12 : 13
+                            }}
+                          >
+                            📎 {msg.file_name}
+                          </a>
+                        </div>
+                      ) : null}
                       <Text style={{ 
                         fontSize: isMobile ? 10 : 11, 
                         color: msg.is_mine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
@@ -674,8 +702,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 <Upload
                   beforeUpload={handleFileSelect}
                   showUploadList={false}
-                  multiple={false}
-                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                  multiple
+                  accept=".doc,.docx,.pdf,.rtf,.txt,.odt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z"
                 >
                   <Button
                     type="text"

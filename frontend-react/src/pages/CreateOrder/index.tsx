@@ -3,12 +3,21 @@ import { Form, Input, InputNumber, Select, Button, Card, Typography, message, Da
 import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { catalogApi } from '../../api/catalog';
 import { ordersApi } from '../../api/orders';
 import dayjs from 'dayjs';
 import styles from './CreateOrder.module.css';
 
 const { Title } = Typography;
+
+const ALLOWED_FILE_EXTENSIONS = [
+  'doc', 'docx', 'pdf', 'rtf', 'txt',
+  'ppt', 'pptx',
+  'xls', 'xlsx', 'csv',
+  'dwg', 'dxf', 'cdr', 'cdw', 'bak',
+  'jpg', 'jpeg', 'png', 'bmp', 'svg',
+];
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
@@ -58,13 +67,12 @@ const CreateOrder: React.FC = () => {
     },
   });
 
-  // Мутация для создания заказа
+  // Мутация для создания заказа (редирект делаем в onFinish после загрузки всех файлов)
   const createOrderMutation = useMutation({
     mutationFn: (data: any) => ordersApi.createOrder(data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       message.success('Заказ успешно создан!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      navigate(`/orders/${data.id}`);
     },
     onError: (error: any) => {
       console.error('Ошибка создания заказа:', error);
@@ -72,11 +80,8 @@ const CreateOrder: React.FC = () => {
     },
   });
 
-  console.log('CreateOrder component rendering');
-
   const onFinish = async (values: any) => {
     try {
-      // Подготавливаем данные для отправки
       const orderData = {
         title: values.title,
         description: values.description,
@@ -84,30 +89,42 @@ const CreateOrder: React.FC = () => {
         subject_id: values.subject,
         work_type_id: values.work_type,
         budget: values.budget,
-        custom_topic: values.title, // Используем название как тему
+        custom_topic: values.title,
       };
 
-      console.log('Создание заказа с данными:', orderData);
-      
-      // Создаем заказ
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
-      
-      // Если есть файлы, загружаем их
+
       if (fileList.length > 0) {
-        console.log('Загрузка файлов к заказу...');
-        for (const file of fileList) {
+        const total = fileList.length;
+        for (let i = 0; i < fileList.length; i++) {
+          const item = fileList[i];
+          // Ant Design Upload хранит реальный File в originFileObj
+          const rawFile = (item as any)?.originFileObj ?? item;
+          if (!(rawFile instanceof File)) {
+            message.warning(`Файл ${i + 1}: неверный объект, пропуск`);
+            continue;
+          }
           try {
-            await ordersApi.uploadOrderFile(createdOrder.id, file, {
+            await ordersApi.uploadOrderFile(createdOrder.id, rawFile, {
               file_type: 'task',
               description: 'Файл задания'
             });
+            if (total > 1) {
+              message.loading({ content: `Загружено файлов: ${i + 1} из ${total}`, key: 'upload', duration: 0 });
+            }
           } catch (error) {
             console.error('Ошибка загрузки файла:', error);
-            message.warning(`Не удалось загрузить файл ${file.name}`);
+            const errMsg = (error as any)?.response?.data?.detail || (error as any)?.response?.data?.file?.[0] || (error as Error)?.message;
+            message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: 'uploadErr' });
           }
         }
+        if (total > 1) {
+          message.destroy('upload');
+        }
+        queryClient.invalidateQueries({ queryKey: ['order', String(createdOrder.id)] });
       }
-      
+
+      navigate(`/orders/${createdOrder.id}`, { state: { from: '/orders-feed' } });
     } catch (error) {
       console.error('Ошибка при создании заказа:', error);
     }
@@ -287,21 +304,9 @@ const CreateOrder: React.FC = () => {
                     return Upload.LIST_IGNORE as any;
                   }
                   
-                  // Проверяем допустимые типы файлов
-                  const allowedTypes = [
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'text/plain',
-                    'image/jpeg',
-                    'image/jpg',
-                    'image/png',
-                    'application/zip',
-                    'application/x-rar-compressed',
-                  ];
-                  
-                  if (!allowedTypes.includes(file.type)) {
-                    message.error('Неподдерживаемый тип файла');
+                  const ext = file.name.split('.').pop()?.toLowerCase() || '';
+                  if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
+                    message.error('Неподдерживаемый формат файла');
                     return Upload.LIST_IGNORE as any;
                   }
                   
@@ -318,7 +323,7 @@ const CreateOrder: React.FC = () => {
                 </p>
                 <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
                 <p className="ant-upload-hint">
-                  Поддерживаются документы (PDF, DOC, DOCX), изображения (JPG, PNG), архивы (ZIP, RAR)
+                  Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg
                 </p>
               </Upload.Dragger>
             </Form.Item>
