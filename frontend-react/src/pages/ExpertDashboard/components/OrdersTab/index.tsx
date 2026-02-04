@@ -39,11 +39,11 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     }
   }, [userProfile?.role]);
 
-  // Загружаем размещенные заказы пользователя (только для клиентов)
+  // Загружаем размещённые заказы пользователя (заказы, где он заказчик)
   const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
     queryKey: ['user-orders'],
     queryFn: () => ordersApi.getClientOrders(),
-    enabled: !!userProfile && userProfile.role === 'client',
+    enabled: !!userProfile,
   });
 
   // Загружаем доступные заказы (лента)

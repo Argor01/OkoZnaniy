@@ -8,8 +8,6 @@ import { catalogApi } from '../../api/catalog';
 import { authApi } from '../../api/auth';
 import { useNotifications } from '../../hooks/useNotifications';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../config/orderStatuses';
-import { SUBJECTS } from '../../config/subjects';
-import { WORK_TYPES } from '../../config/workTypes';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
@@ -280,7 +278,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              {SUBJECTS.map((subject) => (
+              {(fetchedSubjects || []).map((subject: any) => (
                 <Select.Option key={subject.id} value={subject.id}>
                   {subject.name}
                 </Select.Option>
@@ -297,7 +295,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              {WORK_TYPES.map((workType) => (
+              {(workTypes || []).map((workType: any) => (
                 <Select.Option key={workType.id} value={workType.id}>
                   {workType.name}
                 </Select.Option>

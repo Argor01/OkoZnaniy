@@ -168,15 +168,10 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def client_orders(self, request):
         """
-        Получение всех заказов клиента с фильтрацией
+        Получение заказов, размещённых текущим пользователем (где он заказчик).
+        Доступно любому авторизованному пользователю — показываем заказы по полю client.
         """
         user = request.user
-        if user.role != 'client':
-            return Response(
-                {'error': 'Доступно только для клиентов'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         orders = user.client_orders.prefetch_related('bids__expert', 'files', 'comments').all()
         
         # Фильтрация по статусу
