@@ -535,15 +535,16 @@ const OrdersFeed: React.FC = () => {
                       };
 
                       return (
-                        <Tooltip key={file.id} title={`Скачать ${file.filename} (${file.file_size || 'размер неизвестен'})`}>
+                        <Tooltip key={file.id} title={`Открыть ${file.filename} (${file.file_size || 'размер неизвестен'})`}>
                           <Tag 
                             icon={getFileIcon(file.filename)}
                             className={styles.fileTag}
                             onClick={() => {
-                              if (file.file_url || file.file) {
-                                window.open(file.file_url || file.file, '_blank');
+                              const url = file.view_url || file.file_url || file.file;
+                              if (url) {
+                                window.open(url, '_blank');
                               } else {
-                                message.warning('Файл недоступен для скачивания');
+                                message.warning('Файл недоступен для просмотра');
                               }
                             }}
                           >

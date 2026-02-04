@@ -285,7 +285,7 @@ const WorkDetail: React.FC = () => {
                   {work.files.map((file: any, index: number) => (
                     <a 
                       key={index} 
-                      href={file.file || file} 
+                      href={file.view_url || file.file_url || file.file || file} 
                       target="_blank" 
                       rel="noopener noreferrer"
                     >

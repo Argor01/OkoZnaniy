@@ -3,11 +3,14 @@ import { apiClient } from './client';
 export interface OrderFile {
   id: number;
   file_url: string | null;
+  view_url?: string | null;
+  download_url?: string | null;
   filename: string;
   file_type: string;
   file_type_display: string;
   uploaded_by: { id: number; username: string };
   description?: string | null;
+
   created_at: string;
   file_size?: string;
 }

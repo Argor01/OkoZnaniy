@@ -5,11 +5,14 @@ from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTyp
 from apps.catalog.services import PricingService
 from apps.users.serializers import UserSerializer
 from django.utils import timezone
+from rest_framework.reverse import reverse
 
 class OrderFileSerializer(serializers.ModelSerializer):
     uploaded_by = UserSerializer(read_only=True)
     file_type_display = serializers.CharField(source='get_file_type_display', read_only=True)
     file_url = serializers.SerializerMethodField()
+    view_url = serializers.SerializerMethodField()
+    download_url = serializers.SerializerMethodField()
     filename = serializers.CharField(read_only=True)
     file_size = serializers.SerializerMethodField()
 
@@ -17,7 +20,7 @@ class OrderFileSerializer(serializers.ModelSerializer):
         model = OrderFile
         fields = [
             'id', 'file', 'file_type', 'file_type_display', 'uploaded_by',
-            'created_at', 'description', 'file_url', 'filename', 'file_size'
+            'created_at', 'description', 'file_url', 'view_url', 'download_url', 'filename', 'file_size'
         ]
         read_only_fields = ['uploaded_by', 'created_at']
 
@@ -27,6 +30,26 @@ class OrderFileSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.file.url)
         return None
+
+    def get_view_url(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+        return reverse(
+            'order-files-view',
+            kwargs={'order_pk': obj.order_id, 'pk': obj.pk},
+            request=request,
+        )
+
+    def get_download_url(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+        return reverse(
+            'order-files-download',
+            kwargs={'order_pk': obj.order_id, 'pk': obj.pk},
+            request=request,
+        )
 
     def get_file_size(self, obj):
         if obj.file and hasattr(obj.file, 'size'):

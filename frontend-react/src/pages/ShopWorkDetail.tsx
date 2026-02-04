@@ -330,12 +330,13 @@ const ShopWorkDetail: React.FC = () => {
                           type="link"
                           icon={<DownloadOutlined />}
                           onClick={() => {
-                            if (file.file) {
-                              window.open(file.file, '_blank');
+                            const url = file.view_url || file.file_url || file.file;
+                            if (url) {
+                              window.open(url, '_blank');
                             }
                           }}
                         >
-                          Скачать
+                          Открыть
                         </Button>
                       ]}
                     >

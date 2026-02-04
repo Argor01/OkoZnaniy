@@ -186,6 +186,15 @@ class ExpertStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
                     queryset = ExpertStatistics.objects.filter(expert_id=expert_id)
                 except User.DoesNotExist:
                     pass
+            else:
+                # Обновляем статистику при запросе, чтобы фронт получал актуальные данные
+                try:
+                    stats = queryset.select_related('expert').first()
+                    if stats:
+                        stats.update_statistics()
+                except Exception:
+                    # Не ломаем запрос статистики из-за ошибок пересчёта
+                    pass
         
         if self.request.user.is_staff:
             return queryset

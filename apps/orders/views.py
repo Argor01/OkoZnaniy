@@ -526,6 +526,23 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         
         return response
 
+    @action(detail=True, methods=['get'])
+    def view(self, request, order_pk=None, pk=None):
+        order_file = self.get_object()
+        file_handle = order_file.file.open()
+
+        # Получаем MIME-тип файла
+        content_type, _ = mimetypes.guess_type(order_file.file.name)
+        if not content_type:
+            content_type = 'application/octet-stream'
+
+        # Inline просмотр в браузере (если браузер умеет отображать данный тип)
+        response = FileResponse(file_handle, content_type=content_type)
+        response['Content-Length'] = order_file.file.size
+        response['Content-Disposition'] = f'inline; filename="{order_file.filename()}"'
+
+        return response
+
 class OrderCommentViewSet(viewsets.ModelViewSet):
     serializer_class = OrderCommentSerializer
     permission_classes = [permissions.IsAuthenticated]

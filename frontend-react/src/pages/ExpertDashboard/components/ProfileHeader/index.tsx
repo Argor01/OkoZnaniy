@@ -1,7 +1,8 @@
 import React from 'react';
-import { Avatar, Typography, Rate, Space, Button } from 'antd';
+import { Avatar, Typography, Rate, Space, Button, Tooltip } from 'antd';
 import { UserOutlined, EditOutlined } from '@ant-design/icons';
 import { UserProfile } from '../../types';
+import { formatCurrency } from '../../../../utils/formatters';
 import styles from '../../ExpertDashboard.module.css';
 
 const { Title, Text } = Typography;
@@ -101,22 +102,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div>
               <Text style={{ fontSize: 14, color: '#1f2937' }}>
                 Статистика работ:{' '}
-                <span className={styles.statsNumber}>{expertStats?.total_orders || 0}</span>
+                <Tooltip title="Процент заказов, выполненных со статусом «Завершено» среди всех ваших заказов" placement="top">
+                  <span className={styles.statsNumberSuccess}>
+                    {expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}%
+                  </span>
+                </Tooltip>
                 {' | '}
-                <span className={styles.statsNumberCompleted}>{expertStats?.completed_orders || 0}</span>
-                {' | '}
-                <span className={styles.statsNumberSuccess}>{expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}</span>%
-                {' | '}
-                <span className={styles.statsNumberEarnings}>
-                  {(() => {
-                    const val = expertStats?.total_earnings;
-                    if (!val) return '0 ₽';
-                    const num = typeof val === 'string' ? Number(val.replace(/,/g, '')) : Number(val);
-                    return !isNaN(num) 
-                      ? num.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ₽'
-                      : '0 ₽';
-                  })()}
-                </span>
+                <Tooltip title="Сумма ваших выплат (заработано) по завершенным заказам" placement="top">
+                  <span className={styles.statsNumberEarnings}>
+                    {formatCurrency(expertStats?.total_earnings || 0)}
+                  </span>
+                </Tooltip>
               </Text>
             </div>
           </div>
