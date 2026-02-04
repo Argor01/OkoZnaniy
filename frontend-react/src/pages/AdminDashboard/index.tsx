@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations, useSupportRequests, useRequestProcessing, useAdminChats } from './hooks';
+import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
 import { AdminLayout } from './components/Layout';
 import { 
   OverviewSection, 
@@ -14,8 +14,6 @@ import {
   UserRolesSection,
   AllOrdersSection,
   ProblemOrdersSection,
-  WorksModerationSection,
-  CategoriesSubjectsSection,
   NewClaimsSection,
   InProgressClaimsSection,
   CompletedClaimsSection,
@@ -83,11 +81,11 @@ const AdminDashboard: React.FC = () => {
   } = useAdminMutations();
 
   // Хук для поддержки
-  const supportData = useSupportRequests();
+  // const supportData = useSupportRequests(); // Временно отключено до реализации API
 
   // 🆕 Новые хуки для обработки запросов
-  const requestProcessingData = useRequestProcessing();
-  const adminChatsData = useAdminChats();
+  // const requestProcessingData = useRequestProcessing(); // Временно отключено до реализации API
+  // const adminChatsData = useAdminChats(); // Временно отключено до реализации API
 
   // Показываем спиннер во время загрузки
   if (loading) {
@@ -252,37 +250,6 @@ const AdminDashboard: React.FC = () => {
           />
         );
 
-      // Управление магазином
-      case 'works_moderation':
-        return (
-          <WorksModerationSection
-            works={[]}
-            loading={false}
-            onApproveWork={(workId, notes) => console.log('Approve work:', workId, notes)}
-            onRejectWork={(workId, reason, notes) => console.log('Reject work:', workId, reason, notes)}
-            onViewWork={(workId) => console.log('View work:', workId)}
-            onDownloadWork={(workId) => console.log('Download work:', workId)}
-          />
-        );
-      
-      case 'categories_subjects':
-        return (
-          <CategoriesSubjectsSection
-            subjects={[]}
-            categories={[]}
-            workTypes={[]}
-            loading={false}
-            onCreateSubject={(subjectData) => console.log('Create subject:', subjectData)}
-            onUpdateSubject={(subjectId, subjectData) => console.log('Update subject:', subjectId, subjectData)}
-            onDeleteSubject={(subjectId) => console.log('Delete subject:', subjectId)}
-            onCreateCategory={(categoryData) => console.log('Create category:', categoryData)}
-            onUpdateCategory={(categoryId, categoryData) => console.log('Update category:', categoryId, categoryData)}
-            onDeleteCategory={(categoryId) => console.log('Delete category:', categoryId)}
-            onCreateWorkType={(workTypeData) => console.log('Create work type:', workTypeData)}
-            onUpdateWorkType={(workTypeId, workTypeData) => console.log('Update work type:', workTypeId, workTypeData)}
-            onDeleteWorkType={(workTypeId) => console.log('Delete work type:', workTypeId)}
-          />
-        );
 
       // Новые секции поддержки
       case 'support_open':
@@ -290,12 +257,12 @@ const AdminDashboard: React.FC = () => {
       case 'support_completed':
         return (
           <SupportRequestsSection
-            requests={supportData.requests}
-            loading={supportData.loading}
+            requests={[]}
+            loading={false}
             selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
-            onStatusChange={(status) => supportData.handleStatusChange(status)}
-            onRequestClick={supportData.handleRequestSelect}
-            onTakeRequest={supportData.takeRequest}
+            onStatusChange={(status) => console.log('Status change:', status)}
+            onRequestClick={(request) => console.log('Request click:', request)}
+            onTakeRequest={(requestId) => console.log('Take request:', requestId)}
           />
         );
 
@@ -538,13 +505,13 @@ const AdminDashboard: React.FC = () => {
       
       {/* Модальное окно поддержки */}
       <SupportRequestModal
-        request={supportData.selectedRequest}
-        messages={supportData.requestMessages}
-        isOpen={!!supportData.selectedRequest}
-        onClose={supportData.handleRequestClose}
-        onTakeRequest={supportData.takeRequest}
-        onCompleteRequest={supportData.completeRequest}
-        onSendMessage={supportData.sendMessage}
+        request={null}
+        messages={[]}
+        isOpen={false}
+        onClose={() => console.log('Close modal')}
+        onTakeRequest={async (requestId) => { console.log('Take request:', requestId); return true; }}
+        onCompleteRequest={async (requestId, resolution) => { console.log('Complete request:', requestId, resolution); return true; }}
+        onSendMessage={async (requestId, message) => { console.log('Send message:', requestId, message); return true; }}
       />
     </AdminLayout>
   );

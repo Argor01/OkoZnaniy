@@ -415,7 +415,6 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       key: 'admin',
       render: (record: CompletedRequest) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar size="small">{record.assigned_admin.first_name[0]}</Avatar>
           <div>
             <div style={{ fontSize: '13px' }}>
               {record.assigned_admin.first_name} {record.assigned_admin.last_name}

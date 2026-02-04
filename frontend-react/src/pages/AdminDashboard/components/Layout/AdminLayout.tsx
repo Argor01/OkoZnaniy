@@ -2,7 +2,6 @@ import React from 'react';
 import { Layout } from 'antd';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
-import { AdminFooter } from './AdminFooter';
 import { useAdminUI } from '../../hooks';
 import type { User } from '../../../../api/auth';
 import type { MenuKey } from '../../types';
@@ -20,7 +19,7 @@ interface AdminLayoutProps {
 
 /**
  * Основной лейаут админской панели
- * Включает сайдбар, хедер, контент и футер
+ * Включает сайдбар, хедер и контент
  */
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   user,
@@ -82,9 +81,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             {children}
           </div>
         </Content>
-
-        {/* Футер */}
-        {!isMobile && <AdminFooter />}
       </Layout>
     </Layout>
   );

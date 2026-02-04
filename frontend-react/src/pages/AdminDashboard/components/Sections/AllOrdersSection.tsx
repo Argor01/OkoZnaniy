@@ -4,8 +4,7 @@ import {
   Table, 
   Button, 
   Tag, 
-  Space, 
-  Avatar, 
+  Space,
   Typography, 
   Input,
   Select,
@@ -20,17 +19,8 @@ import {
   Divider
 } from 'antd';
 import { 
-  UserOutlined, 
   EyeOutlined,
   SearchOutlined,
-  FilterOutlined,
-  FileTextOutlined,
-  DollarOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  StopOutlined,
-  PlayCircleOutlined,
   EditOutlined,
   MessageOutlined
 } from '@ant-design/icons';
@@ -335,17 +325,14 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       key: 'client',
       width: 180,
       render: (record: Order) => (
-        <Space>
-          <Avatar size="small" icon={<UserOutlined />} />
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>
-              {record.client.first_name} {record.client.last_name}
-            </div>
-            <Text type="secondary" style={{ fontSize: '11px' }}>
-              @{record.client.username}
-            </Text>
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 500 }}>
+            {record.client.first_name} {record.client.last_name}
           </div>
-        </Space>
+          <Text type="secondary" style={{ fontSize: '11px' }}>
+            @{record.client.username}
+          </Text>
+        </div>
       ),
     },
     {
@@ -354,17 +341,14 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       width: 180,
       render: (record: Order) => (
         record.expert ? (
-          <Space>
-            <Avatar size="small" icon={<UserOutlined />} />
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>
-                {record.expert.first_name} {record.expert.last_name}
-              </div>
-              <Text type="secondary" style={{ fontSize: '11px' }}>
-                @{record.expert.username}
-              </Text>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 500 }}>
+              {record.expert.first_name} {record.expert.last_name}
             </div>
-          </Space>
+            <Text type="secondary" style={{ fontSize: '11px' }}>
+              @{record.expert.username}
+            </Text>
+          </div>
         ) : (
           <Text type="secondary">Не назначен</Text>
         )
@@ -381,17 +365,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
         </Tag>
       ),
     },
-    {
-      title: 'Приоритет',
-      dataIndex: 'priority',
-      key: 'priority',
-      width: 100,
-      render: (priority: string) => (
-        <Tag color={getPriorityColor(priority)} size="small">
-          {getPriorityLabel(priority)}
-        </Tag>
-      ),
-    },
+
     {
       title: 'Бюджет',
       dataIndex: 'budget',
@@ -425,47 +399,8 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
         );
       },
     },
-    {
-      title: 'Прогресс',
-      key: 'progress',
-      width: 100,
-      render: (record: Order) => (
-        <div>
-          <div style={{ fontSize: '12px', marginBottom: 2 }}>
-            {record.completion_percentage}%
-          </div>
-          <div style={{ 
-            width: '60px', 
-            height: '4px', 
-            backgroundColor: '#f0f0f0', 
-            borderRadius: '2px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: `${record.completion_percentage}%`,
-              height: '100%',
-              backgroundColor: record.completion_percentage === 100 ? '#52c41a' : '#1890ff',
-              transition: 'width 0.3s'
-            }} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Активность',
-      key: 'activity',
-      width: 100,
-      render: (record: Order) => (
-        <Space direction="vertical" size={0}>
-          <Text type="secondary" style={{ fontSize: '11px' }}>
-            📎 {record.files_count} файлов
-          </Text>
-          <Text type="secondary" style={{ fontSize: '11px' }}>
-            💬 {record.messages_count} сообщений
-          </Text>
-        </Space>
-      ),
-    },
+
+
     {
       title: 'Действия',
       key: 'actions',
@@ -609,7 +544,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
               `${range[0]}-${range[1]} из ${total} заказов`
           }}
           locale={{ emptyText: 'Заказы не найдены' }}
-          scroll={{ x: 1400 }}
+          scroll={{ x: 1000 }}
           size="small"
         />
       </Card>

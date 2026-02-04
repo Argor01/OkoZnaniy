@@ -135,7 +135,7 @@
 
 .earningsTable :global(.ant-pagination) {
   margin: 16px;
-  text-align: right;
+  text-align: center;
 }
 
 /* Адаптивность для планшетов */

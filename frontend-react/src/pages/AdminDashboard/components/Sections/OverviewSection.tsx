@@ -124,55 +124,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
         </Col>
       </Row>
 
-      {/* Дополнительная информация */}
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24}>
-          <Card className={styles.summaryCard}>
-            <Title level={4}>Сводка системы</Title>
-            <Divider />
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={12} md={6}>
-                <div className={styles.summaryItem}>
-                  <Text type="secondary">Общий оборот</Text>
-                  <Title level={3} className={styles.summaryValue}>
-                    {stats.totalEarnings.toLocaleString()} ₽
-                  </Title>
-                </div>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <div className={styles.summaryItem}>
-                  <Text type="secondary">Активных партнеров</Text>
-                  <Title level={3} className={styles.summaryValue}>
-                    {partners.filter(p => p.is_verified).length}
-                  </Title>
-                </div>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <div className={styles.summaryItem}>
-                  <Text type="secondary">Средний доход партнера</Text>
-                  <Title level={3} className={styles.summaryValue}>
-                    {stats.totalPartners > 0 
-                      ? Math.round(stats.totalEarnings / stats.totalPartners).toLocaleString()
-                      : 0
-                    } ₽
-                  </Title>
-                </div>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <div className={styles.summaryItem}>
-                  <Text type="secondary">Процент решенных споров</Text>
-                  <Title level={3} className={styles.summaryValue}>
-                    {stats.totalDisputes > 0 
-                      ? Math.round((stats.resolvedDisputes / stats.totalDisputes) * 100)
-                      : 0
-                    }%
-                  </Title>
-                </div>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+
     </div>
   );
 };

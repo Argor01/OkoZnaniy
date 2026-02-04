@@ -1,5 +1,4 @@
 import {
-  BarChartOutlined,
   TeamOutlined,
   DollarOutlined,
   FileTextOutlined,
@@ -13,13 +12,10 @@ import {
   CommentOutlined,
   UserOutlined,        // 🆕 Для обработки запросов
   ShoppingOutlined,    // Для управления заказами
-  ShopOutlined,        // Для управления магазином
   StopOutlined,        // Для заблокированных пользователей
   SafetyOutlined,      // Для ролей и прав
   UnorderedListOutlined, // Для списка заказов
   ExclamationCircleOutlined, // Для проблемных заказов
-  EyeOutlined,         // Для модерации
-  TagsOutlined,        // Для категорий
 } from '@ant-design/icons';
 import type { MenuKey } from '../types/admin.types';
 
@@ -36,11 +32,6 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
-  {
-    key: 'overview',
-    icon: BarChartOutlined,
-    label: 'Обзор',
-  },
   {
     key: 'partners',
     icon: TeamOutlined,
@@ -97,24 +88,7 @@ export const menuItems: MenuItem[] = [
       },
     ],
   },
-  // Управление магазином
-  {
-    key: 'shop_management' as MenuKey,
-    icon: ShopOutlined,
-    label: 'Управление магазином',
-    children: [
-      {
-        key: 'works_moderation',
-        icon: EyeOutlined,
-        label: 'Модерация работ',
-      },
-      {
-        key: 'categories_subjects',
-        icon: TagsOutlined,
-        label: 'Категории и предметы',
-      },
-    ],
-  },
+
   {
     key: 'claims' as MenuKey,
     icon: FileTextOutlined,
@@ -210,41 +184,39 @@ export const titleMap: Record<MenuKey, string> = {
   partners: 'Партнеры',
   earnings: 'Начисления',
   disputes: 'Споры',
-  // Управление пользователями
-  all_users: 'Все пользователи',
-  blocked_users: 'Заблокированные пользователи',
-  user_roles: 'Роли и права',
-  // Управление заказами
-  all_orders: 'Все заказы',
-  problem_orders: 'Проблемные заказы',
-  // Управление магазином
-  works_moderation: 'Модерация работ',
-  categories_subjects: 'Категории и предметы',
   // Обращения
+  claims: 'Обращения',
   new_claims: 'Новые обращения',
   in_progress_claims: 'В работе',
   completed_claims: 'Завершённые',
   pending_approval: 'Ожидают решения',
   claims_processing: 'Обработка претензий',
   communication: 'Коммуникация с дирекцией',
+  // Управление пользователями
+  users_management: 'Управление пользователями',
+  all_users: 'Все пользователи',
+  blocked_users: 'Заблокированные пользователи',
+  user_roles: 'Роли и права',
+  // Управление заказами
+  orders_management: 'Управление заказами',
+  all_orders: 'Все заказы',
+  problem_orders: 'Проблемные заказы',
   // Поддержка
+  support: 'Поддержка клиентов',
   support_open: 'Открытые запросы',
   support_in_progress: 'В процессе решения',
   support_completed: 'Выполненные',
   admin_chats: 'Чаты администраторов',
-  // Новые пункты меню
+  // Обработка запросов
+  request_processing: 'Обработка запросов',
   request_processing_open: 'Открытые запросы клиентов',
   request_processing_progress: 'Запросы в процессе решения',
   request_processing_completed: 'Выполненные запросы',
-  // Родительские элементы (не отображаются, но нужны для типизации)
-  users_management: 'Управление пользователями',
-  orders_management: 'Управление заказами',
-  shop_management: 'Управление магазином',
 };
 
 // Маппинг для определения родительского меню
 export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
-  const childToParent: Record<MenuKey, MenuKey> = {
+  const childToParent: Partial<Record<MenuKey, MenuKey>> = {
     // Управление пользователями
     all_users: 'users_management' as MenuKey,
     blocked_users: 'users_management' as MenuKey,
@@ -252,9 +224,7 @@ export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
     // Управление заказами
     all_orders: 'orders_management' as MenuKey,
     problem_orders: 'orders_management' as MenuKey,
-    // Управление магазином
-    works_moderation: 'shop_management' as MenuKey,
-    categories_subjects: 'shop_management' as MenuKey,
+
     // Обращения
     new_claims: 'claims' as MenuKey,
     in_progress_claims: 'claims' as MenuKey,

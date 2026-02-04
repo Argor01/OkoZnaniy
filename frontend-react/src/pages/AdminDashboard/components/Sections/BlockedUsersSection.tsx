@@ -189,7 +189,6 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
       width: 250,
       render: (record: BlockedUser) => (
         <Space>
-          <Avatar icon={<UserOutlined />} />
           <div>
             <div><strong>{record.username}</strong></div>
             <Text type="secondary" style={{ fontSize: '12px' }}>

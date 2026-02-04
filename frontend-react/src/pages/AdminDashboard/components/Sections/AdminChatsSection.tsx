@@ -36,7 +36,9 @@ import dayjs from 'dayjs';
 const { Text, Title } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const { TextArea } = Input;interface ChatMessage {
+const { TextArea } = Input;
+
+interface ChatMessage {
   id: number;
   text: string;
   sender: {
@@ -79,9 +81,7 @@ interface ChatRoom {
   unread_count: number;
   is_muted: boolean;
   is_archived: boolean;
-}
-
-interface AdminChatsSectionProps {
+}interface AdminChatsSectionProps {
   chatRooms?: ChatRoom[];
   currentUserId?: number;
   loading?: boolean;
@@ -113,8 +113,9 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const [roomSettingsModalVisible, setRoomSettingsModalVisible] = useState(false);
   
   const [createRoomForm] = Form.useForm();
-  const [inviteUserForm] = Form.useForm(); 
- // Мок данные для демонстрации
+  const [inviteUserForm] = Form.useForm();
+
+  // Мок данные для демонстрации
   const mockChatRooms: ChatRoom[] = [
     {
       id: 1,
@@ -173,8 +174,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       unread_count: 2,
       is_muted: false,
       is_archived: false,
-    },
-    {
+    },   
+ {
       id: 2,
       name: 'Техническая поддержка',
       description: 'Координация работы службы технической поддержки',
@@ -258,8 +259,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       sent_at: '2024-02-04T08:15:00Z',
       is_pinned: false,
       is_system: false,
-    },
-    {
+    },  
+  {
       id: 3,
       text: 'Всем привет! Сегодня обрабатываем претензии по приоритету',
       sender: {
@@ -323,9 +324,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       message.success('Файл загружен');
     }
     return false; // Предотвращаем автоматическую загрузку
-  };
-
-  // Функции для отображения
+  }; 
+ // Функции для отображения
   const getRoomTypeColor = (type: string) => {
     const colors = {
       general: 'blue',
@@ -344,12 +344,14 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       private: 'Личный',
     };
     return texts[type as keyof typeof texts] || 'Другой';
-  };  return (
+  };
+
+  return (
     <div style={{ height: '80vh', display: 'flex' }}>
       {/* Левая панель - список чатов */}
       <Card 
         style={{ width: 350, marginRight: 16, height: '100%' }}
-        bodyStyle={{ padding: 0, height: '100%', display: 'flex', flexDirection: 'column' }}
+        styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
       >
         <div style={{ padding: 16, borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -388,13 +390,21 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 <List.Item.Meta
                   avatar={
                     <Badge count={room.unread_count}>
-                      <Avatar 
-                        icon={<TeamOutlined />} 
-                        style={{ backgroundColor: getRoomTypeColor(room.type) }}
-                      />
+                      <div style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%', 
+                        backgroundColor: getRoomTypeColor(room.type),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white'
+                      }}>
+                        <TeamOutlined />
+                      </div>
                     </Badge>
-                  }
-                  title={
+                  }   
+               title={
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: room.unread_count > 0 ? 'bold' : 'normal' }}>
                         {room.name}
@@ -430,12 +440,13 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             )}
           />
         </div>
-      </Card>  
-    {/* Правая панель - чат */}
+      </Card>
+
+      {/* Правая панель - чат */}
       {selectedRoom ? (
         <Card 
           style={{ flex: 1, height: '100%' }}
-          bodyStyle={{ padding: 0, height: '100%', display: 'flex', flexDirection: 'column' }}
+          styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
         >
           {/* Заголовок чата */}
           <div style={{ 
@@ -476,12 +487,11 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 />
               </Tooltip>
             </Space>
-          </div>
-
-          {/* Список участников */}
+          </div>       
+   {/* Список участников */}
           <div style={{ padding: '8px 16px', borderBottom: '1px solid #f0f0f0' }}>
-            <Avatar.Group maxCount={8}>
-              {selectedRoom.participants.map(participant => (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {selectedRoom.participants.slice(0, 8).map(participant => (
                 <Tooltip 
                   key={participant.id}
                   title={`${participant.first_name} ${participant.last_name} (${participant.role}) ${participant.online ? '• Онлайн' : `• Был(а) ${dayjs(participant.last_seen).fromNow()}`}`}
@@ -491,19 +501,39 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     status={participant.online ? 'success' : 'default'}
                     offset={[-2, 2]}
                   >
-                    <Avatar 
-                      src={participant.avatar}
-                      style={{ 
-                        backgroundColor: participant.online ? '#52c41a' : '#d9d9d9',
-                        cursor: 'pointer'
-                      }}
-                    >
+                    <div style={{ 
+                      width: 32, 
+                      height: 32, 
+                      borderRadius: '50%', 
+                      backgroundColor: participant.online ? '#52c41a' : '#d9d9d9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}>
                       {participant.first_name[0]}{participant.last_name[0]}
-                    </Avatar>
+                    </div>
                   </Badge>
                 </Tooltip>
               ))}
-            </Avatar.Group>
+              {selectedRoom.participants.length > 8 && (
+                <div style={{ 
+                  width: 32, 
+                  height: 32, 
+                  borderRadius: '50%', 
+                  backgroundColor: '#f0f0f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  color: '#666'
+                }}>
+                  +{selectedRoom.participants.length - 8}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Область сообщений */}
@@ -523,15 +553,20 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   gap: 8
                 }}
               >
-                <Avatar 
-                  src={msg.sender.avatar}
-                  style={{ 
-                    backgroundColor: msg.is_system ? '#666' : '#1890ff',
-                    flexShrink: 0
-                  }}
-                >
+                <div style={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: '50%', 
+                  backgroundColor: msg.is_system ? '#666' : '#1890ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '14px',
+                  flexShrink: 0
+                }}>
                   {msg.is_system ? 'S' : `${msg.sender.first_name[0]}${msg.sender.last_name[0]}`}
-                </Avatar>
+                </div>
                 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* Информация об отправителе */}
@@ -553,9 +588,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     {msg.is_pinned && (
                       <PushpinOutlined style={{ color: '#faad14', fontSize: '12px' }} />
                     )}
-                  </div>
-
-                  {/* Текст сообщения */}
+                  </div>  
+                {/* Текст сообщения */}
                   <div style={{ 
                     backgroundColor: msg.is_system ? '#f6f6f6' : 'white',
                     padding: '8px 12px',
@@ -574,8 +608,9 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 </div>
               </div>
             ))}
-          </div>   
-       {/* Поле ввода сообщения */}
+          </div>
+
+          {/* Поле ввода сообщения */}
           <div style={{ 
             padding: 16, 
             borderTop: '1px solid #f0f0f0',
@@ -644,9 +679,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             </Text>
           </div>
         </Card>
-      )}
-
-      {/* Модальные окна */}
+      )}     
+ {/* Модальные окна */}
       
       {/* Создание нового чата */}
       <Modal
@@ -716,9 +750,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             </Select>
           </Form.Item>
         </Form>
-      </Modal>
-
-      {/* Настройки чата */}
+      </Modal>      
+{/* Настройки чата */}
       <Modal
         title="Настройки чата"
         open={roomSettingsModalVisible}

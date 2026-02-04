@@ -378,7 +378,6 @@ const messagesData = messages.length > 0 ? messages : mockMessages;
       key: 'sender',
       render: (record: DirectorMessage) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar src={record.sender.avatar} icon={<UserOutlined />} />
           <div>
             <div style={{ fontWeight: 'bold' }}>
               {record.sender.first_name} {record.sender.last_name}

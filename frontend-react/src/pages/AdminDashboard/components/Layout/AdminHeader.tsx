@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Typography, Button, Space, Avatar, Dropdown } from 'antd';
+import { Layout, Typography, Button, Dropdown } from 'antd';
 import { 
   LogoutOutlined, 
   MenuOutlined, 
@@ -103,18 +103,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             type="text"
             className={styles.userButton}
           >
-            <Space>
-              <Avatar 
-                size={isMobile ? 'small' : 'default'}
-                icon={<UserOutlined />}
-                className={styles.avatar}
-              />
-              {!isMobile && (
-                <Text className={styles.username}>
-                  {user.first_name || user.username}
-                </Text>
-              )}
-            </Space>
+            <Text className={styles.username}>
+              Администратор
+            </Text>
           </Button>
         </Dropdown>
 

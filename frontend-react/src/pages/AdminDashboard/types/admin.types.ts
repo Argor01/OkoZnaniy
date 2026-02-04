@@ -73,16 +73,19 @@ export type MenuKey =
   | 'partners' 
   | 'earnings'
   | 'disputes'
+  | 'claims'
   | 'new_claims'
   | 'in_progress_claims'
   | 'completed_claims'
   | 'pending_approval'
   | 'claims_processing'
   | 'communication'
+  | 'support'
   | 'support_open'
   | 'support_in_progress'
   | 'support_completed'
   | 'admin_chats'
+  | 'request_processing'
   | 'request_processing_open'      // 🆕 Открытые запросы
   | 'request_processing_progress'  // 🆕 В процессе решения
   | 'request_processing_completed' // 🆕 Выполненные запросы
@@ -92,10 +95,7 @@ export type MenuKey =
   | 'user_roles'
   | 'orders_management'           // Управление заказами
   | 'all_orders'
-  | 'problem_orders'
-  | 'shop_management'             // Управление магазином
-  | 'works_moderation'
-  | 'categories_subjects';
+  | 'problem_orders';
 
 // Типы для таблиц
 export interface TableColumn {

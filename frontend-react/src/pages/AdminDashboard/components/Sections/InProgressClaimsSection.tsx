@@ -427,23 +427,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         </div>
       ),
     },
-    {
-      title: 'Прогресс',
-      key: 'progress',
-      width: 120,
-      render: (record: Claim) => (
-        <div>
-          <Progress 
-            percent={record.progress_percentage} 
-            size="small"
-            strokeColor={getProgressColor(record.progress_percentage)}
-          />
-          <Text style={{ fontSize: '11px', color: '#666' }}>
-            {record.progress_percentage}%
-          </Text>
-        </div>
-      ),
-    },
+
     {
       title: 'Сообщения',
       dataIndex: 'messages_count',
