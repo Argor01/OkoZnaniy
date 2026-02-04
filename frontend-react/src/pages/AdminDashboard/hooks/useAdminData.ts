@@ -9,7 +9,28 @@ import type { Partner, PartnerEarning, Dispute, Arbitrator, AdminStats } from '.
  * Хук для получения всех данных админской панели
  * Вынесен из монолитного AdminDashboard.tsx
  */
-export const useAdminData = (canLoadData: boolean) => {
+export const useAdminData = (canLoadData: boolean): {
+  partners: Partner[];
+  earnings: PartnerEarning[];
+  disputes: Dispute[];
+  arbitrators: Arbitrator[];
+  stats: AdminStats;
+  partnersLoading: boolean;
+  earningsLoading: boolean;
+  disputesLoading: boolean;
+  arbitratorsLoading: boolean;
+  isLoading: boolean;
+  partnersError: any;
+  earningsError: any;
+  disputesError: any;
+  arbitratorsError: any;
+  hasErrors: any;
+  refetchPartners: () => void;
+  refetchEarnings: () => void;
+  refetchDisputes: () => void;
+  refetchArbitrators: () => void;
+  refetchAll: () => void;
+} => {
   // Партнеры
   const partnersQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_PARTNERS,
@@ -88,7 +109,7 @@ export const useAdminData = (canLoadData: boolean) => {
   });
 
   // Арбитры
-  const arbitratorsQuery = useQuery<Arbitrator[]>({
+  const arbitratorsQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_ARBITRATORS,
     queryFn: adminApi.getArbitrators,
     enabled: canLoadData,
@@ -144,10 +165,10 @@ export const useAdminData = (canLoadData: boolean) => {
 
   return {
     // Данные
-    partners: partnersQuery.data || [],
-    earnings: earningsQuery.data || [],
-    disputes: disputesQuery.data || [],
-    arbitrators: arbitratorsQuery.data || [],
+    partners: partnersQuery.data || [] as Partner[],
+    earnings: earningsQuery.data || [] as PartnerEarning[],
+    disputes: disputesQuery.data || [] as Dispute[],
+    arbitrators: arbitratorsQuery.data || [] as Arbitrator[],
     stats: calculateStats(),
 
     // Состояние загрузки

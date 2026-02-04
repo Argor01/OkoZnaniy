@@ -90,13 +90,8 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className={styles.rightSection}>
-        {/* Информация о пользователе */}
-        {!isMobile && (
-          <Space className={styles.userInfo}>
-            <Text type="secondary">Добро пожаловать,</Text>
-            <Text strong>{user.first_name || user.username}</Text>
-          </Space>
-        )}
+        {/* Информация о пользователе - убрано приветствие */}
+        {/* Приветственное сообщение убрано по запросу */}
 
         {/* Dropdown с меню пользователя */}
         <Dropdown

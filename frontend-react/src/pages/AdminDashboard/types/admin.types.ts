@@ -82,7 +82,20 @@ export type MenuKey =
   | 'support_open'
   | 'support_in_progress'
   | 'support_completed'
-  | 'admin_chats';
+  | 'admin_chats'
+  | 'request_processing_open'      // 🆕 Открытые запросы
+  | 'request_processing_progress'  // 🆕 В процессе решения
+  | 'request_processing_completed' // 🆕 Выполненные запросы
+  | 'users_management'            // Управление пользователями
+  | 'all_users'
+  | 'blocked_users'
+  | 'user_roles'
+  | 'orders_management'           // Управление заказами
+  | 'all_orders'
+  | 'problem_orders'
+  | 'shop_management'             // Управление магазином
+  | 'works_moderation'
+  | 'categories_subjects';
 
 // Типы для таблиц
 export interface TableColumn {

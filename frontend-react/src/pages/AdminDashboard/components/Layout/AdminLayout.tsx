@@ -52,16 +52,18 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         />
       )}
 
-      {/* Drawer для мобильных */}
-      <AdminSidebar
-        selectedMenu={selectedMenu}
-        openKeys={openKeys}
-        onMenuSelect={onMenuSelect}
-        onOpenChange={setOpenKeys}
-        isMobile={isMobile}
-        drawerVisible={drawerVisible}
-        onDrawerClose={closeDrawer}
-      />
+      {/* Drawer для мобильных - рендерится только для мобильных */}
+      {isMobile && (
+        <AdminSidebar
+          selectedMenu={selectedMenu}
+          openKeys={openKeys}
+          onMenuSelect={onMenuSelect}
+          onOpenChange={setOpenKeys}
+          isMobile={isMobile}
+          drawerVisible={drawerVisible}
+          onDrawerClose={closeDrawer}
+        />
+      )}
 
       <Layout className={styles.contentLayout}>
         {/* Хедер */}

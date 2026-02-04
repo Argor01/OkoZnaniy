@@ -42,9 +42,11 @@ import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';
 import BecomePartner from './pages/BecomePartner';
 import PartnerDashboard from './pages/PartnerDashboard';
-// Новая модульная версия AdminDashboard
-import AdminDashboard from './pages/AdminDashboard';
-// Старая версия остается как резервная копия: './pages/AdminDashboard.tsx'
+// Возвращаемся к основному AdminDashboard
+import AdminDashboard from './pages/AdminDashboard/index';
+// Временный компонент больше не нужен
+// import AdminDashboard from './pages/NewAdminDashboard';
+// Старая версия переименована в AdminDashboard.tsx.backup
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';

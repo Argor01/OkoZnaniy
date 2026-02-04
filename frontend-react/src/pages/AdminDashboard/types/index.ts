@@ -39,6 +39,26 @@ export type {
   SupportCategory,
 } from './support.types';
 
+// 🆕 Типы для обработки запросов клиентов
+export type {
+  CustomerRequest,
+  RequestMessage,
+  RequestAttachment,
+  MessageAttachment,
+  InternalCommunication,
+  AdminUser,
+  AdminChatGroup,
+  RequestStats,
+  RequestStatus,
+  RequestPriority,
+  RequestCategory,
+  CreateRequestForm,
+  UpdateRequestForm,
+  SendMessageForm,
+  RequestsApiResponse,
+  MessagesApiResponse,
+} from './requests.types';
+
 export {
   ClaimStatus,
   ClaimType,

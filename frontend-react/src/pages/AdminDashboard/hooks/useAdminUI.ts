@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Grid } from 'antd';
 import type { MenuKey, Partner, Dispute } from '../types';
+import type { CustomerRequest, AdminChatGroup } from '../types/requests.types'; // 🆕
 import { useConfirmModal } from './useConfirmModal';
 
 const { useBreakpoint } = Grid;
@@ -30,6 +31,20 @@ export const useAdminUI = () => {
   // Новые состояния модальных окон
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
+  
+  // 🆕 Состояния модальных окон для запросов
+  const [requestModalVisible, setRequestModalVisible] = useState(false);
+  const [selectedCustomerRequest, setSelectedCustomerRequest] = useState<CustomerRequest | null>(null);
+  
+  // 🆕 Состояния модальных окон для чатов администраторов
+  const [adminChatModalVisible, setAdminChatModalVisible] = useState(false);
+  const [selectedAdminChat, setSelectedAdminChat] = useState<AdminChatGroup | null>(null);
+  
+  // 🆕 Состояние модального окна создания чата
+  const [createChatModalVisible, setCreateChatModalVisible] = useState(false);
+  
+  // 🆕 Состояние модального окна внутренней коммуникации
+  const [internalCommModalVisible, setInternalCommModalVisible] = useState(false);
 
   // Адаптивность
   const isMobile = !screens.md;
@@ -45,6 +60,16 @@ export const useAdminUI = () => {
     // Если выбран подпункт обращений, открываем меню "Обращения"
     if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(key)) {
       setOpenKeys(['claims']);
+    }
+    
+    // 🆕 Если выбран подпункт поддержки, открываем меню "Поддержка клиентов"
+    if (['support_open', 'support_in_progress', 'support_completed'].includes(key)) {
+      setOpenKeys(['support']);
+    }
+    
+    // 🆕 Если выбран подпункт обработки запросов, открываем меню "Обработка запросов"
+    if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(key)) {
+      setOpenKeys(['request_processing']);
     }
     
     // Закрываем drawer на мобильных после выбора
@@ -226,7 +251,52 @@ export const useAdminUI = () => {
     setDrawerVisible(false);
     closePartnerModals();
     closeDisputeModals();
+    // 🆕 Сброс новых модальных окон
+    closeRequestModal();
+    closeAdminChatModal();
+    closeCreateChatModal();
+    closeInternalCommModal();
   }, [closePartnerModals, closeDisputeModals]);
+
+  // 🆕 Обработчики для модальных окон запросов
+  const handleViewRequest = useCallback((request: CustomerRequest) => {
+    setSelectedCustomerRequest(request);
+    setRequestModalVisible(true);
+  }, []);
+
+  const closeRequestModal = useCallback(() => {
+    setRequestModalVisible(false);
+    setSelectedCustomerRequest(null);
+  }, []);
+
+  // 🆕 Обработчики для модальных окон чатов администраторов
+  const handleViewAdminChat = useCallback((chat: AdminChatGroup) => {
+    setSelectedAdminChat(chat);
+    setAdminChatModalVisible(true);
+  }, []);
+
+  const closeAdminChatModal = useCallback(() => {
+    setAdminChatModalVisible(false);
+    setSelectedAdminChat(null);
+  }, []);
+
+  // 🆕 Обработчики для модального окна создания чата
+  const openCreateChatModal = useCallback(() => {
+    setCreateChatModalVisible(true);
+  }, []);
+
+  const closeCreateChatModal = useCallback(() => {
+    setCreateChatModalVisible(false);
+  }, []);
+
+  // 🆕 Обработчики для модального окна внутренней коммуникации
+  const openInternalCommModal = useCallback(() => {
+    setInternalCommModalVisible(true);
+  }, []);
+
+  const closeInternalCommModal = useCallback(() => {
+    setInternalCommModalVisible(false);
+  }, []);
 
   return {
     // Состояние меню
@@ -265,6 +335,28 @@ export const useAdminUI = () => {
     isDisputeModalOpen,
     closePartnerModal,
     closeDisputeModal,
+    
+    // 🆕 Модальные окна запросов
+    requestModalVisible,
+    selectedCustomerRequest,
+    handleViewRequest,
+    closeRequestModal,
+    
+    // 🆕 Модальные окна чатов администраторов
+    adminChatModalVisible,
+    selectedAdminChat,
+    handleViewAdminChat,
+    closeAdminChatModal,
+    
+    // 🆕 Модальное окно создания чата
+    createChatModalVisible,
+    openCreateChatModal,
+    closeCreateChatModal,
+    
+    // 🆕 Модальное окно внутренней коммуникации
+    internalCommModalVisible,
+    openInternalCommModal,
+    closeInternalCommModal,
     
     // Обработчики действий
     handlePartnerSave,

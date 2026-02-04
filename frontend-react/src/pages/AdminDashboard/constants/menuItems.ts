@@ -11,6 +11,15 @@ import {
   InboxOutlined,
   CustomerServiceOutlined,
   CommentOutlined,
+  UserOutlined,        // 🆕 Для обработки запросов
+  ShoppingOutlined,    // Для управления заказами
+  ShopOutlined,        // Для управления магазином
+  StopOutlined,        // Для заблокированных пользователей
+  SafetyOutlined,      // Для ролей и прав
+  UnorderedListOutlined, // Для списка заказов
+  ExclamationCircleOutlined, // Для проблемных заказов
+  EyeOutlined,         // Для модерации
+  TagsOutlined,        // Для категорий
 } from '@ant-design/icons';
 import type { MenuKey } from '../types/admin.types';
 
@@ -46,6 +55,65 @@ export const menuItems: MenuItem[] = [
     key: 'disputes',
     icon: FileTextOutlined,
     label: 'Споры',
+  },
+  // Управление пользователями
+  {
+    key: 'users_management' as MenuKey,
+    icon: UserOutlined,
+    label: 'Управление пользователями',
+    children: [
+      {
+        key: 'all_users',
+        icon: TeamOutlined,
+        label: 'Все пользователи',
+      },
+      {
+        key: 'blocked_users',
+        icon: StopOutlined,
+        label: 'Заблокированные',
+      },
+      {
+        key: 'user_roles',
+        icon: SafetyOutlined,
+        label: 'Роли и права',
+      },
+    ],
+  },
+  // Управление заказами
+  {
+    key: 'orders_management' as MenuKey,
+    icon: ShoppingOutlined,
+    label: 'Управление заказами',
+    children: [
+      {
+        key: 'all_orders',
+        icon: UnorderedListOutlined,
+        label: 'Все заказы',
+      },
+      {
+        key: 'problem_orders',
+        icon: ExclamationCircleOutlined,
+        label: 'Проблемные заказы',
+      },
+    ],
+  },
+  // Управление магазином
+  {
+    key: 'shop_management' as MenuKey,
+    icon: ShopOutlined,
+    label: 'Управление магазином',
+    children: [
+      {
+        key: 'works_moderation',
+        icon: EyeOutlined,
+        label: 'Модерация работ',
+      },
+      {
+        key: 'categories_subjects',
+        icon: TagsOutlined,
+        label: 'Категории и предметы',
+      },
+    ],
   },
   {
     key: 'claims' as MenuKey,
@@ -112,6 +180,29 @@ export const menuItems: MenuItem[] = [
     icon: CommentOutlined,
     label: 'Чаты администраторов',
   },
+  // Новый раздел обработки запросов
+  {
+    key: 'request_processing' as MenuKey,
+    icon: UserOutlined,
+    label: 'Обработка запросов',
+    children: [
+      {
+        key: 'request_processing_open',
+        icon: InboxOutlined,
+        label: 'Открытые запросы',
+      },
+      {
+        key: 'request_processing_progress',
+        icon: ClockCircleOutlined,
+        label: 'В процессе решения',
+      },
+      {
+        key: 'request_processing_completed',
+        icon: CheckCircleOutlined,
+        label: 'Выполненные',
+      },
+    ],
+  },
 ];
 
 export const titleMap: Record<MenuKey, string> = {
@@ -119,28 +210,64 @@ export const titleMap: Record<MenuKey, string> = {
   partners: 'Партнеры',
   earnings: 'Начисления',
   disputes: 'Споры',
+  // Управление пользователями
+  all_users: 'Все пользователи',
+  blocked_users: 'Заблокированные пользователи',
+  user_roles: 'Роли и права',
+  // Управление заказами
+  all_orders: 'Все заказы',
+  problem_orders: 'Проблемные заказы',
+  // Управление магазином
+  works_moderation: 'Модерация работ',
+  categories_subjects: 'Категории и предметы',
+  // Обращения
   new_claims: 'Новые обращения',
   in_progress_claims: 'В работе',
   completed_claims: 'Завершённые',
   pending_approval: 'Ожидают решения',
   claims_processing: 'Обработка претензий',
   communication: 'Коммуникация с дирекцией',
+  // Поддержка
   support_open: 'Открытые запросы',
   support_in_progress: 'В процессе решения',
   support_completed: 'Выполненные',
   admin_chats: 'Чаты администраторов',
+  // Новые пункты меню
+  request_processing_open: 'Открытые запросы клиентов',
+  request_processing_progress: 'Запросы в процессе решения',
+  request_processing_completed: 'Выполненные запросы',
+  // Родительские элементы (не отображаются, но нужны для типизации)
+  users_management: 'Управление пользователями',
+  orders_management: 'Управление заказами',
+  shop_management: 'Управление магазином',
 };
 
 // Маппинг для определения родительского меню
 export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
   const childToParent: Record<MenuKey, MenuKey> = {
+    // Управление пользователями
+    all_users: 'users_management' as MenuKey,
+    blocked_users: 'users_management' as MenuKey,
+    user_roles: 'users_management' as MenuKey,
+    // Управление заказами
+    all_orders: 'orders_management' as MenuKey,
+    problem_orders: 'orders_management' as MenuKey,
+    // Управление магазином
+    works_moderation: 'shop_management' as MenuKey,
+    categories_subjects: 'shop_management' as MenuKey,
+    // Обращения
     new_claims: 'claims' as MenuKey,
     in_progress_claims: 'claims' as MenuKey,
     completed_claims: 'claims' as MenuKey,
     pending_approval: 'claims' as MenuKey,
+    // Поддержка
     support_open: 'support' as MenuKey,
     support_in_progress: 'support' as MenuKey,
     support_completed: 'support' as MenuKey,
+    // Новые дочерние пункты меню
+    request_processing_open: 'request_processing' as MenuKey,
+    request_processing_progress: 'request_processing' as MenuKey,
+    request_processing_completed: 'request_processing' as MenuKey,
   };
   
   return childToParent[menuKey] || null;

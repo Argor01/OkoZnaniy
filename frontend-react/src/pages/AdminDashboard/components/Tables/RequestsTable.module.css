@@ -1,0 +1,349 @@
+/* Стили для таблицы запросов */
+
+.tableContainer {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  width: 300px;
+  min-width: 200px;
+}
+
+.filterSelect {
+  min-width: 120px;
+}
+
+.tableInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.totalCount {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Основная таблица */
+.table {
+  .ant-table-thead > tr > th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #262626;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background: #f0f9ff;
+  }
+  
+  .ant-table-tbody > tr > td {
+    padding: 12px 16px;
+    vertical-align: middle;
+  }
+}
+
+/* Стили для ячеек */
+.requestId {
+  font-weight: 600;
+  color: #1890ff;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.titleCell {
+  .title {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #262626;
+    line-height: 1.4;
+  }
+  
+  .category {
+    margin-top: 4px;
+  }
+}
+
+.customerCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .customerInfo {
+    min-width: 0;
+    flex: 1;
+    
+    .customerName {
+      font-weight: 500;
+      color: #262626;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .customerEmail {
+      font-size: 12px;
+      color: #8c8c8c;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.assignedAdmin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .adminName {
+    font-size: 12px;
+    color: #262626;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.unassigned {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-style: italic;
+}
+
+.messagesCount {
+  text-align: center;
+  
+  .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    background: #e6f7ff;
+    color: #1890ff;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 8px;
+  }
+}
+
+.timeCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+  
+  .timeText {
+    white-space: nowrap;
+  }
+}
+
+.noMessages {
+  font-size: 12px;
+  color: #bfbfbf;
+  font-style: italic;
+}
+
+/* Кнопки действий */
+.actionButton {
+  color: #1890ff;
+  border-color: transparent;
+  
+  &:hover {
+    color: #40a9ff;
+    background: #f0f9ff;
+  }
+}
+
+.takeButton {
+  font-size: 12px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 4px;
+}
+
+/* Специальные строки */
+.urgentRow {
+  background: #fff2f0 !important;
+  border-left: 3px solid #ff4d4f;
+  
+  &:hover {
+    background: #ffebe8 !important;
+  }
+}
+
+.newRow {
+  background: #f6ffed !important;
+  
+  &:hover {
+    background: #f0f9e8 !important;
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+  .tableHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .filters {
+    justify-content: flex-start;
+  }
+  
+  .tableInfo {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .tableHeader {
+    padding: 12px 16px;
+  }
+  
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .searchInput {
+    width: 100%;
+  }
+  
+  .filterSelect {
+    width: 100%;
+  }
+  
+  .table {
+    .ant-table {
+      font-size: 12px;
+    }
+    
+    .ant-table-tbody > tr > td {
+      padding: 8px 12px;
+    }
+  }
+  
+  .customerCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .titleCell .title {
+    font-size: 13px;
+  }
+  
+  .messagesCount .count {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tableHeader {
+    padding: 8px 12px;
+  }
+  
+  .totalCount {
+    font-size: 12px;
+  }
+  
+  .actionButton {
+    font-size: 11px;
+    padding: 0 6px;
+  }
+  
+  .takeButton {
+    font-size: 11px;
+    height: 24px;
+    padding: 0 8px;
+  }
+}
+
+/* Состояния загрузки */
+.table .ant-table-placeholder {
+  padding: 40px 20px;
+  
+  .ant-empty-description {
+    color: #8c8c8c;
+  }
+}
+
+.table .ant-spin-container {
+  min-height: 200px;
+}
+
+/* Пагинация */
+.table .ant-pagination {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.table .ant-pagination-total-text {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+/* Сортировка */
+.table .ant-table-column-sorter {
+  color: #bfbfbf;
+}
+
+.table .ant-table-column-sorter-up.active,
+.table .ant-table-column-sorter-down.active {
+  color: #1890ff;
+}
+
+/* Фильтры */
+.table .ant-table-filter-trigger {
+  color: #bfbfbf;
+}
+
+.table .ant-table-filter-trigger.active {
+  color: #1890ff;
+}
+
+/* Скроллбар */
+.table .ant-table-body::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table .ant-table-body::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.table .ant-table-body::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.table .ant-table-body::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}

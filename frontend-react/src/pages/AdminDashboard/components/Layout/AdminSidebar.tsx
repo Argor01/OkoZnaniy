@@ -45,6 +45,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     })),
   }));
 
+  // 🆕 Временный лог для отладки
+  console.log('🔍 Menu items loaded:', menuItems.length, menuItems.map(i => i.label));
+  console.log('🔍 Full menu structure:', JSON.stringify(menuItems, null, 2));
+
   const handleMenuClick = ({ key }: { key: string }) => {
     onMenuSelect(key as MenuKey);
   };

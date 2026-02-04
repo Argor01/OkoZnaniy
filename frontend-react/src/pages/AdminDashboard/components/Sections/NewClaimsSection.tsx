@@ -1,0 +1,630 @@
+import React, { useState } from 'react';
+import { 
+  Card, 
+  Table, 
+  Button, 
+  Tag, 
+  Space, 
+  Typography, 
+  Input,
+  Modal,
+  message,
+  Tooltip,
+  Select,
+  DatePicker,
+  Form,
+  Divider,
+  Avatar,
+  Badge,
+  Popconfirm
+} from 'antd';
+import { 
+  EyeOutlined,
+  MessageOutlined,
+  UserOutlined,
+  ClockCircleOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  ExclamationCircleOutlined
+} from '@ant-design/icons';
+import dayjs from 'dayjs';
+
+const { Text, Title, Paragraph } = Typography;
+const { Search } = Input;
+const { Option } = Select;
+const { RangePicker } = DatePicker;
+const { TextArea } = Input;
+
+interface Claim {
+  id: number;
+  title: string;
+  description: string;
+  user: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar?: string;
+  };
+  category: 'technical' | 'billing' | 'order' | 'account' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'new' | 'in_progress' | 'completed' | 'rejected';
+  created_at: string;
+  updated_at: string;
+  attachments?: string[];
+  messages_count: number;
+  assigned_admin?: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+  };
+}
+
+interface NewClaimsSectionProps {
+  claims?: Claim[];
+  loading?: boolean;
+  onViewClaim?: (claimId: number) => void;
+  onAssignClaim?: (claimId: number, adminId: number) => void;
+  onTakeInWork?: (claimId: number) => void;
+  onRejectClaim?: (claimId: number, reason: string) => void;
+  onSendMessage?: (claimId: number, message: string) => void;
+}
+
+export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
+  claims = [],
+  loading = false,
+  onViewClaim,
+  onAssignClaim,
+  onTakeInWork,
+  onRejectClaim,
+  onSendMessage,
+}) => {
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+  
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [rejectModalVisible, setRejectModalVisible] = useState(false);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+  
+  const [rejectForm] = Form.useForm();
+  const [messageForm] = Form.useForm();
+
+  // Мок данные для демонстрации
+  const mockClaims: Claim[] = [
+    {
+      id: 1,
+      title: 'Проблема с оплатой заказа',
+      description: 'Не могу оплатить заказ через банковскую карту. Постоянно выдает ошибку "Транзакция отклонена". Пробовал разные карты.',
+      user: {
+        id: 101,
+        username: 'student123',
+        first_name: 'Анна',
+        last_name: 'Петрова',
+        email: 'anna.petrova@email.com',
+      },
+      category: 'billing',
+      priority: 'high',
+      status: 'new',
+      created_at: '2024-02-04T08:30:00Z',
+      updated_at: '2024-02-04T08:30:00Z',
+      messages_count: 0,
+    },
+    {
+      id: 2,
+      title: 'Не приходят уведомления на email',
+      description: 'Уже неделю не получаю уведомления о новых сообщениях и статусе заказов на почту.',
+      user: {
+        id: 102,
+        username: 'expert_math',
+        first_name: 'Михаил',
+        last_name: 'Сидоров',
+        email: 'mikhail.sidorov@email.com',
+      },
+      category: 'technical',
+      priority: 'medium',
+      status: 'new',
+      created_at: '2024-02-04T07:15:00Z',
+      updated_at: '2024-02-04T07:15:00Z',
+      messages_count: 1,
+    },
+    {
+      id: 3,
+      title: 'Заказ завис в статусе "В работе"',
+      description: 'Заказ №1234 уже 5 дней висит в статусе "В работе", но эксперт не отвечает на сообщения.',
+      user: {
+        id: 103,
+        username: 'client_ivan',
+        first_name: 'Иван',
+        last_name: 'Козлов',
+        email: 'ivan.kozlov@email.com',
+      },
+      category: 'order',
+      priority: 'urgent',
+      status: 'new',
+      created_at: '2024-02-04T06:45:00Z',
+      updated_at: '2024-02-04T06:45:00Z',
+      messages_count: 3,
+      attachments: ['screenshot1.png', 'order_details.pdf'],
+    },
+    {
+      id: 4,
+      title: 'Не могу войти в аккаунт',
+      description: 'Забыл пароль, но письмо для восстановления не приходит. Проверил спам - там тоже нет.',
+      user: {
+        id: 104,
+        username: 'newuser2024',
+        first_name: 'Елена',
+        last_name: 'Волкова',
+        email: 'elena.volkova@email.com',
+      },
+      category: 'account',
+      priority: 'medium',
+      status: 'new',
+      created_at: '2024-02-04T05:20:00Z',
+      updated_at: '2024-02-04T05:20:00Z',
+      messages_count: 0,
+    },
+    {
+      id: 5,
+      title: 'Вопрос по комиссии партнерской программы',
+      description: 'Не понимаю, как рассчитывается комиссия с рефералов. В личном кабинете показывает одну сумму, а в выплатах другую.',
+      user: {
+        id: 105,
+        username: 'partner_alex',
+        first_name: 'Александр',
+        last_name: 'Новиков',
+        email: 'alex.novikov@email.com',
+      },
+      category: 'other',
+      priority: 'low',
+      status: 'new',
+      created_at: '2024-02-04T04:10:00Z',
+      updated_at: '2024-02-04T04:10:00Z',
+      messages_count: 2,
+    },
+  ];
+
+  const claimsData = claims.length > 0 ? claims : mockClaims;
+
+  // Фильтрация данных
+  const filteredClaims = claimsData.filter(claim => {
+    const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                         claim.description.toLowerCase().includes(searchText.toLowerCase()) ||
+                         `${claim.user.first_name} ${claim.user.last_name}`.toLowerCase().includes(searchText.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || claim.category === selectedCategory;
+    const matchesPriority = selectedPriority === 'all' || claim.priority === selectedPriority;
+    
+    let matchesDate = true;
+    if (dateRange) {
+      const claimDate = dayjs(claim.created_at);
+      matchesDate = claimDate.isAfter(dateRange[0]) && claimDate.isBefore(dateRange[1]);
+    }
+    
+    return matchesSearch && matchesCategory && matchesPriority && matchesDate;
+  });
+
+  // Обработчики
+  const handleViewClaim = (claim: Claim) => {
+    setSelectedClaim(claim);
+    setViewModalVisible(true);
+    onViewClaim?.(claim.id);
+  };
+
+  const handleTakeInWork = (claim: Claim) => {
+    onTakeInWork?.(claim.id);
+    message.success(`Обращение "${claim.title}" взято в работу`);
+  };
+
+  const handleRejectClaim = (claim: Claim) => {
+    setSelectedClaim(claim);
+    rejectForm.resetFields();
+    setRejectModalVisible(true);
+  };
+
+  const handleRejectSubmit = async () => {
+    try {
+      const values = await rejectForm.validateFields();
+      if (selectedClaim) {
+        onRejectClaim?.(selectedClaim.id, values.reason);
+        message.success(`Обращение "${selectedClaim.title}" отклонено`);
+        setRejectModalVisible(false);
+      }
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  const handleSendMessage = (claim: Claim) => {
+    setSelectedClaim(claim);
+    messageForm.resetFields();
+    setMessageModalVisible(true);
+  };
+
+  const handleMessageSubmit = async () => {
+    try {
+      const values = await messageForm.validateFields();
+      if (selectedClaim) {
+        onSendMessage?.(selectedClaim.id, values.message);
+        message.success('Сообщение отправлено');
+        setMessageModalVisible(false);
+      }
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  // Функции для отображения
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      technical: 'blue',
+      billing: 'green',
+      order: 'orange',
+      account: 'purple',
+      other: 'gray',
+    };
+    return colors[category as keyof typeof colors] || 'gray';
+  };
+
+  const getCategoryText = (category: string) => {
+    const texts = {
+      technical: 'Техническая',
+      billing: 'Оплата',
+      order: 'Заказ',
+      account: 'Аккаунт',
+      other: 'Другое',
+    };
+    return texts[category as keyof typeof texts] || 'Другое';
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const colors = {
+      low: 'green',
+      medium: 'orange',
+      high: 'red',
+      urgent: 'magenta',
+    };
+    return colors[priority as keyof typeof colors] || 'gray';
+  };
+
+  const getPriorityText = (priority: string) => {
+    const texts = {
+      low: 'Низкий',
+      medium: 'Средний',
+      high: 'Высокий',
+      urgent: 'Срочно',
+    };
+    return texts[priority as keyof typeof texts] || 'Средний';
+  };
+
+  const columns = [
+    {
+      title: 'Обращение',
+      key: 'claim',
+      render: (record: Claim) => (
+        <div>
+          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+            {record.title}
+          </div>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            {record.description.length > 100 
+              ? `${record.description.substring(0, 100)}...` 
+              : record.description
+            }
+          </Text>
+          <div style={{ marginTop: 8 }}>
+            <Tag color={getCategoryColor(record.category)}>
+              {getCategoryText(record.category)}
+            </Tag>
+            <Tag color={getPriorityColor(record.priority)}>
+              {getPriorityText(record.priority)}
+            </Tag>
+            {record.attachments && record.attachments.length > 0 && (
+              <Tag color="blue">📎 {record.attachments.length}</Tag>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Пользователь',
+      key: 'user',
+      width: 200,
+      render: (record: Claim) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Avatar 
+            size="small" 
+            icon={<UserOutlined />}
+            src={record.user.avatar}
+          />
+          <div>
+            <div style={{ fontWeight: 500, fontSize: '13px' }}>
+              {record.user.first_name} {record.user.last_name}
+            </div>
+            <Text type="secondary" style={{ fontSize: '11px' }}>
+              @{record.user.username}
+            </Text>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Сообщения',
+      dataIndex: 'messages_count',
+      key: 'messages_count',
+      width: 100,
+      render: (count: number) => (
+        <Badge count={count} showZero>
+          <MessageOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
+        </Badge>
+      ),
+    },
+    {
+      title: 'Создано',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 120,
+      render: (date: string) => (
+        <div style={{ fontSize: '12px' }}>
+          <div>{dayjs(date).format('DD.MM.YYYY')}</div>
+          <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Действия',
+      key: 'actions',
+      width: 200,
+      render: (record: Claim) => (
+        <Space size="small">
+          <Tooltip title="Просмотреть">
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => handleViewClaim(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Взять в работу">
+            <Button 
+              size="small" 
+              type="primary"
+              icon={<CheckOutlined />}
+              onClick={() => handleTakeInWork(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Отправить сообщение">
+            <Button 
+              size="small" 
+              icon={<MessageOutlined />}
+              onClick={() => handleSendMessage(record)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Отклонить обращение?"
+            description="Вы уверены, что хотите отклонить это обращение?"
+            onConfirm={() => handleRejectClaim(record)}
+            okText="Отклонить"
+            cancelText="Отмена"
+          >
+            <Tooltip title="Отклонить">
+              <Button 
+                size="small" 
+                danger
+                icon={<CloseOutlined />}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <Card>
+        <div style={{ marginBottom: 16 }}>
+          <Title level={4}>Новые обращения</Title>
+          <Text type="secondary">
+            Обращения пользователей, ожидающие обработки
+          </Text>
+        </div>
+
+        {/* Фильтры */}
+        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <Search
+            placeholder="Поиск по обращениям"
+            allowClear
+            style={{ width: 300 }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            prefix={<SearchOutlined />}
+          />
+          
+          <Select
+            placeholder="Категория"
+            style={{ width: 150 }}
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+          >
+            <Option value="all">Все категории</Option>
+            <Option value="technical">Техническая</Option>
+            <Option value="billing">Оплата</Option>
+            <Option value="order">Заказ</Option>
+            <Option value="account">Аккаунт</Option>
+            <Option value="other">Другое</Option>
+          </Select>
+
+          <Select
+            placeholder="Приоритет"
+            style={{ width: 120 }}
+            value={selectedPriority}
+            onChange={setSelectedPriority}
+          >
+            <Option value="all">Все</Option>
+            <Option value="urgent">Срочно</Option>
+            <Option value="high">Высокий</Option>
+            <Option value="medium">Средний</Option>
+            <Option value="low">Низкий</Option>
+          </Select>
+
+          <RangePicker
+            placeholder={['От', 'До']}
+            value={dateRange}
+            onChange={setDateRange}
+            style={{ width: 250 }}
+          />
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={filteredClaims}
+          rowKey="id"
+          loading={loading}
+          pagination={{ 
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => 
+              `${range[0]}-${range[1]} из ${total} обращений`
+          }}
+          locale={{ emptyText: 'Новые обращения не найдены' }}
+          size="small"
+        />
+      </Card>
+
+      {/* Модальное окно просмотра обращения */}
+      <Modal
+        title="Детали обращения"
+        open={viewModalVisible}
+        onCancel={() => setViewModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setViewModalVisible(false)}>
+            Закрыть
+          </Button>,
+          <Button 
+            key="take" 
+            type="primary" 
+            icon={<CheckOutlined />}
+            onClick={() => {
+              if (selectedClaim) {
+                handleTakeInWork(selectedClaim);
+                setViewModalVisible(false);
+              }
+            }}
+          >
+            Взять в работу
+          </Button>,
+        ]}
+        width={700}
+      >
+        {selectedClaim && (
+          <div>
+            <div style={{ marginBottom: 16 }}>
+              <Title level={5}>{selectedClaim.title}</Title>
+              <Space>
+                <Tag color={getCategoryColor(selectedClaim.category)}>
+                  {getCategoryText(selectedClaim.category)}
+                </Tag>
+                <Tag color={getPriorityColor(selectedClaim.priority)}>
+                  {getPriorityText(selectedClaim.priority)}
+                </Tag>
+              </Space>
+            </div>
+
+            <Divider />
+
+            <div style={{ marginBottom: 16 }}>
+              <Text strong>Пользователь:</Text>
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Avatar icon={<UserOutlined />} />
+                <div>
+                  <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
+                  <Text type="secondary">@{selectedClaim.user.username}</Text>
+                  <br />
+                  <Text type="secondary">{selectedClaim.user.email}</Text>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <Text strong>Описание:</Text>
+              <Paragraph style={{ marginTop: 8 }}>
+                {selectedClaim.description}
+              </Paragraph>
+            </div>
+
+            {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <Text strong>Вложения:</Text>
+                <div style={{ marginTop: 8 }}>
+                  {selectedClaim.attachments.map((file, index) => (
+                    <Tag key={index} color="blue">📎 {file}</Tag>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+              <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
+              <span>Сообщений: {selectedClaim.messages_count}</span>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Модальное окно отклонения */}
+      <Modal
+        title="Отклонить обращение"
+        open={rejectModalVisible}
+        onOk={handleRejectSubmit}
+        onCancel={() => setRejectModalVisible(false)}
+        okText="Отклонить"
+        cancelText="Отмена"
+        okButtonProps={{ danger: true }}
+      >
+        <Form form={rejectForm} layout="vertical">
+          <Form.Item
+            name="reason"
+            label="Причина отклонения"
+            rules={[{ required: true, message: 'Укажите причину отклонения' }]}
+          >
+            <TextArea 
+              rows={4} 
+              placeholder="Опишите причину отклонения обращения..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Модальное окно отправки сообщения */}
+      <Modal
+        title="Отправить сообщение"
+        open={messageModalVisible}
+        onOk={handleMessageSubmit}
+        onCancel={() => setMessageModalVisible(false)}
+        okText="Отправить"
+        cancelText="Отмена"
+      >
+        <Form form={messageForm} layout="vertical">
+          <Form.Item
+            name="message"
+            label="Сообщение"
+            rules={[{ required: true, message: 'Введите сообщение' }]}
+          >
+            <TextArea 
+              rows={4} 
+              placeholder="Введите ваше сообщение..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
