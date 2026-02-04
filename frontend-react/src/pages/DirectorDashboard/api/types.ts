@@ -161,7 +161,11 @@ export interface RegisterEmployeeRequest {
 
 export interface MonthlyTurnover {
   period?: string;
-  total: number;
+  total?: number;
+  total_turnover?: number;
+  orders_count?: number;
+  start_date?: string;
+  end_date?: string;
   previous_period?: number;
   previousPeriod?: number;
   change?: number;

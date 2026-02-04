@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic, Row, Col, DatePicker, Space, Button } from 'antd';
-import { ArrowUpOutlined } from '@ant-design/icons';
+import { Card, Statistic, Row, Col, DatePicker, Space, Button, Spin } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import {
   LineChart,
   Line,
@@ -12,28 +12,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getMonthlyTurnover } from '../../api/directorApi';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
-
-// Тестовые данные
-const turnoverData = [
-  { date: '01.11', amount: 125000 },
-  { date: '02.11', amount: 142000 },
-  { date: '03.11', amount: 138000 },
-  { date: '04.11', amount: 165000 },
-  { date: '05.11', amount: 155000 },
-  { date: '06.11', amount: 178000 },
-  { date: '07.11', amount: 162000 },
-  { date: '08.11', amount: 195000 },
-  { date: '09.11', amount: 188000 },
-  { date: '10.11', amount: 205000 },
-  { date: '11.11', amount: 225000 },
-  { date: '12.11', amount: 215000 },
-  { date: '13.11', amount: 235000 },
-  { date: '14.11', amount: 248000 },
-  { date: '15.11', amount: 242000 },
-];
 
 const MonthlyTurnover: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -41,6 +24,12 @@ const MonthlyTurnover: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Получаем данные из API
+  const { data: turnoverData, isLoading } = useQuery({
+    queryKey: ['monthly-turnover', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getMonthlyTurnover(dateRange[0].format('YYYY-MM'), dateRange[1].format('YYYY-MM')),
+  });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,7 +41,17 @@ const MonthlyTurnover: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const totalTurnover = turnoverData.reduce((sum, item) => sum + item.amount, 0);
+  const totalTurnover = turnoverData?.total_turnover || 0;
+  const changePercent = turnoverData?.change_percent || 0;
+  const chartData = turnoverData?.daily_data || [];
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -181,16 +180,16 @@ const MonthlyTurnover: React.FC = () => {
           <Card style={{ 
             borderRadius: isMobile ? 8 : 12,
             textAlign: 'center',
-            background: isMobile ? '#f0f9ff' : '#fff',
-            border: isMobile ? '2px solid #1890ff' : '1px solid #d9d9d9'
+            background: isMobile ? (changePercent >= 0 ? '#f0f9ff' : '#fff1f0') : '#fff',
+            border: isMobile ? `2px solid ${changePercent >= 0 ? '#1890ff' : '#ff4d4f'}` : '1px solid #d9d9d9'
           }}>
             <Statistic
               title="Изменение к предыдущему периоду"
-              value={15.3}
-              prefix={<ArrowUpOutlined />}
+              value={Math.abs(changePercent)}
+              prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
               valueStyle={{ 
-                color: '#3f8600',
+                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
                 fontSize: isMobile ? 22 : 24,
                 fontWeight: 700
               }}
@@ -219,7 +218,7 @@ const MonthlyTurnover: React.FC = () => {
         }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
-              data={turnoverData}
+              data={chartData}
               margin={{
                 top: 20,
                 right: isMobile ? 10 : 30,

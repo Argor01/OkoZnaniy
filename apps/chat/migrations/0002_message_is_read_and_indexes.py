@@ -10,11 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='message',
-            name='is_read',
-            field=models.BooleanField(default=False),
-        ),
         migrations.AlterModelOptions(
             name='message',
             options={'ordering': ['created_at']},

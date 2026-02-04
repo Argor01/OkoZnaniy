@@ -9,7 +9,6 @@ import {
   LogoutOutlined,
   CopyOutlined,
   FileTextOutlined,
-  ExperimentOutlined,
   MenuOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -534,17 +533,6 @@ const PartnerDashboard: React.FC = () => {
             minHeight: 'calc(100vh - 64px)',
           }}
         >
-          {!isMobile && (
-            <Alert
-              message="Режим тестовых данных"
-              description="В данный момент используется режим тестовых данных. Все данные отображаются локально для демонстрации функционала."
-              type="info"
-              icon={<ExperimentOutlined />}
-              showIcon
-              style={{ marginBottom: 16 }}
-              closable
-            />
-          )}
           {currentMenuItem?.component}
         </Content>
         {!isMobile && (

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Tabs, Alert } from 'antd';
-import { DollarOutlined, LineChartOutlined, FileTextOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { Card, Tabs } from 'antd';
+import { DollarOutlined, LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
 import MonthlyTurnover from './MonthlyTurnover';
 import NetProfit from './NetProfit';
 import IncomeExpenseDetail from './IncomeExpenseDetail';
@@ -41,15 +41,6 @@ const FinancialStatistics: React.FC = () => {
 
   return (
     <div>
-      <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Финансовые показатели генерируются динамически для демонстрации функционала."
-        type="info"
-        icon={<ExperimentOutlined />}
-        showIcon
-        style={{ marginBottom: 16 }}
-        closable
-      />
       <Card>
         <Tabs defaultActiveKey="turnover" items={items} />
       </Card>

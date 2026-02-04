@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Tabs, Typography, Alert } from 'antd';
-import { TeamOutlined, UserAddOutlined, FileTextOutlined, InboxOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { Card, Tabs, Typography } from 'antd';
+import { TeamOutlined, UserAddOutlined, FileTextOutlined, InboxOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import EmployeeRegistration from './EmployeeRegistration';
 import ExpertApplications from './ExpertApplications';
@@ -74,20 +74,6 @@ const PersonnelManagement: React.FC = () => {
 
   return (
     <div>
-      <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Все операции выполняются локально для демонстрации функционала."
-        type="info"
-        icon={<ExperimentOutlined />}
-        showIcon
-        style={{ 
-          marginBottom: 16,
-          borderRadius: isMobile ? 8 : 12,
-          border: '1px solid #91d5ff',
-          background: 'linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)',
-        }}
-        closable
-      />
       <Card
         style={{
           borderRadius: isMobile ? 8 : 16,

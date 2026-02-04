@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Tabs, Alert } from 'antd';
-import { UserAddOutlined, DollarOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { Card, Tabs } from 'antd';
+import { UserAddOutlined, DollarOutlined } from '@ant-design/icons';
 import PartnerList from './PartnerList';
 import PartnerTurnover from './PartnerTurnover';
 
@@ -32,18 +32,6 @@ const PartnerPanel: React.FC = () => {
 
   return (
     <div>
-      <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Все операции с партнёрами выполняются локально для демонстрации функционала."
-        type="info"
-        icon={<ExperimentOutlined />}
-        showIcon
-        style={{ 
-          marginBottom: 16,
-          borderRadius: isMobile ? 8 : 12
-        }}
-        closable
-      />
       <Card style={{ 
         borderRadius: isMobile ? 8 : 12
       }}>

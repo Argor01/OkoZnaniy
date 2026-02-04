@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -14,6 +15,11 @@ from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.users.models import User, PartnerEarning
+from .models import InternalMessage, InternalMessageAttachment
+from .serializers import (
+    InternalMessageSerializer,
+    InternalMessageCreateSerializer,
+)
 
 
 class IsDirector(permissions.BasePermission):
@@ -382,7 +388,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def turnover(self, request):
-        """Общий оборот за месяц"""
+        """Общий оборот за месяц с детализацией по дням"""
         period = request.query_params.get('period')
         
         if period:
@@ -418,17 +424,57 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
         orders_count = completed_orders.count()
         
+        # Получаем данные по дням
+        daily_data = []
+        current_date = start_date
+        while current_date <= end_date:
+            day_start = current_date
+            day_end = current_date + timedelta(days=1)
+            
+            day_orders = completed_orders.filter(
+                updated_at__gte=day_start,
+                updated_at__lt=day_end
+            )
+            
+            day_turnover = day_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+            
+            daily_data.append({
+                'date': current_date.strftime('%d.%m'),
+                'amount': float(day_turnover)
+            })
+            
+            current_date += timedelta(days=1)
+        
+        # Рассчитываем изменение к предыдущему периоду
+        prev_start = start_date - timedelta(days=(end_date - start_date).days + 1)
+        prev_end = start_date - timedelta(days=1)
+        
+        prev_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=prev_start,
+            updated_at__lte=prev_end
+        )
+        
+        prev_turnover = prev_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+        
+        if prev_turnover > 0:
+            change_percent = float(((total_turnover - prev_turnover) / prev_turnover) * 100)
+        else:
+            change_percent = 0.0
+        
         return Response({
             'period': period or start_date.strftime('%Y-%m'),
             'total_turnover': float(total_turnover),
             'orders_count': orders_count,
             'start_date': start_date.date(),
-            'end_date': end_date.date()
+            'end_date': end_date.date(),
+            'change_percent': round(change_percent, 2),
+            'daily_data': daily_data
         })
 
     @action(detail=False, methods=['get'])
     def net_profit(self, request):
-        """Чистая прибыль за период"""
+        """Чистая прибыль за период с детализацией по дням"""
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -466,18 +512,66 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                 is_paid=True
             ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
         except Exception:
-            # Таблица может не существовать
             pass
 
         # Чистая прибыль
         net_profit = total_income - expert_payments - partner_payments
+        total_expense = expert_payments + partner_payments
+
+        # Данные по дням
+        daily_data = []
+        current_date = start_dt
+        while current_date <= end_dt:
+            day_start = current_date
+            day_end = current_date + timedelta(days=1)
+            
+            day_orders = completed_orders.filter(
+                updated_at__gte=day_start,
+                updated_at__lt=day_end
+            )
+            
+            day_income = day_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+            day_expense = day_income * Decimal('0.7')
+            day_profit = day_income - day_expense
+            
+            daily_data.append({
+                'date': current_date.strftime('%d.%m'),
+                'profit': float(day_profit),
+                'income': float(day_income),
+                'expense': float(day_expense)
+            })
+            
+            current_date += timedelta(days=1)
+
+        # Рассчитываем изменение к предыдущему периоду
+        days_diff = (end_dt - start_dt).days + 1
+        prev_start = start_dt - timedelta(days=days_diff)
+        prev_end = start_dt - timedelta(days=1)
+        
+        prev_orders = Order.objects.filter(
+            status='completed',
+            updated_at__gte=prev_start,
+            updated_at__lte=prev_end
+        )
+        
+        prev_income = prev_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
+        prev_expense = prev_income * Decimal('0.7')
+        prev_profit = prev_income - prev_expense
+        
+        if prev_profit > 0:
+            change_percent = float(((net_profit - prev_profit) / prev_profit) * 100)
+        else:
+            change_percent = 0.0
 
         return Response({
             'period': f"{start_date} - {end_date}",
-            'total_income': float(total_income),
+            'total': float(net_profit),
+            'income': float(total_income),
+            'expense': float(total_expense),
             'expert_payments': float(expert_payments),
             'partner_payments': float(partner_payments),
-            'net_profit': float(net_profit),
+            'change_percent': round(change_percent, 2),
+            'daily_data': daily_data,
             'profit_margin': float((net_profit / total_income * 100) if total_income > 0 else 0)
         })
 
@@ -983,3 +1077,103 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
             'previous_period_dates': f"{prev_start_dt.strftime('%Y-%m-%d')} - {prev_end_dt.strftime('%Y-%m-%d')}"
         })
 
+
+
+
+class InternalMessagePagination(PageNumberPagination):
+    """Пагинация для внутренних сообщений"""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class IsDirectorOrArbitrator(permissions.BasePermission):
+    """Доступ только для директоров и арбитров"""
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(
+            user and user.is_authenticated and 
+            (user.is_staff or getattr(user, 'role', None) in ['admin', 'arbitrator'])
+        )
+
+
+class InternalMessageViewSet(viewsets.ModelViewSet):
+    """ViewSet для внутренних сообщений между директором и арбитрами"""
+    permission_classes = [permissions.IsAuthenticated, IsDirectorOrArbitrator]
+    pagination_class = InternalMessagePagination
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return InternalMessageCreateSerializer
+        return InternalMessageSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        queryset = InternalMessage.objects.select_related(
+            'sender', 'recipient', 'order'
+        ).prefetch_related('attachments')
+        
+        # Фильтрация по claim_id если указан
+        claim_id = self.request.query_params.get('claim_id')
+        if claim_id:
+            queryset = queryset.filter(claim_id=claim_id)
+        
+        # Фильтрация по непрочитанным
+        unread_only = self.request.query_params.get('unread_only')
+        if unread_only and unread_only.lower() == 'true':
+            queryset = queryset.filter(is_read=False, recipient=user)
+        
+        # Директор видит все сообщения
+        # Арбитр видит только свои сообщения и сообщения без получателя
+        if user.role == 'arbitrator':
+            queryset = queryset.filter(
+                Q(sender=user) | 
+                Q(recipient=user) | 
+                Q(recipient__isnull=True)
+            )
+        
+        return queryset.order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        # Устанавливаем отправителя
+        serializer.save(sender=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """Пометить сообщение как прочитанное"""
+        message = self.get_object()
+        
+        # Только получатель может пометить как прочитанное
+        if message.recipient and message.recipient != request.user:
+            return Response(
+                {'detail': 'Вы не можете пометить это сообщение как прочитанное'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        message.is_read = True
+        message.read_at = timezone.now()
+        message.save(update_fields=['is_read', 'read_at'])
+        
+        serializer = self.get_serializer(message)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Получить количество непрочитанных сообщений"""
+        count = InternalMessage.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).count()
+        return Response({'count': count})
+    
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        """Пометить все сообщения как прочитанные"""
+        updated = InternalMessage.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).update(
+            is_read=True,
+            read_at=timezone.now()
+        )
+        return Response({'updated': updated})

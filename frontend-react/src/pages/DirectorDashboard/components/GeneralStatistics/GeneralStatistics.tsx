@@ -9,97 +9,22 @@ import {
   Space,
   message,
   Typography,
-  Alert,
+  Spin,
 } from 'antd';
 import {
   ArrowUpOutlined,
+  ArrowDownOutlined,
   ShoppingOutlined,
-  UserOutlined,
-  TeamOutlined,
   DownloadOutlined,
   FilePdfOutlined,
-  ExperimentOutlined,
 } from '@ant-design/icons';
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getKPI, exportFinancialData } from '../../api/directorApi';
 import styles from './GeneralStatistics.module.css';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
-
-// Тестовые данные для графиков
-const ordersChartData = [
-  { date: '01.11', orders: 45, completed: 38, cancelled: 7 },
-  { date: '02.11', orders: 52, completed: 45, cancelled: 7 },
-  { date: '03.11', orders: 48, completed: 42, cancelled: 6 },
-  { date: '04.11', orders: 61, completed: 54, cancelled: 7 },
-  { date: '05.11', orders: 55, completed: 48, cancelled: 7 },
-  { date: '06.11', orders: 67, completed: 59, cancelled: 8 },
-  { date: '07.11', orders: 58, completed: 51, cancelled: 7 },
-  { date: '08.11', orders: 72, completed: 65, cancelled: 7 },
-  { date: '09.11', orders: 69, completed: 62, cancelled: 7 },
-  { date: '10.11', orders: 75, completed: 68, cancelled: 7 },
-  { date: '11.11', orders: 82, completed: 74, cancelled: 8 },
-  { date: '12.11', orders: 78, completed: 71, cancelled: 7 },
-  { date: '13.11', orders: 85, completed: 77, cancelled: 8 },
-  { date: '14.11', orders: 91, completed: 83, cancelled: 8 },
-  { date: '15.11', orders: 88, completed: 80, cancelled: 8 },
-];
-
-const revenueChartData = [
-  { date: '01.11', revenue: 125000, profit: 45000 },
-  { date: '02.11', revenue: 142000, profit: 52000 },
-  { date: '03.11', revenue: 138000, profit: 48000 },
-  { date: '04.11', revenue: 165000, profit: 61000 },
-  { date: '05.11', revenue: 155000, profit: 55000 },
-  { date: '06.11', revenue: 178000, profit: 67000 },
-  { date: '07.11', revenue: 162000, profit: 58000 },
-  { date: '08.11', revenue: 195000, profit: 72000 },
-  { date: '09.11', revenue: 188000, profit: 69000 },
-  { date: '10.11', revenue: 205000, profit: 75000 },
-  { date: '11.11', revenue: 225000, profit: 82000 },
-  { date: '12.11', revenue: 215000, profit: 78000 },
-  { date: '13.11', revenue: 235000, profit: 85000 },
-  { date: '14.11', revenue: 248000, profit: 91000 },
-  { date: '15.11', revenue: 242000, profit: 88000 },
-];
-
-const categoryData = [
-  { name: 'Математика', value: 450, color: '#1890ff' },
-  { name: 'Физика', value: 320, color: '#52c41a' },
-  { name: 'Программирование', value: 280, color: '#722ed1' },
-  { name: 'Химия', value: 180, color: '#fa8c16' },
-  { name: 'История', value: 150, color: '#eb2f96' },
-  { name: 'Другое', value: 220, color: '#13c2c2' },
-];
-
-const usersOnlineData = [
-  { time: '00:00', users: 12 },
-  { time: '03:00', users: 8 },
-  { time: '06:00', users: 15 },
-  { time: '09:00', users: 35 },
-  { time: '12:00', users: 52 },
-  { time: '15:00', users: 47 },
-  { time: '18:00', users: 38 },
-  { time: '21:00', users: 28 },
-  { time: '24:00', users: 18 },
-];
 
 const GeneralStatistics: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -107,6 +32,12 @@ const GeneralStatistics: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Получаем данные из API
+  const { data: kpiData, isLoading } = useQuery({
+    queryKey: ['kpi', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getKPI(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -118,20 +49,26 @@ const GeneralStatistics: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Тестовые данные KPI
-  const kpiData = {
-    totalTurnover: 3250000,
-    turnoverChange: 15.3,
-    netProfit: 1180000,
-    profitChange: 18.7,
-    activeOrders: 156,
-    ordersChange: 12.5,
-    averageCheck: 20833,
-    averageCheckChange: 8.2,
-    totalClients: 1247,
-    totalExperts: 89,
-    totalPartners: 23,
-  };
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  // Извлекаем данные из API
+  const totalTurnover = kpiData?.kpi?.total_turnover || 0;
+  const turnoverChange = kpiData?.changes?.turnover_change || 0;
+  const netProfit = kpiData?.kpi?.net_profit || 0;
+  const profitChange = kpiData?.changes?.profit_change || 0;
+  const activeOrders = kpiData?.kpi?.active_orders || 0;
+  const ordersChange = kpiData?.changes?.orders_change || 0;
+  const averageCheck = kpiData?.kpi?.average_check || 0;
+  const averageCheckChange = kpiData?.changes?.average_check_change || 0;
+  const totalClients = kpiData?.kpi?.total_clients || 0;
+  const totalExperts = kpiData?.kpi?.total_experts || 0;
+  const totalPartners = kpiData?.kpi?.total_partners || 0;
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -178,15 +115,6 @@ const GeneralStatistics: React.FC = () => {
 
   return (
     <div>
-      <Alert
-        message="Режим тестовых данных"
-        description="В данный момент используется режим тестовых данных. Все показатели KPI генерируются динамически для демонстрации функционала."
-        type="info"
-        icon={<ExperimentOutlined />}
-        showIcon
-        style={{ marginBottom: 16 }}
-        closable
-      />
 
       {/* Селектор периода */}
       <Card style={{ 
@@ -349,7 +277,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Общий оборот"
-              value={kpiData.totalTurnover}
+              value={totalTurnover}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -359,9 +287,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.turnoverChange.toFixed(2)}%
+                  {turnoverChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: turnoverChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(turnoverChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -378,7 +310,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Чистая прибыль"
-              value={kpiData.netProfit}
+              value={netProfit}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -388,9 +320,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.profitChange.toFixed(2)}%
+                  {profitChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: profitChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(profitChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -407,7 +343,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Активные заказы"
-              value={kpiData.activeOrders}
+              value={activeOrders}
               prefix={<ShoppingOutlined />}
               valueStyle={{ 
                 color: '#722ed1',
@@ -416,9 +352,13 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.ordersChange.toFixed(2)}%
+                  {ordersChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: ordersChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(ordersChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
@@ -437,7 +377,7 @@ const GeneralStatistics: React.FC = () => {
           }}>
             <Statistic
               title="Средний чек"
-              value={kpiData.averageCheck}
+              value={averageCheck}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -447,110 +387,16 @@ const GeneralStatistics: React.FC = () => {
               }}
               suffix={
                 <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    {kpiData.averageCheckChange.toFixed(2)}%
+                  {averageCheckChange >= 0 ? (
+                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                  ) : (
+                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                  )}
+                  <Text style={{ fontSize: isMobile ? 12 : 14, color: averageCheckChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                    {Math.abs(averageCheckChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
-            <Statistic
-              title="Пользователей онлайн"
-              value={47}
-              prefix={<TeamOutlined />}
-              valueStyle={{ 
-                color: '#52c41a',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              suffix={
-                <Text style={{ fontSize: isMobile ? 11 : 12, color: '#8c8c8c' }}>
-                  сейчас на сайте
-                </Text>
-              }
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
-            <Statistic
-              title="Заказов в сутки"
-              value={156}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ 
-                color: '#1890ff',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              suffix={
-                <Space>
-                  <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }}>
-                    12.5%
-                  </Text>
-                </Space>
-              }
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
-            <Statistic
-              title="Клиентов"
-              value={kpiData.totalClients}
-              prefix={<UserOutlined />}
-              valueStyle={{ 
-                color: '#fa8c16',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? '#f6ffed' : '#fff',
-            border: isMobile ? '2px solid #52c41a' : '1px solid #d9d9d9'
-          }}>
-            <Statistic
-              title="Экспертов"
-              value={kpiData.totalExperts}
-              prefix={<TeamOutlined />}
-              valueStyle={{ 
-                color: '#52c41a',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
               style={{
                 padding: isMobile ? '12px 0' : '12px 0'
               }}
@@ -561,216 +407,14 @@ const GeneralStatistics: React.FC = () => {
 
       {/* Графики */}
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginTop: 24 }}>
-        {/* График заказов */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title="Динамика заказов"
-            style={{ 
-              borderRadius: isMobile ? 8 : 12
-            }}
-            headStyle={{
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: 600
-            }}
-          >
-            <div style={{ 
-              width: '100%', 
-              height: isMobile ? 250 : 300,
-              overflowX: isMobile ? 'auto' : 'visible'
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
-                  data={ordersChartData}
-                  margin={{
-                    top: 20,
-                    right: isMobile ? 10 : 30,
-                    left: isMobile ? 10 : 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    fontSize={isMobile ? 10 : 12}
-                    interval={isMobile ? 1 : 0}
-                  />
-                  <YAxis 
-                    fontSize={isMobile ? 10 : 12}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      fontSize: isMobile ? 12 : 14,
-                      borderRadius: 8
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{
-                      fontSize: isMobile ? 12 : 14
-                    }}
-                  />
-                  <Line type="monotone" dataKey="orders" stroke="#1890ff" name="Всего заказов" strokeWidth={2} />
-                  <Line type="monotone" dataKey="completed" stroke="#52c41a" name="Завершено" strokeWidth={2} />
-                  <Line type="monotone" dataKey="cancelled" stroke="#ff4d4f" name="Отменено" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </Col>
-
-        {/* График выручки */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title="Выручка и прибыль"
-            style={{ 
-              borderRadius: isMobile ? 8 : 12
-            }}
-            headStyle={{
-              fontSize: isMobile ? 16 : 18,
-              fontWeight: 600
-            }}
-          >
-            <div style={{ 
-              width: '100%', 
-              height: isMobile ? 250 : 300,
-              overflowX: isMobile ? 'auto' : 'visible'
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart 
-                  data={revenueChartData}
-                  margin={{
-                    top: 20,
-                    right: isMobile ? 10 : 30,
-                    left: isMobile ? 10 : 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    fontSize={isMobile ? 10 : 12}
-                    interval={isMobile ? 1 : 0}
-                  />
-                  <YAxis 
-                    fontSize={isMobile ? 10 : 12}
-                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip 
-                    formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-                    contentStyle={{
-                      fontSize: isMobile ? 12 : 14,
-                      borderRadius: 8
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{
-                      fontSize: isMobile ? 12 : 14
-                    }}
-                  />
-                  <Area type="monotone" dataKey="revenue" stroke="#1890ff" fill="#1890ff" fillOpacity={0.3} name="Выручка" />
-                  <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.3} name="Прибыль" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </Col>
-
-        {/* График по категориям */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title="Распределение заказов по предметам"
-            style={{ 
-              borderRadius: isMobile ? 8 : 12
-            }}
-            headStyle={{
-              fontSize: isMobile ? 14 : 16
-            }}
-          >
-            <div style={{ 
-              width: '100%', 
-              height: isMobile ? 250 : 300
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={isMobile ? false : ({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius={isMobile ? 80 : 100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{
-                      fontSize: isMobile ? 12 : 14,
-                      borderRadius: 8
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{
-                      fontSize: isMobile ? 11 : 14
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        </Col>
-
-        {/* График пользователей онлайн */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title="Пользователи онлайн (24 часа)"
-            style={{ 
-              borderRadius: isMobile ? 8 : 12
-            }}
-            headStyle={{
-              fontSize: isMobile ? 14 : 16
-            }}
-          >
-            <div style={{ 
-              width: '100%', 
-              height: isMobile ? 250 : 300,
-              overflowX: isMobile ? 'auto' : 'visible'
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={usersOnlineData}
-                  margin={{
-                    top: 20,
-                    right: isMobile ? 10 : 30,
-                    left: isMobile ? 10 : 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    fontSize={isMobile ? 10 : 12}
-                  />
-                  <YAxis 
-                    fontSize={isMobile ? 10 : 12}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      fontSize: isMobile ? 12 : 14,
-                      borderRadius: 8
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{
-                      fontSize: isMobile ? 12 : 14
-                    }}
-                  />
-                  <Bar dataKey="users" fill="#52c41a" name="Пользователей" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+        <Col span={24}>
+          <Card style={{ borderRadius: isMobile ? 8 : 12, textAlign: 'center', padding: '40px 20px' }}>
+            <Typography.Title level={4} style={{ color: '#8c8c8c' }}>
+              Детальная статистика в разработке
+            </Typography.Title>
+            <Typography.Text type="secondary">
+              Графики и дополнительная аналитика будут добавлены в следующих версиях
+            </Typography.Text>
           </Card>
         </Col>
       </Row>

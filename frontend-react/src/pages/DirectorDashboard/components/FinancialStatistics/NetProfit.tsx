@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Statistic, Row, Col, DatePicker, Space, Button } from 'antd';
-import { ArrowUpOutlined } from '@ant-design/icons';
+import { Card, Statistic, Row, Col, DatePicker, Space, Button, Spin } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import {
   AreaChart,
   Area,
@@ -12,28 +12,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getNetProfit } from '../../api/directorApi';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
-
-// Тестовые данные
-const profitData = [
-  { date: '01.11', profit: 45000, expenses: 80000 },
-  { date: '02.11', profit: 52000, expenses: 90000 },
-  { date: '03.11', profit: 48000, expenses: 90000 },
-  { date: '04.11', profit: 61000, expenses: 104000 },
-  { date: '05.11', profit: 55000, expenses: 100000 },
-  { date: '06.11', profit: 67000, expenses: 111000 },
-  { date: '07.11', profit: 58000, expenses: 104000 },
-  { date: '08.11', profit: 72000, expenses: 123000 },
-  { date: '09.11', profit: 69000, expenses: 119000 },
-  { date: '10.11', profit: 75000, expenses: 130000 },
-  { date: '11.11', profit: 82000, expenses: 143000 },
-  { date: '12.11', profit: 78000, expenses: 137000 },
-  { date: '13.11', profit: 85000, expenses: 150000 },
-  { date: '14.11', profit: 91000, expenses: 157000 },
-  { date: '15.11', profit: 88000, expenses: 154000 },
-];
 
 const NetProfit: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -41,6 +24,12 @@ const NetProfit: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Получаем данные из API
+  const { data: profitData, isLoading } = useQuery({
+    queryKey: ['net-profit', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getNetProfit(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,7 +41,19 @@ const NetProfit: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const totalProfit = profitData.reduce((sum, item) => sum + item.profit, 0);
+  const totalProfitValue = profitData?.total || 0;
+  const totalIncome = profitData?.income || 0;
+  const totalExpense = profitData?.expense || 0;
+  const changePercent = profitData?.change_percent || 0;
+  const chartData = profitData?.daily_data || [];
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();
@@ -163,7 +164,7 @@ const NetProfit: React.FC = () => {
           }}>
             <Statistic
               title="Чистая прибыль за период"
-              value={totalProfit}
+              value={totalProfitValue}
               prefix="₽"
               precision={0}
               valueStyle={{ 
@@ -181,16 +182,16 @@ const NetProfit: React.FC = () => {
           <Card style={{ 
             borderRadius: isMobile ? 8 : 12,
             textAlign: 'center',
-            background: isMobile ? '#f6ffed' : '#fff',
-            border: isMobile ? '2px solid #52c41a' : '1px solid #d9d9d9'
+            background: isMobile ? (changePercent >= 0 ? '#f6ffed' : '#fff1f0') : '#fff',
+            border: isMobile ? `2px solid ${changePercent >= 0 ? '#52c41a' : '#ff4d4f'}` : '1px solid #d9d9d9'
           }}>
             <Statistic
               title="Изменение к предыдущему периоду"
-              value={18.7}
-              prefix={<ArrowUpOutlined />}
+              value={Math.abs(changePercent)}
+              prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
               valueStyle={{ 
-                color: '#3f8600',
+                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
                 fontSize: isMobile ? 22 : 24,
                 fontWeight: 700
               }}
@@ -219,7 +220,7 @@ const NetProfit: React.FC = () => {
         }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
-              data={profitData}
+              data={chartData}
               margin={{
                 top: 20,
                 right: isMobile ? 10 : 30,
