@@ -1,0 +1,205 @@
+/* Секция начислений */
+.earningsContainer {
+  padding: 0;
+}
+
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.statCard :global(.ant-card-body) {
+  padding: 16px;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.paidValue {
+  color: #52c41a;
+}
+
+.unpaidValue {
+  color: #faad14;
+}
+
+.countValue {
+  color: #1890ff;
+}
+
+.earningsCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.earningsCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.earningsTable {
+  border-radius: 8px;
+}
+
+/* Стили для ячеек таблицы */
+.partnerName {
+  font-weight: 600;
+  color: #262626;
+}
+
+.referralName {
+  color: #666;
+}
+
+.amount {
+  font-weight: 600;
+  color: #52c41a;
+  font-size: 14px;
+}
+
+.typeTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.statusTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeInfo {
+  font-size: 11px;
+  color: #999;
+}
+
+.payButton {
+  border-radius: 4px;
+  font-size: 11px;
+  height: 28px;
+  padding: 0 8px;
+}
+
+/* Кастомизация таблицы */
+.earningsTable :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.earningsTable :global(.ant-table-tbody > tr:hover > td) {
+  background: #f0f9ff;
+}
+
+.earningsTable :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 12px 16px;
+}
+
+.earningsTable :global(.ant-pagination) {
+  margin: 16px;
+  text-align: center;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .statsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .statCard :global(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  .statValue {
+    font-size: 18px;
+  }
+  
+  .earningsTable :global(.ant-table-tbody > tr > td) {
+    padding: 8px 12px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .statsContainer {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .statCard :global(.ant-card-body) {
+    padding: 8px;
+  }
+  
+  .statLabel {
+    font-size: 11px;
+  }
+  
+  .statValue {
+    font-size: 16px;
+  }
+  
+  .earningsTable :global(.ant-table-tbody > tr > td) {
+    padding: 6px 8px;
+  }
+  
+  .amount {
+    font-size: 13px;
+  }
+  
+  .typeTag {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  
+  .statusTag {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  
+  .payButton {
+    font-size: 10px;
+    height: 24px;
+    padding: 0 6px;
+  }
+}

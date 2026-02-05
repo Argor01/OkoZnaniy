@@ -695,7 +695,6 @@ const AdminDashboard: React.FC = () => {
   // Компоненты для разделов
   const OverviewSection = () => (
     <div>
-      <Title level={3}>Обзор</Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={8}>
           <Card>
@@ -762,7 +761,6 @@ const AdminDashboard: React.FC = () => {
 
   const PartnersSection = () => (
     <div>
-      <Title level={3}>Управление партнерами</Title>
       <Card>
         <Table
           columns={partnersColumns}
@@ -778,7 +776,6 @@ const AdminDashboard: React.FC = () => {
 
   const EarningsSection = () => (
     <div>
-      <Title level={3}>История начислений</Title>
       <Card>
         <Table
           columns={earningsColumns}
@@ -794,7 +791,6 @@ const AdminDashboard: React.FC = () => {
 
   const DisputesSection = () => (
     <div>
-      <Title level={3}>Управление спорами</Title>
       <Card>
         {disputesError ? (
           <div style={{ padding: '20px', textAlign: 'center' }}>

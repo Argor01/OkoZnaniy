@@ -1,0 +1,328 @@
+/* Стили для SupportRequestsSection */
+
+.container {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.headerIcon {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  position: relative;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.tabButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tabLabel {
+  font-weight: 500;
+}
+
+.badge {
+  margin-left: 4px;
+}
+
+.requestsList {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.requestItem {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.requestItem:hover {
+  background-color: #fafafa;
+  transform: translateX(4px);
+}
+
+.requestItem:last-child {
+  border-bottom: none;
+}
+
+.avatarContainer {
+  position: relative;
+}
+
+.urgentIcon {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #ff4d4f;
+  background: white;
+  border-radius: 50%;
+  padding: 2px;
+  font-size: 12px;
+}
+
+.requestTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.titleText {
+  font-weight: 600;
+  font-size: 16px;
+  color: #262626;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.requestDescription {
+  max-width: 100%;
+}
+
+.descriptionText {
+  color: #595959;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.requestMeta {
+  margin-bottom: 8px;
+}
+
+.requestMeta .ant-typography {
+  font-size: 13px;
+}
+
+.requestTags {
+  margin-top: 8px;
+}
+
+.requestTags .ant-tag {
+  margin-bottom: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .container {
+    padding: 20px;
+  }
+  
+  .requestItem {
+    padding: 16px;
+  }
+  
+  .titleText {
+    font-size: 15px;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .tabs {
+    justify-content: center;
+    gap: 6px;
+  }
+  
+  .tabButton {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .tabLabel {
+    display: none;
+  }
+  
+  .requestTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .titleText {
+    font-size: 14px;
+  }
+  
+  .tags {
+    align-self: flex-start;
+  }
+  
+  .requestMeta {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .requestItem {
+    padding: 12px;
+  }
+  
+  .requestItem .ant-list-item-action {
+    margin-top: 12px;
+    margin-left: 0;
+  }
+  
+  .requestItem .ant-list-item-action > li {
+    padding: 0 4px;
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .tabButton {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .requestItem {
+    padding: 10px;
+  }
+  
+  .titleText {
+    font-size: 13px;
+  }
+  
+  .descriptionText {
+    font-size: 12px;
+  }
+  
+  .requestMeta .ant-typography {
+    font-size: 11px;
+  }
+  
+  .tags .ant-tag {
+    font-size: 10px;
+    padding: 0 4px;
+    line-height: 18px;
+  }
+  
+  .requestTags .ant-tag {
+    font-size: 10px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+  }
+}
+
+/* Анимации */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.requestItem {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Состояния загрузки */
+.requestsList .ant-spin-container {
+  min-height: 200px;
+}
+
+/* Кастомизация Badge */
+.badge .ant-badge-count {
+  font-size: 11px;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9px;
+  padding: 0 4px;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* Кастомизация Empty */
+.requestsList .ant-empty {
+  padding: 40px 20px;
+}
+
+.requestsList .ant-empty-description {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+/* Hover эффекты для кнопок */
+.tabButton.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.tabButton.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.4);
+}
+
+/* Индикатор приоритета */
+.requestItem[data-priority="urgent"] {
+  border-left: 4px solid #ff4d4f;
+}
+
+.requestItem[data-priority="high"] {
+  border-left: 4px solid #fa8c16;
+}
+
+.requestItem[data-priority="medium"] {
+  border-left: 4px solid #1890ff;
+}
+
+.requestItem[data-priority="low"] {
+  border-left: 4px solid #52c41a;
+}

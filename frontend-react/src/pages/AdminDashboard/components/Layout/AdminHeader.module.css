@@ -1,0 +1,134 @@
+/* Хедер админской панели */
+.header {
+  background: #fff;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menuButton {
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.menuButton:hover {
+  background-color: #f5f5f5;
+}
+
+.title {
+  margin: 0 !important;
+  color: #262626;
+}
+
+.userInfo {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.userButton {
+  height: auto;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.userButton:hover {
+  background-color: #f5f5f5;
+}
+
+.avatar {
+  background-color: #1890ff;
+}
+
+.username {
+  color: #262626;
+  font-weight: 500;
+}
+
+.logoutButton {
+  padding: 8px;
+  border-radius: 6px;
+  color: #ff4d4f;
+}
+
+.logoutButton:hover {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 16px;
+  }
+  
+  .rightSection {
+    gap: 12px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+  }
+  
+  .leftSection {
+    gap: 12px;
+  }
+  
+  .rightSection {
+    gap: 8px;
+  }
+  
+  .userInfo {
+    display: none;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+}
+
+/* Кастомизация dropdown */
+:global(.ant-dropdown) {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:global(.ant-dropdown-menu) {
+  border-radius: 8px;
+  padding: 8px;
+}
+
+:global(.ant-dropdown-menu-item) {
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+:global(.ant-dropdown-menu-item:hover) {
+  background-color: #f5f5f5;
+}
+
+:global(.ant-dropdown-menu-item-danger:hover) {
+  background-color: #fff2f0;
+}

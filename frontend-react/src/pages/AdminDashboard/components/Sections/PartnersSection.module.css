@@ -1,0 +1,151 @@
+/* Секция партнеров */
+.partnersContainer {
+  padding: 0;
+}
+
+.partnersCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.partnersCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.partnersTable {
+  border-radius: 8px;
+}
+
+/* Стили для ячеек таблицы */
+.partnerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.partnerName {
+  font-weight: 600;
+  color: #262626;
+}
+
+.partnerEmail {
+  font-size: 12px;
+  color: #666;
+}
+
+.referralCode {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.commissionRate {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.referralsInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.activeReferrals {
+  color: #52c41a;
+}
+
+.earnings {
+  font-weight: 600;
+  color: #52c41a;
+}
+
+.statusTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.date {
+  color: #666;
+  font-size: 13px;
+}
+
+.actionButton {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  transform: scale(1.05);
+}
+
+/* Кастомизация таблицы */
+.partnersTable :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.partnersTable :global(.ant-table-tbody > tr:hover > td) {
+  background: #f0f9ff;
+}
+
+.partnersTable :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 12px 16px;
+}
+
+.partnersTable :global(.ant-pagination) {
+  margin: 16px;
+  text-align: right;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .partnersTable :global(.ant-table-tbody > tr > td) {
+    padding: 8px 12px;
+  }
+  
+  .partnerEmail {
+    font-size: 11px;
+  }
+  
+  .referralsInfo {
+    font-size: 12px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .partnersTable :global(.ant-table-tbody > tr > td) {
+    padding: 6px 8px;
+  }
+  
+  .partnerName {
+    font-size: 13px;
+  }
+  
+  .partnerEmail {
+    font-size: 10px;
+  }
+  
+  .referralCode {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  
+  .referralsInfo {
+    font-size: 11px;
+  }
+  
+  .statusTag {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+  
+  .date {
+    font-size: 11px;
+  }
+}

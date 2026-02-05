@@ -1,0 +1,47 @@
+/* Основной лейаут админской панели */
+.adminLayout {
+  min-height: 100vh;
+}
+
+.contentLayout {
+  background: #f0f2f5;
+}
+
+.content {
+  margin: 0;
+  padding: 0;
+  background: #f0f2f5;
+  min-height: calc(100vh - 112px); /* Высота экрана минус хедер и футер */
+}
+
+.contentInner {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 160px);
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .contentInner {
+    margin: 16px;
+    padding: 16px;
+    min-height: calc(100vh - 144px);
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .content {
+    min-height: calc(100vh - 64px); /* Только хедер */
+  }
+  
+  .contentInner {
+    margin: 12px;
+    padding: 12px;
+    min-height: calc(100vh - 88px);
+    border-radius: 4px;
+  }
+}

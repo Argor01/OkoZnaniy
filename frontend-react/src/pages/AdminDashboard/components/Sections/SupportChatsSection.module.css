@@ -1,0 +1,138 @@
+.supportChatsSection {
+  height: 100%;
+}
+
+.chatItem {
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.chatItem:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.chatItem.selected {
+  background-color: #e6f7ff !important;
+  border: 1px solid #1890ff;
+}
+
+.messagesContainer {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+}
+
+.messageItem {
+  margin-bottom: 16px;
+  display: flex;
+}
+
+.messageItem.fromAdmin {
+  flex-direction: row-reverse;
+}
+
+.messageContent {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+.messageContent.fromAdmin {
+  background-color: #1890ff;
+  color: white;
+}
+
+.messageContent.fromUser {
+  background-color: #f0f0f0;
+  color: black;
+}
+
+.messageTime {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.messageTime.fromAdmin {
+  text-align: left;
+}
+
+.messageTime.fromUser {
+  text-align: right;
+}
+
+.attachmentsList {
+  margin-top: 8px;
+}
+
+.attachmentItem {
+  margin-bottom: 4px;
+}
+
+.chatInfo {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 6px;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.messageInput {
+  flex: 1;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachedFiles {
+  margin-bottom: 8px;
+}
+
+.sendHint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.chatControls {
+  display: flex;
+  gap: 8px;
+}
+
+.statusSelect {
+  width: 120px;
+}
+
+.prioritySelect {
+  width: 100px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #999;
+}

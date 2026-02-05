@@ -1,140 +1,43 @@
 version: '3.8'
 
 services:
-  backend:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    depends_on:
-      - postgres
-      - redis
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=True
-      - DJANGO_ENV=development
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,nginx
-      - FRONTEND_URL=http://localhost:5173
-      - LOGIN_REDIRECT_URL=http://localhost:5173/expert
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - EMAIL_HOST=smtp.yandex.ru
-      - EMAIL_PORT=587
-      - EMAIL_USE_TLS=True
-      - EMAIL_HOST_USER=YanBrait@yandex.ru
-      - EMAIL_HOST_PASSWORD=tvfibdueaqwoipxn
-      - DEFAULT_FROM_EMAIL=YanBrait@yandex.ru
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - static_files:/app/static
-      - media_files:/app/media
-      - .:/app
-    ports:
-      - "8000:8000"
-    networks:
-      - app_network
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-
+  # Переопределяем frontend для development
   frontend:
     build:
       context: ./frontend-react
       dockerfile: Dockerfile.dev
-      target: development
-    restart: always
-    environment:
-      - VITE_API_URL=http://localhost:8000
-      - CHOKIDAR_USEPOLLING=true
-    depends_on:
-      - backend
     volumes:
       - ./frontend-react:/app
       - /app/node_modules
-    ports:
-      - "5173:5173"
-    networks:
-      - app_network
-    command: npm run dev -- --host 0.0.0.0
-
-  postgres:
-    image: postgres:15-alpine
-    restart: always
     environment:
-      - POSTGRES_DB=oko_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - CHOKIDAR_USEPOLLING=true
+      - FAST_REFRESH=true
+      - WDS_SOCKET_HOST=localhost
+      - WDS_SOCKET_PORT=5173
     ports:
-      - "5433:5432"
-    networks:
-      - app_network
-
-  redis:
-    image: redis:7-alpine
-    restart: always
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
-
-  celery:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    command: celery -A config worker -l INFO --autoreload
-    restart: always
-    depends_on:
-      - redis
-      - postgres
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=True
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - .:/app
-    networks:
-      - app_network
-
-  telegram-bot:
-    build:
-      context: .
-      dockerfile: Dockerfile.bot
-    restart: always
+      - "5173:5173"  # Dev server на стандартном порту
     depends_on:
       - backend
-      - postgres
-      - redis
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_BOT_WEBHOOK_URL=${TELEGRAM_BOT_WEBHOOK_URL}
-      - BACKEND_URL=http://backend:8000
-      - FRONTEND_URL=http://localhost:5173
-      - DEBUG=True
-      - PYTHONPATH=/app
-      - DJANGO_SETTINGS_MODULE=config.settings
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - .:/app
     networks:
       - app_network
-
-volumes:
-  postgres_data:
-  redis_data:
-  static_files:
-  media_files:
+    
+  backend:
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - DJANGO_ENV=development
+    command: python manage.py runserver 0.0.0.0:8000
+    
+  # Отключаем nginx для разработки
+  nginx:
+    profiles:
+      - production
+  
+  # Отключаем telegram-bot для разработки
+  telegram-bot:
+    profiles:
+      - production
 
 networks:
   app_network:
