@@ -26,10 +26,9 @@ import {
   TeamOutlined,
   SettingOutlined,
   BellOutlined,
-  PhoneOutlined,
-  VideoCameraOutlined,
   PushpinOutlined,
-  UploadOutlined
+  UploadOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -111,9 +110,11 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const [createRoomModalVisible, setCreateRoomModalVisible] = useState(false);
   const [inviteUserModalVisible, setInviteUserModalVisible] = useState(false);
   const [roomSettingsModalVisible, setRoomSettingsModalVisible] = useState(false);
+  const [isEditingRoom, setIsEditingRoom] = useState(false);
   
   const [createRoomForm] = Form.useForm();
   const [inviteUserForm] = Form.useForm();
+  const [editRoomForm] = Form.useForm();
 
   // Мок данные для демонстрации
   const mockChatRooms: ChatRoom[] = [
@@ -174,9 +175,66 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       unread_count: 2,
       is_muted: false,
       is_archived: false,
-    },   
- {
+    },
+    {
       id: 2,
+      name: 'Чат с директором',
+      description: 'Прямая связь с руководством компании',
+      type: 'private',
+      participants: [
+        {
+          id: 100,
+          username: 'director',
+          first_name: 'Владимир',
+          last_name: 'Директоров',
+          role: 'Директор',
+          online: true,
+        },
+        {
+          id: 1,
+          username: 'admin_chief',
+          first_name: 'Анна',
+          last_name: 'Главная',
+          role: 'Главный администратор',
+          online: true,
+        },
+        {
+          id: 2,
+          username: 'admin_support',
+          first_name: 'Петр',
+          last_name: 'Поддержкин',
+          role: 'Администратор поддержки',
+          online: true,
+        },
+      ],
+      created_by: {
+        id: 100,
+        username: 'director',
+        first_name: 'Владимир',
+        last_name: 'Директоров',
+      },
+      created_at: '2024-01-10T09:00:00Z',
+      last_message: {
+        id: 201,
+        text: 'Подготовьте отчет по итогам недели к завтрашнему совещанию',
+        sender: {
+          id: 100,
+          username: 'director',
+          first_name: 'Владимир',
+          last_name: 'Директоров',
+          role: 'Директор',
+          online: true,
+        },
+        sent_at: '2024-02-04T16:30:00Z',
+        is_pinned: true,
+        is_system: false,
+      },
+      unread_count: 1,
+      is_muted: false,
+      is_archived: false,
+    },
+    {
+      id: 3,
       name: 'Техническая поддержка',
       description: 'Координация работы службы технической поддержки',
       type: 'department',
@@ -206,7 +264,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       },
       created_at: '2024-01-20T14:30:00Z',
       last_message: {
-        id: 201,
+        id: 301,
         text: 'Обновил базу знаний по новым типам обращений',
         sender: {
           id: 4,
@@ -232,47 +290,53 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const mockMessages: ChatMessage[] = selectedRoom ? [
     {
       id: 1,
-      text: 'Доброе утро, команда! Сегодня у нас много новых обращений',
+      text: selectedRoom.id === 2 
+        ? 'Добро пожаловать в чат с руководством. Здесь мы обсуждаем стратегические вопросы.'
+        : 'Доброе утро, команда! Сегодня у нас много новых обращений',
       sender: {
-        id: 1,
-        username: 'admin_chief',
-        first_name: 'Анна',
-        last_name: 'Главная',
-        role: 'Главный администратор',
+        id: selectedRoom.id === 2 ? 100 : 1,
+        username: selectedRoom.id === 2 ? 'director' : 'admin_chief',
+        first_name: selectedRoom.id === 2 ? 'Владимир' : 'Анна',
+        last_name: selectedRoom.id === 2 ? 'Директоров' : 'Главная',
+        role: selectedRoom.id === 2 ? 'Директор' : 'Главный администратор',
         online: true,
       },
       sent_at: '2024-02-04T08:00:00Z',
-      is_pinned: false,
+      is_pinned: selectedRoom.id === 2,
       is_system: false,
     },
     {
       id: 2,
-      text: 'Принял в работу 5 обращений по техническим вопросам',
+      text: selectedRoom.id === 2 
+        ? 'Понял, Владимир Петрович. Подготовим отчет к завтрашнему совещанию.'
+        : 'Принял в работу 5 обращений по техническим вопросам',
       sender: {
-        id: 2,
-        username: 'admin_support',
-        first_name: 'Петр',
-        last_name: 'Поддержкин',
-        role: 'Администратор поддержки',
+        id: selectedRoom.id === 2 ? 1 : 2,
+        username: selectedRoom.id === 2 ? 'admin_chief' : 'admin_support',
+        first_name: selectedRoom.id === 2 ? 'Анна' : 'Петр',
+        last_name: selectedRoom.id === 2 ? 'Главная' : 'Поддержкин',
+        role: selectedRoom.id === 2 ? 'Главный администратор' : 'Администратор поддержки',
         online: true,
       },
       sent_at: '2024-02-04T08:15:00Z',
       is_pinned: false,
       is_system: false,
     },  
-  {
+    {
       id: 3,
-      text: 'Всем привет! Сегодня обрабатываем претензии по приоритету',
+      text: selectedRoom.id === 2 
+        ? 'Подготовьте отчет по итогам недели к завтрашнему совещанию'
+        : 'Всем привет! Сегодня обрабатываем претензии по приоритету',
       sender: {
-        id: 1,
-        username: 'admin_chief',
-        first_name: 'Анна',
-        last_name: 'Главная',
-        role: 'Главный администратор',
+        id: selectedRoom.id === 2 ? 100 : 1,
+        username: selectedRoom.id === 2 ? 'director' : 'admin_chief',
+        first_name: selectedRoom.id === 2 ? 'Владимир' : 'Анна',
+        last_name: selectedRoom.id === 2 ? 'Директоров' : 'Главная',
+        role: selectedRoom.id === 2 ? 'Директор' : 'Главный администратор',
         online: true,
       },
       sent_at: '2024-02-04T09:15:00Z',
-      is_pinned: true,
+      is_pinned: selectedRoom.id === 2,
       is_system: false,
     },
   ] : [];
@@ -324,6 +388,41 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       message.success('Файл загружен');
     }
     return false; // Предотвращаем автоматическую загрузку
+  };
+
+  const handleEditRoom = () => {
+    if (selectedRoom) {
+      editRoomForm.setFieldsValue({
+        name: selectedRoom.name,
+        description: selectedRoom.description,
+        type: selectedRoom.type,
+      });
+      setIsEditingRoom(true);
+    }
+  };
+
+  const handleSaveRoomChanges = async () => {
+    try {
+      const values = await editRoomForm.validateFields();
+      // Здесь будет вызов API для обновления чата
+      console.log('Updating room:', selectedRoom?.id, values);
+      
+      // Обновляем локальное состояние (в реальном приложении это будет через API)
+      if (selectedRoom) {
+        const updatedRoom = { ...selectedRoom, ...values };
+        setSelectedRoom(updatedRoom);
+      }
+      
+      setIsEditingRoom(false);
+      message.success('Настройки чата обновлены');
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingRoom(false);
+    editRoomForm.resetFields();
   }; 
  // Функции для отображения
   const getRoomTypeColor = (type: string) => {
@@ -341,7 +440,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       general: 'Общий',
       department: 'Отдел',
       project: 'Проект',
-      private: 'Личный',
+      private: 'С директором',
     };
     return texts[type as keyof typeof texts] || 'Другой';
   };
@@ -355,7 +454,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       >
         <div style={{ padding: 16, borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Title level={5} style={{ margin: 0 }}>Чаты администраторов</Title>
+            <Title level={5} style={{ margin: 0 }}>Внутренняя коммуникация</Title>
             <Button 
               type="primary" 
               size="small"
@@ -472,12 +571,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   icon={<TeamOutlined />}
                   onClick={() => setInviteUserModalVisible(true)}
                 />
-              </Tooltip>
-              <Tooltip title="Видеозвонок">
-                <Button size="small" icon={<VideoCameraOutlined />} />
-              </Tooltip>
-              <Tooltip title="Аудиозвонок">
-                <Button size="small" icon={<PhoneOutlined />} />
               </Tooltip>
               <Tooltip title="Настройки">
                 <Button 
@@ -716,10 +809,10 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             rules={[{ required: true, message: 'Выберите тип чата' }]}
           >
             <Select placeholder="Выберите тип чата">
-              <Option value="general">Общий</Option>
-              <Option value="department">Отдел</Option>
-              <Option value="project">Проект</Option>
-              <Option value="private">Личный</Option>
+              <Option value="general">Общий чат администраторов</Option>
+              <Option value="department">Департаментский чат</Option>
+              <Option value="project">Проектный чат</Option>
+              <Option value="private">Чат с директором</Option>
             </Select>
           </Form.Item>
         </Form>
@@ -753,34 +846,100 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       </Modal>      
 {/* Настройки чата */}
       <Modal
-        title="Настройки чата"
+        title={isEditingRoom ? "Редактировать чат" : "Настройки чата"}
         open={roomSettingsModalVisible}
-        onCancel={() => setRoomSettingsModalVisible(false)}
+        onCancel={() => {
+          setRoomSettingsModalVisible(false);
+          setIsEditingRoom(false);
+          editRoomForm.resetFields();
+        }}
         footer={[
-          <Button key="close" onClick={() => setRoomSettingsModalVisible(false)}>
-            Закрыть
-          </Button>
+          isEditingRoom ? (
+            <>
+              <Button key="cancel" onClick={handleCancelEdit}>
+                Отмена
+              </Button>
+              <Button key="save" type="primary" onClick={handleSaveRoomChanges}>
+                Сохранить
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button key="edit" type="primary" icon={<EditOutlined />} onClick={handleEditRoom}>
+                Редактировать
+              </Button>
+              <Button key="close" onClick={() => setRoomSettingsModalVisible(false)}>
+                Закрыть
+              </Button>
+            </>
+          )
         ]}
         width={600}
       >
         {selectedRoom && (
           <div>
-            <Title level={5}>Информация о чате</Title>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Text strong>Название:</Text> {selectedRoom.name}
-              </Col>
-              <Col span={12}>
-                <Text strong>Тип:</Text> {getRoomTypeText(selectedRoom.type)}
-              </Col>
-            </Row>
-            <div style={{ marginTop: 8 }}>
-              <Text strong>Описание:</Text> {selectedRoom.description}
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <Text strong>Создан:</Text> {dayjs(selectedRoom.created_at).format('DD.MM.YYYY HH:mm')} 
-              пользователем {selectedRoom.created_by.first_name} {selectedRoom.created_by.last_name}
-            </div>
+            {isEditingRoom ? (
+              // Режим редактирования
+              <Form form={editRoomForm} layout="vertical">
+                <Title level={5}>Редактирование чата</Title>
+                
+                <Form.Item
+                  name="name"
+                  label="Название чата"
+                  rules={[{ required: true, message: 'Введите название чата' }]}
+                >
+                  <Input placeholder="Название чата" />
+                </Form.Item>
+
+                <Form.Item
+                  name="description"
+                  label="Описание"
+                >
+                  <TextArea 
+                    rows={3} 
+                    placeholder="Описание чата"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="type"
+                  label="Тип чата"
+                  rules={[{ required: true, message: 'Выберите тип чата' }]}
+                >
+                  <Select placeholder="Выберите тип чата">
+                    <Option value="general">Общий</Option>
+                    <Option value="department">Отдел</Option>
+                    <Option value="project">Проект</Option>
+                    <Option value="private">Личный</Option>
+                  </Select>
+                </Form.Item>
+
+                <div style={{ marginTop: 16, padding: 12, backgroundColor: '#f6f6f6', borderRadius: 6 }}>
+                  <Text strong>Создан:</Text> {dayjs(selectedRoom.created_at).format('DD.MM.YYYY HH:mm')} 
+                  пользователем {selectedRoom.created_by.first_name} {selectedRoom.created_by.last_name}
+                </div>
+              </Form>
+            ) : (
+              // Режим просмотра
+              <div>
+                <Title level={5}>Информация о чате</Title>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Text strong>Название:</Text> {selectedRoom.name}
+                  </Col>
+                  <Col span={12}>
+                    <Text strong>Тип:</Text> {getRoomTypeText(selectedRoom.type)}
+                  </Col>
+                </Row>
+                <div style={{ marginTop: 8 }}>
+                  <Text strong>Описание:</Text> {selectedRoom.description}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <Text strong>Создан:</Text> {dayjs(selectedRoom.created_at).format('DD.MM.YYYY HH:mm')} 
+                  пользователем {selectedRoom.created_by.first_name} {selectedRoom.created_by.last_name}
+                </div>
+              </div>
+            )}
 
             <Divider />
 

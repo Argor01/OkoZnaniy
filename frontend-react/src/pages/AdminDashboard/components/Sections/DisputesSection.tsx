@@ -300,9 +300,10 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
             pagination={{
               pageSize: TABLE_CONSTANTS.DEFAULT_PAGE_SIZE,
               showSizeChanger: true,
-              showQuickJumper: true,
+              showQuickJumper: false,
               showTotal: (total, range) => 
                 `${range[0]}-${range[1]} из ${total} споров`,
+              position: ['bottomCenter'],
             }}
             scroll={{ x: 900 }}
             locale={{ emptyText: 'Споры не найдены' }}

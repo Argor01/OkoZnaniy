@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Table, Button, Tag, Space, Avatar, Typography } from 'antd';
 import { UserOutlined, StopOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Text } = Typography;
 
@@ -31,6 +32,11 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
   onUnblockUser,
   onChangeRole,
 }) => {
+  const navigate = useNavigate();
+
+  const handleUserClick = (userId: number) => {
+    navigate(`/user/${userId}`);
+  };
   const columns = [
     {
       title: 'Пользователь',
@@ -39,7 +45,20 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
         <Space>
           <Avatar icon={<UserOutlined />} />
           <div>
-            <div><strong>{record.username}</strong></div>
+            <div>
+              <Button 
+                type="link" 
+                style={{ 
+                  padding: 0, 
+                  height: 'auto', 
+                  fontWeight: 'bold',
+                  fontSize: '14px'
+                }}
+                onClick={() => handleUserClick(record.id)}
+              >
+                {record.username}
+              </Button>
+            </div>
             <Text type="secondary" style={{ fontSize: '12px' }}>
               {record.first_name} {record.last_name}
             </Text>

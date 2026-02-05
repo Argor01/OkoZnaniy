@@ -23,8 +23,7 @@ import {
   AdminChatsSection,
   OpenRequestsSection,
   InProgressRequestsSection,
-  CompletedRequestsSection,
-  CommunicationSection
+  CompletedRequestsSection
 } from './components/Sections';
 import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
@@ -424,23 +423,6 @@ const AdminDashboard: React.FC = () => {
             onRejectApproval={(claimId, reason) => console.log('Reject approval:', claimId, reason)}
             onEscalateToDirector={(claimId) => console.log('Escalate to director:', claimId)}
             onRequestMoreInfo={(claimId, questions) => console.log('Request more info:', claimId, questions)}
-          />
-        );
-
-      case 'communication':
-        return (
-          <CommunicationSection
-            messages={[]}
-            currentUser={user}
-            loading={false}
-            onSendMessage={(messageData) => console.log('Send message to director:', messageData)}
-            onReplyToMessage={(messageId, replyData) => console.log('Reply to message:', messageId, replyData)}
-            onMarkAsRead={(messageId) => console.log('Mark as read:', messageId)}
-            onArchiveMessage={(messageId) => console.log('Archive message:', messageId)}
-            onUploadAttachment={async (file) => {
-              console.log('Upload attachment:', file);
-              return { id: 1, url: '/files/attachment.pdf' };
-            }}
           />
         );
 

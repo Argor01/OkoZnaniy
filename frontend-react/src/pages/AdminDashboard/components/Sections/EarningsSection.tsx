@@ -192,9 +192,10 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
           pagination={{
             pageSize: TABLE_CONSTANTS.DEFAULT_PAGE_SIZE,
             showSizeChanger: true,
-            showQuickJumper: true,
+            showQuickJumper: false,
             showTotal: (total, range) => 
               `${range[0]}-${range[1]} из ${total} начислений`,
+            position: ['bottomCenter'],
           }}
           scroll={{ x: 800 }}
           locale={{ emptyText: 'Начисления не найдены' }}
