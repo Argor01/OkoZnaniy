@@ -10,7 +10,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'sender_id', 'text', 'file_name', 'file_url', 'is_read', 'is_mine', 'created_at']
+        fields = ['id', 'sender', 'sender_id', 'text', 'file_name', 'file_url', 'is_read', 'is_mine', 'created_at', 'message_type', 'offer_data']
         read_only_fields = ['sender', 'sender_id', 'is_mine', 'file_url', 'created_at']
 
     def get_is_mine(self, obj):
@@ -53,8 +53,12 @@ class ChatListSerializer(serializers.ModelSerializer):
         if last_message:
             request = self.context.get('request')
             file_url = request.build_absolute_uri(last_message.file.url) if request and last_message.file else None
+            if last_message.message_type == 'offer':
+                text = 'Индивидуальное предложение'
+            else:
+                text = last_message.text or (f"[Файл: {last_message.file_name}]" if last_message.file_name else '')
             return {
-                'text': last_message.text or (f"[Файл: {last_message.file_name}]" if last_message.file_name else ''),
+                'text': text,
                 'sender_id': last_message.sender.id,
                 'created_at': last_message.created_at,
                 'file_name': last_message.file_name or None,

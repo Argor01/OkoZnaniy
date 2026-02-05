@@ -81,7 +81,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       const data = await notificationsApi.getAll();
       setNotifications(data);
     } catch (error) {
-      console.error('Ошибка загрузки уведомлений:', error);
       antMessage.error('Не удалось загрузить уведомления');
     } finally {
       setLoading(false);
@@ -97,7 +96,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n)
       );
     } catch (error) {
-      console.error('Ошибка отметки уведомления:', error);
+      antMessage.error('Не удалось отметить уведомление');
     }
   };
 
@@ -107,7 +106,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       antMessage.success('Все уведомления отмечены как прочитанные');
     } catch (error) {
-      console.error('Ошибка отметки всех уведомлений:', error);
       antMessage.error('Не удалось отметить уведомления');
     }
   };
@@ -232,7 +230,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
               }}
             >
               {React.isValidElement(tab.icon)
-                ? React.cloneElement(tab.icon as React.ReactElement<any>, {
+                ? React.cloneElement(tab.icon as React.ReactElement<{ style?: React.CSSProperties }>, {
                     style: {
                       fontSize: isMobile ? 16 : 18,
                       color: notificationTab === tab.key ? '#3b82f6' : '#6b7280',

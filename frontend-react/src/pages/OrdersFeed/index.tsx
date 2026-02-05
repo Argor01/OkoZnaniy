@@ -1,38 +1,51 @@
 import React, { useState } from 'react';
-import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, message, Avatar, Divider, Popconfirm, Tooltip } from 'antd';
-import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, PlusOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, message, Avatar, Divider, Tooltip } from 'antd';
+import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi } from '../../api/orders';
-import { catalogApi } from '../../api/catalog';
+import { ordersApi, type Order, type OrderFile } from '../../api/orders';
+import { catalogApi, type Subject, type WorkType } from '../../api/catalog';
 import { authApi } from '../../api/auth';
-import { useNotifications } from '../../hooks/useNotifications';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../config/orderStatuses';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
 import { formatCurrency } from '../../utils/formatters';
-
-// Импорт модальных окон
-import ProfileModal from '../ExpertDashboard/modals/ProfileModal';
-import ApplicationModal from '../ExpertDashboard/modals/ApplicationModal';
-import WelcomeModal from '../ExpertDashboard/modals/WelcomeModal';
-import SpecializationModal from '../ExpertDashboard/modals/SpecializationModal';
-import MessageModal from '../ExpertDashboard/modals/MessageModalNew';
-import NotificationsModal from '../ExpertDashboard/modals/NotificationsModalNew';
-import ArbitrationModal from '../ExpertDashboard/modals/ArbitrationModal';
-import FinanceModal from '../ExpertDashboard/modals/FinanceModal';
-import FriendsModal from '../ExpertDashboard/modals/FriendsModal';
-import FaqModal from '../ExpertDashboard/modals/FaqModal';
-import FriendProfileModal from '../ExpertDashboard/modals/FriendProfileModal';
 import BidModal from './BidModal';
-import { mockNotifications, mockArbitrationCases } from '../ExpertDashboard/mockData';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
 
 const { Title, Text, Paragraph } = Typography;
+
+type OrdersFeedOrder = Order & {
+  subject_id?: number;
+  work_type_id?: number;
+  responses_count?: number;
+  user_has_bid?: boolean;
+  is_active?: boolean;
+  deleted?: boolean;
+  subject_name?: string;
+  work_type_name?: string;
+  client_avatar?: string;
+  client_orders_count?: number;
+  custom_subject?: string;
+  custom_work_type?: string;
+  files?: Array<
+    Partial<OrderFile> & {
+      id?: number | string;
+      filename?: string;
+      file_name?: string;
+      file_size?: string;
+      file_url?: string | null;
+      view_url?: string | null;
+      download_url?: string | null;
+      file?: string | null;
+      file_type?: string;
+    }
+  >;
+};
 
 const OrdersFeed: React.FC = () => {
   const navigate = useNavigate();
@@ -42,31 +55,9 @@ const OrdersFeed: React.FC = () => {
   const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 30000]);
   const [responsesFilter, setResponsesFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
-  const { unreadCount: unreadNotifications } = useNotifications();
-
-  // State для модальных окон
-  const [profileModalVisible, setProfileModalVisible] = useState(false);
-  const [applicationModalVisible, setApplicationModalVisible] = useState(false);
-  const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
-  const [specializationModalVisible, setSpecializationModalVisible] = useState(false);
-  const [messageModalVisible, setMessageModalVisible] = useState(false);
-  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
-  const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
-  const [financeModalVisible, setFinanceModalVisible] = useState(false);
-  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
-  const [faqModalVisible, setFaqModalVisible] = useState(false);
-  const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
-  const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
   const [bidModalVisible, setBidModalVisible] = useState(false);
-  const [selectedOrderForBid, setSelectedOrderForBid] = useState<any>(null);
-
-  // Дополнительный state
-  const [selectedFriend, setSelectedFriend] = useState<any>(null);
-  const [selectedChat, setSelectedChat] = useState<any>(null);
-  const [editingSpecialization, setEditingSpecialization] = useState<any>(null);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [selectedOrderForBid, setSelectedOrderForBid] = useState<OrdersFeedOrder | null>(null);
 
   // Загружаем профиль пользователя
   const { data: userProfile } = useQuery({
@@ -74,26 +65,10 @@ const OrdersFeed: React.FC = () => {
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  const { data: fetchedSubjects = [] } = useQuery({
+  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
   });
-
-  // Обновляем subjects при загрузке
-  React.useEffect(() => {
-    if (fetchedSubjects.length > 0) {
-      setSubjects(fetchedSubjects);
-    }
-  }, [fetchedSubjects]);
-
-  const handleMenuSelect = (key: string) => {
-    if (key === 'orders') return;
-    if (key === 'shop-ready-works') navigate('/shop/ready-works');
-    if (key === 'shop-add-work') navigate('/shop/add-work');
-    if (key === 'shop-my-works' || key === 'works') navigate('/works');
-    if (key === 'shop-purchased') navigate('/shop/purchased');
-    if (key === 'profile') navigate('/expert');
-  };
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -103,15 +78,8 @@ const OrdersFeed: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleLogout = () => {
-    authApi.logout();
-    message.success('Вы вышли из системы');
-    navigate('/');
-    window.location.reload();
-  };
-
   // Загружаем заказы (все доступные заказы для всех пользователей)
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading } = useQuery<OrdersFeedOrder[]>({
     queryKey: ['orders-feed'],
     queryFn: async () => {
       console.log('🔄 Загрузка заказов из API...');
@@ -137,15 +105,14 @@ const OrdersFeed: React.FC = () => {
   });
 
   // Загружаем справочники
-  const { data: workTypes = [] } = useQuery({
+  const { data: workTypes = [] } = useQuery<WorkType[]>({
     queryKey: ['workTypes'],
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
   // Используем реальные данные с API
-  const ordersRaw = ordersData?.results || ordersData || [];
-  const orders = Array.isArray(ordersRaw)
-    ? ordersRaw.filter((order: any) => {
+  const orders = Array.isArray(ordersData)
+    ? ordersData.filter((order) => {
         if (!order) return false;
         if (order.is_active === false) return false;
         if (order.deleted === true) return false;
@@ -154,7 +121,7 @@ const OrdersFeed: React.FC = () => {
     : [];
 
   // Фильтрация заказов
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch = !searchText || 
       order.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       order.description?.toLowerCase().includes(searchText.toLowerCase());
@@ -162,7 +129,9 @@ const OrdersFeed: React.FC = () => {
     const matchesSubject = !selectedSubject || order.subject_id === selectedSubject;
     const matchesWorkType = !selectedWorkType || order.work_type_id === selectedWorkType;
     
-    const matchesBudget = order.budget >= budgetRange[0] && order.budget <= budgetRange[1];
+    const orderBudget = Number(order.budget);
+    const matchesBudget =
+      Number.isFinite(orderBudget) && orderBudget >= budgetRange[0] && orderBudget <= budgetRange[1];
     
     const matchesResponses = 
       responsesFilter === 'all' ||
@@ -177,7 +146,7 @@ const OrdersFeed: React.FC = () => {
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
 
   // Проверка, является ли пользователь владельцем заказа
-  const isOrderOwner = (order: any) => {
+  const isOrderOwner = (order: OrdersFeedOrder) => {
     return order.client?.id === userProfile?.id || 
            order.client_id === userProfile?.id;
   };
@@ -189,13 +158,16 @@ const OrdersFeed: React.FC = () => {
       message.success('Заказ успешно удален');
       // Обновить список заказов
       window.location.reload();
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || 'Ошибка при удалении заказа';
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Ошибка при удалении заказа';
       message.error(errorMessage);
     }
   };
 
-  const handleDownloadOrderFile = React.useCallback(async (orderId: number, file: any) => {
+  const handleDownloadOrderFile = React.useCallback(
+    async (orderId: number, file: OrdersFeedOrder['files'][number]) => {
     try {
       const fileIdNum = Number(file?.id);
       const filename = file?.filename || file?.file_name || 'file';
@@ -210,7 +182,7 @@ const OrdersFeed: React.FC = () => {
         return;
       }
 
-      const blob = await (ordersApi as any).downloadOrderFile(orderId, fileIdNum);
+      const blob = await ordersApi.downloadOrderFile(orderId, fileIdNum);
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -219,15 +191,17 @@ const OrdersFeed: React.FC = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(blobUrl);
-    } catch (e: any) {
-      const status = e?.response?.status;
+    } catch (e: unknown) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
       if (status === 401) {
         message.error('Не авторизовано для скачивания файла');
       } else {
         message.error('Ошибка при скачивании файла');
       }
     }
-  }, []);
+    },
+    []
+  );
 
   return (
     <div className={styles.contentContainer}>
@@ -278,7 +252,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              {(fetchedSubjects || []).map((subject: any) => (
+              {(fetchedSubjects || []).map((subject: Subject) => (
                 <Select.Option key={subject.id} value={subject.id}>
                   {subject.name}
                 </Select.Option>
@@ -295,7 +269,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
               suffixIcon={<FilterOutlined />}
             >
-              {(workTypes || []).map((workType: any) => (
+              {(workTypes || []).map((workType: WorkType) => (
                 <Select.Option key={workType.id} value={workType.id}>
                   {workType.name}
                 </Select.Option>
@@ -334,7 +308,10 @@ const OrdersFeed: React.FC = () => {
                     controls={false}
                     style={{ width: 120 }}
                     formatter={(value) => `${value} ₽`}
-                    parser={(value) => value?.replace(' ₽', '') as any}
+                    parser={(value) => {
+                      const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                      return Number.isFinite(num) ? num : 0;
+                    }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -349,7 +326,10 @@ const OrdersFeed: React.FC = () => {
                     controls={false}
                     style={{ width: 120 }}
                     formatter={(value) => `${value} ₽`}
-                    parser={(value) => value?.replace(' ₽', '') as any}
+                    parser={(value) => {
+                      const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                      return Number.isFinite(num) ? num : 0;
+                    }}
                   />
                 </div>
               </div>
@@ -470,11 +450,18 @@ const OrdersFeed: React.FC = () => {
         </Empty>
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
-          {filteredOrders.map((order: any) => {
+          {filteredOrders.map((order: OrdersFeedOrder) => {
             // Логируем данные заказа для отладки
             if (order.files) {
               console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
             }
+
+            const hasMyBid =
+              userProfile?.role === 'expert'
+                ? (typeof order.user_has_bid === 'boolean'
+                    ? order.user_has_bid
+                    : (Array.isArray(order.bids) && order.bids.some((bid) => bid.expert?.id === userProfile?.id)))
+                : false;
             
             return (
             <Card
@@ -500,11 +487,8 @@ const OrdersFeed: React.FC = () => {
                     {order.title}
                   </Title>
                   <Space size={8} wrap>
-                    <Tag 
-                      className={styles.statusTag}
-                      style={{ background: '#52c41a' }}
-                    >
-                      {getStatusText(order.status) || 'NEW'}
+                    <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
+                      {getStatusText(order.status)}
                     </Tag>
                     {(order.custom_subject || order.subject?.name || order.subject_name) && (
                       <Tag className={styles.subjectTag}>
@@ -544,7 +528,7 @@ const OrdersFeed: React.FC = () => {
                     </Tooltip>
                   </div>
                   <div className={styles.budgetText}>
-                    {order.budget ? formatCurrency(order.budget) : 'Договорная'}
+                    {Number.isFinite(Number(order.budget)) ? formatCurrency(Number(order.budget)) : 'Договорная'}
                   </div>
                 </div>
               </div>
@@ -563,7 +547,7 @@ const OrdersFeed: React.FC = () => {
                     Прикрепленные файлы ({order.files.length}):
                   </Text>
                   <Space size={8} wrap>
-                    {order.files.map((file: any) => {
+                    {order.files.map((file) => {
                       // Определяем иконку по расширению файла
                       const getFileIcon = (filename: string) => {
                         const ext = filename.split('.').pop()?.toLowerCase();
@@ -573,17 +557,21 @@ const OrdersFeed: React.FC = () => {
                         if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined style={{ color: '#fa8c16' }} />;
                         return <FileOutlined style={{ color: '#666' }} />;
                       };
+                      const fileName = file.filename || file.file_name || 'file';
 
                       return (
-                        <Tooltip key={file.id} title={`Открыть ${file.filename} (${file.file_size || 'размер неизвестен'})`}>
+                        <Tooltip
+                          key={String(file.id ?? fileName)}
+                          title={`Открыть ${fileName} (${file.file_size || 'размер неизвестен'})`}
+                        >
                           <Tag 
-                            icon={getFileIcon(file.filename)}
+                            icon={getFileIcon(fileName)}
                             className={styles.fileTag}
                             onClick={() => {
                               handleDownloadOrderFile(order.id, file);
                             }}
                           >
-                            {file.filename} <DownloadOutlined style={{ marginLeft: 4 }} />
+                            {fileName} <DownloadOutlined style={{ marginLeft: 4 }} />
                           </Tag>
                         </Tooltip>
                       );
@@ -658,15 +646,17 @@ const OrdersFeed: React.FC = () => {
                     </Button>
                   ) : userProfile?.role === 'expert' ? (
                     <Button 
-                      type="primary"
+                      type={hasMyBid ? 'default' : 'primary'}
+                      disabled={hasMyBid}
                       className={`${styles.actionButton} ${styles.bidButton}`}
                       onClick={(e) => {
                         e.stopPropagation(); // Предотвращаем переход к деталям
+                        if (hasMyBid) return;
                         setSelectedOrderForBid(order);
                         setBidModalVisible(true);
                       }}
                     >
-                      Откликнуться
+                      {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
                     </Button>
                   ) : null}
                 </Space>
@@ -699,109 +689,18 @@ const OrdersFeed: React.FC = () => {
               </Button>
             )}
 
-      <ProfileModal
-        visible={profileModalVisible}
-        onClose={() => setProfileModalVisible(false)}
-        profile={userProfile}
-        userProfile={userProfile}
-      />
-      
-      <ApplicationModal
-        visible={applicationModalVisible}
-        onClose={() => setApplicationModalVisible(false)}
-      />
-      
-      <WelcomeModal
-        visible={welcomeModalVisible}
-        onClose={() => setWelcomeModalVisible(false)}
-        userProfile={userProfile}
-      />
-      
-      <SpecializationModal
-        visible={specializationModalVisible}
-        onClose={() => setSpecializationModalVisible(false)}
-        editingSpecialization={editingSpecialization}
-        subjects={subjects}
-      />
-      
-      <MessageModal
-        visible={messageModalVisible}
-        onClose={() => {
-          setMessageModalVisible(false);
-          setSelectedUserIdForChat(undefined);
-        }}
-        isMobile={isMobile}
-        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
-        isDesktop={window.innerWidth > 1024}
-        selectedUserId={selectedUserIdForChat}
-        onCreateOrder={() => {
-          // Логика создания заказа
-        }}
-      />
-      
-      <NotificationsModal
-        visible={notificationsModalVisible}
-        onClose={() => setNotificationsModalVisible(false)}
-        isMobile={isMobile}
-      />
-      
-      <ArbitrationModal
-        visible={arbitrationModalVisible}
-        onClose={() => setArbitrationModalVisible(false)}
-        cases={mockArbitrationCases}
-        isMobile={isMobile}
-      />
-      
-      <FinanceModal
-        visible={financeModalVisible}
-        onClose={() => setFinanceModalVisible(false)}
-        profile={userProfile}
-        isMobile={isMobile}
-      />
-      
-      <FriendsModal
-        visible={friendsModalVisible}
-        onClose={() => setFriendsModalVisible(false)}
-        onOpenChat={(chat) => {
-          setSelectedChat(chat);
-          setMessageModalVisible(true);
-          setFriendsModalVisible(false);
-        }}
-        onOpenProfile={(friend) => {
-          setSelectedFriend(friend);
-          setFriendProfileModalVisible(true);
-          setFriendsModalVisible(false);
-        }}
-        isMobile={isMobile}
-      />
-      
-      <FaqModal
-        visible={faqModalVisible}
-        onClose={() => setFaqModalVisible(false)}
-        isMobile={isMobile}
-      />
-      
-      <FriendProfileModal
-        visible={friendProfileModalVisible}
-        onClose={() => setFriendProfileModalVisible(false)}
-        friend={selectedFriend}
-        onOpenChat={() => {
-          setFriendProfileModalVisible(false);
-          setMessageModalVisible(true);
-        }}
-        isMobile={isMobile}
-      />
-
-      <BidModal
-        visible={bidModalVisible}
-        onClose={() => {
-          setBidModalVisible(false);
-          setSelectedOrderForBid(null);
-        }}
-        orderId={selectedOrderForBid?.id}
-        orderTitle={selectedOrderForBid?.title}
-        orderBudget={selectedOrderForBid?.budget}
-      />
+      {selectedOrderForBid && (
+        <BidModal
+          visible={bidModalVisible}
+          onClose={() => {
+            setBidModalVisible(false);
+            setSelectedOrderForBid(null);
+          }}
+          orderId={selectedOrderForBid.id}
+          orderTitle={selectedOrderForBid.title}
+          orderBudget={Number.isFinite(Number(selectedOrderForBid.budget)) ? Number(selectedOrderForBid.budget) : undefined}
+        />
+      )}
     </div>
   );
 };

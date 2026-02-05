@@ -40,6 +40,14 @@ class Message(models.Model):
     text = models.TextField(blank=True)
     file = models.FileField(upload_to=chat_message_file_path, blank=True, null=True, verbose_name="Файл")
     file_name = models.CharField(max_length=255, blank=True, verbose_name="Имя файла")
+    
+    MESSAGE_TYPES = [
+        ('text', 'Текст'),
+        ('offer', 'Индивидуальное предложение'),
+    ]
+    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text', verbose_name="Тип сообщения")
+    offer_data = models.JSONField(blank=True, null=True, verbose_name="Данные предложения")
+    
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -51,8 +59,8 @@ class Message(models.Model):
         ]
 
     def clean(self):
-        if not (self.text or self.file):
-            raise ValidationError("Укажите текст сообщения или прикрепите файл.")
+        if not (self.text or self.file or (self.message_type == 'offer' and self.offer_data)):
+            raise ValidationError("Укажите текст сообщения, прикрепите файл или создайте предложение.")
         if self.text:
             import re
             if re.search(r"(?:@|\+7|https?://|\d{9,})", self.text, re.I):

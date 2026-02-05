@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Input, Button, Avatar, Spin, Empty, Typography } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { authApi } from '../../../api/auth';
+import { authApi, type User } from '../../../api/auth';
 
 const { Text } = Typography;
 
@@ -10,8 +10,8 @@ interface FriendsModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
-  onOpenChat: (friend: any) => void;
-  onOpenProfile: (friend: any) => void;
+  onOpenChat: (friend: User) => void;
+  onOpenProfile: (friend: User) => void;
 }
 
 // Цвета для аватаров
@@ -48,7 +48,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   });
 
   // Фильтрация по поиску
-  const filteredUsers = recentUsers?.filter((user: any) => {
+  const filteredUsers = recentUsers?.filter((user: User) => {
     if (!searchText) return true;
     const search = searchText.toLowerCase();
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
@@ -143,7 +143,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
             gap: isMobile ? 12 : 16, 
             alignItems: 'stretch' 
           }}>
-            {filteredUsers.map((user: any) => (
+            {filteredUsers.map((user: User) => (
               <div 
                 key={user.id}
                 style={{ 

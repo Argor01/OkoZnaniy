@@ -1,17 +1,18 @@
 import React from 'react';
-import { Button, Typography, Spin, Space, Popconfirm, Tag } from 'antd';
+import { Button, Typography, Spin, Space, Tag } from 'antd';
 import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import type { Specialization } from '../../../../api/experts';
 import styles from '../../ExpertDashboard.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
 interface SpecializationsTabProps {
-  specializations: any[];
+  specializations: Specialization[];
   specializationsLoading: boolean;
   isMobile: boolean;
-  onEdit: (spec: any) => void;
+  onEdit: (spec: Specialization) => void;
   onAdd: () => void;
-  onDelete: (spec: any) => void;
+  onDelete: (spec: Specialization) => void;
 }
 
 const SpecializationsTab: React.FC<SpecializationsTabProps> = ({

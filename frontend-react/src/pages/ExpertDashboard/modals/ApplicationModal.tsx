@@ -46,11 +46,11 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       onClose();
       queryClient.invalidateQueries({ queryKey: ['expertProfile'] });
     },
-    onError: (error: any) => {
-      console.error('Error creating application:', error);
-      const errorMessage = error?.response?.data?.detail || 
-                          error?.response?.data?.message || 
-                          'Ошибка при отправке анкеты';
+    onError: (error: unknown) => {
+      const errorMessage =
+        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
+        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
+        'Ошибка при отправке анкеты';
       message.error(errorMessage);
     }
   });

@@ -125,8 +125,9 @@ export interface DisputeModalProps extends ModalProps {
   dispute: Dispute | null;
   arbitrators: Arbitrator[];
   onAssignArbitrator: (disputeId: number, arbitratorId: number) => void;
-}// Тип
-ы для поддержки
+}
+
+// Типы для поддержки
 export type SupportStatus = 'open' | 'in_progress' | 'completed';
 
 export interface SupportChat {

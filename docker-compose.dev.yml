@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Переопределяем frontend для development
   frontend:
@@ -27,6 +25,11 @@ services:
     environment:
       - DEBUG=True
       - DJANGO_ENV=development
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CHANNEL_REDIS_URL=redis://redis:6379/0
     command: python manage.py runserver 0.0.0.0:8000
     
   # Отключаем nginx для разработки

@@ -18,7 +18,7 @@ const PurchasedWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersState>({ sortBy: 'date' });
 
   // Загрузка профиля пользователя
-  const { data: profile } = useQuery({
+  const { data: _profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });

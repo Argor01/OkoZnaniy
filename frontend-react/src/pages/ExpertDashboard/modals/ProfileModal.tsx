@@ -12,7 +12,7 @@ interface ProfileModalProps {
   visible: boolean;
   onClose: () => void;
   profile: UserProfile | null;
-  userProfile?: any;
+  userProfile?: { role?: string; avatar?: string } | null;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, userProfile }) => {
@@ -44,7 +44,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
   useEffect(() => {
     if (visible && profile) {
-      const toNumberOrUndefined = (value: any) => {
+      const toNumberOrUndefined = (value: unknown) => {
         if (value === null || value === undefined || value === '') return undefined;
         if (typeof value === 'number') return value;
         const num = Number(value);
@@ -52,9 +52,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       };
 
       // Преобразуем строку навыков в массив для Select
-      const formValues: any = { ...profile };
-      formValues.experience_years = toNumberOrUndefined((profile as any).experience_years);
-      formValues.hourly_rate = toNumberOrUndefined((profile as any).hourly_rate);
+      const formValues: Record<string, unknown> = { ...profile };
+      formValues.experience_years = toNumberOrUndefined(profile.experience_years);
+      formValues.hourly_rate = toNumberOrUndefined(profile.hourly_rate);
       if (profile.skills && typeof profile.skills === 'string') {
         formValues.skills = profile.skills.split(',').map(s => s.trim()).filter(s => s);
       }
@@ -160,8 +160,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         initialValues={profile || {}}
         onFinish={async (values) => {
           try {
+            type UpdateProfilePayload = {
+              username?: string;
+              first_name?: string;
+              last_name?: string;
+              bio?: string;
+              experience_years?: number;
+              education?: string;
+              hourly_rate?: number;
+              portfolio_url?: string;
+              skills?: string;
+            };
             // Подготавливаем данные для отправки
-            const profileData: any = {
+            const profileData: UpdateProfilePayload = {
               username: values.username,
               first_name: values.first_name,
               last_name: values.last_name,
@@ -183,30 +194,28 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               }
             }
 
-            console.log('Отправляем данные:', profileData);
             const result = await authApi.updateProfile(profileData);
-            console.log('Результат обновления:', result);
             message.success('Профиль обновлен');
             onClose();
             queryClient.setQueryData(['user-profile'], result);
             await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
             await queryClient.refetchQueries({ queryKey: ['user-profile'] });
-            console.log('Кэш обновлен');
-          } catch (e: any) {
-            console.error('Ошибка:', e);
-            console.error('Детали ошибки:', e?.response?.data);
-            const errorData = e?.response?.data;
-            if (errorData && typeof errorData === 'object') {
-              Object.entries(errorData).forEach(([field, messages]) => {
+          } catch (e: unknown) {
+            const errorData = (e as { response?: { data?: unknown } })?.response?.data;
+            if (errorData && typeof errorData === 'object' && !Array.isArray(errorData)) {
+              Object.entries(errorData as Record<string, unknown>).forEach(([field, messages]) => {
                 if (Array.isArray(messages)) {
-                  messages.forEach(msg => message.error(`${field}: ${msg}`));
-                } else {
-                  message.error(`${field}: ${messages}`);
+                  messages.forEach((msg) => message.error(`${field}: ${String(msg)}`));
+                  return;
                 }
+                message.error(`${field}: ${String(messages)}`);
               });
-            } else {
-              message.error(e?.response?.data?.detail || 'Не удалось обновить профиль');
+              return;
             }
+            const detail =
+              (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+              'Не удалось обновить профиль';
+            message.error(detail);
           }
         }}
       >

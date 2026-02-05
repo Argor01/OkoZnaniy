@@ -7,10 +7,15 @@ import { formatCurrency } from '../../../utils/formatters';
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
 
+type FinanceProfile = {
+  balance?: number;
+  frozen_balance?: number;
+};
+
 interface FinanceModalProps {
   visible: boolean;
   onClose: () => void;
-  profile: any;
+  profile: FinanceProfile | null;
   isMobile: boolean;
 }
 
@@ -195,7 +200,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Заблокировано:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                {formatCurrency((profile as any)?.frozen_balance || 0)}
+                {formatCurrency(profile?.frozen_balance || 0)}
               </Text>
 
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>

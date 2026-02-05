@@ -1,19 +1,20 @@
 import React from 'react';
 import { Button, Typography, Spin, Space } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import type { ExpertApplication } from '../../../../api/experts';
+import type { UserProfile } from '../../types';
 import styles from '../../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
 export interface ApplicationStatusProps {
-  application: any;
+  application: ExpertApplication | null;
   applicationLoading: boolean;
-  userProfile: any;
-  isMobile: boolean;
+  userProfile: UserProfile | null | undefined;
   onOpenApplicationModal: () => void;
 }
 
-const getApplicationStatusIcon = (status: string) => {
+const getApplicationStatusIcon = (status: ExpertApplication['status']) => {
   switch (status) {
     case 'pending': return <ClockCircleOutlined />;
     case 'approved': return <CheckCircleOutlined />;
@@ -26,7 +27,6 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
   application,
   applicationLoading,
   userProfile,
-  isMobile,
   onOpenApplicationModal,
 }) => {
   if (applicationLoading) {

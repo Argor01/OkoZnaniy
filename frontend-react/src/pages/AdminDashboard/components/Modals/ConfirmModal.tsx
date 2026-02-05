@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, Typography, Alert } from 'antd';
+import { Modal, Button, Alert } from 'antd';
 import { 
   ExclamationCircleOutlined, 
   CheckCircleOutlined, 
@@ -8,8 +8,6 @@ import {
 } from '@ant-design/icons';
 import { MODAL_CONSTANTS } from '../../constants';
 import styles from './ConfirmModal.module.css';
-
-const { Text, Paragraph } = Typography;
 
 export type ConfirmType = 'info' | 'success' | 'warning' | 'error';
 
@@ -114,83 +112,4 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       </div>
     </Modal>
   );
-};
-
-/**
- * Хук для удобного использования ConfirmModal
- */
-export const useConfirmModal = () => {
-  const [modalState, setModalState] = React.useState<{
-    visible: boolean;
-    type: ConfirmType;
-    title: string;
-    content: React.ReactNode;
-    okText: string;
-    cancelText: string;
-    onOk: () => void | Promise<void>;
-    loading: boolean;
-    danger: boolean;
-  }>({
-    visible: false,
-    type: 'info',
-    title: '',
-    content: '',
-    okText: 'OK',
-    cancelText: 'Отмена',
-    onOk: () => {},
-    loading: false,
-    danger: false,
-  });
-
-  const showConfirm = (options: {
-    type?: ConfirmType;
-    title: string;
-    content: React.ReactNode;
-    okText?: string;
-    cancelText?: string;
-    onOk: () => void | Promise<void>;
-    danger?: boolean;
-  }) => {
-    setModalState({
-      visible: true,
-      type: options.type || 'info',
-      title: options.title,
-      content: options.content,
-      okText: options.okText || 'OK',
-      cancelText: options.cancelText || 'Отмена',
-      onOk: options.onOk,
-      loading: false,
-      danger: options.danger || false,
-    });
-  };
-
-  const hideConfirm = () => {
-    setModalState(prev => ({ ...prev, visible: false }));
-  };
-
-  const setLoading = (loading: boolean) => {
-    setModalState(prev => ({ ...prev, loading }));
-  };
-
-  const confirmModal = (
-    <ConfirmModal
-      visible={modalState.visible}
-      type={modalState.type}
-      title={modalState.title}
-      content={modalState.content}
-      okText={modalState.okText}
-      cancelText={modalState.cancelText}
-      onOk={modalState.onOk}
-      onCancel={hideConfirm}
-      loading={modalState.loading}
-      danger={modalState.danger}
-    />
-  );
-
-  return {
-    showConfirm,
-    hideConfirm,
-    setLoading,
-    confirmModal,
-  };
 };

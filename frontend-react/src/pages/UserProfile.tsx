@@ -1,15 +1,15 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Divider, Rate, Tag, Space } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space } from 'antd';
+import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
 import { expertsApi } from '../api/experts';
 import { apiClient } from '../api/client';
 import dayjs from 'dayjs';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
-const UserProfile: React.FC = () => {
+const UserProfile: FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
@@ -29,12 +29,12 @@ const UserProfile: React.FC = () => {
     queryFn: async () => {
       try {
         const response = await apiClient.get(`/orders/orders/?client=${userId}`);
-        const orders = response.data;
+        const orders = response.data as { results?: Array<{ status?: string }> };
         const total = orders.results?.length || 0;
-        const completed = orders.results?.filter((order: any) => order.status === 'completed').length || 0;
+        const completed = orders.results?.filter((order) => order.status === 'completed').length || 0;
         const success_rate = total > 0 ? (completed / total) * 100 : 0;
         return { total, completed, success_rate };
-      } catch (error) {
+      } catch (_error: unknown) {
         return { total: 0, completed: 0, success_rate: 0 };
       }
     },
@@ -365,7 +365,8 @@ const UserProfile: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {userData.specializations.map((spec: any, index: number) => (
+                  {userData.specializations.map(
+                    (spec: { custom_name?: string; subject?: { name?: string } }, index: number) => (
                     <Tag key={index} color="blue">
                       {spec?.custom_name || spec?.subject?.name || 'Специализация не указана'}
                     </Tag>
@@ -392,7 +393,16 @@ const UserProfile: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {reviews.map((review: any) => (
+                    {reviews.map((review: {
+                      id: number;
+                      rating?: number;
+                      created_at?: string;
+                      text?: string;
+                      comment?: string;
+                      order?: { title?: string | null } | null;
+                      order_title?: string | null;
+                      client?: { first_name?: string; last_name?: string } | null;
+                    }) => (
                       <div 
                         key={review.id}
                         style={{

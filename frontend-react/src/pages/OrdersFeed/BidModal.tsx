@@ -11,10 +11,14 @@ interface BidModalProps {
   orderId: number;
   orderTitle: string;
   orderBudget?: number;
-  onOpenChat?: (chatId: number) => void;
 }
 
-const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget, onOpenChat }) => {
+type BidFormValues = {
+  amount: number;
+  comment?: string;
+};
+
+const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [bidSuccess, setBidSuccess] = useState(false);
@@ -28,13 +32,17 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
     },
-    onError: (error: any) => {
-      message.error(error.response?.data?.detail || 'Не удалось отправить отклик');
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      message.error(detail || 'Не удалось отправить отклик');
     },
   });
 
-  const handleSubmit = (values: any) => {
-    placeBidMutation.mutate(values);
+  const handleSubmit = (values: BidFormValues) => {
+    placeBidMutation.mutate({
+      amount: Number(values.amount),
+      comment: values.comment,
+    });
   };
 
   const handleClose = () => {

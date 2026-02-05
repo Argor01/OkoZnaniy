@@ -118,6 +118,23 @@ class ExpertRatingSerializer(serializers.ModelSerializer):
         
         return data
 
+
+class ExpertRatingDetailSerializer(serializers.ModelSerializer):
+    expert = serializers.IntegerField(source='expert_id', read_only=True)
+    client = SimpleUserSerializer(read_only=True)
+    order = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExpertRating
+        fields = ['id', 'expert', 'client', 'order', 'rating', 'comment', 'created_at']
+        read_only_fields = fields
+
+    def get_order(self, obj):
+        return {
+            'id': obj.order.id,
+            'title': obj.order.title or 'Без названия',
+        }
+
 class ExpertStatisticsSerializer(serializers.ModelSerializer):
     expert = UserSerializer(read_only=True)
     

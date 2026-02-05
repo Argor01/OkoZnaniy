@@ -65,19 +65,22 @@ const RegisterWithEmailVerification: React.FC = () => {
         // Email не требуется или уже подтвержден
         navigate('/login');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.email?.[0] || 
-                          err.response?.data?.password?.[0] ||
-                          err.response?.data?.detail ||
-                          'Ошибка регистрации';
+      const errorMessage = (() => {
+        if (!axios.isAxiosError(err)) return 'Ошибка регистрации';
+        const data = err.response?.data as
+          | { email?: string[]; password?: string[]; detail?: string }
+          | undefined;
+        return data?.email?.[0] || data?.password?.[0] || data?.detail || 'Ошибка регистрации';
+      })();
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerificationSuccess = (user: any, tokens: { access: string; refresh: string }) => {
+  const handleVerificationSuccess = (_user: unknown, _tokens: { access: string; refresh: string }) => {
     // Перенаправляем в зависимости от роли
     navigate('/expert');
   };

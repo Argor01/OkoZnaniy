@@ -69,15 +69,17 @@ export interface Specialization {
 }
 
 export interface CreateSpecializationRequest {
-  subject_id: number;
+  subject_id?: number;
+  custom_name?: string;
   experience_years: number;
   hourly_rate: number;
   description?: string;
+  skills?: string;
 }
 
 export interface ExpertReview {
   id: number;
-  expert: number;
+  expert?: number;
   client: {
     id: number;
     first_name: string;
@@ -89,15 +91,27 @@ export interface ExpertReview {
     title: string;
   };
   rating: number;
-  text: string;
+  comment?: string;
+  text?: string;
   created_at: string;
 }
 
 export const expertsApi = {
   async getReviews(expertId?: number): Promise<ExpertReview[]> {
     const params = expertId ? { expert: expertId } : {};
-    const { data } = await apiClient.get('/experts/reviews/', { params });
-    return data.results || data;
+    const { data } = await apiClient.get('/experts/ratings/', { params });
+    const raw: unknown = (data as { results?: unknown })?.results ?? data;
+    const items: unknown[] = Array.isArray(raw) ? raw : [];
+    return items.map((r) => {
+      const rr = r as Partial<ExpertReview> & { comment?: unknown; text?: unknown };
+      const comment = typeof rr.comment === 'string' ? rr.comment : undefined;
+      const text = typeof rr.text === 'string' ? rr.text : undefined;
+      return {
+        ...(rr as ExpertReview),
+        comment,
+        text: text ?? comment ?? '',
+      };
+    });
   },
 
   async rateExpert(payload: CreateExpertRatingRequest) {
@@ -107,7 +121,19 @@ export const expertsApi = {
 
   async getExpertStatistics(expertId: number): Promise<ExpertStatistics> {
     const { data } = await apiClient.get(`/experts/statistics/?expert=${expertId}`);
-    return data.results?.[0] || data;
+    const raw = data?.results?.[0] || data;
+    if (!raw || typeof raw !== 'object') return raw;
+    const average_rating_raw = (raw as { average_rating?: unknown }).average_rating;
+    const average_rating =
+      typeof average_rating_raw === 'number'
+        ? average_rating_raw
+        : typeof average_rating_raw === 'string'
+          ? Number(average_rating_raw)
+          : 0;
+    return {
+      ...(raw as ExpertStatistics),
+      average_rating: Number.isFinite(average_rating) ? average_rating : 0,
+    };
   },
 
   async getMyApplication(): Promise<ExpertApplication | null> {
@@ -115,9 +141,10 @@ export const expertsApi = {
       const { data } = await apiClient.get('/experts/applications/my_application/');
       // Если сервер вернул null, значит анкеты нет
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Если анкета не найдена (404 или 400), это нормально - значит её ещё нет
-      if (error.response?.status === 404 || error.response?.status === 403 || error.response?.status === 400) {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 404 || status === 403 || status === 400) {
         return null;
       }
       throw error;
