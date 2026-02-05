@@ -80,11 +80,13 @@ export type MenuKey =
   | 'pending_approval'
   | 'claims_processing'
   | 'communication'
-  | 'support'
-  | 'support_open'
-  | 'support_in_progress'
-  | 'support_completed'
+  | 'internal_communication'       // 🆕 Внутренняя коммуникация
+  | 'support_open'                 // 🆕 Открытые запросы поддержки
+  | 'support_in_progress'          // 🆕 Запросы поддержки в работе
+  | 'support_completed'            // 🆕 Завершенные запросы поддержки
+  | 'support_chats'                // 🆕 Чаты поддержки
   | 'admin_chats'
+  | 'admin_group_chats'            // 🆕 Групповые чаты администраторов
   | 'request_processing'
   | 'request_processing_open'      // 🆕 Открытые запросы
   | 'request_processing_progress'  // 🆕 В процессе решения
@@ -123,4 +125,46 @@ export interface DisputeModalProps extends ModalProps {
   dispute: Dispute | null;
   arbitrators: Arbitrator[];
   onAssignArbitrator: (disputeId: number, arbitratorId: number) => void;
+}// Тип
+ы для поддержки
+export type SupportStatus = 'open' | 'in_progress' | 'completed';
+
+export interface SupportChat {
+  id: number;
+  user_id: number;
+  user_name: string;
+  subject: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  unread_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportMessage {
+  id: number;
+  chat_id: number;
+  content: string;
+  is_from_admin: boolean;
+  attachments?: SupportAttachment[];
+  created_at: string;
+}
+
+export interface SupportAttachment {
+  id: number;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+}
+
+export interface SupportRequest {
+  id: number;
+  user: User;
+  subject: string;
+  description: string;
+  status: SupportStatus;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  assigned_admin?: User;
+  created_at: string;
+  updated_at: string;
 }

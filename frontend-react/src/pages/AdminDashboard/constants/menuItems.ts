@@ -126,28 +126,10 @@ export const menuItems: MenuItem[] = [
     icon: MessageOutlined,
     label: 'Коммуникация с дирекцией',
   },
-  // Новый раздел поддержки
   {
-    key: 'support' as MenuKey,
-    icon: CustomerServiceOutlined,
-    label: 'Поддержка клиентов',
-    children: [
-      {
-        key: 'support_open',
-        icon: InboxOutlined,
-        label: 'Открытые запросы',
-      },
-      {
-        key: 'support_in_progress',
-        icon: ClockCircleOutlined,
-        label: 'В процессе решения',
-      },
-      {
-        key: 'support_completed',
-        icon: CheckCircleOutlined,
-        label: 'Выполненные',
-      },
-    ],
+    key: 'support_chats',
+    icon: MessageOutlined,
+    label: 'Чаты поддержки',
   },
   {
     key: 'admin_chats',
@@ -192,6 +174,7 @@ export const titleMap: Record<MenuKey, string> = {
   pending_approval: 'Ожидают решения',
   claims_processing: 'Обработка претензий',
   communication: 'Коммуникация с дирекцией',
+  internal_communication: 'Внутренняя коммуникация',
   // Управление пользователями
   users_management: 'Управление пользователями',
   all_users: 'Все пользователи',
@@ -202,11 +185,12 @@ export const titleMap: Record<MenuKey, string> = {
   all_orders: 'Все заказы',
   problem_orders: 'Проблемные заказы',
   // Поддержка
-  support: 'Поддержка клиентов',
-  support_open: 'Открытые запросы',
-  support_in_progress: 'В процессе решения',
-  support_completed: 'Выполненные',
+  support_open: 'Открытые запросы поддержки',
+  support_in_progress: 'Запросы поддержки в работе',
+  support_completed: 'Завершенные запросы поддержки',
+  support_chats: 'Чаты поддержки',
   admin_chats: 'Чаты администраторов',
+  admin_group_chats: 'Групповые чаты администраторов',
   // Обработка запросов
   request_processing: 'Обработка запросов',
   request_processing_open: 'Открытые запросы клиентов',
@@ -230,10 +214,6 @@ export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
     in_progress_claims: 'claims' as MenuKey,
     completed_claims: 'claims' as MenuKey,
     pending_approval: 'claims' as MenuKey,
-    // Поддержка
-    support_open: 'support' as MenuKey,
-    support_in_progress: 'support' as MenuKey,
-    support_completed: 'support' as MenuKey,
     // Новые дочерние пункты меню
     request_processing_open: 'request_processing' as MenuKey,
     request_processing_progress: 'request_processing' as MenuKey,

@@ -9,6 +9,7 @@ import {
   EarningsSection, 
   DisputesSection,
   SupportRequestsSection,
+  SupportChatsSection,
   UsersManagementSection,
   BlockedUsersSection,
   UserRolesSection,
@@ -252,6 +253,19 @@ const AdminDashboard: React.FC = () => {
 
 
       // Новые секции поддержки
+      case 'support_chats':
+        return (
+          <SupportChatsSection
+            chats={[]}
+            currentUserId={1}
+            loading={false}
+            onSendMessage={(chatId, message) => console.log('Send message:', chatId, message)}
+            onTakeChat={(chatId) => console.log('Take chat:', chatId)}
+            onCloseChat={(chatId) => console.log('Close chat:', chatId)}
+            onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}
+          />
+        );
+
       case 'support_open':
       case 'support_in_progress':
       case 'support_completed':
@@ -272,16 +286,12 @@ const AdminDashboard: React.FC = () => {
             chatRooms={[]}
             currentUserId={1}
             loading={false}
-            onSendMessage={(roomId, message, replyTo) => console.log('Send message:', roomId, message, replyTo)}
+            onSendMessage={(roomId: number, message: string) => console.log('Send message:', roomId, message)}
             onCreateRoom={(roomData) => console.log('Create room:', roomData)}
             onJoinRoom={(roomId) => console.log('Join room:', roomId)}
             onLeaveRoom={(roomId) => console.log('Leave room:', roomId)}
             onInviteUser={(roomId, userId) => console.log('Invite user:', roomId, userId)}
             onUploadFile={(roomId, file) => console.log('Upload file:', roomId, file)}
-            onPinMessage={(messageId) => console.log('Pin message:', messageId)}
-            onDeleteMessage={(messageId) => console.log('Delete message:', messageId)}
-            onEditMessage={(messageId, newText) => console.log('Edit message:', messageId, newText)}
-            onReactToMessage={(messageId, emoji) => console.log('React to message:', messageId, emoji)}
           />
         );
       
@@ -509,9 +519,9 @@ const AdminDashboard: React.FC = () => {
         messages={[]}
         isOpen={false}
         onClose={() => console.log('Close modal')}
-        onTakeRequest={async (requestId) => { console.log('Take request:', requestId); return true; }}
-        onCompleteRequest={async (requestId, resolution) => { console.log('Complete request:', requestId, resolution); return true; }}
-        onSendMessage={async (requestId, message) => { console.log('Send message:', requestId, message); return true; }}
+        onTakeRequest={async (requestId: number) => { console.log('Take request:', requestId); return true; }}
+        onCompleteRequest={async (requestId: number) => { console.log('Complete request:', requestId); return true; }}
+        onSendMessage={async (requestId: number, message: string) => { console.log('Send message:', requestId, message); return true; }}
       />
     </AdminLayout>
   );
