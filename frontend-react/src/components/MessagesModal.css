@@ -5,7 +5,7 @@
 }
 
 .messages-modal .ant-modal {
-  max-width: 900px !important;
+  max-width: 1400px;
 }
 
 @media (max-width: 768px) {
@@ -208,7 +208,7 @@
 }
 
 .messages-modal .message-sender {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   margin-bottom: 4px;
   opacity: 0.8;
@@ -219,13 +219,13 @@
 }
 
 .messages-modal .message-text {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   word-wrap: break-word;
 }
 
 .messages-modal .message-time {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 4px;
   opacity: 0.6;
 }

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';

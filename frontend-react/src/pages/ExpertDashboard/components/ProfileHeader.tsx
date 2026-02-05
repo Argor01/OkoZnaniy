@@ -2,13 +2,14 @@ import React from 'react';
 import { Avatar, Typography, Rate, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import type { UserProfile } from '../types';
+import type { ExpertStatistics } from '../../../api/experts';
 import styles from '../ExpertDashboard.module.css';
 
 const { Title, Text } = Typography;
 
 interface ProfileHeaderProps {
   profile: UserProfile | null;
-  expertStats?: any;
+  expertStats?: ExpertStatistics;
   isMobile?: boolean;
 }
 

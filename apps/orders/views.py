@@ -136,6 +136,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status not in ['in_progress', 'revision']:
             return Response({'detail': 'Отправить на проверку можно только из статусов in_progress или revision.'}, status=status.HTTP_400_BAD_REQUEST)
+        if order.deadline and order.deadline <= timezone.now():
+            return Response({'detail': 'Срок сдачи истёк.'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'review'
         order.save(update_fields=['status', 'updated_at'])
         return Response(self.get_serializer(order).data)
@@ -216,6 +218,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Принять можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'completed'
         order.save(update_fields=['status', 'updated_at'])
+        if order.expert_id:
+            from apps.experts.models import ExpertStatistics
+
+            stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
+            stats.update_statistics()
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -229,6 +236,23 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'На доработку можно отправить только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'revision'
         order.save(update_fields=['status', 'updated_at'])
+        if order.expert_id and order.client_id:
+            from apps.chat.models import Chat, Message
+
+            chat, created = Chat.objects.get_or_create(
+                order=order,
+                client=order.client,
+                expert=order.expert,
+            )
+            if created:
+                chat.participants.add(order.client, order.expert)
+            message = Message(
+                chat=chat,
+                sender=order.client,
+                text='Клиент вернул работу на доработку',
+            )
+            message.full_clean()
+            message.save()
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'])
@@ -488,8 +512,14 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
+        order_pk = self.kwargs.get('order_pk')
+        user = self.request.user
+        # Только клиент или эксперт заказа (или staff) могут видеть/скачивать файлы
+        order = get_object_or_404(Order, pk=order_pk)
+        if not (user.is_staff or order.client_id == user.id or order.expert_id == user.id):
+            return OrderFile.objects.none()
         return OrderFile.objects.filter(
-            order_id=self.kwargs['order_pk']
+            order_id=order_pk
         ).select_related('order', 'uploaded_by')
 
     def perform_create(self, serializer):

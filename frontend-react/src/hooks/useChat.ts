@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import chatApi, { Chat, ChatMessage } from '../api/chat';
+import { chatApi, ChatListItem, Message } from '../api/chat';
 
 export const useChat = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -21,13 +21,13 @@ export const useChat = () => {
     }
   }, []);
 
-  const sendMessage = async (chatId: number, text: string, file?: File): Promise<ChatMessage> => {
+  const sendMessage = async (chatId: number, text: string, file?: File): Promise<Message> => {
     const message = await chatApi.sendMessage(chatId, text, file);
     await loadChats();
     return message;
   };
 
-  const getMessages = async (chatId: number): Promise<ChatMessage[]> => {
+  const getMessages = async (chatId: number): Promise<Message[]> => {
     return await chatApi.getMessages(chatId);
   };
 

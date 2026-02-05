@@ -108,6 +108,7 @@ class OrderSerializer(serializers.ModelSerializer):
     price_breakdown = OrderPriceBreakdownSerializer(read_only=True)
     discount = DiscountRuleSerializer(read_only=True)
     rating = serializers.SerializerMethodField()
+    user_has_bid = serializers.SerializerMethodField()
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
@@ -136,7 +137,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'discount',
-            'original_price', 'discount_amount', 'final_price', 'rating'
+            'original_price', 'discount_amount', 'final_price', 'rating',
+            'user_has_bid'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -193,6 +195,21 @@ class OrderSerializer(serializers.ModelSerializer):
                 })
         
         return data
+
+    def get_user_has_bid(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if not user or not getattr(user, 'is_authenticated', False):
+            return False
+        if getattr(user, 'role', None) != 'expert':
+            return False
+        try:
+            bids_rel = getattr(obj, 'bids', None)
+            if bids_rel is not None and hasattr(bids_rel, 'all'):
+                return any(getattr(b, 'expert_id', None) == user.id for b in bids_rel.all())
+            return Bid.objects.filter(order=obj, expert=user).exists()
+        except Exception:
+            return False
 
     def create(self, validated_data):
         request = self.context.get('request')

@@ -1,12 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Typography, message, Tabs } from 'antd';
-import { LogoutOutlined, MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { message, Tabs } from 'antd';
+import type { FC } from 'react';
 import { authApi } from '../../api/auth';
-import { expertsApi } from '../../api/experts';
-import { catalogApi } from '../../api/catalog';
-import { ordersApi } from '../../api/orders';
+import type { User } from '../../api/auth';
+import { expertsApi, type Specialization } from '../../api/experts';
 import { useNotifications } from '../../hooks/useNotifications';
 import ProfileHeader from './components/ProfileHeader/index';
 import ApplicationStatus from './components/ApplicationStatus/index';
@@ -16,8 +14,8 @@ import ReviewsTab from './components/ReviewsTab';
 import OrdersTab from './components/OrdersTab';
 import WorksTab from './components/WorksTab';
 import FriendsTab from './components/FriendsTab';
-import { UserProfile, ChatMessage } from './types';
-import { mockNotifications, mockArbitrationCases, mockMessages } from './mockData';
+import { UserProfile } from './types';
+import { mockArbitrationCases } from './mockData';
 import styles from './ExpertDashboard.module.css';
 
 // Импорт модальных окон
@@ -33,15 +31,11 @@ import FriendsModal from './modals/FriendsModal';
 import FaqModal from './modals/FaqModal';
 import FriendProfileModal from './modals/FriendProfileModal';
 
-const { Title } = Typography;
-
-const ExpertDashboard: React.FC = () => {
+const ExpertDashboard: FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const location = useLocation();
   
   // Загружаем уведомления
-  const { unreadCount: unreadNotifications } = useNotifications();
+  useNotifications();
   
   // State для модальных окон
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -59,14 +53,10 @@ const ExpertDashboard: React.FC = () => {
   
   // Остальной state
   const [activeTab, setActiveTab] = useState<string>('about');
-  const [selectedMenuKey, setSelectedMenuKey] = useState<string>('orders');
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(mockMessages);
-  const [selectedChat, setSelectedChat] = useState<any>(null);
-  const [editingSpecialization, setEditingSpecialization] = useState<any>(null);
-  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -114,8 +104,11 @@ const ExpertDashboard: React.FC = () => {
       message.success('Специализация удалена');
       queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
     },
-    onError: (err: any) => {
-      message.error(err?.response?.data?.detail || 'Не удалось удалить специализацию');
+    onError: (err: unknown) => {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Не удалось удалить специализацию';
+      message.error(detail);
     },
   });
 
@@ -125,11 +118,6 @@ const ExpertDashboard: React.FC = () => {
     queryKey: ['expert-statistics', userProfile?.id],
     queryFn: () => expertsApi.getExpertStatistics(userProfile!.id),
     enabled: !!userProfile?.id,
-  });
-
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
   });
 
   React.useEffect(() => {
@@ -146,33 +134,6 @@ const ExpertDashboard: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleLogout = () => {
-    authApi.logout();
-    message.success('Вы вышли из системы');
-    navigate('/');
-    window.location.reload();
-  };
-
-  const handleMenuSelect = (key: string) => {
-    if (key.startsWith('orders-')) {
-      setSelectedMenuKey('orders');
-      setActiveTab('orders');
-      setTimeout(() => {
-        tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-      return;
-    }
-    if (key === 'orders') {
-      setSelectedMenuKey(key);
-      setActiveTab(key);
-      setTimeout(() => {
-        tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-      return;
-    }
-    setSelectedMenuKey(key);
-  };
-
   return (
     <>
       <div className={styles.expertContentContainer}>
@@ -188,7 +149,6 @@ const ExpertDashboard: React.FC = () => {
           application={application || null}
           applicationLoading={applicationLoading}
           userProfile={userProfile}
-          isMobile={isMobile}
           onOpenApplicationModal={() => { closeAllModals(); setApplicationModalVisible(true); }}
         />
         
@@ -252,8 +212,6 @@ const ExpertDashboard: React.FC = () => {
                 children: (
                   <WorksTab 
                     isMobile={isMobile}
-                    myCompleted={[]}
-                    myInProgress={[]}
                   />
                 ),
               }] : []),
@@ -264,10 +222,8 @@ const ExpertDashboard: React.FC = () => {
                   <FriendsTab 
                     isMobile={isMobile}
                     onOpenChat={(friend) => {
-                      console.log('FriendsTab onOpenChat called with friend:', friend);
                       closeAllModals();
                       setSelectedUserIdForChat(friend.id);
-                      console.log('Setting selectedUserIdForChat to:', friend.id);
                       setMessageModalVisible(true);
                     }}
                     onOpenProfile={(friend) => {
@@ -306,7 +262,6 @@ const ExpertDashboard: React.FC = () => {
         visible={specializationModalVisible}
         onClose={() => setSpecializationModalVisible(false)}
         editingSpecialization={editingSpecialization}
-        subjects={subjects}
       />
       
       <MessageModal
@@ -319,9 +274,8 @@ const ExpertDashboard: React.FC = () => {
         isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
         isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
-        onCreateOrder={() => {
-          // Логика создания заказа
-        }}
+        userProfile={userProfile}
+        onCreateOrder={() => undefined}
       />
       
       <NotificationsModal
@@ -350,10 +304,8 @@ const ExpertDashboard: React.FC = () => {
         visible={friendsModalVisible}
         onClose={() => setFriendsModalVisible(false)}
         onOpenChat={(friend) => {
-          console.log('FriendsModal onOpenChat called with friend:', friend);
           closeAllModals();
           setSelectedUserIdForChat(friend.id);
-          console.log('Setting selectedUserIdForChat to:', friend.id);
           setMessageModalVisible(true);
         }}
         onOpenProfile={(friend) => {
@@ -376,9 +328,9 @@ const ExpertDashboard: React.FC = () => {
         friend={selectedFriend}
         onOpenChat={() => {
           closeAllModals();
+          if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
           setMessageModalVisible(true);
         }}
-        isMobile={isMobile}
       />
     </>
   );

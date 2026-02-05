@@ -6,7 +6,7 @@ const { Paragraph } = Typography;
 interface WelcomeModalProps {
   visible: boolean;
   onClose: () => void;
-  userProfile?: any;
+  userProfile?: { username?: string; email?: string } | null;
 }
 
 const WelcomeModal: React.FC<WelcomeModalProps> = ({ visible, onClose, userProfile }) => {

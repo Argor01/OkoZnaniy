@@ -51,20 +51,31 @@ export const useExpertData = () => {
     enabled: !!userProfile?.id,
   });
 
-  const orders = Array.isArray(ordersData?.results) ? ordersData.results : (Array.isArray(ordersData) ? ordersData : []);
+  type OrderWithStatus = { status: string };
+  const hasStatus = (o: unknown): o is OrderWithStatus =>
+    !!o &&
+    typeof o === 'object' &&
+    'status' in o &&
+    typeof (o as { status?: unknown }).status === 'string';
+
+  const ordersRaw: unknown[] = Array.isArray((ordersData as { results?: unknown })?.results)
+    ? ((ordersData as { results: unknown[] }).results)
+    : (Array.isArray(ordersData) ? (ordersData as unknown[]) : []);
+
+  const orders = ordersRaw.filter(hasStatus);
 
   // Подсчет заказов по статусам
   const ordersCount = {
     all: orders.length,
-    new: orders.filter((o: any) => o.status === 'new').length,
-    confirming: orders.filter((o: any) => o.status === 'confirming').length,
-    in_progress: orders.filter((o: any) => o.status === 'in_progress').length,
-    payment: orders.filter((o: any) => o.status === 'payment').length,
-    review: orders.filter((o: any) => o.status === 'review').length,
-    completed: orders.filter((o: any) => o.status === 'completed').length,
-    revision: orders.filter((o: any) => o.status === 'revision').length,
-    download: orders.filter((o: any) => o.status === 'download').length,
-    closed: orders.filter((o: any) => o.status === 'closed').length,
+    new: orders.filter((o) => o.status === 'new').length,
+    confirming: orders.filter((o) => o.status === 'confirming').length,
+    in_progress: orders.filter((o) => o.status === 'in_progress').length,
+    payment: orders.filter((o) => o.status === 'payment').length,
+    review: orders.filter((o) => o.status === 'review').length,
+    completed: orders.filter((o) => o.status === 'completed').length,
+    revision: orders.filter((o) => o.status === 'revision').length,
+    download: orders.filter((o) => o.status === 'download').length,
+    closed: orders.filter((o) => o.status === 'closed').length,
   };
 
   return {

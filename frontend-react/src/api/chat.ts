@@ -20,6 +20,16 @@ export interface Message {
   is_read: boolean;
   is_mine: boolean;
   created_at: string;
+  message_type?: 'text' | 'offer';
+  offer_data?: {
+    description?: string;
+    work_type?: string;
+    subject?: string;
+    cost?: number;
+    deadline?: string;
+    status?: 'new' | 'accepted' | 'rejected';
+    order_id?: number;
+  } | null;
 }
 
 export interface ChatListItem {
@@ -98,16 +108,34 @@ export const chatApi = {
     return response.data;
   },
 
-  // Отправить сообщение (текст и/или файл)
-  sendMessage: async (chatId: number, text: string, file?: File): Promise<Message> => {
+  // Отправить сообщение (текст и/или файл, или предложение)
+  sendMessage: async (chatId: number, text: string, file?: File, messageType: 'text' | 'offer' = 'text', offerData?: any): Promise<Message> => {
     if (file) {
       const formData = new FormData();
       formData.append('text', text);
       formData.append('file', file);
+      formData.append('message_type', messageType);
+      if (offerData) {
+        formData.append('offer_data', JSON.stringify(offerData));
+      }
       const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, formData);
       return response.data;
     }
-    const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, { text });
+    const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, { 
+      text, 
+      message_type: messageType,
+      offer_data: offerData 
+    });
+    return response.data;
+  },
+
+  acceptOffer: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/accept_offer/`, { message_id: messageId });
+    return response.data;
+  },
+
+  rejectOffer: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/reject_offer/`, { message_id: messageId });
     return response.data;
   },
 

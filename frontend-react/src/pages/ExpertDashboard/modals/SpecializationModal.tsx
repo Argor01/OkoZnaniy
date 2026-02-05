@@ -1,63 +1,77 @@
 import React from 'react';
 import { Modal, Form, Input, InputNumber as AntInputNumber, message } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { expertsApi } from '../../../api/experts';
+import { expertsApi, type CreateSpecializationRequest, type Specialization } from '../../../api/experts';
 import SkillsSelect from '../../../components/SkillsSelect';
 import styles from '../ExpertDashboard.module.css';
+
+type SpecializationFormValues = {
+  subject_id?: number;
+  custom_name?: string;
+  experience_years?: number;
+  hourly_rate?: number;
+  description?: string;
+  skills?: string[] | string;
+};
 
 interface SpecializationModalProps {
   visible: boolean;
   onClose: () => void;
-  editingSpecialization: any;
-  subjects: any[];
+  editingSpecialization: Specialization | null;
 }
 
 const SpecializationModal: React.FC<SpecializationModalProps> = ({
   visible,
   onClose,
-  editingSpecialization,
-  subjects
+  editingSpecialization
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isMobile] = React.useState(window.innerWidth <= 768);
 
   const createSpecializationMutation = useMutation({
-    mutationFn: (data: any) => expertsApi.createSpecialization(data),
+    mutationFn: (data: CreateSpecializationRequest) => expertsApi.createSpecialization(data),
     onSuccess: () => {
       message.success('Специализация добавлена');
       onClose();
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
     },
-    onError: (err: any) => {
-      message.error(err?.response?.data?.detail || 'Не удалось добавить специализацию');
+    onError: (err: unknown) => {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Не удалось добавить специализацию';
+      message.error(detail);
     },
   });
 
   const updateSpecializationMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => expertsApi.updateSpecialization(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<CreateSpecializationRequest> }) =>
+      expertsApi.updateSpecialization(id, data),
     onSuccess: () => {
       message.success('Специализация обновлена');
       onClose();
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['expert-specializations'] });
     },
-    onError: (err: any) => {
-      message.error(err?.response?.data?.detail || 'Не удалось обновить специализацию');
+    onError: (err: unknown) => {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Не удалось обновить специализацию';
+      message.error(detail);
     },
   });
 
   React.useEffect(() => {
     if (visible && editingSpecialization) {
-      const toNumberOrUndefined = (value: any) => {
+      const toNumberOrUndefined = (value: unknown) => {
         if (value === null || value === undefined || value === '') return undefined;
         if (typeof value === 'number') return value;
         const num = Number(value);
         return Number.isFinite(num) ? num : undefined;
       };
 
-      const formValues: any = {
+      const formValues: SpecializationFormValues = {
         subject_id: editingSpecialization.subject?.id,
         experience_years: toNumberOrUndefined(editingSpecialization.experience_years),
         hourly_rate: toNumberOrUndefined(editingSpecialization.hourly_rate),
@@ -159,12 +173,19 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       <Form
         form={form}
         layout="vertical"
-        onFinish={(values) => {
-          // Преобразуем массив навыков в строку для отправки на сервер
-          const dataToSend = { ...values };
-          if (Array.isArray(values.skills)) {
-            dataToSend.skills = values.skills.join(', ');
-          }
+        onFinish={(values: SpecializationFormValues) => {
+          const dataToSend: CreateSpecializationRequest = {
+            subject_id: values.subject_id,
+            custom_name: values.custom_name,
+            experience_years: Number(values.experience_years),
+            hourly_rate: Number(values.hourly_rate),
+            description: values.description,
+            skills: Array.isArray(values.skills)
+              ? values.skills.join(', ')
+              : typeof values.skills === 'string'
+                ? values.skills
+                : undefined,
+          };
           
           if (editingSpecialization) {
             updateSpecializationMutation.mutate({ id: editingSpecialization.id, data: dataToSend });

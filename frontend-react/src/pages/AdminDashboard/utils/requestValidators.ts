@@ -320,7 +320,7 @@ export const validateSearchQuery = (query: string): ValidationResult => {
   }
 
   // Проверка на потенциально опасные символы
-  if (/[<>\"'%;()&+]/.test(query)) {
+  if (/[<>"'%;()&+]/.test(query)) {
     errors.query = 'Поисковый запрос содержит недопустимые символы';
   }
 

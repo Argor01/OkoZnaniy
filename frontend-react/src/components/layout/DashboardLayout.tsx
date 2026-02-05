@@ -283,6 +283,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
         selectedOrderId={selectedOrderIdForChat}
+        userProfile={userProfile}
       />
       <NotificationsModal 
         visible={notificationsModalVisible} 

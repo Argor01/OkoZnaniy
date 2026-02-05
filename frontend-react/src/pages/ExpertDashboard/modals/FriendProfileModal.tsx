@@ -8,25 +8,43 @@ import {
   ClockCircleOutlined, 
   StarFilled 
 } from '@ant-design/icons';
+import type { User } from '../../../api/auth';
 
 const { Text } = Typography;
 
 interface FriendProfileModalProps {
   visible: boolean;
   onClose: () => void;
-  friend: any;
+  friend: User | null;
   onOpenChat: () => void;
-  isMobile: boolean;
 }
+
+const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+
+const getInitials = (firstName?: string, lastName?: string, username?: string) => {
+  if (firstName && lastName) return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  if (firstName) return firstName.slice(0, 2).toUpperCase();
+  if (username) return username.slice(0, 2).toUpperCase();
+  return 'U';
+};
 
 const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
   visible,
   onClose,
   friend,
   onOpenChat,
-  isMobile
 }) => {
   if (!friend) return null;
+
+  const name =
+    (friend.first_name || friend.last_name)
+      ? [friend.first_name, friend.last_name].filter(Boolean).join(' ')
+      : friend.username || 'Пользователь';
+
+  const skills = typeof friend.skills === 'string'
+    ? friend.skills.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
 
   return (
     <Modal
@@ -68,14 +86,15 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
           }}>
             <Avatar 
               size={100} 
+              src={friend.avatar || undefined}
               style={{ 
-                backgroundColor: friend.avatarColor,
+                backgroundColor: getAvatarColor(friend.id),
                 fontSize: 36,
                 fontWeight: 600,
                 border: '4px solid rgba(255, 255, 255, 0.3)'
               }}
             >
-              {friend.avatar}
+              {!friend.avatar && getInitials(friend.first_name, friend.last_name, friend.username)}
             </Avatar>
             <div style={{ flex: 1 }}>
               <Text 
@@ -87,7 +106,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
                   marginBottom: 8
                 }}
               >
-                {friend.name}
+                {name}
               </Text>
               <Text 
                 style={{ 
@@ -97,19 +116,12 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
                   marginBottom: 12
                 }}
               >
-                {friend.specialization}
+                {friend.role === 'expert' ? 'Эксперт' : friend.role === 'client' ? 'Клиент' : friend.role}
               </Text>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div>
-                  <Rate 
-                    disabled 
-                    defaultValue={friend.rating} 
-                    style={{ fontSize: 16, color: '#fbbf24' }} 
-                  />
+                  <Rate disabled defaultValue={0} style={{ fontSize: 16, color: '#fbbf24' }} />
                 </div>
-                <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 14 }}>
-                  {friend.worksCount} работ
-                </Text>
               </div>
             </div>
           </div>
@@ -167,7 +179,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
               </Text>
             </div>
             <Text style={{ fontSize: 15, color: '#4b5563' }}>
-              {friend.experience}
+              {typeof friend.experience_years === 'number' ? `${friend.experience_years} лет` : ''}
             </Text>
           </div>
 
@@ -185,7 +197,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
               </Text>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {friend.skills?.map((skill: string, index: number) => (
+              {skills.map((skill: string, index: number) => (
                 <Tag 
                   key={index}
                   style={{ 

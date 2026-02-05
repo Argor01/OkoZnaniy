@@ -139,16 +139,37 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return ExpertRating.objects.select_related(
-            'expert', 'client', 'order'
-        ).all()
+        qs = ExpertRating.objects.select_related('expert', 'client', 'order')
+        user = self.request.user
+
+        if user.is_staff:
+            return qs
+
+        expert_id = self.request.query_params.get('expert')
+        if expert_id:
+            return qs.filter(expert_id=expert_id)
+
+        if getattr(user, 'role', None) == 'expert':
+            return qs.filter(expert=user)
+
+        return qs.filter(client=user)
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            from .serializers import ExpertRatingDetailSerializer
+
+            return ExpertRatingDetailSerializer
+        return ExpertRatingSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            rating = self.perform_create(serializer)
+            from .serializers import ExpertRatingDetailSerializer
+
+            output = ExpertRatingDetailSerializer(rating, context={'request': request}).data
+            headers = self.get_success_headers(output)
+            return Response(output, status=status.HTTP_201_CREATED, headers=headers)
         # Логируем ошибки валидации для дебага
         print("[Expert Rating] validation errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -163,6 +184,7 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
         stats.update_statistics()
         # Отправляем уведомление эксперту
         NotificationService.notify_new_rating(rating)
+        return rating
 
 class ExpertStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ExpertStatisticsSerializer

@@ -254,12 +254,8 @@ export const disputesApi = {
       throw new Error('Создание спора через mock данные не поддерживается');
     }
 
-    try {
-      const response = await apiClient.post(`/orders/orders/${orderId}/create_dispute/`, data);
-      return response.data;
-    } catch (error: any) {
-      throw error;
-    }
+    const response = await apiClient.post(`/orders/orders/${orderId}/create_dispute/`, data);
+    return response.data;
   },
 
   // Назначить арбитра на спор
@@ -321,11 +317,7 @@ export const disputesApi = {
       throw new Error('Решение спора через mock данные не поддерживается');
     }
 
-    try {
-      const response = await apiClient.post(`/orders/disputes/${disputeId}/resolve/`, data);
-      return response.data;
-    } catch (error: any) {
-      throw error;
-    }
+    const response = await apiClient.post(`/orders/disputes/${disputeId}/resolve/`, data);
+    return response.data;
   },
 };

@@ -1,6 +1,4 @@
-import React from 'react';
-import { Tag, Button, Space, Modal, message, Alert } from 'antd';
-import { EyeOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Tag, Modal, Alert } from 'antd';
 import dayjs from 'dayjs';
 import {
   ClaimType,
@@ -12,6 +10,29 @@ import {
   getClaimStatusLabel,
   getClaimStatusColor,
 } from '../types/claims';
+
+type ClaimUser = { username?: string; email?: string };
+type ClaimAdmin = { username?: string } | null | undefined;
+type ClaimOrder = { id: number; title?: string | null };
+type ClaimMessage = {
+  id: number;
+  author: { username?: string };
+  createdAt?: string;
+  isInternal?: boolean;
+  message?: string;
+};
+type ClaimRecord = {
+  id: number;
+  user: ClaimUser;
+  claimType: string;
+  priority: string;
+  subject?: string;
+  description?: string;
+  relatedOrder?: ClaimOrder | null;
+  messages?: ClaimMessage[] | null;
+  status?: string;
+  resolution?: string;
+};
 
 export const getCommonClaimColumns = () => {
   return {
@@ -26,7 +47,7 @@ export const getCommonClaimColumns = () => {
       title: 'Пользователь',
       dataIndex: 'user',
       key: 'user',
-      render: (user: any) => (
+      render: (user: ClaimUser) => (
         <div>
           <div><strong>{user.username}</strong></div>
           <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
@@ -75,12 +96,12 @@ export const getCommonClaimColumns = () => {
       title: 'Администратор',
       dataIndex: 'assignedAdmin',
       key: 'assignedAdmin',
-      render: (admin: any) => admin?.username || 'Не назначен',
+      render: (admin: ClaimAdmin) => admin?.username || 'Не назначен',
     },
   };
 };
 
-export const renderClaimDetailModal = (record: any) => {
+export const renderClaimDetailModal = (record: ClaimRecord) => {
   Modal.info({
     title: `Обращение #${record.id}`,
     content: (
@@ -97,7 +118,7 @@ export const renderClaimDetailModal = (record: any) => {
         {record.messages && record.messages.length > 0 && (
           <>
             <p><strong>Сообщения:</strong></p>
-            {record.messages.map((msg: any) => (
+            {record.messages.map((msg) => (
               <div key={msg.id} style={{ marginBottom: 8, padding: 8, background: '#f5f5f5', borderRadius: 4 }}>
                 <div style={{ fontSize: '12px', color: '#666' }}>
                   {msg.author.username} - {dayjs(msg.createdAt).format('DD.MM.YYYY HH:mm')}

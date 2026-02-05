@@ -8,8 +8,9 @@ import { shopApi } from '../api/shop';
 import { authApi } from '../api/auth';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import type { WorkFile } from './ShopReadyWorks/types';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
@@ -36,7 +37,7 @@ const ShopWorkDetail: React.FC = () => {
   // Находим работу по ID
   const work = React.useMemo(() => {
     if (!works || !workId) return null;
-    return works.find((w: any) => w.id === Number(workId));
+    return works.find((w) => w.id === Number(workId));
   }, [works, workId]);
 
   const deleteMutation = useMutation({
@@ -323,14 +324,15 @@ const ShopWorkDetail: React.FC = () => {
               >
                 <List
                   dataSource={work.files}
-                  renderItem={(file: any) => (
+                  renderItem={(file: WorkFile) => (
                     <List.Item
                       actions={[
                         <Button
                           type="link"
                           icon={<DownloadOutlined />}
                           onClick={() => {
-                            const url = file.view_url || file.file_url || file.file;
+                            const fileWithLinks = file as WorkFile & { view_url?: string; file_url?: string };
+                            const url = fileWithLinks.view_url || fileWithLinks.file_url || file.file;
                             if (url) {
                               window.open(url, '_blank');
                             }

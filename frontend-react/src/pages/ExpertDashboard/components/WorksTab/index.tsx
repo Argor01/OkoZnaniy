@@ -4,11 +4,9 @@ import styles from '../../ExpertDashboard.module.css';
 
 interface WorksTabProps {
   isMobile: boolean;
-  myCompleted: any[];
-  myInProgress: any[];
 }
 
-const WorksTab: React.FC<WorksTabProps> = ({ isMobile, myCompleted, myInProgress }) => {
+const WorksTab: React.FC<WorksTabProps> = ({ isMobile }) => {
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionCardHeader}>

@@ -1,22 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload } from 'antd';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
   BellOutlined,
-  StarOutlined,
   SearchOutlined,
   UserOutlined,
   ArrowLeftOutlined,
   CheckCircleOutlined,
+  CheckOutlined,
   SendOutlined,
   PaperClipOutlined,
-  FileOutlined
+  FileOutlined,
+  FileTextOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
+  UploadOutlined
 } from '@ant-design/icons';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../config/api';
+import IndividualOfferModal from '../../../components/modals/IndividualOfferModal';
+import { ordersApi } from '../../../api/orders';
+import { expertsApi } from '../../../api/experts';
 
 const { Text } = Typography;
 
@@ -26,10 +33,40 @@ interface MessageModalProps {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  onCreateOrder?: () => void;
   selectedUserId?: number; // ID пользователя для открытия чата
   selectedOrderId?: number; // ID заказа для открытия чата (чат по заказу+пользователю)
+  userProfile?: { role?: string };
 }
+
+type OfferData = {
+  description?: string;
+  work_type?: string;
+  subject?: string;
+  cost?: number;
+  deadline?: string | null;
+  status?: 'new' | 'accepted' | 'rejected';
+  order_id?: number;
+} & Record<string, unknown>;
+
+type OrderForChat = {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  budget?: string | number | null;
+  deadline?: string | null;
+  status?: string | null;
+  subject?: { name?: string | null } | null;
+  work_type?: { name?: string | null } | null;
+  custom_subject?: string | null;
+  custom_work_type?: string | null;
+};
+
+const getErrorDetail = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  if (!('response' in error)) return undefined;
+  const resp = (error as { response?: { data?: { detail?: string } } }).response;
+  return resp?.data?.detail;
+};
 
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
@@ -37,9 +74,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   isMobile,
   isTablet,
   isDesktop,
-  onCreateOrder,
   selectedUserId,
-  selectedOrderId
+  selectedOrderId,
+  userProfile
 }) => {
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
@@ -49,11 +86,84 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [orderPanelOpen, setOrderPanelOpen] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [order, setOrder] = useState<OrderForChat | null>(null);
+  const [workUploading, setWorkUploading] = useState(false);
+  const [deadlineTick, setDeadlineTick] = useState(0);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const workFileInputRef = useRef<HTMLInputElement>(null);
+  const effectiveOrderId = (() => {
+    const fromAcceptedOffer = selectedChat?.messages?.find(
+      (m) => m.message_type === 'offer' && m.offer_data?.status === 'accepted' && typeof m.offer_data?.order_id === 'number'
+    )?.offer_data?.order_id;
+    if (typeof fromAcceptedOffer === 'number' && fromAcceptedOffer > 0) return fromAcceptedOffer;
+
+    const fromChat = selectedChat?.order_id;
+    if (typeof fromChat === 'number' && fromChat > 0) return fromChat;
+
+    return null;
+  })();
+
+  const loadChats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await chatApi.getAll();
+      setChatList(data);
+    } catch (error: unknown) {
+      antMessage.error('Не удалось загрузить чаты');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadChatDetail = useCallback(async (chatId: number) => {
+    try {
+      const data = await chatApi.getById(chatId);
+      setSelectedChat(data);
+      await chatApi.markAsRead(chatId);
+      setChatList((prev) => prev.map((chat) =>
+        chat.id === chatId ? { ...chat, unread_count: 0 } : chat
+      ));
+    } catch (error: unknown) {
+      antMessage.error('Не удалось загрузить чат');
+    }
+  }, []);
+
+  const loadOrCreateChatByOrderAndUser = useCallback(async (orderId: number, userId: number) => {
+    setLoading(true);
+    try {
+      const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
+      setSelectedChat(chatData);
+      await loadChats();
+    } catch (error: unknown) {
+      antMessage.error('Не удалось открыть чат по заказу');
+    } finally {
+      setLoading(false);
+    }
+  }, [loadChats]);
+
+  const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
+    setLoading(true);
+    try {
+      const chatData = await chatApi.getOrCreateByUser(userId);
+      setSelectedChat(chatData);
+      await loadChats();
+      antMessage.success('Чат открыт');
+    } catch (error: unknown) {
+      antMessage.error('Не удалось открыть чат с пользователем');
+    } finally {
+      setLoading(false);
+    }
+  }, [loadChats]);
 
   useEffect(() => {
     if (visible) {
-      console.log('MessageModal opened, selectedUserId:', selectedUserId);
       loadChats();
       // Если передан orderId+userId, открываем чат по заказу (важно для откликов)
       if (selectedOrderId && selectedUserId) {
@@ -62,11 +172,94 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }
       // Если передан selectedUserId, автоматически открываем чат с этим пользователем
       if (selectedUserId) {
-        console.log('Loading chat with user:', selectedUserId);
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId, selectedOrderId]);
+  }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
+
+  useEffect(() => {
+    setOrderPanelOpen(false);
+    if (!visible) return;
+    if (!effectiveOrderId) {
+      setOrder(null);
+      setOrderLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setOrderLoading(true);
+    ordersApi
+      .getById(effectiveOrderId)
+      .then((data) => {
+        if (!cancelled) setOrder(data as OrderForChat);
+      })
+      .catch(() => {
+        if (!cancelled) setOrder(null);
+      })
+      .finally(() => {
+        if (!cancelled) setOrderLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, effectiveOrderId]);
+
+  const refreshOrder = async () => {
+    if (!effectiveOrderId) return;
+    try {
+      setOrderLoading(true);
+      const data = await ordersApi.getById(effectiveOrderId);
+      setOrder(data as OrderForChat);
+    } catch {
+      setOrder(null);
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  const formatRemaining = (deadline?: string) => {
+    if (!deadline) return '';
+    const end = new Date(deadline).getTime();
+    if (Number.isNaN(end)) return '';
+    const diff = end - Date.now();
+    if (diff <= 0) return 'Срок истёк';
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes - days * 24 * 60) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) return `${days}д ${hours}ч`;
+    if (hours > 0) return `${hours}ч ${minutes}м`;
+    return `${minutes}м`;
+  };
+
+  const isDeadlineExpired = (deadline?: string | null) => {
+    if (!deadline) return false;
+    const end = new Date(deadline).getTime();
+    if (Number.isNaN(end)) return false;
+    return end <= Date.now();
+  };
+
+  const formatOrderStatus = (status?: string) => {
+    if (!status) return '';
+    const map: Record<string, string> = {
+      new: 'Новый',
+      waiting_payment: 'Ожидает оплаты',
+      in_progress: 'В работе',
+      review: 'На проверке',
+      revision: 'На доработке',
+      completed: 'Выполнен',
+      cancelled: 'Отменён',
+    };
+    return map[status] || status;
+  };
+
+  useEffect(() => {
+    if (!visible) return;
+    if (!order?.deadline) return;
+
+    setDeadlineTick((v) => v + 1);
+    const id = window.setInterval(() => setDeadlineTick((v) => v + 1), 30000);
+    return () => window.clearInterval(id);
+  }, [visible, order?.deadline]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -74,65 +267,187 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [selectedChat?.messages]);
 
-  const loadChats = async () => {
-    setLoading(true);
-    try {
-      const data = await chatApi.getAll();
-      setChatList(data);
-    } catch (error) {
-      console.error('Ошибка загрузки чатов:', error);
-      antMessage.error('Не удалось загрузить чаты');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const currentRole =
+    userProfile?.role ||
+    (() => {
+      try {
+        const raw = localStorage.getItem('user');
+        if (!raw) return undefined;
+        return JSON.parse(raw)?.role;
+      } catch {
+        return undefined;
+      }
+    })();
 
-  const loadOrCreateChatByOrderAndUser = async (orderId: number, userId: number) => {
-    setLoading(true);
+  const remainingLabel = useMemo(() => {
+    if (!order?.deadline) return '';
+    return formatRemaining(order.deadline);
+  }, [order?.deadline, deadlineTick]);
+
+  const handleOfferSubmit = async (data: OfferData) => {
+    if (!selectedChat) return;
     try {
-      const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
-      setSelectedChat(chatData);
+      await chatApi.sendMessage(selectedChat.id, '', undefined, 'offer', data);
+      setOfferModalOpen(false);
+      await loadChatDetail(selectedChat.id);
       await loadChats();
-    } catch (error) {
-      console.error('Ошибка создания/загрузки чата по заказу:', error);
-      antMessage.error('Не удалось открыть чат по заказу');
-    } finally {
-      setLoading(false);
+      antMessage.success('Предложение отправлено');
+    } catch {
+      antMessage.error('Не удалось отправить предложение');
     }
   };
 
-  const loadChatDetail = async (chatId: number) => {
+  const handleAcceptOffer = async (messageId: number) => {
+    if (!selectedChat) return;
     try {
-      const data = await chatApi.getById(chatId);
-      setSelectedChat(data);
-      // Отмечаем сообщения как прочитанные
-      await chatApi.markAsRead(chatId);
-      // Обновляем список чатов
-      setChatList(prev => prev.map(chat => 
-        chat.id === chatId ? { ...chat, unread_count: 0 } : chat
-      ));
-    } catch (error) {
-      console.error('Ошибка загрузки чата:', error);
-      antMessage.error('Не удалось загрузить чат');
-    }
-  };
+      const chatId = selectedChat.id;
+      const result = await chatApi.acceptOffer(chatId, messageId);
+      const createdOrderIdRaw = (result as { order_id?: unknown } | undefined)?.order_id;
+      const createdOrderId =
+        typeof createdOrderIdRaw === 'number'
+          ? createdOrderIdRaw
+          : typeof createdOrderIdRaw === 'string'
+            ? Number(createdOrderIdRaw)
+            : NaN;
 
-  const loadOrCreateChatWithUser = async (userId: number) => {
-    console.log('loadOrCreateChatWithUser called with userId:', userId);
-    setLoading(true);
-    try {
-      console.log('Calling chatApi.getOrCreateByUser...');
-      const chatData = await chatApi.getOrCreateByUser(userId);
-      console.log('Chat data received:', chatData);
-      setSelectedChat(chatData);
-      // Обновляем список чатов
+      if (Number.isFinite(createdOrderId) && createdOrderId > 0) {
+        setSelectedChat((prev) =>
+          prev
+            ? {
+                ...prev,
+                order_id: createdOrderId,
+                order: createdOrderId,
+                messages: Array.isArray(prev.messages)
+                  ? prev.messages.map((m) => {
+                      if (m.id !== messageId) return m;
+                      return {
+                        ...m,
+                        offer_data: {
+                          ...(m.offer_data || {}),
+                          status: 'accepted',
+                          order_id: createdOrderId,
+                        },
+                      };
+                    })
+                  : prev.messages,
+              }
+            : prev
+        );
+        setChatList((prev) =>
+          prev.map((chat) =>
+            chat.id === chatId
+              ? { ...chat, order_id: createdOrderId, order: createdOrderId }
+              : chat
+          )
+        );
+      }
+
+      await loadChatDetail(chatId);
       await loadChats();
-      antMessage.success('Чат открыт');
-    } catch (error) {
-      console.error('Ошибка создания/загрузки чата:', error);
-      antMessage.error('Не удалось открыть чат с пользователем');
+      antMessage.success('Предложение принято');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка принятия предложения');
+    }
+  };
+
+  const handleRejectOffer = async (messageId: number) => {
+    if (!selectedChat) return;
+    try {
+      setSelectedChat((prev) =>
+        prev
+          ? {
+              ...prev,
+              messages: Array.isArray(prev.messages)
+                ? prev.messages.map((m) => {
+                    if (m.id !== messageId) return m;
+                    return {
+                      ...m,
+                      offer_data: {
+                        ...(m.offer_data || {}),
+                        status: 'rejected',
+                      },
+                    };
+                  })
+                : prev.messages,
+            }
+          : prev
+      );
+      await chatApi.rejectOffer(selectedChat.id, messageId);
+      await loadChatDetail(selectedChat.id);
+      await loadChats();
+      antMessage.success('Предложение отклонено');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка отклонения предложения');
+    }
+  };
+
+  const handleUploadWork = async (file: File) => {
+    if (!selectedChat || !effectiveOrderId) return;
+    if (isDeadlineExpired(order?.deadline)) {
+      antMessage.error('Срок сдачи истёк');
+      if (workFileInputRef.current) workFileInputRef.current.value = '';
+      return;
+    }
+    setWorkUploading(true);
+    try {
+      await chatApi.sendMessage(selectedChat.id, 'Работа загружена', file);
+      await ordersApi.submitOrder(effectiveOrderId);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats(), refreshOrder()]);
+      antMessage.success('Работа отправлена на проверку');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить работу');
     } finally {
-      setLoading(false);
+      setWorkUploading(false);
+      if (workFileInputRef.current) workFileInputRef.current.value = '';
+    }
+  };
+
+  const handleApproveOrder = async () => {
+    if (!effectiveOrderId) return;
+    try {
+      await ordersApi.approveOrder(effectiveOrderId);
+      await Promise.all([refreshOrder(), loadChats()]);
+      setReviewRating(5);
+      setReviewComment('');
+      setReviewModalOpen(true);
+      antMessage.success('Заказ принят');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось принять заказ');
+    }
+  };
+
+  const handleRequestRevision = async () => {
+    if (!effectiveOrderId) return;
+    try {
+      await ordersApi.requestRevision(effectiveOrderId);
+      await Promise.all([refreshOrder(), loadChats()]);
+      antMessage.success('Отправлено на доработку');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить на доработку');
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!effectiveOrderId) return;
+    const rating = Math.max(1, Math.min(5, Math.round(reviewRating || 0)));
+    if (rating < 1 || rating > 5) {
+      antMessage.error('Оценка должна быть от 1 до 5');
+      return;
+    }
+
+    setReviewSubmitting(true);
+    try {
+      await expertsApi.rateExpert({
+        order: effectiveOrderId,
+        rating,
+        comment: reviewComment.trim() || undefined,
+      });
+      setReviewModalOpen(false);
+      antMessage.success('Отзыв отправлен');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить отзыв');
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -193,8 +508,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setMessageText('');
       setAttachedFiles([]);
       antMessage.success('Сообщение отправлено');
-    } catch (error) {
-      console.error('Ошибка отправки сообщения:', error);
+    } catch (error: unknown) {
       antMessage.error('Не удалось отправить сообщение');
     } finally {
       setSending(false);
@@ -284,6 +598,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           background: '#ffffff',
           boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
           width: isMobile ? '100vw' : undefined,
+          maxWidth: isMobile ? undefined : (isDesktop ? 1400 : 1200),
           height: isMobile ? '100vh' : 'calc(100vh - 80px)'
         },
         header: {
@@ -522,6 +837,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     )}
                   </div>
                 </Space>
+                {currentRole === 'expert' && (
+                  <Button
+                    type="primary"
+                    size={isMobile ? 'small' : 'middle'}
+                    icon={<FileTextOutlined />}
+                    style={{ background: '#10B981', borderColor: '#10B981' }}
+                    onClick={() => setOfferModalOpen(true)}
+                  >
+                    {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
+                  </Button>
+                )}
               </>
             ) : (
               <Space>
@@ -531,6 +857,73 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               </Space>
             )}
           </div>
+
+          {effectiveOrderId ? (
+            <>
+              <div style={{ padding: isMobile ? '8px 12px' : '8px 16px', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <Button
+                  size="small"
+                  icon={<ClockCircleOutlined />}
+                  onClick={() => setOrderPanelOpen((v) => !v)}
+                  style={{ borderRadius: 999 }}
+                >
+                  {`Заказ #${effectiveOrderId}`}{remainingLabel ? ` • ${remainingLabel}` : ''}
+                </Button>
+                {currentRole === 'expert' ? (
+                  <>
+                    <input
+                      ref={workFileInputRef}
+                      type="file"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleUploadWork(f);
+                      }}
+                    />
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<UploadOutlined />}
+                      loading={workUploading}
+                      disabled={!order || !['in_progress', 'revision'].includes(order?.status) || isDeadlineExpired(order?.deadline)}
+                      onClick={() => workFileInputRef.current?.click()}
+                      style={{ background: '#10B981', borderColor: '#10B981' }}
+                    >
+                      Выгрузить работу
+                    </Button>
+                  </>
+                ) : null}
+              </div>
+              {orderPanelOpen ? (
+                <div style={{ padding: isMobile ? '10px 12px' : '12px 16px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                  {orderLoading ? (
+                    <div style={{ textAlign: 'center', padding: 8 }}>
+                      <Spin size="small" />
+                    </div>
+                  ) : order ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                        <Text strong>{order.title || `Заказ #${order.id}`}</Text>
+                        <Text type="secondary">{formatOrderStatus(order.status)}</Text>
+                      </div>
+                      <Text type="secondary">
+                      Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан'}{remainingLabel ? ` • осталось ${remainingLabel}` : ''}
+                      </Text>
+                      <Text>
+                        Предмет: {order.subject?.name || order.custom_subject || '—'} · Тип: {order.work_type?.name || order.custom_work_type || '—'}
+                      </Text>
+                      <Text>
+                        Стоимость: <Text strong style={{ color: '#10B981' }}>{order.budget ? `${Number(order.budget).toLocaleString('ru-RU')} ₽` : '—'}</Text>
+                      </Text>
+                      {order.description ? <Text style={{ whiteSpace: 'pre-wrap' }}>{order.description}</Text> : null}
+                    </div>
+                  ) : (
+                    <Text type="secondary">Не удалось загрузить данные заказа</Text>
+                  )}
+                </div>
+              ) : null}
+            </>
+          ) : null}
 
           {/* Messages Area */}
           <div style={{ 
@@ -542,62 +935,200 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           }}>
             {selectedChat ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
-                {selectedChat.messages.map((msg: Message) => (
-                  <div
-                    key={msg.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: msg.is_mine ? 'flex-end' : 'flex-start'
-                    }}
-                  >
+                {selectedChat.messages.map((msg: Message, idx: number) => {
+                  const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
+                  const offerExpired = isOffer
+                    ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
+                    : false;
+                  const offerStatus = isOffer ? (msg.offer_data?.status || 'new') : 'new';
+                  const showOfferActions = isOffer && currentRole === 'client' && !msg.is_mine && offerStatus === 'new' && !offerExpired;
+                  const isLast = idx === selectedChat.messages.length - 1;
+                  const showWorkActions =
+                    isLast &&
+                    currentRole === 'client' &&
+                    !!effectiveOrderId &&
+                    order?.status === 'review' &&
+                    !msg.is_mine &&
+                    !!msg.file_url;
+
+                  return (
                     <div
+                      key={msg.id}
                       style={{
-                        maxWidth: isMobile ? '85%' : '70%',
-                        padding: isMobile ? '8px 12px' : '10px 14px',
-                        borderRadius: msg.is_mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        background: msg.is_mine ? '#3b82f6' : '#ffffff',
-                        color: msg.is_mine ? '#ffffff' : '#1f2937',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                        border: msg.is_mine ? 'none' : '1px solid #e5e7eb'
+                        display: 'flex',
+                        justifyContent: msg.is_mine ? 'flex-end' : 'flex-start'
                       }}
                     >
-                      {msg.text ? (
-                        <Text style={{ 
-                          fontSize: isMobile ? 13 : 14, 
+                      <div
+                        style={{
+                          maxWidth: isOffer ? (isMobile ? '92%' : 420) : (isMobile ? '85%' : '70%'),
+                          padding: isOffer ? 0 : (isMobile ? '8px 12px' : '10px 14px'),
+                          borderRadius: isOffer ? 0 : (msg.is_mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px'),
+                          background: isOffer ? 'transparent' : (msg.is_mine ? '#3b82f6' : '#ffffff'),
                           color: msg.is_mine ? '#ffffff' : '#1f2937',
-                          display: 'block',
-                          marginBottom: 4
-                        }}>
-                          {msg.text}
-                        </Text>
-                      ) : null}
-                      {msg.file_url && msg.file_name ? (
-                        <div style={{ marginTop: msg.text ? 8 : 0, marginBottom: 4 }}>
-                          <a
-                            href={msg.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ 
-                              color: msg.is_mine ? '#fff' : '#1890ff',
-                              fontSize: isMobile ? 12 : 13
-                            }}
-                          >
-                            📎 {msg.file_name}
-                          </a>
-                        </div>
-                      ) : null}
-                      <Text style={{ 
-                        fontSize: isMobile ? 10 : 11, 
-                        color: msg.is_mine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
-                      }}>
-                        {formatMessageTime(msg.created_at)}
-                        {msg.is_mine && msg.is_read && (
-                          <CheckCircleOutlined style={{ marginLeft: 4, fontSize: isMobile ? 10 : 11 }} />
+                          boxShadow: isOffer ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          border: isOffer ? 'none' : (msg.is_mine ? 'none' : '1px solid #e5e7eb')
+                        }}
+                      >
+                        {isOffer ? (
+                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
+                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Индивидуальное предложение</div>
+                            <div style={{ marginBottom: 6 }}>
+                              <Text type="secondary">Тип работы</Text>
+                              <div>{msg.offer_data?.work_type}</div>
+                            </div>
+                            <div style={{ marginBottom: 6 }}>
+                              <Text type="secondary">Предмет</Text>
+                              <div>{msg.offer_data?.subject}</div>
+                            </div>
+                            <div style={{ marginBottom: 10 }}>
+                              <Text type="secondary">Описание</Text>
+                              <div style={{ whiteSpace: 'pre-wrap' }}>{msg.offer_data?.description}</div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                              <div>
+                                <Text type="secondary">Стоимость</Text>
+                                <div style={{ fontWeight: 600, color: '#10B981' }}>
+                                  {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                                </div>
+                              </div>
+                              <div>
+                                <Text type="secondary">Срок</Text>
+                                <div>
+                                  {msg.offer_data?.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                                </div>
+                              </div>
+                            </div>
+
+                            {offerStatus === 'accepted' ? (
+                              <div style={{ color: '#10B981', fontWeight: 500 }}>
+                                <CheckCircleOutlined /> Предложение принято
+                              </div>
+                            ) : offerStatus === 'rejected' ? (
+                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                                <CloseCircleOutlined /> Предложение отклонено
+                              </div>
+                            ) : offerExpired ? (
+                              <div style={{ color: '#9CA3AF' }}>Срок предложения истек</div>
+                            ) : showOfferActions ? (
+                              <div style={{ display: 'flex', gap: 8 }}>
+                                <Button
+                                  type="primary"
+                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  onClick={() => handleAcceptOffer(msg.id)}
+                                  block
+                                >
+                                  Принять
+                                </Button>
+                                <Button danger onClick={() => handleRejectOffer(msg.id)} block>
+                                  Отказаться
+                                </Button>
+                              </div>
+                            ) : (
+                              <div style={{ color: '#9CA3AF' }}>Ожидает решения клиента</div>
+                            )}
+
+                            <div style={{ marginTop: 8 }}>
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                {formatMessageTime(msg.created_at)}
+                              </Text>
+                            </div>
+                          </Card>
+                        ) : (
+                          <>
+                            {msg.text ? (
+                              <Text style={{ 
+                                fontSize: isMobile ? 15 : 16, 
+                                color: msg.is_mine ? '#ffffff' : '#1f2937',
+                                display: 'block',
+                                marginBottom: 4
+                              }}>
+                                {msg.text}
+                              </Text>
+                            ) : null}
+                            {msg.file_url && msg.file_name ? (
+                              <div style={{ marginTop: msg.text ? 8 : 0, marginBottom: 4 }}>
+                                <a
+                                  href={msg.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ 
+                                    color: msg.is_mine ? '#fff' : '#1890ff',
+                                    fontSize: isMobile ? 13 : 14
+                                  }}
+                                >
+                                  📎 {msg.file_name}
+                                </a>
+                              </div>
+                            ) : null}
+                            {showWorkActions ? (
+                              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                                <Button
+                                  type="primary"
+                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  onClick={handleApproveOrder}
+                                  block
+                                >
+                                  Принять заказ
+                                </Button>
+                                <Button danger onClick={handleRequestRevision} block>
+                                  На доработку
+                                </Button>
+                              </div>
+                            ) : null}
+                            <Text style={{ 
+                              fontSize: isMobile ? 11 : 12, 
+                              color: msg.is_mine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
+                            }}>
+                              {formatMessageTime(msg.created_at)}
+                              {msg.is_mine && (
+                                <span
+                                  style={{
+                                    marginLeft: 6,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    transform: 'translateY(1px)',
+                                    color: msg.is_read ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.75)'
+                                  }}
+                                >
+                                  {msg.is_read ? (
+                                    <span
+                                      style={{
+                                        position: 'relative',
+                                        width: isMobile ? 16 : 18,
+                                        height: isMobile ? 12 : 14,
+                                        display: 'inline-block'
+                                      }}
+                                    >
+                                      <CheckOutlined
+                                        style={{
+                                          position: 'absolute',
+                                          left: 0,
+                                          top: 0,
+                                          fontSize: isMobile ? 11 : 12
+                                        }}
+                                      />
+                                      <CheckOutlined
+                                        style={{
+                                          position: 'absolute',
+                                          left: isMobile ? 6 : 7,
+                                          top: 0,
+                                          fontSize: isMobile ? 11 : 12
+                                        }}
+                                      />
+                                    </span>
+                                  ) : (
+                                    <CheckOutlined style={{ fontSize: isMobile ? 11 : 12 }} />
+                                  )}
+                                </span>
+                              )}
+                            </Text>
+                          </>
                         )}
-                      </Text>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
             ) : (
@@ -742,6 +1273,38 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </div>
       </ErrorBoundary>
+      <Modal
+        open={reviewModalOpen}
+        centered
+        onCancel={() => setReviewModalOpen(false)}
+        onOk={handleSubmitReview}
+        okButtonProps={{ loading: reviewSubmitting }}
+        okText="Отправить"
+        cancelText="Позже"
+        title="Оставьте отзыв об эксперте"
+        destroyOnClose
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 6 }}>Оценка</Text>
+            <Rate value={reviewRating} onChange={(v) => setReviewRating(v)} />
+          </div>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 6 }}>Комментарий</Text>
+            <Input.TextArea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Напишите пару слов (необязательно)"
+              autoSize={{ minRows: 3, maxRows: 6 }}
+            />
+          </div>
+        </div>
+      </Modal>
+      <IndividualOfferModal
+        open={offerModalOpen}
+        onClose={() => setOfferModalOpen(false)}
+        onSubmit={handleOfferSubmit}
+      />
     </Modal>
   );
 };

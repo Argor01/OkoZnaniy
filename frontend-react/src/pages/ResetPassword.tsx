@@ -27,8 +27,10 @@ const ResetPassword: React.FC = () => {
       await authApi.resetPasswordConfirm(uid, token, values.new_password);
       message.success('Пароль успешно изменен. Вы можете войти.');
       navigate('/login');
-    } catch (error: any) {
-      const detail = error?.response?.data?.detail || 'Не удалось изменить пароль';
+    } catch (error: unknown) {
+      const detail =
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Не удалось изменить пароль';
       message.error(detail);
     } finally {
       setLoading(false);

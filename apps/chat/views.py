@@ -50,13 +50,21 @@ class ChatViewSet(viewsets.ModelViewSet):
         if request.content_type and 'multipart/form-data' in request.content_type:
             text = (request.POST.get('text') or '').strip()
             uploaded_file = request.FILES.get('file')
+            message_type = request.POST.get('message_type', 'text')
+            import json
+            try:
+                offer_data = json.loads(request.POST.get('offer_data', '{}')) if request.POST.get('offer_data') else None
+            except json.JSONDecodeError:
+                offer_data = None
         else:
             text = (request.data.get('text') or '').strip()
             uploaded_file = None
+            message_type = request.data.get('message_type', 'text')
+            offer_data = request.data.get('offer_data')
 
-        if not text and not uploaded_file:
+        if not text and not uploaded_file and not (message_type == 'offer' and offer_data):
             return Response(
-                {'detail': 'Укажите текст сообщения или прикрепите файл.'},
+                {'detail': 'Укажите текст сообщения, прикрепите файл или создайте предложение.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -89,6 +97,8 @@ class ChatViewSet(viewsets.ModelViewSet):
                 text=text or '',
                 file=uploaded_file or None,
                 file_name=file_name,
+                message_type=message_type,
+                offer_data=offer_data
             )
             message.full_clean()
             message.save()
@@ -102,6 +112,9 @@ class ChatViewSet(viewsets.ModelViewSet):
         other_user = chat.participants.exclude(id=request.user.id).first()
         if other_user:
             notification_text = (message.text or f'Файл: {message.file_name}')[:100]
+            if message_type == 'offer':
+                notification_text = 'Вам поступило индивидуальное предложение'
+            
             NotificationService.create_notification(
                 recipient=other_user,
                 type='new_comment',
@@ -112,6 +125,106 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
 
         return Response(MessageSerializer(message, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'])
+    def accept_offer(self, request, pk=None):
+        """Принять индивидуальное предложение"""
+        chat = self.get_object()
+        message_id = request.data.get('message_id')
+        
+        if not message_id:
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        message = get_object_or_404(Message, id=message_id, chat=chat)
+        
+        if message.message_type != 'offer' or not message.offer_data:
+            return Response({'detail': 'Это сообщение не является предложением'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if request.user == message.sender:
+            return Response({'detail': 'Нельзя принять свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Проверка срока действия (2 дня)
+        from django.utils import timezone
+        import datetime
+        if timezone.now() > message.created_at + datetime.timedelta(days=2):
+            return Response({'detail': 'Срок действия предложения истек'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        offer_data = message.offer_data
+        if offer_data.get('status') == 'accepted':
+             return Response({'detail': 'Предложение уже принято'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Создаем заказ
+        try:
+            # Парсим дедлайн. Предполагаем, что фронт шлет ISO строку или что-то понятное.
+            deadline_str = offer_data.get('deadline')
+            deadline = None
+            if deadline_str:
+                # Если приходит timestamp (число)
+                if isinstance(deadline_str, (int, float)):
+                    deadline = timezone.datetime.fromtimestamp(deadline_str / 1000.0, tz=timezone.utc)
+                else:
+                    # Попытка распарсить строку
+                    try:
+                        deadline = timezone.datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
+                    except ValueError:
+                        pass
+            
+            if not deadline:
+                 # Дефолт - через 3 дня, если не удалось распарсить (или вернуть ошибку)
+                 deadline = timezone.now() + datetime.timedelta(days=3)
+
+            subject_id = offer_data.get('subject_id')
+            work_type_id = offer_data.get('work_type_id')
+
+            order = Order.objects.create(
+                client=request.user,
+                expert=message.sender,
+                subject_id=subject_id if subject_id else None,
+                work_type_id=work_type_id if work_type_id else None,
+                custom_subject=offer_data.get('subject') if not subject_id else None,
+                custom_work_type=offer_data.get('work_type') if not work_type_id else None,
+                title=offer_data.get('title') or None,
+                description=offer_data.get('description'),
+                budget=offer_data.get('cost', 0),
+                deadline=deadline,
+                status='in_progress'
+            )
+            
+            # Обновляем статус предложения
+            offer_data['status'] = 'accepted'
+            offer_data['order_id'] = order.id
+            message.offer_data = offer_data
+            message.save()
+            
+            if chat.order_id != order.id:
+                chat.order = order
+                chat.save(update_fields=['order'])
+                
+            return Response({'status': 'success', 'order_id': order.id})
+            
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def reject_offer(self, request, pk=None):
+        """Отклонить индивидуальное предложение"""
+        chat = self.get_object()
+        message_id = request.data.get('message_id')
+        
+        if not message_id:
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        message = get_object_or_404(Message, id=message_id, chat=chat)
+        
+        if message.message_type != 'offer':
+            return Response({'detail': 'Это сообщение не является предложением'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        offer_data = message.offer_data or {}
+        offer_data['status'] = 'rejected'
+        message.offer_data = offer_data
+        message.save()
+        
+        return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):

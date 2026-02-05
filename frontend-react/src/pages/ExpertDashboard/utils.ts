@@ -31,7 +31,7 @@ export const getApplicationStatusColor = (status: string) => {
   }
 };
 
-export const translateError = (s: any) => {
+export const translateError = (s: unknown) => {
   const m = String(s)
     .replace('This field is required', 'Это поле обязательно для заполнения')
     .replace('This field may not be blank', 'Это поле не может быть пустым')

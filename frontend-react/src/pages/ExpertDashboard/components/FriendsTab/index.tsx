@@ -2,15 +2,15 @@ import React from 'react';
 import { Button, Typography, Avatar, Rate, Spin, Empty } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { authApi } from '../../../../api/auth';
+import { authApi, type User } from '../../../../api/auth';
 import styles from '../../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
 interface FriendsTabProps {
   isMobile: boolean;
-  onOpenChat: (friend: any) => void;
-  onOpenProfile: (friend: any) => void;
+  onOpenChat: (friend: User) => void;
+  onOpenProfile: (friend: User) => void;
 }
 
 // Цвета для аватаров
@@ -70,7 +70,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
         gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', 
         gap: isMobile ? 12 : 16 
       }}>
-        {recentUsers.map((user: any) => (
+        {recentUsers.map((user: User) => (
           <div 
             key={user.id} 
             style={{ 

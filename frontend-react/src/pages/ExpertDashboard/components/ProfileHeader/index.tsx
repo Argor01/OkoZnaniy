@@ -2,6 +2,7 @@ import React from 'react';
 import { Avatar, Typography, Rate, Space, Button, Tooltip } from 'antd';
 import { UserOutlined, EditOutlined } from '@ant-design/icons';
 import { UserProfile } from '../../types';
+import type { ExpertStatistics } from '../../../../api/experts';
 import { formatCurrency } from '../../../../utils/formatters';
 import styles from '../../ExpertDashboard.module.css';
 
@@ -9,8 +10,8 @@ const { Title, Text } = Typography;
 
 export interface ProfileHeaderProps {
   profile: UserProfile | null;
-  expertStats: any;
-  userProfile: any;
+  expertStats: ExpertStatistics | undefined;
+  userProfile: UserProfile | null | undefined;
   isMobile: boolean;
   onEditProfile?: () => void;
 }
@@ -22,6 +23,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   isMobile,
   onEditProfile,
 }) => {
+  const displayName =
+    (profile?.first_name || profile?.last_name)
+      ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+      : (userProfile?.username || userProfile?.email || 'Эксперт');
+
   return (
     <div className={styles.profileBlock}>
       <div className={styles.profileBlockContent}>
@@ -40,7 +46,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className={styles.profileInfo}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
               <Title level={3} style={{ margin: 0, color: '#1f2937', fontSize: isMobile ? 20 : 20 }}>
-                {userProfile?.username || userProfile?.email || 'Эксперт'}
+                {displayName}
               </Title>
               {isMobile ? (
                 <span style={{ 

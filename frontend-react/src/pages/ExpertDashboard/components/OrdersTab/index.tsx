@@ -3,7 +3,7 @@ import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, mess
 import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi, Bid } from '../../../../api/orders';
+import { ordersApi } from '../../../../api/orders';
 import { authApi } from '../../../../api/auth';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_TEXTS } from '../../../../config/orderStatuses';
 import dayjs from 'dayjs';
@@ -20,15 +20,37 @@ interface OrdersTabProps {
   isMobile: boolean;
 }
 
+type OrdersListItem = {
+  id: number;
+  title: string;
+  status: string;
+  description?: string | null;
+  budget?: string | number | null;
+  deadline?: string | null;
+  responses_count?: number;
+  subject_name?: string | null;
+  work_type_name?: string | null;
+  is_active?: boolean;
+  deleted?: boolean;
+};
+
+const isOrdersListItem = (o: unknown): o is OrdersListItem => {
+  if (!o || typeof o !== 'object') return false;
+  const obj = o as Record<string, unknown>;
+  return typeof obj.id === 'number' && typeof obj.title === 'string' && typeof obj.status === 'string';
+};
+
 const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
-  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('available'); // По умолчанию доступные заказы
+  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my');
 
   // Загружаем профиль пользователя
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isLoading: userProfileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
+
+  const showAvailableTab = userProfile?.role === 'expert';
 
   // Устанавливаем правильный фильтр в зависимости от роли пользователя
   React.useEffect(() => {
@@ -36,6 +58,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
       setOrderFilter('my');
     } else if (userProfile?.role === 'expert') {
       setOrderFilter('available');
+    } else {
+      setOrderFilter('my');
     }
   }, [userProfile?.role]);
 
@@ -50,20 +74,24 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const { data: availableOrdersData, isLoading: availableOrdersLoading } = useQuery({
     queryKey: ['available-orders'],
     queryFn: () => ordersApi.getAvailableOrders({ ordering: '-created_at' }),
-    enabled: !!userProfile,
+    enabled: !!userProfile && showAvailableTab,
   });
 
-  // Определяем какие данные показывать в зависимости от фильтра
-  const currentOrdersData = orderFilter === 'my' ? myOrdersData : availableOrdersData;
-  const isLoading = orderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
+  const effectiveOrderFilter: 'my' | 'available' = showAvailableTab ? orderFilter : 'my';
 
-  const sanitizeOrders = (items: any) => {
-    const raw = Array.isArray(items?.results) ? items.results : (Array.isArray(items) ? items : []);
-    return raw.filter((order: any) => {
-      if (!order) return false;
+  // Определяем какие данные показывать в зависимости от фильтра
+  const currentOrdersData = effectiveOrderFilter === 'my' ? myOrdersData : availableOrdersData;
+  const isLoading = effectiveOrderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
+
+  const sanitizeOrders = (items: unknown): OrdersListItem[] => {
+    const results = (items && typeof items === 'object' && 'results' in items)
+      ? (items as { results?: unknown }).results
+      : undefined;
+    const raw = Array.isArray(results) ? results : (Array.isArray(items) ? items : []);
+    return raw.filter(isOrdersListItem).filter((order) => {
       if (order.is_active === false) return false;
       if (order.deleted === true) return false;
-      return !!order.id && !!order.title;
+      return true;
     });
   };
 
@@ -78,12 +106,12 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const freshOrders = availableOrdersSanitized.slice(0, 5);
 
   // Используем реальные данные
-  const displayOrders = orderFilter === 'available' ? freshOrders : orders;
+  const displayOrders = effectiveOrderFilter === 'available' ? freshOrders : orders;
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
 
-  if (isLoading) {
+  if (userProfileLoading || isLoading) {
     return (
       <div className={styles.sectionCard}>
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
@@ -114,49 +142,51 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
         </div>
 
         {/* Фильтр заказов */}
-        <div style={{ marginBottom: 24 }}>
-          <Radio.Group 
-            value={orderFilter} 
-            onChange={(e) => setOrderFilter(e.target.value)}
-            style={{ width: '100%' }}
-          >
-            <Radio.Button 
-              value="my" 
-              style={{ 
-                borderRadius: '8px 0 0 8px',
-                fontWeight: 500,
-                minWidth: isMobile ? 'auto' : 150,
-                textAlign: 'center'
-              }}
+        {showAvailableTab && (
+          <div style={{ marginBottom: 24 }}>
+            <Radio.Group 
+              value={orderFilter} 
+              onChange={(e) => setOrderFilter(e.target.value)}
+              style={{ width: '100%' }}
             >
-              <Space>
-                <UserOutlined />
-                Мои размещенные заказы
-              </Space>
-            </Radio.Button>
-            <Radio.Button 
-              value="available" 
-              style={{ 
-                borderRadius: '0 8px 8px 0',
-                fontWeight: 500,
-                minWidth: isMobile ? 'auto' : 150,
-                textAlign: 'center'
-              }}
-            >
-              <Space>
-                <FilterOutlined />
-                Доступные заказы
-              </Space>
-            </Radio.Button>
-          </Radio.Group>
-        </div>
+              <Radio.Button 
+                value="my" 
+                style={{ 
+                  borderRadius: '8px 0 0 8px',
+                  fontWeight: 500,
+                  minWidth: isMobile ? 'auto' : 150,
+                  textAlign: 'center'
+                }}
+              >
+                <Space>
+                  <UserOutlined />
+                  Мои размещенные заказы
+                </Space>
+              </Radio.Button>
+              <Radio.Button 
+                value="available" 
+                style={{ 
+                  borderRadius: '0 8px 8px 0',
+                  fontWeight: 500,
+                  minWidth: isMobile ? 'auto' : 150,
+                  textAlign: 'center'
+                }}
+              >
+                <Space>
+                  <FilterOutlined />
+                  Доступные заказы
+                </Space>
+              </Radio.Button>
+            </Radio.Group>
+          </div>
+        )}
 
         {displayOrders.length === 0 ? (
           <Empty
             description={
               <div>
                 <Text style={{ fontSize: 16, color: '#999' }}>
-                  {orderFilter === 'my' 
+                  {effectiveOrderFilter === 'my' 
                     ? 'У вас пока нет размещенных заказов'
                     : 'Нет доступных заказов для отклика'}
                 </Text>
@@ -166,7 +196,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           />
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>
-            {displayOrders.map((order: any) => (
+            {displayOrders.map((order) => (
               <Card
                 key={order.id}
                 hoverable
@@ -249,7 +279,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       </Space>
                     )}
                   </Space>
-                  {orderFilter === 'available' && userProfile?.role === 'expert' && (
+                  {effectiveOrderFilter === 'available' && userProfile?.role === 'expert' && (
                     <Button 
                       type="primary"
                       size="small"

@@ -96,6 +96,7 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
       <MessagesModal
         open={messagesModalOpen}
         onClose={() => setMessagesModalOpen(false)}
+        userProfile={userProfile}
       />
 
       {/* Модалка уведомлений */}

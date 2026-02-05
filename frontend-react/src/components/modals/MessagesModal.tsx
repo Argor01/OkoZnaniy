@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { Modal, Input, Button, Space, Avatar, Badge, Typography, Upload, Popover } from 'antd';
-import { SendOutlined, SmileOutlined, PaperClipOutlined, SearchOutlined, UserOutlined, ArrowLeftOutlined, MessageOutlined, BellOutlined, StarOutlined, CheckCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Modal, Input, Button, Space, Avatar, Badge, Typography, Upload, Popover, message as antMessage, Card } from 'antd';
+import { SendOutlined, SmileOutlined, PaperClipOutlined, SearchOutlined, UserOutlined, ArrowLeftOutlined, MessageOutlined, BellOutlined, StarOutlined, CheckCircleOutlined, PlusOutlined, FileTextOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import EmojiPicker from 'emoji-picker-react';
+import IndividualOfferModal from './IndividualOfferModal';
+import { chatApi } from '../../api/chat';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -22,158 +24,110 @@ interface ChatMessage {
     timestamp: string;
     isMine: boolean;
     isRead: boolean;
+    message_type?: 'text' | 'offer';
+    offer_data?: any;
   }[];
 }
 
 interface MessagesModalProps {
-  visible: boolean;
-  onCancel: () => void;
+  visible?: boolean;
+  open?: boolean;
+  onCancel?: () => void;
+  onClose?: () => void;
   selectedChat?: ChatMessage | null;
   onChatSelect?: (chat: ChatMessage) => void;
+  userProfile?: any;
 }
 
 const MessagesModal: React.FC<MessagesModalProps> = ({
   visible,
+  open,
   onCancel,
+  onClose,
   selectedChat,
-  onChatSelect
+  onChatSelect,
+  userProfile
 }) => {
+  const isOpen = open || visible || false;
+  const handleClose = onClose || onCancel || (() => {});
+
   const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [isMobile] = useState(window.innerWidth <= 840);
   const [isDesktop] = useState(window.innerWidth > 1024);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Тестовые данные для сообщений
-  const mockMessages: ChatMessage[] = [
-    {
-      id: 1,
-      chatId: 1,
-      userName: 'Иван Петров',
-      userAvatar: undefined,
-      lastMessage: 'Здравствуйте! Когда будет готова работа?',
-      timestamp: '2 мин назад',
-      isRead: false,
-      isOnline: true,
-      unreadCount: 3,
-      messages: [
-        { id: 1, text: 'Здравствуйте! Я хотел бы заказать решение задач по математике', timestamp: '10:30', isMine: false, isRead: true },
-        { id: 2, text: 'Здравствуйте! Конечно, пришлите задание', timestamp: '10:32', isMine: true, isRead: true },
-        { id: 3, text: 'Вот файл с заданием', timestamp: '10:35', isMine: false, isRead: true },
-        { id: 4, text: 'Принял в работу. Срок выполнения - 2 дня', timestamp: '10:40', isMine: true, isRead: true },
-        { id: 5, text: 'Отлично, спасибо!', timestamp: '10:42', isMine: false, isRead: true },
-        { id: 6, text: 'Здравствуйте! Когда будет готова работа?', timestamp: '14:25', isMine: false, isRead: false }
-      ]
-    },
-    {
-      id: 2,
-      chatId: 2,
-      userName: 'Мария Сидорова',
-      userAvatar: undefined,
-      lastMessage: 'Спасибо за помощь! Все отлично',
-      timestamp: '1 час назад',
-      isRead: true,
-      isOnline: false,
-      unreadCount: 0,
-      messages: [
-        { id: 1, text: 'Добрый день! Нужна помощь с курсовой по экономике', timestamp: 'Вчера 15:20', isMine: false, isRead: true },
-        { id: 2, text: 'Здравствуйте! Какая тема курсовой?', timestamp: 'Вчера 15:25', isMine: true, isRead: true },
-        { id: 3, text: 'Макроэкономический анализ', timestamp: 'Вчера 15:30', isMine: false, isRead: true },
-        { id: 4, text: 'Хорошо, могу помочь. Срок - неделя', timestamp: 'Вчера 15:35', isMine: true, isRead: true },
-        { id: 5, text: 'Спасибо за помощь! Все отлично', timestamp: '1 час назад', isMine: false, isRead: true }
-      ]
-    },
-    {
-      id: 3,
-      chatId: 3,
-      userName: 'Алексей Смирнов',
-      userAvatar: undefined,
-      lastMessage: 'Можете взять еще один заказ?',
-      timestamp: '3 часа назад',
-      isRead: false,
-      isOnline: true,
-      unreadCount: 1,
-      messages: [
-        { id: 1, text: 'Здравствуйте! Вы делаете лабораторные по физике?', timestamp: 'Вчера 12:00', isMine: false, isRead: true },
-        { id: 2, text: 'Да, конечно. Какая тема?', timestamp: 'Вчера 12:15', isMine: true, isRead: true },
-        { id: 3, text: 'Механика, колебания', timestamp: 'Вчера 12:20', isMine: false, isRead: true },
-        { id: 4, text: 'Хорошо, пришлите задание', timestamp: 'Вчера 12:25', isMine: true, isRead: true },
-        { id: 5, text: 'Можете взять еще один заказ?', timestamp: '3 часа назад', isMine: false, isRead: false }
-      ]
-    },
-    {
-      id: 4,
-      chatId: 4,
-      userName: 'Елена Козлова',
-      userAvatar: undefined,
-      lastMessage: 'Хорошо, жду результат',
-      timestamp: '5 часов назад',
-      isRead: true,
-      isOnline: false,
-      unreadCount: 0,
-      messages: [
-        { id: 1, text: 'Добрый вечер! Нужна дипломная работа', timestamp: '2 дня назад', isMine: false, isRead: true },
-        { id: 2, text: 'Здравствуйте! Какая специальность?', timestamp: '2 дня назад', isMine: true, isRead: true },
-        { id: 3, text: 'Программирование, веб-разработка', timestamp: '2 дня назад', isMine: false, isRead: true },
-        { id: 4, text: 'Хорошо, жду результат', timestamp: '5 часов назад', isMine: false, isRead: true }
-      ]
-    },
-    {
-      id: 5,
-      chatId: 5,
-      userName: 'Дмитрий Новиков',
-      userAvatar: undefined,
-      lastMessage: 'Отлично, договорились!',
-      timestamp: '1 день назад',
-      isRead: true,
-      isOnline: false,
-      unreadCount: 0,
-      messages: [
-        { id: 1, text: 'Здравствуйте! Нужна помощь с рефератом по истории', timestamp: '3 дня назад', isMine: false, isRead: true },
-        { id: 2, text: 'Добрый день! Какая тема?', timestamp: '3 дня назад', isMine: true, isRead: true },
-        { id: 3, text: 'Реформы Петра I', timestamp: '3 дня назад', isMine: false, isRead: true },
-        { id: 4, text: 'Отлично, договорились!', timestamp: '1 день назад', isMine: false, isRead: true }
-      ]
-    }
-  ];
 
-  const [chatMessages] = useState<ChatMessage[]>(mockMessages);
+  const [chatMessages] = useState<ChatMessage[]>();
 
-  // Функция прокрутки к последнему сообщению
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Функция отправки сообщения
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (messageText.trim() && selectedChat) {
-      // Создаем новое сообщение
-      const newMessage = {
-        id: Date.now(),
-        text: messageText.trim(),
-        timestamp: new Date().toLocaleTimeString('ru-RU', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        isMine: true,
-        isRead: false
-      };
-
-      console.log('Отправка сообщения:', newMessage);
+      try {
+        await chatApi.sendMessage(selectedChat.chatId, messageText.trim());
+        const newMessage = {
+          id: Date.now(),
+          text: messageText.trim(),
+          timestamp: new Date().toLocaleTimeString('ru-RU', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          isMine: true,
+          isRead: false
+        };
+        console.log('Отправка сообщения:', newMessage);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        antMessage.error('Не удалось отправить сообщение');
+      }
       setMessageText('');
       setFileList([]);
-      
-      // Прокручиваем к последнему сообщению
       setTimeout(scrollToBottom, 100);
+    }
+  };
+
+  const handleOfferSubmit = async (data: any) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.sendMessage(selectedChat.chatId, '', undefined, 'offer', data);
+      setOfferModalOpen(false);
+      antMessage.success('Предложение отправлено');
+    } catch (error) {
+      console.error('Failed to send offer:', error);
+      antMessage.error('Не удалось отправить предложение');
+    }
+  };
+
+  const handleAcceptOffer = async (msgId: number) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.acceptOffer(selectedChat.chatId, msgId);
+      antMessage.success('Предложение принято, заказ создан');
+    } catch (error: any) {
+      antMessage.error(error.response?.data?.detail || 'Ошибка принятия предложения');
+    }
+  };
+
+  const handleRejectOffer = async (msgId: number) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.rejectOffer(selectedChat.chatId, msgId);
+      antMessage.success('Предложение отклонено');
+    } catch (error: any) {
+      antMessage.error(error.response?.data?.detail || 'Ошибка отклонения предложения');
     }
   };
 
   return (
     <Modal
-      open={visible}
-      onCancel={onCancel}
+      open={isOpen}
+      onCancel={handleClose}
       footer={null}
       width="auto"
       styles={{
@@ -195,6 +149,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
           right: isMobile ? 0 : '20px',
           bottom: isMobile ? 0 : '20px',
           width: isMobile ? '100vw !important' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)'),
+          maxWidth: isMobile ? undefined : (isDesktop ? 1400 : 1200),
           height: isMobile ? '100vh !important' : 'calc(100vh - 80px)',
           transform: isMobile ? 'none' : 'none',
           position: 'fixed'
@@ -452,14 +407,26 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
                   </div>
                 </Space>
                 {!isMobile && (
-                  <Button 
-                    type="primary" 
-                    size="small"
-                    icon={<PlusOutlined />}
-                    style={{ fontSize: 14 }}
-                  >
-                    Создать заказ
-                  </Button>
+                  userProfile?.role === 'expert' ? (
+                    <Button 
+                      type="primary" 
+                      size="small"
+                      icon={<FileTextOutlined />}
+                      style={{ fontSize: 14, background: '#10B981', borderColor: '#10B981' }}
+                      onClick={() => setOfferModalOpen(true)}
+                    >
+                      Индивидуальное предложение
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="primary" 
+                      size="small"
+                      icon={<PlusOutlined />}
+                      style={{ fontSize: 14 }}
+                    >
+                      Создать заказ
+                    </Button>
+                  )
                 )}
               </>
             ) : (
@@ -506,31 +473,109 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
                     <div
                       style={{
                         maxWidth: isMobile ? '85%' : '70%',
-                        padding: isMobile ? '8px 12px' : '10px 14px',
+                        padding: msg.message_type === 'offer' ? 0 : (isMobile ? '8px 12px' : '10px 14px'),
                         borderRadius: msg.isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        background: msg.isMine ? '#3b82f6' : '#ffffff',
+                        background: msg.message_type === 'offer' ? 'transparent' : (msg.isMine ? '#3b82f6' : '#ffffff'),
                         color: msg.isMine ? '#ffffff' : '#1f2937',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                        border: msg.isMine ? 'none' : '1px solid #e5e7eb'
+                        boxShadow: msg.message_type === 'offer' ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        border: msg.message_type === 'offer' ? 'none' : (msg.isMine ? 'none' : '1px solid #e5e7eb'),
+                        overflow: 'hidden'
                       }}
                     >
-                      <Text style={{ 
-                        fontSize: isMobile ? 13 : 14, 
-                        color: msg.isMine ? '#ffffff' : '#1f2937',
-                        display: 'block',
-                        marginBottom: 4
-                      }}>
-                        {msg.text}
-                      </Text>
-                      <Text style={{ 
-                        fontSize: isMobile ? 10 : 11, 
-                        color: msg.isMine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
-                      }}>
-                        {msg.timestamp}
-                        {msg.isMine && msg.isRead && (
-                          <CheckCircleOutlined style={{ marginLeft: 4, fontSize: isMobile ? 10 : 11 }} />
-                        )}
-                      </Text>
+                      {msg.message_type === 'offer' && msg.offer_data ? (
+                        <Card 
+                          size="small" 
+                          style={{ width: 300, borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb' }}
+                          bodyStyle={{ padding: 0 }}
+                        >
+                          <div style={{ padding: '12px 16px', background: '#f9fafb', borderBottom: '1px solid #f0f0f0' }}>
+                            <Text strong style={{ fontSize: 16 }}>Индивидуальное предложение</Text>
+                          </div>
+                          <div style={{ padding: '16px' }}>
+                            <div style={{ marginBottom: 12 }}>
+                              <Text type="secondary" style={{ fontSize: 12 }}>Предмет</Text>
+                              <div style={{ fontSize: 14, fontWeight: 500 }}>{msg.offer_data.subject}</div>
+                            </div>
+                            <div style={{ marginBottom: 12 }}>
+                              <Text type="secondary" style={{ fontSize: 12 }}>Тип работы</Text>
+                              <div style={{ fontSize: 14 }}>{msg.offer_data.work_type}</div>
+                            </div>
+                            <div style={{ marginBottom: 12 }}>
+                              <Text type="secondary" style={{ fontSize: 12 }}>Описание</Text>
+                              <div style={{ fontSize: 14, whiteSpace: 'pre-wrap' }}>{msg.offer_data.description}</div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                              <div>
+                                <Text type="secondary" style={{ fontSize: 12 }}>Стоимость</Text>
+                                <div style={{ fontSize: 16, fontWeight: 600, color: '#10B981' }}>
+                                  {msg.offer_data.cost?.toLocaleString('ru-RU')} ₽
+                                </div>
+                              </div>
+                              <div>
+                                <Text type="secondary" style={{ fontSize: 12 }}>Срок</Text>
+                                <div style={{ fontSize: 14 }}>
+                                  {msg.offer_data.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString() : 'Не указан'}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {msg.offer_data.status === 'accepted' ? (
+                              <div style={{ textAlign: 'center', color: '#10B981', fontWeight: 500 }}>
+                                <CheckCircleOutlined /> Предложение принято
+                              </div>
+                            ) : msg.offer_data.status === 'rejected' ? (
+                              <div style={{ textAlign: 'center', color: '#EF4444', fontWeight: 500 }}>
+                                <CloseCircleOutlined /> Предложение отклонено
+                              </div>
+                            ) : (
+                              !msg.isMine && (
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                  <Button 
+                                    type="primary" 
+                                    block 
+                                    style={{ background: '#10B981', borderColor: '#10B981' }}
+                                    onClick={() => handleAcceptOffer(msg.id)}
+                                  >
+                                    Принять
+                                  </Button>
+                                  <Button 
+                                    danger 
+                                    block
+                                    onClick={() => handleRejectOffer(msg.id)}
+                                  >
+                                    Отказаться
+                                  </Button>
+                                </div>
+                              )
+                            )}
+                            {msg.isMine && !msg.offer_data.status && (
+                                <div style={{ textAlign: 'center', color: '#9CA3AF', fontSize: 12, marginTop: 8 }}>
+                                  Ожидает решения клиента
+                                </div>
+                            )}
+                          </div>
+                        </Card>
+                      ) : (
+                        <>
+                          <Text style={{ 
+                            fontSize: isMobile ? 15 : 16, 
+                            color: msg.isMine ? '#ffffff' : '#1f2937',
+                            display: 'block',
+                            marginBottom: 4
+                          }}>
+                            {msg.text}
+                          </Text>
+                          <Text style={{ 
+                            fontSize: isMobile ? 11 : 12, 
+                            color: msg.isMine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
+                          }}>
+                            {msg.timestamp}
+                            {msg.isMine && msg.isRead && (
+                              <CheckCircleOutlined style={{ marginLeft: 4, fontSize: isMobile ? 11 : 12 }} />
+                            )}
+                          </Text>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -554,11 +599,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
             padding: isMobile ? '8px 12px 8px 12px' : '12px',
             borderTop: '1px solid #e5e7eb',
             background: '#ffffff',
-            // flexShrink: 0 — можно оставить, чтобы не схлопывался при маленькой высоте
             flexShrink: 0
-            // position: 'sticky',
-            // bottom: 0,
-            // zIndex: 10
           }}>
             {fileList.length > 0 && (
               <div style={{ marginBottom: 12 }}>
@@ -661,6 +702,11 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
           </div>
         </div>
       </div>
+      <IndividualOfferModal
+        open={offerModalOpen}
+        onClose={() => setOfferModalOpen(false)}
+        onSubmit={handleOfferSubmit}
+      />
     </Modal>
   );
 };

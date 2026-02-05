@@ -24,7 +24,7 @@ const ShopReadyWorks: React.FC = () => {
     queryFn: () => shopApi.getWorks(),
   });
 
-  const { data: profile } = useQuery({
+  const { data: _profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
@@ -107,31 +107,37 @@ const ShopReadyWorks: React.FC = () => {
     let local: Work[] = [];
     try {
       local = JSON.parse(localStorage.getItem('shop_custom_works') || '[]');
-    } catch {}
+    } catch {
+      local = [];
+    }
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : mockWorks;
     
     // Преобразуем данные из API в нужный формат
-    const transformedBase = base.map((work: any) => ({
-      ...work,
-      // Обеспечиваем совместимость полей
-      createdAt: work.created_at || work.createdAt,
-      updatedAt: work.updated_at || work.updatedAt,
-      category: work.work_type_name || work.category || 'Другое',
-      workType: work.work_type_name || work.workType || 'Другое',
-      subject: Number(work.subject ?? work.subjectId ?? work.subject_id ?? 0),
-      work_type: Number(work.work_type ?? work.workTypeId ?? work.work_type_id ?? 0),
-      rating: work.rating || 0,
-      reviewsCount: work.reviewsCount || 0,
-      viewsCount: work.viewsCount || 0,
-      purchasesCount: work.purchasesCount || 0,
-      // Обеспечиваем правильную структуру автора
-      author: work.author || {
-        id: 0,
-        name: work.author_name || 'Неизвестен',
-        username: work.author_name || 'Неизвестен',
-        rating: 0
-      }
-    }));
+    const transformedBase = base.map((work: Work) => {
+      const extended = work as Work & { subject_id?: number; work_type_id?: number };
+      const subject = Number(work.subject ?? work.subjectId ?? extended.subject_id ?? 0);
+      const work_type = Number(work.work_type ?? work.workTypeId ?? extended.work_type_id ?? 0);
+
+      return {
+        ...work,
+        createdAt: work.created_at || work.createdAt,
+        updatedAt: work.updated_at || work.updatedAt,
+        category: work.work_type_name || work.category || 'Другое',
+        workType: work.work_type_name || work.workType || 'Другое',
+        subject,
+        work_type,
+        rating: work.rating || 0,
+        reviewsCount: work.reviewsCount || 0,
+        viewsCount: work.viewsCount || 0,
+        purchasesCount: work.purchasesCount || 0,
+        author: work.author || {
+          id: 0,
+          name: work.author_name || 'Неизвестен',
+          username: work.author_name || 'Неизвестен',
+          rating: 0,
+        },
+      };
+    });
     
     const all = [...local, ...transformedBase];
     const uniqueById = Array.from(new Map(all.map((w) => [w.id, w])).values());
