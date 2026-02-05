@@ -192,7 +192,21 @@
 
 .disputesTable :global(.ant-pagination) {
   margin: 16px;
-  text-align: right;
+  text-align: center;
+}
+
+/* Центрирование пагинации */
+.disputesTable :global(.ant-table-pagination-right) {
+  justify-content: center !important;
+}
+
+.disputesTable :global(.ant-table-pagination) {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+:where(.css-1odpy5d).ant-table-wrapper .ant-table-pagination-right {
+  justify-content: center;
 }
 
 /* Адаптивность для планшетов */

@@ -2,9 +2,7 @@ import React from 'react';
 import { Layout, Typography, Button, Dropdown } from 'antd';
 import { 
   LogoutOutlined, 
-  MenuOutlined, 
-  UserOutlined,
-  SettingOutlined 
+  MenuOutlined
 } from '@ant-design/icons';
 import { titleMap } from '../../constants';
 import type { User } from '../../../../api/auth';
@@ -39,25 +37,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 
   // Меню пользователя для dropdown
   const userMenuItems = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: 'Профиль',
-      onClick: () => {
-        // TODO: Открыть профиль пользователя
-      },
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: 'Настройки',
-      onClick: () => {
-        // TODO: Открыть настройки
-      },
-    },
-    {
-      type: 'divider' as const,
-    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,

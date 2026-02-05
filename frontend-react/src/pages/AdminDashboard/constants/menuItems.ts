@@ -122,11 +122,6 @@ export const menuItems: MenuItem[] = [
     label: 'Обработка претензий',
   },
   {
-    key: 'communication',
-    icon: MessageOutlined,
-    label: 'Коммуникация с дирекцией',
-  },
-  {
     key: 'support_chats',
     icon: MessageOutlined,
     label: 'Чаты поддержки',
@@ -134,7 +129,7 @@ export const menuItems: MenuItem[] = [
   {
     key: 'admin_chats',
     icon: CommentOutlined,
-    label: 'Чаты администраторов',
+    label: 'Внутренняя коммуникация',
   },
   // Новый раздел обработки запросов
   {
@@ -173,7 +168,6 @@ export const titleMap: Record<MenuKey, string> = {
   completed_claims: 'Завершённые',
   pending_approval: 'Ожидают решения',
   claims_processing: 'Обработка претензий',
-  communication: 'Коммуникация с дирекцией',
   internal_communication: 'Внутренняя коммуникация',
   // Управление пользователями
   users_management: 'Управление пользователями',
@@ -189,7 +183,7 @@ export const titleMap: Record<MenuKey, string> = {
   support_in_progress: 'Запросы поддержки в работе',
   support_completed: 'Завершенные запросы поддержки',
   support_chats: 'Чаты поддержки',
-  admin_chats: 'Чаты администраторов',
+  admin_chats: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
   // Обработка запросов
   request_processing: 'Обработка запросов',

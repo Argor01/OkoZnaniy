@@ -79,7 +79,6 @@ export type MenuKey =
   | 'completed_claims'
   | 'pending_approval'
   | 'claims_processing'
-  | 'communication'
   | 'internal_communication'       // 🆕 Внутренняя коммуникация
   | 'support_open'                 // 🆕 Открытые запросы поддержки
   | 'support_in_progress'          // 🆕 Запросы поддержки в работе
@@ -125,8 +124,9 @@ export interface DisputeModalProps extends ModalProps {
   dispute: Dispute | null;
   arbitrators: Arbitrator[];
   onAssignArbitrator: (disputeId: number, arbitratorId: number) => void;
-}// Тип
-ы для поддержки
+}
+
+// Типы для поддержки
 export type SupportStatus = 'open' | 'in_progress' | 'completed';
 
 export interface SupportChat {
