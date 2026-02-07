@@ -11,7 +11,8 @@ class Command(BaseCommand):
         parser.add_argument('--prefix', type=str, default='test')
 
     def handle(self, *args, **options):
-        per_role = int(options.get('per_role') or 1)
+        per_role_opt = options.get('per_role')
+        per_role = int(per_role_opt) if per_role_opt is not None else 1
         password = str(options.get('password') or 'testpass123')
         domain = str(options.get('domain') or 'test.com')
         prefix = str(options.get('prefix') or 'test')
@@ -23,13 +24,14 @@ class Command(BaseCommand):
         created_or_updated = []
         for role_choice in Roles.choices:
             role_value = role_choice[0]
-            base_username = f"{role_value}_test"
-            base_email = f"{role_value}@{domain}"
-
-            users_to_create = [(base_username, base_email)]
+            users_to_create = []
             for i in range(1, per_role + 1):
-                username = f"{role_value}_{prefix}{i}"
-                email = f"{role_value}{i}@{domain}"
+                if per_role == 1:
+                    username = f"{role_value}_{prefix}"
+                    email = f"{role_value}@{domain}"
+                else:
+                    username = f"{role_value}_{prefix}{i}"
+                    email = f"{role_value}{i}@{domain}"
                 users_to_create.append((username, email))
 
             for username, email in users_to_create:
@@ -41,6 +43,7 @@ class Command(BaseCommand):
                 }
                 if role_value == Roles.ADMIN:
                     defaults['is_staff'] = True
+                    defaults['is_superuser'] = True
                 if role_value == Roles.EXPERT:
                     defaults['bio'] = f"Test expert profile: {username}"
                     defaults['experience_years'] = 3
@@ -55,6 +58,7 @@ class Command(BaseCommand):
                 user.is_active = True
                 if role_value == Roles.ADMIN:
                     user.is_staff = True
+                    user.is_superuser = True
                 if role_value == Roles.EXPERT:
                     user.bio = user.bio or f"Test expert profile: {username}"
                     user.experience_years = user.experience_years or 3
@@ -66,29 +70,8 @@ class Command(BaseCommand):
                 if role_value == Roles.PARTNER:
                     partners.append(user)
 
-            self.stdout.write(f"{role_value.ljust(12)}: {base_email}/{password}")
-
-        superuser_email = f"superuser@{domain}"
-        superuser, created = User.objects.get_or_create(
-            username='superuser_test',
-            defaults={
-                'email': superuser_email,
-                'role': Roles.ADMIN,
-                'is_staff': True,
-                'is_superuser': True,
-                'email_verified': True,
-                'is_active': True
-            }
-        )
-        if created:
-            superuser.set_password(password)
-            superuser.save()
-        else:
-            superuser.set_password(password)
-            superuser.email = superuser_email
-            superuser.is_staff = True
-            superuser.is_superuser = True
-            superuser.save()
+            if users_to_create:
+                self.stdout.write(f"{role_value.ljust(12)}: {users_to_create[0][1]}/{password}")
 
         if partners:
             referral_candidates = [
@@ -99,5 +82,4 @@ class Command(BaseCommand):
                 u.partner = partners[idx % len(partners)]
                 u.save(update_fields=['partner'])
         
-        self.stdout.write(f"{'superuser'.ljust(12)}: {superuser_email}/{password}")
         self.stdout.write("-" * 40)

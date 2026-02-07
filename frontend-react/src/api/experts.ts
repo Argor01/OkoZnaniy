@@ -82,6 +82,7 @@ export interface ExpertReview {
   expert?: number;
   client: {
     id: number;
+    username?: string;
     first_name: string;
     last_name: string;
     avatar?: string;

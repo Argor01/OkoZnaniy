@@ -1,4 +1,3 @@
-export { default as MessagesModal } from './MessagesModal';
 export { default as NotificationsModal } from './NotificationsModal';
 export { default as ArbitrationModal } from './ArbitrationModal';
 export { default as FinanceModal } from './FinanceModal';

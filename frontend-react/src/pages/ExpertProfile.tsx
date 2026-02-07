@@ -1,10 +1,11 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Tag, Spin, Alert, Button, Rate, Divider } from 'antd';
+import { Card, Typography, Tag, Spin, Alert, Button, Rate, Divider, Avatar } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { expertsApi, type ExpertStatistics } from '../api/experts';
+import { expertsApi, type ExpertStatistics, type ExpertReview } from '../api/experts';
 import dayjs from 'dayjs';
+import { getMediaUrl } from '../config/api';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -287,7 +288,7 @@ const ExpertProfile: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {reviews.map((review: any) => (
+            {reviews.map((review: ExpertReview) => (
               <div 
                 key={review.id}
                 style={{
@@ -298,12 +299,29 @@ const ExpertProfile: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <div>
-                    <Text strong style={{ fontSize: 15 }}>{review.client?.first_name} {review.client?.last_name}</Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      {review.order?.title || review.order_title}
-                    </Text>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/user/${review.client.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                  >
+                    <Avatar
+                      size={16}
+                      src={getMediaUrl(review.client.avatar)}
+                      icon={<UserOutlined style={{ fontSize: 10 }} />}
+                    />
+                    <div>
+                      <Text strong style={{ fontSize: 15, lineHeight: 1.2 }}>
+                        @{review.client.username || `user${review.client.id}`}
+                      </Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {review.client.first_name} {review.client.last_name}
+                      </Text>
+                    </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
@@ -313,6 +331,9 @@ const ExpertProfile: React.FC = () => {
                     </Text>
                   </div>
                 </div>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
+                  {review.order?.title}
+                </Text>
                 <Paragraph style={{ margin: 0, fontSize: 14 }}>
                   {review.text || review.comment}
                 </Paragraph>

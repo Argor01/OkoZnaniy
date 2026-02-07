@@ -1,11 +1,12 @@
 import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space } from 'antd';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar } from 'antd';
 import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
-import { expertsApi } from '../api/experts';
+import { expertsApi, type ExpertReview } from '../api/experts';
 import { apiClient } from '../api/client';
 import dayjs from 'dayjs';
+import { getMediaUrl } from '../config/api';
 
 const { Text, Paragraph } = Typography;
 
@@ -393,16 +394,7 @@ const UserProfile: FC = () => {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {reviews.map((review: {
-                      id: number;
-                      rating?: number;
-                      created_at?: string;
-                      text?: string;
-                      comment?: string;
-                      order?: { title?: string | null } | null;
-                      order_title?: string | null;
-                      client?: { first_name?: string; last_name?: string } | null;
-                    }) => (
+                    {reviews.map((review: ExpertReview) => (
                       <div 
                         key={review.id}
                         style={{
@@ -413,12 +405,29 @@ const UserProfile: FC = () => {
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                          <div>
-                            <Text strong style={{ fontSize: 15 }}>{review.client?.first_name} {review.client?.last_name}</Text>
-                            <br />
-                            <Text type="secondary" style={{ fontSize: 12 }}>
-                              {review.order?.title || review.order_title}
-                            </Text>
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate(`/user/${review.client.id}`)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
+                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                          >
+                            <Avatar
+                              size={16}
+                              src={getMediaUrl(review.client.avatar)}
+                              icon={<UserOutlined style={{ fontSize: 10 }} />}
+                            />
+                            <div>
+                              <Text strong style={{ fontSize: 15, lineHeight: 1.2 }}>
+                                @{review.client.username || `user${review.client.id}`}
+                              </Text>
+                              <br />
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {review.client.first_name} {review.client.last_name}
+                              </Text>
+                            </div>
                           </div>
                           <div style={{ textAlign: 'right' }}>
                             <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
@@ -428,6 +437,9 @@ const UserProfile: FC = () => {
                             </Text>
                           </div>
                         </div>
+                        <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
+                          {review.order?.title}
+                        </Text>
                         <Paragraph style={{ margin: 0, fontSize: 14 }}>
                           {review.text || review.comment}
                         </Paragraph>

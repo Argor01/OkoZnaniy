@@ -58,6 +58,7 @@ const OrdersFeed: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [selectedOrderForBid, setSelectedOrderForBid] = useState<OrdersFeedOrder | null>(null);
+  const [myBidsByOrderId, setMyBidsByOrderId] = useState<Record<number, boolean | 'loading'>>({});
 
   // Загружаем профиль пользователя
   const { data: userProfile } = useQuery({
@@ -119,6 +120,50 @@ const OrdersFeed: React.FC = () => {
         return !!order.id && !!order.title;
       })
     : [];
+
+  React.useEffect(() => {
+    if (userProfile?.role !== 'expert') return;
+    if (typeof userProfile?.id !== 'number') return;
+    if (!Array.isArray(orders) || orders.length === 0) return;
+
+    let cancelled = false;
+    const toFetch = orders.filter((o) => {
+      if (typeof o?.id !== 'number') return false;
+      if (typeof o.user_has_bid === 'boolean') return false;
+      if (Array.isArray(o.bids)) return false;
+      return myBidsByOrderId[o.id] === undefined;
+    });
+
+    if (toFetch.length === 0) return;
+
+    setMyBidsByOrderId((prev) => {
+      const next = { ...prev };
+      for (const o of toFetch) next[o.id] = 'loading';
+      return next;
+    });
+
+    (async () => {
+      for (const o of toFetch) {
+        try {
+          const bids = await ordersApi.getBids(o.id);
+          const hasBid = Array.isArray(bids)
+            ? bids.some((bid) => bid.expert?.id === userProfile.id && (bid.status || 'active') === 'active')
+            : false;
+          if (!cancelled) {
+            setMyBidsByOrderId((prev) => ({ ...prev, [o.id]: hasBid }));
+          }
+        } catch {
+          if (!cancelled) {
+            setMyBidsByOrderId((prev) => ({ ...prev, [o.id]: false }));
+          }
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orders, userProfile?.role, userProfile?.id, myBidsByOrderId]);
 
   // Фильтрация заказов
   const filteredOrders = orders.filter((order) => {
@@ -456,11 +501,15 @@ const OrdersFeed: React.FC = () => {
               console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
             }
 
+            const cachedMyBid = typeof order.id === 'number' ? myBidsByOrderId[order.id] : undefined;
+            const checkingMyBid = cachedMyBid === 'loading';
             const hasMyBid =
               userProfile?.role === 'expert'
                 ? (typeof order.user_has_bid === 'boolean'
                     ? order.user_has_bid
-                    : (Array.isArray(order.bids) && order.bids.some((bid) => bid.expert?.id === userProfile?.id)))
+                    : (Array.isArray(order.bids) && order.bids.some((bid) => bid.expert?.id === userProfile?.id))
+                      ? true
+                      : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
                 : false;
             
             return (
@@ -647,16 +696,16 @@ const OrdersFeed: React.FC = () => {
                   ) : userProfile?.role === 'expert' ? (
                     <Button 
                       type={hasMyBid ? 'default' : 'primary'}
-                      disabled={hasMyBid}
+                      disabled={hasMyBid || checkingMyBid}
                       className={`${styles.actionButton} ${styles.bidButton}`}
                       onClick={(e) => {
                         e.stopPropagation(); // Предотвращаем переход к деталям
-                        if (hasMyBid) return;
+                        if (hasMyBid || checkingMyBid) return;
                         setSelectedOrderForBid(order);
                         setBidModalVisible(true);
                       }}
                     >
-                      {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
+                      {hasMyBid ? 'Вы уже откликнулись на этот заказ' : checkingMyBid ? 'Проверяем...' : 'Откликнуться'}
                     </Button>
                   ) : null}
                 </Space>

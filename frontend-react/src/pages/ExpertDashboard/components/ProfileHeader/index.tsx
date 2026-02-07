@@ -1,8 +1,10 @@
 import React from 'react';
 import { Avatar, Typography, Rate, Space, Button, Tooltip } from 'antd';
 import { UserOutlined, EditOutlined } from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
 import { UserProfile } from '../../types';
 import type { ExpertStatistics } from '../../../../api/experts';
+import { ordersApi, type Order } from '../../../../api/orders';
 import { formatCurrency } from '../../../../utils/formatters';
 import styles from '../../ExpertDashboard.module.css';
 
@@ -27,6 +29,40 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     (profile?.first_name || profile?.last_name)
       ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
       : (userProfile?.username || userProfile?.email || 'Эксперт');
+
+  const { data: ordersData } = useQuery({
+    queryKey: ['expert-success-rate-orders', userProfile?.id],
+    queryFn: () => ordersApi.getMyOrders({}),
+    enabled: !!userProfile?.id && userProfile?.role === 'expert',
+  });
+
+  const orders = React.useMemo<Order[] | undefined>(() => {
+    if (!ordersData) return undefined;
+    if (Array.isArray(ordersData)) return ordersData as Order[];
+    const results = (ordersData as { results?: unknown })?.results;
+    return Array.isArray(results) ? (results as Order[]) : [];
+  }, [ordersData]);
+
+  const computedSuccessRate = React.useMemo<number | undefined>(() => {
+    if (!orders) return undefined;
+
+    const now = Date.now();
+    const relevant = orders.filter((order) => {
+      if (order.status === 'completed') return true;
+      const deadlineTime = new Date(order.deadline).getTime();
+      if (!Number.isFinite(deadlineTime)) return false;
+      return deadlineTime <= now;
+    });
+
+    if (relevant.length === 0) return 0;
+    const completedCount = relevant.filter((order) => order.status === 'completed').length;
+    return (completedCount / relevant.length) * 100;
+  }, [orders]);
+
+  const displayedSuccessRate =
+    typeof computedSuccessRate === 'number'
+      ? computedSuccessRate
+      : (expertStats?.success_rate ? Number(expertStats.success_rate) : 0);
 
   return (
     <div className={styles.profileBlock}>
@@ -108,9 +144,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div>
               <Text style={{ fontSize: 14, color: '#1f2937' }}>
                 Статистика работ:{' '}
-                <Tooltip title="Процент заказов, выполненных со статусом «Завершено» среди всех ваших заказов" placement="top">
+                <Tooltip
+                  title="Процент заказов со статусом «Завершено» среди завершенных и просроченных заказов"
+                  placement="top"
+                >
                   <span className={styles.statsNumberSuccess}>
-                    {expertStats?.success_rate ? Number(expertStats.success_rate).toFixed(0) : 0}%
+                    {Number(displayedSuccessRate).toFixed(0)}%
                   </span>
                 </Tooltip>
                 {' | '}

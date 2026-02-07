@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import DashboardHeader from './common/DashboardHeader';
-import MessagesModal from './MessagesModal';
 import NotificationSystem, { NotificationSettings } from './notifications/NotificationSystem';
 import { useChat } from '../hooks/useChat';
 import { useNotifications } from '../hooks/useNotifications';
+import MessageModal from '../pages/ExpertDashboard/modals/MessageModalNew';
 
 interface DashboardWithChatAndNotificationsProps {
   userProfile?: {
@@ -93,10 +93,13 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
       {children}
 
       {/* Модалка чата */}
-      <MessagesModal
-        open={messagesModalOpen}
+      <MessageModal
+        visible={messagesModalOpen}
         onClose={() => setMessagesModalOpen(false)}
-        userProfile={userProfile}
+        isMobile={isMobile}
+        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
+        isDesktop={window.innerWidth > 1024}
+        userProfile={userProfile ? { role: userProfile.role } : undefined}
       />
 
       {/* Модалка уведомлений */}

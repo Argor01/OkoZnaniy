@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
@@ -7,6 +7,7 @@ import {
   SearchOutlined,
   UserOutlined,
   ArrowLeftOutlined,
+  CustomerServiceOutlined,
   CheckCircleOutlined,
   CheckOutlined,
   SendOutlined,
@@ -90,6 +91,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [order, setOrder] = useState<OrderForChat | null>(null);
+  const [headerOrder, setHeaderOrder] = useState<{ id: number | null; title: string | null }>({ id: null, title: null });
+  const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+  const [orderIdsByChatId, setOrderIdsByChatId] = useState<Record<number, number[]>>({});
+  const [closedOrderIdsByChatId, setClosedOrderIdsByChatId] = useState<Record<number, number[]>>({});
   const [workUploading, setWorkUploading] = useState(false);
   const [deadlineTick, setDeadlineTick] = useState(0);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -98,17 +103,93 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [reviewComment, setReviewComment] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
-  const effectiveOrderId = (() => {
-    const fromAcceptedOffer = selectedChat?.messages?.find(
-      (m) => m.message_type === 'offer' && m.offer_data?.status === 'accepted' && typeof m.offer_data?.order_id === 'number'
-    )?.offer_data?.order_id;
-    if (typeof fromAcceptedOffer === 'number' && fromAcceptedOffer > 0) return fromAcceptedOffer;
+  const toPositiveNumber = (raw: unknown): number | null => {
+    const n =
+      typeof raw === 'number'
+        ? raw
+        : typeof raw === 'string'
+          ? Number(raw)
+          : NaN;
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
 
-    const fromChat = selectedChat?.order_id;
-    if (typeof fromChat === 'number' && fromChat > 0) return fromChat;
-
+  const offerToShow = (() => {
+    const messages = selectedChat?.messages;
+    if (!Array.isArray(messages) || messages.length === 0) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m?.message_type === 'offer' && m.offer_data) return m;
+    }
     return null;
   })();
+
+  const computedOrderIds = useMemo(() => {
+    const messages = selectedChat?.messages;
+    const ids: number[] = [];
+    if (Array.isArray(messages)) {
+      for (const m of messages) {
+        if (m?.message_type !== 'offer') continue;
+        const id = toPositiveNumber(m.offer_data?.order_id);
+        if (!id) continue;
+        if (m.offer_data?.status === 'rejected') continue;
+        if (!ids.includes(id)) ids.push(id);
+      }
+    }
+    const chatOrderId = toPositiveNumber(selectedChat?.order_id);
+    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+    const chatOrder = toPositiveNumber((selectedChat as { order?: unknown } | null)?.order);
+    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    return ids;
+  }, [selectedChat?.messages, selectedChat?.order_id, (selectedChat as { order?: unknown } | null)?.order]);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (!selectedChat?.id) return;
+    if (computedOrderIds.length === 0) return;
+    setOrderIdsByChatId((prev) => {
+      const prevIds = prev[selectedChat.id] || [];
+      let changed = false;
+      const nextIds = [...prevIds];
+      for (const id of computedOrderIds) {
+        if (!nextIds.includes(id)) {
+          nextIds.push(id);
+          changed = true;
+        }
+      }
+      if (!changed) return prev;
+      return { ...prev, [selectedChat.id]: nextIds };
+    });
+  }, [visible, selectedChat?.id, computedOrderIds]);
+
+  const orderIdsForTabs = useMemo(() => {
+    if (!selectedChat?.id) return computedOrderIds;
+    if (Object.prototype.hasOwnProperty.call(orderIdsByChatId, selectedChat.id)) {
+      const stored = orderIdsByChatId[selectedChat.id];
+      return Array.isArray(stored) ? stored : computedOrderIds;
+    }
+    return computedOrderIds;
+  }, [selectedChat?.id, computedOrderIds, orderIdsByChatId]);
+
+  const prevAcceptedOrderIdsRef = useRef<number[]>([]);
+  useEffect(() => {
+    if (!visible) return;
+    const prevIds = prevAcceptedOrderIdsRef.current;
+    prevAcceptedOrderIdsRef.current = orderIdsForTabs;
+    if (orderIdsForTabs.length === 0) {
+      setActiveOrderId(null);
+      return;
+    }
+    const prevLast = prevIds[prevIds.length - 1];
+    const nextLast = orderIdsForTabs[orderIdsForTabs.length - 1];
+    const hasNewOrder = orderIdsForTabs.length > prevIds.length && nextLast !== prevLast;
+    setActiveOrderId((prev) => {
+      if (hasNewOrder) return nextLast;
+      if (prev && orderIdsForTabs.includes(prev)) return prev;
+      return nextLast;
+    });
+  }, [visible, orderIdsForTabs]);
+
+  const effectiveOrderId = activeOrderId;
 
   const loadChats = useCallback(async () => {
     setLoading(true);
@@ -178,8 +259,33 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
 
   useEffect(() => {
-    setOrderPanelOpen(false);
     if (!visible) return;
+    const orderId = typeof effectiveOrderId === 'number' && effectiveOrderId > 0 ? effectiveOrderId : null;
+    if (!orderId) {
+      setHeaderOrder({ id: null, title: null });
+      return;
+    }
+    if (headerOrder.id === orderId) return;
+    let cancelled = false;
+    ordersApi
+      .getById(orderId)
+      .then((data) => {
+        if (cancelled) return;
+        const title = (data as OrderForChat | undefined)?.title ?? null;
+        setHeaderOrder({ id: orderId, title });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setHeaderOrder({ id: orderId, title: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, effectiveOrderId, headerOrder.id]);
+
+  useEffect(() => {
+    if (!visible) return;
+    setOrderPanelOpen(!!effectiveOrderId);
     if (!effectiveOrderId) {
       setOrder(null);
       setOrderLoading(false);
@@ -187,6 +293,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
     let cancelled = false;
     setOrderLoading(true);
+    setOrder(null);
     ordersApi
       .getById(effectiveOrderId)
       .then((data) => {
@@ -254,12 +361,78 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   useEffect(() => {
     if (!visible) return;
-    if (!order?.deadline) return;
+    const deadline = order?.deadline;
+    if (!deadline) return;
 
     setDeadlineTick((v) => v + 1);
     const id = window.setInterval(() => setDeadlineTick((v) => v + 1), 30000);
     return () => window.clearInterval(id);
   }, [visible, order?.deadline]);
+
+  const isClosedOrder = order?.status === 'completed' || order?.status === 'cancelled';
+
+  const closedOrderIdsForChat = useMemo(() => {
+    if (!selectedChat?.id) return [];
+    const ids = closedOrderIdsByChatId[selectedChat.id];
+    return Array.isArray(ids) ? ids : [];
+  }, [closedOrderIdsByChatId, selectedChat?.id]);
+
+  const tabsBaseOrderIds = useMemo(() => {
+    const base = Array.isArray(orderIdsForTabs) && orderIdsForTabs.length > 0 ? orderIdsForTabs : computedOrderIds;
+    const next = [...base];
+    for (const id of computedOrderIds) {
+      if (!next.includes(id)) next.push(id);
+    }
+    return next;
+  }, [computedOrderIds, orderIdsForTabs]);
+
+  const tabsOrderIds = useMemo(() => {
+    const filteredByClosed = tabsBaseOrderIds.filter((id) => !closedOrderIdsForChat.includes(id));
+    if (!effectiveOrderId || !isClosedOrder) return filteredByClosed;
+    return filteredByClosed.filter((id) => id !== effectiveOrderId);
+  }, [closedOrderIdsForChat, effectiveOrderId, isClosedOrder, tabsBaseOrderIds]);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (!isClosedOrder) return;
+    if (!selectedChat?.id) return;
+    if (!effectiveOrderId) return;
+
+    setClosedOrderIdsByChatId((prev) => {
+      const prevIds = prev[selectedChat.id] || [];
+      if (prevIds.includes(effectiveOrderId)) return prev;
+      return { ...prev, [selectedChat.id]: [...prevIds, effectiveOrderId] };
+    });
+
+    const removedIndex = tabsBaseOrderIds.indexOf(effectiveOrderId);
+    const nextIds = tabsBaseOrderIds.filter(
+      (id) => id !== effectiveOrderId && !closedOrderIdsForChat.includes(id)
+    );
+    const nextActive =
+      nextIds.length === 0 ? null : nextIds[Math.min(Math.max(removedIndex, 0), nextIds.length - 1)];
+
+    setOrderIdsByChatId((prev) => {
+      const existing = prev[selectedChat.id];
+      if (
+        Array.isArray(existing) &&
+        existing.length === tabsOrderIds.length &&
+        existing.every((v, i) => v === tabsOrderIds[i])
+      ) {
+        return prev;
+      }
+      return { ...prev, [selectedChat.id]: tabsOrderIds };
+    });
+
+    setActiveOrderId(nextActive);
+  }, [
+    visible,
+    isClosedOrder,
+    selectedChat?.id,
+    effectiveOrderId,
+    tabsBaseOrderIds,
+    tabsOrderIds,
+    closedOrderIdsForChat,
+  ]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -280,9 +453,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     })();
 
   const remainingLabel = useMemo(() => {
+    if (isClosedOrder) return '';
     if (!order?.deadline) return '';
     return formatRemaining(order.deadline);
-  }, [order?.deadline, deadlineTick]);
+  }, [order?.deadline, deadlineTick, isClosedOrder]);
 
   const handleOfferSubmit = async (data: OfferData) => {
     if (!selectedChat) return;
@@ -562,6 +736,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const safeChatList = Array.isArray(chatList) ? chatList : [];
+  const supportUserId = (() => {
+    const raw = localStorage.getItem('support_user_id');
+    const parsed = raw ? Number(raw) : 1;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  })();
+  const supportAvatarSrc = '/assets/icons/support.png';
+  const supportChat = safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null;
+  const isSupportChatSelected = selectedChat?.other_user?.id === supportUserId;
+
   const filteredChats = safeChatList.filter(chat => {
     // Фильтр по вкладкам
     if (messageTab === 'unread' && chat.unread_count === 0) return false;
@@ -576,6 +759,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     
     return true;
   });
+  const filteredChatsWithoutSupport = filteredChats.filter((chat) => chat.other_user?.id !== supportUserId);
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const showPinnedSupport =
+    !normalizedSearchQuery ||
+    'техническая поддержка'.includes(normalizedSearchQuery) ||
+    'поддержка'.includes(normalizedSearchQuery) ||
+    'support'.includes(normalizedSearchQuery);
 
   return (
     <Modal
@@ -696,11 +886,87 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             overflowY: 'auto',
             background: '#ffffff'
           }}>
+            {showPinnedSupport && (
+              <div 
+                onClick={() => {
+                  if (supportChat) {
+                    loadChatDetail(supportChat.id);
+                    return;
+                  }
+                  loadOrCreateChatWithUser(supportUserId);
+                }}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  padding: isMobile ? '8px' : '12px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #f3f4f6',
+                  background: isSupportChatSelected ? '#eff6ff' : (supportChat?.unread_count ? '#f0fdf4' : '#ffffff'),
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSupportChatSelected) {
+                    e.currentTarget.style.background = '#f9fafb';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSupportChatSelected) {
+                    e.currentTarget.style.background = supportChat?.unread_count ? '#f0fdf4' : '#ffffff';
+                  }
+                }}
+              >
+                <Avatar
+                  className="support-avatar"
+                  size={isMobile ? 36 : 40}
+                  icon={<CustomerServiceOutlined />}
+                  src={supportAvatarSrc}
+                />
+                <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                    <Text strong style={{ 
+                      fontSize: isMobile ? 13 : 14, 
+                      color: '#1f2937',
+                      fontWeight: (supportChat?.unread_count ?? 0) > 0 ? 600 : 500
+                    }}>
+                      Техническая поддержка
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
+                      {supportChat?.last_message ? formatTimestamp(supportChat.last_message.created_at) : ''}
+                    </Text>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text 
+                      ellipsis 
+                      style={{ 
+                        fontSize: isMobile ? 11 : 12, 
+                        color: (supportChat?.unread_count ?? 0) > 0 ? '#059669' : '#6b7280',
+                        fontWeight: (supportChat?.unread_count ?? 0) > 0 ? 500 : 400,
+                        maxWidth: isMobile ? '140px' : '180px'
+                      }}
+                    >
+                      {supportChat?.last_message?.text || 'Написать в поддержку'}
+                    </Text>
+                    {(supportChat?.unread_count ?? 0) > 0 && (
+                      <Badge 
+                        count={supportChat?.unread_count} 
+                        style={{ 
+                          backgroundColor: '#10b981',
+                          fontSize: isMobile ? 9 : 10,
+                          height: isMobile ? 16 : 18,
+                          minWidth: isMobile ? 16 : 18,
+                          lineHeight: isMobile ? '16px' : '18px'
+                        }} 
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
                 <Spin />
               </div>
-            ) : filteredChats.length === 0 ? (
+            ) : filteredChatsWithoutSupport.length === 0 && !showPinnedSupport ? (
               <div style={{ 
                 textAlign: 'center', 
                 color: '#9ca3af', 
@@ -711,7 +977,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 {searchQuery ? 'Ничего не найдено' : 'Нет чатов'}
               </div>
             ) : (
-              filteredChats.map((chat) => (
+              filteredChatsWithoutSupport.map((chat) => (
                 <div 
                   key={chat.id}
                   onClick={() => loadChatDetail(chat.id)}
@@ -819,25 +1085,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   <Avatar
                     size={isMobile ? 32 : 36}
                     icon={<UserOutlined />}
-                    src={getMediaUrl(selectedChat.other_user?.avatar)}
-                    style={{ backgroundColor: '#6b7280' }}
+                    src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat.other_user?.avatar)}
+                    className={isSupportChatSelected ? 'support-avatar' : undefined}
+                    style={isSupportChatSelected ? undefined : { backgroundColor: '#6b7280' }}
                   />
                   <div>
                     <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500 }}>
-                      {selectedChat.other_user?.username || 'Пользователь'}
+                      {isSupportChatSelected ? 'Техническая поддержка' : (selectedChat.other_user?.username || 'Пользователь')}
                     </Text>
-                    {selectedChat.order_id ? (
-                      <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
-                        {selectedChat.order_title || `Заказ #${selectedChat.order_id}`}
-                      </Text>
-                    ) : (
-                      <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
-                        Заказ удалён
-                      </Text>
-                    )}
+                    {!isSupportChatSelected ? (
+                      effectiveOrderId && !isClosedOrder ? (
+                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                          {headerOrder.title || order?.title || `Заказ #${effectiveOrderId}`}
+                        </Text>
+                      ) : (
+                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                          Без заказа
+                        </Text>
+                      )
+                    ) : null}
                   </div>
                 </Space>
-                {currentRole === 'expert' && (
+                {currentRole === 'expert' && !isSupportChatSelected && (
                   <Button
                     type="primary"
                     size={isMobile ? 'small' : 'middle'}
@@ -858,56 +1127,69 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             )}
           </div>
 
-          {effectiveOrderId ? (
+          {tabsOrderIds.length > 0 && !isSupportChatSelected ? (
             <>
               <div style={{ padding: isMobile ? '8px 12px' : '8px 16px', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                <Button
+                <Tabs
                   size="small"
-                  icon={<ClockCircleOutlined />}
-                  onClick={() => setOrderPanelOpen((v) => !v)}
-                  style={{ borderRadius: 999 }}
-                >
-                  {`Заказ #${effectiveOrderId}`}{remainingLabel ? ` • ${remainingLabel}` : ''}
+                  activeKey={
+                    effectiveOrderId && !isClosedOrder
+                      ? String(effectiveOrderId)
+                      : (tabsOrderIds.length > 0 ? String(tabsOrderIds[tabsOrderIds.length - 1]) : undefined)
+                  }
+                  onChange={(key) => {
+                    const next = Number(key);
+                    if (Number.isFinite(next) && next > 0) setActiveOrderId(next);
+                    setOrderPanelOpen(true);
+                  }}
+                  tabBarStyle={{ margin: 0, flex: 1 }}
+                  items={tabsOrderIds.map((id) => ({
+                    key: String(id),
+                    label: `Заказ #${id}${effectiveOrderId === id && remainingLabel ? ` • ${remainingLabel}` : ''}`,
+                  }))}
+                />
+                <Button size="small" disabled={isClosedOrder} onClick={() => setOrderPanelOpen((v) => !v)} style={{ borderRadius: 999 }}>
+                  {orderPanelOpen ? 'Скрыть' : 'Показать'}
                 </Button>
-                {currentRole === 'expert' ? (
-                  <>
-                    <input
-                      ref={workFileInputRef}
-                      type="file"
-                      style={{ display: 'none' }}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUploadWork(f);
-                      }}
-                    />
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<UploadOutlined />}
-                      loading={workUploading}
-                      disabled={!order || !['in_progress', 'revision'].includes(order?.status) || isDeadlineExpired(order?.deadline)}
-                      onClick={() => workFileInputRef.current?.click()}
-                      style={{ background: '#10B981', borderColor: '#10B981' }}
-                    >
-                      Выгрузить работу
-                    </Button>
-                  </>
-                ) : null}
               </div>
-              {orderPanelOpen ? (
+              {orderPanelOpen && !isClosedOrder ? (
                 <div style={{ padding: isMobile ? '10px 12px' : '12px 16px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                  <input
+                    ref={workFileInputRef}
+                    type="file"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleUploadWork(f);
+                    }}
+                  />
                   {orderLoading ? (
                     <div style={{ textAlign: 'center', padding: 8 }}>
                       <Spin size="small" />
                     </div>
                   ) : order ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                        <Text strong>{order.title || `Заказ #${order.id}`}</Text>
-                        <Text type="secondary">{formatOrderStatus(order.status)}</Text>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <Text strong>{order.title || `Заказ #${order.id}`}</Text>
+                          <Text type="secondary">{formatOrderStatus(order.status)}</Text>
+                        </div>
+                        {currentRole === 'expert' ? (
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<UploadOutlined />}
+                            loading={workUploading}
+                            disabled={!['in_progress', 'revision'].includes(order?.status) || isDeadlineExpired(order?.deadline)}
+                            onClick={() => workFileInputRef.current?.click()}
+                            style={{ background: '#10B981', borderColor: '#10B981' }}
+                          >
+                            Выгрузить работу
+                          </Button>
+                        ) : null}
                       </div>
                       <Text type="secondary">
-                      Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан'}{remainingLabel ? ` • осталось ${remainingLabel}` : ''}
+                        Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'не указан'}{remainingLabel ? ` • осталось ${remainingLabel}` : ''}
                       </Text>
                       <Text>
                         Предмет: {order.subject?.name || order.custom_subject || '—'} · Тип: {order.work_type?.name || order.custom_work_type || '—'}
@@ -1152,58 +1434,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               background: '#ffffff',
               flexShrink: 0
             }}>
-              {/* Attached Files Display */}
-              {attachedFiles.length > 0 && (
-                <div style={{ 
-                  marginBottom: 12,
-                  padding: 8,
-                  background: '#f9fafb',
-                  borderRadius: 8,
-                  border: '1px solid #e5e7eb'
-                }}>
-                  <Text style={{ fontSize: 12, color: '#6b7280', marginBottom: 8, display: 'block' }}>
-                    Прикрепленные файлы:
-                  </Text>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {attachedFiles.map((file, index) => (
-                      <div key={index} style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        padding: '4px 8px',
-                        background: '#ffffff',
-                        borderRadius: 4,
-                        border: '1px solid #d1d5db'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <FileOutlined style={{ color: '#6b7280', fontSize: 12 }} />
-                          <Text style={{ fontSize: 12, color: '#374151' }}>
-                            {file.name}
-                          </Text>
-                          <Text style={{ fontSize: 10, color: '#9ca3af' }}>
-                            ({(file.size / 1024 / 1024).toFixed(2)} МБ)
-                          </Text>
-                        </div>
-                        <Button
-                          type="text"
-                          size="small"
-                          onClick={() => removeAttachedFile(file)}
-                          style={{ 
-                            color: '#ef4444', 
-                            fontSize: 12,
-                            padding: '0 4px',
-                            height: 20,
-                            minWidth: 20
-                          }}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div style={{ 
                 display: 'flex',
                 gap: isMobile ? 6 : 8,
@@ -1213,7 +1443,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: isMobile ? 2 : 3 }}
+                  autoSize={{ minRows: isMobile ? 2 : 3, maxRows: isMobile ? 6 : 8 }}
                   style={{ 
                     flex: 1,
                     borderRadius: 8,
@@ -1268,6 +1498,62 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   disabled={!messageText.trim() && attachedFiles.length === 0}
                 />
               </div>
+
+              {attachedFiles.length > 0 && (
+                <div style={{
+                  marginTop: 10,
+                  paddingTop: 10,
+                  borderTop: '1px solid #f3f4f6',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 8
+                }}>
+                  {attachedFiles.map((file, index) => (
+                    <div
+                      key={`${file.name}-${file.size}-${index}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '6px 10px',
+                        background: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 999,
+                        maxWidth: '100%'
+                      }}
+                    >
+                      <FileOutlined style={{ color: '#6b7280' }} />
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: '#374151',
+                          maxWidth: isMobile ? 160 : 240
+                        }}
+                        ellipsis
+                      >
+                        {file.name}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                        {(file.size / 1024 / 1024).toFixed(2)} МБ
+                      </Text>
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={() => removeAttachedFile(file)}
+                        style={{
+                          color: '#ef4444',
+                          padding: 0,
+                          height: 20,
+                          minWidth: 20,
+                          lineHeight: '20px'
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

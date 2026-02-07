@@ -40,6 +40,14 @@ const CreateOrder: React.FC = () => {
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
+  const sortedSubjects = [...subjects].sort((a: any, b: any) =>
+    String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'ru', { sensitivity: 'base' })
+  );
+
+  const sortedWorkTypes = [...workTypes].sort((a: any, b: any) =>
+    String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'ru', { sensitivity: 'base' })
+  );
+
   // Мутации для создания новых типов работ и предметов
   const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
@@ -178,6 +186,11 @@ const CreateOrder: React.FC = () => {
                 <Select 
                   placeholder="Тип работы" 
                   className={styles.selectField}
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
                   dropdownRender={(menu) => (
                     <>
                       {menu}
@@ -194,7 +207,7 @@ const CreateOrder: React.FC = () => {
                     </>
                   )}
                 >
-                  {workTypes.map((type: any) => (
+                  {sortedWorkTypes.map((type: any) => (
                     <Select.Option key={type.id} value={type.id}>
                       {type.name}
                     </Select.Option>
@@ -212,6 +225,10 @@ const CreateOrder: React.FC = () => {
                   placeholder="Предмет" 
                   className={styles.selectField}
                   showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
                   dropdownRender={(menu) => (
                     <>
                       {menu}
@@ -228,7 +245,7 @@ const CreateOrder: React.FC = () => {
                     </>
                   )}
                 >
-                  {subjects.map((subject: any) => (
+                  {sortedSubjects.map((subject: any) => (
                     <Select.Option key={subject.id} value={subject.id}>
                       {subject.name}
                     </Select.Option>

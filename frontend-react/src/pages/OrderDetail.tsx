@@ -11,8 +11,6 @@ import { ru } from 'date-fns/locale';
 import { useDashboard } from '../contexts/DashboardContext';
 import { formatCurrency } from '../utils/formatters';
 
-const ALLOWED_FORMATS_TEXT = 'Текстовые документы: .doc, .docx, .pdf, .rtf, .txt\nПрезентации: .ppt, .pptx, .pdf\nТаблицы: .xls, .xlsx, .csv\nЧертежи и работы: .dwg, .dxf, .cdr, .cdw, .bak, .pdf\nГрафика/изображения: .jpg, .png, .bmp, .svg';
-
 const { Title, Text, Paragraph } = Typography;
 
 const OrderDetail: React.FC = () => {
@@ -376,12 +374,6 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
-            <Card title="Допустимые форматы файлов" style={{ borderRadius: 12 }}>
-              <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>
-                {ALLOWED_FORMATS_TEXT}
-              </Paragraph>
-            </Card>
-
             {/* Кнопка отклика для эксперта */}
             {userProfile?.role === 'expert' && 
              !order.expert && 
@@ -558,6 +550,15 @@ const OrderDetail: React.FC = () => {
                     <br />
                     <Text type="secondary" style={{ fontSize: isMobile ? 12 : 14 }}>Эксперт</Text>
                   </div>
+                  {isOrderOwner && (
+                    <Button
+                      size={isMobile ? 'small' : 'middle'}
+                      icon={<MessageOutlined />}
+                      onClick={() => dashboard.openOrderChat(order.id, order.expert.id)}
+                    >
+                      Написать
+                    </Button>
+                  )}
                 </Space>
               </div>
             )}
