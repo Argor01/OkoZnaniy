@@ -112,14 +112,15 @@ const OrdersFeed: React.FC = () => {
   });
 
   // Используем реальные данные с API
-  const orders = Array.isArray(ordersData)
-    ? ordersData.filter((order) => {
-        if (!order) return false;
-        if (order.is_active === false) return false;
-        if (order.deleted === true) return false;
-        return !!order.id && !!order.title;
-      })
-    : [];
+  const orders = React.useMemo(() => {
+    if (!Array.isArray(ordersData)) return [];
+    return ordersData.filter((order) => {
+      if (!order) return false;
+      if (order.is_active === false) return false;
+      if (order.deleted === true) return false;
+      return !!order.id && !!order.title;
+    });
+  }, [ordersData]);
 
   React.useEffect(() => {
     if (userProfile?.role !== 'expert') return;
@@ -606,7 +607,7 @@ const OrdersFeed: React.FC = () => {
                         if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined style={{ color: '#fa8c16' }} />;
                         return <FileOutlined style={{ color: '#666' }} />;
                       };
-                      const fileName = file.filename || file.file_name || 'file';
+                      const fileName = file.filename || 'file';
 
                       return (
                         <Tooltip

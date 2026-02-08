@@ -1282,7 +1282,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </Form>
       </Modal>
 
-      <style jsx>{`
+      <style>{`
         .overdue-row {
           background-color: #fff2f0 !important;
         }

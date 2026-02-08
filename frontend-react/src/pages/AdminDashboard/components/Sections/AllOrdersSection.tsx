@@ -309,7 +309,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <strong>#{record.id}</strong>
-            {record.is_urgent && <Tag color="red" size="small">Срочно</Tag>}
+            {record.is_urgent && <Tag color="red">Срочно</Tag>}
           </div>
           <div style={{ fontWeight: 500, marginBottom: 4 }}>
             {record.title}

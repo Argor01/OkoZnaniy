@@ -24,7 +24,7 @@ export const useAdminChats = () => {
     queryFn: () => adminChatsApi.getChats({ search: searchQuery }),
     refetchInterval: 10000, // Обновление каждые 10 секунд
     staleTime: 5000, // Данные считаются свежими 5 секунд
-    cacheTime: 300000, // Кэш на 5 минут
+    gcTime: 300000, // Кэш на 5 минут
   });
 
   // Извлекаем массив чатов из ответа
@@ -54,7 +54,7 @@ export const useAdminChats = () => {
     queryKey: ['available-admins'],
     queryFn: () => adminChatsApi.getAvailableAdmins(),
     staleTime: 60000, // Список админов свежий 1 минуту
-    cacheTime: 300000, // Кэш на 5 минут
+    gcTime: 300000, // Кэш на 5 минут
   });
 
   // Получение количества непрочитанных сообщений
@@ -63,7 +63,10 @@ export const useAdminChats = () => {
     refetch: refetchUnreadCounts
   } = useQuery<{ [chatId: number]: number }>({
     queryKey: ['unread-counts'],
-    queryFn: () => adminChatsApi.getUnreadCount(),
+    queryFn: async () => {
+      const data = await adminChatsApi.getUnreadCount();
+      return typeof data === 'number' ? {} : data;
+    },
     refetchInterval: 5000, // Обновление каждые 5 секунд
     staleTime: 2000,
   });

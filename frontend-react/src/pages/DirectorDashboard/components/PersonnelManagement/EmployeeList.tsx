@@ -81,7 +81,9 @@ const EmployeeList: React.FC = () => {
           const next = arr.filter((x: number) => x !== updated.id);
           localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
         }
-      } catch {}
+      } catch (e: unknown) {
+        void e;
+      }
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     },
     onError: (error: any, id: number) => {
@@ -94,7 +96,9 @@ const EmployeeList: React.FC = () => {
           const next = arr.filter((x: number) => x !== id);
           localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
         }
-      } catch {}
+      } catch (e: unknown) {
+        void e;
+      }
       queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
         if (!prev) return prev;
         return prev.map((e) => (e.id === id ? { ...e, is_active: true } : e));

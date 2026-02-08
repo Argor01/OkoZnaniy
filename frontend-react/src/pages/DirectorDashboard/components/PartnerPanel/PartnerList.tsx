@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   Table,
@@ -29,13 +29,13 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   getPartners,
   updatePartnerCommission,
   togglePartnerStatus,
-  type Partner,
 } from '../../api/directorApi';
+import type { Partner } from '../../api/types';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './PartnerList.module.css';
 import mobileStyles from '../shared/MobileDatePicker.module.css';
@@ -48,7 +48,7 @@ const PartnerList: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateRange, setDateRange] = useState<[any, any] | null>(null);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [commissionModalVisible, setCommissionModalVisible] = useState(false);
@@ -58,13 +58,16 @@ const PartnerList: React.FC = () => {
 
   const [commissionForm] = Form.useForm();
 
-  const { data: partners, isLoading } = useQuery({
+  const { data: partners = [], isLoading, error: partnersError } = useQuery<Partner[], unknown, Partner[]>({
     queryKey: ['director-partners'],
     queryFn: getPartners,
-    onError: (error: any) => {
-      message.error('Ошибка при загрузке списка партнёров');
-    },
   });
+  
+  useEffect(() => {
+    if (partnersError) {
+      message.error('Ошибка при загрузке списка партнёров');
+    }
+  }, [partnersError]);
 
   const updateCommissionMutation = useMutation({
     mutationFn: ({ partnerId, commission }: { partnerId: number; commission: number }) =>

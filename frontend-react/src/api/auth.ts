@@ -146,6 +146,20 @@ export const authApi = {
     });
   },
 
+  resetPasswordConfirm: async (
+    uid: string,
+    token: string,
+    newPassword: string,
+    newPassword2?: string
+  ): Promise<void> => {
+    await apiClient.post('/users/reset_password_confirm/', {
+      uid,
+      token,
+      new_password: newPassword,
+      new_password2: newPassword2 ?? newPassword,
+    });
+  },
+
   // Alias для совместимости
   resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<void> => {
     await apiClient.post('/users/reset_password_with_code/', {

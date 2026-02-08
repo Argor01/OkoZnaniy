@@ -366,7 +366,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
           </Text>
           <div style={{ marginTop: 4 }}>
             {record.tags.map(tag => (
-              <Tag key={tag} size="small">{tag}</Tag>
+              <Tag key={tag}>{tag}</Tag>
             ))}
           </div>
         </div>
@@ -384,7 +384,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
           <div>
             <div style={{ fontWeight: 'bold' }}>
               {record.user.first_name} {record.user.last_name}
-              {record.user.is_vip && <Tag color="gold" size="small" style={{ marginLeft: 4 }}>VIP</Tag>}
+              {record.user.is_vip && <Tag color="gold" style={{ marginLeft: 4 }}>VIP</Tag>}
             </div>
             <Text type="secondary" style={{ fontSize: '11px' }}>
               {record.user.total_orders} заказов • {record.user.total_spent.toLocaleString()} ₽
@@ -453,7 +453,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
             </div>
           )}
           {record.follow_up_required && (
-            <Tag color="orange" size="small" style={{ marginTop: 4 }}>
+            <Tag color="orange" style={{ marginTop: 4 }}>
               Требует контроля
             </Tag>
           )}

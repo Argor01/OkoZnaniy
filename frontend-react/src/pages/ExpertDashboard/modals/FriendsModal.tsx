@@ -112,7 +112,8 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
             onChange={(e) => setSearchText(e.target.value)}
             style={{ 
               marginBottom: isMobile ? 16 : 24,
-              width: '100%'
+              width: '100%',
+              height: isMobile ? 44 : undefined
             }}
             styles={{
               input: {
@@ -120,10 +121,6 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                 lineHeight: isMobile ? '1.5' : 'normal',
                 padding: isMobile ? '10px 11px' : undefined,
                 height: isMobile ? '100%' : 'auto'
-              },
-              affixWrapper: {
-                height: isMobile ? 44 : 'auto',
-                alignItems: 'center'
               }
             }}
           />

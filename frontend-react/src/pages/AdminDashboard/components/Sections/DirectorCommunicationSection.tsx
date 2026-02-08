@@ -70,7 +70,7 @@ interface DirectorMessage {
     first_name: string;
     last_name: string;
     role: string;
-    department: string;
+    department?: string;
     avatar?: string;
   };
   recipient: {
@@ -79,6 +79,7 @@ interface DirectorMessage {
     first_name: string;
     last_name: string;
     role: string;
+    department?: string;
     avatar?: string;
   };
   created_at: string;

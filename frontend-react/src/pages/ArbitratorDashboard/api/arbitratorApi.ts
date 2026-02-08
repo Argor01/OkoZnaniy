@@ -1226,7 +1226,8 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
         name: file.name,
         url: '#', // В реальном приложении URL будет получен от сервера
         size: file.size,
-        type: file.type,
+        file_type: file.type,
+        uploaded_at: new Date().toISOString(),
       })) || [],
       created_at: new Date().toISOString(),
       status: 'sent',

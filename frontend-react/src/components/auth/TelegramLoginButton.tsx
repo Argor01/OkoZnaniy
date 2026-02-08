@@ -92,17 +92,17 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
       console.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
     };
 
-    // Добавляем скрипт в контейнер
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-      containerRef.current.appendChild(script);
+    const container = containerRef.current;
+    if (container) {
+      container.innerHTML = '';
+      container.appendChild(script);
       console.log('[TelegramLoginButton] Widget script added to DOM');
     }
 
     // Cleanup
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
       delete (window as any).onTelegramAuth;
     };

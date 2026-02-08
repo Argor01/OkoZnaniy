@@ -275,14 +275,12 @@ const ExpertDashboard: FC = () => {
         isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
         userProfile={userProfile}
-        onCreateOrder={() => undefined}
       />
       
       <NotificationsModal
         visible={notificationsModalVisible}
         onClose={() => setNotificationsModalVisible(false)}
         isMobile={isMobile}
-        isDesktop={window.innerWidth > 1024}
       />
       
       <ArbitrationModal
@@ -290,7 +288,6 @@ const ExpertDashboard: FC = () => {
         onClose={() => setArbitrationModalVisible(false)}
         cases={mockArbitrationCases}
         isMobile={isMobile}
-        isDesktop={window.innerWidth > 1024}
       />
       
       <FinanceModal

@@ -30,7 +30,7 @@ export const useRequestProcessing = () => {
     queryFn: () => requestsApi.getRequests({ status: selectedStatus }),
     refetchInterval: 30000, // Обновление каждые 30 секунд
     staleTime: 10000, // Данные считаются свежими 10 секунд
-    cacheTime: 300000, // Кэш на 5 минут
+    gcTime: 300000, // Кэш на 5 минут
   });
 
   // Извлекаем массив запросов из ответа

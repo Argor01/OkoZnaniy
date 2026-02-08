@@ -60,7 +60,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
     if (selectedChat) {
       scrollToBottom();
     }
-  }, [selectedChat?.messages]);
+  }, [selectedChat]);
 
   const filteredChats = chats.filter(chat =>
     chat.userName.toLowerCase().includes(searchQuery.toLowerCase())

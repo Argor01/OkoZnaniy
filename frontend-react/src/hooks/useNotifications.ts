@@ -7,21 +7,7 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const formatNotification = (apiNotif: ApiNotification): Notification => {
-    return {
-      id: apiNotif.id,
-      type: apiNotif.type as any,
-      title: apiNotif.title,
-      message: apiNotif.message,
-      timestamp: formatTimestamp(apiNotif.created_at),
-      isRead: apiNotif.is_read,
-      actionUrl: apiNotif.related_object_id 
-        ? `/${apiNotif.related_object_type}/${apiNotif.related_object_id}`
-        : undefined,
-    };
-  };
-
-  const formatTimestamp = (dateString: string): string => {
+  const formatTimestamp = useCallback((dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -34,7 +20,21 @@ export const useNotifications = () => {
     if (hours < 24) return `${hours} ч. назад`;
     if (days < 7) return `${days} дн. назад`;
     return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-  };
+  }, []);
+
+  const formatNotification = useCallback((apiNotif: ApiNotification): Notification => {
+    return {
+      id: apiNotif.id,
+      type: apiNotif.type as any,
+      title: apiNotif.title,
+      message: apiNotif.message,
+      timestamp: formatTimestamp(apiNotif.created_at),
+      isRead: apiNotif.is_read,
+      actionUrl: apiNotif.related_object_id 
+        ? `/${apiNotif.related_object_type}/${apiNotif.related_object_id}`
+        : undefined,
+    };
+  }, [formatTimestamp]);
 
   const loadNotifications = useCallback(async () => {
     setLoading(true);
@@ -48,7 +48,7 @@ export const useNotifications = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [formatNotification]);
 
   const markAsRead = async (notificationId: number) => {
     try {

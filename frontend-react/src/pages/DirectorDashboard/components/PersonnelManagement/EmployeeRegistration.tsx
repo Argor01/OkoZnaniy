@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Form, Input, Select, Button, Card, Space, message, Typography } from 'antd';
 import { UserOutlined, MailOutlined, PhoneOutlined, LockOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { registerEmployee, type RegisterEmployeeRequest } from '../../api/directorApi';
+import { registerEmployee } from '../../api/directorApi';
+import type { RegisterEmployeeRequest } from '../../api/types';
 
 const { Option } = Select;
 const { Title } = Typography;

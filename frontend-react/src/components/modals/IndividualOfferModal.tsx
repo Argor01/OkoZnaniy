@@ -144,10 +144,10 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClo
             label={<Text strong>Стоимость</Text>}
             rules={[{ required: true, message: 'Укажите стоимость' }]}
           >
-            <InputNumber
+            <InputNumber<number>
               style={{ width: '100%' }}
               formatter={value => `₽ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-              parser={value => value!.replace(/₽\s?|(,*)/g, '')}
+              parser={value => Number((value ?? '').replace(/₽\s?|(,*)/g, ''))}
               min={500}
               max={2000000}
               placeholder="₽ 500 - 2 000 000"

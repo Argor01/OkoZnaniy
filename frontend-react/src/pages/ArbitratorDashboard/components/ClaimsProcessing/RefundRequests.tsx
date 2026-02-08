@@ -305,7 +305,7 @@ const RefundRequests: React.FC = () => {
               onChange={(value) => setMinAmount(value || undefined)}
               min={0}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-              parser={(value) => value!.replace(/\s?/g, '')}
+              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
             />
           </Col>
           <Col xs={24} sm={12} md={8} lg={3}>
@@ -316,7 +316,7 @@ const RefundRequests: React.FC = () => {
               onChange={(value) => setMaxAmount(value || undefined)}
               min={0}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-              parser={(value) => value!.replace(/\s?/g, '')}
+              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
             />
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>

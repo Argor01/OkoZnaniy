@@ -116,6 +116,7 @@ export interface Employee {
   email: string;
   first_name: string;
   last_name: string;
+  middle_name?: string;
   phone?: string;
   role: 'admin' | 'arbitrator' | 'partner' | 'expert' | 'client';
   is_active?: boolean;
@@ -127,6 +128,7 @@ export interface Employee {
   skills?: string;
   portfolio_url?: string;
   bio?: string;
+  application_approved?: boolean;
 }
 
 export interface ExpertApplication {

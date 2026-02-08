@@ -12,7 +12,7 @@ import { SupportRequest, SupportStatus } from '../../types/support.types';
 import { formatRelativeTime } from '../../utils/formatters';
 import styles from './SupportRequestsSection.module.css';
 
-const { Text, Title } = Typography;
+const { Text, Title, Paragraph } = Typography;
 
 interface SupportRequestsSectionProps {
   requests: SupportRequest[];
@@ -197,9 +197,9 @@ export const SupportRequestsSection: React.FC<SupportRequestsSectionProps> = ({
                   }
                   description={
                     <div className={styles.requestDescription}>
-                      <Text ellipsis={{ rows: 2 }} className={styles.descriptionText}>
+                      <Paragraph ellipsis={{ rows: 2 }} className={styles.descriptionText}>
                         {request.description}
-                      </Text>
+                      </Paragraph>
                       <div className={styles.requestMeta}>
                         <Space size="middle" wrap>
                           <Text type="secondary">
@@ -223,7 +223,7 @@ export const SupportRequestsSection: React.FC<SupportRequestsSectionProps> = ({
                       {request.tags.length > 0 && (
                         <div className={styles.requestTags}>
                           {request.tags.map(tag => (
-                            <Tag key={tag} size="small">
+                            <Tag key={tag}>
                               {tag}
                             </Tag>
                           ))}

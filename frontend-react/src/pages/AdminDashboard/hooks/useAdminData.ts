@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { message } from 'antd';
 import { adminApi } from '../../../api/admin';
@@ -20,17 +21,24 @@ export const useAdminData = (canLoadData: boolean): {
   disputesLoading: boolean;
   arbitratorsLoading: boolean;
   isLoading: boolean;
-  partnersError: any;
-  earningsError: any;
-  disputesError: any;
-  arbitratorsError: any;
-  hasErrors: any;
+  partnersError: unknown;
+  earningsError: unknown;
+  disputesError: unknown;
+  arbitratorsError: unknown;
+  hasErrors: unknown;
   refetchPartners: () => void;
   refetchEarnings: () => void;
   refetchDisputes: () => void;
   refetchArbitrators: () => void;
   refetchAll: () => void;
 } => {
+  const lastErrorRef = useRef<{
+    partners?: unknown;
+    earnings?: unknown;
+    disputes?: unknown;
+    arbitrators?: unknown;
+  }>({});
+
   // Партнеры
   const partnersQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_PARTNERS,
@@ -39,19 +47,27 @@ export const useAdminData = (canLoadData: boolean): {
     retry: QUERY_CONFIG.RETRY,
     retryDelay: QUERY_CONFIG.RETRY_DELAY,
     staleTime: QUERY_CONFIG.STALE_TIME,
-    cacheTime: QUERY_CONFIG.CACHE_TIME,
-    select: (data: any): Partner[] => {
+    gcTime: QUERY_CONFIG.CACHE_TIME,
+    select: (data: unknown): Partner[] => {
       // Обрабатываем разные форматы ответа
       if (Array.isArray(data)) return data;
-      if (data?.results && Array.isArray(data.results)) return data.results;
-      if (data?.data && Array.isArray(data.data)) return data.data;
-      return [];
-    },
-    onError: (error: any) => {
-      console.error('Error fetching partners:', error);
-      if (error.response?.status !== 401) {
-        message.error('Ошибка при загрузке данных партнеров');
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'results' in data &&
+        Array.isArray((data as { results?: unknown }).results)
+      ) {
+        return (data as { results: Partner[] }).results;
       }
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'data' in data &&
+        Array.isArray((data as { data?: unknown }).data)
+      ) {
+        return (data as { data: Partner[] }).data;
+      }
+      return [];
     },
   });
 
@@ -63,18 +79,26 @@ export const useAdminData = (canLoadData: boolean): {
     retry: QUERY_CONFIG.RETRY,
     retryDelay: QUERY_CONFIG.RETRY_DELAY,
     staleTime: QUERY_CONFIG.STALE_TIME,
-    cacheTime: QUERY_CONFIG.CACHE_TIME,
-    select: (data: any): PartnerEarning[] => {
+    gcTime: QUERY_CONFIG.CACHE_TIME,
+    select: (data: unknown): PartnerEarning[] => {
       if (Array.isArray(data)) return data;
-      if (data?.results && Array.isArray(data.results)) return data.results;
-      if (data?.data && Array.isArray(data.data)) return data.data;
-      return [];
-    },
-    onError: (error: any) => {
-      console.error('Error fetching earnings:', error);
-      if (error.response?.status !== 401) {
-        message.error('Ошибка при загрузке данных начислений');
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'results' in data &&
+        Array.isArray((data as { results?: unknown }).results)
+      ) {
+        return (data as { results: PartnerEarning[] }).results;
       }
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'data' in data &&
+        Array.isArray((data as { data?: unknown }).data)
+      ) {
+        return (data as { data: PartnerEarning[] }).data;
+      }
+      return [];
     },
   });
 
@@ -86,25 +110,40 @@ export const useAdminData = (canLoadData: boolean): {
     retry: QUERY_CONFIG.RETRY,
     retryDelay: QUERY_CONFIG.RETRY_DELAY,
     staleTime: QUERY_CONFIG.STALE_TIME,
-    cacheTime: QUERY_CONFIG.CACHE_TIME,
-    select: (data: any): Dispute[] => {
+    gcTime: QUERY_CONFIG.CACHE_TIME,
+    select: (data: unknown): Dispute[] => {
       // API возвращает пагинированный ответ: {count: 2, next: null, previous: null, results: Array}
-      if (data?.data?.results && Array.isArray(data.data.results)) {
-        return data.data.results;
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'data' in data &&
+        typeof (data as { data?: unknown }).data === 'object' &&
+        (data as { data?: unknown }).data !== null &&
+        'results' in ((data as { data?: unknown }).data as object) &&
+        Array.isArray((((data as { data?: unknown }).data as { results?: unknown }).results))
+      ) {
+        return ((data as { data: { results: Dispute[] } }).data.results);
       }
       
       // Обрабатываем разные форматы ответа
       if (Array.isArray(data)) return data;
-      if (data?.results && Array.isArray(data.results)) return data.results;
-      if (data?.data && Array.isArray(data.data)) return data.data;
-      return [];
-    },
-    onError: (error: any) => {
-      console.error('Error fetching disputes:', error);
-      // Не показываем ошибку, если это 404 (споры могут отсутствовать)
-      if (error.response?.status !== 401 && error.response?.status !== 404) {
-        message.warning('Не удалось загрузить данные о спорах');
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'results' in data &&
+        Array.isArray((data as { results?: unknown }).results)
+      ) {
+        return (data as { results: Dispute[] }).results;
       }
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'data' in data &&
+        Array.isArray((data as { data?: unknown }).data)
+      ) {
+        return (data as { data: Dispute[] }).data;
+      }
+      return [];
     },
   });
 
@@ -116,20 +155,64 @@ export const useAdminData = (canLoadData: boolean): {
     retry: QUERY_CONFIG.RETRY,
     retryDelay: QUERY_CONFIG.RETRY_DELAY,
     staleTime: QUERY_CONFIG.STALE_TIME,
-    cacheTime: QUERY_CONFIG.CACHE_TIME,
-    select: (data: any): Arbitrator[] => {
+    gcTime: QUERY_CONFIG.CACHE_TIME,
+    select: (data: unknown): Arbitrator[] => {
       if (Array.isArray(data)) return data;
-      if (data?.results && Array.isArray(data.results)) return data.results;
-      if (data?.data && Array.isArray(data.data)) return data.data;
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'results' in data &&
+        Array.isArray((data as { results?: unknown }).results)
+      ) {
+        return (data as { results: Arbitrator[] }).results;
+      }
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'data' in data &&
+        Array.isArray((data as { data?: unknown }).data)
+      ) {
+        return (data as { data: Arbitrator[] }).data;
+      }
       return [];
     },
-    onError: (error: any) => {
-      console.error('Error fetching arbitrators:', error);
-      if (error.response?.status !== 401) {
-        message.error('Ошибка при загрузке данных арбитров');
-      }
-    },
   });
+
+  useEffect(() => {
+    if (!partnersQuery.error) return;
+    if (lastErrorRef.current.partners === partnersQuery.error) return;
+    lastErrorRef.current.partners = partnersQuery.error;
+
+    const status = (partnersQuery.error as { response?: { status?: number } })?.response?.status;
+    if (status !== 401) message.error('Ошибка при загрузке данных партнеров');
+  }, [partnersQuery.error]);
+
+  useEffect(() => {
+    if (!earningsQuery.error) return;
+    if (lastErrorRef.current.earnings === earningsQuery.error) return;
+    lastErrorRef.current.earnings = earningsQuery.error;
+
+    const status = (earningsQuery.error as { response?: { status?: number } })?.response?.status;
+    if (status !== 401) message.error('Ошибка при загрузке данных начислений');
+  }, [earningsQuery.error]);
+
+  useEffect(() => {
+    if (!disputesQuery.error) return;
+    if (lastErrorRef.current.disputes === disputesQuery.error) return;
+    lastErrorRef.current.disputes = disputesQuery.error;
+
+    const status = (disputesQuery.error as { response?: { status?: number } })?.response?.status;
+    if (status !== 401 && status !== 404) message.warning('Не удалось загрузить данные о спорах');
+  }, [disputesQuery.error]);
+
+  useEffect(() => {
+    if (!arbitratorsQuery.error) return;
+    if (lastErrorRef.current.arbitrators === arbitratorsQuery.error) return;
+    lastErrorRef.current.arbitrators = arbitratorsQuery.error;
+
+    const status = (arbitratorsQuery.error as { response?: { status?: number } })?.response?.status;
+    if (status !== 401) message.error('Ошибка при загрузке данных арбитров');
+  }, [arbitratorsQuery.error]);
 
   // Вычисляем статистику на основе полученных данных
   const calculateStats = (): AdminStats => {

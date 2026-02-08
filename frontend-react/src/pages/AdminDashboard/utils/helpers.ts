@@ -2,7 +2,7 @@
  * Вспомогательные утилиты для админ-панели
  */
 
-import { User, Order, Partner, Dispute } from '../types';
+import type { Partner, Dispute } from '../types';
 
 /**
  * Генерирует уникальный ID
@@ -98,33 +98,49 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
+type SearchableUser = {
+  first_name?: string | null;
+  last_name?: string | null;
+  username?: string | null;
+  email?: string | null;
+  phone?: string | null;
+};
+
 /**
  * Фильтрует пользователей по поисковому запросу
  */
-export const filterUsers = (users: User[], searchQuery: string): User[] => {
+export const filterUsers = <T extends SearchableUser>(users: T[], searchQuery: string): T[] => {
   if (!searchQuery.trim()) return users;
   
   const query = searchQuery.toLowerCase();
   return users.filter(user => 
-    user.firstName.toLowerCase().includes(query) ||
-    user.lastName.toLowerCase().includes(query) ||
-    user.email.toLowerCase().includes(query) ||
-    user.phone?.toLowerCase().includes(query)
+    (user.first_name || '').toLowerCase().includes(query) ||
+    (user.last_name || '').toLowerCase().includes(query) ||
+    (user.username || '').toLowerCase().includes(query) ||
+    (user.email || '').toLowerCase().includes(query) ||
+    (user.phone || '').toLowerCase().includes(query)
   );
+};
+
+type SearchableOrder = {
+  id: number | string;
+  title?: string | null;
+  customerName?: string | null;
+  expertName?: string | null;
 };
 
 /**
  * Фильтрует заказы по поисковому запросу
  */
-export const filterOrders = (orders: Order[], searchQuery: string): Order[] => {
+export const filterOrders = <T extends SearchableOrder>(orders: T[], searchQuery: string): T[] => {
   if (!searchQuery.trim()) return orders;
   
   const query = searchQuery.toLowerCase();
   return orders.filter(order => 
-    order.id.toString().includes(query) ||
-    order.title.toLowerCase().includes(query) ||
-    order.customerName.toLowerCase().includes(query) ||
-    order.expertName?.toLowerCase().includes(query)
+    String(order.id).toLowerCase().includes(query) ||
+    (order.title || '').toLowerCase().includes(query) ||
+    (order.customerName || '').toLowerCase().includes(query) ||
+    (order.expertName || '').toLowerCase().includes(query)
   );
 };
 
@@ -136,9 +152,11 @@ export const filterPartners = (partners: Partner[], searchQuery: string): Partne
   
   const query = searchQuery.toLowerCase();
   return partners.filter(partner => 
-    partner.name.toLowerCase().includes(query) ||
+    partner.username.toLowerCase().includes(query) ||
     partner.email.toLowerCase().includes(query) ||
-    partner.company?.toLowerCase().includes(query)
+    partner.first_name.toLowerCase().includes(query) ||
+    partner.last_name.toLowerCase().includes(query) ||
+    partner.referral_code.toLowerCase().includes(query)
   );
 };
 
@@ -151,9 +169,9 @@ export const filterDisputes = (disputes: Dispute[], searchQuery: string): Disput
   const query = searchQuery.toLowerCase();
   return disputes.filter(dispute => 
     dispute.id.toString().includes(query) ||
-    dispute.title.toLowerCase().includes(query) ||
-    dispute.customerName.toLowerCase().includes(query) ||
-    dispute.expertName.toLowerCase().includes(query)
+    dispute.order.title.toLowerCase().includes(query) ||
+    dispute.order.client.username.toLowerCase().includes(query) ||
+    (dispute.order.expert?.username || '').toLowerCase().includes(query)
   );
 };
 

@@ -84,36 +84,6 @@ export const useAdminMutations = () => {
   });
 
   /**
-   * Мутация для создания нового партнера (если потребуется)
-   */
-  const createPartnerMutation = useMutation({
-    mutationFn: adminApi.createPartner,
-    onSuccess: () => {
-      message.success('Партнер создан');
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PARTNERS });
-    },
-    onError: (error: any) => {
-      console.error('Error creating partner:', error);
-      message.error(error?.response?.data?.message || 'Ошибка создания партнера');
-    },
-  });
-
-  /**
-   * Мутация для удаления партнера (если потребуется)
-   */
-  const deletePartnerMutation = useMutation({
-    mutationFn: adminApi.deletePartner,
-    onSuccess: () => {
-      message.success('Партнер удален');
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PARTNERS });
-    },
-    onError: (error: any) => {
-      console.error('Error deleting partner:', error);
-      message.error(error?.response?.data?.message || 'Ошибка удаления партнера');
-    },
-  });
-
-  /**
    * Универсальная функция для обновления кэша
    */
   const invalidateQueries = (queryKeys?: string[][]) => {
@@ -134,34 +104,24 @@ export const useAdminMutations = () => {
     // Мутации для начислений
     markEarningPaid: markEarningPaidMutation.mutate,
     markEarningPaidAsync: markEarningPaidMutation.mutateAsync,
-    isMarkingEarningPaid: markEarningPaidMutation.isLoading,
+    isMarkingEarningPaid: markEarningPaidMutation.isPending,
 
     // Мутации для партнеров
     updatePartner: updatePartnerMutation.mutate,
     updatePartnerAsync: updatePartnerMutation.mutateAsync,
-    isUpdatingPartner: updatePartnerMutation.isLoading,
-
-    createPartner: createPartnerMutation.mutate,
-    createPartnerAsync: createPartnerMutation.mutateAsync,
-    isCreatingPartner: createPartnerMutation.isLoading,
-
-    deletePartner: deletePartnerMutation.mutate,
-    deletePartnerAsync: deletePartnerMutation.mutateAsync,
-    isDeletingPartner: deletePartnerMutation.isLoading,
+    isUpdatingPartner: updatePartnerMutation.isPending,
 
     // Мутации для споров
     assignArbitrator: assignArbitratorMutation.mutate,
     assignArbitratorAsync: assignArbitratorMutation.mutateAsync,
-    isAssigningArbitrator: assignArbitratorMutation.isLoading,
+    isAssigningArbitrator: assignArbitratorMutation.isPending,
 
     // Утилиты
     invalidateQueries,
     
     // Общее состояние загрузки
-    isLoading: markEarningPaidMutation.isLoading || 
-               updatePartnerMutation.isLoading || 
-               assignArbitratorMutation.isLoading ||
-               createPartnerMutation.isLoading ||
-               deletePartnerMutation.isLoading,
+    isLoading: markEarningPaidMutation.isPending || 
+               updatePartnerMutation.isPending || 
+               assignArbitratorMutation.isPending,
   };
 };

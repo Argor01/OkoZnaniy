@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout, Button, Typography, Space, message, Modal, Result, Spin, Menu } from 'antd';
 import {
@@ -53,11 +53,7 @@ const ArbitratorDashboard: React.FC = () => {
   }, [newClaimsData]);
 
   // Проверка аутентификации и роли
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
       setLoading(false);
@@ -82,7 +78,11 @@ const ArbitratorDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const handleLogout = () => {
     Modal.confirm({

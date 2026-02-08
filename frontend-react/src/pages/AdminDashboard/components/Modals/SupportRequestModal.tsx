@@ -13,8 +13,10 @@ import {
   Upload,
   message,
   Tooltip,
-  Badge
+  Badge,
+  type UploadProps
 } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import { 
   UserOutlined, 
   ClockCircleOutlined, 
@@ -154,19 +156,21 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
     }
   };
 
-  const uploadProps = {
-    beforeUpload: (file: File) => {
-      setAttachments(prev => [...prev, file]);
+  const uploadProps: UploadProps = {
+    beforeUpload: (file) => {
+      setAttachments((prev) => [...prev, file as unknown as File]);
       return false;
     },
-    onRemove: (file: File) => {
-      setAttachments(prev => prev.filter(f => f !== file));
+    onRemove: (file) => {
+      const original = (file as UploadFile).originFileObj;
+      if (!original) return;
+      setAttachments((prev) => prev.filter((f) => f !== original));
     },
-    fileList: attachments.map(file => ({
+    fileList: attachments.map((file) => ({
       uid: file.name,
       name: file.name,
-      status: 'done' as const
-    }))
+      status: 'done' as const,
+    })),
   };
 
   return (
@@ -246,7 +250,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
           {request.tags.length > 0 && (
             <div className={styles.tags}>
               {request.tags.map(tag => (
-                <Tag key={tag} size="small">
+                <Tag key={tag}>
                   {tag}
                 </Tag>
               ))}

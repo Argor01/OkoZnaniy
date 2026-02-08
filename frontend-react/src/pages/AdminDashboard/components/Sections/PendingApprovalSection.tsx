@@ -567,7 +567,6 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
           </div>
           <Tag 
             color={getEscalationColor(record.escalation_level)}
-            size="small"
           >
             Ур. {record.escalation_level}
           </Tag>
@@ -942,7 +941,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
         </Form>
       </Modal>
 
-      <style jsx>{`
+      <style>{`
         .urgent-row {
           background-color: #fff2f0 !important;
         }

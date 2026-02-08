@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -99,10 +99,9 @@ const Reviews: React.FC = () => {
   const prevRef = useRef<HTMLButtonElement | null>(null);
   const nextRef = useRef<HTMLButtonElement | null>(null);
   const paginationRef = useRef<HTMLDivElement | null>(null);
-  const swiperRef = useRef<SwiperInstance | null>(null);
+  const [swiper, setSwiper] = useState<SwiperInstance | null>(null);
 
   useEffect(() => {
-    const swiper = swiperRef.current;
     if (!swiper) return;
 
     // Инициализация navigation
@@ -126,7 +125,7 @@ const Reviews: React.FC = () => {
       swiper.pagination.init();
       swiper.pagination.update();
     }
-  }, [prevRef.current, nextRef.current, paginationRef.current]);
+  }, [swiper]);
 
   return (
     <section className="reviews" id="reviews">
@@ -148,7 +147,7 @@ const Reviews: React.FC = () => {
               640: { slidesPerView: 2 },
               1024: { slidesPerView: 3 },
             }}
-            onSwiper={(instance) => (swiperRef.current = instance)}
+            onSwiper={setSwiper}
             className="swiper"
           >
             {reviews.map((review) => (

@@ -58,17 +58,17 @@ const GeneralStatistics: React.FC = () => {
   }
 
   // Извлекаем данные из API
-  const totalTurnover = kpiData?.kpi?.total_turnover || 0;
-  const turnoverChange = kpiData?.changes?.turnover_change || 0;
-  const netProfit = kpiData?.kpi?.net_profit || 0;
-  const profitChange = kpiData?.changes?.profit_change || 0;
-  const activeOrders = kpiData?.kpi?.active_orders || 0;
-  const ordersChange = kpiData?.changes?.orders_change || 0;
-  const averageCheck = kpiData?.kpi?.average_check || 0;
-  const averageCheckChange = kpiData?.changes?.average_check_change || 0;
-  const totalClients = kpiData?.kpi?.total_clients || 0;
-  const totalExperts = kpiData?.kpi?.total_experts || 0;
-  const totalPartners = kpiData?.kpi?.total_partners || 0;
+  const totalTurnover = kpiData?.total_turnover ?? kpiData?.totalTurnover ?? 0;
+  const turnoverChange = kpiData?.turnover_change ?? kpiData?.turnoverChange ?? 0;
+  const netProfit = kpiData?.net_profit ?? kpiData?.netProfit ?? 0;
+  const profitChange = kpiData?.profit_change ?? kpiData?.profitChange ?? 0;
+  const activeOrders = kpiData?.active_orders ?? kpiData?.activeOrders ?? 0;
+  const ordersChange = kpiData?.orders_change ?? kpiData?.ordersChange ?? 0;
+  const averageCheck = kpiData?.average_check ?? kpiData?.averageCheck ?? kpiData?.averageOrderValue ?? 0;
+  const averageCheckChange = kpiData?.average_check_change ?? kpiData?.averageCheckChange ?? 0;
+  const totalClients = kpiData?.total_clients ?? kpiData?.totalClients ?? 0;
+  const totalExperts = kpiData?.total_experts ?? kpiData?.totalExperts ?? 0;
+  const totalPartners = kpiData?.total_partners ?? kpiData?.totalPartners ?? 0;
 
   const handleQuickSelect = (type: string) => {
     const today = dayjs();

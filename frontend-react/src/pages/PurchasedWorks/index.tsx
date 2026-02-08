@@ -103,7 +103,7 @@ const PurchasedWorks: React.FC = () => {
       
       <Filters
         filters={filters}
-        onFiltersChange={setFilters}
+        onFilterChange={(next) => setFilters(next)}
         subjects={subjects}
         workTypes={workTypes}
       />
@@ -115,7 +115,7 @@ const PurchasedWorks: React.FC = () => {
           works={filteredWorks}
           loading={isLoading}
           onDownload={handleDownload}
-          onViewDetails={handleViewDetails}
+          onView={handleViewDetails}
         />
       )}
     </div>

@@ -15,6 +15,8 @@ export interface UserProfile {
   portfolio_url?: string;
   is_verified?: boolean;
   date_joined?: string;
+  balance?: string;
+  frozen_balance?: string;
 }
 
 export interface Notification {

@@ -41,6 +41,7 @@ export interface FiltersState {
   search?: string;
   category?: string;
   subject?: string;
+  workType?: string;
   sortBy?: string;
 }
 

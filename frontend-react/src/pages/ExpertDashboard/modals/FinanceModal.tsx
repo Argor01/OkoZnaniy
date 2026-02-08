@@ -8,8 +8,8 @@ const { Text } = Typography;
 const { RangePicker } = DatePicker;
 
 type FinanceProfile = {
-  balance?: number;
-  frozen_balance?: number;
+  balance?: number | string;
+  frozen_balance?: number | string;
 };
 
 interface FinanceModalProps {
@@ -159,7 +159,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
                 Текущий баланс:
               </Text>
               <Text strong style={{ fontSize: isMobile ? 28 : 32, color: '#1f2937', display: 'block', marginBottom: isMobile ? 12 : 16 }}>
-                {formatCurrency(profile?.balance || 0)}
+                {formatCurrency(Number(profile?.balance ?? 0))}
               </Text>
               <Button 
                 type="primary"
@@ -186,7 +186,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Доступно к выводу:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                {formatCurrency(profile?.balance || 0)}
+                {formatCurrency(Number(profile?.balance ?? 0))}
               </Text>
 
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
@@ -200,7 +200,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
                 <Text style={{ fontSize: 13, color: '#6b7280' }}>Заблокировано:</Text>
               </div>
               <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
-                {formatCurrency(profile?.frozen_balance || 0)}
+                {formatCurrency(Number(profile?.frozen_balance ?? 0))}
               </Text>
 
               <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>

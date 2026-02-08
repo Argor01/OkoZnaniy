@@ -1,16 +1,17 @@
 import React from 'react';
 import { Row, Col, Empty, Spin } from 'antd';
 import PurchasedWorkCard from '../PurchasedWorkCard';
-import { Work } from '../../types';
+import { PurchasedWork } from '../../types';
 import styles from './WorksList.module.css';
 
 interface WorksListProps {
-  works: Work[];
+  works: PurchasedWork[];
   loading?: boolean;
   onDownload: (id: number) => void;
+  onView?: (id: number) => void;
 }
 
-const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload }) => {
+const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload, onView }) => {
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -32,7 +33,7 @@ const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload }) => 
     <Row gutter={[16, 16]} className={styles.grid}>
       {works.map((work) => (
         <Col key={work.id} xs={24} sm={12} md={8} lg={6}>
-          <PurchasedWorkCard work={work} onDownload={onDownload} />
+          <PurchasedWorkCard work={work} onDownload={onDownload} onView={onView} />
         </Col>
       ))}
     </Row>

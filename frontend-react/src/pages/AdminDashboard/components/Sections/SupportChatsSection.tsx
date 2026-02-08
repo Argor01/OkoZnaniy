@@ -361,10 +361,10 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span>{chat.client.first_name} {chat.client.last_name}</span>
                           <div>
-                            <Tag color={getStatusColor(chat.status)} size="small">
+                            <Tag color={getStatusColor(chat.status)}>
                               {getStatusText(chat.status)}
                             </Tag>
-                            <Tag color={getPriorityColor(chat.priority)} size="small">
+                            <Tag color={getPriorityColor(chat.priority)}>
                               {getPriorityText(chat.priority)}
                             </Tag>
                           </div>

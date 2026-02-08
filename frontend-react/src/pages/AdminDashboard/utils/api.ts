@@ -2,7 +2,9 @@
  * API утилиты для админ-панели
  */
 
-import { User, Order, Partner, Dispute, AdminStats } from '../types';
+import type { User } from '../../../api/auth';
+import type { Order } from '../../../api/orders';
+import type { Partner, Dispute, AdminStats } from '../types';
 
 const API_BASE = '/api/admin';
 

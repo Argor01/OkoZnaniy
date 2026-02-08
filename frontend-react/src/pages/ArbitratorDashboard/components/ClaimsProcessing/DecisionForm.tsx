@@ -108,7 +108,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
             min={1}
             max={orderAmount}
             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-            parser={(value) => value!.replace(/\s?/g, '')}
+            parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
             suffix="₽"
           />
         </Form.Item>

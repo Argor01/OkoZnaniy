@@ -585,7 +585,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               @{record.user.username}
             </Text>
             <div style={{ marginTop: 2 }}>
-              <Tag size="small" color={getUserTypeColor(record.user.user_type)}>
+              <Tag color={getUserTypeColor(record.user.user_type)}>
                 {record.user.user_type === 'student' ? 'Студент' : 
                  record.user.user_type === 'expert' ? 'Эксперт' : 'Партнер'}
               </Tag>
@@ -625,7 +625,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             SLA: {dayjs(record.sla_deadline).format('HH:mm')}
           </div>
           {record.escalation_level > 0 && (
-            <Tag size="small" color="orange">
+            <Tag color="orange">
               Ур. {record.escalation_level}
             </Tag>
           )}
@@ -639,12 +639,12 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       render: (record: CustomerRequest) => (
         <div>
           {record.tags.slice(0, 2).map(tag => (
-            <Tag key={tag} size="small" style={{ marginBottom: 2 }}>
+            <Tag key={tag} style={{ marginBottom: 2 }}>
               {tag}
             </Tag>
           ))}
           {record.tags.length > 2 && (
-            <Tag size="small" color="blue">
+            <Tag color="blue">
               +{record.tags.length - 2}
             </Tag>
           )}
@@ -1109,7 +1109,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </Form>
       </Modal>
 
-      <style jsx>{`
+      <style>{`
         .overdue-row {
           background-color: #fff2f0 !important;
         }

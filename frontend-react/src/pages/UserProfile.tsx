@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar } from 'antd';
-import { ArrowLeftOutlined, UserOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertReview } from '../api/experts';
 import { apiClient } from '../api/client';
 import dayjs from 'dayjs';

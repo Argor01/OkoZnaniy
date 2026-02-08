@@ -572,7 +572,6 @@ const OrderDetail: React.FC = () => {
          orderId={order.id}
          orderTitle={order.title}
          orderBudget={order.budget ? Number(order.budget) : undefined}
-         onOpenChat={(chatId) => navigate(`/messages?chat=${chatId}`)}
        />
     </div>
   );

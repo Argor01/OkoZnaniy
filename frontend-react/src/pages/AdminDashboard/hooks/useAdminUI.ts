@@ -242,22 +242,6 @@ export const useAdminUI = () => {
     setDrawerVisible(false);
   }, []);
 
-  /**
-   * Сброс всех состояний UI
-   */
-  const resetUI = useCallback(() => {
-    setSelectedMenu('overview');
-    setOpenKeys([]);
-    setDrawerVisible(false);
-    closePartnerModals();
-    closeDisputeModals();
-    // 🆕 Сброс новых модальных окон
-    closeRequestModal();
-    closeAdminChatModal();
-    closeCreateChatModal();
-    closeInternalCommModal();
-  }, [closePartnerModals, closeDisputeModals]);
-
   // 🆕 Обработчики для модальных окон запросов
   const handleViewRequest = useCallback((request: CustomerRequest) => {
     setSelectedCustomerRequest(request);
@@ -297,6 +281,28 @@ export const useAdminUI = () => {
   const closeInternalCommModal = useCallback(() => {
     setInternalCommModalVisible(false);
   }, []);
+
+  /**
+   * Сброс всех состояний UI
+   */
+  const resetUI = useCallback(() => {
+    setSelectedMenu('overview');
+    setOpenKeys([]);
+    setDrawerVisible(false);
+    closePartnerModals();
+    closeDisputeModals();
+    closeRequestModal();
+    closeAdminChatModal();
+    closeCreateChatModal();
+    closeInternalCommModal();
+  }, [
+    closePartnerModals,
+    closeDisputeModals,
+    closeRequestModal,
+    closeAdminChatModal,
+    closeCreateChatModal,
+    closeInternalCommModal,
+  ]);
 
   return {
     // Состояние меню

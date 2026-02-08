@@ -123,8 +123,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return null;
   })();
 
+  const selectedChatMessages = selectedChat?.messages;
+  const selectedChatOrderId = selectedChat?.order_id;
+  const selectedChatOrder = (selectedChat as { order?: unknown } | null)?.order;
+
   const computedOrderIds = useMemo(() => {
-    const messages = selectedChat?.messages;
+    const messages = selectedChatMessages;
     const ids: number[] = [];
     if (Array.isArray(messages)) {
       for (const m of messages) {
@@ -135,12 +139,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         if (!ids.includes(id)) ids.push(id);
       }
     }
-    const chatOrderId = toPositiveNumber(selectedChat?.order_id);
+    const chatOrderId = toPositiveNumber(selectedChatOrderId);
     if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
-    const chatOrder = toPositiveNumber((selectedChat as { order?: unknown } | null)?.order);
+    const chatOrder = toPositiveNumber(selectedChatOrder);
     if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
     return ids;
-  }, [selectedChat?.messages, selectedChat?.order_id, (selectedChat as { order?: unknown } | null)?.order]);
+  }, [selectedChatMessages, selectedChatOrderId, selectedChatOrder]);
 
   useEffect(() => {
     if (!visible) return;
@@ -453,6 +457,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     })();
 
   const remainingLabel = useMemo(() => {
+    void deadlineTick;
     if (isClosedOrder) return '';
     if (!order?.deadline) return '';
     return formatRemaining(order.deadline);

@@ -27,8 +27,8 @@ const MonthlyTurnover: React.FC = () => {
 
   // Получаем данные из API
   const { data: turnoverData, isLoading } = useQuery({
-    queryKey: ['monthly-turnover', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
-    queryFn: () => getMonthlyTurnover(dateRange[0].format('YYYY-MM'), dateRange[1].format('YYYY-MM')),
+    queryKey: ['monthly-turnover', dateRange[0].format('YYYY-MM')],
+    queryFn: () => getMonthlyTurnover(dateRange[0].format('YYYY-MM')),
   });
 
   useEffect(() => {
