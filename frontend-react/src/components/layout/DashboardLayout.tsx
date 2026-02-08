@@ -3,6 +3,7 @@ import { Layout, Modal, message, Spin } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '../../api/auth';
+import { chatApi } from '../../api/chat';
 import DashboardHeader from '../common/DashboardHeader';
 import Sidebar from './Sidebar';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -54,6 +55,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Получаем баланс из профиля пользователя
   const balance = userProfile?.balance ? parseFloat(userProfile.balance) : 0.00;
+  const supportUserId = (() => {
+    const raw = localStorage.getItem('support_user_id');
+    const parsed = raw ? Number(raw) : 1;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  })();
 
   const handleLogout = () => {
     Modal.confirm({
@@ -146,6 +152,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return '';
   };
 
+  const isExpert = userProfile?.role === 'expert';
+  const isClient = userProfile?.role === 'client';
+  const shouldShowHeader = isExpert || isClient;
+  const shouldPollMessages = Boolean(userProfile && shouldShowHeader);
+
+  const { data: unreadMessages = 0 } = useQuery({
+    queryKey: ['unread-messages-count'],
+    queryFn: () => chatApi.getUnreadCount(),
+    enabled: shouldPollMessages,
+    refetchInterval: 5000,
+    staleTime: 2000,
+  });
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -153,10 +172,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
     );
   }
-
-  const isExpert = userProfile?.role === 'expert';
-  const isClient = userProfile?.role === 'client';
-  const shouldShowHeader = isExpert || isClient;
 
   return (
     <DashboardContext.Provider value={contextValue}>
@@ -170,10 +185,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               role: userProfile.role,
               balance: balance
             } : undefined}
-            unreadMessages={0}
+            unreadMessages={unreadMessages}
             unreadNotifications={unreadNotifications}
             onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
             onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
+            onSupportClick={() => {
+              closeAllModals();
+              setSelectedUserIdForChat(supportUserId);
+              setMessageModalVisible(true);
+            }}
             onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
             onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
             onLogout={handleLogout}

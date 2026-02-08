@@ -156,7 +156,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
             <List.Item.Meta
               avatar={
                 <Avatar
-                  size={isMobile ? 40 : 48}
+                  size={isMobile ? 80 : 96}
                   icon={<UserOutlined />}
                   style={{
                     backgroundColor: isCurrentUser ? '#1890ff' : '#1890ff',

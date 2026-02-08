@@ -21,9 +21,12 @@ class SimpleUserSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request:
                 url = request.build_absolute_uri(obj.avatar.url)
-                # Принудительно используем HTTPS
                 if url.startswith('http://'):
-                    url = url.replace('http://', 'https://', 1)
+                    forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO')
+                    if forwarded_proto:
+                        forwarded_proto = forwarded_proto.split(',')[0].strip().lower()
+                    if request.is_secure() or forwarded_proto == 'https':
+                        url = url.replace('http://', 'https://', 1)
                 return url
             return obj.avatar.url
         return None
@@ -52,7 +55,14 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.avatar:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.avatar.url)
+                url = request.build_absolute_uri(obj.avatar.url)
+                if url.startswith('http://'):
+                    forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO')
+                    if forwarded_proto:
+                        forwarded_proto = forwarded_proto.split(',')[0].strip().lower()
+                    if request.is_secure() or forwarded_proto == 'https':
+                        url = url.replace('http://', 'https://', 1)
+                return url
             # Если нет request в контексте, возвращаем относительный путь
             return obj.avatar.url
         return None

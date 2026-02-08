@@ -103,14 +103,177 @@ export const expertsApi = {
     const { data } = await apiClient.get('/experts/ratings/', { params });
     const raw: unknown = (data as { results?: unknown })?.results ?? data;
     const items: unknown[] = Array.isArray(raw) ? raw : [];
-    return items.map((r) => {
-      const rr = r as Partial<ExpertReview> & { comment?: unknown; text?: unknown };
-      const comment = typeof rr.comment === 'string' ? rr.comment : undefined;
-      const text = typeof rr.text === 'string' ? rr.text : undefined;
+    const debugEnabled = import.meta.env.DEV && localStorage.getItem('debug_reviews') === '1';
+
+    const extractNonEmptyString = (value: unknown): string | undefined => {
+      if (typeof value !== 'string') return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    };
+
+    const extractAvatarString = (value: unknown): string | undefined => {
+      const direct = extractNonEmptyString(value);
+      if (direct) return direct;
+      if (!value || typeof value !== 'object') return undefined;
+      const obj = value as Record<string, unknown>;
+      return extractNonEmptyString(
+        obj.url ??
+          obj.path ??
+          obj.src ??
+          obj.file ??
+          obj.original ??
+          obj.absolute_url ??
+          obj.absoluteUrl ??
+          obj.avatar ??
+          obj.avatar_url ??
+          obj.avatarUrl
+      );
+    };
+
+    const baseReviews = items.map((r) => {
+      const src = r as Record<string, unknown>;
+
+      const maybeClient = src.client;
+      const maybeUser =
+        (src.client_user as Record<string, unknown> | undefined) ??
+        (src.client_details as Record<string, unknown> | undefined) ??
+        (src.client_info as Record<string, unknown> | undefined) ??
+        (src.user as Record<string, unknown> | undefined) ??
+        (src.author as Record<string, unknown> | undefined) ??
+        (src.reviewer as Record<string, unknown> | undefined);
+
+      const clientObject: Record<string, unknown> | undefined =
+        maybeClient && typeof maybeClient === 'object' ? (maybeClient as Record<string, unknown>) : maybeUser;
+
+      const clientIdRaw =
+        (clientObject?.id as unknown) ??
+        (clientObject?.pk as unknown) ??
+        (typeof maybeClient === 'number' ? maybeClient : undefined) ??
+        (src.client_id as unknown) ??
+        (src.user_id as unknown);
+
+      const clientId = typeof clientIdRaw === 'number' ? clientIdRaw : Number(clientIdRaw);
+
+      const firstNameRaw =
+        (clientObject?.first_name as unknown) ??
+        (clientObject?.firstName as unknown) ??
+        (src.client_first_name as unknown) ??
+        (src.user_first_name as unknown);
+      const lastNameRaw =
+        (clientObject?.last_name as unknown) ??
+        (clientObject?.lastName as unknown) ??
+        (src.client_last_name as unknown) ??
+        (src.user_last_name as unknown);
+
+      const usernameRaw =
+        (clientObject?.username as unknown) ??
+        (clientObject?.login as unknown) ??
+        (src.client_username as unknown) ??
+        (src.user_username as unknown);
+
+      const avatarRaw =
+        (clientObject?.avatar as unknown) ??
+        (clientObject?.avatar_url as unknown) ??
+        (clientObject?.avatarUrl as unknown) ??
+        (src.client_avatar as unknown) ??
+        (src.client_avatar_url as unknown) ??
+        (src.avatar as unknown) ??
+        (src.avatar_url as unknown);
+
+      const client = {
+        id: Number.isFinite(clientId) ? clientId : 0,
+        username: typeof usernameRaw === 'string' ? usernameRaw : undefined,
+        first_name: typeof firstNameRaw === 'string' ? firstNameRaw : '',
+        last_name: typeof lastNameRaw === 'string' ? lastNameRaw : '',
+        avatar: extractAvatarString(avatarRaw),
+      };
+
+      const commentRaw = src.comment;
+      const textRaw = src.text;
+      const comment = typeof commentRaw === 'string' ? commentRaw : undefined;
+      const text = typeof textRaw === 'string' ? textRaw : undefined;
+
       return {
-        ...(rr as ExpertReview),
+        ...(src as unknown as ExpertReview),
+        client,
         comment,
         text: text ?? comment ?? '',
+      };
+    });
+
+    const idsToHydrate = Array.from(
+      new Set(
+        baseReviews
+          .map((r) => r.client?.id)
+          .filter((id): id is number => typeof id === 'number' && id > 0)
+          .filter((id) => baseReviews.some((r) => r.client?.id === id && !r.client?.avatar))
+      )
+    );
+
+    if (debugEnabled) {
+      (window as unknown as { __debugReviews?: unknown }).__debugReviews = {
+        expertId,
+        firstRaw: items[0],
+        firstMapped: baseReviews[0],
+        idsToHydrate,
+      };
+    }
+
+    if (idsToHydrate.length === 0) return baseReviews;
+
+    const hydrated = await Promise.all(
+      idsToHydrate.map(async (id) => {
+        try {
+          const { data: u } = await apiClient.get(`/users/${id}/`);
+          return [id, u as Record<string, unknown>] as const;
+        } catch (e) {
+          if (debugEnabled) {
+            (window as unknown as { __debugReviewsUserHydration?: unknown }).__debugReviewsUserHydration = {
+              ...(window as unknown as { __debugReviewsUserHydration?: Record<string, unknown> }).__debugReviewsUserHydration,
+              [id]: e,
+            };
+          }
+          return null;
+        }
+      })
+    );
+
+    const usersById = new Map<number, Record<string, unknown>>();
+    hydrated.forEach((pair) => {
+      if (pair) usersById.set(pair[0], pair[1]);
+    });
+
+    if (usersById.size === 0) return baseReviews;
+
+    return baseReviews.map((review) => {
+      const u = usersById.get(review.client.id);
+      if (!u) return review;
+
+      const profile =
+        (u.profile as Record<string, unknown> | undefined) ??
+        (u.user_profile as Record<string, unknown> | undefined) ??
+        (u.details as Record<string, unknown> | undefined);
+
+      const avatarRaw =
+        (u.avatar as unknown) ??
+        (u.avatar_url as unknown) ??
+        (u.avatarUrl as unknown) ??
+        (profile?.avatar as unknown) ??
+        (profile?.avatar_url as unknown) ??
+        (profile?.avatarUrl as unknown);
+      const usernameRaw = (u.username as unknown) ?? (u.login as unknown);
+      const firstNameRaw = (u.first_name as unknown) ?? (u.firstName as unknown);
+      const lastNameRaw = (u.last_name as unknown) ?? (u.lastName as unknown);
+
+      return {
+        ...review,
+        client: {
+          ...review.client,
+          avatar: review.client.avatar || extractAvatarString(avatarRaw),
+          username: review.client.username || (typeof usernameRaw === 'string' ? usernameRaw : undefined),
+          first_name: review.client.first_name || (typeof firstNameRaw === 'string' ? firstNameRaw : ''),
+          last_name: review.client.last_name || (typeof lastNameRaw === 'string' ? lastNameRaw : ''),
+        },
       };
     });
   },

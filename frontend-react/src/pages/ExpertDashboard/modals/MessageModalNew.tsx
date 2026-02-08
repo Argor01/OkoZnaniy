@@ -15,7 +15,6 @@ import {
   FileOutlined,
   FileTextOutlined,
   CloseCircleOutlined,
-  ClockCircleOutlined,
   UploadOutlined
 } from '@ant-design/icons';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
@@ -103,7 +102,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [reviewComment, setReviewComment] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
-  const toPositiveNumber = (raw: unknown): number | null => {
+  const toPositiveNumber = useCallback((raw: unknown): number | null => {
     const n =
       typeof raw === 'number'
         ? raw
@@ -111,7 +110,57 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           ? Number(raw)
           : NaN;
     return Number.isFinite(n) && n > 0 ? n : null;
-  };
+  }, []);
+
+  const extractOrderIdsFromChat = useCallback((chat: ChatDetail): number[] => {
+    const ids: number[] = [];
+    const messages = chat?.messages;
+    if (Array.isArray(messages)) {
+      for (const m of messages) {
+        if (m?.message_type !== 'offer') continue;
+        const id = toPositiveNumber((m as { offer_data?: { order_id?: unknown } }).offer_data?.order_id);
+        if (!id) continue;
+        if ((m as { offer_data?: { status?: unknown } }).offer_data?.status === 'rejected') continue;
+        if (!ids.includes(id)) ids.push(id);
+      }
+    }
+    const chatOrderId = toPositiveNumber((chat as unknown as { order_id?: unknown }).order_id);
+    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+    const chatOrder = toPositiveNumber((chat as unknown as { order?: unknown }).order);
+    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    return ids;
+  }, [toPositiveNumber]);
+
+  const hydrateClosedOrdersForChat = useCallback(async (chat: ChatDetail): Promise<void> => {
+    const chatId = chat?.id;
+    if (!chatId) return;
+
+    const orderIds = extractOrderIdsFromChat(chat);
+    if (orderIds.length === 0) {
+      setClosedOrderIdsByChatId((prev) => (Object.prototype.hasOwnProperty.call(prev, chatId) ? prev : { ...prev, [chatId]: [] }));
+      setOrderIdsByChatId((prev) => (Object.prototype.hasOwnProperty.call(prev, chatId) ? prev : { ...prev, [chatId]: [] }));
+      return;
+    }
+
+    const closedStatuses = new Set(['completed', 'cancelled', 'canceled', 'done']);
+    const results = await Promise.all(
+      orderIds.map(async (id) => {
+        try {
+          const data = await ordersApi.getById(id);
+          return { id, status: (data as { status?: unknown } | undefined)?.status };
+        } catch {
+          return { id, status: undefined };
+        }
+      })
+    );
+    const closedIds = results
+      .filter((r) => typeof r.status === 'string' && closedStatuses.has(r.status))
+      .map((r) => r.id);
+    const openIds = closedIds.length === 0 ? orderIds : orderIds.filter((id) => !closedIds.includes(id));
+
+    setClosedOrderIdsByChatId((prev) => ({ ...prev, [chatId]: closedIds }));
+    setOrderIdsByChatId((prev) => ({ ...prev, [chatId]: openIds }));
+  }, [extractOrderIdsFromChat]);
 
   const offerToShow = (() => {
     const messages = selectedChat?.messages;
@@ -144,17 +193,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const chatOrder = toPositiveNumber(selectedChatOrder);
     if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
     return ids;
-  }, [selectedChatMessages, selectedChatOrderId, selectedChatOrder]);
+  }, [selectedChatMessages, selectedChatOrderId, selectedChatOrder, toPositiveNumber]);
 
   useEffect(() => {
     if (!visible) return;
     if (!selectedChat?.id) return;
     if (computedOrderIds.length === 0) return;
+    const closed = closedOrderIdsByChatId[selectedChat.id];
+    const closedSet = new Set(Array.isArray(closed) ? closed : []);
     setOrderIdsByChatId((prev) => {
       const prevIds = prev[selectedChat.id] || [];
       let changed = false;
       const nextIds = [...prevIds];
       for (const id of computedOrderIds) {
+        if (closedSet.has(id)) continue;
         if (!nextIds.includes(id)) {
           nextIds.push(id);
           changed = true;
@@ -163,7 +215,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       if (!changed) return prev;
       return { ...prev, [selectedChat.id]: nextIds };
     });
-  }, [visible, selectedChat?.id, computedOrderIds]);
+  }, [visible, selectedChat?.id, computedOrderIds, closedOrderIdsByChatId]);
 
   const orderIdsForTabs = useMemo(() => {
     if (!selectedChat?.id) return computedOrderIds;
@@ -210,6 +262,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const loadChatDetail = useCallback(async (chatId: number) => {
     try {
       const data = await chatApi.getById(chatId);
+      await hydrateClosedOrdersForChat(data);
       setSelectedChat(data);
       await chatApi.markAsRead(chatId);
       setChatList((prev) => prev.map((chat) =>
@@ -218,12 +271,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch (error: unknown) {
       antMessage.error('Не удалось загрузить чат');
     }
-  }, []);
+  }, [hydrateClosedOrdersForChat]);
 
   const loadOrCreateChatByOrderAndUser = useCallback(async (orderId: number, userId: number) => {
     setLoading(true);
     try {
       const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
+      await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
       await loadChats();
     } catch (error: unknown) {
@@ -231,12 +285,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [loadChats]);
+  }, [hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
     setLoading(true);
     try {
       const chatData = await chatApi.getOrCreateByUser(userId);
+      await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
       await loadChats();
       antMessage.success('Чат открыт');
@@ -245,7 +300,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [loadChats]);
+  }, [hydrateClosedOrdersForChat, loadChats]);
 
   useEffect(() => {
     if (visible) {

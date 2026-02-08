@@ -198,7 +198,7 @@ const ExpertDashboard: FC = () => {
               ...(userProfile?.role === 'expert' ? [{
                 key: 'reviews',
                 label: 'Отзывы',
-                children: <ReviewsTab isMobile={isMobile} />,
+                children: <ReviewsTab isMobile={isMobile} expertId={userProfile?.id} />,
               }] : []),
               {
                 key: 'orders',

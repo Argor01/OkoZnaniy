@@ -42,7 +42,8 @@ export const getMediaUrl = (path: string | undefined | null): string | undefined
     return path;
   }
   // Иначе добавляем базовый URL
-  return `${API_BASE_URL}${path}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${normalizedPath}`;
 };
 
 export default {

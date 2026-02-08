@@ -157,7 +157,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                   />
                 )}
                 <Avatar
-                  size={40}
+                  size={80}
                   src={selectedChat.userAvatar}
                   icon={<UserOutlined />}
                 />

@@ -309,9 +309,9 @@ const ExpertProfile: React.FC = () => {
                     style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
                   >
                     <Avatar
-                      size={16}
+                      size={32}
                       src={getMediaUrl(review.client.avatar)}
-                      icon={<UserOutlined style={{ fontSize: 10 }} />}
+                      icon={<UserOutlined style={{ fontSize: 16 }} />}
                     />
                     <div>
                       <Text strong style={{ fontSize: 15, lineHeight: 1.2 }}>

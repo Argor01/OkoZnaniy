@@ -652,7 +652,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           <div style={{ marginBottom: 8 }}>
             <Text strong style={{ fontSize: '11px' }}>Клиент:</Text>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Avatar size="small" icon={<UserOutlined />} />
+              <Avatar size={48} icon={<UserOutlined />} />
               <span style={{ fontSize: '12px' }}>
                 {record.user.first_name} {record.user.last_name}
               </span>
@@ -662,7 +662,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             <div>
               <Text strong style={{ fontSize: '11px' }}>Эксперт:</Text>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Avatar size="small" icon={<UserOutlined />} />
+                <Avatar size={48} icon={<UserOutlined />} />
                 <span style={{ fontSize: '12px' }}>
                   {record.expert.first_name} {record.expert.last_name}
                 </span>

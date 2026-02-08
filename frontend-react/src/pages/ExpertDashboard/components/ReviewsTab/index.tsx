@@ -12,13 +12,15 @@ const { Text, Paragraph } = Typography;
 
 interface ReviewsTabProps {
   isMobile: boolean;
+  expertId?: number;
 }
 
-const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile }) => {
+const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
   const navigate = useNavigate();
   const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ['expert-reviews'],
-    queryFn: () => expertsApi.getReviews(),
+    queryKey: ['expert-reviews', expertId],
+    queryFn: () => expertsApi.getReviews(expertId),
+    enabled: !!expertId,
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
@@ -42,46 +44,43 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile }) => {
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
           {reviews.map((review: ExpertReview) => (
-            <div key={review.id} className={styles.orderCard}>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => navigate(`/user/${review.client.id}`)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
-                    }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
-                  >
-                    <Avatar
-                      size={24}
-                      src={getMediaUrl(review.client.avatar)}
-                      icon={<UserOutlined style={{ fontSize: 8 }} />}
-                    />
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <Text strong style={{ fontSize: isMobile ? 14 : 16, lineHeight: 1.2 }}>
-                        @{review.client.username || `user${review.client.id}`}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: 12, lineHeight: 1.2 }}>
-                        {review.client.first_name} {review.client.last_name}
-                      </Text>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Rate disabled value={review.rating} style={{ fontSize: isMobile ? 14 : 16 }} />
+            <div key={review.id} className={`${styles.orderCard} ${styles.reviewCard}`}>
+              <div className={styles.reviewHeaderRow}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/user/${review.client.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
+                  }}
+                  className={styles.reviewUser}
+                >
+                  <Avatar
+                    size={48}
+                    src={getMediaUrl(review.client.avatar)}
+                    icon={<UserOutlined style={{ fontSize: 16 }} />}
+                  />
+                  <div className={styles.reviewUserText}>
+                    <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>
+                      @{review.client.username || `user${review.client.id}`}
+                    </Text>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      {dayjs(review.created_at).format('DD.MM.YYYY')}
+                      {review.client.first_name} {review.client.last_name}
                     </Text>
                   </div>
                 </div>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  Заказ: {review.order?.title}
-                </Text>
+
+                <div className={styles.reviewMeta}>
+                  <Rate disabled value={review.rating} style={{ fontSize: isMobile ? 14 : 16 }} />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {dayjs(review.created_at).format('DD.MM.YYYY')}
+                  </Text>
+                </div>
               </div>
-              <Paragraph style={{ color: '#6b7280', marginBottom: 8 }}>
-                {review.text || review.comment}
-              </Paragraph>
+
+              <div className={styles.reviewOrderLine}>Заказ: {review.order?.title || '—'}</div>
+
+              <Paragraph className={styles.reviewText}>{review.text || review.comment || '—'}</Paragraph>
             </div>
           ))}
         </div>

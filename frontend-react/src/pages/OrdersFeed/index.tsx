@@ -662,7 +662,7 @@ const OrdersFeed: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <Space size={10}>
                   <Avatar 
-                    size={24}
+                    size={48}
                     src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
                     icon={<UserOutlined />}
                     style={{ backgroundColor: '#667eea' }}

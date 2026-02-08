@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Button, Dropdown, Layout, Menu, Space, Typography } from 'antd';
+import { Badge, Button, Dropdown, Layout, Menu, Space, Tooltip, Typography } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -11,6 +11,7 @@ import {
   ShopOutlined,
   FileDoneOutlined,
   PlusOutlined,
+  CustomerServiceOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -31,6 +32,7 @@ interface DashboardHeaderProps {
   unreadNotifications?: number;
   onMessagesClick?: () => void;
   onNotificationsClick?: () => void;
+  onSupportClick?: () => void;
   onBalanceClick?: () => void;
   onProfileClick?: () => void;
   onLogout?: () => void;
@@ -44,6 +46,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   unreadNotifications = 0,
   onMessagesClick,
   onNotificationsClick,
+  onSupportClick,
   onBalanceClick,
   onProfileClick,
   onLogout,
@@ -189,6 +192,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               className={styles.iconButton}
             />
           </Badge>
+
+          <Tooltip title="Поддержка" placement="bottom">
+            <Button
+              type="text"
+              icon={<CustomerServiceOutlined />}
+              onClick={onSupportClick}
+              className={styles.iconButton}
+            />
+          </Tooltip>
 
           {/* Профиль */}
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">

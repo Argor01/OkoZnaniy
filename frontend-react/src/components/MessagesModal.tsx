@@ -447,7 +447,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                   <List.Item.Meta
                     avatar={
                       <Badge count={chat.unreadCount} offset={[-5, 5]}>
-                        <Avatar size={48} icon={<UserOutlined />}>{chat.name[0]}</Avatar>
+                        <Avatar size={40} icon={<UserOutlined />}>{chat.name[0]}</Avatar>
                       </Badge>
                     }
                     title={<div className="chat-name">{chat.name}</div>}
@@ -479,7 +479,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                       className="back-button"
                     />
                     <div className="chat-header-info">
-                      <Avatar size={36} icon={<UserOutlined />}>
+                      <Avatar size={40} icon={<UserOutlined />}>
                         {activeChat?.name?.[0]}
                       </Avatar>
                       <span className="chat-header-name">
@@ -502,7 +502,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
               ) : (
                 <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Avatar size={36} icon={<UserOutlined />}>
+                    <Avatar size={72} icon={<UserOutlined />}>
                       {activeChat?.name?.[0]}
                     </Avatar>
                     <span style={{ fontWeight: 500 }}>{activeChat?.name}</span>
