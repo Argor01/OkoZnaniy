@@ -193,14 +193,61 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             />
           </Badge>
 
-          <Tooltip title="Поддержка" placement="bottom">
+          {/* Поддержка */}
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'support-info',
+                  label: (
+                    <div style={{ padding: '8px 4px', minWidth: 250 }}>
+                      <div style={{ marginBottom: 12 }}>
+                        <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
+                          Служба поддержки
+                        </Text>
+                        <div style={{ marginBottom: 6 }}>
+                          <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                            📞 8 (800) 500-78-57
+                          </Text>
+                        </div>
+                        <div style={{ marginBottom: 6 }}>
+                          <Text style={{ fontSize: 13, color: '#6b7280' }}>
+                            ✉️ b-oko.znaniy@mail.ru
+                          </Text>
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: 4, paddingTop: 8, borderTop: '1px solid #e5e7eb' }}>
+                        <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
+                          График работы
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#6b7280' }}>
+                          Пн-Пт 07:00 - 16:00 (МСК)
+                        </Text>
+                      </div>
+                    </div>
+                  ),
+                  disabled: true,
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  key: 'write-to-support',
+                  label: 'Написать нам',
+                  icon: <MessageOutlined />,
+                  onClick: onSupportClick,
+                },
+              ],
+            }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
             <Button
               type="text"
               icon={<CustomerServiceOutlined />}
-              onClick={onSupportClick}
               className={styles.iconButton}
             />
-          </Tooltip>
+          </Dropdown>
 
           {/* Профиль */}
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">

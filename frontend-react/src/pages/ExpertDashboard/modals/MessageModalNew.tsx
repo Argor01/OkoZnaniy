@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
@@ -15,7 +15,8 @@ import {
   FileOutlined,
   FileTextOutlined,
   CloseCircleOutlined,
-  UploadOutlined
+  UploadOutlined,
+  ExclamationCircleOutlined
 } from '@ant-design/icons';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
 import { formatDistanceToNow } from 'date-fns';
@@ -100,8 +101,27 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewRating, setReviewRating] = useState<number>(5);
   const [reviewComment, setReviewComment] = useState<string>('');
+  const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const [claimText, setClaimText] = useState<string>('');
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+  const [showClaimCategories, setShowClaimCategories] = useState(false);
+  const [selectedClaimCategory, setSelectedClaimCategory] = useState<string>('');
+  const [claimFiles, setClaimFiles] = useState<File[]>([]);
+  const [orderRelevance, setOrderRelevance] = useState<string>(''); // Заказ актуален/не актуален
+  const [refundType, setRefundType] = useState<string>(''); // Тип возврата средств
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Категории претензий
+  const claimCategories = [
+    'Заказ не выполнен',
+    'Заказ выполнен некачественно/частично', 
+    'Заказ не оплачен',
+    'Необоснованный отзыв',
+    'Магазин готовых работ',
+    'Другое'
+  ];
+  
   const toPositiveNumber = useCallback((raw: unknown): number | null => {
     const n =
       typeof raw === 'number'
@@ -685,6 +705,123 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
+  const handleSubmitClaim = async () => {
+    if (!selectedClaimCategory) {
+      antMessage.warning('Выберите категорию претензии');
+      return;
+    }
+
+    // Дополнительная валидация для категории "Заказ не выполнен"
+    if (selectedClaimCategory === 'Заказ не выполнен') {
+      if (!orderRelevance) {
+        antMessage.warning('Укажите актуальность заказа');
+        return;
+      }
+      if (!refundType) {
+        antMessage.warning('Выберите тип возврата средств');
+        return;
+      }
+    }
+
+    if (!claimText.trim()) {
+      antMessage.warning('Введите текст претензии');
+      return;
+    }
+
+    if (!selectedChat || !isSupportChatSelected) {
+      antMessage.error('Претензию можно подать только в чате с технической поддержкой');
+      return;
+    }
+
+    setClaimSubmitting(true);
+    try {
+      let claimMessage = `🚨 ПРЕТЕНЗИЯ: ${selectedClaimCategory}\n\n`;
+      
+      // Добавляем дополнительные поля для категории "Заказ не выполнен"
+      if (selectedClaimCategory === 'Заказ не выполнен') {
+        claimMessage += `Актуальность заказа: ${orderRelevance}\n`;
+        claimMessage += `Возврат средств: ${refundType}\n\n`;
+      }
+      
+      claimMessage += claimText.trim();
+      
+      let createdMessages: Message[] = [];
+      
+      // Если есть файлы, отправляем с файлами
+      if (claimFiles.length > 0) {
+        createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, claimMessage, claimFiles);
+      } else {
+        const msg = await chatApi.sendMessage(selectedChat.id, claimMessage);
+        createdMessages = msg ? [msg] : [];
+      }
+      
+      // Обновляем чат с реальными сообщениями от сервера
+      if (createdMessages.length > 0) {
+        const lastMessage = createdMessages[createdMessages.length - 1];
+        
+        setSelectedChat(prev => prev ? {
+          ...prev,
+          messages: [...prev.messages, ...createdMessages]
+        } : null);
+
+        // Обновляем список чатов
+        setChatList(prev => prev.map(chat =>
+          chat.id === selectedChat.id
+            ? {
+                ...chat,
+                last_message: {
+                  text: claimMessage,
+                  sender_id: lastMessage.sender_id,
+                  created_at: lastMessage.created_at
+                },
+                last_message_time: lastMessage.created_at
+              }
+            : chat
+        ));
+      }
+
+      setClaimModalOpen(false);
+      setClaimText('');
+      setSelectedClaimCategory('');
+      setClaimFiles([]);
+      setOrderRelevance('');
+      setRefundType('');
+      setShowClaimCategories(false);
+      antMessage.success('Претензия отправлена в техническую поддержку');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить претензию');
+    } finally {
+      setClaimSubmitting(false);
+    }
+  };
+
+  const handleClaimFileSelect = (file: File) => {
+    if (typeof file.size === 'number' && file.size <= 0) {
+      antMessage.error('Передаваемый файл пуст');
+      return false;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10 МБ
+    if (file.size > maxSize) {
+      antMessage.error('Размер файла не должен превышать 10 МБ');
+      return false;
+    }
+
+    if (claimFiles.find(f => f.name === file.name && f.size === file.size)) {
+      antMessage.warning('Этот файл уже прикреплен');
+      return false;
+    }
+
+    setClaimFiles(prev => [...prev, file]);
+    antMessage.success(`Файл "${file.name}" прикреплен`);
+    return false;
+  };
+
+  const removeClaimFile = (fileToRemove: File) => {
+    setClaimFiles(prev => prev.filter(file => file !== fileToRemove));
+    antMessage.info('Файл удален');
+  };
+
   const sendMessage = async () => {
     if (!messageText.trim() && attachedFiles.length === 0) {
       antMessage.warning('Введите сообщение или прикрепите файл');
@@ -1177,6 +1314,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
                   </Button>
                 )}
+                {isSupportChatSelected && (
+                  <Button
+                    type="text"
+                    danger
+                    icon={<ExclamationCircleOutlined />}
+                    size={isMobile ? 'middle' : 'large'}
+                    onClick={() => setClaimModalOpen(true)}
+                    style={{
+                      fontSize: isMobile ? 18 : 20,
+                      color: '#ef4444'
+                    }}
+                    title="Подать претензию"
+                  />
+                )}
               </>
             ) : (
               <Space>
@@ -1494,6 +1645,67 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               background: '#ffffff',
               flexShrink: 0
             }}>
+              {/* Claim Categories Carousel - only for support chat */}
+              {isSupportChatSelected && (
+                <div style={{ 
+                  marginBottom: isMobile ? 8 : 12,
+                  paddingBottom: isMobile ? 8 : 12,
+                  borderBottom: '1px solid #f3f4f6',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <style>{`
+                    @keyframes scroll-carousel {
+                      0% {
+                        transform: translateX(0);
+                      }
+                      100% {
+                        transform: translateX(-50%);
+                      }
+                    }
+                    .carousel-scroll {
+                      animation: scroll-carousel 20s linear infinite;
+                    }
+                    .carousel-scroll:hover {
+                      animation-play-state: paused;
+                    }
+                  `}</style>
+                  <div 
+                    className="carousel-scroll"
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      paddingBottom: 4
+                    }}
+                  >
+                    {/* Дублируем категории для бесшовного loop эффекта */}
+                    {[...claimCategories, ...claimCategories].map((category, index) => (
+                      <Button
+                        key={index}
+                        type="default"
+                        size="small"
+                        onClick={() => {
+                          setSelectedClaimCategory(category);
+                          setClaimModalOpen(true);
+                        }}
+                        style={{
+                          borderRadius: 6,
+                          border: '1px solid #ef4444',
+                          background: '#ffffff',
+                          color: '#ef4444',
+                          fontSize: isMobile ? 11 : 12,
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                          fontWeight: 500
+                        }}
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div style={{ 
                 display: 'flex',
                 gap: isMobile ? 6 : 8,
@@ -1619,6 +1831,205 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </div>
       </ErrorBoundary>
+      
+      {/* Claim Modal */}
+      <Modal
+        open={claimModalOpen}
+        centered
+        onCancel={() => {
+          setClaimModalOpen(false);
+          setSelectedClaimCategory('');
+          setClaimText('');
+          setClaimFiles([]);
+          setOrderRelevance('');
+          setRefundType('');
+        }}
+        onOk={handleSubmitClaim}
+        okButtonProps={{ 
+          loading: claimSubmitting,
+          danger: true
+        }}
+        okText="Подать претензию"
+        cancelText="Отмена"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ExclamationCircleOutlined style={{ color: '#ef4444' }} />
+            Подача претензии
+          </div>
+        }
+        destroyOnClose
+        width={isMobile ? '90%' : 600}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ 
+            padding: '12px 16px', 
+            background: '#fef2f2', 
+            border: '1px solid #fecaca', 
+            borderRadius: 8,
+            color: '#991b1b'
+          }}>
+            <Text style={{ fontSize: 13, color: '#991b1b' }}>
+              Претензия будет отправлена в техническую поддержку для рассмотрения. 
+              Опишите подробно суть вашей проблемы.
+            </Text>
+          </div>
+          
+          {/* Категории претензий */}
+          <div>
+            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+              Категория претензии *
+            </Text>
+            <Select
+              value={selectedClaimCategory || undefined}
+              onChange={(value) => {
+                setSelectedClaimCategory(value);
+                // Сбрасываем дополнительные поля при смене категории
+                if (value !== 'Заказ не выполнен') {
+                  setOrderRelevance('');
+                  setRefundType('');
+                }
+              }}
+              placeholder="Выберите категорию претензии"
+              size="large"
+              style={{ width: '100%' }}
+              options={claimCategories.map(category => ({
+                label: category,
+                value: category
+              }))}
+            />
+          </div>
+          
+          {/* Дополнительные поля для категории "Заказ не выполнен" */}
+          {selectedClaimCategory === 'Заказ не выполнен' && (
+            <>
+              <div>
+                <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+                  Актуальность заказа *
+                </Text>
+                <Select
+                  value={orderRelevance || undefined}
+                  onChange={(value) => setOrderRelevance(value)}
+                  placeholder="Выберите актуальность заказа"
+                  size="large"
+                  style={{ width: '100%' }}
+                  options={[
+                    { label: 'Заказ актуален', value: 'Заказ актуален' },
+                    { label: 'Заказ не актуален', value: 'Заказ не актуален' }
+                  ]}
+                />
+              </div>
+              
+              <div>
+                <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+                  Возврат средств *
+                </Text>
+                <Select
+                  value={refundType || undefined}
+                  onChange={(value) => setRefundType(value)}
+                  placeholder="Выберите тип возврата средств"
+                  size="large"
+                  style={{ width: '100%' }}
+                  options={[
+                    { label: 'Возврат предоплаты', value: 'Возврат предоплаты' },
+                    { label: 'Возврат предоплаты и неустойка', value: 'Возврат предоплаты и неустойка' },
+                    { label: 'Возврат средств не требуется', value: 'Возврат средств не требуется' }
+                  ]}
+                />
+              </div>
+            </>
+          )}
+          
+          {/* Текст претензии */}
+          <div>
+            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+              Описание претензии *
+            </Text>
+            <Input.TextArea
+              value={claimText}
+              onChange={(e) => setClaimText(e.target.value)}
+              placeholder="Опишите подробно суть проблемы, укажите детали ситуации..."
+              autoSize={{ minRows: 4, maxRows: 8 }}
+              maxLength={1000}
+              showCount
+              style={{ fontSize: 14 }}
+            />
+          </div>
+          
+          {/* Прикрепление файлов */}
+          <div>
+            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+              Прикрепить файлы (необязательно)
+            </Text>
+            <Upload
+              beforeUpload={handleClaimFileSelect}
+              showUploadList={false}
+              multiple
+              accept=".doc,.docx,.pdf,.rtf,.txt,.odt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z"
+            >
+              <Button
+                icon={<PaperClipOutlined />}
+                style={{ width: '100%' }}
+              >
+                Выбрать файлы
+              </Button>
+            </Upload>
+            
+            {claimFiles.length > 0 && (
+              <div style={{
+                marginTop: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8
+              }}>
+                {claimFiles.map((file, index) => (
+                  <div
+                    key={`${file.name}-${file.size}-${index}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '6px 10px',
+                      background: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: 6
+                    }}
+                  >
+                    <FileOutlined style={{ color: '#6b7280' }} />
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: '#374151',
+                        flex: 1
+                      }}
+                      ellipsis
+                    >
+                      {file.name}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                      {(file.size / 1024 / 1024).toFixed(2)} МБ
+                    </Text>
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={() => removeClaimFile(file)}
+                      style={{
+                        color: '#ef4444',
+                        padding: 0,
+                        height: 20,
+                        minWidth: 20,
+                        lineHeight: '20px'
+                      }}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+      
       <Modal
         open={reviewModalOpen}
         centered
