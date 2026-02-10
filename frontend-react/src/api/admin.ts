@@ -42,7 +42,7 @@ export interface Arbitrator {
 }
 
 // Флаг для использования mock данных
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // Хранилище для обновленных партнеров
 const getUpdatedPartners = (): Map<number, Partial<Partner>> => {

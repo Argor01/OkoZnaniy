@@ -13,3 +13,6 @@ export { useSupportRequests } from './useSupportRequests';
 // 🆕 Новые хуки для обработки запросов
 export { useRequestProcessing } from './useRequestProcessing';
 export { useAdminChats } from './useAdminChats';
+
+// 🆕 Хуки для работы с реальными данными из API
+export * from './useAdminPanelData';

@@ -167,6 +167,11 @@ class Order(models.Model):
         null=True,
         blank=True
     )
+    has_issues = models.BooleanField(
+        default=False,
+        verbose_name="Есть проблемы",
+        help_text="Отметка о наличии проблем с заказом"
+    )
 
     class Meta:
         verbose_name = "Заказ"

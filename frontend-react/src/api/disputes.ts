@@ -29,7 +29,7 @@ export interface ResolveDisputeRequest {
 }
 
 // Флаг для использования mock данных
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // Хранилище для назначенных арбитров
 const getAssignedArbitrators = (): Map<number, number> => {

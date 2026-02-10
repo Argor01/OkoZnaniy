@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/notifications/', include('apps.notifications.urls')),
     path('api/chat/', include('apps.chat.urls')),
     path('api/shop/', include('apps.shop.urls')),
+    path('api/admin-panel/', include('apps.admin_panel.urls')),
     path("api/accounts/", include("allauth.urls")),
 ]
 

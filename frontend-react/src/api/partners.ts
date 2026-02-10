@@ -39,7 +39,7 @@ export interface ReferralLinkResponse {
 }
 
 // Флаг для использования mock данных
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // Генерация mock данных
 const generateMockDashboard = (): PartnerDashboardData => {

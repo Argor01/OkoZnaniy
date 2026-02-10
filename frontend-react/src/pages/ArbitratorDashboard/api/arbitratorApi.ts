@@ -896,7 +896,7 @@ const generateMockStatistics = (): Statistics => {
  */
 export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResponse<Claim>> => {
   // Используем тестовые данные, если API недоступен (для разработки)
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
   
   // Генерируем тестовые данные (используется всегда, если USE_MOCK_DATA = true, или как fallback при ошибке API)
   const generateMockResponse = (): PaginatedResponse<Claim> => {
@@ -1005,7 +1005,7 @@ export const getClaim = async (id: number): Promise<Claim> => {
  * Взять претензию/обращение в работу
  */
 export const takeClaim = async (id: number): Promise<Claim> => {
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
   // Mock-реализация
   const mockTakeClaim = (): Claim => {
@@ -1050,7 +1050,7 @@ export const takeClaim = async (id: number): Promise<Claim> => {
  * Принять решение по претензии/обращению
  */
 export const makeDecision = async (id: number, data: DecisionRequest): Promise<Decision> => {
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
   // Mock-реализация
   const mockMakeDecision = (): Decision => {
@@ -1117,7 +1117,7 @@ export const requestInfo = async (id: number, data: RequestInfoRequest): Promise
  * Отправить на согласование дирекции
  */
 export const sendForApproval = async (id: number, data: SendForApprovalRequest): Promise<void> => {
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
   // Mock-реализация
   const mockSendForApproval = (): void => {
@@ -1151,7 +1151,7 @@ export const sendForApproval = async (id: number, data: SendForApprovalRequest):
  */
 export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
   // Используем тестовые данные, если API недоступен (для разработки)
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
   
   if (USE_MOCK_DATA) {
     const allMockMessages = generateMockMessages(params);
@@ -1202,7 +1202,7 @@ export const getMessages = async (params?: GetMessagesParams): Promise<Paginated
  * Отправка сообщения дирекции
  */
 export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
-  const USE_MOCK_DATA = true; // Установите в false, когда API будет готов
+  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
   // Mock-реализация
   const mockSendMessage = (): InternalMessage => {

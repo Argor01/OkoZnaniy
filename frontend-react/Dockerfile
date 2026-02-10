@@ -7,8 +7,10 @@ WORKDIR /app
 # Копирование файлов зависимостей
 COPY package*.json ./
 
-# Установка зависимостей
-RUN npm ci
+# Установка зависимостей с увеличенным таймаутом
+RUN npm config set fetch-timeout 600000 && \
+    npm config set fetch-retries 5 && \
+    npm ci --prefer-offline --no-audit
 
 # Копирование исходного кода
 COPY . .
