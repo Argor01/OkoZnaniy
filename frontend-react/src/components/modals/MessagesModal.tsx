@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Modal, Input, Button, Space, Avatar, Badge, Typography, Upload, Popover, message as antMessage, Card } from 'antd';
-import { SendOutlined, SmileOutlined, PaperClipOutlined, SearchOutlined, UserOutlined, ArrowLeftOutlined, MessageOutlined, BellOutlined, StarOutlined, CheckCircleOutlined, PlusOutlined, FileTextOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { SendOutlined, SmileOutlined, PaperClipOutlined, SearchOutlined, UserOutlined, ArrowLeftOutlined, MessageOutlined, StarOutlined, CheckCircleOutlined, PlusOutlined, FileTextOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import EmojiPicker from 'emoji-picker-react';
 import IndividualOfferModal from './IndividualOfferModal';
 import { chatApi } from '../../api/chat';
@@ -211,24 +211,6 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
               {isMobile ? 'Все' : 'Все'}
             </div>
             <div
-              onClick={() => setMessageTab('unread')}
-              style={{
-                flex: 1,
-                padding: isMobile ? '10px 2px' : '12px 4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                borderBottom: messageTab === 'unread' ? '2px solid #3b82f6' : '2px solid transparent',
-                color: messageTab === 'unread' ? '#3b82f6' : '#6b7280',
-                fontWeight: messageTab === 'unread' ? 600 : 400,
-                fontSize: isMobile ? 11 : 13
-              }}
-            >
-              <BellOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
-              {isMobile ? 'Новые' : 'Непрочитанные'}
-            </div>
-            <div
               onClick={() => setMessageTab('favorites')}
               style={{
                 flex: 1,
@@ -266,7 +248,6 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
           }}>
             {chatMessages
               .filter(chat => {
-                if (messageTab === 'unread') return !chat.isRead;
                 return true;
               })
               .map((chat) => (
@@ -336,13 +317,9 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
                       </Text>
                       {chat.unreadCount > 0 && (
                         <Badge 
-                          count={chat.unreadCount} 
+                          dot
                           style={{ 
-                            backgroundColor: '#10b981',
-                            fontSize: isMobile ? 9 : 10,
-                            height: isMobile ? 16 : 18,
-                            minWidth: isMobile ? 16 : 18,
-                            lineHeight: isMobile ? '16px' : '18px'
+                            backgroundColor: '#3b82f6'
                           }} 
                         />
                       )}

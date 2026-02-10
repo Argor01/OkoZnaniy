@@ -78,8 +78,6 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                 </div>
               </div>
 
-              <div className={styles.reviewOrderLine}>Заказ: {review.order?.title || '—'}</div>
-
               <Paragraph className={styles.reviewText}>{review.text || review.comment || '—'}</Paragraph>
             </div>
           ))}

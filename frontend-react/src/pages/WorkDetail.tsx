@@ -10,8 +10,6 @@ import { ru } from 'date-fns/locale';
 
 const { Title, Text, Paragraph } = Typography;
 
-const ALLOWED_FORMATS_TEXT = 'Текстовые документы: .doc, .docx, .pdf, .rtf, .txt\nПрезентации: .ppt, .pptx, .pdf\nТаблицы: .xls, .xlsx, .csv\nЧертежи и работы: .dwg, .dxf, .cdr, .cdw, .bak, .pdf\nГрафика/изображения: .jpg, .png, .bmp, .svg';
-
 const WorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
   const navigate = useNavigate();
@@ -297,12 +295,6 @@ const WorkDetail: React.FC = () => {
                 </Space>
               </Card>
             )}
-
-            <Card title="Допустимые форматы файлов" style={{ borderRadius: 12, marginBottom: 24 }}>
-              <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>
-                {ALLOWED_FORMATS_TEXT}
-              </Paragraph>
-            </Card>
 
             {/* Рейтинг работы */}
             {work.expert_rating && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Tabs, List, Avatar, Badge, Input, Button, Empty, message as antMessage, Spin, Card, Typography } from 'antd';
+import { Modal, List, Avatar, Badge, Input, Button, Empty, message as antMessage, Spin, Card, Typography } from 'antd';
 import { MessageOutlined, SendOutlined, ArrowLeftOutlined, UserOutlined, PaperClipOutlined, FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import './MessagesModal.css';
 import { chatApi, ChatListItem as ApiChat, Message as ApiMessage } from '../api/chat';
@@ -89,7 +89,6 @@ interface MessagesModalProps {
 }
 
 const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfile }) => {
-  const [activeTab, setActiveTab] = useState('all');
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchText, setSearchText] = useState('');
@@ -420,16 +419,6 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
             />
           </div>
 
-          <Tabs
-            activeKey={activeTab}
-            onChange={setActiveTab}
-            items={[
-              { key: 'all', label: 'Все' },
-              { key: 'unread', label: 'Непрочитанные' },
-            ]}
-            className="chats-tabs"
-          />
-
           {loading && !selectedChat ? (
             <div style={{ textAlign: 'center', padding: '20px' }}>
               <Spin />
@@ -446,7 +435,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                 >
                   <List.Item.Meta
                     avatar={
-                      <Badge count={chat.unreadCount} offset={[-5, 5]}>
+                      <Badge dot={chat.unreadCount > 0} offset={[-5, 5]} style={{ backgroundColor: '#3b82f6' }}>
                         <Avatar size={40} icon={<UserOutlined />}>{chat.name[0]}</Avatar>
                       </Badge>
                     }

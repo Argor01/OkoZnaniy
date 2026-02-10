@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Modal, Input, Button, Avatar, Space, Typography } from 'antd';
 import {
   MessageOutlined,
-  BellOutlined,
   StarOutlined,
   MobileOutlined,
   SearchOutlined,
@@ -76,13 +75,6 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
             >
               <MessageOutlined className={styles.tabIcon} />
               Все
-            </div>
-            <div
-              onClick={() => setMessageTab('unread')}
-              className={`${styles.tab} ${messageTab === 'unread' ? styles.tabActive : ''}`}
-            >
-              <BellOutlined className={styles.tabIcon} />
-              Непрочитанные
             </div>
             <div
               onClick={() => setMessageTab('favorites')}

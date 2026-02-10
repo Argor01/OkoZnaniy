@@ -3,7 +3,6 @@ import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antM
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
-  BellOutlined,
   SearchOutlined,
   UserOutlined,
   ArrowLeftOutlined,
@@ -79,7 +78,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   selectedOrderId,
   userProfile
 }) => {
-  const [messageTab, setMessageTab] = useState<string>('all');
   const [messageText, setMessageText] = useState<string>('');
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
@@ -943,9 +941,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const isSupportChatSelected = selectedChat?.other_user?.id === supportUserId;
 
   const filteredChats = safeChatList.filter(chat => {
-    // Фильтр по вкладкам
-    if (messageTab === 'unread' && chat.unread_count === 0) return false;
-    
     // Поиск
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -1020,51 +1015,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           flexDirection: 'column',
           height: isMobile ? '100%' : 'auto'
         }}>
-          {/* Tabs */}
-          <div style={{ 
-            display: 'flex', 
-            borderBottom: '1px solid #e5e7eb',
-            background: '#ffffff',
-            padding: isMobile ? '0 4px' : '0 8px'
-          }}>
-            <div
-              onClick={() => setMessageTab('all')}
-              style={{
-                flex: 1,
-                padding: isMobile ? '10px 2px' : '12px 4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                borderBottom: messageTab === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
-                color: messageTab === 'all' ? '#3b82f6' : '#6b7280',
-                fontWeight: messageTab === 'all' ? 600 : 400,
-                fontSize: isMobile ? 11 : 13
-              }}
-            >
-              <MessageOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
-              Все
-            </div>
-            <div
-              onClick={() => setMessageTab('unread')}
-              style={{
-                flex: 1,
-                padding: isMobile ? '10px 2px' : '12px 4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                borderBottom: messageTab === 'unread' ? '2px solid #3b82f6' : '2px solid transparent',
-                color: messageTab === 'unread' ? '#3b82f6' : '#6b7280',
-                fontWeight: messageTab === 'unread' ? 600 : 400,
-                fontSize: isMobile ? 11 : 13
-              }}
-            >
-              <BellOutlined style={{ marginRight: isMobile ? 2 : 4, fontSize: isMobile ? 12 : 14 }} />
-              {isMobile ? 'Новые' : 'Непрочитанные'}
-            </div>
-          </div>
-
           {/* Search */}
           <div style={{ padding: isMobile ? '8px' : '12px', background: '#ffffff' }}>
             <Input
@@ -1145,13 +1095,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     </Text>
                     {(supportChat?.unread_count ?? 0) > 0 && (
                       <Badge 
-                        count={supportChat?.unread_count} 
+                        dot
                         style={{ 
-                          backgroundColor: '#10b981',
-                          fontSize: isMobile ? 9 : 10,
-                          height: isMobile ? 16 : 18,
-                          minWidth: isMobile ? 16 : 18,
-                          lineHeight: isMobile ? '16px' : '18px'
+                          backgroundColor: '#3b82f6'
                         }} 
                       />
                     )}
@@ -1231,13 +1177,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       </Text>
                       {chat.unread_count > 0 && (
                         <Badge 
-                          count={chat.unread_count} 
+                          dot
                           style={{ 
-                            backgroundColor: '#10b981',
-                            fontSize: isMobile ? 9 : 10,
-                            height: isMobile ? 16 : 18,
-                            minWidth: isMobile ? 16 : 18,
-                            lineHeight: isMobile ? '16px' : '18px'
+                            backgroundColor: '#3b82f6'
                           }} 
                         />
                       )}

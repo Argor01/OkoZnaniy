@@ -134,7 +134,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                         {chat.lastMessage}
                       </Text>
                       {chat.unreadCount > 0 && (
-                        <Badge count={chat.unreadCount} />
+                        <Badge dot style={{ backgroundColor: '#3b82f6' }} />
                       )}
                     </div>
                   </div>
