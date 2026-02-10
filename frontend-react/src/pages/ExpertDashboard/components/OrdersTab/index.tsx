@@ -280,22 +280,38 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                     )}
                   </Space>
                   {effectiveOrderFilter === 'available' && userProfile?.role === 'expert' && (
+                    (() => {
+                      const hasMyBid =
+                        typeof (order as unknown as { user_has_bid?: unknown }).user_has_bid === 'boolean'
+                          ? (order as unknown as { user_has_bid: boolean }).user_has_bid
+                          : Array.isArray((order as unknown as { bids?: unknown }).bids) && typeof userProfile?.id === 'number'
+                            ? (order as unknown as { bids: Array<{ expert?: { id?: number } | null }> }).bids.some(
+                                (bid) => bid?.expert?.id === userProfile.id
+                              )
+                            : false;
+
+                      return (
                     <Button 
-                      type="primary"
+                      type={hasMyBid ? 'default' : 'primary'}
                       size="small"
+                      disabled={hasMyBid}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (hasMyBid) return;
                         navigate(`/orders/${order.id}`);
                       }}
                       style={{
-                        background: '#52c41a',
+                        background: hasMyBid ? '#e5e7eb' : '#52c41a',
+                        color: hasMyBid ? '#6b7280' : undefined,
                         border: 'none',
                         borderRadius: 6,
                         marginLeft: 8
                       }}
                     >
-                      Откликнуться
+                      {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
                     </Button>
+                      );
+                    })()
                   )}
                 </div>
               </Card>

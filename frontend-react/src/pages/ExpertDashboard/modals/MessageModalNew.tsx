@@ -99,6 +99,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewRating, setReviewRating] = useState<number>(5);
   const [reviewComment, setReviewComment] = useState<string>('');
+  const [reviewOrderId, setReviewOrderId] = useState<number | null>(null);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [claimText, setClaimText] = useState<string>('');
   const [claimSubmitting, setClaimSubmitting] = useState(false);
@@ -136,16 +137,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (Array.isArray(messages)) {
       for (const m of messages) {
         if (m?.message_type !== 'offer') continue;
+        if ((m as { offer_data?: { status?: unknown } }).offer_data?.status !== 'accepted') continue;
         const id = toPositiveNumber((m as { offer_data?: { order_id?: unknown } }).offer_data?.order_id);
         if (!id) continue;
-        if ((m as { offer_data?: { status?: unknown } }).offer_data?.status === 'rejected') continue;
         if (!ids.includes(id)) ids.push(id);
       }
     }
-    const chatOrderId = toPositiveNumber((chat as unknown as { order_id?: unknown }).order_id);
-    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
-    const chatOrder = toPositiveNumber((chat as unknown as { order?: unknown }).order);
-    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    if (ids.length > 0) {
+      const chatOrderId = toPositiveNumber((chat as unknown as { order_id?: unknown }).order_id);
+      if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+      const chatOrder = toPositiveNumber((chat as unknown as { order?: unknown }).order);
+      if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    }
     return ids;
   }, [toPositiveNumber]);
 
@@ -200,16 +203,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (Array.isArray(messages)) {
       for (const m of messages) {
         if (m?.message_type !== 'offer') continue;
+        if (m.offer_data?.status !== 'accepted') continue;
         const id = toPositiveNumber(m.offer_data?.order_id);
         if (!id) continue;
-        if (m.offer_data?.status === 'rejected') continue;
         if (!ids.includes(id)) ids.push(id);
       }
     }
-    const chatOrderId = toPositiveNumber(selectedChatOrderId);
-    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
-    const chatOrder = toPositiveNumber(selectedChatOrder);
-    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    if (ids.length > 0) {
+      const chatOrderId = toPositiveNumber(selectedChatOrderId);
+      if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+      const chatOrder = toPositiveNumber(selectedChatOrder);
+      if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
+    }
     return ids;
   }, [selectedChatMessages, selectedChatOrderId, selectedChatOrder, toPositiveNumber]);
 
@@ -297,13 +302,61 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
+      const hasMessages = Array.isArray(chatData.messages) && chatData.messages.length > 0;
+      if (!hasMessages) {
+        try {
+          const orderData = await ordersApi.getById(orderId);
+          const title =
+            typeof (orderData as { title?: unknown } | undefined)?.title === 'string'
+              ? String((orderData as { title?: unknown }).title).trim()
+              : '';
+          const subjectName =
+            typeof (orderData as { subject?: { name?: unknown } | null } | undefined)?.subject?.name === 'string'
+              ? String((orderData as { subject?: { name?: unknown } | null }).subject?.name).trim()
+              : '';
+          const workTypeName =
+            typeof (orderData as { work_type?: { name?: unknown } | null } | undefined)?.work_type?.name === 'string'
+              ? String((orderData as { work_type?: { name?: unknown } | null }).work_type?.name).trim()
+              : '';
+          const budgetRaw = (orderData as { budget?: unknown } | undefined)?.budget;
+          const budgetText =
+            typeof budgetRaw === 'number'
+              ? `${budgetRaw.toLocaleString('ru-RU')} ₽`
+              : typeof budgetRaw === 'string' && budgetRaw.trim()
+                ? (() => {
+                    const raw = budgetRaw.trim();
+                    const asNumber = /^[0-9]+(?:\.[0-9]+)?$/.test(raw) ? Number(raw) : NaN;
+                    if (Number.isFinite(asNumber)) return `${asNumber.toLocaleString('ru-RU')} ₽`;
+                    return `${raw} ₽`;
+                  })()
+                : 'Договорная';
+          const deadlineRaw = (orderData as { deadline?: unknown } | undefined)?.deadline;
+          const deadlineText =
+            typeof deadlineRaw === 'string' && deadlineRaw.trim()
+              ? new Date(deadlineRaw).toLocaleDateString('ru-RU')
+              : 'Не указан';
+
+          const infoText = [
+            `Этот чат по теме: ${title || `Заказ #${orderId}`}`,
+            `Предмет: ${subjectName || '—'}`,
+            `Тип работы: ${workTypeName || '—'}`,
+            `Бюджет: ${budgetText}`,
+            `Дедлайн: ${deadlineText}`,
+          ].join('\n');
+
+          await chatApi.sendMessage(chatData.id, infoText);
+          await loadChatDetail(chatData.id);
+        } catch {
+          await loadChatDetail(chatData.id);
+        }
+      }
       await loadChats();
     } catch (error: unknown) {
       antMessage.error('Не удалось открыть чат по заказу');
     } finally {
       setLoading(false);
     }
-  }, [hydrateClosedOrdersForChat, loadChats]);
+  }, [hydrateClosedOrdersForChat, loadChatDetail, loadChats]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
     setLoading(true);
@@ -400,9 +453,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const formatRemaining = (deadline?: string) => {
+  const formatRemaining = (deadline?: string, status?: string) => {
     if (!deadline) return '';
-    const end = new Date(deadline).getTime();
+    const baseEnd = new Date(deadline).getTime();
+    const reviewExtraMs = status === 'review' ? 5 * 24 * 60 * 60 * 1000 : 0;
+    const end = baseEnd + reviewExtraMs;
     if (Number.isNaN(end)) return '';
     const diff = end - Date.now();
     if (diff <= 0) return 'Срок истёк';
@@ -533,8 +588,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     void deadlineTick;
     if (isClosedOrder) return '';
     if (!order?.deadline) return '';
-    return formatRemaining(order.deadline);
-  }, [order?.deadline, deadlineTick, isClosedOrder]);
+    return formatRemaining(order.deadline, order.status);
+  }, [order?.deadline, order?.status, deadlineTick, isClosedOrder]);
 
   const handleOfferSubmit = async (data: OfferData) => {
     if (!selectedChat) return;
@@ -661,6 +716,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       await Promise.all([refreshOrder(), loadChats()]);
       setReviewRating(5);
       setReviewComment('');
+      setReviewOrderId(effectiveOrderId);
       setReviewModalOpen(true);
       antMessage.success('Заказ принят');
     } catch (error: unknown) {
@@ -680,7 +736,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const handleSubmitReview = async () => {
-    if (!effectiveOrderId) return;
+    const orderId = reviewOrderId || effectiveOrderId;
+    if (!orderId) {
+      antMessage.error('Не удалось определить заказ для отзыва');
+      return;
+    }
     const rating = Math.max(1, Math.min(5, Math.round(reviewRating || 0)));
     if (rating < 1 || rating > 5) {
       antMessage.error('Оценка должна быть от 1 до 5');
@@ -690,11 +750,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     setReviewSubmitting(true);
     try {
       await expertsApi.rateExpert({
-        order: effectiveOrderId,
+        order: orderId,
         rating,
         comment: reviewComment.trim() || undefined,
       });
       setReviewModalOpen(false);
+      setReviewOrderId(null);
       antMessage.success('Отзыв отправлен');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Не удалось отправить отзыв');
@@ -1975,7 +2036,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       <Modal
         open={reviewModalOpen}
         centered
-        onCancel={() => setReviewModalOpen(false)}
+        onCancel={() => {
+          setReviewModalOpen(false);
+          setReviewOrderId(null);
+        }}
         onOk={handleSubmitReview}
         okButtonProps={{ loading: reviewSubmitting }}
         okText="Отправить"

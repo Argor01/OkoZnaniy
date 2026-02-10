@@ -414,56 +414,6 @@ const OrdersFeed: React.FC = () => {
         )}
       </Card>
 
-      {/* Информационное сообщение для клиентов */}
-      {userProfile?.role === 'client' && filteredOrders.length === 0 && !ordersLoading && (
-        <Card 
-          className={styles.infoCard}
-        >
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <Title level={4} style={{ color: 'white', marginBottom: 16 }}>
-              💡 Подсказка: Где найти свои заказы?
-            </Title>
-            <Paragraph style={{ color: 'white', fontSize: 16, marginBottom: 20 }}>
-              Эта страница показывает заказы <strong>других клиентов</strong> для экспертов.<br />
-              Ваши созданные заказы находятся в <strong>главном дашборде</strong>.
-            </Paragraph>
-            <Space size={12}>
-              <Button 
-                type="default"
-                size="large"
-                onClick={() => navigate('/expert')}
-                style={{
-                  background: 'white',
-                  color: '#667eea',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  height: 48,
-                  padding: '0 32px'
-                }}
-              >
-                Перейти в дашборд
-              </Button>
-              <Button 
-                size="large"
-                onClick={() => navigate('/create-order')}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  border: '2px solid white',
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  height: 48,
-                  padding: '0 32px'
-                }}
-              >
-                Создать заказ
-              </Button>
-            </Space>
-          </div>
-        </Card>
-      )}
-
       {/* Список заказов */}
       {ordersLoading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>

@@ -253,9 +253,11 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
     };
   }, [open, effectiveOrderId]);
 
-  const formatRemaining = (deadline?: string) => {
+  const formatRemaining = (deadline?: string, status?: string) => {
     if (!deadline) return '';
-    const end = new Date(deadline).getTime();
+    const baseEnd = new Date(deadline).getTime();
+    const reviewExtraMs = status === 'review' ? 5 * 24 * 60 * 60 * 1000 : 0;
+    const end = baseEnd + reviewExtraMs;
     if (Number.isNaN(end)) return '';
     const diff = end - Date.now();
     if (diff <= 0) return 'Срок истёк';
@@ -518,7 +520,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                       onClick={() => setOrderPanelOpen((v) => !v)}
                       style={{ borderRadius: 999 }}
                     >
-                      {`Заказ #${effectiveOrderId}`}{order?.deadline ? ` • ${formatRemaining(order.deadline)}` : ''}
+                      {`Заказ #${effectiveOrderId}`}{order?.deadline ? ` • ${formatRemaining(order.deadline, order.status)}` : ''}
                     </Button>
                     {currentRole === 'expert' ? (
                       <>
@@ -557,7 +559,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                             <Text type="secondary">{formatOrderStatus(order.status)}</Text>
                           </div>
                           <Text type="secondary">
-                            Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан'}{order.deadline ? ` • осталось ${formatRemaining(order.deadline)}` : ''}
+                            Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан'}{order.deadline ? ` • осталось ${formatRemaining(order.deadline, order.status)}` : ''}
                           </Text>
                           <Text>
                             Предмет: {order.subject?.name || order.custom_subject || '—'} · Тип: {order.work_type?.name || order.custom_work_type || '—'}

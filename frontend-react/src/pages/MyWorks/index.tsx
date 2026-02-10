@@ -88,9 +88,10 @@ const MyWorks: React.FC = () => {
     return d.locale('ru').format('D MMMM, HH:mm');
   };
 
-  const formatRemaining = (value: unknown) => {
+  const formatRemaining = (value: unknown, status?: unknown) => {
     if (typeof value !== 'string') return '—';
-    const end = dayjs(value);
+    const baseEnd = dayjs(value);
+    const end = String(status ?? '') === 'review' ? baseEnd.add(5, 'day') : baseEnd;
     if (!end.isValid()) return '—';
     const now = dayjs();
     const hours = end.diff(now, 'hour');
@@ -154,10 +155,16 @@ const MyWorks: React.FC = () => {
       title: 'Осталось',
       dataIndex: 'deadline',
       key: 'deadline',
-      render: (value: unknown) => formatRemaining(value),
+      render: (value: unknown, record: any) => formatRemaining(value, record?.status),
       sorter: (a: any, b: any) => {
-        const ta = typeof a?.deadline === 'string' ? dayjs(a.deadline).valueOf() : 0;
-        const tb = typeof b?.deadline === 'string' ? dayjs(b.deadline).valueOf() : 0;
+        const ta =
+          typeof a?.deadline === 'string'
+            ? (String(a?.status ?? '') === 'review' ? dayjs(a.deadline).add(5, 'day').valueOf() : dayjs(a.deadline).valueOf())
+            : 0;
+        const tb =
+          typeof b?.deadline === 'string'
+            ? (String(b?.status ?? '') === 'review' ? dayjs(b.deadline).add(5, 'day').valueOf() : dayjs(b.deadline).valueOf())
+            : 0;
         return ta - tb;
       },
     },
