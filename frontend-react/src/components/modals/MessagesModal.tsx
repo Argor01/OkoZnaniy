@@ -60,6 +60,12 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
   const [isDesktop] = useState(window.innerWidth > 1024);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const isChatInitiator = (() => {
+    if (!selectedChat) return false;
+    const msgs = selectedChat.messages;
+    if (!Array.isArray(msgs) || msgs.length === 0) return true;
+    return !!msgs[0]?.isMine;
+  })();
 
   const [chatMessages] = useState<ChatMessage[]>();
 
@@ -384,7 +390,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
                   </div>
                 </Space>
                 {!isMobile && (
-                  userProfile?.role === 'expert' ? (
+                  userProfile?.role === 'expert' && !isChatInitiator ? (
                     <Button 
                       type="primary" 
                       size="small"
@@ -527,7 +533,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({
                             )}
                             {msg.isMine && !msg.offer_data.status && (
                                 <div style={{ textAlign: 'center', color: '#9CA3AF', fontSize: 12, marginTop: 8 }}>
-                                  Ожидает решения клиента
+                                  Ожидает решения получателя
                                 </div>
                             )}
                           </div>

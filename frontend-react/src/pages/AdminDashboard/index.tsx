@@ -271,23 +271,25 @@ const AdminDashboard: React.FC = () => {
       case 'support_open':
       case 'support_in_progress':
       case 'support_completed':
-        const statusMap = {
-          'support_open': { data: openRequests, loading: openRequestsLoading },
-          'support_in_progress': { data: inProgressRequests, loading: inProgressRequestsLoading },
-          'support_completed': { data: completedRequests, loading: completedRequestsLoading },
-        };
-        const currentStatus = statusMap[selectedMenu as keyof typeof statusMap];
-        
-        return (
-          <SupportRequestsSection
-            requests={currentStatus.data}
-            loading={currentStatus.loading}
-            selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
-            onStatusChange={(status) => console.log('Status change:', status)}
-            onRequestClick={(request) => console.log('Request click:', request)}
-            onTakeRequest={takeRequest}
-          />
-        );
+        {
+          const statusMap = {
+            support_open: { data: openRequests, loading: openRequestsLoading },
+            support_in_progress: { data: inProgressRequests, loading: inProgressRequestsLoading },
+            support_completed: { data: completedRequests, loading: completedRequestsLoading },
+          };
+          const currentStatus = statusMap[selectedMenu as keyof typeof statusMap];
+          
+          return (
+            <SupportRequestsSection
+              requests={currentStatus.data}
+              loading={currentStatus.loading}
+              selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
+              onStatusChange={(status) => console.log('Status change:', status)}
+              onRequestClick={(request) => console.log('Request click:', request)}
+              onTakeRequest={takeRequest}
+            />
+          );
+        }
 
       case 'admin_chats':
         return (

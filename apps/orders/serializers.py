@@ -109,6 +109,7 @@ class OrderSerializer(serializers.ModelSerializer):
     discount = DiscountRuleSerializer(read_only=True)
     rating = serializers.SerializerMethodField()
     user_has_bid = serializers.SerializerMethodField()
+    is_overdue = serializers.SerializerMethodField()
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
@@ -138,7 +139,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'discount',
             'original_price', 'discount_amount', 'final_price', 'rating',
-            'user_has_bid'
+            'user_has_bid', 'is_overdue'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -208,6 +209,16 @@ class OrderSerializer(serializers.ModelSerializer):
             if bids_rel is not None and hasattr(bids_rel, 'all'):
                 return any(getattr(b, 'expert_id', None) == user.id for b in bids_rel.all())
             return Bid.objects.filter(order=obj, expert=user).exists()
+        except Exception:
+            return False
+
+    def get_is_overdue(self, obj):
+        try:
+            if obj.status not in ['in_progress', 'revision']:
+                return False
+            if not obj.deadline:
+                return False
+            return obj.deadline <= timezone.now()
         except Exception:
             return False
 

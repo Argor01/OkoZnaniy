@@ -22,6 +22,7 @@ export interface Order {
   budget: string;
   deadline: string;
   status: string;
+  is_overdue?: boolean;
   client?: {
     id: number;
     username: string;
@@ -182,6 +183,18 @@ export const ordersApi = {
   // Отправить на доработку (клиент)
   requestRevision: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/revision/`);
+    return response.data;
+  },
+
+  // Продлить дедлайн просроченного заказа (клиент)
+  extendDeadline: async (id: number, deadline: string) => {
+    const response = await apiClient.post(`/orders/orders/${id}/extend_deadline/`, { deadline });
+    return response.data;
+  },
+
+  // Отменить просроченный заказ (клиент)
+  cancelOverdue: async (id: number) => {
+    const response = await apiClient.post(`/orders/orders/${id}/cancel_overdue/`);
     return response.data;
   },
 

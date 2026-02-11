@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db import models
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
 from .serializers import OrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from apps.notifications.services import NotificationService
@@ -140,6 +141,81 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Срок сдачи истёк.'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'review'
         order.save(update_fields=['status', 'updated_at'])
+        return Response(self.get_serializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def extend_deadline(self, request, pk=None):
+        """Клиент продлевает дедлайн просроченного заказа: deadline -> новое значение, статус -> in_progress."""
+        order = self.get_object()
+        user = request.user
+        if order.client_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if not order.expert_id:
+            return Response({'detail': 'У заказа нет назначенного эксперта.'}, status=status.HTTP_400_BAD_REQUEST)
+        if order.status not in ['in_progress', 'revision']:
+            return Response({'detail': 'Продлить дедлайн можно только для заказа в работе.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not order.deadline or order.deadline > timezone.now():
+            return Response({'detail': 'Заказ не просрочен.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_deadline_raw = request.data.get('deadline')
+        new_deadline = parse_datetime(new_deadline_raw) if isinstance(new_deadline_raw, str) else None
+        if not new_deadline:
+            return Response({'deadline': 'Некорректный дедлайн.'}, status=status.HTTP_400_BAD_REQUEST)
+        if timezone.is_naive(new_deadline):
+            new_deadline = timezone.make_aware(new_deadline, timezone.get_current_timezone())
+        if new_deadline <= timezone.now():
+            return Response({'deadline': 'Дедлайн не может быть в прошлом.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        old_status = order.status
+        order.deadline = new_deadline
+        order.status = 'in_progress'
+        order.save(update_fields=['deadline', 'status', 'updated_at'])
+
+        if order.expert_id:
+            NotificationService.create_notification(
+                recipient=order.expert,
+                type='status_changed',
+                title='Дедлайн продлён',
+                message=f"Клиент продлил дедлайн по заказу '{order.title or f'#{order.id}'}' до {timezone.localtime(order.deadline).strftime('%d.%m.%Y %H:%M')}",
+                related_object_id=order.id,
+                related_object_type='order',
+                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
+            )
+        return Response(self.get_serializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def cancel_overdue(self, request, pk=None):
+        """Клиент отменяет просроченный заказ: статус -> cancelled + уведомление эксперту."""
+        order = self.get_object()
+        user = request.user
+        if order.client_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if not order.expert_id:
+            return Response({'detail': 'У заказа нет назначенного эксперта.'}, status=status.HTTP_400_BAD_REQUEST)
+        if order.status not in ['in_progress', 'revision']:
+            return Response({'detail': 'Отменить можно только заказ в работе.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not order.deadline or order.deadline > timezone.now():
+            return Response({'detail': 'Заказ не просрочен.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        old_status = order.status
+        order.status = 'cancelled'
+        order.save(update_fields=['status', 'updated_at'])
+
+        if order.expert_id:
+            NotificationService.create_notification(
+                recipient=order.expert,
+                type='status_changed',
+                title='Заказ отменён',
+                message=f"Клиент отменил заказ '{order.title or f'#{order.id}'}' из‑за просрочки.",
+                related_object_id=order.id,
+                related_object_type='order',
+                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
+            )
+            from apps.experts.models import ExpertStatistics
+
+            stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
+            stats.update_statistics()
+
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])

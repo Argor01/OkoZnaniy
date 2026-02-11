@@ -43,8 +43,24 @@ const MyWorks: React.FC = () => {
     return Array.isArray(raw) ? (raw as any[]) : [];
   }, [myOrdersData]);
 
+  const isOverdueOrder = (order: any) => {
+    if (order?.is_overdue === true) return true;
+    const status = String(order?.status ?? '');
+    if (!(status === 'in_progress' || status === 'revision')) return false;
+    const deadlineRaw = order?.deadline;
+    if (typeof deadlineRaw !== 'string') return false;
+    const d = dayjs(deadlineRaw);
+    if (!d.isValid()) return false;
+    return d.valueOf() <= dayjs().valueOf();
+  };
+
+  const isInProgressGroup = (order: any) => {
+    const status = String(order?.status ?? '');
+    return status === 'in_progress' || status === 'revision';
+  };
+
   const counts = useMemo(() => {
-    const inProgress = orders.filter((o) => o?.status === 'in_progress').length;
+    const inProgress = orders.filter((o) => isInProgressGroup(o)).length;
     const review = orders.filter((o) => o?.status === 'review' || o?.status === 'under_review').length;
     const completed = orders.filter((o) => o?.status === 'completed').length;
     return { in_progress: inProgress, review, completed, all: orders.length };
@@ -56,6 +72,8 @@ const MyWorks: React.FC = () => {
       if (activeTab !== 'all') {
         if (activeTab === 'review') {
           if (!(order.status === 'review' || order.status === 'under_review')) return false;
+        } else if (activeTab === 'in_progress') {
+          if (!isInProgressGroup(order)) return false;
         } else if (order.status !== activeTab) {
           return false;
         }
@@ -155,7 +173,7 @@ const MyWorks: React.FC = () => {
       title: 'Осталось',
       dataIndex: 'deadline',
       key: 'deadline',
-      render: (value: unknown, record: any) => formatRemaining(value, record?.status),
+      render: (value: unknown, record: any) => (isOverdueOrder(record) ? 'Просрочено' : formatRemaining(value, record?.status)),
       sorter: (a: any, b: any) => {
         const ta =
           typeof a?.deadline === 'string'
@@ -185,8 +203,10 @@ const MyWorks: React.FC = () => {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      render: (status: unknown) => (
-        <Tag className={styles.statusTag}>{getStatusLabel(String(status ?? ''))}</Tag>
+      render: (status: unknown, record: any) => (
+        <Tag className={styles.statusTag} color={isOverdueOrder(record) ? 'red' : undefined}>
+          {isOverdueOrder(record) ? 'Просрочен' : getStatusLabel(String(status ?? ''))}
+        </Tag>
       ),
       width: 140,
     },

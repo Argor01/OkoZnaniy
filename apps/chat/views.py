@@ -67,6 +67,25 @@ class ChatViewSet(viewsets.ModelViewSet):
                 {'detail': 'Укажите текст сообщения, прикрепите файл или создайте предложение.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        if message_type == 'offer':
+            if getattr(request.user, 'role', None) != 'expert' and not getattr(request.user, 'is_staff', False):
+                return Response(
+                    {'detail': 'Только эксперт может отправлять индивидуальные предложения.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            first_sender_id = chat.messages.order_by('created_at').values_list('sender_id', flat=True).first()
+            if first_sender_id is None:
+                return Response(
+                    {'detail': 'Создатель чата не может отправлять индивидуальное предложение.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            if int(first_sender_id) == int(request.user.id):
+                return Response(
+                    {'detail': 'Создатель чата не может отправлять индивидуальное предложение.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         file_name = ''
         if uploaded_file:

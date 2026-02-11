@@ -219,6 +219,11 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
     chat.name.toLowerCase().includes(searchText.toLowerCase())
   );
   const activeChat = chats.find((chat) => chat.id === selectedChat);
+  const isChatInitiator = (() => {
+    if (!selectedChat) return false;
+    if (messages.length === 0) return true;
+    return !!messages[0]?.isMine;
+  })();
   const activeOrderId = typeof activeChat?.orderId === 'number' && activeChat.orderId > 0 ? activeChat.orderId : null;
   const effectiveOrderId = (() => {
     if (activeOrderId) return activeOrderId;
@@ -226,6 +231,12 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
       (m) => m.message_type === 'offer' && m.offer_data?.status === 'accepted' && typeof m.offer_data?.order_id === 'number'
     )?.offer_data?.order_id;
     return typeof fromAcceptedOffer === 'number' && fromAcceptedOffer > 0 ? fromAcceptedOffer : null;
+  })();
+  const isOrderClient = (() => {
+    const clientId = (order as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id
+      ?? (order as { client_id?: unknown } | null)?.client_id;
+    if (!clientId) return false;
+    return Number(clientId) === currentUserId;
   })();
 
   useEffect(() => {
@@ -478,7 +489,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                       </span>
                     </div>
                   </div>
-                  {currentRole === 'expert' && (
+                  {currentRole === 'expert' && !isChatInitiator && (
                     <Button
                       type="primary"
                       size="small"
@@ -498,7 +509,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                     </Avatar>
                     <span style={{ fontWeight: 500 }}>{activeChat?.name}</span>
                   </div>
-                  {currentRole === 'expert' && (
+                  {currentRole === 'expert' && !isChatInitiator && (
                     <Button
                       type="primary"
                       size="small"
@@ -522,7 +533,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                     >
                       {`Заказ #${effectiveOrderId}`}{order?.deadline ? ` • ${formatRemaining(order.deadline, order.status)}` : ''}
                     </Button>
-                    {currentRole === 'expert' ? (
+                    {currentRole === 'expert' && !isChatInitiator ? (
                       <>
                         <input
                           ref={workFileInputRef}
@@ -591,7 +602,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                     const isLast = idx === messages.length - 1;
                     const showWorkActions =
                       isLast &&
-                      currentRole === 'client' &&
+                      isOrderClient &&
                       !!effectiveOrderId &&
                       order?.status === 'review' &&
                       !msg.isMine &&
@@ -642,7 +653,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                               </div>
                             ) : offerExpired ? (
                               <div style={{ color: '#9CA3AF' }}>Срок предложения истек</div>
-                            ) : userProfile?.role === 'client' && !msg.isMine ? (
+                            ) : !msg.isMine ? (
                               <div style={{ display: 'flex', gap: 8 }}>
                                 <Button
                                   type="primary"
@@ -657,7 +668,7 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                                 </Button>
                               </div>
                             ) : (
-                              <div style={{ color: '#9CA3AF' }}>Ожидает решения клиента</div>
+                              <div style={{ color: '#9CA3AF' }}>Ожидает решения получателя</div>
                             )}
                           </Card>
                         ) : (

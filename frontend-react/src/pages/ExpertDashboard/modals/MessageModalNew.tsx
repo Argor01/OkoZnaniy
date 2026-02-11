@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
@@ -17,6 +17,7 @@ import {
   UploadOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons';
+import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -55,6 +56,9 @@ type OrderForChat = {
   budget?: string | number | null;
   deadline?: string | null;
   status?: string | null;
+  is_overdue?: boolean | null;
+  client?: { id?: number | null } | null;
+  client_id?: number | null;
   subject?: { name?: string | null } | null;
   work_type?: { name?: string | null } | null;
   custom_subject?: string | null;
@@ -106,8 +110,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [showClaimCategories, setShowClaimCategories] = useState(false);
   const [selectedClaimCategory, setSelectedClaimCategory] = useState<string>('');
   const [claimFiles, setClaimFiles] = useState<File[]>([]);
+  const [overdueExtendModalOpen, setOverdueExtendModalOpen] = useState(false);
+  const [overdueDeadlineValue, setOverdueDeadlineValue] = useState<Dayjs | null>(null);
+  const [overdueExtending, setOverdueExtending] = useState(false);
+  const [overdueCancelling, setOverdueCancelling] = useState(false);
   const [orderRelevance, setOrderRelevance] = useState<string>(''); // Заказ актуален/не актуален
   const [refundType, setRefundType] = useState<string>(''); // Тип возврата средств
+  const [orderIntroByChatId, setOrderIntroByChatId] = useState<Record<number, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
   
@@ -287,6 +296,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const data = await chatApi.getById(chatId);
       await hydrateClosedOrdersForChat(data);
       setSelectedChat(data);
+      setOrderIntroByChatId((prev) => {
+        const hasMessages = Array.isArray(data.messages) && data.messages.length > 0;
+        if (!hasMessages) return prev;
+        if (!Object.prototype.hasOwnProperty.call(prev, chatId)) return prev;
+        const { [chatId]: _removed, ...rest } = prev;
+        return rest;
+      });
       await chatApi.markAsRead(chatId);
       setChatList((prev) => prev.map((chat) =>
         chat.id === chatId ? { ...chat, unread_count: 0 } : chat
@@ -344,11 +360,19 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             `Дедлайн: ${deadlineText}`,
           ].join('\n');
 
-          await chatApi.sendMessage(chatData.id, infoText);
-          await loadChatDetail(chatData.id);
+          setOrderIntroByChatId((prev) => ({ ...prev, [chatData.id]: infoText }));
         } catch {
-          await loadChatDetail(chatData.id);
+          setOrderIntroByChatId((prev) => {
+            if (Object.prototype.hasOwnProperty.call(prev, chatData.id)) return prev;
+            return { ...prev, [chatData.id]: `Этот чат по теме: Заказ #${orderId}` };
+          });
         }
+      } else {
+        setOrderIntroByChatId((prev) => {
+          if (!Object.prototype.hasOwnProperty.call(prev, chatData.id)) return prev;
+          const { [chatData.id]: _removed, ...rest } = prev;
+          return rest;
+        });
       }
       await loadChats();
     } catch (error: unknown) {
@@ -356,7 +380,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [hydrateClosedOrdersForChat, loadChatDetail, loadChats]);
+  }, [hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
     setLoading(true);
@@ -583,6 +607,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         return undefined;
       }
     })();
+  const currentUserId = (() => {
+    const rawId = localStorage.getItem('user_id');
+    const parsed = rawId ? Number(rawId) : NaN;
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return 0;
+      const id = Number(JSON.parse(raw)?.id);
+      return Number.isFinite(id) && id > 0 ? id : 0;
+    } catch {
+      return 0;
+    }
+  })();
+  const isChatInitiator = (() => {
+    if (!selectedChat) return false;
+    const msgs = (selectedChat as { messages?: unknown } | null)?.messages;
+    if (!Array.isArray(msgs) || msgs.length === 0) return true;
+    return !!(msgs[0] as { is_mine?: unknown } | undefined)?.is_mine;
+  })();
+  const isOrderClient = (() => {
+    const clientId = order?.client?.id ?? order?.client_id;
+    if (clientId) return Number(clientId) === currentUserId;
+    if (selectedChat) return isChatInitiator;
+    return false;
+  })();
 
   const remainingLabel = useMemo(() => {
     void deadlineTick;
@@ -1001,6 +1050,93 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const supportChat = safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null;
   const isSupportChatSelected = selectedChat?.other_user?.id === supportUserId;
 
+  const canOverdueClientActions =
+    !!selectedChat &&
+    isChatInitiator &&
+    !!effectiveOrderId &&
+    (order?.is_overdue === true || isDeadlineExpired(order?.deadline)) &&
+    (order?.status === 'in_progress' || order?.status === 'revision');
+
+  const openOverdueExtendModal = () => {
+    setOverdueDeadlineValue(dayjs().add(1, 'day'));
+    setOverdueExtendModalOpen(true);
+  };
+
+  const handleConfirmOverdueExtend = async () => {
+    if (!effectiveOrderId) return;
+    if (!overdueDeadlineValue) {
+      antMessage.error('Выберите новый дедлайн');
+      return;
+    }
+    if (overdueDeadlineValue.valueOf() <= dayjs().valueOf()) {
+      antMessage.error('Дедлайн не может быть в прошлом');
+      return;
+    }
+
+    setOverdueExtending(true);
+    try {
+      await ordersApi.extendDeadline(effectiveOrderId, overdueDeadlineValue.toISOString());
+      setOverdueExtendModalOpen(false);
+      await Promise.all([refreshOrder(), loadChats()]);
+      antMessage.success('Дедлайн продлён');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось продлить дедлайн');
+    } finally {
+      setOverdueExtending(false);
+    }
+  };
+
+  const handleCancelOverdueOrder = () => {
+    if (!effectiveOrderId) return;
+    Modal.confirm({
+      title: 'Отменить заказ?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Эксперту заказ зачтётся как невыполненный.',
+      okText: 'Отменить',
+      okButtonProps: { danger: true, loading: overdueCancelling },
+      cancelText: 'Назад',
+      onOk: async () => {
+        setOverdueCancelling(true);
+        try {
+          await ordersApi.cancelOverdue(effectiveOrderId);
+          await Promise.all([refreshOrder(), loadChats()]);
+          antMessage.success('Заказ отменён');
+        } catch (error: unknown) {
+          antMessage.error(getErrorDetail(error) || 'Не удалось отменить заказ');
+        } finally {
+          setOverdueCancelling(false);
+        }
+      },
+    });
+  };
+
+  const handleOverdueComplaint = async () => {
+    if (!effectiveOrderId) return;
+    const expertName = selectedChat?.other_user?.username || 'эксперт';
+    const deadlineText = order?.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан';
+    const title = order?.title || `Заказ #${effectiveOrderId}`;
+    const text = [
+      'Здравствуйте!',
+      '',
+      `Хочу подать претензию по заказу #${effectiveOrderId}.`,
+      `Заказ: ${title}`,
+      `Эксперт: ${expertName}`,
+      `Дедлайн: ${deadlineText}`,
+      'Причина: заказ не выполнен в срок.',
+      '',
+      'Описание ситуации:',
+      ''
+    ].join('\n');
+
+    await loadOrCreateChatWithUser(supportUserId);
+    setSelectedClaimCategory('Заказ не выполнен');
+    setOrderRelevance('Заказ актуален');
+    setRefundType('Возврат предоплаты');
+    setClaimText(text);
+    setShowClaimCategories(false);
+    setClaimModalOpen(true);
+  };
+
   const filteredChats = safeChatList.filter(chat => {
     // Поиск
     if (searchQuery) {
@@ -1306,7 +1442,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     ) : null}
                   </div>
                 </Space>
-                {currentRole === 'expert' && !isSupportChatSelected && (
+                {currentRole === 'expert' && !isSupportChatSelected && !isChatInitiator && (
                   <Button
                     type="primary"
                     size={isMobile ? 'small' : 'middle'}
@@ -1388,7 +1524,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           <Text strong>{order.title || `Заказ #${order.id}`}</Text>
                           <Text type="secondary">{formatOrderStatus(order.status)}</Text>
                         </div>
-                        {currentRole === 'expert' ? (
+                        {currentRole === 'expert' && !isChatInitiator ? (
                           <Button
                             type="primary"
                             size="small"
@@ -1400,6 +1536,34 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           >
                             Выгрузить работу
                           </Button>
+                        ) : canOverdueClientActions ? (
+                          <Space size={8} wrap>
+                            <Button
+                              type="primary"
+                              size="small"
+                              disabled={overdueCancelling}
+                              loading={overdueExtending}
+                              onClick={openOverdueExtendModal}
+                            >
+                              Продлить дедлайн
+                            </Button>
+                            <Button
+                              danger
+                              size="small"
+                              disabled={overdueExtending}
+                              loading={overdueCancelling}
+                              onClick={handleCancelOverdueOrder}
+                            >
+                              Отменить заказ
+                            </Button>
+                            <Button
+                              size="small"
+                              disabled={overdueExtending || overdueCancelling}
+                              onClick={handleOverdueComplaint}
+                            >
+                              Жалоба
+                            </Button>
+                          </Space>
                         ) : null}
                       </div>
                       <Text type="secondary">
@@ -1431,17 +1595,36 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           }}>
             {selectedChat ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
+                {orderIntroByChatId[selectedChat.id] ? (
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div
+                      style={{
+                        maxWidth: isMobile ? '92%' : 520,
+                        padding: '8px 12px',
+                        background: '#f3f4f6',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        color: '#6b7280',
+                        fontSize: isMobile ? 12 : 13,
+                        whiteSpace: 'pre-wrap',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {orderIntroByChatId[selectedChat.id]}
+                    </div>
+                  </div>
+                ) : null}
                 {selectedChat.messages.map((msg: Message, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const offerExpired = isOffer
                     ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
                     : false;
                   const offerStatus = isOffer ? (msg.offer_data?.status || 'new') : 'new';
-                  const showOfferActions = isOffer && currentRole === 'client' && !msg.is_mine && offerStatus === 'new' && !offerExpired;
+                  const showOfferActions = isOffer && !msg.is_mine && offerStatus === 'new' && !offerExpired;
                   const isLast = idx === selectedChat.messages.length - 1;
                   const showWorkActions =
                     isLast &&
-                    currentRole === 'client' &&
+                    isOrderClient &&
                     !!effectiveOrderId &&
                     order?.status === 'review' &&
                     !msg.is_mine &&
@@ -1521,7 +1704,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 </Button>
                               </div>
                             ) : (
-                              <div style={{ color: '#9CA3AF' }}>Ожидает решения клиента</div>
+                              <div style={{ color: '#9CA3AF' }}>Ожидает решения получателя</div>
                             )}
 
                             <div style={{ marginTop: 8 }}>
@@ -1834,6 +2017,33 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </div>
       </ErrorBoundary>
+
+      <Modal
+        open={overdueExtendModalOpen}
+        centered
+        onCancel={() => {
+          setOverdueExtendModalOpen(false);
+          setOverdueDeadlineValue(null);
+        }}
+        onOk={handleConfirmOverdueExtend}
+        okButtonProps={{ loading: overdueExtending }}
+        okText="Продлить"
+        cancelText="Отмена"
+        title="Продлить дедлайн"
+        destroyOnClose
+        width={isMobile ? '90%' : 520}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Text type="secondary">Выберите новый дедлайн</Text>
+          <DatePicker
+            showTime
+            style={{ width: '100%' }}
+            value={overdueDeadlineValue}
+            onChange={(v) => setOverdueDeadlineValue(v)}
+            format="DD.MM.YYYY HH:mm"
+          />
+        </div>
+      </Modal>
       
       {/* Claim Modal */}
       <Modal

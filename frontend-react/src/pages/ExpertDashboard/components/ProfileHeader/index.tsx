@@ -47,11 +47,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     if (!orders) return undefined;
 
     const now = Date.now();
-    const relevant = orders.filter((order) => {
-      if (order.status === 'completed') return true;
+    const isOverdue = (order: Order) => {
+      if (order.is_overdue === true) return true;
+      if (!(order.status === 'in_progress' || order.status === 'revision')) return false;
       const deadlineTime = new Date(order.deadline).getTime();
       if (!Number.isFinite(deadlineTime)) return false;
       return deadlineTime <= now;
+    };
+    const relevant = orders.filter((order) => {
+      if (order.status === 'completed') return true;
+      if (order.status === 'cancelled') return true;
+      return isOverdue(order);
     });
 
     if (relevant.length === 0) return 0;

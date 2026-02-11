@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Rate } from 'antd';
+import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Rate, Modal } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '../api/orders';
 import { authApi } from '../api/auth';
@@ -565,7 +565,7 @@ const OrderDetail: React.FC = () => {
           </Space>
         </Card>
       </div>
-      
+
       <BidModal
          visible={bidModalVisible}
          onClose={() => setBidModalVisible(false)}
