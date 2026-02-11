@@ -43,6 +43,12 @@ celerybeat.pid
 dmypy.json
 .pyre/
 
+# Test/Check scripts
+check_*.py
+test_*.py
+simple_test.py
+reproduce_issue.py
+
 # Next.js
 .next/
 out/
