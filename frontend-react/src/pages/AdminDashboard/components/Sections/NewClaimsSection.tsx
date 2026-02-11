@@ -90,11 +90,9 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
   
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
-  const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   
   const [rejectForm] = Form.useForm();
-  const [messageForm] = Form.useForm();
 
   // Мок данные для демонстрации
   const mockClaims: Claim[] = [
@@ -242,25 +240,6 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
     }
   };
 
-  const handleSendMessage = (claim: Claim) => {
-    setSelectedClaim(claim);
-    messageForm.resetFields();
-    setMessageModalVisible(true);
-  };
-
-  const handleMessageSubmit = async () => {
-    try {
-      const values = await messageForm.validateFields();
-      if (selectedClaim) {
-        onSendMessage?.(selectedClaim.id, values.message);
-        message.success('Сообщение отправлено');
-        setMessageModalVisible(false);
-      }
-    } catch (error) {
-      console.error('Validation failed:', error);
-    }
-  };
-
   // Функции для отображения
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -381,7 +360,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
     {
       title: 'Действия',
       key: 'actions',
-      width: 200,
+      width: 180,
       render: (record: Claim) => (
         <Space size="small">
           <Tooltip title="Просмотреть">
@@ -397,13 +376,6 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
               type="primary"
               icon={<CheckOutlined />}
               onClick={() => handleTakeInWork(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Отправить сообщение">
-            <Button 
-              size="small" 
-              icon={<MessageOutlined />}
-              onClick={() => handleSendMessage(record)}
             />
           </Tooltip>
           <Popconfirm
@@ -598,29 +570,6 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
             <TextArea 
               rows={4} 
               placeholder="Опишите причину отклонения обращения..."
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* Модальное окно отправки сообщения */}
-      <Modal
-        title="Отправить сообщение"
-        open={messageModalVisible}
-        onOk={handleMessageSubmit}
-        onCancel={() => setMessageModalVisible(false)}
-        okText="Отправить"
-        cancelText="Отмена"
-      >
-        <Form form={messageForm} layout="vertical">
-          <Form.Item
-            name="message"
-            label="Сообщение"
-            rules={[{ required: true, message: 'Введите сообщение' }]}
-          >
-            <TextArea 
-              rows={4} 
-              placeholder="Введите ваше сообщение..."
             />
           </Form.Item>
         </Form>

@@ -42,11 +42,6 @@ export const menuItems: MenuItem[] = [
     icon: DollarOutlined,
     label: 'Начисления',
   },
-  {
-    key: 'disputes',
-    icon: FileTextOutlined,
-    label: 'Споры',
-  },
   // Управление пользователями
   {
     key: 'users_management' as MenuKey,
@@ -117,11 +112,6 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    key: 'claims_processing',
-    icon: FileTextOutlined,
-    label: 'Обработка претензий',
-  },
-  {
     key: 'support_chats',
     icon: MessageOutlined,
     label: 'Чаты поддержки',
@@ -160,14 +150,12 @@ export const titleMap: Record<MenuKey, string> = {
   overview: 'Обзор',
   partners: 'Партнеры',
   earnings: 'Начисления',
-  disputes: 'Споры',
   // Обращения
   claims: 'Обращения',
   new_claims: 'Новые обращения',
   in_progress_claims: 'В работе',
   completed_claims: 'Завершённые',
   pending_approval: 'Ожидают решения',
-  claims_processing: 'Обработка претензий',
   internal_communication: 'Внутренняя коммуникация',
   // Управление пользователями
   users_management: 'Управление пользователями',

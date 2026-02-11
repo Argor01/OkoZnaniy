@@ -72,13 +72,11 @@ export type MenuKey =
   | 'overview'
   | 'partners' 
   | 'earnings'
-  | 'disputes'
   | 'claims'
   | 'new_claims'
   | 'in_progress_claims'
   | 'completed_claims'
   | 'pending_approval'
-  | 'claims_processing'
   | 'internal_communication'       // 🆕 Внутренняя коммуникация
   | 'support_open'                 // 🆕 Открытые запросы поддержки
   | 'support_in_progress'          // 🆕 Запросы поддержки в работе

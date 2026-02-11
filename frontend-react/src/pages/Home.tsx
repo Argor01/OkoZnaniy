@@ -9,6 +9,7 @@ import Prices from '../components/landing/sections/Prices';
 import OnlyPro from '../components/landing/sections/OnlyPro';
 import Reviews from '../components/landing/sections/Reviews';
 import LeaveOrder from '../components/landing/sections/LeaveOrder';
+import About from '../components/landing/sections/About';
 import FAQ from '../components/landing/sections/FAQ';
 import PlaceTaskInfo from '../components/landing/sections/PlaceTaskInfo';
 import Footer from '../components/landing/sections/Footer';
@@ -43,6 +44,7 @@ const Home: React.FC = () => {
         <OnlyPro />
         <Reviews />
         <LeaveOrder />
+        <About />
         <FAQ />
         <PlaceTaskInfo />
       </main>

@@ -21,7 +21,6 @@ import {
   OverviewSection, 
   PartnersSection, 
   EarningsSection, 
-  DisputesSection,
   SupportRequestsSection,
   SupportChatsSection,
   UsersManagementSection,
@@ -33,13 +32,12 @@ import {
   InProgressClaimsSection,
   CompletedClaimsSection,
   PendingApprovalSection,
-  ClaimsProcessingSection,
   AdminChatsSection,
   OpenRequestsSection,
   InProgressRequestsSection,
   CompletedRequestsSection
 } from './components/Sections';
-import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
+import { PartnerModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
 import type { MenuKey, SupportStatus } from './types';
 import { DirectorCommunicationSection } from './components/Sections/DirectorCommunicationSection';
@@ -75,23 +73,17 @@ const AdminDashboard: React.FC = () => {
     handleMenuClick, 
     handleEditPartner, 
     handleViewPartner,
-    handleViewDispute,
     partnerEditModalVisible,
     partnerViewModalVisible,
-    disputeModalVisible,
     selectedPartner,
-    selectedDispute,
-    closePartnerModals,
-    closeDisputeModals
+    closePartnerModals
   } = useAdminUI();
   
   const { 
     markEarningPaid, 
     updatePartner,
-    assignArbitrator, 
     isMarkingEarningPaid, 
-    isUpdatingPartner,
-    isAssigningArbitrator 
+    isUpdatingPartner
   } = useAdminMutations();
 
   // 🆕 Реальные данные из API
@@ -165,11 +157,6 @@ const AdminDashboard: React.FC = () => {
     closePartnerModals();
   };
 
-  const handleAssignArbitratorToDispute = (disputeId: number, arbitratorId: number) => {
-    assignArbitrator({ disputeId, arbitratorId });
-    closeDisputeModals();
-  };
-
   // Рендерим соответствующую секцию
   const renderSection = () => {
     switch (selectedMenu) {
@@ -179,7 +166,6 @@ const AdminDashboard: React.FC = () => {
             stats={adminData.stats}
             partners={adminData.partners}
             earnings={adminData.earnings}
-            disputes={adminData.disputes}
             isLoading={adminData.isLoading}
           />
         );
@@ -204,19 +190,6 @@ const AdminDashboard: React.FC = () => {
           />
         );
       
-      case 'disputes':
-        return (
-          <DisputesSection
-            disputes={adminData.disputes}
-            arbitrators={adminData.arbitrators}
-            loading={adminData.disputesLoading}
-            error={adminData.disputesError}
-            onViewDispute={handleViewDispute}
-            onAssignArbitrator={handleAssignArbitratorToDispute}
-            isAssigningArbitrator={isAssigningArbitrator}
-          />
-        );
-
       // Управление пользователями
       case 'all_users':
         return (
@@ -463,22 +436,6 @@ const AdminDashboard: React.FC = () => {
           />
         );
 
-      case 'claims_processing':
-        return (
-          <ClaimsProcessingSection
-            claims={[...newClaims, ...inProgressClaims]}
-            loading={newClaimsLoading || inProgressClaimsLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onAssignClaim={(claimId, adminId) => console.log('Assign claim:', claimId, adminId)}
-            onUpdateStatus={(claimId, status, notes) => console.log('Update status:', claimId, status, notes)}
-            onAddAction={(claimId, action) => console.log('Add action:', claimId, action)}
-            onResolveClaim={completeClaim}
-            onSendMessage={(claimId, message, recipient) => console.log('Send message:', claimId, message, recipient)}
-            onUploadEvidence={(claimId, file, type) => console.log('Upload evidence:', claimId, file, type)}
-            onScheduleCall={(claimId, datetime, participants) => console.log('Schedule call:', claimId, datetime, participants)}
-          />
-        );
-      
       default:
         return (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -520,16 +477,6 @@ const AdminDashboard: React.FC = () => {
         onUpdate={handleUpdatePartner}
         isUpdating={isUpdatingPartner}
         mode="view"
-      />
-      
-      <DisputeModal
-        visible={disputeModalVisible}
-        dispute={selectedDispute}
-        onCancel={closeDisputeModals}
-        onAssignArbitrator={(dispute) => {
-          // Логика назначения арбитра уже в DisputesSection
-          closeDisputeModals();
-        }}
       />
       
       {/* Модальное окно поддержки */}
