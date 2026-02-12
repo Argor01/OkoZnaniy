@@ -37,6 +37,8 @@ export interface ChatListItem {
   order: number;
   order_id?: number;
   order_title?: string | null;
+  client?: User | null;
+  expert?: User | null;
   participants: User[];
   other_user: User;
   last_message: {
@@ -55,6 +57,8 @@ export interface ChatDetail {
   order: number;
   order_id: number;
   order_title?: string | null;
+  client?: User | null;
+  expert?: User | null;
   participants: User[];
   other_user: User;
   messages: Message[];

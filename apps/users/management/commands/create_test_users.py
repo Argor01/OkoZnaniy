@@ -44,11 +44,6 @@ class Command(BaseCommand):
                 if role_value == Roles.ADMIN:
                     defaults['is_staff'] = True
                     defaults['is_superuser'] = True
-                if role_value == Roles.EXPERT:
-                    defaults['bio'] = f"Test expert profile: {username}"
-                    defaults['experience_years'] = 3
-                    defaults['hourly_rate'] = 1200
-                    defaults['is_verified'] = True
 
                 user, created = User.objects.get_or_create(username=username, defaults=defaults)
                 user.set_password(password)
@@ -59,11 +54,6 @@ class Command(BaseCommand):
                 if role_value == Roles.ADMIN:
                     user.is_staff = True
                     user.is_superuser = True
-                if role_value == Roles.EXPERT:
-                    user.bio = user.bio or f"Test expert profile: {username}"
-                    user.experience_years = user.experience_years or 3
-                    user.hourly_rate = user.hourly_rate or 1200
-                    user.is_verified = True
                 user.save()
 
                 created_or_updated.append(user)

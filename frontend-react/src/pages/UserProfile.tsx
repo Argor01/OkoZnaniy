@@ -31,8 +31,9 @@ const UserProfile: FC = () => {
       try {
         const response = await apiClient.get(`/orders/orders/?client=${userId}`);
         const orders = response.data as { results?: Array<{ status?: string }> };
-        const total = orders.results?.length || 0;
-        const completed = orders.results?.filter((order) => order.status === 'completed').length || 0;
+        const relevantOrders = (orders.results || []).filter((order) => order.status !== 'cancelled');
+        const total = relevantOrders.length;
+        const completed = relevantOrders.filter((order) => order.status === 'completed').length;
         const success_rate = total > 0 ? (completed / total) * 100 : 0;
         return { total, completed, success_rate };
       } catch (_error: unknown) {
@@ -228,26 +229,13 @@ const UserProfile: FC = () => {
                         </div>
                         <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         <Text>Завершено:</Text>
                         <Text strong style={{ color: '#52c41a' }}>{expertStats.completed_orders}</Text>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Text>Успешность:</Text>
-                        <Text strong style={{ color: '#52c41a' }}>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
-                      </div>
-                    </div>
-
-                    {/* Заработок */}
-                    <div style={{ textAlign: 'center', padding: '16px' }}>
-                      <div style={{ fontSize: 32, fontWeight: 600, color: '#52c41a', marginBottom: 8 }}>
-                        {expertStats.total_earnings?.toLocaleString('ru-RU', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })} ₽
-                      </div>
-                      <div style={{ fontSize: 14, color: '#666' }}>
-                        Общий заработок
+                        <Text strong style={{ color: '#52c41a' }}>{Number(expertStats.success_rate || 0).toFixed(1)}%</Text>
                       </div>
                     </div>
                   </div>
@@ -275,7 +263,7 @@ const UserProfile: FC = () => {
                         </div>
                         <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Text>Завершено:</Text>
                         <Text strong style={{ color: '#52c41a' }}>{ordersStats.completed}</Text>
                       </div>
@@ -314,6 +302,31 @@ const UserProfile: FC = () => {
                   }}
                 >
                   <Paragraph>{userData.education}</Paragraph>
+                </Card>
+              )}
+
+              {(userData.role === 'expert' && (userData.experience_years || userData.hourly_rate)) && (
+                <Card
+                  title="Дополнительно"
+                  style={{
+                    marginBottom: 16,
+                    borderRadius: 12,
+                  }}
+                >
+                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                    {!!userData.experience_years && (
+                      <Space size={8}>
+                        <Text>Опыт работы:</Text>
+                        <Text strong>{userData.experience_years} лет</Text>
+                      </Space>
+                    )}
+                    {!!userData.hourly_rate && (
+                      <Space size={8}>
+                        <Text>Почасовая ставка:</Text>
+                        <Text strong>{Number(userData.hourly_rate).toLocaleString('ru-RU')} ₽/час</Text>
+                      </Space>
+                    )}
+                  </Space>
                 </Card>
               )}
 
@@ -367,9 +380,23 @@ const UserProfile: FC = () => {
               >
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {userData.specializations.map(
-                    (spec: { custom_name?: string; subject?: { name?: string } }, index: number) => (
+                    (
+                      spec: {
+                        custom_name?: string;
+                        subject?: { name?: string };
+                        hourly_rate?: number | string;
+                        experience_years?: number | string;
+                      },
+                      index: number
+                    ) => (
                     <Tag key={index} color="blue">
-                      {spec?.custom_name || spec?.subject?.name || 'Специализация не указана'}
+                      {[
+                        spec?.custom_name || spec?.subject?.name || 'Специализация не указана',
+                        spec?.hourly_rate ? `${Number(spec.hourly_rate).toLocaleString('ru-RU')} ₽/час` : null,
+                        spec?.experience_years ? `${spec.experience_years} лет` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' • ')}
                     </Tag>
                   ))}
                 </div>

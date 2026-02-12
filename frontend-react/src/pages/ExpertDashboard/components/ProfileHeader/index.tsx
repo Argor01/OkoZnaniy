@@ -45,8 +45,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const computedSuccessRate = React.useMemo<number | undefined>(() => {
     if (!orders) return undefined;
+    if (!userProfile?.id) return undefined;
 
     const now = Date.now();
+    const currentUserId = Number(userProfile.id);
+    const isExecutorOrder = (order: Order) => {
+      const expertId =
+        order.expert?.id ?? (order as unknown as { expert_id?: unknown } | null)?.expert_id;
+      if (!expertId) return false;
+      return Number(expertId) === currentUserId;
+    };
     const isOverdue = (order: Order) => {
       if (order.is_overdue === true) return true;
       if (!(order.status === 'in_progress' || order.status === 'revision')) return false;
@@ -55,6 +63,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       return deadlineTime <= now;
     };
     const relevant = orders.filter((order) => {
+      if (!isExecutorOrder(order)) return false;
       if (order.status === 'completed') return true;
       if (order.status === 'cancelled') return true;
       return isOverdue(order);
@@ -63,7 +72,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     if (relevant.length === 0) return 0;
     const completedCount = relevant.filter((order) => order.status === 'completed').length;
     return (completedCount / relevant.length) * 100;
-  }, [orders]);
+  }, [orders, userProfile?.id]);
 
   const displayedSuccessRate =
     typeof computedSuccessRate === 'number'

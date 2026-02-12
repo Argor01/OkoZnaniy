@@ -30,6 +30,8 @@ class MessageSerializer(serializers.ModelSerializer):
 class ChatListSerializer(serializers.ModelSerializer):
     """Сериализатор для списка чатов (без всех сообщений)"""
     participants = UserSerializer(many=True, read_only=True)
+    client = UserSerializer(read_only=True)
+    expert = UserSerializer(read_only=True)
     last_message = serializers.SerializerMethodField()
     last_message_time = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
@@ -39,7 +41,19 @@ class ChatListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'order_id', 'order_title', 'participants', 'other_user', 'last_message', 'last_message_time', 'unread_count']
+        fields = [
+            'id',
+            'order',
+            'order_id',
+            'order_title',
+            'client',
+            'expert',
+            'participants',
+            'other_user',
+            'last_message',
+            'last_message_time',
+            'unread_count',
+        ]
         read_only_fields = ['participants', 'order']
 
     def get_order_id(self, obj):
@@ -89,6 +103,8 @@ class ChatListSerializer(serializers.ModelSerializer):
 class ChatDetailSerializer(serializers.ModelSerializer):
     """Сериализатор для детального просмотра чата (со всеми сообщениями)"""
     participants = UserSerializer(many=True, read_only=True)
+    client = UserSerializer(read_only=True)
+    expert = UserSerializer(read_only=True)
     messages = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
@@ -97,7 +113,18 @@ class ChatDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'order_id', 'order_title', 'participants', 'other_user', 'messages', 'unread_count']
+        fields = [
+            'id',
+            'order',
+            'order_id',
+            'order_title',
+            'client',
+            'expert',
+            'participants',
+            'other_user',
+            'messages',
+            'unread_count',
+        ]
         read_only_fields = ['participants', 'order']
 
     def get_order_id(self, obj):

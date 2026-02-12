@@ -471,7 +471,7 @@ const OrderDetail: React.FC = () => {
                                 src={bid.expert.avatar} 
                                 icon={<UserOutlined />}
                                 style={{ cursor: 'pointer' }}
-                                onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                                onClick={() => navigate(`/user/${bid.expert.id}`)}
                               />
                             }
                             title={
@@ -479,7 +479,7 @@ const OrderDetail: React.FC = () => {
                                 <Space>
                                   <Button 
                                     type="link" 
-                                    onClick={() => navigate(`/expert/${bid.expert.id}`)}
+                                    onClick={() => navigate(`/user/${bid.expert.id}`)}
                                     style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
                                   >
                                     <Text strong>{bid.expert.username}</Text>
@@ -542,7 +542,7 @@ const OrderDetail: React.FC = () => {
                   <div>
                     <Button 
                       type="link" 
-                      onClick={() => navigate(`/expert/${order.expert.id}`)}
+                      onClick={() => navigate(`/user/${order.expert.id}`)}
                       style={{ padding: 0, height: 'auto' }}
                     >
                       <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>{order.expert.username}</Text>

@@ -211,10 +211,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 related_object_type='order',
                 data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
             )
-            from apps.experts.models import ExpertStatistics
-
-            stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
-            stats.update_statistics()
+            from apps.experts.services import ExpertStatisticsService
+            ExpertStatisticsService.update_expert_statistics(order.expert)
 
         return Response(self.get_serializer(order).data)
 

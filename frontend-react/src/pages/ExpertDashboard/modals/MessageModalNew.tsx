@@ -622,9 +622,21 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   })();
   const isChatInitiator = (() => {
     if (!selectedChat) return false;
+    const chatClientId =
+      (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
+      (selectedChat as { client_id?: unknown } | null)?.client_id;
+    if (chatClientId) return Number(chatClientId) === currentUserId;
     const msgs = (selectedChat as { messages?: unknown } | null)?.messages;
     if (!Array.isArray(msgs) || msgs.length === 0) return true;
     return !!(msgs[0] as { is_mine?: unknown } | undefined)?.is_mine;
+  })();
+  const isChatExpert = (() => {
+    if (!selectedChat) return false;
+    const chatExpertId =
+      (selectedChat as { expert?: { id?: unknown } | null; expert_id?: unknown } | null)?.expert?.id ??
+      (selectedChat as { expert_id?: unknown } | null)?.expert_id;
+    if (chatExpertId) return Number(chatExpertId) === currentUserId;
+    return !isChatInitiator;
   })();
   const isOrderClient = (() => {
     const clientId = order?.client?.id ?? order?.client_id;
@@ -1052,7 +1064,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const canOverdueClientActions =
     !!selectedChat &&
-    isChatInitiator &&
+    isOrderClient &&
     !!effectiveOrderId &&
     (order?.is_overdue === true || isDeadlineExpired(order?.deadline)) &&
     (order?.status === 'in_progress' || order?.status === 'revision');
@@ -1442,7 +1454,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     ) : null}
                   </div>
                 </Space>
-                {currentRole === 'expert' && !isSupportChatSelected && !isChatInitiator && (
+                {currentRole === 'expert' && !isSupportChatSelected && isChatExpert && (
                   <Button
                     type="primary"
                     size={isMobile ? 'small' : 'middle'}
@@ -1524,7 +1536,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           <Text strong>{order.title || `Заказ #${order.id}`}</Text>
                           <Text type="secondary">{formatOrderStatus(order.status)}</Text>
                         </div>
-                        {currentRole === 'expert' && !isChatInitiator ? (
+                        {currentRole === 'expert' && isChatExpert ? (
                           <Button
                             type="primary"
                             size="small"

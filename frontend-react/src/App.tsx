@@ -37,7 +37,6 @@ import Login from './pages/Login';
 import GoogleCallback from './pages/GoogleCallback';
 import CreateOrder from './pages/CreateOrder';
 import ExpertDashboard from './pages/ExpertDashboard';
-import ExpertProfile from './pages/ExpertProfile';
 import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';
 import BecomePartner from './pages/BecomePartner';
@@ -154,10 +153,10 @@ const App: React.FC = () => {
                 element={<BecomePartner />} 
               />
               <Route 
-                path="/expert/:expertId" 
+                path="/expert/:userId" 
                 element={
                   <DashboardLayout>
-                    <ExpertProfile />
+                    <UserProfile />
                   </DashboardLayout>
                 } 
               />

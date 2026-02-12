@@ -161,6 +161,12 @@ class ChatViewSet(viewsets.ModelViewSet):
             
         if request.user == message.sender:
             return Response({'detail': 'Нельзя принять свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user not in chat.participants.all():
+            return Response(
+                {'detail': 'Вы не являетесь участником этого чата'},
+                status=status.HTTP_403_FORBIDDEN
+            )
             
         # Проверка срока действия (2 дня)
         from django.utils import timezone
@@ -195,9 +201,22 @@ class ChatViewSet(viewsets.ModelViewSet):
             subject_id = offer_data.get('subject_id')
             work_type_id = offer_data.get('work_type_id')
 
+            client_user = chat.client or request.user
+            expert_user = chat.expert or message.sender
+
+            if chat.client_id and request.user.id != chat.client_id:
+                return Response({'detail': 'Только заказчик может принять предложение'}, status=status.HTTP_403_FORBIDDEN)
+
+            if not chat.client_id:
+                chat.client = client_user
+            if not chat.expert_id:
+                chat.expert = expert_user
+            if not chat.client_id or not chat.expert_id:
+                chat.save(update_fields=['client', 'expert'])
+
             order = Order.objects.create(
-                client=request.user,
-                expert=message.sender,
+                client=client_user,
+                expert=expert_user,
                 subject_id=subject_id if subject_id else None,
                 work_type_id=work_type_id if work_type_id else None,
                 custom_subject=offer_data.get('subject') if not subject_id else None,
@@ -401,8 +420,18 @@ class ChatViewSet(viewsets.ModelViewSet):
         
         # Если чат не найден, создаем новый
         if not chat:
-            chat = Chat.objects.create(order=None)
+            chat = Chat.objects.create(order=None, client=request.user, expert=other_user)
             chat.participants.add(request.user, other_user)
+        else:
+            updated_fields = []
+            if not chat.client_id:
+                chat.client = request.user
+                updated_fields.append('client')
+            if not chat.expert_id:
+                chat.expert = other_user
+                updated_fields.append('expert')
+            if updated_fields:
+                chat.save(update_fields=updated_fields)
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
