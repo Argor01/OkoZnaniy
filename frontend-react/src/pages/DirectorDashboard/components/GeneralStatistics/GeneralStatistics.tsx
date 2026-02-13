@@ -407,16 +407,6 @@ const GeneralStatistics: React.FC = () => {
 
       {/* Графики */}
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginTop: 24 }}>
-        <Col span={24}>
-          <Card style={{ borderRadius: isMobile ? 8 : 12, textAlign: 'center', padding: '40px 20px' }}>
-            <Typography.Title level={4} style={{ color: '#8c8c8c' }}>
-              Детальная статистика в разработке
-            </Typography.Title>
-            <Typography.Text type="secondary">
-              Графики и дополнительная аналитика будут добавлены в следующих версиях
-            </Typography.Text>
-          </Card>
-        </Col>
       </Row>
     </div>
   );
