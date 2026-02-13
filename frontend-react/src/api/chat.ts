@@ -170,3 +170,15 @@ export const chatApi = {
     return response.data.unread_count;
   },
 };
+
+  // Создать претензию
+  createClaim: async (data: {
+    order_id?: number;
+    claim_type: string;
+    subject: string;
+    description: string;
+  }): Promise<any> => {
+    const response = await apiClient.post('/admin-panel/claims/', data);
+    return response.data;
+  },
+};
