@@ -855,7 +855,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     setClaimSubmitting(true);
     try {
-      let claimMessage = `🚨 ПРЕТЕНЗИЯ: ${selectedClaimCategory}\n\n`;
+      // Маппинг категорий претензий на типы БД
+      const claimTypeMap: Record<string, string> = {
+        'Заказ не выполнен': 'refund',
+        'Заказ выполнен некачественно/частично': 'quality',
+        'Заказ не оплачен': 'refund',
+        'Необоснованный отзыв': 'complaint',
+        'Магазин готовых работ': 'complaint',
+        'Другое': 'other',
+      };
+      
+      const claimType = claimTypeMap[selectedClaimCategory] || 'other';
+      
+      // Создаем претензию в БД
+      const claim = await chatApi.createClaim({
+        order_id: effectiveOrderId || undefined,
+        claim_type: claimType,
+        subject: selectedClaimCategory,
+        description: claimText.trim(),
+      });
+      
+      // Формируем сообщение со ссылкой на претензию
+      let claimMessage = `🚨 ПРЕТЕНЗИЯ #${claim.id}: ${selectedClaimCategory}\n\n`;
       
       // Добавляем дополнительные поля для категории "Заказ не выполнен"
       if (selectedClaimCategory === 'Заказ не выполнен') {
