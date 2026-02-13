@@ -435,7 +435,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
     },
   ];
 
-  const requestsData = requests.length > 0 ? requests : mockRequests;
+  const requestsData = requests;
   
   // Фильтрация данных
   const filteredRequests = requestsData.filter(request => {

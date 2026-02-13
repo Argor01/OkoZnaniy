@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Grid } from 'antd';
 import type { MenuKey, Partner, Dispute } from '../types';
 import type { CustomerRequest, AdminChatGroup } from '../types/requests.types'; // 🆕
@@ -14,8 +14,18 @@ export const useAdminUI = () => {
   const screens = useBreakpoint();
   const confirmModal = useConfirmModal();
   
+  // Загружаем сохраненную вкладку из localStorage или используем 'overview' по умолчанию
+  const getSavedMenu = (): MenuKey => {
+    try {
+      const saved = localStorage.getItem('adminDashboard_selectedMenu');
+      return (saved as MenuKey) || 'overview';
+    } catch {
+      return 'overview';
+    }
+  };
+  
   // Состояние меню
-  const [selectedMenu, setSelectedMenu] = useState<MenuKey>('overview');
+  const [selectedMenu, setSelectedMenu] = useState<MenuKey>(getSavedMenu());
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
@@ -51,11 +61,36 @@ export const useAdminUI = () => {
   const isTablet = screens.md && !screens.lg;
   const isDesktop = screens.lg;
 
+  // Автоматически открываем нужное подменю при загрузке
+  useEffect(() => {
+    const menu = selectedMenu;
+    
+    if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(menu)) {
+      setOpenKeys(['claims']);
+    } else if (['support_open', 'support_in_progress', 'support_completed', 'support_chats'].includes(menu)) {
+      setOpenKeys(['support']);
+    } else if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(menu)) {
+      setOpenKeys(['request_processing']);
+    } else if (['all_users', 'blocked_users', 'user_roles'].includes(menu)) {
+      setOpenKeys(['users']);
+    } else if (['all_orders', 'problem_orders'].includes(menu)) {
+      setOpenKeys(['orders']);
+    }
+  }, [selectedMenu]);
+
   /**
    * Обработчик выбора пункта меню
+   * Сохраняет выбранную вкладку в localStorage
    */
   const handleMenuClick = useCallback((key: MenuKey) => {
     setSelectedMenu(key);
+    
+    // Сохраняем выбранную вкладку в localStorage
+    try {
+      localStorage.setItem('adminDashboard_selectedMenu', key);
+    } catch (error) {
+      console.error('Failed to save menu selection:', error);
+    }
     
     // Если выбран подпункт обращений, открываем меню "Обращения"
     if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(key)) {

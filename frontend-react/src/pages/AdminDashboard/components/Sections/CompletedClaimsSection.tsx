@@ -318,7 +318,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
     },
   ];
 
-  const claimsData = claims.length > 0 ? claims : mockClaims;
+  const claimsData = claims;
 
   // Фильтрация данных
   const filteredClaims = claimsData.filter(claim => {
@@ -761,7 +761,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
               <div style={{ flex: 1 }}>
                 <Text strong>Пользователь:</Text>
                 <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Avatar icon={<UserOutlined />} />
+                  <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
                     <Text type="secondary">@{selectedClaim.user.username}</Text>
@@ -774,7 +774,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
               <div style={{ flex: 1 }}>
                 <Text strong>Администратор:</Text>
                 <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Avatar icon={<UserOutlined />} />
+                  <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
                     <Text type="secondary">@{selectedClaim.assigned_admin.username}</Text>

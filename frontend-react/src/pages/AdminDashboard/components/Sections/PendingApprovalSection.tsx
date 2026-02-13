@@ -301,7 +301,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
     },
   ];
 
-  const claimsData = claims.length > 0 ? claims : mockClaims;
+  const claimsData = claims;
 
   // Фильтрация данных
   const filteredClaims = claimsData.filter(claim => {

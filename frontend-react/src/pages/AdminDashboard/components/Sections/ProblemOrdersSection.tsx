@@ -257,7 +257,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
     },
   ];
 
-  const dataSource = orders.length > 0 ? orders : mockProblemOrders;
+  const dataSource = orders;
 
   // Фильтрация данных
   const filteredData = dataSource.filter(order => {

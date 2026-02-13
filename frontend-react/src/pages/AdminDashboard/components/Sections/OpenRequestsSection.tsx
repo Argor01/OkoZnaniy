@@ -335,7 +335,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
     },
   ];
 
-  const requestsData = requests.length > 0 ? requests : mockRequests;
+  const requestsData = requests;
   
   // Фильтрация данных
   const filteredRequests = requestsData.filter(request => {

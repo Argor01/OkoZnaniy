@@ -189,7 +189,7 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
     <Card title="Управление пользователями">
       <Table
         columns={columns}
-        dataSource={users.length > 0 ? users : mockUsers}
+        dataSource={users}
         rowKey="id"
         loading={loading}
         pagination={{ pageSize: 10 }}

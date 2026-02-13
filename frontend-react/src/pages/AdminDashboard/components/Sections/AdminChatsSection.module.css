@@ -1,0 +1,219 @@
+/* Адаптивные стили для чата администратора */
+
+.chatContainer {
+  height: 80vh;
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.chatListCard {
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.chatListCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chatRoomItem {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.chatRoomItem:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.chatRoomItemActive {
+  background-color: #f0f8ff !important;
+  border-left: 3px solid #1890ff !important;
+}
+
+.messageContainer {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.messageBubble {
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.messageBubble:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+.inputArea {
+  transition: all 0.2s ease;
+}
+
+.sendButton {
+  transition: all 0.2s ease;
+}
+
+.sendButton:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25) !important;
+}
+
+.sendButton:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .chatContainer {
+    flex-direction: column;
+    gap: 8px;
+    height: 90vh;
+  }
+
+  .chatListCard {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .chatMainCard {
+    width: 100% !important;
+    height: 85vh !important;
+  }
+
+  .messageContainer {
+    padding: 12px !important;
+  }
+
+  .participantAvatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 10px !important;
+  }
+
+  .backButton {
+    display: flex !important;
+  }
+}
+
+/* Планшетная адаптация */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chatListCard {
+    width: 280px !important;
+  }
+
+  .messageContainer {
+    padding: 14px !important;
+  }
+}
+
+/* Десктопная версия */
+@media (min-width: 1025px) {
+  .chatListCard {
+    width: 350px !important;
+  }
+
+  .messageContainer {
+    padding: 16px !important;
+  }
+}
+
+/* Скроллбар */
+.chatScrollArea::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.chatScrollArea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.chatScrollArea::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.chatScrollArea::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Анимация для уведомлений */
+.unreadBadge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Статус онлайн */
+.onlineIndicator {
+  animation: blink 3s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Плавное появление модальных окон */
+.modalContent {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивная типографика */
+@media (max-width: 768px) {
+  .chatTitle {
+    font-size: 14px !important;
+  }
+
+  .messageText {
+    font-size: 13px !important;
+  }
+
+  .timestamp {
+    font-size: 10px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .chatTitle {
+    font-size: 16px !important;
+  }
+
+  .messageText {
+    font-size: 14px !important;
+  }
+
+  .timestamp {
+    font-size: 11px !important;
+  }
+}

@@ -652,7 +652,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           <div style={{ marginBottom: 8 }}>
             <Text strong style={{ fontSize: '11px' }}>Клиент:</Text>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Avatar size={48} icon={<UserOutlined />} />
+              <Avatar size={32} icon={<UserOutlined />} />
               <span style={{ fontSize: '12px' }}>
                 {record.user.first_name} {record.user.last_name}
               </span>
@@ -662,7 +662,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             <div>
               <Text strong style={{ fontSize: '11px' }}>Эксперт:</Text>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Avatar size={48} icon={<UserOutlined />} />
+                <Avatar size={32} icon={<UserOutlined />} />
                 <span style={{ fontSize: '12px' }}>
                   {record.expert.first_name} {record.expert.last_name}
                 </span>
@@ -995,7 +995,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                   <div style={{ marginBottom: 16 }}>
                     <Text strong>Клиент:</Text>
                     <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Avatar icon={<UserOutlined />} />
+                      <Avatar size={32} icon={<UserOutlined />} />
                       <div>
                         <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
                         <Text type="secondary">@{selectedClaim.user.username}</Text>
@@ -1017,7 +1017,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                     <div style={{ marginBottom: 16 }}>
                       <Text strong>Эксперт:</Text>
                       <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Avatar icon={<UserOutlined />} />
+                        <Avatar size={32} icon={<UserOutlined />} />
                         <div>
                           <div>{selectedClaim.expert.first_name} {selectedClaim.expert.last_name}</div>
                           <Text type="secondary">@{selectedClaim.expert.username}</Text>

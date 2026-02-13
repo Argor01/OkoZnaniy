@@ -1,35 +1,84 @@
+/* Адаптивные стили для чата поддержки с современным дизайном */
+
 .supportChatsSection {
   height: 100%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatItem {
-  transition: background-color 0.2s ease;
-  border-radius: 6px;
+  transition: all 0.2s ease;
+  border-radius: 8px;
   margin-bottom: 4px;
+  cursor: pointer;
 }
 
 .chatItem:hover {
   background-color: #f5f5f5 !important;
+  transform: translateX(4px);
 }
 
 .chatItem.selected {
-  background-color: #e6f7ff !important;
-  border: 1px solid #1890ff;
+  background-color: #f0f8ff !important;
+  border-left: 4px solid #667eea !important;
 }
 
 .messagesContainer {
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 16px;
-  background-color: #fafafa;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+}
+
+/* Кастомный скроллбар */
+.messagesContainer::-webkit-scrollbar,
+.chatScrollArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-track,
+.chatScrollArea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb,
+.chatScrollArea::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb:hover,
+.chatScrollArea::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
 .messageItem {
   margin-bottom: 16px;
   display: flex;
+  animation: fadeInUp 0.3s ease;
 }
 
 .messageItem.fromAdmin {
@@ -38,25 +87,41 @@
 
 .messageContent {
   max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
   word-wrap: break-word;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  line-height: 1.5;
+}
+
+.messageContent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .messageContent.fromAdmin {
-  background-color: #1890ff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.messageContent.fromAdmin:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .messageContent.fromUser {
-  background-color: #f0f0f0;
-  color: black;
+  background-color: white;
+  color: #333;
+  border-radius: 18px 18px 18px 4px;
 }
 
 .messageTime {
   font-size: 11px;
   opacity: 0.8;
-  margin-top: 4px;
+  margin-top: 6px;
+  font-weight: 500;
 }
 
 .messageTime.fromAdmin {
@@ -77,9 +142,11 @@
 
 .chatInfo {
   margin-bottom: 16px;
-  padding: 12px;
-  background-color: #fafafa;
-  border-radius: 6px;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .inputGroup {
@@ -90,22 +157,33 @@
 
 .messageInput {
   flex: 1;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+  padding: 10px 14px;
+}
+
+.messageInput:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .actionButtons {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .attachedFiles {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .sendHint {
   font-size: 11px;
   color: #999;
-  margin-top: 4px;
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 500;
 }
 
 .chatHeader {
@@ -135,4 +213,58 @@
   justify-content: center;
   height: 400px;
   color: #999;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .messageContent {
+    max-width: 85%;
+    padding: 10px 14px;
+  }
+  
+  .chatInfo {
+    padding: 12px;
+  }
+  
+  .messagesContainer {
+    height: 300px;
+    padding: 12px;
+  }
+}
+
+/* Анимация для кнопок */
+.sendButton {
+  transition: all 0.3s ease;
+}
+
+.sendButton:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.sendButton:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.attachButton {
+  transition: all 0.3s ease;
+}
+
+.attachButton:hover {
+  transform: scale(1.05);
+  border-color: #667eea;
+}
+
+/* Выравнивание аватарки по центру */
+:global(.ant-list-item) {
+  align-items: center !important;
+}
+
+:global(.ant-list-item-meta) {
+  align-items: center !important;
+}
+
+:global(.ant-list-item-meta-avatar) {
+  align-self: center !important;
+  margin-top: 0 !important;
 }

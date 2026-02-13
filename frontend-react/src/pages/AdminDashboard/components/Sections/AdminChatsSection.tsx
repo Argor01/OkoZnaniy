@@ -31,6 +31,7 @@ import {
   EditOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import styles from './AdminChatsSection.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -106,6 +107,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
   const [createRoomModalVisible, setCreateRoomModalVisible] = useState(false);
   const [inviteUserModalVisible, setInviteUserModalVisible] = useState(false);
@@ -115,6 +117,16 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const [createRoomForm] = Form.useForm();
   const [inviteUserForm] = Form.useForm();
   const [editRoomForm] = Form.useForm();
+
+  // Отслеживание размера окна для адаптивности
+  React.useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
+  const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
   // Мок данные для демонстрации
   const mockChatRooms: ChatRoom[] = [
@@ -284,7 +296,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
     },
   ];
 
-  const chatRoomsData = chatRooms.length > 0 ? chatRooms : mockChatRooms;
+  // Используем только реальные данные из БД
+  const chatRoomsData = chatRooms;
 
   // Мок сообщения для выбранной комнаты
   const mockMessages: ChatMessage[] = selectedRoom ? [
@@ -446,22 +459,39 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   };
 
   return (
-    <div style={{ height: '80vh', display: 'flex' }}>
+    <div 
+      className={styles.chatContainer}
+      style={{ 
+        height: '80vh', 
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 8 : 16
+      }}
+    >
       {/* Левая панель - список чатов */}
       <Card 
-        style={{ width: 350, marginRight: 16, height: '100%' }}
+        className={styles.chatListCard}
+        style={{ 
+          width: isMobile ? '100%' : isTablet ? 280 : 350,
+          marginRight: isMobile ? 0 : 0,
+          height: isMobile && selectedRoom ? '0' : isMobile ? '50vh' : '100%',
+          overflow: isMobile && selectedRoom ? 'hidden' : 'visible',
+          display: isMobile && selectedRoom ? 'none' : 'block'
+        }}
         styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
       >
-        <div style={{ padding: 16, borderBottom: '1px solid #f0f0f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Title level={5} style={{ margin: 0 }}>Внутренняя коммуникация</Title>
+        <div style={{ padding: isMobile ? 12 : 16, borderBottom: '1px solid #f0f0f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <Title level={5} style={{ margin: 0, fontSize: isMobile ? 14 : 16 }}>
+              {isMobile ? 'Чаты' : 'Внутренняя коммуникация'}
+            </Title>
             <Button 
               type="primary" 
               size="small"
               icon={<PlusOutlined />}
               onClick={() => setCreateRoomModalVisible(true)}
             >
-              Создать
+              {isMobile ? '' : 'Создать'}
             </Button>
           </div>
           
@@ -479,10 +509,11 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             renderItem={(room) => (
               <List.Item
                 style={{ 
-                  padding: '12px 16px',
+                  padding: isMobile ? '10px 12px' : '12px 16px',
                   cursor: 'pointer',
                   backgroundColor: selectedRoom?.id === room.id ? '#f0f8ff' : 'transparent',
-                  borderLeft: selectedRoom?.id === room.id ? '3px solid #1890ff' : '3px solid transparent'
+                  borderLeft: selectedRoom?.id === room.id ? '3px solid #1890ff' : '3px solid transparent',
+                  transition: 'all 0.2s ease'
                 }}
                 onClick={() => setSelectedRoom(room)}
               >
@@ -490,14 +521,15 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   avatar={
                     <Badge count={room.unread_count}>
                       <div style={{ 
-                        width: 40, 
-                        height: 40, 
+                        width: isMobile ? 36 : 40, 
+                        height: isMobile ? 36 : 40, 
                         borderRadius: '50%', 
                         backgroundColor: getRoomTypeColor(room.type),
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'white'
+                        color: 'white',
+                        fontSize: isMobile ? 14 : 16
                       }}>
                         <TeamOutlined />
                       </div>
@@ -544,27 +576,43 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       {/* Правая панель - чат */}
       {selectedRoom ? (
         <Card 
-          style={{ flex: 1, height: '100%' }}
+          style={{ 
+            flex: 1, 
+            height: isMobile ? '85vh' : '100%',
+            width: isMobile ? '100%' : 'auto'
+          }}
           styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
         >
           {/* Заголовок чата */}
           <div style={{ 
-            padding: 16, 
+            padding: isMobile ? 12 : 16, 
             borderBottom: '1px solid #f0f0f0',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
+            backgroundColor: 'white'
           }}>
-            <div>
-              <Title level={5} style={{ margin: 0 }}>
-                {selectedRoom.name}
-              </Title>
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                {selectedRoom.participants.filter(p => p.online).length} онлайн из {selectedRoom.participants.length}
-              </Text>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isMobile && (
+                <Button 
+                  size="small" 
+                  onClick={() => setSelectedRoom(null)}
+                  style={{ flexShrink: 0 }}
+                >
+                  ←
+                </Button>
+              )}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <Title level={5} style={{ margin: 0, fontSize: isMobile ? 14 : 16, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {selectedRoom.name}
+                </Title>
+                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                  {selectedRoom.participants.filter(p => p.online).length} онлайн из {selectedRoom.participants.length}
+                </Text>
+              </div>
             </div>
             
-            <Space>
+            <Space size={isMobile ? 4 : 8}>
               <Tooltip title="Участники">
                 <Button 
                   size="small" 
@@ -582,9 +630,17 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             </Space>
           </div>       
    {/* Список участников */}
-          <div style={{ padding: '8px 16px', borderBottom: '1px solid #f0f0f0' }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {selectedRoom.participants.slice(0, 8).map(participant => (
+          <div style={{ 
+            padding: isMobile ? '6px 12px' : '8px 16px', 
+            borderBottom: '1px solid #f0f0f0',
+            backgroundColor: 'white',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <div style={{ display: 'inline-flex', gap: isMobile ? 6 : 8 }}>
+              {selectedRoom.participants.slice(0, isMobile ? 6 : 8).map(participant => (
                 <Tooltip 
                   key={participant.id}
                   title={`${participant.first_name} ${participant.last_name} (${participant.role}) ${participant.online ? '• Онлайн' : `• Был(а) ${dayjs(participant.last_seen).fromNow()}`}`}
@@ -595,35 +651,37 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     offset={[-2, 2]}
                   >
                     <div style={{ 
-                      width: 32, 
-                      height: 32, 
+                      width: isMobile ? 28 : 32, 
+                      height: isMobile ? 28 : 32, 
                       borderRadius: '50%', 
                       backgroundColor: participant.online ? '#52c41a' : '#d9d9d9',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: 'white',
-                      fontSize: '12px',
-                      cursor: 'pointer'
+                      fontSize: isMobile ? 10 : 12,
+                      cursor: 'pointer',
+                      flexShrink: 0
                     }}>
                       {participant.first_name[0]}{participant.last_name[0]}
                     </div>
                   </Badge>
                 </Tooltip>
               ))}
-              {selectedRoom.participants.length > 8 && (
+              {selectedRoom.participants.length > (isMobile ? 6 : 8) && (
                 <div style={{ 
-                  width: 32, 
-                  height: 32, 
+                  width: isMobile ? 28 : 32, 
+                  height: isMobile ? 28 : 32, 
                   borderRadius: '50%', 
                   backgroundColor: '#f0f0f0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '12px',
-                  color: '#666'
+                  fontSize: isMobile ? 10 : 12,
+                  color: '#666',
+                  flexShrink: 0
                 }}>
-                  +{selectedRoom.participants.length - 8}
+                  +{selectedRoom.participants.length - (isMobile ? 6 : 8)}
                 </div>
               )}
             </div>
@@ -633,29 +691,29 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
           <div style={{ 
             flex: 1, 
             overflow: 'auto', 
-            padding: 16,
-            backgroundColor: '#fafafa'
+            padding: isMobile ? 12 : 16,
+            backgroundColor: '#f5f5f5'
           }}>
             {mockMessages.map((msg) => (
               <div 
                 key={msg.id} 
                 style={{ 
-                  marginBottom: 16,
+                  marginBottom: isMobile ? 12 : 16,
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: 8
+                  gap: isMobile ? 6 : 8
                 }}
               >
                 <div style={{ 
-                  width: 32, 
-                  height: 32, 
+                  width: isMobile ? 28 : 32, 
+                  height: isMobile ? 28 : 32, 
                   borderRadius: '50%', 
                   backgroundColor: msg.is_system ? '#666' : '#1890ff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  fontSize: '12px',
+                  fontSize: isMobile ? 10 : 12,
                   flexShrink: 0
                 }}>
                   {msg.is_system ? 'S' : `${msg.sender.first_name[0]}${msg.sender.last_name[0]}`}
@@ -666,34 +724,41 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    gap: 8, 
-                    marginBottom: 4 
+                    gap: isMobile ? 4 : 8, 
+                    marginBottom: 4,
+                    flexWrap: 'wrap'
                   }}>
-                    <Text strong style={{ fontSize: '13px' }}>
+                    <Text strong style={{ fontSize: isMobile ? 12 : 13 }}>
                       {msg.sender.first_name} {msg.sender.last_name}
                     </Text>
-                    <Tag color="blue">
-                      {msg.sender.role}
-                    </Tag>
-                    <Text type="secondary" style={{ fontSize: '11px' }}>
+                    {!isMobile && (
+                      <Tag color="blue" style={{ fontSize: 11 }}>
+                        {msg.sender.role}
+                      </Tag>
+                    )}
+                    <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11 }}>
                       {dayjs(msg.sent_at).format('HH:mm')}
                     </Text>
                     {msg.is_pinned && (
-                      <PushpinOutlined style={{ color: '#faad14', fontSize: '12px' }} />
+                      <PushpinOutlined style={{ color: '#faad14', fontSize: isMobile ? 11 : 12 }} />
                     )}
                   </div>  
                 {/* Текст сообщения */}
                   <div style={{ 
                     backgroundColor: msg.is_system ? '#f6f6f6' : 'white',
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    border: msg.is_pinned ? '1px solid #faad14' : '1px solid #f0f0f0',
-                    position: 'relative'
+                    padding: isMobile ? '8px 12px' : '10px 14px',
+                    borderRadius: isMobile ? 8 : 10,
+                    border: msg.is_pinned ? '1px solid #faad14' : '1px solid #e8e8e8',
+                    position: 'relative',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                    maxWidth: '100%',
+                    wordBreak: 'break-word'
                   }}>
                     <Text style={{ 
-                      fontSize: '14px',
+                      fontSize: isMobile ? 13 : 14,
                       fontStyle: msg.is_system ? 'italic' : 'normal',
-                      color: msg.is_system ? '#666' : 'inherit'
+                      color: msg.is_system ? '#666' : 'inherit',
+                      lineHeight: 1.5
                     }}>
                       {msg.text}
                     </Text>
@@ -705,22 +770,27 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
 
           {/* Поле ввода сообщения */}
           <div style={{ 
-            padding: 16, 
+            padding: isMobile ? 12 : 16, 
             borderTop: '1px solid #f0f0f0',
             backgroundColor: 'white'
           }}>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', width: '100%' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: isMobile ? 6 : 10, 
+              alignItems: 'flex-end', 
+              width: '100%' 
+            }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <TextArea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 2, maxRows: 6 }}
+                  autoSize={{ minRows: isMobile ? 1 : 2, maxRows: isMobile ? 4 : 6 }}
                   style={{
-                    borderRadius: 12,
+                    borderRadius: isMobile ? 8 : 12,
                     border: '1px solid #e5e7eb',
-                    fontSize: 15,
-                    padding: '10px 14px',
+                    fontSize: isMobile ? 14 : 15,
+                    padding: isMobile ? '8px 12px' : '10px 14px',
                     resize: 'none'
                   }}
                   onPressEnter={(e) => {
@@ -732,25 +802,27 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 />
               </div>
               
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                <Upload
-                  beforeUpload={handleFileUpload}
-                  showUploadList={false}
-                  multiple
-                >
-                  <Button 
-                    icon={<UploadOutlined />}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      border: '1px solid #e5e7eb',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  />
-                </Upload>
+              <div style={{ display: 'flex', gap: isMobile ? 4 : 8, alignItems: 'center', flexShrink: 0 }}>
+                {!isMobile && (
+                  <Upload
+                    beforeUpload={handleFileUpload}
+                    showUploadList={false}
+                    multiple
+                  >
+                    <Button 
+                      icon={<UploadOutlined />}
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        border: '1px solid #e5e7eb',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    />
+                  </Upload>
+                )}
                 
                 <Button 
                   type="primary" 
@@ -758,27 +830,30 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   onClick={handleSendMessage}
                   disabled={!messageText.trim()}
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
+                    width: isMobile ? 40 : 44,
+                    height: isMobile ? 40 : 44,
+                    borderRadius: isMobile ? 8 : 12,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(24, 144, 255, 0.3)'
+                    backgroundColor: '#1890ff',
+                    borderColor: '#1890ff'
                   }}
                 >
                 </Button>
               </div>
             </div>
             
-            <div style={{ 
-              fontSize: '11px', 
-              color: '#999', 
-              marginTop: 8,
-              textAlign: 'center'
-            }}>
-              Enter - отправить, Shift+Enter - новая строка
-            </div>
+            {!isMobile && (
+              <div style={{ 
+                fontSize: '11px', 
+                color: '#999', 
+                marginTop: 8,
+                textAlign: 'center'
+              }}>
+                Enter - отправить, Shift+Enter - новая строка
+              </div>
+            )}
           </div>
         </Card>
       ) : (

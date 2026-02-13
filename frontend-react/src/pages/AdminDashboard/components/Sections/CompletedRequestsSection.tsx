@@ -198,7 +198,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
     },
   ];
 
-  const requestsData = requests.length > 0 ? requests : mockRequests;
+  const requestsData = requests;
 
   // Фильтрация запросов
   const filteredRequests = requestsData.filter(request => {

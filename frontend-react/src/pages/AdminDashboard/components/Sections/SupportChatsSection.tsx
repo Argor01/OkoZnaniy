@@ -101,7 +101,18 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Отслеживание размера окна для адаптивности
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
+  const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
   // Мок данные для демонстрации
   const mockChats: SupportChat[] = [
@@ -301,7 +312,9 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
     };
     return texts[priority as keyof typeof texts] || 'Неизвестно';
   }; 
-  const chatsData = chats.length > 0 ? chats : mockChats;
+  
+  // Используем только реальные данные из БД
+  const chatsData = chats;
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -322,11 +335,17 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
 
   return (
     <div className={styles.supportChatsSection}>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 16]}>
         {/* Список чатов */}
-        <Col xs={24} lg={8}>
+        <Col 
+          xs={24} 
+          lg={8}
+          style={{
+            display: isMobile && selectedChat ? 'none' : 'block'
+          }}
+        >
           <Card 
-            title="Чаты поддержки" 
+            title={isMobile ? "Чаты" : "Чаты поддержки"} 
             size="small"
             extra={
               <Badge count={filteredChats.filter(chat => chat.unread_count > 0).length} showZero={false}>
@@ -334,11 +353,12 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                   type="text" 
                   icon={<ReloadOutlined />} 
                   loading={loading}
+                  size={isMobile ? "small" : "middle"}
                 />
               </Badge>
             }
           >
-            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: isMobile ? '400px' : '600px', overflowY: 'auto' }}>
               <List
                 loading={loading}
                 dataSource={filteredChats}
@@ -348,13 +368,23 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                     onClick={() => setSelectedChat(chat)}
                     style={{ 
                       cursor: 'pointer',
-                      backgroundColor: selectedChat?.id === chat.id ? '#f0f0f0' : 'transparent'
+                      backgroundColor: selectedChat?.id === chat.id ? '#f0f0f0' : 'transparent',
+                      alignItems: 'center'
                     }}
                   >
                     <List.Item.Meta
                       avatar={
                         <Badge count={chat.unread_count} size="small">
-                          <Avatar icon={<UserOutlined />} />
+                          <Avatar 
+                            icon={<UserOutlined />} 
+                            size={isMobile ? 36 : 40}
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center',
+                              backgroundColor: '#1890ff'
+                            }}
+                          />
                         </Badge>
                       }
                       title={
@@ -393,42 +423,57 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
           {selectedChat ? (
             <Card 
               title={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <span>{selectedChat.client.first_name} {selectedChat.client.last_name}</span>
-                    <Tag color={getStatusColor(selectedChat.status)} style={{ marginLeft: '8px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: 8
+                }}>
+                  {/* Первая строка: имя и кнопка назад */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {isMobile && (
+                      <Button 
+                        size="small" 
+                        onClick={() => setSelectedChat(null)}
+                      >
+                        ←
+                      </Button>
+                    )}
+                    <span style={{ fontSize: isMobile ? 16 : 18, fontWeight: 600, color: '#262626' }}>
+                      {selectedChat.client.first_name} {selectedChat.client.last_name}
+                    </span>
+                  </div>
+                  
+                  {/* Вторая строка: теги и тема */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <Tag color={getStatusColor(selectedChat.status)} style={{ fontSize: isMobile ? 11 : 12, margin: 0 }}>
                       {getStatusText(selectedChat.status)}
                     </Tag>
-                    <Tag color={getPriorityColor(selectedChat.priority)}>
+                    <Tag color={getPriorityColor(selectedChat.priority)} style={{ fontSize: isMobile ? 11 : 12, margin: 0 }}>
                       {getPriorityText(selectedChat.priority)}
                     </Tag>
+                    <Text style={{ fontSize: isMobile ? 13 : 14, color: '#595959' }}>
+                      {selectedChat.subject}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, marginLeft: 'auto' }}>
+                      {formatTimestamp(selectedChat.created_at)}
+                    </Text>
                   </div>
                 </div>
               }
               size="small"
             >
-              {/* Информация о чате */}
-              <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#fafafa', borderRadius: '6px' }}>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Text strong>Тема:</Text> {selectedChat.subject}
-                  </Col>
-                  <Col span={12}>
-                    <Text strong>Создан:</Text> {formatTimestamp(selectedChat.created_at)}
-                  </Col>
-                </Row>
-              </div>
-
               {/* Сообщения */}
               <div 
                 style={{ 
-                  height: '400px', 
+                  height: isMobile ? '300px' : '400px', 
                   overflowY: 'auto', 
-                  border: '1px solid #d9d9d9', 
-                  borderRadius: '6px',
-                  padding: '12px',
-                  marginBottom: '16px'
+                  border: '1px solid #f0f0f0',
+                  borderRadius: 12,
+                  padding: isMobile ? 12 : 16,
+                  marginBottom: isMobile ? 12 : 16,
+                  background: '#fafafa'
                 }}
+                className={styles.chatScrollArea}
               >
                 {selectedChat.messages.length === 0 ? (
                   <Empty description="Нет сообщений" />
@@ -437,27 +482,51 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                     <div 
                       key={message.id} 
                       style={{ 
-                        marginBottom: '16px',
+                        marginBottom: isMobile ? 12 : 16,
                         display: 'flex',
-                        flexDirection: message.sender.is_admin ? 'row-reverse' : 'row'
+                        flexDirection: message.sender.is_admin ? 'row-reverse' : 'row',
+                        animation: 'fadeInUp 0.3s ease'
                       }}
                     >
                       <div 
                         style={{
-                          maxWidth: '70%',
-                          padding: '8px 12px',
-                          borderRadius: '12px',
-                          backgroundColor: message.sender.is_admin ? '#1890ff' : '#f0f0f0',
-                          color: message.sender.is_admin ? 'white' : 'black'
+                          maxWidth: isMobile ? '85%' : '70%',
+                          padding: isMobile ? '10px 14px' : '12px 16px',
+                          borderRadius: message.sender.is_admin ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                          background: message.sender.is_admin 
+                            ? '#1890ff'
+                            : 'white',
+                          color: message.sender.is_admin ? 'white' : '#333',
+                          fontSize: isMobile ? 13 : 14,
+                          wordBreak: 'break-word',
+                          boxShadow: message.sender.is_admin
+                            ? '0 2px 8px rgba(24, 144, 255, 0.2)'
+                            : '0 2px 8px rgba(0, 0, 0, 0.08)',
+                          transition: 'all 0.2s ease',
+                          cursor: 'default',
+                          border: message.sender.is_admin ? 'none' : '1px solid #f0f0f0'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = message.sender.is_admin
+                            ? '0 4px 12px rgba(24, 144, 255, 0.3)'
+                            : '0 4px 12px rgba(0, 0, 0, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = message.sender.is_admin
+                            ? '0 2px 8px rgba(24, 144, 255, 0.2)'
+                            : '0 2px 8px rgba(0, 0, 0, 0.08)';
                         }}
                       >
-                        <div>{message.text}</div>
+                        <div style={{ lineHeight: 1.5 }}>{message.text}</div>
                         <div 
                           style={{ 
-                            fontSize: '11px', 
+                            fontSize: isMobile ? 10 : 11, 
                             opacity: 0.8, 
-                            marginTop: '4px',
-                            textAlign: message.sender.is_admin ? 'left' : 'right'
+                            marginTop: 6,
+                            textAlign: message.sender.is_admin ? 'left' : 'right',
+                            fontWeight: 500
                           }}
                         >
                           {formatMessageTime(message.created_at)}
@@ -470,16 +539,26 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               </div>
 
               {/* Форма отправки сообщения */}
-              <div>
+              <div style={{
+                padding: isMobile ? 12 : 16,
+                background: 'white',
+                borderRadius: 12,
+                boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.05)'
+              }}>
                 {/* Прикрепленные файлы */}
                 {attachedFiles.length > 0 && (
-                  <div style={{ marginBottom: '8px' }}>
+                  <div style={{ marginBottom: 12 }}>
                     {attachedFiles.map((file, index) => (
                       <Tag 
                         key={index}
                         closable
                         onClose={() => removeAttachedFile(file)}
                         icon={<PaperClipOutlined />}
+                        style={{
+                          borderRadius: 8,
+                          padding: '4px 12px',
+                          marginBottom: 4
+                        }}
                       >
                         {file.name}
                       </Tag>
@@ -487,44 +566,99 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                   </div>
                 )}
 
-                <Input.Group compact>
+                <div style={{ display: 'flex', gap: isMobile ? 6 : 8, alignItems: 'flex-end' }}>
                   <TextArea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Введите сообщение..."
-                    rows={3}
-                    style={{ width: 'calc(100% - 80px)' }}
+                    rows={isMobile ? 2 : 3}
+                    style={{ 
+                      flex: 1,
+                      fontSize: isMobile ? 14 : 15,
+                      borderRadius: 12,
+                      border: '2px solid #e8e8e8',
+                      transition: 'all 0.3s ease',
+                      padding: '10px 14px'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#1890ff';
+                      e.target.style.boxShadow = '0 0 0 2px rgba(24, 144, 255, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e8e8e8';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     onPressEnter={(e) => {
                       if (e.ctrlKey) {
                         sendMessage();
                       }
                     }}
                   />
-                  <div style={{ width: '80px', display: 'flex', flexDirection: 'column' }}>
-                    <Upload
-                      beforeUpload={handleFileSelect}
-                      showUploadList={false}
-                      multiple
-                    >
-                      <Button 
-                        icon={<PaperClipOutlined />} 
-                        style={{ width: '100%', marginBottom: '4px' }}
-                        size="small"
-                      />
-                    </Upload>
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: 6
+                  }}>
+                    {!isMobile && (
+                      <Upload
+                        beforeUpload={handleFileSelect}
+                        showUploadList={false}
+                        multiple
+                      >
+                        <Button 
+                          icon={<PaperClipOutlined />} 
+                          style={{ 
+                            width: 44,
+                            height: 44,
+                            borderRadius: 12,
+                            border: '2px solid #e8e8e8',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = '#1890ff';
+                            e.currentTarget.style.transform = 'scale(1.03)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = '#e8e8e8';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        />
+                      </Upload>
+                    )}
                     <Button 
                       type="primary" 
                       icon={<SendOutlined />}
                       onClick={sendMessage}
                       loading={sending}
-                      style={{ width: '100%' }}
-                      size="small"
+                      disabled={!messageText.trim() && attachedFiles.length === 0}
+                      style={{ 
+                        width: isMobile ? 44 : 44,
+                        height: isMobile ? 44 : 44,
+                        borderRadius: 12,
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!sending && (messageText.trim() || attachedFiles.length > 0)) {
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
                     />
                   </div>
-                </Input.Group>
-                <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>
-                  Ctrl+Enter для отправки
                 </div>
+                {!isMobile && (
+                  <div style={{ 
+                    fontSize: 11, 
+                    color: '#999', 
+                    marginTop: 8,
+                    textAlign: 'center',
+                    fontWeight: 500
+                  }}>
+                    💡 Ctrl+Enter для отправки
+                  </div>
+                )}
               </div>
             </Card>
           ) : (

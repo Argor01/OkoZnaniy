@@ -119,7 +119,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
     },
   ];
 
-  const dataSource = users.length > 0 ? users : mockBlockedUsers;
+  const dataSource = users;
 
   // Фильтрация данных
   const filteredData = dataSource.filter(user => {
