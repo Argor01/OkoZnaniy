@@ -25,7 +25,6 @@ import {
   SupportChatsSection,
   UsersManagementSection,
   BlockedUsersSection,
-  UserRolesSection,
   AllOrdersSection,
   ProblemOrdersSection,
   NewClaimsSection,
@@ -209,20 +208,6 @@ const AdminDashboard: React.FC = () => {
             loading={blockedUsersLoading}
             onUnblockUser={unblockUser}
             onViewUserDetails={(user) => console.log('View user details:', user)}
-          />
-        );
-      
-      case 'user_roles':
-        return (
-          <UserRolesSection
-            users={allUsers}
-            roles={[]}
-            permissions={[]}
-            loading={usersLoading}
-            onChangeUserRole={changeUserRole}
-            onUpdateRolePermissions={(roleId, permissions) => console.log('Update role permissions:', roleId, permissions)}
-            onCreateRole={(roleData) => console.log('Create role:', roleData)}
-            onDeleteRole={(roleId) => console.log('Delete role:', roleId)}
           />
         );
 
