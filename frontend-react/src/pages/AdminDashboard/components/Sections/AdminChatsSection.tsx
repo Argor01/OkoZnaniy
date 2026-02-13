@@ -647,15 +647,15 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 }}
               >
                 <div style={{ 
-                  width: 40, 
-                  height: 40, 
+                  width: 32, 
+                  height: 32, 
                   borderRadius: '50%', 
                   backgroundColor: msg.is_system ? '#666' : '#1890ff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   flexShrink: 0
                 }}>
                   {msg.is_system ? 'S' : `${msg.sender.first_name[0]}${msg.sender.last_name[0]}`}
@@ -709,21 +709,20 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             borderTop: '1px solid #f0f0f0',
             backgroundColor: 'white'
           }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-              <Upload
-                beforeUpload={handleFileUpload}
-                showUploadList={false}
-                multiple
-              >
-                <Button icon={<UploadOutlined />} />
-              </Upload>
-              
-              <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', width: '100%' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <TextArea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: 4 }}
+                  autoSize={{ minRows: 2, maxRows: 6 }}
+                  style={{
+                    borderRadius: 12,
+                    border: '1px solid #e5e7eb',
+                    fontSize: 15,
+                    padding: '10px 14px',
+                    resize: 'none'
+                  }}
                   onPressEnter={(e) => {
                     if (!e.shiftKey) {
                       e.preventDefault();
@@ -733,20 +732,49 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 />
               </div>
               
-              <Button 
-                type="primary" 
-                icon={<SendOutlined />}
-                onClick={handleSendMessage}
-                disabled={!messageText.trim()}
-              >
-                Отправить
-              </Button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                <Upload
+                  beforeUpload={handleFileUpload}
+                  showUploadList={false}
+                  multiple
+                >
+                  <Button 
+                    icon={<UploadOutlined />}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      border: '1px solid #e5e7eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  />
+                </Upload>
+                
+                <Button 
+                  type="primary" 
+                  icon={<SendOutlined />}
+                  onClick={handleSendMessage}
+                  disabled={!messageText.trim()}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(24, 144, 255, 0.3)'
+                  }}
+                >
+                </Button>
+              </div>
             </div>
             
             <div style={{ 
               fontSize: '11px', 
               color: '#999', 
-              marginTop: 4,
+              marginTop: 8,
               textAlign: 'center'
             }}>
               Enter - отправить, Shift+Enter - новая строка
