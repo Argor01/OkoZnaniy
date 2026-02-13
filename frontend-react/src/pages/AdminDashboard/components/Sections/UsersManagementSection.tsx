@@ -15,6 +15,7 @@ interface User {
   is_active: boolean;
   date_joined: string;
   last_login?: string;
+  avatar?: string;
 }
 
 interface UsersManagementSectionProps {
@@ -43,7 +44,7 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
       key: 'user',
       render: (record: User) => (
         <Space>
-          <Avatar icon={<UserOutlined />} />
+          <Avatar size={40} src={record.avatar} icon={<UserOutlined />} />
           <div>
             <div>
               <Button 

@@ -47,6 +47,7 @@ interface User {
   date_joined: string;
   last_login?: string;
   permissions: string[];
+  avatar?: string;
 }
 
 interface Role {
@@ -342,7 +343,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       width: 250,
       render: (record: User) => (
         <Space>
-          <Avatar icon={<UserOutlined />} />
+          <Avatar size={40} src={record.avatar} icon={<UserOutlined />} />
           <div>
             <div><strong>{record.username}</strong></div>
             <Text type="secondary" style={{ fontSize: '12px' }}>
