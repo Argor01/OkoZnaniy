@@ -169,7 +169,6 @@ export const chatApi = {
     const response = await apiClient.get('/chat/chats/unread_count/');
     return response.data.unread_count;
   },
-};
 
   // Создать претензию
   createClaim: async (data: {
