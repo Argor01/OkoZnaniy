@@ -1906,74 +1906,114 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               
               <div style={{ 
                 display: 'flex',
-                gap: isMobile ? 6 : 8,
-                alignItems: 'flex-end'
+                gap: isMobile ? 8 : 10,
+                alignItems: 'flex-end',
+                width: '100%'
               }}>
-                <Input.TextArea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Введите сообщение..."
-                  autoSize={{ minRows: isMobile ? 2 : 3, maxRows: isMobile ? 6 : 8 }}
-                  style={{ 
-                    flex: 1,
-                    borderRadius: 8,
-                    border: '1px solid #d1d5db',
-                    fontSize: isMobile ? 13 : 14
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  disabled={sending}
-                />
-                
-                {/* File Attachment Button */}
-                <Upload
-                  beforeUpload={handleFileSelect}
-                  showUploadList={false}
-                  multiple
-                  accept=".doc,.docx,.pdf,.rtf,.txt,.odt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z"
-                >
-                  <Button
-                    type="text"
-                    icon={<PaperClipOutlined />}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Input.TextArea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Введите сообщение..."
+                    autoSize={{ minRows: isMobile ? 2 : 2, maxRows: isMobile ? 6 : 6 }}
                     style={{ 
-                      width: isMobile ? 36 : 40, 
-                      height: isMobile ? 36 : 40,
-                      border: '1px solid #d1d5db',
-                      borderRadius: 8,
-                      color: '#6b7280',
-                      fontSize: isMobile ? 14 : 16
+                      width: '100%',
+                      borderRadius: 12,
+                      border: '1px solid #e5e7eb',
+                      fontSize: isMobile ? 14 : 15,
+                      padding: '10px 14px',
+                      resize: 'none'
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
                     }}
                     disabled={sending}
-                    title="Прикрепить файл"
                   />
-                </Upload>
+                </div>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  gap: isMobile ? 6 : 8,
+                  alignItems: 'center',
+                  flexShrink: 0
+                }}>
+                  {/* File Attachment Button */}
+                  <Upload
+                    beforeUpload={handleFileSelect}
+                    showUploadList={false}
+                    multiple
+                    accept=".doc,.docx,.pdf,.rtf,.txt,.odt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z"
+                  >
+                    <Button
+                      type="default"
+                      icon={<PaperClipOutlined />}
+                      style={{ 
+                        width: isMobile ? 40 : 44, 
+                        height: isMobile ? 40 : 44,
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        color: '#6b7280',
+                        fontSize: isMobile ? 16 : 18,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#ffffff',
+                        transition: 'all 0.2s'
+                      }}
+                      disabled={sending}
+                      title="Прикрепить файл"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f9fafb';
+                        e.currentTarget.style.borderColor = '#3b82f6';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#ffffff';
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                      }}
+                    />
+                  </Upload>
 
-                <Button
-                  type="primary"
-                  shape="circle"
-                  icon={<SendOutlined />}
-                  style={{ 
-                    width: isMobile ? 36 : 40, 
-                    height: isMobile ? 36 : 40,
-                    background: '#3b82f6',
-                    border: 'none',
-                    fontSize: isMobile ? 14 : 16
-                  }}
-                  onClick={sendMessage}
-                  loading={sending}
-                  disabled={!messageText.trim() && attachedFiles.length === 0}
-                />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    style={{ 
+                      width: isMobile ? 40 : 44, 
+                      height: isMobile ? 40 : 44,
+                      background: '#3b82f6',
+                      border: 'none',
+                      borderRadius: 12,
+                      fontSize: isMobile ? 16 : 18,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                    onClick={sendMessage}
+                    loading={sending}
+                    disabled={!messageText.trim() && attachedFiles.length === 0}
+                    onMouseEnter={(e) => {
+                      if (!sending && (messageText.trim() || attachedFiles.length > 0)) {
+                        e.currentTarget.style.background = '#2563eb';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#3b82f6';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
               </div>
 
               {attachedFiles.length > 0 && (
                 <div style={{
-                  marginTop: 10,
-                  paddingTop: 10,
-                  borderTop: '1px solid #f3f4f6',
+                  marginTop: 12,
+                  paddingTop: 12,
+                  borderTop: '1px solid #e5e7eb',
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 8
@@ -1984,42 +2024,54 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
-                        padding: '6px 10px',
-                        background: '#f9fafb',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 999,
-                        maxWidth: '100%'
+                        gap: 10,
+                        padding: '8px 12px',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: 12,
+                        maxWidth: '100%',
+                        transition: 'all 0.2s'
                       }}
                     >
-                      <FileOutlined style={{ color: '#6b7280' }} />
+                      <FileOutlined style={{ color: '#0284c7', fontSize: 16 }} />
                       <Text
                         style={{
-                          fontSize: 12,
-                          color: '#374151',
-                          maxWidth: isMobile ? 160 : 240
+                          fontSize: 13,
+                          color: '#0c4a6e',
+                          maxWidth: isMobile ? 140 : 220,
+                          fontWeight: 500
                         }}
                         ellipsis
                       >
                         {file.name}
                       </Text>
-                      <Text style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                      <Text style={{ fontSize: 11, color: '#0369a1', whiteSpace: 'nowrap' }}>
                         {(file.size / 1024 / 1024).toFixed(2)} МБ
                       </Text>
                       <Button
                         type="text"
                         size="small"
                         onClick={() => removeAttachedFile(file)}
+                        icon={<span style={{ fontSize: 18, lineHeight: 1 }}>×</span>}
                         style={{
                           color: '#ef4444',
                           padding: 0,
-                          height: 20,
-                          minWidth: 20,
-                          lineHeight: '20px'
+                          height: 24,
+                          width: 24,
+                          minWidth: 24,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 6,
+                          transition: 'all 0.2s'
                         }}
-                      >
-                        ×
-                      </Button>
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#fee2e2';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
