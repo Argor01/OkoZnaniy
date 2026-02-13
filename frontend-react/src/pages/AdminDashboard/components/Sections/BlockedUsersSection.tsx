@@ -69,56 +69,6 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
   const [unblockModalVisible, setUnblockModalVisible] = useState(false);
   const [unblockForm] = Form.useForm();
 
-  // Мок данные для демонстрации
-  const mockBlockedUsers: BlockedUser[] = [
-    {
-      id: 1,
-      username: 'blocked_user1',
-      email: 'blocked1@example.com',
-      first_name: 'Иван',
-      last_name: 'Заблокированный',
-      role: 'client',
-      blocked_at: '2024-01-20T10:30:00Z',
-      blocked_by: 'admin',
-      block_reason: 'Нарушение правил сообщества',
-      block_duration: 'temporary',
-      unblock_date: '2024-02-20T10:30:00Z',
-      last_login: '2024-01-19T15:20:00Z',
-      registration_date: '2023-12-01T09:00:00Z',
-      violation_count: 3,
-    },
-    {
-      id: 2,
-      username: 'spammer_user',
-      email: 'spam@example.com',
-      first_name: 'Спам',
-      last_name: 'Пользователь',
-      role: 'expert',
-      blocked_at: '2024-01-15T14:45:00Z',
-      blocked_by: 'admin',
-      block_reason: 'Спам и реклама',
-      block_duration: 'permanent',
-      last_login: '2024-01-15T12:30:00Z',
-      registration_date: '2023-11-15T11:20:00Z',
-      violation_count: 5,
-    },
-    {
-      id: 3,
-      username: 'fraud_user',
-      email: 'fraud@example.com',
-      first_name: 'Мошенник',
-      last_name: 'Пользователь',
-      role: 'client',
-      blocked_at: '2024-01-10T16:20:00Z',
-      blocked_by: 'admin',
-      block_reason: 'Мошенничество',
-      block_duration: 'permanent',
-      last_login: '2024-01-10T14:15:00Z',
-      registration_date: '2023-10-05T13:45:00Z',
-      violation_count: 1,
-    },
-  ];
-
   const dataSource = users;
 
   // Фильтрация данных

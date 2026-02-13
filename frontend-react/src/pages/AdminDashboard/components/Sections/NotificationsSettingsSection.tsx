@@ -119,91 +119,9 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
   const [scheduleForm] = Form.useForm();
   const [testForm] = Form.useForm();
 
-  // Мок данные для демонстрации
-  const mockTemplates: NotificationTemplate[] = [
-    {
-      id: 1,
-      name: 'Подтверждение заказа',
-      description: 'Уведомление клиенту о создании заказа',
-      type: 'email',
-      trigger: 'order_created',
-      subject: 'Ваш заказ №{order_id} принят в работу',
-      content: 'Здравствуйте, {user_name}!\n\nВаш заказ №{order_id} на тему "{order_title}" принят в работу.\n\nСрок выполнения: {deadline}\nСтоимость: {price} ₽\n\nС уважением,\nКоманда ОкоЗнаний',
-      variables: ['user_name', 'order_id', 'order_title', 'deadline', 'price'],
-      is_active: true,
-      recipient_type: 'user',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-02-01T14:30:00Z',
-    },
-    {
-      id: 2,
-      name: 'SMS уведомление о готовности',
-      description: 'SMS клиенту о готовности заказа',
-      type: 'sms',
-      trigger: 'order_completed',
-      subject: '',
-      content: 'Ваш заказ №{order_id} готов! Проверьте личный кабинет на сайте ОкоЗнаний.',
-      variables: ['order_id'],
-      is_active: true,
-      recipient_type: 'user',
-      created_at: '2024-01-20T12:00:00Z',
-      updated_at: '2024-02-03T09:15:00Z',
-    },
-  ];
-
-  const mockSettings: NotificationSettings[] = [
-    {
-      id: 1,
-      setting_key: 'email_enabled',
-      setting_name: 'Email уведомления включены',
-      setting_value: true,
-      description: 'Глобальное включение/отключение email уведомлений',
-      category: 'email',
-    },
-    {
-      id: 2,
-      setting_key: 'sms_enabled',
-      setting_name: 'SMS уведомления включены',
-      setting_value: true,
-      description: 'Глобальное включение/отключение SMS уведомлений',
-      category: 'sms',
-    },
-    {
-      id: 3,
-      setting_key: 'email_from_address',
-      setting_name: 'Email отправителя',
-      setting_value: 'noreply@okoznaniy.ru',
-      description: 'Адрес отправителя для email уведомлений',
-      category: 'email',
-    },
-    {
-      id: 4,
-      setting_key: 'sms_sender_name',
-      setting_name: 'Имя отправителя SMS',
-      setting_value: 'OkoZnaniy',
-      description: 'Имя отправителя для SMS уведомлений',
-      category: 'sms',
-    },
-  ];
-
-  const mockSchedules: NotificationSchedule[] = [
-    {
-      id: 1,
-      name: 'Еженедельный отчет администраторам',
-      description: 'Отправка еженедельного отчета о работе платформы',
-      template_id: 1,
-      schedule_type: 'weekly',
-      schedule_time: '09:00',
-      schedule_days: [1], // Понедельник
-      is_active: true,
-      last_sent: '2024-02-05T09:00:00Z',
-      next_send: '2024-02-12T09:00:00Z',
-    },
-  ];
-
-  const templatesData = templates.length > 0 ? templates : mockTemplates;
-  const settingsData = settings.length > 0 ? settings : mockSettings;
-  const schedulesData = schedules.length > 0 ? schedules : mockSchedules;
+  const templatesData = templates;
+  const settingsData = settings;
+  const schedulesData = schedules;
 
   // Обработчики для шаблонов
   const handleCreateTemplate = async () => {
