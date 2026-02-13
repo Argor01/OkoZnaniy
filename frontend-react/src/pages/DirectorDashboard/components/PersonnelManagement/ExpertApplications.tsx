@@ -166,7 +166,12 @@ const ExpertApplications: React.FC = () => {
     }
   };
 
-  const getStatusTag = (status: string) => {
+  const getStatusTag = (status: string, user?: any) => {
+    // Если пользователь активен, показываем "Активирована" вместо "Деактивирована"
+    if (status === 'deactivated' && user?.is_active) {
+      return <Tag color="green">Активирована</Tag>;
+    }
+    
     const statusConfig = {
       new: { color: 'blue', text: 'Новая' },
       under_review: { color: 'orange', text: 'На рассмотрении' },
@@ -212,10 +217,10 @@ const ExpertApplications: React.FC = () => {
       key: 'status',
       render: (status: string | undefined, record: ExpertApplication) => {
         // Приоритет: status > application_approved > по датам
-        if (status) return getStatusTag(status);
-        if (record.application_approved) return getStatusTag('approved');
-        if (record.application_reviewed_at || record.application_submitted_at) return getStatusTag('under_review');
-        return getStatusTag('new');
+        if (status) return getStatusTag(status, record.user);
+        if (record.application_approved) return getStatusTag('approved', record.user);
+        if (record.application_reviewed_at || record.application_submitted_at) return getStatusTag('under_review', record.user);
+        return getStatusTag('new', record.user);
       },
     },
     {
@@ -295,12 +300,12 @@ const ExpertApplications: React.FC = () => {
           </span>
           <div className={styles.statusTag}>
             {application.status
-              ? getStatusTag(application.status)
+              ? getStatusTag(application.status, application.user)
               : application.application_approved
-                ? getStatusTag('approved')
+                ? getStatusTag('approved', application.user)
                 : (application.application_reviewed_at || application.application_submitted_at)
-                  ? getStatusTag('under_review')
-                  : getStatusTag('new')}
+                  ? getStatusTag('under_review', application.user)
+                  : getStatusTag('new', application.user)}
           </div>
         </div>
         
@@ -480,12 +485,12 @@ const ExpertApplications: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
                 {selectedApplication.status
-                  ? getStatusTag(selectedApplication.status)
+                  ? getStatusTag(selectedApplication.status, selectedApplication.user)
                   : selectedApplication.application_approved
-                    ? getStatusTag('approved')
+                    ? getStatusTag('approved', selectedApplication.user)
                     : (selectedApplication.application_reviewed_at || selectedApplication.application_submitted_at)
-                      ? getStatusTag('under_review')
-                      : getStatusTag('new')}
+                      ? getStatusTag('under_review', selectedApplication.user)
+                      : getStatusTag('new', selectedApplication.user)}
               </Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 16, textAlign: isMobile ? 'center' : 'right' }}>
