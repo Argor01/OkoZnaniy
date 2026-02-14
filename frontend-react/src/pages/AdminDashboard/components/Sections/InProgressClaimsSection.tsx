@@ -118,7 +118,8 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
   const [messageForm] = Form.useForm();
   const [progressForm] = Form.useForm();
 
-  const claimsData = claims;
+  // Убеждаемся, что claims - это массив
+  const claimsData = Array.isArray(claims) ? claims : [];
 
   // Фильтрация данных
   const filteredClaims = claimsData.filter(claim => {

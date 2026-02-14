@@ -181,9 +181,11 @@ export const useClaims = (status?: string) => {
         ? `${API_BASE}/claims/?status=${status}`
         : `${API_BASE}/claims/`;
       const response = await axios.get(url);
-      setClaims(response.data);
+      // Убеждаемся, что данные - это массив
+      setClaims(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error('Error fetching claims:', err);
+      setClaims([]); // Устанавливаем пустой массив при ошибке
     } finally {
       setLoading(false);
     }

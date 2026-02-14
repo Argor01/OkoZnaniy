@@ -125,7 +125,8 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
   const [rejectForm] = Form.useForm();
   const [moreInfoForm] = Form.useForm();
 
-  const claimsData = claims;
+  // Убеждаемся, что claims - это массив
+  const claimsData = Array.isArray(claims) ? claims : [];
 
   // Фильтрация данных
   const filteredClaims = claimsData.filter(claim => {
