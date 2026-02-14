@@ -177,14 +177,42 @@ class ClaimViewSet(viewsets.ModelViewSet):
     """ViewSet для обращений"""
     queryset = Claim.objects.all()
     serializer_class = ClaimSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Разные права для разных действий:
+        - create: любой авторизованный пользователь
+        - list, retrieve: только администраторы или владелец претензии
+        - update, partial_update, destroy, actions: только администраторы
+        """
+        if self.action == 'create':
+            return [IsAuthenticated()]
+        elif self.action in ['list', 'retrieve']:
+            # Для list и retrieve проверим в get_queryset
+            return [IsAuthenticated()]
+        else:
+            # Для всех остальных действий (update, delete, actions) - только админы
+            return [IsAdminUser()]
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        status_filter = self.request.query_params.get('status')
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
+        user = self.request.user
+        
+        # Администраторы видят все претензии
+        if user.role == 'admin':
+            status_filter = self.request.query_params.get('status')
+            if status_filter:
+                queryset = queryset.filter(status=status_filter)
+            return queryset
+        
+        # Обычные пользователи видят только свои претензии
+        queryset = queryset.filter(user=user)
         return queryset
+    
+    def perform_create(self, serializer):
+        """При создании претензии автоматически устанавливаем пользователя"""
+        serializer.save(user=self.request.user)
     
     @action(detail=True, methods=['post'])
     def take_in_work(self, request, pk=None):

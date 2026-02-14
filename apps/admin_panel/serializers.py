@@ -27,11 +27,13 @@ class ClaimSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     admin = UserSerializer(read_only=True)
     order = OrderSerializer(read_only=True)
+    order_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     class Meta:
         model = Claim
-        fields = ['id', 'user', 'admin', 'order', 'claim_type', 'subject', 
+        fields = ['id', 'user', 'admin', 'order', 'order_id', 'claim_type', 'subject', 
                   'description', 'status', 'resolution', 'created_at', 'updated_at', 'completed_at']
+        read_only_fields = ['status', 'resolution', 'created_at', 'updated_at', 'completed_at']
 
 
 class AdminChatMessageSerializer(serializers.ModelSerializer):

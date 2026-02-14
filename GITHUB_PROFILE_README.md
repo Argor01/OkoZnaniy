@@ -60,10 +60,6 @@ Frontend         │  React • TypeScript • JavaScript • HTML5 • CSS3
 
 <div align="center">
 
-<img height="180em" src="https://github-readme-stats.vercel.app/api?username=Br1Im&show_icons=true&theme=github_dark&hide_border=true&bg_color=0d1117&title_color=c9d1d9&text_color=8b949e&icon_color=58a6ff&count_private=true&include_all_commits=true"/>
-
-<img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Br1Im&layout=compact&theme=github_dark&hide_border=true&bg_color=0d1117&title_color=c9d1d9&text_color=8b949e&langs_count=6"/>
-
 <img src="https://github-readme-streak-stats.herokuapp.com/?user=Br1Im&theme=github-dark-blue&hide_border=true&background=0d1117&stroke=30363d&ring=58a6ff&fire=58a6ff&currStreakLabel=c9d1d9" alt="GitHub Streak"/>
 
 </div>
