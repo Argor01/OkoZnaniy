@@ -1,6 +1,6 @@
 /* Стили для логотипа с эффектом сияния */
 
-.header__logo-link {
+.header__logo-circle {
   position: relative;
   display: flex;
   align-items: center;
@@ -18,7 +18,7 @@
   transition: all 0.3s ease;
 }
 
-.header__logo-link:hover {
+.header__logo-circle:hover {
   box-shadow: 
     0 0 20px rgba(255, 255, 255, 1),
     0 0 40px rgba(255, 255, 255, 0.8),
@@ -44,7 +44,7 @@
   }
 }
 
-.header__logo-link-image {
+.header__logo-circle .header__logo-link-image {
   position: relative;
   z-index: 1;
   width: 62px;
@@ -53,18 +53,18 @@
 
 /* Адаптивность */
 @media (max-width: 1024px) {
-  .header__logo-link {
+  .header__logo-circle {
     width: 80px;
     height: 80px;
   }
   
-  .header__logo-link-image {
+  .header__logo-circle .header__logo-link-image {
     width: 55px;
   }
 }
 
 @media (max-width: 576px) {
-  .header__logo-link {
+  .header__logo-circle {
     width: 70px;
     height: 70px;
     box-shadow: 
@@ -73,7 +73,7 @@
       0 0 30px rgba(255, 255, 255, 0.4);
   }
   
-  .header__logo-link-image {
+  .header__logo-circle .header__logo-link-image {
     width: 48px;
   }
 }

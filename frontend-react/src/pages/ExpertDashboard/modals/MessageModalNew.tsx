@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown } from 'antd';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import {
   MessageOutlined,
@@ -15,7 +15,8 @@ import {
   FileTextOutlined,
   CloseCircleOutlined,
   UploadOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  MoreOutlined
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '../../../api/chat';
@@ -36,6 +37,8 @@ interface MessageModalProps {
   isDesktop: boolean;
   selectedUserId?: number; // ID пользователя для открытия чата
   selectedOrderId?: number; // ID заказа для открытия чата (чат по заказу+пользователю)
+  chatContextTitle?: string;
+  supportUserId?: number;
   userProfile?: { role?: string };
 }
 
@@ -47,6 +50,15 @@ type OfferData = {
   deadline?: string | null;
   status?: 'new' | 'accepted' | 'rejected';
   order_id?: number;
+} & Record<string, unknown>;
+
+type WorkOfferData = {
+  title?: string;
+  description?: string;
+  cost?: number;
+  status?: 'new' | 'accepted' | 'rejected';
+  delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
+  delivered_message_id?: number;
 } & Record<string, unknown>;
 
 type OrderForChat = {
@@ -72,6 +84,16 @@ const getErrorDetail = (error: unknown): string | undefined => {
   return resp?.data?.detail;
 };
 
+const parseContextTitle = (raw?: string | null): { title: string; workId?: number } => {
+  const value = typeof raw === 'string' ? raw.trim() : '';
+  if (!value) return { title: '' };
+  const match = value.match(/work:(\d+)/);
+  const workIdRaw = match?.[1] ? Number(match[1]) : NaN;
+  const workId = Number.isFinite(workIdRaw) && workIdRaw > 0 ? workIdRaw : undefined;
+  const title = value.replace(/\s*\|\s*work:\d+\s*$/, '').trim();
+  return { title, workId };
+};
+
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
   onClose,
@@ -80,6 +102,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   isDesktop,
   selectedUserId,
   selectedOrderId,
+  chatContextTitle,
+  supportUserId: supportUserIdProp,
   userProfile
 }) => {
   const [messageText, setMessageText] = useState<string>('');
@@ -87,9 +111,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [deletingChat, setDeletingChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [workOfferModalOpen, setWorkOfferModalOpen] = useState(false);
+  const [acceptWorkDeliveryModalOpen, setAcceptWorkDeliveryModalOpen] = useState(false);
+  const [acceptWorkDeliveryMessageId, setAcceptWorkDeliveryMessageId] = useState<number | null>(null);
+  const [acceptWorkDeliveryRating, setAcceptWorkDeliveryRating] = useState<number>(5);
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [order, setOrder] = useState<OrderForChat | null>(null);
@@ -98,6 +127,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [orderIdsByChatId, setOrderIdsByChatId] = useState<Record<number, number[]>>({});
   const [closedOrderIdsByChatId, setClosedOrderIdsByChatId] = useState<Record<number, number[]>>({});
   const [workUploading, setWorkUploading] = useState(false);
+  const [workOfferUploading, setWorkOfferUploading] = useState(false);
   const [deadlineTick, setDeadlineTick] = useState(0);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -116,9 +146,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [overdueCancelling, setOverdueCancelling] = useState(false);
   const [orderRelevance, setOrderRelevance] = useState<string>(''); // Заказ актуален/не актуален
   const [refundType, setRefundType] = useState<string>(''); // Тип возврата средств
+  const [contextChat, setContextChat] = useState<{ userId: number; title: string } | null>(null);
   const [orderIntroByChatId, setOrderIntroByChatId] = useState<Record<number, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
+  const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   
   // Категории претензий
   const claimCategories = [
@@ -279,6 +311,36 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const effectiveOrderId = activeOrderId;
 
+  useEffect(() => {
+    if (!visible) {
+      setContextChat(null);
+      return;
+    }
+    if (chatContextTitle && selectedUserId) {
+      setContextChat({ userId: selectedUserId, title: chatContextTitle });
+    }
+  }, [visible, chatContextTitle, selectedUserId]);
+
+  const headerContextMeta = useMemo(() => {
+    if (!selectedChat) return { title: '' as string, workId: undefined as number | undefined };
+    if (effectiveOrderId) return { title: '' as string, workId: undefined as number | undefined };
+    const chatStoredTitle =
+      typeof (selectedChat as { context_title?: unknown }).context_title === 'string'
+        ? String((selectedChat as { context_title?: unknown }).context_title).trim()
+        : '';
+    if (chatStoredTitle) return parseContextTitle(chatStoredTitle);
+    if (!contextChat) return { title: '' as string, workId: undefined as number | undefined };
+    if (selectedChat.other_user?.id !== contextChat.userId) return { title: '' as string, workId: undefined as number | undefined };
+    return parseContextTitle(contextChat.title);
+  }, [contextChat, effectiveOrderId, selectedChat]);
+
+  const headerContextTitle = useMemo(() => {
+    const title = headerContextMeta.title;
+    return title ? title : null;
+  }, [headerContextMeta.title]);
+
+  const headerContextWorkId = useMemo(() => headerContextMeta.workId, [headerContextMeta.workId]);
+
   const loadChats = useCallback(async () => {
     setLoading(true);
     try {
@@ -385,7 +447,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
     setLoading(true);
     try {
-      const chatData = await chatApi.getOrCreateByUser(userId);
+      const chatData = await chatApi.getOrCreateByUser(userId, chatContextTitle);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
       await loadChats();
@@ -395,7 +457,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [hydrateClosedOrdersForChat, loadChats]);
+  }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
   useEffect(() => {
     if (visible) {
@@ -665,6 +727,124 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
+  const lastWorkOffer = useMemo(() => {
+    const messages = selectedChat?.messages;
+    if (!Array.isArray(messages) || messages.length === 0) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m?.message_type === 'work_offer' && m.offer_data) return m;
+    }
+    return null;
+  }, [selectedChat?.messages]);
+
+  const uploadableWorkOffer = useMemo(() => {
+    const messages = selectedChat?.messages;
+    if (!Array.isArray(messages) || messages.length === 0) return null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m?.message_type !== 'work_offer' || !m.offer_data) continue;
+      if (!m.is_mine) continue;
+      const status = (m.offer_data as WorkOfferData | null)?.status;
+      const deliveryStatus = (m.offer_data as WorkOfferData | null)?.delivery_status;
+      if (status === 'accepted' && deliveryStatus === 'awaiting_upload') return m;
+    }
+    return null;
+  }, [selectedChat?.messages]);
+
+  const handleWorkOfferSubmit = async (data: WorkOfferData) => {
+    if (!selectedChat) return;
+    setWorkOfferUploading(true);
+    try {
+      const title = headerContextTitle || chatContextTitle || '';
+      const payload: WorkOfferData = {
+        ...data,
+        title: title || data.title,
+        ...(headerContextWorkId ? { work_id: headerContextWorkId } : {}),
+        status: 'new',
+        delivery_status: 'pending',
+      };
+      await chatApi.sendMessage(selectedChat.id, '', undefined, 'work_offer', payload);
+      setWorkOfferModalOpen(false);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Предложение отправлено');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить предложение');
+    } finally {
+      setWorkOfferUploading(false);
+    }
+  };
+
+  const handleAcceptWorkOffer = async (messageId: number) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.acceptWorkOffer(selectedChat.id, messageId);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Предложение принято');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка принятия предложения');
+    }
+  };
+
+  const handleRejectWorkOffer = async (messageId: number) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.rejectWorkOffer(selectedChat.id, messageId);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Предложение отклонено');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка отклонения предложения');
+    }
+  };
+
+  const handleDeliverWorkOffer = async (messageId: number, file: File) => {
+    if (!selectedChat) return;
+    setWorkOfferUploading(true);
+    try {
+      await chatApi.deliverWorkOffer(selectedChat.id, messageId, file);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Работа отправлена');
+      setContextChat(null);
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось отправить работу');
+    } finally {
+      setWorkOfferUploading(false);
+      if (workOfferFileInputRef.current) workOfferFileInputRef.current.value = '';
+    }
+  };
+
+  const handleAcceptWorkDelivery = async (messageId: number) => {
+    if (!selectedChat) return;
+    setAcceptWorkDeliveryMessageId(messageId);
+    setAcceptWorkDeliveryRating(5);
+    setAcceptWorkDeliveryModalOpen(true);
+  };
+
+  const handleConfirmAcceptWorkDelivery = async () => {
+    if (!selectedChat) return;
+    const messageId = acceptWorkDeliveryMessageId;
+    if (!messageId) return;
+    try {
+      await chatApi.acceptWorkDelivery(selectedChat.id, messageId, acceptWorkDeliveryRating);
+      setAcceptWorkDeliveryModalOpen(false);
+      setAcceptWorkDeliveryMessageId(null);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Работа принята');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка принятия работы');
+    }
+  };
+
+  const handleRejectWorkDelivery = async (messageId: number) => {
+    if (!selectedChat) return;
+    try {
+      await chatApi.rejectWorkDelivery(selectedChat.id, messageId);
+      await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
+      antMessage.success('Работа отклонена');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка отклонения работы');
+    }
+  };
+
   const handleAcceptOffer = async (messageId: number) => {
     if (!selectedChat) return;
     try {
@@ -768,6 +948,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setWorkUploading(false);
       if (workFileInputRef.current) workFileInputRef.current.value = '';
     }
+  };
+
+  const handleOfferWorkUpload = async (file: File) => {
+    if (!selectedChat) return;
+    const offerId = uploadableWorkOffer?.id ?? lastWorkOffer?.id;
+    if (!offerId) {
+      antMessage.error('Не найдено предложение для отправки работы');
+      if (workOfferFileInputRef.current) workOfferFileInputRef.current.value = '';
+      return;
+    }
+    await handleDeliverWorkOffer(offerId, file);
   };
 
   const handleApproveOrder = async () => {
@@ -1075,13 +1266,58 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const safeChatList = Array.isArray(chatList) ? chatList : [];
   const supportUserId = (() => {
+    if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
     const raw = localStorage.getItem('support_user_id');
-    const parsed = raw ? Number(raw) : 1;
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+    if (!raw) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
   })();
   const supportAvatarSrc = '/assets/icons/support.png';
-  const supportChat = safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null;
-  const isSupportChatSelected = selectedChat?.other_user?.id === supportUserId;
+  const supportChat =
+    supportUserId ? (safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null) : null;
+  const isSupportChatSelected = !!supportUserId && selectedChat?.other_user?.id === supportUserId;
+
+  const hasActiveOffersInSelectedChat = useMemo(() => {
+    const messages = selectedChat?.messages;
+    if (!Array.isArray(messages) || messages.length === 0) return false;
+    const now = Date.now();
+    const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
+    return messages.some((m) => {
+      if (m?.message_type !== 'offer') return false;
+      const status = (m.offer_data?.status ?? 'new') as unknown;
+      if (status !== 'new') return false;
+      const createdAt = Date.parse(m.created_at);
+      if (!Number.isFinite(createdAt)) return true;
+      return createdAt + twoDaysMs > now;
+    });
+  }, [selectedChat?.messages]);
+
+  const handleDeleteSelectedChat = useCallback(() => {
+    if (!selectedChat) return;
+    Modal.confirm({
+      title: 'Удалить чат?',
+      icon: <ExclamationCircleOutlined />,
+      content: hasActiveOffersInSelectedChat
+        ? 'В этом чате есть активные индивидуальные предложения. Сначала дождитесь окончания действия предложения или отклоните/примите его.'
+        : 'Чат будет удалён без возможности восстановления.',
+      okText: 'Удалить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true, disabled: hasActiveOffersInSelectedChat, loading: deletingChat },
+      onOk: async () => {
+        setDeletingChat(true);
+        try {
+          await chatApi.deleteChat(selectedChat.id);
+          setSelectedChat(null);
+          await loadChats();
+          antMessage.success('Чат удалён');
+        } catch (error: unknown) {
+          antMessage.error(getErrorDetail(error) || 'Не удалось удалить чат');
+        } finally {
+          setDeletingChat(false);
+        }
+      },
+    });
+  }, [deletingChat, hasActiveOffersInSelectedChat, loadChats, selectedChat]);
 
   const canOverdueClientActions =
     !!selectedChat &&
@@ -1145,6 +1381,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const handleOverdueComplaint = async () => {
     if (!effectiveOrderId) return;
+    if (!supportUserId) {
+      antMessage.error('Поддержка не настроена');
+      return;
+    }
     const expertName = selectedChat?.other_user?.username || 'эксперт';
     const deadlineText = order?.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан';
     const title = order?.title || `Заказ #${effectiveOrderId}`;
@@ -1181,13 +1421,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     
     return true;
   });
-  const filteredChatsWithoutSupport = filteredChats.filter((chat) => chat.other_user?.id !== supportUserId);
+  const filteredChatsWithoutSupport = supportUserId
+    ? filteredChats.filter((chat) => chat.other_user?.id !== supportUserId)
+    : filteredChats;
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const showPinnedSupport =
     !normalizedSearchQuery ||
-    'техническая поддержка'.includes(normalizedSearchQuery) ||
-    'поддержка'.includes(normalizedSearchQuery) ||
-    'support'.includes(normalizedSearchQuery);
+      'техническая поддержка'.includes(normalizedSearchQuery) ||
+      'поддержка'.includes(normalizedSearchQuery) ||
+      'support'.includes(normalizedSearchQuery);
 
   return (
     <Modal
@@ -1235,6 +1477,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         overflow: 'hidden',
         position: 'relative'
       }}>
+        {selectedChat && !isSupportChatSelected && (
+          <Dropdown
+            trigger={['click']}
+            menu={{
+              items: [
+                {
+                  key: 'delete',
+                  label: 'Удалить чат',
+                  danger: true,
+                  disabled: deletingChat || hasActiveOffersInSelectedChat,
+                },
+              ],
+              onClick: ({ key }) => {
+                if (key === 'delete') handleDeleteSelectedChat();
+              },
+            }}
+          >
+            <Button
+              type="text"
+              icon={<MoreOutlined />}
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 48,
+                zIndex: 10,
+                width: 40,
+                height: 40,
+              }}
+            />
+          </Dropdown>
+        )}
         {/* Left Sidebar */}
         <div style={{ 
           width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
@@ -1270,7 +1543,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     loadChatDetail(supportChat.id);
                     return;
                   }
-                  loadOrCreateChatWithUser(supportUserId);
+                  if (supportUserId) {
+                    loadOrCreateChatWithUser(supportUserId);
+                  }
                 }}
                 style={{ 
                   display: 'flex', 
@@ -1434,7 +1709,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           <div style={{
             background: selectedChat ? '#ffffff' : '#e0f2fe',
             padding: isMobile ? '8px 12px' : '12px 16px',
-            paddingRight: isMobile ? '12px' : '56px',
+            paddingRight: selectedChat ? (isMobile ? '96px' : '140px') : (isMobile ? '12px' : '56px'),
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -1467,6 +1742,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
                           {headerOrder.title || order?.title || `Заказ #${effectiveOrderId}`}
                         </Text>
+                      ) : headerContextTitle ? (
+                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                          {headerContextTitle}
+                        </Text>
                       ) : (
                         <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
                           Без заказа
@@ -1475,17 +1754,52 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     ) : null}
                   </div>
                 </Space>
-                {currentRole === 'expert' && !isSupportChatSelected && isChatExpert && (
-                  <Button
-                    type="primary"
-                    size={isMobile ? 'small' : 'middle'}
-                    icon={<FileTextOutlined />}
-                    style={{ background: '#10B981', borderColor: '#10B981' }}
-                    onClick={() => setOfferModalOpen(true)}
-                  >
-                    {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
-                  </Button>
-                )}
+                <input
+                  ref={workOfferFileInputRef}
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleOfferWorkUpload(f);
+                  }}
+                />
+                {currentRole === 'expert' && !isSupportChatSelected ? (
+                  headerContextTitle ? (
+                    <Button
+                      type="primary"
+                      size={isMobile ? 'small' : 'middle'}
+                      icon={
+                        uploadableWorkOffer
+                          ? <UploadOutlined />
+                          : <FileTextOutlined />
+                      }
+                      loading={workOfferUploading}
+                      onClick={() => {
+                        if (uploadableWorkOffer) {
+                          workOfferFileInputRef.current?.click();
+                        } else {
+                          setWorkOfferModalOpen(true);
+                        }
+                      }}
+                      style={{ background: '#10B981', borderColor: '#10B981' }}
+                    >
+                      {(() => {
+                        if (uploadableWorkOffer) return isMobile ? 'Работа' : 'Отправить работу';
+                        return isMobile ? 'Работа' : 'Предложить работу';
+                      })()}
+                    </Button>
+                  ) : isChatExpert ? (
+                    <Button
+                      type="primary"
+                      size={isMobile ? 'small' : 'middle'}
+                      icon={<FileTextOutlined />}
+                      style={{ background: '#10B981', borderColor: '#10B981' }}
+                      onClick={() => setOfferModalOpen(true)}
+                    >
+                      {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
+                    </Button>
+                  ) : null
+                ) : null}
                 {isSupportChatSelected && (
                   <Button
                     type="text"
@@ -1649,11 +1963,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 ) : null}
                 {selectedChat.messages.map((msg: Message, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
+                  const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
+                  const isCardMessage = isOffer || isWorkOffer;
                   const offerExpired = isOffer
                     ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
                     : false;
                   const offerStatus = isOffer ? (msg.offer_data?.status || 'new') : 'new';
                   const showOfferActions = isOffer && !msg.is_mine && offerStatus === 'new' && !offerExpired;
+                  const workOfferStatus = isWorkOffer ? ((msg.offer_data as WorkOfferData | null)?.status || 'new') : 'new';
+                  const workDeliveryStatus = isWorkOffer
+                    ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
+                    : 'pending';
+                  const showWorkOfferActions =
+                    isWorkOffer && !msg.is_mine && currentRole !== 'expert' && workOfferStatus === 'new';
+                  const showWorkDeliveryActions =
+                    isWorkOffer &&
+                    !msg.is_mine &&
+                    currentRole !== 'expert' &&
+                    workOfferStatus === 'accepted' &&
+                    workDeliveryStatus === 'delivered';
+                  const showExpertUploadForWorkOffer =
+                    isWorkOffer &&
+                    msg.is_mine &&
+                    currentRole === 'expert' &&
+                    workOfferStatus === 'accepted' &&
+                    workDeliveryStatus === 'awaiting_upload';
                   const isLast = idx === selectedChat.messages.length - 1;
                   const showWorkActions =
                     isLast &&
@@ -1673,13 +2007,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     >
                       <div
                         style={{
-                          maxWidth: isOffer ? (isMobile ? '92%' : 420) : (isMobile ? '85%' : '70%'),
-                          padding: isOffer ? 0 : (isMobile ? '8px 12px' : '10px 14px'),
-                          borderRadius: isOffer ? 0 : (msg.is_mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px'),
-                          background: isOffer ? 'transparent' : (msg.is_mine ? '#3b82f6' : '#ffffff'),
+                          maxWidth: isCardMessage ? (isMobile ? '92%' : 420) : (isMobile ? '85%' : '70%'),
+                          padding: isCardMessage ? 0 : (isMobile ? '8px 12px' : '10px 14px'),
+                          borderRadius: isCardMessage ? 0 : (msg.is_mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px'),
+                          background: isCardMessage ? 'transparent' : (msg.is_mine ? '#3b82f6' : '#ffffff'),
                           color: msg.is_mine ? '#ffffff' : '#1f2937',
-                          boxShadow: isOffer ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
-                          border: isOffer ? 'none' : (msg.is_mine ? 'none' : '1px solid #e5e7eb')
+                          boxShadow: isCardMessage ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
+                          border: isCardMessage ? 'none' : (msg.is_mine ? 'none' : '1px solid #e5e7eb')
                         }}
                       >
                         {isOffer ? (
@@ -1739,6 +2073,111 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             ) : (
                               <div style={{ color: '#9CA3AF' }}>Ожидает решения получателя</div>
                             )}
+
+                            <div style={{ marginTop: 8 }}>
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                {formatMessageTime(msg.created_at)}
+                              </Text>
+                            </div>
+                          </Card>
+                        ) : isWorkOffer ? (
+                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
+                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Предложение готовой работы</div>
+                            <div style={{ marginBottom: 10 }}>
+                              <Text type="secondary">Название</Text>
+                              <div style={{ whiteSpace: 'pre-wrap' }}>
+                                {(msg.offer_data as WorkOfferData | null)?.title || headerContextTitle || 'Готовая работа'}
+                              </div>
+                            </div>
+                            {(msg.offer_data as WorkOfferData | null)?.description ? (
+                              <div style={{ marginBottom: 10 }}>
+                                <Text type="secondary">Описание</Text>
+                                <div style={{ whiteSpace: 'pre-wrap' }}>
+                                  {(msg.offer_data as WorkOfferData | null)?.description}
+                                </div>
+                              </div>
+                            ) : null}
+                            {typeof (msg.offer_data as WorkOfferData | null)?.cost === 'number' ? (
+                              <div style={{ marginBottom: 10 }}>
+                                <Text type="secondary">Стоимость</Text>
+                                <div>
+                                  <Text strong style={{ color: '#10B981' }}>
+                                    {Number((msg.offer_data as WorkOfferData | null)?.cost).toLocaleString('ru-RU')} ₽
+                                  </Text>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {workOfferStatus === 'rejected' ? (
+                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                                <CloseCircleOutlined /> Предложение отклонено
+                              </div>
+                            ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'accepted' ? (
+                              <div style={{ color: '#10B981', fontWeight: 500 }}>
+                                <CheckCircleOutlined /> Работа принята
+                              </div>
+                            ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'rejected' ? (
+                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                                <CloseCircleOutlined /> Работа отклонена
+                              </div>
+                            ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'delivered' ? (
+                              <div style={{ color: '#2563eb', fontWeight: 500 }}>
+                                Работа отправлена, ожидает решения покупателя
+                              </div>
+                            ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'awaiting_upload' ? (
+                              <div style={{ color: '#2563eb', fontWeight: 500 }}>
+                                Ожидается отправка работы экспертом
+                              </div>
+                            ) : (
+                              <div style={{ color: '#9CA3AF' }}>Ожидает решения покупателя</div>
+                            )}
+
+                            {showWorkOfferActions ? (
+                              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                                <Button
+                                  type="primary"
+                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  onClick={() => handleAcceptWorkOffer(msg.id)}
+                                  block
+                                >
+                                  Принять
+                                </Button>
+                                <Button danger onClick={() => handleRejectWorkOffer(msg.id)} block>
+                                  Отказаться
+                                </Button>
+                              </div>
+                            ) : null}
+
+                            {showExpertUploadForWorkOffer ? (
+                              <div style={{ marginTop: 12 }}>
+                                <Button
+                                  type="primary"
+                                  icon={<UploadOutlined />}
+                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  onClick={() => workOfferFileInputRef.current?.click()}
+                                  loading={workOfferUploading}
+                                  block
+                                >
+                                  Отправить работу
+                                </Button>
+                              </div>
+                            ) : null}
+
+                            {showWorkDeliveryActions ? (
+                              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                                <Button
+                                  type="primary"
+                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  onClick={() => handleAcceptWorkDelivery(msg.id)}
+                                  block
+                                >
+                                  Принять
+                                </Button>
+                                <Button danger onClick={() => handleRejectWorkDelivery(msg.id)} block>
+                                  Отказаться
+                                </Button>
+                              </div>
+                            ) : null}
 
                             <div style={{ marginTop: 8 }}>
                               <Text type="secondary" style={{ fontSize: 11 }}>
@@ -2358,10 +2797,38 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           </div>
         </div>
       </Modal>
+      <Modal
+        open={acceptWorkDeliveryModalOpen}
+        centered
+        onCancel={() => {
+          setAcceptWorkDeliveryModalOpen(false);
+          setAcceptWorkDeliveryMessageId(null);
+        }}
+        onOk={handleConfirmAcceptWorkDelivery}
+        okText="Принять"
+        cancelText="Отмена"
+        title="Оцените работу"
+        destroyOnClose
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text style={{ display: 'block', marginBottom: 6 }}>Оценка</Text>
+            <Rate value={acceptWorkDeliveryRating} onChange={(v) => setAcceptWorkDeliveryRating(v)} />
+          </div>
+        </div>
+      </Modal>
       <IndividualOfferModal
         open={offerModalOpen}
         onClose={() => setOfferModalOpen(false)}
         onSubmit={handleOfferSubmit}
+      />
+      <IndividualOfferModal
+        open={workOfferModalOpen}
+        onClose={() => setWorkOfferModalOpen(false)}
+        onSubmit={(data) => handleWorkOfferSubmit(data as unknown as WorkOfferData)}
+        loading={workOfferUploading}
+        variant="work_offer"
+        workTitle={headerContextTitle || chatContextTitle || undefined}
       />
     </Modal>
   );

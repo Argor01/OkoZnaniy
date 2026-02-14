@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
+from django.db.models import Avg, Count
 from .models import ReadyWork, Purchase
 from .serializers import (
     ReadyWorkSerializer, 
@@ -35,6 +36,12 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
                 Q(title__icontains=search) | 
                 Q(description__icontains=search)
             )
+
+        queryset = queryset.annotate(
+            rating_avg=Avg('purchase__rating'),
+            rating_count=Count('purchase__rating'),
+            purchase_count=Count('purchase', distinct=True),
+        )
         
         return queryset.select_related('subject', 'work_type', 'author')
     
@@ -118,4 +125,28 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return Purchase.objects.filter(
             buyer=self.request.user
-        ).select_related('work', 'work__subject', 'work__work_type')
+        ).select_related('work', 'work__subject', 'work__work_type', 'work__author')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    @action(detail=True, methods=['post'])
+    def rate(self, request, pk=None):
+        purchase = self.get_object()
+        rating = request.data.get('rating')
+        if rating is None or rating == '':
+            return Response({'detail': 'rating обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return Response({'detail': 'rating должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+        if rating < 1 or rating > 5:
+            return Response({'detail': 'rating должен быть в диапазоне 1..5'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.utils import timezone
+        purchase.rating = rating
+        purchase.rated_at = timezone.now()
+        purchase.save(update_fields=['rating', 'rated_at'])
+        return Response(PurchaseSerializer(purchase, context={'request': request}).data)

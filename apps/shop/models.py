@@ -88,6 +88,14 @@ class Purchase(models.Model):
         related_name="purchases"
     )
     price_paid = models.DecimalField("Оплаченная цена", max_digits=10, decimal_places=2)
+
+    delivered_file = models.FileField("Файл работы", upload_to="purchases/", blank=True, null=True)
+    delivered_file_name = models.CharField("Имя файла", max_length=255, blank=True, default="")
+    delivered_file_type = models.CharField("Тип файла", max_length=50, blank=True, default="")
+    delivered_file_size = models.PositiveIntegerField("Размер файла", default=0)
+
+    rating = models.PositiveSmallIntegerField("Оценка", blank=True, null=True)
+    rated_at = models.DateTimeField("Дата оценки", blank=True, null=True)
     
     created_at = models.DateTimeField("Дата покупки", auto_now_add=True)
     

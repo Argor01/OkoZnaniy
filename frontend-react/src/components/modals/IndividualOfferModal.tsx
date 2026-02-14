@@ -13,13 +13,15 @@ interface IndividualOfferModalProps {
   onClose: () => void;
   onSubmit: (data: OfferSubmitData) => void;
   loading?: boolean;
+  variant?: 'individual' | 'work_offer';
+  workTitle?: string;
 }
 
 type OfferSubmitData = {
   description: string;
-  work_type_id: number;
+  work_type_id?: number;
   work_type?: string;
-  subject_id: number;
+  subject_id?: number;
   subject?: string;
   cost: number;
   deadline: string | null;
@@ -27,39 +29,51 @@ type OfferSubmitData = {
 
 type OfferFormValues = {
   description: string;
-  work_type_id: number;
-  subject_id: number;
+  work_type_id?: number;
+  subject_id?: number;
   cost: number;
   deadline: { toISOString: () => string } | null;
 } & Record<string, unknown>;
 
-const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClose, onSubmit, loading }) => {
+const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
+  open,
+  onClose,
+  onSubmit,
+  loading,
+  variant = 'individual',
+  workTitle,
+}) => {
   const [form] = Form.useForm();
+
+  const isIndividual = variant === 'individual';
 
   const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
-    enabled: open,
+    enabled: open && isIndividual,
   });
 
   const { data: workTypes = [], isLoading: workTypesLoading } = useQuery({
     queryKey: ['work-types'],
     queryFn: () => catalogApi.getWorkTypes(),
-    enabled: open,
+    enabled: open && isIndividual,
   });
 
   const handleFinish = (values: OfferFormValues) => {
-    const selectedWorkType = workTypes.find((w) => w.id === values.work_type_id);
-    const selectedSubject = subjects.find((s) => s.id === values.subject_id);
+    const selectedWorkType = isIndividual
+      ? workTypes.find((w) => w.id === values.work_type_id)
+      : undefined;
+    const selectedSubject = isIndividual
+      ? subjects.find((s) => s.id === values.subject_id)
+      : undefined;
 
-    // Format deadline to ISO string or timestamp
     const data: OfferSubmitData = {
       ...values,
-      work_type_id: values.work_type_id,
-      work_type: selectedWorkType?.name,
-      subject_id: values.subject_id,
-      subject: selectedSubject?.name,
-      deadline: values.deadline ? values.deadline.toISOString() : null,
+      work_type_id: isIndividual ? values.work_type_id : undefined,
+      work_type: isIndividual ? selectedWorkType?.name : undefined,
+      subject_id: isIndividual ? values.subject_id : undefined,
+      subject: isIndividual ? selectedSubject?.name : undefined,
+      deadline: isIndividual && values.deadline ? values.deadline.toISOString() : null,
     };
     onSubmit(data);
   };
@@ -72,21 +86,33 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClo
       width={600}
       title={
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: 24 }}>
-          <Title level={4} style={{ margin: 0 }}>Индивидуальное предложение</Title>
+          <Title level={4} style={{ margin: 0 }}>
+            {isIndividual ? 'Индивидуальное предложение' : 'Предложение готовой работы'}
+          </Title>
         </div>
       }
       closeIcon={<CloseOutlined />}
     >
       <div style={{ padding: '0 0 20px' }}>
         <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-          Вы можете отправить покупателю индивидуальное предложение своих услуг.
+          {isIndividual
+            ? 'Вы можете отправить покупателю индивидуальное предложение своих услуг.'
+            : 'Заполните информацию, после чего в чат отправится карточка предложения.'}
         </Text>
-        <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
-          1. Укажите, какие услуги и в каком объеме будут предоставлены покупателю.
-        </Text>
-        <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-          2. Опишите свой релевантный опыт. Продемонстрируйте 1-3 примера выполнения похожей работы.
-        </Text>
+        {isIndividual ? (
+          <>
+            <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
+              1. Укажите, какие услуги и в каком объеме будут предоставлены покупателю.
+            </Text>
+            <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+              2. Опишите свой релевантный опыт. Продемонстрируйте 1-3 примера выполнения похожей работы.
+            </Text>
+          </>
+        ) : workTitle ? (
+          <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+            {workTitle}
+          </Text>
+        ) : null}
 
         <Form
           form={form}
@@ -101,43 +127,47 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClo
           >
             <TextArea 
               rows={6} 
-              placeholder="Напишите, как вы будете решать задачу клиента" 
+              placeholder={isIndividual ? 'Напишите, как вы будете решать задачу клиента' : 'Опишите, что входит в работу'} 
               maxLength={2000}
               showCount
             />
           </Form.Item>
 
-          <Form.Item
-            name="work_type_id"
-            label={<Text strong>Тип работы</Text>}
-            rules={[{ required: true, message: 'Укажите тип работы' }]}
-          >
-            <Select
-              placeholder="Выберите тип работы"
-              loading={workTypesLoading}
-              showSearch
-              optionFilterProp="label"
-              options={workTypes
-                .filter((w) => w.is_active !== false)
-                .map((w) => ({ value: w.id, label: w.name }))}
-            />
-          </Form.Item>
+          {isIndividual ? (
+            <>
+              <Form.Item
+                name="work_type_id"
+                label={<Text strong>Тип работы</Text>}
+                rules={[{ required: true, message: 'Укажите тип работы' }]}
+              >
+                <Select
+                  placeholder="Выберите тип работы"
+                  loading={workTypesLoading}
+                  showSearch
+                  optionFilterProp="label"
+                  options={workTypes
+                    .filter((w) => w.is_active !== false)
+                    .map((w) => ({ value: w.id, label: w.name }))}
+                />
+              </Form.Item>
 
-          <Form.Item
-            name="subject_id"
-            label={<Text strong>Предмет</Text>}
-            rules={[{ required: true, message: 'Укажите предмет' }]}
-          >
-            <Select
-              placeholder="Выберите предмет"
-              loading={subjectsLoading}
-              showSearch
-              optionFilterProp="label"
-              options={subjects
-                .filter((s) => s.is_active !== false)
-                .map((s) => ({ value: s.id, label: s.name }))}
-            />
-          </Form.Item>
+              <Form.Item
+                name="subject_id"
+                label={<Text strong>Предмет</Text>}
+                rules={[{ required: true, message: 'Укажите предмет' }]}
+              >
+                <Select
+                  placeholder="Выберите предмет"
+                  loading={subjectsLoading}
+                  showSearch
+                  optionFilterProp="label"
+                  options={subjects
+                    .filter((s) => s.is_active !== false)
+                    .map((s) => ({ value: s.id, label: s.name }))}
+                />
+              </Form.Item>
+            </>
+          ) : null}
 
           <Form.Item
             name="cost"
@@ -154,17 +184,23 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClo
             />
           </Form.Item>
 
-          <Form.Item
-            name="deadline"
-            label={<Text strong>Срок выполнения</Text>}
-            rules={[{ required: true, message: 'Укажите срок выполнения' }]}
-          >
-            <DatePicker 
-              style={{ width: '100%' }} 
-              placeholder="Выберите дату"
-              disabledDate={(current) => current && current < dayjs().endOf('day')}
-            />
-          </Form.Item>
+          {isIndividual ? (
+            <Form.Item
+              name="deadline"
+              label={<Text strong>Срок выполнения</Text>}
+              rules={[{ required: true, message: 'Укажите срок выполнения' }]}
+            >
+              <DatePicker 
+                style={{ width: '100%' }} 
+                placeholder="Выберите дату"
+                disabledDate={(current) => current && current < dayjs().endOf('day')}
+              />
+            </Form.Item>
+          ) : (
+            <Form.Item name="deadline" hidden>
+              <Input />
+            </Form.Item>
+          )}
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'center', marginTop: 24 }}>
             <Button 
@@ -180,7 +216,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({ open, onClo
                 fontWeight: 500
               }}
             >
-              Предложить
+              {isIndividual ? 'Предложить' : 'Отправить предложение'}
             </Button>
           </Form.Item>
         </Form>

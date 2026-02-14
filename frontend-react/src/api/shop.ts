@@ -11,10 +11,40 @@ export interface CreateWorkPayload {
   files?: File[];
 }
 
+export interface Purchase {
+  id: number;
+  work: number;
+  work_title?: string;
+  work_detail?: Work;
+  price_paid: string | number;
+  rating?: number | null;
+  rated_at?: string | null;
+  delivered_file_url?: string | null;
+  delivered_file_name?: string;
+  delivered_file_type?: string;
+  delivered_file_size?: number;
+  created_at: string;
+}
+
 export const shopApi = {
   getWorks: async (): Promise<Work[]> => {
     const response = await apiClient.get('/shop/works/');
     return response.data.results || response.data;
+  },
+
+  purchaseWork: async (workId: number): Promise<Purchase> => {
+    const response = await apiClient.post(`/shop/works/${workId}/purchase/`);
+    return response.data;
+  },
+
+  getPurchases: async (): Promise<Purchase[]> => {
+    const response = await apiClient.get('/shop/purchases/');
+    return response.data.results || response.data;
+  },
+
+  ratePurchase: async (purchaseId: number, rating: number): Promise<Purchase> => {
+    const response = await apiClient.post(`/shop/purchases/${purchaseId}/rate/`, { rating });
+    return response.data;
   },
 
   createWork: async (data: CreateWorkPayload): Promise<Work> => {

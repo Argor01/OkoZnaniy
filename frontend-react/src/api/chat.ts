@@ -20,7 +20,7 @@ export interface Message {
   is_read: boolean;
   is_mine: boolean;
   created_at: string;
-  message_type?: 'text' | 'offer';
+  message_type?: 'text' | 'offer' | 'work_offer' | 'work_delivery';
   offer_data?: {
     description?: string;
     work_type?: string;
@@ -29,6 +29,9 @@ export interface Message {
     deadline?: string;
     status?: 'new' | 'accepted' | 'rejected';
     order_id?: number;
+    title?: string;
+    delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
+    delivered_message_id?: number;
   } | null;
 }
 
@@ -37,6 +40,7 @@ export interface ChatListItem {
   order: number;
   order_id?: number;
   order_title?: string | null;
+  context_title?: string | null;
   client?: User | null;
   expert?: User | null;
   participants: User[];
@@ -57,6 +61,7 @@ export interface ChatDetail {
   order: number;
   order_id: number;
   order_title?: string | null;
+  context_title?: string | null;
   client?: User | null;
   expert?: User | null;
   participants: User[];
@@ -105,15 +110,22 @@ export const chatApi = {
   },
 
   // Получить или создать чат с конкретным пользователем
-  getOrCreateByUser: async (userId: number): Promise<ChatDetail> => {
+  getOrCreateByUser: async (userId: number, contextTitle?: string): Promise<ChatDetail> => {
     const response = await apiClient.post('/chat/chats/get_or_create_by_user/', {
       user_id: userId,
+      ...(contextTitle ? { context_title: contextTitle } : {}),
     });
     return response.data;
   },
 
   // Отправить сообщение (текст и/или файл, или предложение)
-  sendMessage: async (chatId: number, text: string, file?: File, messageType: 'text' | 'offer' = 'text', offerData?: any): Promise<Message> => {
+  sendMessage: async (
+    chatId: number,
+    text: string,
+    file?: File,
+    messageType: 'text' | 'offer' | 'work_offer' | 'work_delivery' = 'text',
+    offerData?: any
+  ): Promise<Message> => {
     if (file) {
       const formData = new FormData();
       formData.append('text', text);
@@ -143,6 +155,38 @@ export const chatApi = {
     return response.data;
   },
 
+  acceptWorkOffer: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/accept_work_offer/`, { message_id: messageId });
+    return response.data;
+  },
+
+  rejectWorkOffer: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/reject_work_offer/`, { message_id: messageId });
+    return response.data;
+  },
+
+  deliverWorkOffer: async (chatId: number, messageId: number, file: File, text?: string): Promise<Message> => {
+    const formData = new FormData();
+    formData.append('message_id', String(messageId));
+    formData.append('file', file);
+    if (text) formData.append('text', text);
+    const response = await apiClient.post(`/chat/chats/${chatId}/deliver_work_offer/`, formData);
+    return response.data;
+  },
+
+  acceptWorkDelivery: async (chatId: number, messageId: number, rating?: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/accept_work_delivery/`, {
+      message_id: messageId,
+      ...(typeof rating === 'number' ? { rating } : {}),
+    });
+    return response.data;
+  },
+
+  rejectWorkDelivery: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/reject_work_delivery/`, { message_id: messageId });
+    return response.data;
+  },
+
   // Отправить группу файлов одним действием (создаёт несколько сообщений на бэке)
   sendMessageWithFiles: async (chatId: number, text: string, files: File[]): Promise<Message[]> => {
     const filesToSend = Array.isArray(files) ? files : [];
@@ -162,6 +206,10 @@ export const chatApi = {
   // Отметить все сообщения в чате как прочитанные
   markAsRead: async (chatId: number): Promise<void> => {
     await apiClient.post(`/chat/chats/${chatId}/mark_read/`);
+  },
+
+  deleteChat: async (chatId: number): Promise<void> => {
+    await apiClient.delete(`/chat/chats/${chatId}/`);
   },
 
   // Получить общее количество непрочитанных сообщений

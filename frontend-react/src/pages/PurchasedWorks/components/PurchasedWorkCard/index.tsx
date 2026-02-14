@@ -11,7 +11,7 @@ interface PurchasedWorkCardProps {
   work: PurchasedWork;
   onDownload: (id: number) => void;
   onFavorite?: (id: number) => void;
-  onView?: (id: number) => void;
+  onView?: (workId: number) => void;
 }
 
 const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
@@ -30,7 +30,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
     <Card
       hoverable
       className={styles.card}
-      onClick={() => onView && onView(work.id)}
+      onClick={() => onView && onView(work.workId)}
       cover={
         work.preview && !imageError ? (
           <img 

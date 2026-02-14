@@ -51,7 +51,10 @@ const Header: React.FC = () => {
         <div className="header__wrapper">
           <div className="header__logo">
             <div className="header__logo-link">
-              <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+              <div className="header__logo-circle">
+                <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+              </div>
+              <div className="header__logo-link-text">Око Знаний</div>
             </div>
           </div>
 
@@ -59,7 +62,10 @@ const Header: React.FC = () => {
             <div className="header__nav-wrapper">
               <div className="header__logo">
                 <div className="header__logo-link">
-                  <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+                  <div className="header__logo-circle">
+                    <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+                  </div>
+                  <div className="header__logo-link-text">Око Знаний</div>
                 </div>
               </div>
 

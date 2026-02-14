@@ -19,6 +19,7 @@ class Chat(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='client_chats')
     expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='expert_chats')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    context_title = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -44,6 +45,8 @@ class Message(models.Model):
     MESSAGE_TYPES = [
         ('text', 'Текст'),
         ('offer', 'Индивидуальное предложение'),
+        ('work_offer', 'Предложение готовой работы'),
+        ('work_delivery', 'Отправка готовой работы'),
     ]
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text', verbose_name="Тип сообщения")
     offer_data = models.JSONField(blank=True, null=True, verbose_name="Данные предложения")
@@ -59,7 +62,7 @@ class Message(models.Model):
         ]
 
     def clean(self):
-        if not (self.text or self.file or (self.message_type == 'offer' and self.offer_data)):
+        if not (self.text or self.file or (self.message_type in ['offer', 'work_offer'] and self.offer_data)):
             raise ValidationError("Укажите текст сообщения, прикрепите файл или создайте предложение.")
         if self.text:
             import re

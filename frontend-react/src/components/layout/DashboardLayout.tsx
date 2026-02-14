@@ -43,6 +43,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
   const [selectedOrderIdForChat, setSelectedOrderIdForChat] = useState<number | undefined>(undefined);
+  const [selectedChatContextTitle, setSelectedChatContextTitle] = useState<string | undefined>(undefined);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
 
   const { unreadCount: unreadNotifications } = useNotifications();
@@ -55,11 +56,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Получаем баланс из профиля пользователя
   const balance = userProfile?.balance ? parseFloat(userProfile.balance) : 0.00;
-  const supportUserId = (() => {
+  const [supportUserId, setSupportUserId] = useState<number | null>(() => {
     const raw = localStorage.getItem('support_user_id');
-    const parsed = raw ? Number(raw) : 1;
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-  })();
+    if (!raw) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  });
+
+  const ensureSupportUserId = React.useCallback(async () => {
+    if (supportUserId) return supportUserId;
+    try {
+      const data = await authApi.getSupportUser();
+      if (data?.id) {
+        localStorage.setItem('support_user_id', String(data.id));
+        setSupportUserId(data.id);
+        return data.id;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [supportUserId]);
 
   const handleLogout = () => {
     Modal.confirm({
@@ -104,6 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setFriendProfileModalVisible(false);
     setSelectedUserIdForChat(undefined);
     setSelectedOrderIdForChat(undefined);
+    setSelectedChatContextTitle(undefined);
   };
 
   const contextValue = {
@@ -111,12 +129,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openMessageModal: (userId?: number) => { 
         closeAllModals(); 
         if (userId) setSelectedUserIdForChat(userId);
+        setSelectedChatContextTitle(undefined);
         setMessageModalVisible(true); 
     },
     openOrderChat: (orderId: number, userId: number) => {
         closeAllModals();
         setSelectedOrderIdForChat(orderId);
         setSelectedUserIdForChat(userId);
+        setSelectedChatContextTitle(undefined);
+        setMessageModalVisible(true);
+    },
+    openContextChat: (userId: number, title: string, workId?: number) => {
+        closeAllModals();
+        setSelectedOrderIdForChat(undefined);
+        setSelectedUserIdForChat(userId);
+        const contextTitle =
+          typeof workId === 'number' && Number.isFinite(workId) && workId > 0
+            ? `${title} | work:${workId}`
+            : title;
+        setSelectedChatContextTitle(contextTitle);
         setMessageModalVisible(true);
     },
     openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
@@ -157,6 +188,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const shouldShowHeader = isExpert || isClient;
   const shouldPollMessages = Boolean(userProfile && shouldShowHeader);
 
+  React.useEffect(() => {
+    if (!shouldShowHeader) return;
+    void ensureSupportUserId();
+  }, [ensureSupportUserId, shouldShowHeader]);
+
   const { data: unreadMessages = 0 } = useQuery({
     queryKey: ['unread-messages-count'],
     queryFn: () => chatApi.getUnreadCount(),
@@ -190,9 +226,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
             onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
             onSupportClick={() => {
-              closeAllModals();
-              setSelectedUserIdForChat(supportUserId);
-              setMessageModalVisible(true);
+              void (async () => {
+                const id = await ensureSupportUserId();
+                if (!id) {
+                  message.error('Поддержка не настроена');
+                  return;
+                }
+                closeAllModals();
+                setSelectedUserIdForChat(id);
+                setSelectedChatContextTitle(undefined);
+                setMessageModalVisible(true);
+              })();
             }}
             onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
             onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
@@ -249,12 +293,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       />
       <MessageModal 
         visible={messageModalVisible} 
-        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); }}
+        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); setSelectedChatContextTitle(undefined); }}
         isMobile={isMobile}
         isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
         isDesktop={window.innerWidth > 1024}
         selectedUserId={selectedUserIdForChat}
         selectedOrderId={selectedOrderIdForChat}
+        chatContextTitle={selectedChatContextTitle}
+        supportUserId={supportUserId ?? undefined}
         userProfile={userProfile}
       />
       <NotificationsModal 

@@ -115,6 +115,20 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def support_user(self, request):
+        qs = User.objects.filter(is_active=True)
+        support = qs.filter(is_staff=True, username__iexact='support').first()
+        if not support:
+            support = qs.filter(is_staff=True, username__iexact='administrator').first() or qs.filter(
+                is_staff=True, username__iexact='admin'
+            ).first()
+        if not support:
+            support = qs.filter(is_staff=True).order_by('id').first()
+        if not support:
+            return Response({'detail': 'Support user not configured'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'id': support.id})
+
     @action(detail=False, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def update_me(self, request):
         serializer = UserUpdateSerializer(request.user, data=request.data, partial=True)

@@ -8,7 +8,7 @@ interface WorksListProps {
   works: PurchasedWork[];
   loading?: boolean;
   onDownload: (id: number) => void;
-  onView?: (id: number) => void;
+  onView?: (workId: number) => void;
 }
 
 const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload, onView }) => {

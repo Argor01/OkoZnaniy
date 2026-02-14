@@ -79,6 +79,11 @@ export const authApi = {
     return response.data;
   },
 
+  getSupportUser: async (): Promise<{ id: number }> => {
+    const response = await apiClient.get('/users/support_user/');
+    return response.data;
+  },
+
   // Получить последних активных пользователей
   getRecentUsers: async (): Promise<User[]> => {
     const response = await apiClient.get('/users/recent_users/');

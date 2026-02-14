@@ -9,12 +9,14 @@ import { authApi } from '../api/auth';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { WorkFile } from './ShopReadyWorks/types';
+import { useDashboard } from '../contexts/DashboardContext';
 
 const { Title, Text } = Typography;
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
   const navigate = useNavigate();
+  const dashboard = useDashboard();
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -76,8 +78,20 @@ const ShopWorkDetail: React.FC = () => {
   };
 
   const handlePurchase = () => {
-    // TODO: Реализовать покупку
-    message.info('Функция покупки будет реализована позже');
+    const sellerId = work?.author?.id;
+    if (!sellerId) {
+      message.error('Не удалось открыть чат: неизвестен продавец');
+      return;
+    }
+    shopApi
+      .purchaseWork(work.id)
+      .then(() => {
+        dashboard.openContextChat(sellerId, work.title, work.id);
+      })
+      .catch((error: any) => {
+        const detail = error?.response?.data?.error || error?.response?.data?.detail;
+        message.error(detail || 'Не удалось купить работу');
+      });
   };
 
   const formatFileSize = (bytes: number) => {

@@ -2,6 +2,7 @@
 
 export interface PurchasedWork {
   id: number;
+  workId: number;
   title: string;
   description: string;
   price: number;

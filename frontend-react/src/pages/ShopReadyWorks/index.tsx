@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography } from 'antd';
+import { Typography, message } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
@@ -9,12 +9,14 @@ import { catalogApi } from '../../api/catalog';
 import { Filters as FiltersType, Work } from './types';
 import { mockWorks } from './mockData';
 import { shopApi } from '../../api/shop';
+import { useDashboard } from '../../contexts/DashboardContext';
 import styles from './ShopReadyWorks.module.css';
 
 const { Title } = Typography;
 
 const ShopReadyWorks: React.FC = () => {
   const navigate = useNavigate();
+  const dashboard = useDashboard();
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
 
@@ -40,11 +42,18 @@ const ShopReadyWorks: React.FC = () => {
   });
 
   const handlePurchase = async (id: number) => {
+    const work = works.find((w) => w.id === id);
+    const sellerId = work?.author?.id;
+    if (!work || !sellerId) {
+      message.error('Не удалось открыть чат: неизвестен продавец');
+      return;
+    }
     try {
-      // TODO: Реализовать покупку работы
-      console.log('Purchase work:', id);
-    } catch (error) {
-      console.error('Error purchasing work:', error);
+      await shopApi.purchaseWork(id);
+      dashboard.openContextChat(sellerId, work.title, id);
+    } catch (error: any) {
+      const detail = error?.response?.data?.error || error?.response?.data?.detail;
+      message.error(detail || 'Не удалось купить работу');
     }
   };
 

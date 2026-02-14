@@ -38,6 +38,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
     order_id = serializers.SerializerMethodField()
     order_title = serializers.SerializerMethodField()
+    context_title = serializers.CharField(read_only=True)
 
     class Meta:
         model = Chat
@@ -46,6 +47,7 @@ class ChatListSerializer(serializers.ModelSerializer):
             'order',
             'order_id',
             'order_title',
+            'context_title',
             'client',
             'expert',
             'participants',
@@ -69,6 +71,10 @@ class ChatListSerializer(serializers.ModelSerializer):
             file_url = request.build_absolute_uri(last_message.file.url) if request and last_message.file else None
             if last_message.message_type == 'offer':
                 text = 'Индивидуальное предложение'
+            elif last_message.message_type == 'work_offer':
+                text = 'Предложение готовой работы'
+            elif last_message.message_type == 'work_delivery':
+                text = 'Отправлена готовая работа'
             else:
                 text = last_message.text or (f"[Файл: {last_message.file_name}]" if last_message.file_name else '')
             return {
@@ -110,6 +116,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
     order_id = serializers.SerializerMethodField()
     order_title = serializers.SerializerMethodField()
+    context_title = serializers.CharField(read_only=True)
 
     class Meta:
         model = Chat
@@ -118,6 +125,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
             'order',
             'order_id',
             'order_title',
+            'context_title',
             'client',
             'expert',
             'participants',

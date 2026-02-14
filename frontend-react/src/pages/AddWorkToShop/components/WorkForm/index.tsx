@@ -80,6 +80,9 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     onSave(formData);
   };
 
+  const filterSelectByLabel = (input: string, option: any) =>
+    String(option?.children ?? '').toLowerCase().includes(input.toLowerCase());
+
   return (
     <Card className={styles.card}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
@@ -122,6 +125,8 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               value={formData.workType}
               onChange={(value) => setFormData({ ...formData, workType: value })}
               className={styles.select}
+              showSearch
+              filterOption={filterSelectByLabel}
               dropdownRender={(menu) => (
                 <>
                   {menu}
@@ -155,6 +160,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               onChange={(value) => setFormData({ ...formData, subject: value })}
               className={styles.select}
               showSearch
+              filterOption={filterSelectByLabel}
               dropdownRender={(menu) => (
                 <>
                   {menu}

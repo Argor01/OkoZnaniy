@@ -26,7 +26,16 @@ type OfferData = {
   deadline?: string | null;
   status?: 'new' | 'accepted' | 'rejected';
   order_id?: number;
-} & Record<string, unknown>;
+};
+
+type WorkOfferData = {
+  title?: string;
+  description?: string;
+  cost?: number;
+  status?: 'new' | 'accepted' | 'rejected';
+  delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
+  delivered_message_id?: number;
+};
 
 interface Message {
   id: number;
@@ -36,8 +45,8 @@ interface Message {
   isMine: boolean;
   file_name?: string | null;
   file_url?: string | null;
-  message_type?: 'text' | 'offer';
-  offer_data?: OfferData | null;
+  message_type?: ApiMessage['message_type'];
+  offer_data?: (OfferData | WorkOfferData) | null;
   created_at?: string;
 }
 
@@ -227,9 +236,12 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
   const activeOrderId = typeof activeChat?.orderId === 'number' && activeChat.orderId > 0 ? activeChat.orderId : null;
   const effectiveOrderId = (() => {
     if (activeOrderId) return activeOrderId;
-    const fromAcceptedOffer = messages.find(
-      (m) => m.message_type === 'offer' && m.offer_data?.status === 'accepted' && typeof m.offer_data?.order_id === 'number'
-    )?.offer_data?.order_id;
+    const acceptedOffer = messages.find((m) => {
+      if (m.message_type !== 'offer' || !m.offer_data) return false;
+      const offer = m.offer_data as OfferData;
+      return offer.status === 'accepted' && typeof offer.order_id === 'number';
+    })?.offer_data as OfferData | undefined;
+    const fromAcceptedOffer = acceptedOffer?.order_id;
     return typeof fromAcceptedOffer === 'number' && fromAcceptedOffer > 0 ? fromAcceptedOffer : null;
   })();
   const isOrderClient = (() => {
@@ -619,35 +631,35 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ open, onClose, userProfil
                             <div style={{ marginBottom: 8, fontWeight: 600 }}>Индивидуальное предложение</div>
                             <div style={{ marginBottom: 6 }}>
                               <Text type="secondary">Тип работы</Text>
-                              <div>{msg.offer_data.work_type}</div>
+                              <div>{(msg.offer_data as OfferData).work_type}</div>
                             </div>
                             <div style={{ marginBottom: 6 }}>
                               <Text type="secondary">Предмет</Text>
-                              <div>{msg.offer_data.subject}</div>
+                              <div>{(msg.offer_data as OfferData).subject}</div>
                             </div>
                             <div style={{ marginBottom: 6 }}>
                               <Text type="secondary">Описание</Text>
-                              <div style={{ whiteSpace: 'pre-wrap' }}>{msg.offer_data.description}</div>
+                              <div style={{ whiteSpace: 'pre-wrap' }}>{(msg.offer_data as OfferData).description}</div>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                               <div>
                                 <Text type="secondary">Стоимость</Text>
                                 <div style={{ fontWeight: 600, color: '#10B981' }}>
-                                  {msg.offer_data.cost?.toLocaleString('ru-RU')} ₽
+                                  {(msg.offer_data as OfferData).cost?.toLocaleString('ru-RU')} ₽
                                 </div>
                               </div>
                               <div>
                                 <Text type="secondary">Срок</Text>
                                 <div>
-                                  {msg.offer_data.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                                  {(msg.offer_data as OfferData).deadline ? new Date((msg.offer_data as OfferData).deadline as string).toLocaleDateString('ru-RU') : 'Не указан'}
                                 </div>
                               </div>
                             </div>
-                            {msg.offer_data.status === 'accepted' ? (
+                            {(msg.offer_data as OfferData).status === 'accepted' ? (
                               <div style={{ color: '#10B981', fontWeight: 500 }}>
                                 <CheckCircleOutlined /> Предложение принято
                               </div>
-                            ) : msg.offer_data.status === 'rejected' ? (
+                            ) : (msg.offer_data as OfferData).status === 'rejected' ? (
                               <div style={{ color: '#EF4444', fontWeight: 500 }}>
                                 <CloseCircleOutlined /> Предложение отклонено
                               </div>

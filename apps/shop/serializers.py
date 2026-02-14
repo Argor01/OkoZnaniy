@@ -35,13 +35,18 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
     author = AuthorSerializer(read_only=True)
     preview = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
+    reviewsCount = serializers.SerializerMethodField()
+    purchasesCount = serializers.SerializerMethodField()
+    viewsCount = serializers.SerializerMethodField()
     
     class Meta:
         model = ReadyWork
         fields = [
             'id', 'title', 'description', 'price', 'subject', 'work_type',
             'subject_name', 'work_type_name', 'author', 'author_name',
-            'preview', 'is_active', 'created_at', 'updated_at', 'files'
+            'preview', 'rating', 'reviewsCount', 'viewsCount', 'purchasesCount',
+            'is_active', 'created_at', 'updated_at', 'files'
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
     
@@ -52,6 +57,18 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.preview.url)
             return obj.preview.url
         return None
+
+    def get_rating(self, obj):
+        return float(getattr(obj, 'rating_avg', None) or 0)
+
+    def get_reviewsCount(self, obj):
+        return int(getattr(obj, 'rating_count', None) or 0)
+
+    def get_purchasesCount(self, obj):
+        return int(getattr(obj, 'purchase_count', None) or 0)
+
+    def get_viewsCount(self, obj):
+        return int(getattr(obj, 'views_count', None) or 0)
     
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
@@ -94,8 +111,31 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
 
 class PurchaseSerializer(serializers.ModelSerializer):
     work_title = serializers.CharField(source='work.title', read_only=True)
+    work_detail = ReadyWorkSerializer(source='work', read_only=True)
+    delivered_file_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Purchase
-        fields = ['id', 'work', 'work_title', 'price_paid', 'created_at']
+        fields = [
+            'id',
+            'work',
+            'work_title',
+            'work_detail',
+            'price_paid',
+            'rating',
+            'rated_at',
+            'delivered_file_url',
+            'delivered_file_name',
+            'delivered_file_type',
+            'delivered_file_size',
+            'created_at',
+        ]
         read_only_fields = ['buyer', 'created_at']
+
+    def get_delivered_file_url(self, obj):
+        if not obj.delivered_file:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.delivered_file.url)
+        return obj.delivered_file.url

@@ -4,6 +4,7 @@ interface DashboardContextType {
   openProfileModal: () => void;
   openMessageModal: (userId?: number) => void;
   openOrderChat: (orderId: number, userId: number) => void;
+  openContextChat: (userId: number, title: string, workId?: number) => void;
   openNotificationsModal: () => void;
   openArbitrationModal: () => void;
   openFinanceModal: () => void;
@@ -17,6 +18,7 @@ export const DashboardContext = createContext<DashboardContextType>({
   openProfileModal: () => {},
   openMessageModal: () => {},
   openOrderChat: () => {},
+  openContextChat: () => {},
   openNotificationsModal: () => {},
   openArbitrationModal: () => {},
   openFinanceModal: () => {},
