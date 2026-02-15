@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Tag, Button, Space, Typography, Rate, Popconfirm } from 'antd';
-import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Work } from '../../types';
 import styles from './WorkCard.module.css';
@@ -12,11 +12,14 @@ interface WorkCardProps {
   onView: (id: number) => void;
   onFavorite: (id: number) => void;
   onPurchase: (id: number) => void;
+  onDownload?: (id: number) => void;
+  isPurchased?: boolean;
+  canDownload?: boolean;
   onDelete?: (id: number) => void;
   allowDelete?: boolean;
 }
 
-const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase, onDelete, allowDelete }) => {
+const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase, onDownload, isPurchased, canDownload, onDelete, allowDelete }) => {
   const [imageError, setImageError] = React.useState(false);
   const navigate = useNavigate();
 
@@ -131,13 +134,18 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         </div>
         <Button
           type="primary"
-          icon={<ShoppingCartOutlined />}
+          icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
+          disabled={isPurchased ? !canDownload : false}
           onClick={(e) => {
             e.stopPropagation();
+            if (isPurchased) {
+              onDownload?.(work.id);
+              return;
+            }
             onPurchase(work.id);
           }}
         >
-          Купить
+          {isPurchased ? 'Скачать' : 'Купить'}
         </Button>
       </div>
     </Card>

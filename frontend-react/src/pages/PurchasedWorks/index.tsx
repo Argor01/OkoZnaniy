@@ -43,6 +43,8 @@ const PurchasedWorks: React.FC = () => {
         const purchases = await shopApi.getPurchases();
         const mapped = (Array.isArray(purchases) ? purchases : []).map((p: Purchase): PurchasedWork => {
           const w = (p.work_detail ?? {}) as any;
+          const subjectId = Number(w.subject ?? w.subject_id ?? 0);
+          const workTypeId = Number(w.work_type ?? w.work_type_id ?? 0);
           const deliveredFile =
             p.delivered_file_url
               ? [{
@@ -57,6 +59,8 @@ const PurchasedWorks: React.FC = () => {
           return {
             id: p.id,
             workId: p.work,
+            subjectId: Number.isFinite(subjectId) ? subjectId : 0,
+            workTypeId: Number.isFinite(workTypeId) ? workTypeId : 0,
             title: String(w.title ?? p.work_title ?? 'Работа'),
             description: String(w.description ?? ''),
             price: typeof p.price_paid === 'number' ? p.price_paid : Number(p.price_paid ?? 0),
@@ -98,19 +102,18 @@ const PurchasedWorks: React.FC = () => {
     if (filters.search) {
       result = result.filter(
         (work) =>
-          work.title.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          work.description.toLowerCase().includes(filters.search!.toLowerCase())
+          work.title.toLowerCase().includes(filters.search!.toLowerCase())
       );
     }
 
     // Фильтр по предмету
-    if (filters.subject && filters.subject !== 'Все предметы') {
-      result = result.filter((work) => work.subject === filters.subject);
+    if (typeof filters.subjectId === 'number') {
+      result = result.filter((work) => work.subjectId === filters.subjectId);
     }
 
     // Фильтр по типу работы
-    if (filters.workType && filters.workType !== 'Все типы') {
-      result = result.filter((work) => work.workType === filters.workType);
+    if (typeof filters.workTypeId === 'number') {
+      result = result.filter((work) => work.workTypeId === filters.workTypeId);
     }
 
     // Сортировка

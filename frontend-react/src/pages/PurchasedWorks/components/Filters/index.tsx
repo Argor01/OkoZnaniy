@@ -4,7 +4,6 @@ import { Input, Select, Space, Button } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { FiltersState } from '../../types';
 import type { Subject, WorkType } from '../../../../api/catalog';
-import { mockCategories } from '../../mockData';
 import styles from './Filters.module.css';
 
 const { Option } = Select;
@@ -30,31 +29,16 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
         />
 
         <Select
-          placeholder="Категория"
-          value={filters.category}
-          onChange={(value) => onFilterChange({ ...filters, category: value })}
-          className={styles.select}
-          allowClear
-        >
-          {mockCategories.map((cat) => (
-            <Option key={cat} value={cat}>
-              {cat}
-            </Option>
-          ))}
-        </Select>
-
-        <Select
           placeholder="Предмет"
-          value={filters.subject}
-          onChange={(value) => onFilterChange({ ...filters, subject: value })}
+          value={filters.subjectId}
+          onChange={(value) => onFilterChange({ ...filters, subjectId: value as number })}
           className={styles.select}
           allowClear
         >
-          <Option value="Все предметы">Все предметы</Option>
           {subjects
             .filter((s) => s.is_active !== false)
             .map((subj) => (
-              <Option key={subj.id} value={subj.name}>
+              <Option key={subj.id} value={subj.id}>
                 {subj.name}
               </Option>
             ))}
@@ -62,16 +46,15 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
 
         <Select
           placeholder="Тип работы"
-          value={filters.workType}
-          onChange={(value) => onFilterChange({ ...filters, workType: value })}
+          value={filters.workTypeId}
+          onChange={(value) => onFilterChange({ ...filters, workTypeId: value as number })}
           className={styles.select}
           allowClear
         >
-          <Option value="Все типы">Все типы</Option>
           {workTypes
             .filter((w) => w.is_active !== false)
             .map((wt) => (
-              <Option key={wt.id} value={wt.name}>
+              <Option key={wt.id} value={wt.id}>
                 {wt.name}
               </Option>
             ))}

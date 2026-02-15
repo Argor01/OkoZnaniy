@@ -71,6 +71,8 @@ type OrderForChat = {
   is_overdue?: boolean | null;
   client?: { id?: number | null } | null;
   client_id?: number | null;
+  expert?: { id?: number | null } | null;
+  expert_id?: number | null;
   subject?: { name?: string | null } | null;
   work_type?: { name?: string | null } | null;
   custom_subject?: string | null;
@@ -184,12 +186,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         if (!ids.includes(id)) ids.push(id);
       }
     }
-    if (ids.length > 0) {
-      const chatOrderId = toPositiveNumber((chat as unknown as { order_id?: unknown }).order_id);
-      if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
-      const chatOrder = toPositiveNumber((chat as unknown as { order?: unknown }).order);
-      if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
-    }
+    const chatOrderId = toPositiveNumber((chat as unknown as { order_id?: unknown }).order_id);
+    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+    const chatOrder = toPositiveNumber((chat as unknown as { order?: unknown }).order);
+    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
     return ids;
   }, [toPositiveNumber]);
 
@@ -250,12 +250,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         if (!ids.includes(id)) ids.push(id);
       }
     }
-    if (ids.length > 0) {
-      const chatOrderId = toPositiveNumber(selectedChatOrderId);
-      if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
-      const chatOrder = toPositiveNumber(selectedChatOrder);
-      if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
-    }
+    const chatOrderId = toPositiveNumber(selectedChatOrderId);
+    if (chatOrderId && !ids.includes(chatOrderId)) ids.push(chatOrderId);
+    const chatOrder = toPositiveNumber(selectedChatOrder);
+    if (chatOrder && !ids.includes(chatOrder)) ids.push(chatOrder);
     return ids;
   }, [selectedChatMessages, selectedChatOrderId, selectedChatOrder, toPositiveNumber]);
 
@@ -336,8 +334,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const headerContextTitle = useMemo(() => {
     const title = headerContextMeta.title;
-    return title ? title : null;
-  }, [headerContextMeta.title]);
+    return headerContextMeta.workId && title ? title : null;
+  }, [headerContextMeta.title, headerContextMeta.workId]);
 
   const headerContextWorkId = useMemo(() => headerContextMeta.workId, [headerContextMeta.workId]);
 
@@ -358,13 +356,67 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const data = await chatApi.getById(chatId);
       await hydrateClosedOrdersForChat(data);
       setSelectedChat(data);
-      setOrderIntroByChatId((prev) => {
-        const hasMessages = Array.isArray(data.messages) && data.messages.length > 0;
-        if (!hasMessages) return prev;
-        if (!Object.prototype.hasOwnProperty.call(prev, chatId)) return prev;
-        const { [chatId]: _removed, ...rest } = prev;
-        return rest;
-      });
+      const orderIdFromContext = (() => {
+        const ctx = typeof (data as { context_title?: unknown } | null)?.context_title === 'string'
+          ? String((data as { context_title?: unknown }).context_title)
+          : '';
+        const m = ctx.match(/#(\d+)/);
+        const parsed = m?.[1] ? Number(m[1]) : NaN;
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+      })();
+
+      if (data.order_id) {
+        setOrderIntroByChatId((prev) => {
+          if (!Object.prototype.hasOwnProperty.call(prev, chatId)) return prev;
+          const { [chatId]: _removed, ...rest } = prev;
+          return rest;
+        });
+      } else if (orderIdFromContext) {
+        try {
+          const orderData = await ordersApi.getById(orderIdFromContext);
+          const title =
+            typeof (orderData as { title?: unknown } | undefined)?.title === 'string'
+              ? String((orderData as { title?: unknown }).title).trim()
+              : '';
+          const subjectName =
+            typeof (orderData as { subject?: { name?: unknown } | null } | undefined)?.subject?.name === 'string'
+              ? String((orderData as { subject?: { name?: unknown } | null }).subject?.name).trim()
+              : '';
+          const workTypeName =
+            typeof (orderData as { work_type?: { name?: unknown } | null } | undefined)?.work_type?.name === 'string'
+              ? String((orderData as { work_type?: { name?: unknown } | null }).work_type?.name).trim()
+              : '';
+          const budgetRaw = (orderData as { budget?: unknown } | undefined)?.budget;
+          const budgetText =
+            typeof budgetRaw === 'number'
+              ? `${budgetRaw.toLocaleString('ru-RU')} ₽`
+              : typeof budgetRaw === 'string' && budgetRaw.trim()
+                ? (() => {
+                    const raw = budgetRaw.trim();
+                    const asNumber = /^[0-9]+(?:\.[0-9]+)?$/.test(raw) ? Number(raw) : NaN;
+                    if (Number.isFinite(asNumber)) return `${asNumber.toLocaleString('ru-RU')} ₽`;
+                    return `${raw} ₽`;
+                  })()
+                : 'Договорная';
+          const deadlineRaw = (orderData as { deadline?: unknown } | undefined)?.deadline;
+          const deadlineText =
+            typeof deadlineRaw === 'string' && deadlineRaw.trim()
+              ? new Date(deadlineRaw).toLocaleDateString('ru-RU')
+              : 'Не указан';
+
+          const infoText = [
+            `Этот чат по теме: ${title || `Заказ #${orderIdFromContext}`}`,
+            `Предмет: ${subjectName || '—'}`,
+            `Тип работы: ${workTypeName || '—'}`,
+            `Бюджет: ${budgetText}`,
+            `Дедлайн: ${deadlineText}`,
+          ].join('\n');
+
+          setOrderIntroByChatId((prev) => ({ ...prev, [chatId]: infoText }));
+        } catch {
+          setOrderIntroByChatId((prev) => ({ ...prev, [chatId]: `Этот чат по теме: Заказ #${orderIdFromContext}` }));
+        }
+      }
       await chatApi.markAsRead(chatId);
       setChatList((prev) => prev.map((chat) =>
         chat.id === chatId ? { ...chat, unread_count: 0 } : chat
@@ -380,8 +432,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
-      const hasMessages = Array.isArray(chatData.messages) && chatData.messages.length > 0;
-      if (!hasMessages) {
+      if (!chatData.order_id) {
         try {
           const orderData = await ordersApi.getById(orderId);
           const title =
@@ -689,7 +740,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       (selectedChat as { client_id?: unknown } | null)?.client_id;
     if (chatClientId) return Number(chatClientId) === currentUserId;
     const msgs = (selectedChat as { messages?: unknown } | null)?.messages;
-    if (!Array.isArray(msgs) || msgs.length === 0) return true;
+    if (!Array.isArray(msgs) || msgs.length === 0) return false;
     return !!(msgs[0] as { is_mine?: unknown } | undefined)?.is_mine;
   })();
   const isChatExpert = (() => {
@@ -706,6 +757,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (selectedChat) return isChatInitiator;
     return false;
   })();
+
+  const showExpertUploadButton = useMemo(() => {
+    if (currentRole !== 'expert') return false;
+    if (!order || isClosedOrder) return false;
+    if (isOrderClient) return false;
+    const status = String(order?.status ?? '');
+    return status === 'in_progress' || status === 'revision';
+  }, [currentRole, isClosedOrder, isOrderClient, order]);
 
   const remainingLabel = useMemo(() => {
     void deadlineTick;
@@ -1788,7 +1847,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         return isMobile ? 'Работа' : 'Предложить работу';
                       })()}
                     </Button>
-                  ) : isChatExpert ? (
+                  ) : !isChatInitiator ? (
                     <Button
                       type="primary"
                       size={isMobile ? 'small' : 'middle'}
@@ -1826,6 +1885,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
           {tabsOrderIds.length > 0 && !isSupportChatSelected ? (
             <>
+              <input
+                ref={workFileInputRef}
+                type="file"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleUploadWork(f);
+                }}
+              />
               <div style={{ padding: isMobile ? '8px 12px' : '8px 16px', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                 <Tabs
                   size="small"
@@ -1851,15 +1919,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               </div>
               {orderPanelOpen && !isClosedOrder ? (
                 <div style={{ padding: isMobile ? '10px 12px' : '12px 16px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
-                  <input
-                    ref={workFileInputRef}
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleUploadWork(f);
-                    }}
-                  />
                   {orderLoading ? (
                     <div style={{ textAlign: 'center', padding: 8 }}>
                       <Spin size="small" />
@@ -1871,19 +1930,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           <Text strong>{order.title || `Заказ #${order.id}`}</Text>
                           <Text type="secondary">{formatOrderStatus(order.status)}</Text>
                         </div>
-                        {currentRole === 'expert' && isChatExpert ? (
-                          <Button
-                            type="primary"
-                            size="small"
-                            icon={<UploadOutlined />}
-                            loading={workUploading}
-                            disabled={!['in_progress', 'revision'].includes(order?.status) || isDeadlineExpired(order?.deadline)}
-                            onClick={() => workFileInputRef.current?.click()}
-                            style={{ background: '#10B981', borderColor: '#10B981' }}
-                          >
-                            Выгрузить работу
-                          </Button>
-                        ) : canOverdueClientActions ? (
+                        {canOverdueClientActions ? (
                           <Space size={8} wrap>
                             <Button
                               type="primary"
@@ -1923,6 +1970,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         Стоимость: <Text strong style={{ color: '#10B981' }}>{order.budget ? `${Number(order.budget).toLocaleString('ru-RU')} ₽` : '—'}</Text>
                       </Text>
                       {order.description ? <Text style={{ whiteSpace: 'pre-wrap' }}>{order.description}</Text> : null}
+                      {showExpertUploadButton ? (
+                        <div style={{ marginTop: 6 }}>
+                          <Button
+                            type="primary"
+                            icon={<UploadOutlined />}
+                            loading={workUploading}
+                            disabled={isDeadlineExpired(order?.deadline)}
+                            onClick={() => workFileInputRef.current?.click()}
+                            style={{ background: '#10B981', borderColor: '#10B981' }}
+                          >
+                            Выгрузить работу
+                          </Button>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <Text type="secondary">Не удалось загрузить данные заказа</Text>
@@ -1964,7 +2025,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 {selectedChat.messages.map((msg: Message, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
-                  const isCardMessage = isOffer || isWorkOffer;
+                  const canReviewOrder =
+                    (isOrderClient || currentRole === 'client') && currentRole !== 'expert';
+                  const showWorkActions =
+                    canReviewOrder &&
+                    !!effectiveOrderId &&
+                    order?.status === 'review' &&
+                    !msg.is_mine &&
+                    !!msg.file_url;
+                  const isCardMessage = isOffer || isWorkOffer || showWorkActions;
                   const offerExpired = isOffer
                     ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
                     : false;
@@ -1988,14 +2057,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     currentRole === 'expert' &&
                     workOfferStatus === 'accepted' &&
                     workDeliveryStatus === 'awaiting_upload';
-                  const isLast = idx === selectedChat.messages.length - 1;
-                  const showWorkActions =
-                    isLast &&
-                    isOrderClient &&
-                    !!effectiveOrderId &&
-                    order?.status === 'review' &&
-                    !msg.is_mine &&
-                    !!msg.file_url;
 
                   return (
                     <div
@@ -2016,7 +2077,45 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           border: isCardMessage ? 'none' : (msg.is_mine ? 'none' : '1px solid #e5e7eb')
                         }}
                       >
-                        {isOffer ? (
+                        {showWorkActions ? (
+                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
+                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Работа по заказу</div>
+                            <div style={{ marginBottom: 10 }}>
+                              <Text type="secondary">Файл</Text>
+                              <div style={{ marginTop: 4 }}>
+                                <a
+                                  href={msg.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ color: '#1890ff', fontSize: isMobile ? 13 : 14 }}
+                                >
+                                  📎 {msg.file_name || 'Скачать файл'}
+                                </a>
+                              </div>
+                            </div>
+                            <div style={{ color: '#2563eb', fontWeight: 500, marginBottom: 10 }}>
+                              Работа отправлена, ожидает решения заказчика
+                            </div>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <Button
+                                type="primary"
+                                style={{ background: '#10B981', borderColor: '#10B981' }}
+                                onClick={handleApproveOrder}
+                                block
+                              >
+                                Принять
+                              </Button>
+                              <Button danger onClick={handleRequestRevision} block>
+                                На доработку
+                              </Button>
+                            </div>
+                            <div style={{ marginTop: 8 }}>
+                              <Text type="secondary" style={{ fontSize: 11 }}>
+                                {formatMessageTime(msg.created_at)}
+                              </Text>
+                            </div>
+                          </Card>
+                        ) : isOffer ? (
                           <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
                             <div style={{ marginBottom: 8, fontWeight: 600 }}>Индивидуальное предложение</div>
                             <div style={{ marginBottom: 6 }}>

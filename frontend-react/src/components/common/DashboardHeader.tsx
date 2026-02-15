@@ -71,7 +71,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   if (isExpert) {
     navItems.push({
       key: '/works',
-      label: 'Мои работы',
+      label: 'Мои заказы',
       icon: <FileDoneOutlined />,
     });
     navItems.push({

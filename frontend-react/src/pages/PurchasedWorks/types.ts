@@ -3,6 +3,8 @@
 export interface PurchasedWork {
   id: number;
   workId: number;
+  subjectId: number;
+  workTypeId: number;
   title: string;
   description: string;
   price: number;
@@ -40,9 +42,8 @@ export interface WorkFile {
 
 export interface FiltersState {
   search?: string;
-  category?: string;
-  subject?: string;
-  workType?: string;
+  subjectId?: number;
+  workTypeId?: number;
   sortBy?: string;
 }
 

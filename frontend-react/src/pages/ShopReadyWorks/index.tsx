@@ -26,6 +26,11 @@ const ShopReadyWorks: React.FC = () => {
     queryFn: () => shopApi.getWorks(),
   });
 
+  const { data: purchases = [] } = useQuery({
+    queryKey: ['shop-purchases'],
+    queryFn: () => shopApi.getPurchases(),
+  });
+
   const { data: _profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
@@ -57,6 +62,13 @@ const ShopReadyWorks: React.FC = () => {
     }
   };
 
+  const handleDownload = (id: number) => {
+    const purchase = (Array.isArray(purchases) ? purchases : []).find((p) => p.work === id);
+    const url = purchase?.delivered_file_url;
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleDelete = async (id: number) => {
     try {
       await shopApi.deleteWork(id);
@@ -74,8 +86,7 @@ const ShopReadyWorks: React.FC = () => {
     if (filters.search) {
       result = result.filter(
         (work) =>
-          work.title.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          work.description.toLowerCase().includes(filters.search!.toLowerCase())
+          work.title.toLowerCase().includes(filters.search!.toLowerCase())
       );
     }
 
@@ -153,6 +164,11 @@ const ShopReadyWorks: React.FC = () => {
     setWorks(uniqueById);
   }, [apiWorks]);
 
+  const purchasesByWorkId = React.useMemo(() => {
+    const list = Array.isArray(purchases) ? purchases : [];
+    return Object.fromEntries(list.map((p) => [p.work, p]));
+  }, [purchases]);
+
   return (
     <div className={styles.container}>
       <Title level={2} style={{ margin: 0, marginBottom: 24 }}>
@@ -171,6 +187,8 @@ const ShopReadyWorks: React.FC = () => {
         onWorkClick={(id) => navigate(`/shop/works/${id}`)}
         onFavorite={(id) => console.log('Favorite:', id)}
         onPurchase={handlePurchase}
+        onDownload={handleDownload}
+        purchasesByWorkId={purchasesByWorkId}
         onDelete={handleDelete}
       />
     </div>

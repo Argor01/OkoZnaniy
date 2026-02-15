@@ -36,11 +36,23 @@ const ShopWorkDetail: React.FC = () => {
     queryFn: () => shopApi.getWorks(),
   });
 
+  const { data: purchases = [] } = useQuery({
+    queryKey: ['shop-purchases'],
+    queryFn: () => shopApi.getPurchases(),
+  });
+
   // Находим работу по ID
   const work = React.useMemo(() => {
     if (!works || !workId) return null;
     return works.find((w) => w.id === Number(workId));
   }, [works, workId]);
+
+  const purchase = React.useMemo(() => {
+    const list = Array.isArray(purchases) ? purchases : [];
+    const id = Number(workId);
+    if (!Number.isFinite(id) || id <= 0) return undefined;
+    return list.find((p) => p.work === id);
+  }, [purchases, workId]);
 
   const deleteMutation = useMutation({
     mutationFn: (workId: number) => shopApi.deleteWork(workId),
@@ -392,6 +404,26 @@ const ShopWorkDetail: React.FC = () => {
                     Удалить работу
                   </Button>
                 </Popconfirm>
+              ) : purchase ? (
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<DownloadOutlined />}
+                  disabled={!purchase.delivered_file_url}
+                  onClick={() => {
+                    if (!purchase.delivered_file_url) return;
+                    window.open(purchase.delivered_file_url, '_blank', 'noopener,noreferrer');
+                  }}
+                  style={{
+                    minWidth: isMobile ? '100%' : 200,
+                    height: 48,
+                    fontSize: 16,
+                    background: '#10b981',
+                    borderColor: '#10b981',
+                  }}
+                >
+                  Скачать
+                </Button>
               ) : (
                 // Если это чужая работа - показываем кнопку покупки
                 <Button 

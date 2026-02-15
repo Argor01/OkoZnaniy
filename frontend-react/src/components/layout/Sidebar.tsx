@@ -209,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <WalletOutlined />,
       label: 'Счет: 0.00 ₽',
     },
-    !isMobile ? {
+    (!isExpert && !isMobile) ? {
       key: 'orders',
       icon: <ShoppingOutlined />,
       label: 'Мои заказы',
@@ -225,11 +225,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         { key: 'orders-download', label: 'Ожидает скачивания (0)' },
         { key: 'orders-closed', label: 'Закрыт (0)' },
       ],
-    } : {
+    } : (!isExpert && isMobile) ? {
       key: 'orders',
       icon: <ShoppingOutlined />,
       label: 'Заказы',
-    },
+    } : null,
     // Убираем "Лента работ", "Мои работы" и "Авторский магазин" для экспертов
     // {
     //   key: 'orders-feed',

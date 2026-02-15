@@ -14,6 +14,25 @@ import styles from './MyWorks.module.css';
 
 const { Title } = Typography;
 
+const isInProgressGroup = (order: any) => {
+  const status = String(order?.status ?? '');
+  return status === 'in_progress' || status === 'revision';
+};
+
+const isReviewGroup = (order: any) => {
+  const status = String(order?.status ?? '');
+  return status === 'review' || status === 'under_review';
+};
+
+const isAllTabGroup = (order: any) => {
+  const status = String(order?.status ?? '');
+  if (isInProgressGroup(order)) return true;
+  if (isReviewGroup(order)) return true;
+  if (status === 'completed') return true;
+  if (status === 'cancelled' || status === 'canceled') return true;
+  return false;
+};
+
 const MyWorks: React.FC = () => {
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
@@ -54,16 +73,12 @@ const MyWorks: React.FC = () => {
     return d.valueOf() <= dayjs().valueOf();
   };
 
-  const isInProgressGroup = (order: any) => {
-    const status = String(order?.status ?? '');
-    return status === 'in_progress' || status === 'revision';
-  };
-
   const counts = useMemo(() => {
     const inProgress = orders.filter((o) => isInProgressGroup(o)).length;
-    const review = orders.filter((o) => o?.status === 'review' || o?.status === 'under_review').length;
+    const review = orders.filter((o) => isReviewGroup(o)).length;
     const completed = orders.filter((o) => o?.status === 'completed').length;
-    return { in_progress: inProgress, review, completed, all: orders.length };
+    const all = orders.filter((o) => isAllTabGroup(o)).length;
+    return { in_progress: inProgress, review, completed, all };
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -71,12 +86,14 @@ const MyWorks: React.FC = () => {
     return orders.filter((order) => {
       if (activeTab !== 'all') {
         if (activeTab === 'review') {
-          if (!(order.status === 'review' || order.status === 'under_review')) return false;
+          if (!isReviewGroup(order)) return false;
         } else if (activeTab === 'in_progress') {
           if (!isInProgressGroup(order)) return false;
         } else if (order.status !== activeTab) {
           return false;
         }
+      } else {
+        if (!isAllTabGroup(order)) return false;
       }
 
       if (!query) return true;
@@ -216,7 +233,7 @@ const MyWorks: React.FC = () => {
     <div className={styles.contentContainer}>
       <div className={styles.pageHeader}>
         <Title level={2} className={styles.pageTitle}>
-          Мои работы
+          Мои заказы
         </Title>
         <div className={styles.pageHeaderRight}>
           <span className={styles.rating}>

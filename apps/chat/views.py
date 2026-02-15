@@ -35,6 +35,30 @@ class ChatViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+        order_ids = set()
+        if getattr(chat, 'order_id', None):
+            order_ids.add(chat.order_id)
+        for msg in offer_messages:
+            data = msg.offer_data or {}
+            if data.get('status') != 'accepted':
+                continue
+            raw_id = data.get('order_id')
+            try:
+                order_id = int(raw_id)
+            except (TypeError, ValueError):
+                order_id = None
+            if order_id:
+                order_ids.add(order_id)
+
+        if order_ids:
+            closed_statuses = {'completed', 'cancelled', 'canceled', 'done'}
+            active_exists = Order.objects.filter(id__in=order_ids).exclude(status__in=closed_statuses).exists()
+            if active_exists:
+                return Response(
+                    {'detail': 'Нельзя удалить чат: есть заказ в работе.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         self.perform_destroy(chat)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -95,16 +119,10 @@ class ChatViewSet(viewsets.ModelViewSet):
                     {'detail': 'Только эксперт может отправлять индивидуальные предложения.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            
-            first_sender_id = chat.messages.order_by('created_at').values_list('sender_id', flat=True).first()
-            if first_sender_id is None:
+
+            if getattr(chat, 'expert_id', None) and int(chat.expert_id) != int(request.user.id) and not getattr(request.user, 'is_staff', False):
                 return Response(
-                    {'detail': 'Создатель чата не может отправлять индивидуальное предложение.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            if int(first_sender_id) == int(request.user.id):
-                return Response(
-                    {'detail': 'Создатель чата не может отправлять индивидуальное предложение.'},
+                    {'detail': 'Только эксперт этого чата может отправлять индивидуальные предложения.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
 
@@ -670,7 +688,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def get_or_create_by_order_and_user(self, request):
-        """Получить или создать чат по ID заказа и ID пользователя (для переписки по отклику)."""
+        """Получить или создать чат по ID заказа и ID пользователя (контекст заказа из ленты)."""
         from apps.users.models import User
 
         order_id = request.data.get('order_id')
@@ -698,16 +716,27 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Чат по заказу всегда между клиентом заказа и конкретным экспертом
+        if getattr(other_user, 'role', None) != 'expert' and not getattr(other_user, 'is_staff', False):
+            return Response(
+                {'detail': 'Чат можно создать только с экспертом'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         client = order.client
         expert = other_user
 
-        chat, created = Chat.objects.get_or_create(
-            order=order,
+        context_title = f"Заказ из ленты #{order.id}"
+        chat = Chat.objects.filter(
+            order__isnull=True,
             client=client,
-            expert=expert
-        )
-        if created:
+            expert=expert,
+            context_title=context_title
+        ).first()
+
+        created = False
+        if not chat:
+            created = True
+            chat = Chat.objects.create(order=None, client=client, expert=expert, context_title=context_title)
             chat.participants.add(client, expert)
 
         serializer = ChatDetailSerializer(chat, context={'request': request})
