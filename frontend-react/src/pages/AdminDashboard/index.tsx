@@ -96,17 +96,6 @@ const AdminDashboard: React.FC = () => {
     isAssigningArbitrator 
   } = useAdminMutations();
 
-<<<<<<< HEAD
-  // Хук для внутренней коммуникации
-  const internalComm = useInternalCommunication();
-
-  // Хук для поддержки
-  // const supportData = useSupportRequests(); // Временно отключено до реализации API
-
-  // 🆕 Новые хуки для обработки запросов
-  // const requestProcessingData = useRequestProcessing(); // Временно отключено до реализации API
-  // const adminChatsData = useAdminChats(); // Временно отключено до реализации API
-=======
   // 🆕 Реальные данные из API
   const { users: allUsers, loading: usersLoading } = useAllUsers();
   const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers();
@@ -131,7 +120,9 @@ const AdminDashboard: React.FC = () => {
   
   const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms();
   const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
->>>>>>> 6058de7 (Добавлен API для отображения чатов с техподдержкой в админ-панели)
+  
+  // Хук для внутренней коммуникации
+  const internalComm = useInternalCommunication();
 
   // Показываем спиннер во время загрузки
   if (loading) {
@@ -301,17 +292,10 @@ const AdminDashboard: React.FC = () => {
       case 'support_chats':
         return (
           <SupportChatsSection
-<<<<<<< HEAD
-            chats={[]}
-            currentUserId={1}
-            loading={false}
-            onSendMessage={(chatId, message) => console.log('Send message:', chatId, message)}
-=======
             chats={supportChats}
             currentUserId={user?.id || 1}
             loading={supportChatsLoading}
             onSendMessage={sendSupportChatMessage}
->>>>>>> 6058de7 (Добавлен API для отображения чатов с техподдержкой в админ-панели)
             onTakeChat={(chatId) => console.log('Take chat:', chatId)}
             onCloseChat={(chatId) => console.log('Close chat:', chatId)}
             onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}
