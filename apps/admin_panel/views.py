@@ -296,3 +296,123 @@ def get_admin_stats(request):
         'new_claims': Claim.objects.filter(status='new').count(),
     }
     return Response(stats)
+
+
+# ============= ЧАТЫ С ТЕХПОДДЕРЖКОЙ =============
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_support_chats(request):
+    """Получить все чаты с техподдержкой"""
+    from apps.chat.models import Chat, Message
+    from apps.chat.serializers import ChatSerializer
+    
+    # Находим пользователя техподдержки
+    support_user = User.objects.filter(
+        Q(username__icontains='support') | Q(role='admin')
+    ).first()
+    
+    if not support_user:
+        return Response({'error': 'Пользователь техподдержки не найден'}, status=404)
+    
+    # Получаем все чаты с участием техподдержки
+    chats = Chat.objects.filter(participants=support_user).prefetch_related(
+        'participants', 'messages', 'messages__sender'
+    ).order_by('-id')
+    
+    # Формируем ответ в формате, совместимом с SupportChatsSection
+    result = []
+    for chat in chats:
+        # Находим клиента (не техподдержка)
+        client = chat.participants.exclude(id=support_user.id).first()
+        if not client:
+            continue
+            
+        last_message = chat.messages.last()
+        unread_count = chat.messages.filter(is_read=False).exclude(sender=request.user).count()
+        
+        # Получаем все сообщения чата
+        messages = []
+        for msg in chat.messages.all():
+            messages.append({
+                'id': msg.id,
+                'text': msg.text,
+                'sender': {
+                    'id': msg.sender.id,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'role': msg.sender.role,
+                    'is_admin': msg.sender.role == 'admin',
+                },
+                'created_at': msg.created_at.isoformat(),
+                'is_mine': msg.sender == request.user,
+            })
+        
+        result.append({
+            'id': chat.id,
+            'client': {
+                'id': client.id,
+                'username': client.username,
+                'first_name': client.first_name,
+                'last_name': client.last_name,
+                'email': client.email,
+                'avatar': None,
+            },
+            'admin': {
+                'id': support_user.id,
+                'first_name': support_user.first_name,
+                'last_name': support_user.last_name,
+                'role': support_user.role,
+            } if support_user else None,
+            'status': 'open',  # Можно добавить логику определения статуса
+            'priority': 'medium',  # Можно добавить логику определения приоритета
+            'subject': chat.context_title or 'Обращение в поддержку',
+            'messages': messages,
+            'last_message': {
+                'text': last_message.text if last_message else '',
+                'created_at': last_message.created_at.isoformat() if last_message else '',
+            } if last_message else None,
+            'unread_count': unread_count,
+            'created_at': chat.messages.first().created_at.isoformat() if chat.messages.exists() else '',
+            'updated_at': last_message.created_at.isoformat() if last_message else '',
+        })
+    
+    return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def send_support_chat_message(request, chat_id):
+    """Отправить сообщение в чат техподдержки"""
+    from apps.chat.models import Chat, Message
+    
+    try:
+        chat = Chat.objects.get(id=chat_id)
+    except Chat.DoesNotExist:
+        return Response({'error': 'Чат не найден'}, status=404)
+    
+    message_text = request.data.get('message', '')
+    if not message_text:
+        return Response({'error': 'Сообщение не может быть пустым'}, status=400)
+    
+    # Создаем сообщение
+    message = Message.objects.create(
+        chat=chat,
+        sender=request.user,
+        text=message_text,
+        message_type='text'
+    )
+    
+    return Response({
+        'id': message.id,
+        'text': message.text,
+        'sender': {
+            'id': message.sender.id,
+            'first_name': message.sender.first_name,
+            'last_name': message.sender.last_name,
+            'role': message.sender.role,
+            'is_admin': message.sender.role == 'admin',
+        },
+        'created_at': message.created_at.isoformat(),
+        'is_mine': True,
+    })

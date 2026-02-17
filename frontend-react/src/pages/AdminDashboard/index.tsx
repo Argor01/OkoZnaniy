@@ -3,6 +3,21 @@ import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
 import { useInternalCommunication } from './hooks/useInternalCommunication';
+import {
+  useAllUsers,
+  useBlockedUsers,
+  useUserActions,
+  useAllOrders,
+  useProblemOrders,
+  useOrderActions,
+  useSupportRequests,
+  useSupportChats,
+  useSupportActions,
+  useClaims,
+  useClaimActions,
+  useAdminChatRooms,
+  useChatRoomActions,
+} from './hooks/useAdminPanelData';
 import { AdminLayout } from './components/Layout';
 import { 
   OverviewSection, 
@@ -81,6 +96,7 @@ const AdminDashboard: React.FC = () => {
     isAssigningArbitrator 
   } = useAdminMutations();
 
+<<<<<<< HEAD
   // Хук для внутренней коммуникации
   const internalComm = useInternalCommunication();
 
@@ -90,6 +106,32 @@ const AdminDashboard: React.FC = () => {
   // 🆕 Новые хуки для обработки запросов
   // const requestProcessingData = useRequestProcessing(); // Временно отключено до реализации API
   // const adminChatsData = useAdminChats(); // Временно отключено до реализации API
+=======
+  // 🆕 Реальные данные из API
+  const { users: allUsers, loading: usersLoading } = useAllUsers();
+  const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers();
+  const { blockUser, unblockUser, changeUserRole } = useUserActions();
+  
+  const { orders: allOrders, loading: ordersLoading } = useAllOrders();
+  const { orders: problemOrders, loading: problemOrdersLoading } = useProblemOrders();
+  const { changeOrderStatus } = useOrderActions();
+  
+  const { requests: openRequests, loading: openRequestsLoading } = useSupportRequests('open');
+  const { requests: inProgressRequests, loading: inProgressRequestsLoading } = useSupportRequests('in_progress');
+  const { requests: completedRequests, loading: completedRequestsLoading } = useSupportRequests('completed');
+  const { takeRequest, completeRequest, sendMessage: sendSupportMessage, sendChatMessage: sendSupportChatMessage } = useSupportActions();
+  
+  const { chats: supportChats, loading: supportChatsLoading } = useSupportChats();
+  
+  const { claims: newClaims, loading: newClaimsLoading } = useClaims('new');
+  const { claims: inProgressClaims, loading: inProgressClaimsLoading } = useClaims('in_progress');
+  const { claims: completedClaims, loading: completedClaimsLoading } = useClaims('completed');
+  const { claims: pendingApprovalClaims, loading: pendingApprovalLoading } = useClaims('pending_approval');
+  const { takeInWork, completeClaim, rejectClaim } = useClaimActions();
+  
+  const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms();
+  const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
+>>>>>>> 6058de7 (Добавлен API для отображения чатов с техподдержкой в админ-панели)
 
   // Показываем спиннер во время загрузки
   if (loading) {
@@ -259,10 +301,17 @@ const AdminDashboard: React.FC = () => {
       case 'support_chats':
         return (
           <SupportChatsSection
+<<<<<<< HEAD
             chats={[]}
             currentUserId={1}
             loading={false}
             onSendMessage={(chatId, message) => console.log('Send message:', chatId, message)}
+=======
+            chats={supportChats}
+            currentUserId={user?.id || 1}
+            loading={supportChatsLoading}
+            onSendMessage={sendSupportChatMessage}
+>>>>>>> 6058de7 (Добавлен API для отображения чатов с техподдержкой в админ-панели)
             onTakeChat={(chatId) => console.log('Take chat:', chatId)}
             onCloseChat={(chatId) => console.log('Close chat:', chatId)}
             onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}

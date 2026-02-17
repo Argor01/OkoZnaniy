@@ -23,6 +23,10 @@ urlpatterns = [
     path('orders/problems/', views.get_problem_orders, name='get-problem-orders'),
     path('orders/<int:order_id>/change-status/', views.change_order_status, name='change-order-status'),
     
+    # Чаты с техподдержкой
+    path('support-chats/', views.get_support_chats, name='get-support-chats'),
+    path('support-chats/<int:chat_id>/send-message/', views.send_support_chat_message, name='send-support-chat-message'),
+    
     # Статистика
     path('stats/', views.get_admin_stats, name='admin-stats'),
 ]

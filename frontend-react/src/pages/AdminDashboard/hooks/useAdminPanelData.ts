@@ -152,6 +152,29 @@ export const useSupportRequests = (status?: string) => {
   return { requests, loading, refetch: fetchRequests };
 };
 
+export const useSupportChats = () => {
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchChats = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE}/support-chats/`);
+      setChats(response.data);
+    } catch (err) {
+      console.error('Error fetching support chats:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+  return { chats, loading, refetch: fetchChats };
+};
+
 export const useSupportActions = () => {
   const takeRequest = async (requestId: number) => {
     await axios.post(`${API_BASE}/support-requests/${requestId}/take_request/`);
@@ -165,7 +188,11 @@ export const useSupportActions = () => {
     await axios.post(`${API_BASE}/support-requests/${requestId}/send_message/`, { message });
   };
 
-  return { takeRequest, completeRequest, sendMessage };
+  const sendChatMessage = async (chatId: number, message: string) => {
+    await axios.post(`${API_BASE}/support-chats/${chatId}/send-message/`, { message });
+  };
+
+  return { takeRequest, completeRequest, sendMessage, sendChatMessage };
 };
 
 // ============= ОБРАЩЕНИЯ =============
