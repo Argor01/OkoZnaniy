@@ -307,10 +307,15 @@ def get_support_chats(request):
     from apps.chat.models import Chat, Message
     from apps.chat.serializers import ChatSerializer
     
-    # Находим пользователя техподдержки
-    support_user = User.objects.filter(
-        Q(username__icontains='support') | Q(role='admin')
-    ).first()
+    # Находим пользователя техподдержки (та же логика, что в apps/users/views.py)
+    qs = User.objects.filter(is_active=True)
+    support_user = qs.filter(is_staff=True, username__iexact='support').first()
+    if not support_user:
+        support_user = qs.filter(is_staff=True, username__iexact='administrator').first() or qs.filter(
+            is_staff=True, username__iexact='admin'
+        ).first()
+    if not support_user:
+        support_user = qs.filter(is_staff=True).order_by('id').first()
     
     if not support_user:
         return Response({'error': 'Пользователь техподдержки не найден'}, status=404)
