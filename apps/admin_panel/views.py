@@ -305,7 +305,6 @@ def get_admin_stats(request):
 def get_support_chats(request):
     """Получить все чаты с техподдержкой"""
     from apps.chat.models import Chat, Message
-    from apps.chat.serializers import ChatSerializer
     
     # Находим пользователя техподдержки (та же логика, что в apps/users/views.py)
     qs = User.objects.filter(is_active=True)
