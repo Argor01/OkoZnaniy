@@ -812,3 +812,259 @@ class ChatViewSet(viewsets.ModelViewSet):
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
+
+
+
+# ViewSet для чатов технической поддержки
+
+from .models import SupportChat, SupportMessage
+from rest_framework.pagination import PageNumberPagination
+
+
+class SupportChatViewSet(viewsets.ModelViewSet):
+    """ViewSet для чатов технической поддержки"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Админы видят все чаты
+        if user.role == 'admin':
+            return SupportChat.objects.all().select_related(
+                'client', 'admin'
+            ).prefetch_related('support_messages__sender')
+        
+        # Клиенты видят только свои чаты
+        return SupportChat.objects.filter(
+            client=user
+        ).select_related('admin').prefetch_related('support_messages__sender')
+    
+    def create(self, request, *args, **kwargs):
+        """Создание нового чата поддержки"""
+        subject = request.data.get('subject', 'Вопрос по работе платформы')
+        priority = request.data.get('priority', 'medium')
+        initial_message = request.data.get('message', '')
+        
+        if not initial_message:
+            return Response(
+                {'detail': 'Сообщение обязательно'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Создаем чат
+        chat = SupportChat.objects.create(
+            client=request.user,
+            subject=subject,
+            priority=priority,
+            status='open'
+        )
+        
+        # Создаем первое сообщение
+        SupportMessage.objects.create(
+            chat=chat,
+            sender=request.user,
+            text=initial_message
+        )
+        
+        # Уведомляем админов
+        from apps.notifications.services import NotificationService
+        from apps.users.models import User
+        
+        admins = User.objects.filter(role='admin')
+        for admin in admins:
+            NotificationService.create_notification(
+                recipient=admin,
+                type='support_request',
+                title='Новое обращение в поддержку',
+                message=f'{request.user.get_full_name() or request.user.username}: {initial_message[:100]}',
+                related_object_id=chat.id,
+                related_object_type='support_chat'
+            )
+        
+        return Response({
+            'id': chat.id,
+            'subject': chat.subject,
+            'status': chat.status,
+            'priority': chat.priority,
+            'created_at': chat.created_at
+        }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'])
+    def send_message(self, request, pk=None):
+        """Отправка сообщения в чат поддержки"""
+        chat = self.get_object()
+        text = request.data.get('text', '').strip()
+        uploaded_file = request.FILES.get('file')
+        
+        if not text and not uploaded_file:
+            return Response(
+                {'detail': 'Укажите текст сообщения или прикрепите файл'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Создаем сообщение
+        message = SupportMessage.objects.create(
+            chat=chat,
+            sender=request.user,
+            text=text or '',
+            file=uploaded_file,
+            message_type='file' if uploaded_file else 'text'
+        )
+        
+        # Обновляем время последнего обновления чата
+        chat.save(update_fields=['updated_at'])
+        
+        # Уведомляем получателя
+        from apps.notifications.services import NotificationService
+        
+        recipient = chat.admin if request.user == chat.client else chat.client
+        if recipient:
+            NotificationService.create_notification(
+                recipient=recipient,
+                type='support_message',
+                title=f'Новое сообщение в чате поддержки',
+                message=text[:100] if text else 'Файл',
+                related_object_id=chat.id,
+                related_object_type='support_chat'
+            )
+        
+        return Response({
+            'id': message.id,
+            'text': message.text,
+            'sender': {
+                'id': message.sender.id,
+                'username': message.sender.username,
+                'first_name': message.sender.first_name,
+                'last_name': message.sender.last_name,
+                'role': message.sender.role,
+            },
+            'created_at': message.created_at,
+            'is_read': message.is_read
+        })
+    
+    @action(detail=True, methods=['post'])
+    def take_chat(self, request, pk=None):
+        """Взять чат в работу (только для админов)"""
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        chat = self.get_object()
+        chat.admin = request.user
+        chat.status = 'in_progress'
+        chat.save()
+        
+        # Системное сообщение
+        SupportMessage.objects.create(
+            chat=chat,
+            sender=request.user,
+            text=f'Администратор {request.user.get_full_name() or request.user.username} взял обращение в работу',
+            message_type='system'
+        )
+        
+        return Response({'status': 'success'})
+    
+    @action(detail=True, methods=['post'])
+    def close_chat(self, request, pk=None):
+        """Закрыть чат"""
+        chat = self.get_object()
+        
+        # Только админ или клиент могут закрыть чат
+        if request.user.role != 'admin' and request.user != chat.client:
+            return Response(
+                {'detail': 'Недостаточно прав'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        chat.status = 'resolved'
+        chat.save()
+        
+        # Системное сообщение
+        SupportMessage.objects.create(
+            chat=chat,
+            sender=request.user,
+            text=f'Чат закрыт пользователем {request.user.get_full_name() or request.user.username}',
+            message_type='system'
+        )
+        
+        return Response({'status': 'success'})
+    
+    @action(detail=True, methods=['get'])
+    def messages(self, request, pk=None):
+        """Получить сообщения чата"""
+        chat = self.get_object()
+        messages = chat.support_messages.all().select_related('sender')
+        
+        # Отмечаем сообщения как прочитанные
+        if request.user == chat.client:
+            messages.filter(sender__role='admin', is_read=False).update(is_read=True)
+        elif request.user.role == 'admin':
+            messages.filter(sender=chat.client, is_read=False).update(is_read=True)
+        
+        messages_data = []
+        for msg in messages:
+            messages_data.append({
+                'id': msg.id,
+                'text': msg.text,
+                'sender': {
+                    'id': msg.sender.id,
+                    'username': msg.sender.username,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'role': msg.sender.role,
+                    'is_admin': msg.sender.role == 'admin',
+                },
+                'message_type': msg.message_type,
+                'file': request.build_absolute_uri(msg.file.url) if msg.file else None,
+                'is_read': msg.is_read,
+                'created_at': msg.created_at,
+                'is_mine': msg.sender == request.user,
+            })
+        
+        return Response(messages_data)
+    
+    def list(self, request, *args, **kwargs):
+        """Список чатов поддержки"""
+        queryset = self.get_queryset()
+        
+        # Фильтрация по статусу
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        queryset = queryset.order_by('-updated_at')
+        
+        chats_data = []
+        for chat in queryset:
+            last_message = chat.support_messages.last()
+            
+            chats_data.append({
+                'id': chat.id,
+                'client': {
+                    'id': chat.client.id,
+                    'username': chat.client.username,
+                    'first_name': chat.client.first_name,
+                    'last_name': chat.client.last_name,
+                    'email': chat.client.email,
+                },
+                'admin': {
+                    'id': chat.admin.id,
+                    'first_name': chat.admin.first_name,
+                    'last_name': chat.admin.last_name,
+                    'role': 'Администратор поддержки',
+                } if chat.admin else None,
+                'status': chat.status,
+                'priority': chat.priority,
+                'subject': chat.subject,
+                'last_message': {
+                    'text': last_message.text if last_message else '',
+                    'created_at': last_message.created_at if last_message else chat.created_at,
+                } if last_message else None,
+                'unread_count': chat.unread_count if request.user == chat.client else 0,
+                'created_at': chat.created_at,
+                'updated_at': chat.updated_at,
+            })
+        
+        return Response(chats_data)

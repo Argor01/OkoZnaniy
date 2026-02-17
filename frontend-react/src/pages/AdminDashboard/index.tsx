@@ -2,41 +2,31 @@ import React from 'react';
 import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
-import {
-  useAllUsers,
-  useBlockedUsers,
-  useUserActions,
-  useAllOrders,
-  useProblemOrders,
-  useOrderActions,
-  useSupportRequests,
-  useSupportActions,
-  useClaims,
-  useClaimActions,
-  useAdminChatRooms,
-  useChatRoomActions,
-} from './hooks/useAdminPanelData';
+import { useInternalCommunication } from './hooks/useInternalCommunication';
 import { AdminLayout } from './components/Layout';
 import { 
   OverviewSection, 
   PartnersSection, 
   EarningsSection, 
+  DisputesSection,
   SupportRequestsSection,
   SupportChatsSection,
   UsersManagementSection,
   BlockedUsersSection,
+  UserRolesSection,
   AllOrdersSection,
   ProblemOrdersSection,
   NewClaimsSection,
   InProgressClaimsSection,
   CompletedClaimsSection,
   PendingApprovalSection,
+  ClaimsProcessingSection,
   AdminChatsSection,
   OpenRequestsSection,
   InProgressRequestsSection,
   CompletedRequestsSection
 } from './components/Sections';
-import { PartnerModal, SupportRequestModal } from './components/Modals';
+import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
 import type { MenuKey, SupportStatus } from './types';
 import { DirectorCommunicationSection } from './components/Sections/DirectorCommunicationSection';
@@ -72,41 +62,34 @@ const AdminDashboard: React.FC = () => {
     handleMenuClick, 
     handleEditPartner, 
     handleViewPartner,
+    handleViewDispute,
     partnerEditModalVisible,
     partnerViewModalVisible,
+    disputeModalVisible,
     selectedPartner,
-    closePartnerModals
+    selectedDispute,
+    closePartnerModals,
+    closeDisputeModals
   } = useAdminUI();
   
   const { 
     markEarningPaid, 
     updatePartner,
+    assignArbitrator, 
     isMarkingEarningPaid, 
-    isUpdatingPartner
+    isUpdatingPartner,
+    isAssigningArbitrator 
   } = useAdminMutations();
 
-  // 🆕 Реальные данные из API
-  const { users: allUsers, loading: usersLoading } = useAllUsers();
-  const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers();
-  const { blockUser, unblockUser, changeUserRole } = useUserActions();
-  
-  const { orders: allOrders, loading: ordersLoading } = useAllOrders();
-  const { orders: problemOrders, loading: problemOrdersLoading } = useProblemOrders();
-  const { changeOrderStatus } = useOrderActions();
-  
-  const { requests: openRequests, loading: openRequestsLoading } = useSupportRequests('open');
-  const { requests: inProgressRequests, loading: inProgressRequestsLoading } = useSupportRequests('in_progress');
-  const { requests: completedRequests, loading: completedRequestsLoading } = useSupportRequests('completed');
-  const { takeRequest, completeRequest, sendMessage: sendSupportMessage } = useSupportActions();
-  
-  const { claims: newClaims, loading: newClaimsLoading } = useClaims('new');
-  const { claims: inProgressClaims, loading: inProgressClaimsLoading } = useClaims('in_progress');
-  const { claims: completedClaims, loading: completedClaimsLoading } = useClaims('completed');
-  const { claims: pendingApprovalClaims, loading: pendingApprovalLoading } = useClaims('pending_approval');
-  const { takeInWork, completeClaim, rejectClaim } = useClaimActions();
-  
-  const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms();
-  const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
+  // Хук для внутренней коммуникации
+  const internalComm = useInternalCommunication();
+
+  // Хук для поддержки
+  // const supportData = useSupportRequests(); // Временно отключено до реализации API
+
+  // 🆕 Новые хуки для обработки запросов
+  // const requestProcessingData = useRequestProcessing(); // Временно отключено до реализации API
+  // const adminChatsData = useAdminChats(); // Временно отключено до реализации API
 
   // Показываем спиннер во время загрузки
   if (loading) {
@@ -156,6 +139,11 @@ const AdminDashboard: React.FC = () => {
     closePartnerModals();
   };
 
+  const handleAssignArbitratorToDispute = (disputeId: number, arbitratorId: number) => {
+    assignArbitrator({ disputeId, arbitratorId });
+    closeDisputeModals();
+  };
+
   // Рендерим соответствующую секцию
   const renderSection = () => {
     switch (selectedMenu) {
@@ -165,6 +153,7 @@ const AdminDashboard: React.FC = () => {
             stats={adminData.stats}
             partners={adminData.partners}
             earnings={adminData.earnings}
+            disputes={adminData.disputes}
             isLoading={adminData.isLoading}
           />
         );
@@ -189,25 +178,52 @@ const AdminDashboard: React.FC = () => {
           />
         );
       
+      case 'disputes':
+        return (
+          <DisputesSection
+            disputes={adminData.disputes}
+            arbitrators={adminData.arbitrators}
+            loading={adminData.disputesLoading}
+            error={adminData.disputesError}
+            onViewDispute={handleViewDispute}
+            onAssignArbitrator={handleAssignArbitratorToDispute}
+            isAssigningArbitrator={isAssigningArbitrator}
+          />
+        );
+
       // Управление пользователями
       case 'all_users':
         return (
           <UsersManagementSection
-            users={allUsers}
-            loading={usersLoading}
-            onBlockUser={blockUser}
-            onUnblockUser={unblockUser}
-            onChangeRole={changeUserRole}
+            users={[]}
+            loading={false}
+            onBlockUser={(userId) => console.log('Block user:', userId)}
+            onUnblockUser={(userId) => console.log('Unblock user:', userId)}
+            onChangeRole={(userId, role) => console.log('Change role:', userId, role)}
           />
         );
       
       case 'blocked_users':
         return (
           <BlockedUsersSection
-            users={blockedUsers}
-            loading={blockedUsersLoading}
-            onUnblockUser={unblockUser}
+            users={[]}
+            loading={false}
+            onUnblockUser={(userId) => console.log('Unblock user:', userId)}
             onViewUserDetails={(user) => console.log('View user details:', user)}
+          />
+        );
+      
+      case 'user_roles':
+        return (
+          <UserRolesSection
+            users={[]}
+            roles={[]}
+            permissions={[]}
+            loading={false}
+            onChangeUserRole={(userId, newRole) => console.log('Change user role:', userId, newRole)}
+            onUpdateRolePermissions={(roleId, permissions) => console.log('Update role permissions:', roleId, permissions)}
+            onCreateRole={(roleData) => console.log('Create role:', roleData)}
+            onDeleteRole={(roleId) => console.log('Delete role:', roleId)}
           />
         );
 
@@ -215,11 +231,11 @@ const AdminDashboard: React.FC = () => {
       case 'all_orders':
         return (
           <AllOrdersSection
-            orders={allOrders}
-            loading={ordersLoading}
+            orders={[]}
+            loading={false}
             onViewOrder={(orderId) => console.log('View order:', orderId)}
             onEditOrder={(orderId) => console.log('Edit order:', orderId)}
-            onChangeOrderStatus={changeOrderStatus}
+            onChangeOrderStatus={(orderId, newStatus) => console.log('Change order status:', orderId, newStatus)}
             onAssignExpert={(orderId, expertId) => console.log('Assign expert:', orderId, expertId)}
             onContactClient={(orderId) => console.log('Contact client:', orderId)}
           />
@@ -228,8 +244,8 @@ const AdminDashboard: React.FC = () => {
       case 'problem_orders':
         return (
           <ProblemOrdersSection
-            orders={problemOrders}
-            loading={problemOrdersLoading}
+            orders={[]}
+            loading={false}
             onViewOrder={(orderId) => console.log('View problem order:', orderId)}
             onResolveIssue={(orderId, resolution) => console.log('Resolve issue:', orderId, resolution)}
             onEscalateIssue={(orderId, escalationNote) => console.log('Escalate issue:', orderId, escalationNote)}
@@ -243,12 +259,12 @@ const AdminDashboard: React.FC = () => {
       case 'support_chats':
         return (
           <SupportChatsSection
-            chats={[...openRequests, ...inProgressRequests]}
-            currentUserId={user?.id || 1}
-            loading={openRequestsLoading || inProgressRequestsLoading}
-            onSendMessage={sendSupportMessage}
-            onTakeChat={takeRequest}
-            onCloseChat={completeRequest}
+            chats={[]}
+            currentUserId={1}
+            loading={false}
+            onSendMessage={(chatId, message) => console.log('Send message:', chatId, message)}
+            onTakeChat={(chatId) => console.log('Take chat:', chatId)}
+            onCloseChat={(chatId) => console.log('Close chat:', chatId)}
             onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}
           />
         );
@@ -256,36 +272,27 @@ const AdminDashboard: React.FC = () => {
       case 'support_open':
       case 'support_in_progress':
       case 'support_completed':
-        {
-          const statusMap = {
-            support_open: { data: openRequests, loading: openRequestsLoading },
-            support_in_progress: { data: inProgressRequests, loading: inProgressRequestsLoading },
-            support_completed: { data: completedRequests, loading: completedRequestsLoading },
-          };
-          const currentStatus = statusMap[selectedMenu as keyof typeof statusMap];
-          
-          return (
-            <SupportRequestsSection
-              requests={currentStatus.data}
-              loading={currentStatus.loading}
-              selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
-              onStatusChange={(status) => console.log('Status change:', status)}
-              onRequestClick={(request) => console.log('Request click:', request)}
-              onTakeRequest={takeRequest}
-            />
-          );
-        }
+        return (
+          <SupportRequestsSection
+            requests={[]}
+            loading={false}
+            selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
+            onStatusChange={(status) => console.log('Status change:', status)}
+            onRequestClick={(request) => console.log('Request click:', request)}
+            onTakeRequest={(requestId) => console.log('Take request:', requestId)}
+          />
+        );
 
       case 'admin_chats':
         return (
           <AdminChatsSection
-            chatRooms={chatRooms}
-            currentUserId={user?.id || 1}
-            loading={chatRoomsLoading}
-            onSendMessage={sendChatMessage}
+            chatRooms={[]}
+            currentUserId={1}
+            loading={false}
+            onSendMessage={(roomId: number, message: string) => console.log('Send message:', roomId, message)}
             onCreateRoom={(roomData) => console.log('Create room:', roomData)}
-            onJoinRoom={joinRoom}
-            onLeaveRoom={leaveRoom}
+            onJoinRoom={(roomId) => console.log('Join room:', roomId)}
+            onLeaveRoom={(roomId) => console.log('Leave room:', roomId)}
             onInviteUser={(roomId, userId) => console.log('Invite user:', roomId, userId)}
             onUploadFile={(roomId, file) => console.log('Upload file:', roomId, file)}
           />
@@ -295,14 +302,14 @@ const AdminDashboard: React.FC = () => {
       case 'request_processing_open':
         return (
           <OpenRequestsSection
-            requests={openRequests}
-            loading={openRequestsLoading}
+            requests={[]}
+            loading={false}
             onViewRequest={(requestId) => console.log('View request:', requestId)}
-            onTakeRequest={takeRequest}
+            onTakeRequest={(requestId) => console.log('Take request:', requestId)}
             onAssignRequest={(requestId, adminId) => console.log('Assign request:', requestId, adminId)}
-            onSendResponse={sendSupportMessage}
+            onSendResponse={(requestId, response, isAutoResponse) => console.log('Send response:', requestId, response, isAutoResponse)}
             onEscalateRequest={(requestId, reason) => console.log('Escalate request:', requestId, reason)}
-            onCloseRequest={completeRequest}
+            onCloseRequest={(requestId, reason) => console.log('Close request:', requestId, reason)}
             onAddTags={(requestId, tags) => console.log('Add tags:', requestId, tags)}
             onScheduleCall={(requestId, datetime) => console.log('Schedule call:', requestId, datetime)}
           />
@@ -311,12 +318,12 @@ const AdminDashboard: React.FC = () => {
       case 'request_processing_progress':
         return (
           <InProgressRequestsSection
-            requests={inProgressRequests}
-            loading={inProgressRequestsLoading}
+            requests={[]}
+            loading={false}
             onViewRequest={(requestId) => console.log('View request:', requestId)}
             onUpdateProgress={(requestId, progress) => console.log('Update progress:', requestId, progress)}
-            onSendResponse={sendSupportMessage}
-            onCompleteRequest={completeRequest}
+            onSendResponse={(requestId, response) => console.log('Send response:', requestId, response)}
+            onCompleteRequest={(requestId, resolution) => console.log('Complete request:', requestId, resolution)}
             onPauseRequest={(requestId, reason) => console.log('Pause request:', requestId, reason)}
             onResumeRequest={(requestId) => console.log('Resume request:', requestId)}
             onAddNote={(requestId, note) => console.log('Add note:', requestId, note)}
@@ -328,8 +335,8 @@ const AdminDashboard: React.FC = () => {
       case 'request_processing_completed':
         return (
           <CompletedRequestsSection
-            requests={completedRequests}
-            loading={completedRequestsLoading}
+            requests={[]}
+            loading={false}
             onViewRequest={(requestId) => console.log('View completed request:', requestId)}
             onReopenRequest={(requestId, reason) => console.log('Reopen request:', requestId, reason)}
             onExportReport={(filters) => console.log('Export completed requests report:', filters)}
@@ -378,11 +385,11 @@ const AdminDashboard: React.FC = () => {
       case 'new_claims':
         return (
           <NewClaimsSection
-            claims={newClaims}
-            loading={newClaimsLoading}
+            claims={[]}
+            loading={false}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onTakeInWork={takeInWork}
-            onRejectClaim={rejectClaim}
+            onTakeInWork={(claimId) => console.log('Take in work:', claimId)}
+            onRejectClaim={(claimId, reason) => console.log('Reject claim:', claimId, reason)}
             onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
           />
         );
@@ -390,10 +397,10 @@ const AdminDashboard: React.FC = () => {
       case 'in_progress_claims':
         return (
           <InProgressClaimsSection
-            claims={inProgressClaims}
-            loading={inProgressClaimsLoading}
+            claims={[]}
+            loading={false}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onCompleteClaim={completeClaim}
+            onCompleteClaim={(claimId, resolution) => console.log('Complete claim:', claimId, resolution)}
             onUpdateProgress={(claimId, progress) => console.log('Update progress:', claimId, progress)}
             onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
           />
@@ -402,8 +409,8 @@ const AdminDashboard: React.FC = () => {
       case 'completed_claims':
         return (
           <CompletedClaimsSection
-            claims={completedClaims}
-            loading={completedClaimsLoading}
+            claims={[]}
+            loading={false}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
             onReopenClaim={(claimId, reason) => console.log('Reopen claim:', claimId, reason)}
             onExportReport={(filters) => console.log('Export report:', filters)}
@@ -413,16 +420,32 @@ const AdminDashboard: React.FC = () => {
       case 'pending_approval':
         return (
           <PendingApprovalSection
-            claims={pendingApprovalClaims}
-            loading={pendingApprovalLoading}
+            claims={[]}
+            loading={false}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
             onApproveClaim={(claimId, decision) => console.log('Approve claim:', claimId, decision)}
-            onRejectApproval={rejectClaim}
+            onRejectApproval={(claimId, reason) => console.log('Reject approval:', claimId, reason)}
             onEscalateToDirector={(claimId) => console.log('Escalate to director:', claimId)}
             onRequestMoreInfo={(claimId, questions) => console.log('Request more info:', claimId, questions)}
           />
         );
 
+      case 'claims_processing':
+        return (
+          <ClaimsProcessingSection
+            claims={[]}
+            loading={false}
+            onViewClaim={(claimId) => console.log('View claim:', claimId)}
+            onAssignClaim={(claimId, adminId) => console.log('Assign claim:', claimId, adminId)}
+            onUpdateStatus={(claimId, status, notes) => console.log('Update status:', claimId, status, notes)}
+            onAddAction={(claimId, action) => console.log('Add action:', claimId, action)}
+            onResolveClaim={(claimId, resolution) => console.log('Resolve claim:', claimId, resolution)}
+            onSendMessage={(claimId, message, recipient) => console.log('Send message:', claimId, message, recipient)}
+            onUploadEvidence={(claimId, file, type) => console.log('Upload evidence:', claimId, file, type)}
+            onScheduleCall={(claimId, datetime, participants) => console.log('Schedule call:', claimId, datetime, participants)}
+          />
+        );
+      
       default:
         return (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -464,6 +487,16 @@ const AdminDashboard: React.FC = () => {
         onUpdate={handleUpdatePartner}
         isUpdating={isUpdatingPartner}
         mode="view"
+      />
+      
+      <DisputeModal
+        visible={disputeModalVisible}
+        dispute={selectedDispute}
+        onCancel={closeDisputeModals}
+        onAssignArbitrator={(dispute) => {
+          // Логика назначения арбитра уже в DisputesSection
+          closeDisputeModals();
+        }}
       />
       
       {/* Модальное окно поддержки */}

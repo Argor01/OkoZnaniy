@@ -8,6 +8,8 @@ from .views import (
     DirectorPartnersViewSet,
     DirectorStatisticsViewSet,
     InternalMessageViewSet,
+    InternalCommunicationViewSet,
+    MeetingRequestViewSet,
 )
 
 router = DefaultRouter()
@@ -17,6 +19,8 @@ router.register(r'finance', DirectorFinanceViewSet, basename='director-finance')
 router.register(r'partners', DirectorPartnersViewSet, basename='director-partners')
 router.register(r'statistics', DirectorStatisticsViewSet, basename='director-statistics')
 router.register(r'messages', InternalMessageViewSet, basename='director-messages')
+router.register(r'internal-communication', InternalCommunicationViewSet, basename='internal-communication')
+router.register(r'meeting-requests', MeetingRequestViewSet, basename='meeting-requests')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -15,7 +15,7 @@ from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.users.models import User, PartnerEarning
-from .models import InternalMessage, InternalMessageAttachment
+from .models import InternalMessage, MeetingRequest, MessageAttachment
 from .serializers import (
     InternalMessageSerializer,
     InternalMessageCreateSerializer,
@@ -1177,3 +1177,324 @@ class InternalMessageViewSet(viewsets.ModelViewSet):
             read_at=timezone.now()
         )
         return Response({'updated': updated})
+
+
+
+# ViewSet для внутренней коммуникации
+
+class InternalCommunicationViewSet(viewsets.ModelViewSet):
+    """ViewSet для внутренней коммуникации между администраторами и директором"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Только админы и директор могут видеть сообщения
+        if user.role not in ['admin', 'director']:
+            return InternalMessage.objects.none()
+        
+        # Показываем сообщения, где пользователь - отправитель или получатель
+        return InternalMessage.objects.filter(
+            Q(sender=user) | Q(recipient=user)
+        ).select_related('sender', 'recipient', 'parent_message').order_by('-created_at')
+    
+    @action(detail=False, methods=['post'])
+    def send_message(self, request):
+        """Отправить сообщение"""
+        recipient_id = request.data.get('recipient_id')
+        subject = request.data.get('subject')
+        message = request.data.get('message')
+        message_type = request.data.get('message_type', 'question')
+        priority = request.data.get('priority', 'medium')
+        parent_message_id = request.data.get('parent_message_id')
+        
+        if not all([recipient_id, subject, message]):
+            return Response(
+                {'error': 'recipient_id, subject и message обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            recipient = User.objects.get(id=recipient_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Получатель не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Создаем сообщение
+        internal_message = InternalMessage.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            subject=subject,
+            message=message,
+            message_type=message_type,
+            priority=priority,
+            parent_message_id=parent_message_id if parent_message_id else None
+        )
+        
+        # Уведомляем получателя
+        from apps.notifications.services import NotificationService
+        NotificationService.create_notification(
+            recipient=recipient,
+            type='new_contact',
+            title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
+            message=f'{subject}: {message[:100]}',
+            related_object_id=internal_message.id,
+            related_object_type='internal_message'
+        )
+        
+        return Response({
+            'id': internal_message.id,
+            'subject': internal_message.subject,
+            'message': internal_message.message,
+            'created_at': internal_message.created_at
+        }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """Отметить сообщение как прочитанное"""
+        message = self.get_object()
+        
+        if message.recipient != request.user:
+            return Response(
+                {'error': 'Вы не можете отметить это сообщение'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        message.is_read = True
+        message.read_at = timezone.now()
+        message.save()
+        
+        return Response({'status': 'success'})
+    
+    @action(detail=True, methods=['post'])
+    def archive(self, request, pk=None):
+        """Архивировать сообщение"""
+        message = self.get_object()
+        
+        if message.sender != request.user and message.recipient != request.user:
+            return Response(
+                {'error': 'Вы не можете архивировать это сообщение'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        message.is_archived = True
+        message.save()
+        
+        return Response({'status': 'success'})
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """Получить количество непрочитанных сообщений"""
+        count = InternalMessage.objects.filter(
+            recipient=request.user,
+            is_read=False,
+            is_archived=False
+        ).count()
+        
+        return Response({'unread_count': count})
+    
+    def list(self, request, *args, **kwargs):
+        """Список сообщений"""
+        queryset = self.get_queryset()
+        
+        # Фильтрация
+        is_archived = request.query_params.get('is_archived', 'false').lower() == 'true'
+        queryset = queryset.filter(is_archived=is_archived)
+        
+        messages_data = []
+        for msg in queryset:
+            messages_data.append({
+                'id': msg.id,
+                'sender': {
+                    'id': msg.sender.id,
+                    'username': msg.sender.username,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'role': msg.sender.role,
+                },
+                'recipient': {
+                    'id': msg.recipient.id,
+                    'username': msg.recipient.username,
+                    'first_name': msg.recipient.first_name,
+                    'last_name': msg.recipient.last_name,
+                    'role': msg.recipient.role,
+                },
+                'subject': msg.subject,
+                'message': msg.message,
+                'message_type': msg.message_type,
+                'priority': msg.priority,
+                'is_read': msg.is_read,
+                'is_archived': msg.is_archived,
+                'created_at': msg.created_at,
+                'read_at': msg.read_at,
+                'parent_message_id': msg.parent_message_id,
+            })
+        
+        return Response(messages_data)
+
+
+class MeetingRequestViewSet(viewsets.ModelViewSet):
+    """ViewSet для запросов на встречи"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Только админы и директор могут видеть запросы
+        if user.role not in ['admin', 'director']:
+            return MeetingRequest.objects.none()
+        
+        # Директор видит все запросы, админы - только свои
+        if user.role == 'director':
+            return MeetingRequest.objects.all().select_related('requester', 'director')
+        else:
+            return MeetingRequest.objects.filter(requester=user).select_related('director')
+    
+    @action(detail=False, methods=['post'])
+    def request_meeting(self, request):
+        """Запросить встречу с директором"""
+        director_id = request.data.get('director_id')
+        subject = request.data.get('subject')
+        description = request.data.get('description')
+        proposed_date = request.data.get('proposed_date')
+        
+        if not all([director_id, subject, description, proposed_date]):
+            return Response(
+                {'error': 'Все поля обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            director = User.objects.get(id=director_id, role='admin')
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Директор не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Создаем запрос
+        meeting = MeetingRequest.objects.create(
+            requester=request.user,
+            director=director,
+            subject=subject,
+            description=description,
+            proposed_date=proposed_date,
+            status='pending'
+        )
+        
+        # Уведомляем директора
+        from apps.notifications.services import NotificationService
+        NotificationService.create_notification(
+            recipient=director,
+            type='new_contact',
+            title='Новый запрос на встречу',
+            message=f'{request.user.get_full_name()}: {subject}',
+            related_object_id=meeting.id,
+            related_object_type='meeting_request'
+        )
+        
+        return Response({
+            'id': meeting.id,
+            'subject': meeting.subject,
+            'status': meeting.status,
+            'created_at': meeting.created_at
+        }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """Одобрить встречу (только для директора)"""
+        if request.user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для директора'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        meeting = self.get_object()
+        approved_date = request.data.get('approved_date', meeting.proposed_date)
+        
+        meeting.status = 'approved'
+        meeting.approved_date = approved_date
+        meeting.save()
+        
+        # Уведомляем инициатора
+        from apps.notifications.services import NotificationService
+        NotificationService.create_notification(
+            recipient=meeting.requester,
+            type='new_contact',
+            title='Встреча одобрена',
+            message=f'Ваша встреча "{meeting.subject}" одобрена',
+            related_object_id=meeting.id,
+            related_object_type='meeting_request'
+        )
+        
+        return Response({'status': 'success'})
+    
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Отклонить встречу (только для директора)"""
+        if request.user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для директора'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        meeting = self.get_object()
+        reason = request.data.get('reason', '')
+        
+        meeting.status = 'rejected'
+        meeting.rejection_reason = reason
+        meeting.save()
+        
+        # Уведомляем инициатора
+        from apps.notifications.services import NotificationService
+        NotificationService.create_notification(
+            recipient=meeting.requester,
+            type='new_contact',
+            title='Встреча отклонена',
+            message=f'Ваша встреча "{meeting.subject}" отклонена. Причина: {reason}',
+            related_object_id=meeting.id,
+            related_object_type='meeting_request'
+        )
+        
+        return Response({'status': 'success'})
+    
+    def list(self, request, *args, **kwargs):
+        """Список запросов на встречи"""
+        queryset = self.get_queryset()
+        
+        # Фильтрация по статусу
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        queryset = queryset.order_by('-created_at')
+        
+        meetings_data = []
+        for meeting in queryset:
+            meetings_data.append({
+                'id': meeting.id,
+                'requester': {
+                    'id': meeting.requester.id,
+                    'username': meeting.requester.username,
+                    'first_name': meeting.requester.first_name,
+                    'last_name': meeting.requester.last_name,
+                },
+                'director': {
+                    'id': meeting.director.id,
+                    'first_name': meeting.director.first_name,
+                    'last_name': meeting.director.last_name,
+                },
+                'subject': meeting.subject,
+                'description': meeting.description,
+                'proposed_date': meeting.proposed_date,
+                'approved_date': meeting.approved_date,
+                'status': meeting.status,
+                'rejection_reason': meeting.rejection_reason,
+                'notes': meeting.notes,
+                'created_at': meeting.created_at,
+                'updated_at': meeting.updated_at,
+            })
+        
+        return Response(meetings_data)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import InternalMessage, InternalMessageAttachment
+from .models import InternalMessage, MeetingRequest, MessageAttachment
 
 User = get_user_model()
 
@@ -13,11 +13,11 @@ class UserBasicSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role']
 
 
-class InternalMessageAttachmentSerializer(serializers.ModelSerializer):
+class MessageAttachmentSerializer(serializers.ModelSerializer):
     """Сериализатор для вложений"""
     
     class Meta:
-        model = InternalMessageAttachment
+        model = MessageAttachment
         fields = ['id', 'file', 'filename', 'file_size', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
 
@@ -27,7 +27,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     
     sender = UserBasicSerializer(read_only=True)
     recipient = UserBasicSerializer(read_only=True)
-    attachments = InternalMessageAttachmentSerializer(many=True, read_only=True)
+    attachments = MessageAttachmentSerializer(many=True, read_only=True)
     
     class Meta:
         model = InternalMessage
@@ -58,7 +58,7 @@ class InternalMessageCreateSerializer(serializers.ModelSerializer):
         
         # Создаем вложения
         for file in attachments_data:
-            InternalMessageAttachment.objects.create(
+            MessageAttachment.objects.create(
                 message=message,
                 file=file,
                 filename=file.name,

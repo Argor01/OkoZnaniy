@@ -717,6 +717,108 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def admin_all_users(self, request):
+        """Получение всех пользователей для админки"""
+        user = request.user
+        if user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Фильтрация по роли
+        role_filter = request.query_params.get('role')
+        users = User.objects.all().order_by('-date_joined')
+        
+        if role_filter:
+            users = users.filter(role=role_filter)
+        
+        # Поиск
+        search = request.query_params.get('search')
+        if search:
+            users = users.filter(
+                models.Q(username__icontains=search) |
+                models.Q(email__icontains=search) |
+                models.Q(first_name__icontains=search) |
+                models.Q(last_name__icontains=search)
+            )
+        
+        serializer = self.get_serializer(users, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def admin_all_orders(self, request):
+        """Получение всех заказов для админки"""
+        user = request.user
+        if user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        orders = Order.objects.select_related('client', 'expert').prefetch_related('bids').all().order_by('-created_at')
+        
+        # Фильтрация по статусу
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+        
+        serializer = OrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def admin_block_user(self, request, pk=None):
+        """Блокировка пользователя администратором"""
+        admin_user = request.user
+        if admin_user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.is_active = False
+        user.save()
+        
+        return Response({
+            'message': f'Пользователь {user.username} заблокирован',
+            'user': self.get_serializer(user).data
+        })
+
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def admin_unblock_user(self, request, pk=None):
+        """Разблокировка пользователя администратором"""
+        admin_user = request.user
+        if admin_user.role != 'admin':
+            return Response(
+                {'error': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.is_active = True
+        user.save()
+        
+        return Response({
+            'message': f'Пользователь {user.username} разблокирован',
+            'user': self.get_serializer(user).data
+        })
+
 
 # Telegram Auth Status Check
 from rest_framework.decorators import api_view, permission_classes

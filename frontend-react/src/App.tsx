@@ -52,9 +52,11 @@ import AddWorkToShop from './pages/AddWorkToShop';
 import MyWorks from './pages/MyWorks';
 import PurchasedWorks from './pages/PurchasedWorks';
 import OrdersFeed from './pages/OrdersFeed';
+import SupportChat from './pages/SupportChat';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
+import SupportButton from './components/SupportButton';
 
 // Configure dayjs
 dayjs.locale('ru');
@@ -246,9 +248,18 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/support-chat/:chatId"
+                element={
+                  <ProtectedRoute>
+                    <SupportChat />
+                  </ProtectedRoute>
+                } 
+              />
               {/* 404 - должен быть последним */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <SupportButton />
           </div>
         </Router>
       </ConfigProvider>

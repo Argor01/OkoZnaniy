@@ -4,6 +4,7 @@ from . import views
 
 router = DefaultRouter()
 router.register('chats', views.ChatViewSet, basename='chat')
+router.register('support', views.SupportChatViewSet, basename='support-chat')
 
 app_name = 'chat'
 
