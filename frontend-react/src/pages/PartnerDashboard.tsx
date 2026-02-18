@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, Space, message, Modal, Card, Row, Col, Statistic, Table, Tag, Input, Spin, Alert, Drawer, Grid } from 'antd';
+import { Layout, Menu, Button, Typography, Space, message, Modal, Card, Row, Col, Statistic, Table, Tag, Input, Spin, Alert, Drawer, Grid, DatePicker } from 'antd';
 import {
   TeamOutlined,
   DollarOutlined,
@@ -10,61 +10,118 @@ import {
   CopyOutlined,
   FileTextOutlined,
   MenuOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '../api/partners';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
+const { RangePicker } = DatePicker;
 
 // Компонент статистики
-const StatisticsPanel: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
+const StatisticsPanel: React.FC<{ 
+  data: PartnerDashboardData;
+  dateRange: [Dayjs, Dayjs] | null;
+  onDateRangeChange: (dates: [Dayjs, Dayjs] | null) => void;
+}> = ({ data, dateRange, onDateRangeChange }) => {
   const partnerInfo = data.partner_info;
 
+  // Фильтруем данные по выбранному периоду
+  const filteredEarnings = dateRange 
+    ? data.recent_earnings.filter(earning => {
+        const earningDate = dayjs(earning.created_at);
+        return earningDate.isAfter(dateRange[0]) && earningDate.isBefore(dateRange[1].add(1, 'day'));
+      })
+    : data.recent_earnings;
+
+  const filteredTotalEarnings = filteredEarnings.reduce((sum, earning) => sum + earning.amount, 0);
+  const filteredActiveOrders = dateRange
+    ? data.referrals.reduce((sum, ref) => sum + ref.orders_count, 0)
+    : data.referrals.reduce((sum, ref) => sum + ref.orders_count, 0);
+
+  // Предустановленные периоды
+  const rangePresets = [
+    { label: 'Последние 7 дней', value: [dayjs().subtract(7, 'day'), dayjs()] as [Dayjs, Dayjs] },
+    { label: 'Последние 30 дней', value: [dayjs().subtract(30, 'day'), dayjs()] as [Dayjs, Dayjs] },
+    { label: 'Этот месяц', value: [dayjs().startOf('month'), dayjs()] as [Dayjs, Dayjs] },
+    { label: 'Прошлый месяц', value: [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')] as [Dayjs, Dayjs] },
+  ];
+
   return (
-    <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-      <Col xs={24} sm={12} md={6}>
-        <Card>
-          <Statistic
-            title="Всего рефералов"
-            value={partnerInfo.total_referrals}
-            prefix={<TeamOutlined />}
+    <div style={{ marginBottom: 24 }}>
+      <Card style={{ marginBottom: 20 }}>
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <Title level={4} style={{ margin: 0 }}>
+              <CalendarOutlined /> Выберите период
+            </Title>
+            {dateRange && (
+              <Button onClick={() => onDateRangeChange(null)}>
+                Сбросить фильтр
+              </Button>
+            )}
+          </div>
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => onDateRangeChange(dates as [Dayjs, Dayjs] | null)}
+            format="DD.MM.YYYY"
+            placeholder={['Начало периода', 'Конец периода']}
+            style={{ width: '100%', maxWidth: 400 }}
+            presets={rangePresets}
           />
-        </Card>
-      </Col>
-      <Col xs={24} sm={12} md={6}>
-        <Card>
-          <Statistic
-            title="Активных рефералов"
-            value={partnerInfo.active_referrals}
-            prefix={<UserAddOutlined />}
-          />
-        </Card>
-      </Col>
-      <Col xs={24} sm={12} md={6}>
-        <Card>
-          <Statistic
-            title="Общий доход"
-            value={partnerInfo.total_earnings}
-            suffix="₽"
-            prefix={<DollarOutlined />}
-          />
-        </Card>
-      </Col>
-      <Col xs={24} sm={12} md={6}>
-        <Card>
-          <Statistic
-            title="Процент комиссии"
-            value={partnerInfo.commission_rate}
-            suffix="%"
-            prefix={<TrophyOutlined />}
-          />
-        </Card>
-      </Col>
-    </Row>
+          {dateRange && (
+            <Text type="secondary">
+              Показаны данные за период: {dateRange[0].format('DD.MM.YYYY')} - {dateRange[1].format('DD.MM.YYYY')}
+            </Text>
+          )}
+        </Space>
+      </Card>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: 0 }}>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Всего рефералов"
+              value={partnerInfo.total_referrals}
+              prefix={<TeamOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Активных рефералов"
+              value={partnerInfo.active_referrals}
+              prefix={<UserAddOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title={dateRange ? "Доход за период" : "Общий доход"}
+              value={dateRange ? filteredTotalEarnings : partnerInfo.total_earnings}
+              suffix="₽"
+              prefix={<DollarOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Процент комиссии"
+              value={partnerInfo.commission_rate}
+              suffix="%"
+              prefix={<TrophyOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 };
 
@@ -96,8 +153,8 @@ const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   const partnerInfo = data.partner_info;
 
   return (
-    <div>
-      <Card title="Реферальная программа" style={{ marginBottom: 24 }}>
+    <div style={{ marginTop: 20 }}>
+      <Card title="Реферальная программа" style={{ marginBottom: 0 }}>
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <div>
             <Text strong>Ваш реферальный код: </Text>
@@ -323,6 +380,7 @@ const PartnerDashboard: React.FC = () => {
   const screens = useBreakpoint();
   const [selectedMenu, setSelectedMenu] = useState<string>('statistics');
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
 
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
@@ -346,7 +404,11 @@ const PartnerDashboard: React.FC = () => {
       label: 'Статистика',
       component: (
         <div>
-          <StatisticsPanel data={data} />
+          <StatisticsPanel 
+            data={data} 
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
           <ReferralProgram data={data} />
         </div>
       ),
@@ -491,7 +553,7 @@ const PartnerDashboard: React.FC = () => {
         {renderMenu()}
       </Drawer>
 
-      <Layout>
+      <Layout style={{ background: '#f0f2f5' }}>
         <Header
           style={{
             background: '#fff',
@@ -527,10 +589,12 @@ const PartnerDashboard: React.FC = () => {
         </Header>
         <Content
           style={{
-            margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
-            padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
+            margin: isMobile ? '12px' : '16px',
+            padding: isMobile ? '16px' : '20px',
+            background: '#fff',
             borderRadius: '8px',
             minHeight: 'calc(100vh - 64px)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
           }}
         >
           {currentMenuItem?.component}
