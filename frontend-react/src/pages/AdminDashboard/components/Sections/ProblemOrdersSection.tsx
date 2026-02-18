@@ -401,7 +401,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             {record.title}
           </div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.subject} • {record.work_type}
+            {typeof record.subject === 'object' && record.subject?.name ? record.subject.name : record.subject} • {typeof record.work_type === 'object' && record.work_type?.name ? record.work_type.name : record.work_type}
           </Text>
         </div>
       ),

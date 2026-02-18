@@ -88,7 +88,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             src={userProfile?.avatar || undefined}
             icon={<UserOutlined />}
             style={{ 
-              backgroundColor: '#667eea',
+              backgroundColor: '#1890ff',
               border: '3px solid #fff',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               flexShrink: 0

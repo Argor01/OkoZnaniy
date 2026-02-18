@@ -77,7 +77,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         <div style={{ 
           fontSize: isMobile ? 18 : 24, 
           fontWeight: 600, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+          background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 50%, #40a9ff 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'

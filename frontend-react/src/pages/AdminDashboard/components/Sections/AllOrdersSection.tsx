@@ -201,7 +201,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
             {record.title}
           </div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.subject} • {record.work_type}
+            {typeof record.subject === 'object' && record.subject?.name ? record.subject.name : record.subject} • {typeof record.work_type === 'object' && record.work_type?.name ? record.work_type.name : record.work_type}
           </Text>
         </div>
       ),
@@ -472,10 +472,10 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
                 {selectedOrder.description}
               </Descriptions.Item>
               <Descriptions.Item label="Предмет">
-                {selectedOrder.subject}
+                {typeof selectedOrder.subject === 'object' && selectedOrder.subject?.name ? selectedOrder.subject.name : selectedOrder.subject}
               </Descriptions.Item>
               <Descriptions.Item label="Тип работы">
-                {selectedOrder.work_type}
+                {typeof selectedOrder.work_type === 'object' && selectedOrder.work_type?.name ? selectedOrder.work_type.name : selectedOrder.work_type}
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
                 <Tag color={getStatusColor(selectedOrder.status)}>

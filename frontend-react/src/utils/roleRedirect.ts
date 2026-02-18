@@ -14,8 +14,8 @@ export const redirectByRole = async (
   // Проверка: если роль admin и email director@test.com, то это директор
   const isDirector = role === 'admin' && userEmail === 'director@test.com';
   
-  if (isDirector) {
-    navigate('/director');
+  if (isDirector || role === 'director') {
+    navigate('/admin/directordashboard');
     return;
   }
 
@@ -46,16 +46,11 @@ export const redirectByRole = async (
       break;
       
     case 'admin':
-      navigate('/administrator');
+      navigate('/admin/dashboard');
       break;
       
     case 'arbitrator':
       navigate('/arbitrator');
-      break;
-      
-    case 'director':
-      // Директор имеет отдельную страницу
-      navigate('/director');
       break;
       
     default:

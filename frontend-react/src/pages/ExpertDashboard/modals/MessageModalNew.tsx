@@ -502,7 +502,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
       await loadChats();
-      antMessage.success('Чат открыт');
     } catch (error: unknown) {
       antMessage.error('Не удалось открыть чат с пользователем');
     } finally {
@@ -1867,8 +1866,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     size={isMobile ? 'middle' : 'large'}
                     onClick={() => setClaimModalOpen(true)}
                     style={{
-                      fontSize: isMobile ? 18 : 20,
-                      color: '#ef4444'
+                      position: 'absolute',
+                      right: isMobile ? 36 : 40,
+                      top: isMobile ? 6 : 8,
+                      fontSize: isMobile ? 20 : 22,
+                      color: '#ef4444',
+                      zIndex: 10,
+                      padding: isMobile ? '4px' : '6px',
+                      height: isMobile ? 32 : 40,
+                      width: isMobile ? 32 : 40,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     title="Подать претензию"
                   />
@@ -1999,8 +2008,63 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             overflowY: 'auto',
             padding: isMobile ? '12px' : '20px',
             background: '#f9fafb',
-            minHeight: 0
+            minHeight: 0,
+            position: 'relative'
           }}>
+            {/* Кнопка подачи претензии для чата техподдержки - по центру экрана */}
+            {isSupportChatSelected && (
+              <div style={{ 
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 5
+              }}>
+                <div
+                  onClick={() => setClaimModalOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: isMobile ? '12px 24px' : '14px 32px',
+                    background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%)',
+                    border: '1.5px solid rgba(239, 68, 68, 0.2)',
+                    borderRadius: 12,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.08)',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(254, 226, 226, 1) 0%, rgba(254, 202, 202, 1) 100%)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%)';
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.08)';
+                  }}
+                >
+                  <ExclamationCircleOutlined 
+                    style={{ 
+                      fontSize: isMobile ? 18 : 20, 
+                      color: '#ef4444' 
+                    }} 
+                  />
+                  <span style={{
+                    fontSize: isMobile ? 14 : 15,
+                    fontWeight: 600,
+                    color: '#dc2626',
+                    letterSpacing: '0.3px'
+                  }}>
+                    Подать претензию
+                  </span>
+                </div>
+              </div>
+            )}
             {selectedChat ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
                 {orderIntroByChatId[selectedChat.id] ? (
@@ -2453,7 +2517,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           fontSize: isMobile ? 11 : 12,
                           whiteSpace: 'nowrap',
                           flexShrink: 0,
-                          fontWeight: 500
+                          fontWeight: 500,
+                          transition: 'all 0.2s',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#fef2f2';
+                          e.currentTarget.style.borderColor = '#dc2626';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#ffffff';
+                          e.currentTarget.style.borderColor = '#ef4444';
                         }}
                       >
                         {category}
@@ -2474,7 +2548,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Введите сообщение..."
-                    autoSize={{ minRows: isMobile ? 2 : 2, maxRows: isMobile ? 6 : 6 }}
+                    autoSize={{ minRows: isMobile ? 1 : 1, maxRows: isMobile ? 4 : 4 }}
                     style={{ 
                       width: '100%',
                       borderRadius: 12,
@@ -2541,15 +2615,16 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     style={{ 
                       width: isMobile ? 40 : 44, 
                       height: isMobile ? 40 : 44,
-                      background: '#3b82f6',
+                      background: (!messageText.trim() && attachedFiles.length === 0) ? '#9ca3af' : '#3b82f6',
                       border: 'none',
                       borderRadius: 12,
                       fontSize: isMobile ? 16 : 18,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-                      transition: 'all 0.2s'
+                      boxShadow: (!messageText.trim() && attachedFiles.length === 0) ? 'none' : '0 2px 8px rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.2s',
+                      cursor: (!messageText.trim() && attachedFiles.length === 0) ? 'not-allowed' : 'pointer'
                     }}
                     onClick={sendMessage}
                     loading={sending}
@@ -2561,7 +2636,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#3b82f6';
+                      if (messageText.trim() || attachedFiles.length > 0) {
+                        e.currentTarget.style.background = '#3b82f6';
+                      } else {
+                        e.currentTarget.style.background = '#9ca3af';
+                      }
                       e.currentTarget.style.transform = 'scale(1)';
                     }}
                   />

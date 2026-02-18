@@ -3,6 +3,7 @@ import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
 import { useInternalCommunication } from './hooks/useInternalCommunication';
+import { User } from '../../api/auth';
 import {
   useAllUsers,
   useBlockedUsers,
@@ -24,7 +25,6 @@ import {
   PartnersSection, 
   EarningsSection, 
   DisputesSection,
-  SupportRequestsSection,
   SupportChatsSection,
   UsersManagementSection,
   BlockedUsersSection,
@@ -37,14 +37,10 @@ import {
   PendingApprovalSection,
   ClaimsProcessingSection,
   AdminChatsSection,
-  OpenRequestsSection,
-  InProgressRequestsSection,
-  CompletedRequestsSection
 } from './components/Sections';
 import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
-import type { MenuKey, SupportStatus } from './types';
-import { DirectorCommunicationSection } from './components/Sections/DirectorCommunicationSection';
+import type { MenuKey } from './types';
 
 const { Content } = Layout;
 
@@ -69,8 +65,59 @@ const AdminDashboard: React.FC = () => {
     handleLoginSuccess,
     handleLogout
   } = useAdminAuth();
-  
-  const adminData = useAdminData(canLoadData);
+
+  // Показываем спиннер во время загрузки
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: '100vh' }}>
+        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
+  // Показываем форму входа если не авторизован
+  if (!hasToken || !user) {
+    return <AdminLogin onSuccess={handleLoginSuccess} />;
+  }
+
+  // Перенаправляем директора
+  if (isDirector) {
+    navigate('/admin/directordashboard');
+    return null;
+  }
+
+  // Проверяем права доступа
+  if (user.role !== 'admin') {
+    return (
+      <Layout style={{ minHeight: '100vh' }}>
+        <Content style={{ padding: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Result
+            status="403"
+            title="Доступ запрещен"
+            subTitle="У вас нет прав для доступа к личному кабинету администратора."
+            extra={
+              <Button type="primary" onClick={() => navigate('/')}>
+                Вернуться на главную
+              </Button>
+            }
+          />
+        </Content>
+      </Layout>
+    );
+  }
+
+  // Рендерим основной контент только после успешной авторизации
+  return <AdminDashboardContent user={user} onLogout={handleLogout} />;
+};
+
+/**
+ * Компонент с основным контентом админ-панели
+ * Рендерится только после успешной авторизации
+ */
+const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
+  const adminData = useAdminData(true); // Всегда true, т.к. компонент рендерится только после авторизации
   
   const { 
     selectedMenu, 
@@ -96,75 +143,26 @@ const AdminDashboard: React.FC = () => {
     isAssigningArbitrator 
   } = useAdminMutations();
 
-  // 🆕 Реальные данные из API
-  const { users: allUsers, loading: usersLoading } = useAllUsers();
-  const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers();
+  // Реальные данные из API - загружаем только если пользователь авторизован
+  const { users: allUsers, loading: usersLoading } = useAllUsers(true);
+  const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers(true);
   const { blockUser, unblockUser, changeUserRole } = useUserActions();
   
-  const { orders: allOrders, loading: ordersLoading } = useAllOrders();
-  const { orders: problemOrders, loading: problemOrdersLoading } = useProblemOrders();
+  const { orders: allOrders, loading: ordersLoading } = useAllOrders(true);
+  const { orders: problemOrders, loading: problemOrdersLoading } = useProblemOrders(true);
   const { changeOrderStatus } = useOrderActions();
   
-  const { requests: openRequests, loading: openRequestsLoading } = useSupportRequests('open');
-  const { requests: inProgressRequests, loading: inProgressRequestsLoading } = useSupportRequests('in_progress');
-  const { requests: completedRequests, loading: completedRequestsLoading } = useSupportRequests('completed');
-  const { takeRequest, completeRequest, sendMessage: sendSupportMessage, sendChatMessage: sendSupportChatMessage } = useSupportActions();
+  const { chats: supportChats, loading: supportChatsLoading } = useSupportChats(true);
+  const { sendChatMessage: sendSupportChatMessage } = useSupportActions();
   
-  const { chats: supportChats, loading: supportChatsLoading } = useSupportChats();
-  
-  const { claims: newClaims, loading: newClaimsLoading } = useClaims('new');
-  const { claims: inProgressClaims, loading: inProgressClaimsLoading } = useClaims('in_progress');
-  const { claims: completedClaims, loading: completedClaimsLoading } = useClaims('completed');
-  const { claims: pendingApprovalClaims, loading: pendingApprovalLoading } = useClaims('pending_approval');
+  const { claims: newClaims, loading: newClaimsLoading } = useClaims('new', true);
+  const { claims: inProgressClaims, loading: inProgressClaimsLoading } = useClaims('in_progress', true);
+  const { claims: completedClaims, loading: completedClaimsLoading } = useClaims('completed', true);
+  const { claims: pendingApprovalClaims, loading: pendingApprovalLoading } = useClaims('pending_approval', true);
   const { takeInWork, completeClaim, rejectClaim } = useClaimActions();
   
-  const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms();
+  const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms(true);
   const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
-  
-  // Хук для внутренней коммуникации
-  const internalComm = useInternalCommunication();
-
-  // Показываем спиннер во время загрузки
-  if (loading) {
-    return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Spin size="large" />
-        </Content>
-      </Layout>
-    );
-  }
-
-  // Показываем форму входа если не авторизован
-  if (!hasToken || !user) {
-    return <AdminLogin onSuccess={handleLoginSuccess} />;
-  }
-
-  // Перенаправляем директора
-  if (isDirector) {
-    navigate('/director');
-    return null;
-  }
-
-  // Проверяем права доступа
-  if (user.role !== 'admin') {
-    return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ padding: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Result
-            status="403"
-            title="Доступ запрещен"
-            subTitle="У вас нет прав для доступа к личному кабинету администратора."
-            extra={
-              <Button type="primary" onClick={() => navigate('/')}>
-                Вернуться на главную
-              </Button>
-            }
-          />
-        </Content>
-      </Layout>
-    );
-  }
 
   // Обработчики для модальных окон
   const handleUpdatePartner = (partnerId: number, data: any) => {
@@ -228,35 +226,32 @@ const AdminDashboard: React.FC = () => {
       case 'all_users':
         return (
           <UsersManagementSection
-            users={[]}
-            loading={false}
-            onBlockUser={(userId) => console.log('Block user:', userId)}
-            onUnblockUser={(userId) => console.log('Unblock user:', userId)}
-            onChangeRole={(userId, role) => console.log('Change role:', userId, role)}
+            users={allUsers}
+            loading={usersLoading}
+            onBlockUser={blockUser}
+            onUnblockUser={unblockUser}
+            onChangeRole={changeUserRole}
           />
         );
       
       case 'blocked_users':
         return (
           <BlockedUsersSection
-            users={[]}
-            loading={false}
-            onUnblockUser={(userId) => console.log('Unblock user:', userId)}
+            users={blockedUsers}
+            loading={blockedUsersLoading}
+            onUnblockUser={unblockUser}
             onViewUserDetails={(user) => console.log('View user details:', user)}
           />
         );
-      
+
       case 'user_roles':
         return (
           <UserRolesSection
-            users={[]}
+            users={allUsers}
             roles={[]}
             permissions={[]}
-            loading={false}
-            onChangeUserRole={(userId, newRole) => console.log('Change user role:', userId, newRole)}
-            onUpdateRolePermissions={(roleId, permissions) => console.log('Update role permissions:', roleId, permissions)}
-            onCreateRole={(roleData) => console.log('Create role:', roleData)}
-            onDeleteRole={(roleId) => console.log('Delete role:', roleId)}
+            loading={usersLoading}
+            onChangeUserRole={changeUserRole}
           />
         );
 
@@ -264,11 +259,11 @@ const AdminDashboard: React.FC = () => {
       case 'all_orders':
         return (
           <AllOrdersSection
-            orders={[]}
-            loading={false}
+            orders={allOrders}
+            loading={ordersLoading}
             onViewOrder={(orderId) => console.log('View order:', orderId)}
             onEditOrder={(orderId) => console.log('Edit order:', orderId)}
-            onChangeOrderStatus={(orderId, newStatus) => console.log('Change order status:', orderId, newStatus)}
+            onChangeOrderStatus={changeOrderStatus}
             onAssignExpert={(orderId, expertId) => console.log('Assign expert:', orderId, expertId)}
             onContactClient={(orderId) => console.log('Contact client:', orderId)}
           />
@@ -277,8 +272,8 @@ const AdminDashboard: React.FC = () => {
       case 'problem_orders':
         return (
           <ProblemOrdersSection
-            orders={[]}
-            loading={false}
+            orders={problemOrders}
+            loading={problemOrdersLoading}
             onViewOrder={(orderId) => console.log('View problem order:', orderId)}
             onResolveIssue={(orderId, resolution) => console.log('Resolve issue:', orderId, resolution)}
             onEscalateIssue={(orderId, escalationNote) => console.log('Escalate issue:', orderId, escalationNote)}
@@ -302,127 +297,31 @@ const AdminDashboard: React.FC = () => {
           />
         );
 
-      case 'support_open':
-      case 'support_in_progress':
-      case 'support_completed':
-        return (
-          <SupportRequestsSection
-            requests={[]}
-            loading={false}
-            selectedStatus={selectedMenu.replace('support_', '') as SupportStatus}
-            onStatusChange={(status) => console.log('Status change:', status)}
-            onRequestClick={(request) => console.log('Request click:', request)}
-            onTakeRequest={(requestId) => console.log('Take request:', requestId)}
-          />
-        );
-
       case 'admin_chats':
         return (
           <AdminChatsSection
-            chatRooms={[]}
-            currentUserId={1}
-            loading={false}
-            onSendMessage={(roomId: number, message: string) => console.log('Send message:', roomId, message)}
+            chatRooms={chatRooms}
+            currentUserId={user?.id || 1}
+            loading={chatRoomsLoading}
+            onSendMessage={sendChatMessage}
             onCreateRoom={(roomData) => console.log('Create room:', roomData)}
-            onJoinRoom={(roomId) => console.log('Join room:', roomId)}
-            onLeaveRoom={(roomId) => console.log('Leave room:', roomId)}
+            onJoinRoom={joinRoom}
+            onLeaveRoom={leaveRoom}
             onInviteUser={(roomId, userId) => console.log('Invite user:', roomId, userId)}
             onUploadFile={(roomId, file) => console.log('Upload file:', roomId, file)}
           />
         );
       
-      // 🆕 Новые секции обработки запросов
-      case 'request_processing_open':
-        return (
-          <OpenRequestsSection
-            requests={[]}
-            loading={false}
-            onViewRequest={(requestId) => console.log('View request:', requestId)}
-            onTakeRequest={(requestId) => console.log('Take request:', requestId)}
-            onAssignRequest={(requestId, adminId) => console.log('Assign request:', requestId, adminId)}
-            onSendResponse={(requestId, response, isAutoResponse) => console.log('Send response:', requestId, response, isAutoResponse)}
-            onEscalateRequest={(requestId, reason) => console.log('Escalate request:', requestId, reason)}
-            onCloseRequest={(requestId, reason) => console.log('Close request:', requestId, reason)}
-            onAddTags={(requestId, tags) => console.log('Add tags:', requestId, tags)}
-            onScheduleCall={(requestId, datetime) => console.log('Schedule call:', requestId, datetime)}
-          />
-        );
-
-      case 'request_processing_progress':
-        return (
-          <InProgressRequestsSection
-            requests={[]}
-            loading={false}
-            onViewRequest={(requestId) => console.log('View request:', requestId)}
-            onUpdateProgress={(requestId, progress) => console.log('Update progress:', requestId, progress)}
-            onSendResponse={(requestId, response) => console.log('Send response:', requestId, response)}
-            onCompleteRequest={(requestId, resolution) => console.log('Complete request:', requestId, resolution)}
-            onPauseRequest={(requestId, reason) => console.log('Pause request:', requestId, reason)}
-            onResumeRequest={(requestId) => console.log('Resume request:', requestId)}
-            onAddNote={(requestId, note) => console.log('Add note:', requestId, note)}
-            onScheduleFollowUp={(requestId, datetime, action) => console.log('Schedule follow up:', requestId, datetime, action)}
-            onReassignRequest={(requestId, adminId) => console.log('Reassign request:', requestId, adminId)}
-          />
-        );
-      
-      case 'request_processing_completed':
-        return (
-          <CompletedRequestsSection
-            requests={[]}
-            loading={false}
-            onViewRequest={(requestId) => console.log('View completed request:', requestId)}
-            onReopenRequest={(requestId, reason) => console.log('Reopen request:', requestId, reason)}
-            onExportReport={(filters) => console.log('Export completed requests report:', filters)}
-            onViewUserProfile={(userId) => console.log('View user profile:', userId)}
-            onViewRelatedOrder={(orderId) => console.log('View related order:', orderId)}
-            onScheduleFollowUp={(requestId, date, notes) => console.log('Schedule follow up:', requestId, date, notes)}
-          />
-        );
-      
-      // 🆕 Внутренняя коммуникация
-      case 'internal_communication':
-        return (
-          <DirectorCommunicationSection
-            messages={[]}
-            meetingRequests={[]}
-            currentUser={user}
-            loading={false}
-            onSendMessage={(messageData) => console.log('Send message to director:', messageData)}
-            onReplyToMessage={(messageId, replyData) => console.log('Reply to message:', messageId, replyData)}
-            onMarkAsRead={(messageId) => console.log('Mark as read:', messageId)}
-            onArchiveMessage={(messageId) => console.log('Archive message:', messageId)}
-            onRequestMeeting={(meetingData) => console.log('Request meeting:', meetingData)}
-            onApproveMeeting={(meetingId, approvedDate) => console.log('Approve meeting:', meetingId, approvedDate)}
-            onRejectMeeting={(meetingId, reason) => console.log('Reject meeting:', meetingId, reason)}
-            onUploadAttachment={async (file) => {
-              console.log('Upload attachment:', file);
-              return { id: 1, url: '/files/attachment.pdf' };
-            }}
-          />
-        );
-      
-      // 🆕 Чаты администраторов
-      case 'admin_group_chats':
-        return (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <Alert
-              message="🆕 Чаты администраторов"
-              description="Новый функционал групповых чатов администраторов. Таблицы и хуки созданы!"
-              type="info"
-              showIcon
-            />
-          </div>
-        );
-
       // Обращения
       case 'new_claims':
+        console.log('📋 New claims data:', newClaims);
         return (
           <NewClaimsSection
-            claims={[]}
-            loading={false}
+            claims={newClaims}
+            loading={newClaimsLoading}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onTakeInWork={(claimId) => console.log('Take in work:', claimId)}
-            onRejectClaim={(claimId, reason) => console.log('Reject claim:', claimId, reason)}
+            onTakeInWork={takeInWork}
+            onRejectClaim={rejectClaim}
             onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
           />
         );
@@ -430,10 +329,10 @@ const AdminDashboard: React.FC = () => {
       case 'in_progress_claims':
         return (
           <InProgressClaimsSection
-            claims={[]}
-            loading={false}
+            claims={inProgressClaims}
+            loading={inProgressClaimsLoading}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onCompleteClaim={(claimId, resolution) => console.log('Complete claim:', claimId, resolution)}
+            onCompleteClaim={completeClaim}
             onUpdateProgress={(claimId, progress) => console.log('Update progress:', claimId, progress)}
             onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
           />
@@ -442,8 +341,8 @@ const AdminDashboard: React.FC = () => {
       case 'completed_claims':
         return (
           <CompletedClaimsSection
-            claims={[]}
-            loading={false}
+            claims={completedClaims}
+            loading={completedClaimsLoading}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
             onReopenClaim={(claimId, reason) => console.log('Reopen claim:', claimId, reason)}
             onExportReport={(filters) => console.log('Export report:', filters)}
@@ -453,8 +352,8 @@ const AdminDashboard: React.FC = () => {
       case 'pending_approval':
         return (
           <PendingApprovalSection
-            claims={[]}
-            loading={false}
+            claims={pendingApprovalClaims}
+            loading={pendingApprovalLoading}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
             onApproveClaim={(claimId, decision) => console.log('Approve claim:', claimId, decision)}
             onRejectApproval={(claimId, reason) => console.log('Reject approval:', claimId, reason)}
@@ -466,29 +365,17 @@ const AdminDashboard: React.FC = () => {
       case 'claims_processing':
         return (
           <ClaimsProcessingSection
-            claims={[]}
-            loading={false}
+            claims={[...newClaims, ...inProgressClaims]}
+            loading={newClaimsLoading || inProgressClaimsLoading}
             onViewClaim={(claimId) => console.log('View claim:', claimId)}
             onAssignClaim={(claimId, adminId) => console.log('Assign claim:', claimId, adminId)}
             onUpdateStatus={(claimId, status, notes) => console.log('Update status:', claimId, status, notes)}
             onAddAction={(claimId, action) => console.log('Add action:', claimId, action)}
-            onResolveClaim={(claimId, resolution) => console.log('Resolve claim:', claimId, resolution)}
+            onResolveClaim={(claimId, resolution) => completeClaim(claimId, resolution)}
             onSendMessage={(claimId, message, recipient) => console.log('Send message:', claimId, message, recipient)}
             onUploadEvidence={(claimId, file, type) => console.log('Upload evidence:', claimId, file, type)}
             onScheduleCall={(claimId, datetime, participants) => console.log('Schedule call:', claimId, datetime, participants)}
           />
-        );
-      
-      default:
-        return (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <Alert
-              message="Секция в разработке"
-              description={`Секция "${selectedMenu}" будет реализована в следующих этапах рефакторинга.`}
-              type="info"
-              showIcon
-            />
-          </div>
         );
     }
   };
@@ -499,7 +386,7 @@ const AdminDashboard: React.FC = () => {
       user={user}
       selectedMenu={selectedMenu}
       onMenuSelect={handleMenuClick}
-      onLogout={handleLogout}
+      onLogout={onLogout}
     >
       {renderSection()}
       

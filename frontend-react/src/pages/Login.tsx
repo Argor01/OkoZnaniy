@@ -41,6 +41,11 @@ const Login: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'client' | 'expert'>('client');
   const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
+  const location = window.location;
+
+  // Определяем, с какой страницы входа мы пришли
+  const isAdminLogin = location.pathname === '/admin/login';
+  const isDirectorLogin = location.pathname === '/admin/directorlogin';
 
   // Модалка подтверждения email
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
@@ -136,16 +141,40 @@ const Login: React.FC = () => {
       setVerificationModalVisible(false);
       
       const role = auth?.user?.role;
-      if (role === 'client' || role === 'expert') {
-        navigate('/expert');
-      } else if (role === 'partner') {
-        navigate('/partner');
-      } else if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'arbitrator') {
-        navigate('/arbitrator');
-      } else {
-        navigate('/expert');
+      
+      // Если вход через /admin/login, проверяем роль admin
+      if (isAdminLogin) {
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          message.error('У вас нет доступа к панели администратора');
+          navigate('/expert');
+        }
+      } 
+      // Если вход через /admin/directorlogin, проверяем роль director
+      else if (isDirectorLogin) {
+        if (role === 'director') {
+          navigate('/admin/directordashboard');
+        } else {
+          message.error('У вас нет доступа к панели директора');
+          navigate('/expert');
+        }
+      } 
+      // Обычный вход
+      else {
+        if (role === 'client' || role === 'expert') {
+          navigate('/expert');
+        } else if (role === 'partner') {
+          navigate('/partner');
+        } else if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'director') {
+          navigate('/admin/directordashboard');
+        } else if (role === 'arbitrator') {
+          navigate('/arbitrator');
+        } else {
+          navigate('/expert');
+        }
       }
     } catch (error: any) {
       const errorData = error.response?.data;
@@ -248,13 +277,31 @@ const Login: React.FC = () => {
       const role = auth?.user?.role;
       setVerificationModalVisible(false);
       
-      // Перенаправляем в зависимости от роли
-      if (role === 'client' || role === 'expert') {
-        navigate('/expert');
-      } else if (role === 'partner') {
-        navigate('/partner');
+      // Перенаправляем в зависимости от роли и страницы входа
+      if (isAdminLogin) {
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/expert');
+        }
+      } else if (isDirectorLogin) {
+        if (role === 'director') {
+          navigate('/admin/directordashboard');
+        } else {
+          navigate('/expert');
+        }
       } else {
-        navigate('/expert');
+        if (role === 'client' || role === 'expert') {
+          navigate('/expert');
+        } else if (role === 'partner') {
+          navigate('/partner');
+        } else if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'director') {
+          navigate('/admin/directordashboard');
+        } else {
+          navigate('/expert');
+        }
       }
     } catch (error: any) {
       message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
@@ -354,16 +401,34 @@ const Login: React.FC = () => {
   const handleTelegramAuth = async (user: any) => {
     message.success('Успешный вход через Telegram!');
     const role = user?.role;
-    if (role === 'client' || role === 'expert') {
-      navigate('/expert');
-    } else if (role === 'partner') {
-      navigate('/partner');
-    } else if (role === 'admin') {
-      navigate('/admin');
-    } else if (role === 'arbitrator') {
-      navigate('/arbitrator');
+    
+    // Перенаправляем в зависимости от роли и страницы входа
+    if (isAdminLogin) {
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/expert');
+      }
+    } else if (isDirectorLogin) {
+      if (role === 'director') {
+        navigate('/admin/directordashboard');
+      } else {
+        navigate('/expert');
+      }
     } else {
-      navigate('/expert');
+      if (role === 'client' || role === 'expert') {
+        navigate('/expert');
+      } else if (role === 'partner') {
+        navigate('/partner');
+      } else if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (role === 'director') {
+        navigate('/admin/directordashboard');
+      } else if (role === 'arbitrator') {
+        navigate('/arbitrator');
+      } else {
+        navigate('/expert');
+      }
     }
   };
 

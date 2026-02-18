@@ -32,11 +32,28 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     
     def post(self, request, *args, **kwargs):
         import logging
+        from django.utils import timezone
         logger = logging.getLogger(__name__)
         try:
             logger.info(f"[Token View] Login request received: {request.data}")
             print(f"[Token View] Login request received: {request.data}")
-            return super().post(request, *args, **kwargs)
+            
+            # Получаем ответ от родительского класса
+            response = super().post(request, *args, **kwargs)
+            
+            # Если логин успешен, обновляем last_login
+            if response.status_code == 200:
+                username = request.data.get('username')
+                if username:
+                    try:
+                        user = User.objects.get(username=username)
+                        user.last_login = timezone.now()
+                        user.save(update_fields=['last_login'])
+                        logger.info(f"[Token View] Updated last_login for user: {username}")
+                    except User.DoesNotExist:
+                        pass
+            
+            return response
         except Exception as e:
             logger.error(f"[Token View] Error in post: {str(e)}")
             print(f"[Token View] Error in post: {str(e)}")

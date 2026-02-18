@@ -615,7 +615,7 @@ const OrdersFeed: React.FC = () => {
                     size={48}
                     src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
                     icon={<UserOutlined />}
-                    style={{ backgroundColor: '#667eea' }}
+                    style={{ backgroundColor: '#1890ff' }}
                   />
                   <div>
                     <Text strong style={{ display: 'block', fontSize: 14 }}>

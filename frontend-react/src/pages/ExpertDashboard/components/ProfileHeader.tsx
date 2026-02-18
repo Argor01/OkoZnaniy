@@ -27,7 +27,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             src={profile?.avatar ? `http://localhost:8000${profile.avatar}` : undefined}
             icon={!profile?.avatar && <UserOutlined />}
             style={{
-              backgroundColor: profile?.avatar ? 'transparent' : '#667eea',
+              backgroundColor: profile?.avatar ? 'transparent' : '#1890ff',
               border: '3px solid #fff',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               flexShrink: 0,

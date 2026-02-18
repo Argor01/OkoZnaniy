@@ -35,6 +35,9 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  console.log('👥 UsersManagementSection - users:', users);
+  console.log('👥 First user:', users[0]);
+
   const handleUserClick = (userId: number) => {
     navigate(`/user/${userId}`);
   };
@@ -112,14 +115,30 @@ export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
       title: 'Дата регистрации',
       dataIndex: 'date_joined',
       key: 'date_joined',
-      render: (date: string) => new Date(date).toLocaleDateString('ru-RU'),
+      render: (date: string) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('ru-RU', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        });
+      },
     },
     {
       title: 'Последний вход',
       dataIndex: 'last_login',
       key: 'last_login',
-      render: (date?: string) => 
-        date ? new Date(date).toLocaleDateString('ru-RU') : 'Никогда',
+      render: (date?: string | null) => {
+        if (!date) return <Text type="secondary">—</Text>;
+        const d = new Date(date);
+        return d.toLocaleDateString('ru-RU', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      },
     },
     {
       title: 'Действия',

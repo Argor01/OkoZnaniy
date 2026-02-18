@@ -519,7 +519,8 @@ const PartnerList: React.FC = () => {
 
       {/* Таблица с партнёрами */}
       <Card style={{ 
-        borderRadius: isMobile ? 8 : 12
+        borderRadius: isMobile ? 8 : 12,
+        overflow: 'auto'
       }}>
         <Spin spinning={isLoading}>
           <Table
@@ -534,6 +535,7 @@ const PartnerList: React.FC = () => {
               simple: isMobile,
               style: {
                 padding: isMobile ? '12px' : '16px',
+                marginRight: 8
               }
             }}
             size={isMobile ? "middle" : "small"}

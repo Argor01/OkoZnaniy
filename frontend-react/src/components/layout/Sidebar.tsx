@@ -278,7 +278,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         size={48}
         src={userProfile?.avatar || undefined}
         icon={<UserOutlined />}
-        style={{ backgroundColor: '#667eea' }}
+        style={{ backgroundColor: '#1890ff' }}
       />
       <div style={{ marginLeft: 12, flex: 1 }}>
         <Title level={5} style={{ margin: 0, fontSize: 14, color: 'white' }}>

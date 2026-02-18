@@ -533,6 +533,8 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
             />
           </TabPane>
 
+          {/* Временно отключена вкладка "Роли" из-за проблем с данными */}
+          {/*
           <TabPane tab="Роли" key="roles">
             <div style={{ marginBottom: 16 }}>
               <Button 
@@ -553,6 +555,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               locale={{ emptyText: 'Роли не найдены' }}
             />
           </TabPane>
+          */}
         </Tabs>
       </Card>
 

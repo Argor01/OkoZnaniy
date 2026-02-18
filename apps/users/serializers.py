@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 
             'role', 'phone', 'telegram_id', 'balance', 'frozen_balance',
-            'date_joined', 'last_login', 'specializations', 'partner',
+            'date_joined', 'last_login', 'is_active', 'specializations', 'partner',
             'avatar', 'bio', 'experience_years', 'hourly_rate', 'education', 
             'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate', 'total_referrals', 

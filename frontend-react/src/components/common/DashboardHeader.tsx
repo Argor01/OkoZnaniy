@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Button, Dropdown, Layout, Menu, Space, Tooltip, Typography } from 'antd';
+import { Badge, Button, Dropdown, Layout, Menu, Space, Tooltip, Typography, message } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -12,6 +12,10 @@ import {
   FileDoneOutlined,
   PlusOutlined,
   CustomerServiceOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  ClockCircleOutlined,
+  CopyOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -200,29 +204,93 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {
                   key: 'support-info',
                   label: (
-                    <div style={{ padding: '8px 4px', minWidth: 250 }}>
+                    <div style={{ padding: '8px 4px', minWidth: 280 }}>
                       <div style={{ marginBottom: 12 }}>
-                        <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 8 }}>
+                        <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 12 }}>
                           Служба поддержки
                         </Text>
-                        <div style={{ marginBottom: 6 }}>
-                          <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                            📞 8 (800) 500-78-57
+                        
+                        {/* Телефон */}
+                        <div 
+                          style={{ 
+                            marginBottom: 8, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            padding: '8px 12px',
+                            background: '#f9fafb',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText('88005007857');
+                            message.success('Телефон скопирован!');
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#f3f4f6';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#f9fafb';
+                          }}
+                        >
+                          <PhoneOutlined style={{ fontSize: 16, color: '#10b981', marginRight: 10 }} />
+                          <Text style={{ fontSize: 13, color: '#374151', flex: 1 }}>
+                            8 (800) 500-78-57
                           </Text>
+                          <CopyOutlined style={{ fontSize: 12, color: '#9ca3af' }} />
                         </div>
-                        <div style={{ marginBottom: 6 }}>
-                          <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                            ✉️ b-oko.znaniy@mail.ru
+                        
+                        {/* Email */}
+                        <div 
+                          style={{ 
+                            marginBottom: 8, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            padding: '8px 12px',
+                            background: '#f9fafb',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText('b-oko.znaniy@mail.ru');
+                            message.success('Email скопирован!');
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#f3f4f6';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#f9fafb';
+                          }}
+                        >
+                          <MailOutlined style={{ fontSize: 16, color: '#3b82f6', marginRight: 10 }} />
+                          <Text style={{ fontSize: 13, color: '#374151', flex: 1 }}>
+                            b-oko.znaniy@mail.ru
                           </Text>
+                          <CopyOutlined style={{ fontSize: 12, color: '#9ca3af' }} />
                         </div>
                       </div>
-                      <div style={{ marginBottom: 4, paddingTop: 8, borderTop: '1px solid #e5e7eb' }}>
-                        <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
-                          График работы
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#6b7280' }}>
-                          Пн-Пт 07:00 - 16:00 (МСК)
-                        </Text>
+                      
+                      {/* График работы */}
+                      <div style={{ 
+                        marginBottom: 4, 
+                        paddingTop: 12, 
+                        borderTop: '1px solid #e5e7eb',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '12px 12px 4px 12px',
+                      }}>
+                        <ClockCircleOutlined style={{ fontSize: 14, color: '#f59e0b', marginRight: 8 }} />
+                        <div>
+                          <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 2 }}>
+                            График работы
+                          </Text>
+                          <Text style={{ fontSize: 12, color: '#6b7280' }}>
+                            Пн-Пт 07:00 - 16:00 (МСК)
+                          </Text>
+                        </div>
                       </div>
                     </div>
                   ),

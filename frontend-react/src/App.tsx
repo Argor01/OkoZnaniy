@@ -6,6 +6,7 @@ import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import './utils/clearAuth'; // Утилита для очистки токенов (доступна через window.clearAuth())
+import './utils/axiosConfig'; // Настройка axios interceptors
 
 // Import styles
 import './styles/page-transitions.css';
@@ -46,6 +47,7 @@ import AdminDashboard from './pages/AdminDashboard/index';
 // Временный компонент больше не нужен
 // import AdminDashboard from './pages/NewAdminDashboard';
 // Старая версия переименована в AdminDashboard.tsx.backup
+import AdminLogin from './components/admin/AdminLogin';
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
 import AddWorkToShop from './pages/AddWorkToShop';
@@ -74,7 +76,14 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ConfigProvider locale={ruRU}>
+      <ConfigProvider 
+        locale={ruRU}
+        theme={{
+          token: {
+            colorPrimary: '#1890ff',
+          },
+        }}
+      >
         <Router>
           <div className="App">
             <Routes>
@@ -178,10 +187,26 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
+              {/* Admin login page with quick links */}
               <Route 
                 path="/admin" 
+                element={<AdminLogin />} 
+              />
+              {/* Admin dashboard */}
+              <Route 
+                path="/admin/dashboard" 
                 element={<AdminDashboard />} 
               />
+              {/* Director dashboard */}
+              <Route 
+                path="/admin/directordashboard"
+                element={
+                  <ProtectedRoute>
+                    <DirectorDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* Legacy redirects */}
               <Route 
                 path="/ADMIN" 
                 element={<Navigate to="/admin" replace />} 
@@ -192,11 +217,7 @@ const App: React.FC = () => {
               />
               <Route 
                 path="/director"
-                element={
-                  <ProtectedRoute>
-                    <DirectorDashboard />
-                  </ProtectedRoute>
-                } 
+                element={<Navigate to="/admin/directordashboard" replace />} 
               />
               <Route 
                 path="/shop/ready-works"

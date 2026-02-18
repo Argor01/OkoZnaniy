@@ -99,7 +99,12 @@
 
 .partnersTable :global(.ant-pagination) {
   margin: 16px;
+  margin-right: 32px;
   text-align: right;
+}
+
+.partnersTable :global(.ant-pagination-options) {
+  margin-right: 24px;
 }
 
 /* Адаптивность для планшетов */
