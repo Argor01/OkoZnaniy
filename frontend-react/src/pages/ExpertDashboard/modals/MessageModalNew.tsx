@@ -1862,9 +1862,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     </Button>
                   ) : null
                 ) : null}
-                {isSupportChatSelected && (
+                {isSupportChatSelected ? (
                   <Button
-                    key="support-claim-button"
+                    key={`support-claim-${selectedChat?.id || 'none'}`}
                     type="text"
                     danger
                     icon={<ExclamationCircleOutlined />}
@@ -1886,7 +1886,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     }}
                     title="Подать претензию"
                   />
-                )}
+                ) : null}
               </>
             ) : (
               <Space>
