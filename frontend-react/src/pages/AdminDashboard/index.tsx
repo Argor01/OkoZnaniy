@@ -159,7 +159,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   const { sendChatMessage: sendSupportChatMessage } = useSupportActions();
   
   // Тикеты
-  const { tickets, loading: ticketsLoading, refetch: refetchTickets } = useTickets(canLoadData);
+  const { tickets, loading: ticketsLoading, refetch: refetchTickets } = useTickets(true);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
   
   const { claims: newClaims, loading: newClaimsLoading } = useClaims('new', true);
