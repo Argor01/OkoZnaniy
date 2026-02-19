@@ -16,7 +16,9 @@ import {
   Row,
   Col,
   Empty,
-  Select
+  Select,
+  Dropdown,
+  Menu
 } from 'antd';
 import {
   MessageOutlined,
@@ -26,7 +28,12 @@ import {
   FileOutlined,
   UserOutlined,
   CustomerServiceOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  FilterOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  MoreOutlined,
+  FlagOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -102,6 +109,8 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Отслеживание размера окна для адаптивности
@@ -323,13 +332,26 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   }, [selectedChat?.messages]);
 
   const filteredChats = chatsData.filter(chat => {
+    // Фильтр по поиску
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      return chat.subject.toLowerCase().includes(query) ||
+      const matchesSearch = chat.subject.toLowerCase().includes(query) ||
              chat.client.first_name.toLowerCase().includes(query) ||
              chat.client.last_name.toLowerCase().includes(query) ||
              chat.client.username.toLowerCase().includes(query);
+      if (!matchesSearch) return false;
     }
+    
+    // Фильтр по статусу
+    if (statusFilter !== 'all' && chat.status !== statusFilter) {
+      return false;
+    }
+    
+    // Фильтр по приоритету
+    if (priorityFilter !== 'all' && chat.priority !== priorityFilter) {
+      return false;
+    }
+    
     return true;
   });
 
@@ -345,7 +367,12 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
           }}
         >
           <Card 
-            title={isMobile ? "Чаты" : "Чаты поддержки"} 
+            title={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <CustomerServiceOutlined style={{ fontSize: 18, color: '#1890ff' }} />
+                <span>{isMobile ? "Чаты" : "Чаты поддержки"}</span>
+              </div>
+            }
             size="small"
             extra={
               <Badge count={filteredChats.filter(chat => chat.unread_count > 0).length} showZero={false}>
@@ -358,26 +385,108 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               </Badge>
             }
           >
+            {/* Поиск */}
+            <Input
+              prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+              placeholder="Поиск по чатам..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                marginBottom: 12,
+                borderRadius: 8
+              }}
+              allowClear
+            />
+            
+            {/* Фильтры */}
+            <div style={{ 
+              display: 'flex', 
+              gap: 8, 
+              marginBottom: 12,
+              flexWrap: 'wrap'
+            }}>
+              <Select
+                value={statusFilter}
+                onChange={setStatusFilter}
+                style={{ flex: 1, minWidth: 120 }}
+                size="small"
+              >
+                <Option value="all">Все статусы</Option>
+                <Option value="open">Открыт</Option>
+                <Option value="in_progress">В работе</Option>
+                <Option value="resolved">Решен</Option>
+                <Option value="closed">Закрыт</Option>
+              </Select>
+              
+              <Select
+                value={priorityFilter}
+                onChange={setPriorityFilter}
+                style={{ flex: 1, minWidth: 120 }}
+                size="small"
+              >
+                <Option value="all">Все приоритеты</Option>
+                <Option value="urgent">Срочный</Option>
+                <Option value="high">Высокий</Option>
+                <Option value="medium">Средний</Option>
+                <Option value="low">Низкий</Option>
+              </Select>
+            </div>
+            
+            {/* Статистика */}
+            <div style={{ 
+              display: 'flex', 
+              gap: 8, 
+              marginBottom: 12,
+              padding: '8px 12px',
+              background: '#f5f5f5',
+              borderRadius: 8,
+              fontSize: 12
+            }}>
+              <span>Всего: <strong>{chatsData.length}</strong></span>
+              <span>•</span>
+              <span>Найдено: <strong>{filteredChats.length}</strong></span>
+              <span>•</span>
+              <span style={{ color: '#ff4d4f' }}>
+                Непрочитанных: <strong>{filteredChats.filter(c => c.unread_count > 0).length}</strong>
+              </span>
+            </div>
+            
             <div style={{ maxHeight: isMobile ? '400px' : '600px', overflowY: 'auto' }}>
               <List
                 loading={loading}
                 dataSource={filteredChats}
+                locale={{ emptyText: 'Нет чатов' }}
                 renderItem={(chat) => (
                   <List.Item
                     className={`chat-item ${selectedChat?.id === chat.id ? 'selected' : ''}`}
                     onClick={() => setSelectedChat(chat)}
                     style={{ 
                       cursor: 'pointer',
-                      backgroundColor: selectedChat?.id === chat.id ? '#f0f0f0' : 'transparent',
-                      alignItems: 'center'
+                      backgroundColor: selectedChat?.id === chat.id ? '#e6f7ff' : 'transparent',
+                      alignItems: 'flex-start',
+                      padding: '12px',
+                      borderRadius: 8,
+                      marginBottom: 4,
+                      border: selectedChat?.id === chat.id ? '1px solid #1890ff' : '1px solid transparent',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedChat?.id !== chat.id) {
+                        e.currentTarget.style.backgroundColor = '#fafafa';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedChat?.id !== chat.id) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
                     }}
                   >
                     <List.Item.Meta
                       avatar={
-                        <Badge count={chat.unread_count} size="small">
+                        <Badge count={chat.unread_count} size="small" offset={[-5, 5]}>
                           <Avatar 
                             icon={<UserOutlined />} 
-                            size={isMobile ? 36 : 40}
+                            size={isMobile ? 40 : 44}
                             style={{ 
                               display: 'flex', 
                               alignItems: 'center', 
@@ -388,13 +497,32 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                         </Badge>
                       }
                       title={
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span>{chat.client.first_name} {chat.client.last_name}</span>
-                          <div>
-                            <Tag color={getStatusColor(chat.status)}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                          <span style={{ fontWeight: 600, fontSize: 14 }}>
+                            {chat.client.first_name} {chat.client.last_name}
+                          </span>
+                          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                            <Tag 
+                              color={getStatusColor(chat.status)} 
+                              style={{ 
+                                margin: 0, 
+                                fontSize: 10,
+                                padding: '0 6px',
+                                lineHeight: '18px'
+                              }}
+                            >
                               {getStatusText(chat.status)}
                             </Tag>
-                            <Tag color={getPriorityColor(chat.priority)}>
+                            <Tag 
+                              color={getPriorityColor(chat.priority)}
+                              icon={chat.priority === 'urgent' || chat.priority === 'high' ? <FlagOutlined /> : undefined}
+                              style={{ 
+                                margin: 0, 
+                                fontSize: 10,
+                                padding: '0 6px',
+                                lineHeight: '18px'
+                              }}
+                            >
                               {getPriorityText(chat.priority)}
                             </Tag>
                           </div>
@@ -402,10 +530,34 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                       }
                       description={
                         <div>
-                          <div style={{ fontSize: '12px', color: '#666' }}>
+                          <div style={{ 
+                            fontSize: 13, 
+                            color: '#595959',
+                            marginBottom: 4,
+                            fontWeight: 500
+                          }}>
                             {chat.subject}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>
+                          {chat.last_message && (
+                            <div style={{ 
+                              fontSize: 12, 
+                              color: '#8c8c8c',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              marginBottom: 4
+                            }}>
+                              {chat.last_message.text}
+                            </div>
+                          )}
+                          <div style={{ 
+                            fontSize: 11, 
+                            color: '#bfbfbf',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}>
+                            <MessageOutlined style={{ fontSize: 10 }} />
                             {formatTimestamp(chat.updated_at)}
                           </div>
                         </div>
