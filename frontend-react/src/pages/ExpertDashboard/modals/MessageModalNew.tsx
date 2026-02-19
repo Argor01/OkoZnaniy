@@ -2009,62 +2009,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             padding: isMobile ? '12px' : '20px',
             background: '#f9fafb',
             minHeight: 0,
-            position: 'relative'
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            {/* Кнопка подачи претензии для чата техподдержки - по центру экрана */}
-            {isSupportChatSelected && selectedChat && selectedChat.messages.length === 0 && (
-              <div style={{ 
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 5
-              }}>
-                <div
-                  onClick={() => setClaimModalOpen(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: isMobile ? '12px 24px' : '14px 32px',
-                    background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%)',
-                    border: '1.5px solid rgba(239, 68, 68, 0.2)',
-                    borderRadius: 12,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.08)',
-                    backdropFilter: 'blur(10px)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(254, 226, 226, 1) 0%, rgba(254, 202, 202, 1) 100%)';
-                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.95) 100%)';
-                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.08)';
-                  }}
-                >
-                  <ExclamationCircleOutlined 
-                    style={{ 
-                      fontSize: isMobile ? 18 : 20, 
-                      color: '#ef4444' 
-                    }} 
-                  />
-                  <span style={{
-                    fontSize: isMobile ? 14 : 15,
-                    fontWeight: 600,
-                    color: '#dc2626',
-                    letterSpacing: '0.3px'
-                  }}>
-                    Подать претензию
-                  </span>
-                </div>
-              </div>
-            )}
             {selectedChat ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
                 {orderIntroByChatId[selectedChat.id] ? (
