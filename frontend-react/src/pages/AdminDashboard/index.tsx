@@ -26,6 +26,7 @@ import {
   EarningsSection, 
   DisputesSection,
   SupportChatsSection,
+  TicketSystemSection,
   UsersManagementSection,
   BlockedUsersSection,
   UserRolesSection,
@@ -294,6 +295,17 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             onTakeChat={(chatId) => console.log('Take chat:', chatId)}
             onCloseChat={(chatId) => console.log('Close chat:', chatId)}
             onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}
+          />
+        );
+
+      case 'tickets':
+        return (
+          <TicketSystemSection
+            tickets={[]}
+            loading={false}
+            onSendMessage={(ticketId, message) => console.log('Send message:', ticketId, message)}
+            onUpdateStatus={(ticketId, status) => console.log('Update status:', ticketId, status)}
+            onUpdatePriority={(ticketId, priority) => console.log('Update priority:', ticketId, priority)}
           />
         );
 
