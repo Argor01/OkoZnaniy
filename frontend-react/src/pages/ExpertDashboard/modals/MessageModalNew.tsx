@@ -2012,7 +2012,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             position: 'relative'
           }}>
             {/* Кнопка подачи претензии для чата техподдержки - по центру экрана */}
-            {isSupportChatSelected && (
+            {isSupportChatSelected && selectedChat && selectedChat.messages.length === 0 && (
               <div style={{ 
                 position: 'absolute',
                 top: '50%',
