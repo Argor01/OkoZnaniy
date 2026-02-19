@@ -41,6 +41,7 @@ const { Option } = Select;
 
 interface Ticket {
   id: number;
+  type: 'support_request' | 'claim';
   user: {
     id: number;
     username: string;

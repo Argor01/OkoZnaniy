@@ -367,3 +367,93 @@ export const useAdminStats = () => {
 
   return { stats, loading, refetch: fetchStats };
 };
+
+
+// ============= ТИКЕТЫ ПОДДЕРЖКИ =============
+
+export const useTickets = (enabled: boolean = true) => {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchTickets = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token || !enabled) return;
+    
+    setLoading(true);
+    try {
+      // Получаем и SupportRequest и Claim
+      const [supportRequests, claims] = await Promise.all([
+        apiClient.get(`${API_BASE}/support-requests/`),
+        apiClient.get(`${API_BASE}/claims/`)
+      ]);
+      
+      // Объединяем и нормализуем данные
+      const allTickets = [
+        ...supportRequests.data.map((req: any) => ({
+          ...req,
+          type: 'support_request',
+          claim_type: null
+        })),
+        ...claims.data.map((claim: any) => ({
+          ...claim,
+          type: 'claim'
+        }))
+      ];
+      
+      // Сортируем по дате создания (новые первые)
+      allTickets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      setTickets(allTickets);
+    } catch (err: any) {
+      if (!err.silent && err.response?.status !== 401) {
+        console.error('Error fetching tickets:', err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (enabled) {
+      fetchTickets();
+    }
+  }, [enabled]);
+
+  return { tickets, loading, refetch: fetchTickets };
+};
+
+export const useTicketActions = () => {
+  const sendMessage = async (ticketId: number, message: string, ticketType: 'support_request' | 'claim') => {
+    const endpoint = ticketType === 'support_request' 
+      ? `${API_BASE}/support-requests/${ticketId}/send_message/`
+      : `${API_BASE}/claims/${ticketId}/send_message/`;
+    
+    await apiClient.post(endpoint, { message });
+  };
+
+  const updateStatus = async (ticketId: number, status: string, ticketType: 'support_request' | 'claim') => {
+    const endpoint = ticketType === 'support_request'
+      ? `${API_BASE}/support-requests/${ticketId}/`
+      : `${API_BASE}/claims/${ticketId}/`;
+    
+    await apiClient.patch(endpoint, { status });
+  };
+
+  const updatePriority = async (ticketId: number, priority: string, ticketType: 'support_request' | 'claim') => {
+    const endpoint = ticketType === 'support_request'
+      ? `${API_BASE}/support-requests/${ticketId}/`
+      : `${API_BASE}/claims/${ticketId}/`;
+    
+    await apiClient.patch(endpoint, { priority });
+  };
+
+  const assignAdmin = async (ticketId: number, adminId: number, ticketType: 'support_request' | 'claim') => {
+    const endpoint = ticketType === 'support_request'
+      ? `${API_BASE}/support-requests/${ticketId}/assign/`
+      : `${API_BASE}/claims/${ticketId}/assign/`;
+    
+    await apiClient.post(endpoint, { admin_id: adminId });
+  };
+
+  return { sendMessage, updateStatus, updatePriority, assignAdmin };
+};

@@ -18,6 +18,8 @@ import {
   useClaimActions,
   useAdminChatRooms,
   useChatRoomActions,
+  useTickets,
+  useTicketActions,
 } from './hooks/useAdminPanelData';
 import { AdminLayout } from './components/Layout';
 import { 
@@ -155,6 +157,10 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   
   const { chats: supportChats, loading: supportChatsLoading } = useSupportChats(true);
   const { sendChatMessage: sendSupportChatMessage } = useSupportActions();
+  
+  // Тикеты
+  const { tickets, loading: ticketsLoading, refetch: refetchTickets } = useTickets(canLoadData);
+  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
   
   const { claims: newClaims, loading: newClaimsLoading } = useClaims('new', true);
   const { claims: inProgressClaims, loading: inProgressClaimsLoading } = useClaims('in_progress', true);
@@ -301,11 +307,29 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'tickets':
         return (
           <TicketSystemSection
-            tickets={[]}
-            loading={false}
-            onSendMessage={(ticketId, message) => console.log('Send message:', ticketId, message)}
-            onUpdateStatus={(ticketId, status) => console.log('Update status:', ticketId, status)}
-            onUpdatePriority={(ticketId, priority) => console.log('Update priority:', ticketId, priority)}
+            tickets={tickets}
+            loading={ticketsLoading}
+            onSendMessage={async (ticketId, message) => {
+              const ticket = tickets.find((t: any) => t.id === ticketId);
+              if (ticket) {
+                await sendTicketMessage(ticketId, message, ticket.type);
+                refetchTickets();
+              }
+            }}
+            onUpdateStatus={async (ticketId, status) => {
+              const ticket = tickets.find((t: any) => t.id === ticketId);
+              if (ticket) {
+                await updateTicketStatus(ticketId, status, ticket.type);
+                refetchTickets();
+              }
+            }}
+            onUpdatePriority={async (ticketId, priority) => {
+              const ticket = tickets.find((t: any) => t.id === ticketId);
+              if (ticket) {
+                await updateTicketPriority(ticketId, priority, ticket.type);
+                refetchTickets();
+              }
+            }}
           />
         );
 
