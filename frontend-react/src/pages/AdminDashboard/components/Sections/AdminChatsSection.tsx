@@ -250,7 +250,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
     try {
       const values = await editRoomForm.validateFields();
       // Здесь будет вызов API для обновления чата
-      console.log('Updating room:', selectedRoom?.id, values);
+      
       
       // Обновляем локальное состояние (в реальном приложении это будет через API)
       if (selectedRoom) {

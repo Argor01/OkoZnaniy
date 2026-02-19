@@ -428,7 +428,8 @@ export const useTicketActions = () => {
       ? `${API_BASE}/support-requests/${ticketId}/send_message/`
       : `${API_BASE}/claims/${ticketId}/send_message/`;
     
-    await apiClient.post(endpoint, { message });
+    const response = await apiClient.post(endpoint, { message });
+    return response.data;
   };
 
   const updateStatus = async (ticketId: number, status: string, ticketType: 'support_request' | 'claim') => {
@@ -436,7 +437,8 @@ export const useTicketActions = () => {
       ? `${API_BASE}/support-requests/${ticketId}/`
       : `${API_BASE}/claims/${ticketId}/`;
     
-    await apiClient.patch(endpoint, { status });
+    const response = await apiClient.patch(endpoint, { status });
+    return response.data;
   };
 
   const updatePriority = async (ticketId: number, priority: string, ticketType: 'support_request' | 'claim') => {
@@ -444,7 +446,8 @@ export const useTicketActions = () => {
       ? `${API_BASE}/support-requests/${ticketId}/`
       : `${API_BASE}/claims/${ticketId}/`;
     
-    await apiClient.patch(endpoint, { priority });
+    const response = await apiClient.patch(endpoint, { priority });
+    return response.data;
   };
 
   const assignAdmin = async (ticketId: number, adminId: number, ticketType: 'support_request' | 'claim') => {
@@ -452,7 +455,8 @@ export const useTicketActions = () => {
       ? `${API_BASE}/support-requests/${ticketId}/assign/`
       : `${API_BASE}/claims/${ticketId}/assign/`;
     
-    await apiClient.post(endpoint, { admin_id: adminId });
+    const response = await apiClient.post(endpoint, { admin_id: adminId });
+    return response.data;
   };
 
   return { sendMessage, updateStatus, updatePriority, assignAdmin };

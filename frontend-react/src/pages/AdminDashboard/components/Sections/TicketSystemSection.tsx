@@ -79,7 +79,7 @@ interface Ticket {
 interface TicketSystemSectionProps {
   tickets?: Ticket[];
   loading?: boolean;
-  onSendMessage?: (ticketId: number, message: string) => void;
+  onSendMessage?: (ticketId: number, message: string) => Promise<any>;
   onUpdateStatus?: (ticketId: number, status: string) => void;
   onUpdatePriority?: (ticketId: number, priority: string) => void;
   onAssignAdmin?: (ticketId: number, adminId: number) => void;
@@ -128,7 +128,16 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
 
     setSending(true);
     try {
-      onSendMessage?.(selectedTicket.id, messageText);
+      const newMessage = await onSendMessage?.(selectedTicket.id, messageText);
+      
+      // Обновляем локально список сообщений
+      if (newMessage && selectedTicket) {
+        setSelectedTicket({
+          ...selectedTicket,
+          messages: [...(selectedTicket.messages || []), newMessage]
+        });
+      }
+      
       setMessageText('');
       antMessage.success('Сообщение отправлено');
     } catch (error) {

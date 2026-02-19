@@ -54,7 +54,6 @@ const { Content } = Layout;
  * Старый файл переименован в AdminDashboard.tsx.backup
  */
 const AdminDashboard: React.FC = () => {
-  console.log('🚀 NEW AdminDashboard component loaded!');
   const navigate = useNavigate();
   
   // Используем новые хуки
@@ -247,7 +246,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             users={blockedUsers}
             loading={blockedUsersLoading}
             onUnblockUser={unblockUser}
-            onViewUserDetails={(user) => console.log('View user details:', user)}
+            onViewUserDetails={() => {}}
           />
         );
 
@@ -350,7 +349,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       
       // Обращения
       case 'new_claims':
-        console.log('📋 New claims data:', newClaims);
+        
         return (
           <NewClaimsSection
             claims={newClaims}
@@ -461,9 +460,9 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         messages={[]}
         isOpen={false}
         onClose={() => console.log('Close modal')}
-        onTakeRequest={async (requestId: number) => { console.log('Take request:', requestId); return true; }}
-        onCompleteRequest={async (requestId: number) => { console.log('Complete request:', requestId); return true; }}
-        onSendMessage={async (requestId: number, message: string) => { console.log('Send message:', requestId, message); return true; }}
+        onTakeRequest={async (requestId: number) => {  return true; }}
+        onCompleteRequest={async (requestId: number) => {  return true; }}
+        onSendMessage={async (requestId: number, message: string) => {  return true; }}
       />
     </AdminLayout>
   );

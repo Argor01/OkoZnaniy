@@ -6,10 +6,10 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q, Count
 from django.utils import timezone
 
-from .models import SupportRequest, SupportMessage, Claim, AdminChatRoom, AdminChatMessage
+from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage
 from .serializers import (
     SupportRequestSerializer, SupportMessageSerializer,
-    ClaimSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer
+    ClaimSerializer, ClaimMessageSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer
 )
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
@@ -242,6 +242,19 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.completed_at = timezone.now()
         claim.save()
         return Response({'message': 'Обращение отклонено'})
+    
+    @action(detail=True, methods=['post'])
+    def send_message(self, request, pk=None):
+        """Отправить сообщение в претензию"""
+        claim = self.get_object()
+        message = ClaimMessage.objects.create(
+            claim=claim,
+            sender=request.user,
+            message=request.data.get('message'),
+            is_admin=(request.user.role == 'admin')
+        )
+        serializer = ClaimMessageSerializer(message)
+        return Response(serializer.data)
 
 
 # ============= ЧАТЫ АДМИНИСТРАТОРОВ =============

@@ -70,6 +70,13 @@ class Claim(models.Model):
         ('other', 'Другое'),
     ]
     
+    PRIORITY_CHOICES = [
+        ('low', 'Низкий'),
+        ('medium', 'Средний'),
+        ('high', 'Высокий'),
+        ('urgent', 'Срочный'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claims')
     admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_claims')
     order = models.ForeignKey('orders.Order', on_delete=models.SET_NULL, null=True, blank=True)
@@ -77,6 +84,7 @@ class Claim(models.Model):
     subject = models.CharField(max_length=255)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     resolution = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,6 +95,24 @@ class Claim(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Обращение'
         verbose_name_plural = 'Обращения'
+    
+    def __str__(self):
+        return f"Претензия #{self.id}: {self.subject}"
+
+
+class ClaimMessage(models.Model):
+    """Сообщения в претензиях"""
+    claim = models.ForeignKey(Claim, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField(verbose_name='Сообщение')
+    is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'claim_messages'
+        ordering = ['created_at']
+        verbose_name = 'Сообщение претензии'
+        verbose_name_plural = 'Сообщения претензий'
 
 
 class AdminChatRoom(models.Model):

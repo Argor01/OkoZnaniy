@@ -23,7 +23,7 @@ from django.urls import path
 from apps.core.health import health_check
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),  # Изменили с admin/ на django-admin/
     path('hijack/', include('hijack.urls')),
     path('api/health/', health_check, name='health_check'),
     path('api/users/', include('apps.users.urls')),
