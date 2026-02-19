@@ -1866,12 +1866,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     size={isMobile ? 'middle' : 'large'}
                     onClick={() => setClaimModalOpen(true)}
                     style={{
-                      position: 'absolute',
-                      right: isMobile ? 36 : 40,
-                      top: isMobile ? 6 : 8,
                       fontSize: isMobile ? 20 : 22,
                       color: '#ef4444',
-                      zIndex: 10,
                       padding: isMobile ? '4px' : '6px',
                       height: isMobile ? 32 : 40,
                       width: isMobile ? 32 : 40,
