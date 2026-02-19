@@ -110,7 +110,208 @@ const GeneralStatistics: React.FC = () => {
   };
 
   const handleExport = async (format: 'excel' | 'pdf') => {
-    message.info(`Экспорт в ${format.toUpperCase()} в разработке`);
+    try {
+      message.loading({ content: 'Подготовка данных для экспорта...', key: 'export' });
+
+      if (format === 'excel') {
+        // Импортируем библиотеку динамически
+        const XLSX = await import('xlsx');
+
+        // Подготавливаем данные для экспорта
+        const exportData = [
+          {
+            'Показатель': 'Общий оборот',
+            'Значение': `${totalTurnover.toLocaleString('ru-RU')} ₽`,
+            'Изменение': `${turnoverChange >= 0 ? '+' : ''}${turnoverChange.toFixed(2)}%`,
+          },
+          {
+            'Показатель': 'Чистая прибыль',
+            'Значение': `${netProfit.toLocaleString('ru-RU')} ₽`,
+            'Изменение': `${profitChange >= 0 ? '+' : ''}${profitChange.toFixed(2)}%`,
+          },
+          {
+            'Показатель': 'Активные заказы',
+            'Значение': activeOrders,
+            'Изменение': `${ordersChange >= 0 ? '+' : ''}${ordersChange.toFixed(2)}%`,
+          },
+          {
+            'Показатель': 'Средний чек',
+            'Значение': `${averageCheck.toLocaleString('ru-RU')} ₽`,
+            'Изменение': `${averageCheckChange >= 0 ? '+' : ''}${averageCheckChange.toFixed(2)}%`,
+          },
+          {},
+          {
+            'Показатель': 'Всего клиентов',
+            'Значение': totalClients,
+            'Изменение': '',
+          },
+          {
+            'Показатель': 'Всего экспертов',
+            'Значение': totalExperts,
+            'Изменение': '',
+          },
+          {
+            'Показатель': 'Всего партнеров',
+            'Значение': totalPartners,
+            'Изменение': '',
+          },
+        ];
+
+        // Создаем рабочую книгу
+        const wb = XLSX.utils.book_new();
+        
+        // Создаем лист из данных
+        const ws = XLSX.utils.json_to_sheet(exportData);
+
+        // Настраиваем ширину колонок
+        ws['!cols'] = [
+          { wch: 25 }, // Показатель
+          { wch: 20 }, // Значение
+          { wch: 15 }, // Изменение
+        ];
+
+        // Добавляем лист в книгу
+        XLSX.utils.book_append_sheet(wb, ws, 'Статистика');
+
+        // Формируем имя файла
+        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
+
+        // Сохраняем файл
+        XLSX.writeFile(wb, fileName);
+
+        message.success({ content: 'Данные успешно экспортированы!', key: 'export', duration: 2 });
+      } else if (format === 'pdf') {
+        // Импортируем pdfmake для лучшей поддержки кириллицы
+        const pdfMakeModule = await import('pdfmake/build/pdfmake');
+        const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+        
+        const pdfMake = pdfMakeModule.default || pdfMakeModule;
+        
+        // Устанавливаем шрифты
+        if (pdfFontsModule.default && pdfFontsModule.default.pdfMake) {
+          pdfMake.vfs = pdfFontsModule.default.pdfMake.vfs;
+        } else if (pdfFontsModule.pdfMake) {
+          pdfMake.vfs = pdfFontsModule.pdfMake.vfs;
+        } else if (pdfFontsModule.default) {
+          pdfMake.vfs = pdfFontsModule.default;
+        } else {
+          pdfMake.vfs = pdfFontsModule;
+        }
+
+        // Подготавливаем данные для таблицы
+        const tableBody = [
+          [
+            { text: 'Показатель', style: 'tableHeader' },
+            { text: 'Значение', style: 'tableHeader' },
+            { text: 'Изменение', style: 'tableHeader' }
+          ],
+          [
+            'Общий оборот',
+            `${totalTurnover.toLocaleString('ru-RU')} ₽`,
+            `${turnoverChange >= 0 ? '+' : ''}${turnoverChange.toFixed(2)}%`
+          ],
+          [
+            'Чистая прибыль',
+            `${netProfit.toLocaleString('ru-RU')} ₽`,
+            `${profitChange >= 0 ? '+' : ''}${profitChange.toFixed(2)}%`
+          ],
+          [
+            'Активные заказы',
+            activeOrders.toString(),
+            `${ordersChange >= 0 ? '+' : ''}${ordersChange.toFixed(2)}%`
+          ],
+          [
+            'Средний чек',
+            `${averageCheck.toLocaleString('ru-RU')} ₽`,
+            `${averageCheckChange >= 0 ? '+' : ''}${averageCheckChange.toFixed(2)}%`
+          ]
+        ];
+
+        const additionalTableBody = [
+          [
+            { text: 'Показатель', style: 'tableHeader' },
+            { text: 'Значение', style: 'tableHeader' }
+          ],
+          ['Всего клиентов', totalClients.toString()],
+          ['Всего экспертов', totalExperts.toString()],
+          ['Всего партнеров', totalPartners.toString()]
+        ];
+
+        // Определяем структуру документа
+        const docDefinition: any = {
+          content: [
+            { text: 'Общая статистика', style: 'header' },
+            { text: `Период: ${dateRange[0].format('DD.MM.YYYY')} - ${dateRange[1].format('DD.MM.YYYY')}`, style: 'subheader' },
+            { text: '\n' },
+            {
+              table: {
+                headerRows: 1,
+                widths: ['*', 'auto', 'auto'],
+                body: tableBody
+              },
+              layout: {
+                fillColor: function (rowIndex: number) {
+                  return rowIndex === 0 ? '#1890ff' : null;
+                }
+              }
+            },
+            { text: '\n' },
+            { text: 'Дополнительная информация', style: 'subheader' },
+            { text: '\n' },
+            {
+              table: {
+                headerRows: 1,
+                widths: ['*', 'auto'],
+                body: additionalTableBody
+              },
+              layout: {
+                fillColor: function (rowIndex: number) {
+                  return rowIndex === 0 ? '#1890ff' : null;
+                }
+              }
+            }
+          ],
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true,
+              margin: [0, 0, 0, 10]
+            },
+            subheader: {
+              fontSize: 14,
+              bold: true,
+              margin: [0, 10, 0, 5]
+            },
+            tableHeader: {
+              bold: true,
+              fontSize: 11,
+              color: 'white'
+            }
+          },
+          defaultStyle: {
+            font: 'Roboto'
+          },
+          footer: function(currentPage: number, pageCount: number) {
+            return {
+              columns: [
+                { text: `Сгенерировано: ${dayjs().format('DD.MM.YYYY HH:mm')}`, fontSize: 9, margin: [40, 0] },
+                { text: `Страница ${currentPage} из ${pageCount}`, alignment: 'right', fontSize: 9, margin: [0, 0, 40, 0] }
+              ]
+            };
+          }
+        };
+
+        // Создаем и скачиваем PDF
+        pdfMake.createPdf(docDefinition).download(
+          `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.pdf`
+        );
+
+        message.success({ content: 'PDF успешно сгенерирован!', key: 'export', duration: 2 });
+      }
+    } catch (error) {
+      console.error('Ошибка экспорта:', error);
+      message.error({ content: 'Ошибка при экспорте данных', key: 'export', duration: 2 });
+    }
   };
 
   return (
