@@ -1537,6 +1537,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }}>
         {selectedChat && !isSupportChatSelected && (
           <Dropdown
+            key={`dropdown-${selectedChat.id}`}
             trigger={['click']}
             menu={{
               items: [
@@ -1755,14 +1756,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
 
         {/* Right Content Area */}
-        <div style={{ 
-          flex: 1, 
-          display: (!selectedChat && isMobile) ? 'none' : 'flex',
-          flexDirection: 'column',
-          background: '#ffffff',
-          minHeight: 0,
-          overflow: 'hidden'
-        }}>
+        <div 
+          key={selectedChat ? `chat-${selectedChat.id}` : 'no-chat'}
+          style={{ 
+            flex: 1, 
+            display: (!selectedChat && isMobile) ? 'none' : 'flex',
+            flexDirection: 'column',
+            background: '#ffffff',
+            minHeight: 0,
+            overflow: 'hidden'
+          }}
+        >
           {/* Header */}
           <div style={{
             background: selectedChat ? '#ffffff' : '#e0f2fe',
