@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../../../api/client';
 
 const API_BASE = '/admin-panel';
+const isDebugEnabled = () =>
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  window.localStorage?.getItem('debug_api') === '1';
 
 // ============= ПОЛЬЗОВАТЕЛИ =============
 
@@ -10,10 +14,8 @@ export const useAllUsers = (enabled: boolean = true) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchUsers = async () => {
-    // Проверяем наличие токена перед запросом
+  const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem('access_token');
-    console.log('🔍 useAllUsers - enabled:', enabled, 'token:', !!token);
     if (!token || !enabled) {
       return;
     }
@@ -21,28 +23,24 @@ export const useAllUsers = (enabled: boolean = true) => {
     setLoading(true);
     try {
       const response = await apiClient.get(`${API_BASE}/users/`);
-      console.log('✅ useAllUsers - received data:', response.data);
-      console.log('✅ useAllUsers - data type:', Array.isArray(response.data) ? 'array' : typeof response.data);
-      console.log('✅ useAllUsers - data length:', response.data?.length);
       setUsers(response.data);
     } catch (err: any) {
       // Игнорируем тихие ошибки и 401 (не авторизован)
       if (!err.silent && err.response?.status !== 401) {
-        console.error('❌ useAllUsers - error:', err);
+        if (isDebugEnabled()) console.error('❌ useAllUsers - error:', err);
         setError(err.message);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchUsers();
     }
-  }, [enabled]);
+  }, [enabled, fetchUsers]);
 
-  console.log('🎯 useAllUsers - returning users:', users.length, 'loading:', loading);
   return { users, loading, error, refetch: fetchUsers };
 };
 
@@ -50,7 +48,7 @@ export const useBlockedUsers = (enabled: boolean = true) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchBlockedUsers = async () => {
+  const fetchBlockedUsers = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -60,18 +58,18 @@ export const useBlockedUsers = (enabled: boolean = true) => {
       setUsers(response.data);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching blocked users:', err);
+        if (isDebugEnabled()) console.error('Error fetching blocked users:', err);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchBlockedUsers();
     }
-  }, [enabled]);
+  }, [enabled, fetchBlockedUsers]);
 
   return { users, loading, refetch: fetchBlockedUsers };
 };
@@ -98,7 +96,7 @@ export const useAllOrders = (enabled: boolean = true) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -108,18 +106,18 @@ export const useAllOrders = (enabled: boolean = true) => {
       setOrders(response.data);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching orders:', err);
+        if (isDebugEnabled()) console.error('Error fetching orders:', err);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchOrders();
     }
-  }, [enabled]);
+  }, [enabled, fetchOrders]);
 
   return { orders, loading, refetch: fetchOrders };
 };
@@ -128,7 +126,7 @@ export const useProblemOrders = (enabled: boolean = true) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchProblemOrders = async () => {
+  const fetchProblemOrders = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -138,18 +136,18 @@ export const useProblemOrders = (enabled: boolean = true) => {
       setOrders(response.data);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching problem orders:', err);
+        if (isDebugEnabled()) console.error('Error fetching problem orders:', err);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchProblemOrders();
     }
-  }, [enabled]);
+  }, [enabled, fetchProblemOrders]);
 
   return { orders, loading, refetch: fetchProblemOrders };
 };
@@ -168,7 +166,7 @@ export const useSupportRequests = (status?: string) => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       const url = status 
@@ -177,15 +175,15 @@ export const useSupportRequests = (status?: string) => {
       const response = await apiClient.get(url);
       setRequests(response.data);
     } catch (err) {
-      console.error('Error fetching support requests:', err);
+      if (isDebugEnabled()) console.error('Error fetching support requests:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [status]);
 
   useEffect(() => {
     fetchRequests();
-  }, [status]);
+  }, [fetchRequests]);
 
   return { requests, loading, refetch: fetchRequests };
 };
@@ -194,7 +192,7 @@ export const useSupportChats = (enabled: boolean = true) => {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchChats = async () => {
+  const fetchChats = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -204,18 +202,18 @@ export const useSupportChats = (enabled: boolean = true) => {
       setChats(response.data);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching support chats:', err);
+        if (isDebugEnabled()) console.error('Error fetching support chats:', err);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchChats();
     }
-  }, [enabled]);
+  }, [enabled, fetchChats]);
 
   return { chats, loading, refetch: fetchChats };
 };
@@ -246,7 +244,7 @@ export const useClaims = (status?: string, enabled: boolean = true) => {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchClaims = async () => {
+  const fetchClaims = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -260,19 +258,19 @@ export const useClaims = (status?: string, enabled: boolean = true) => {
       setClaims(Array.isArray(response.data) ? response.data : []);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching claims:', err);
+        if (isDebugEnabled()) console.error('Error fetching claims:', err);
       }
       setClaims([]); // Устанавливаем пустой массив при ошибке
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled, status]);
 
   useEffect(() => {
     if (enabled) {
       fetchClaims();
     }
-  }, [status, enabled]);
+  }, [enabled, fetchClaims]);
 
   return { claims, loading, refetch: fetchClaims };
 };
@@ -299,7 +297,7 @@ export const useAdminChatRooms = (enabled: boolean = true) => {
   const [chatRooms, setChatRooms] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchChatRooms = async () => {
+  const fetchChatRooms = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -310,19 +308,19 @@ export const useAdminChatRooms = (enabled: boolean = true) => {
       setChatRooms(Array.isArray(response.data) ? response.data : []);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching chat rooms:', err);
+        if (isDebugEnabled()) console.error('Error fetching chat rooms:', err);
       }
       setChatRooms([]); // Устанавливаем пустой массив при ошибке
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchChatRooms();
     }
-  }, [enabled]);
+  }, [enabled, fetchChatRooms]);
 
   return { chatRooms, loading, refetch: fetchChatRooms };
 };
@@ -349,21 +347,21 @@ export const useAdminStats = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiClient.get(`${API_BASE}/stats/`);
       setStats(response.data);
     } catch (err) {
-      console.error('Error fetching admin stats:', err);
+      if (isDebugEnabled()) console.error('Error fetching admin stats:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return { stats, loading, refetch: fetchStats };
 };
@@ -375,7 +373,7 @@ export const useTickets = (enabled: boolean = true) => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token || !enabled) return;
     
@@ -406,18 +404,18 @@ export const useTickets = (enabled: boolean = true) => {
       setTickets(allTickets);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
-        console.error('Error fetching tickets:', err);
+        if (isDebugEnabled()) console.error('Error fetching tickets:', err);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [enabled]);
 
   useEffect(() => {
     if (enabled) {
       fetchTickets();
     }
-  }, [enabled]);
+  }, [enabled, fetchTickets]);
 
   return { tickets, loading, refetch: fetchTickets };
 };

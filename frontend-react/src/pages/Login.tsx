@@ -43,6 +43,10 @@ const Login: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('register');
   const navigate = useNavigate();
   const location = window.location;
+  const debugEnabled =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('debug_api') === '1';
 
   // Определяем, с какой страницы входа мы пришли
   const isAdminLogin = location.pathname === ROUTES.admin.login;
@@ -121,7 +125,7 @@ const Login: React.FC = () => {
       const orders = ordersData?.results || ordersData || [];
       return orders.length > 0;
     } catch (error) {
-      console.error('Ошибка при проверке заказов:', error);
+      if (debugEnabled) console.error('Ошибка при проверке заказов:', error);
       return false;
     }
   };
@@ -224,7 +228,7 @@ const Login: React.FC = () => {
         await onLogin(loginData);
       }
     } catch (error: any) {
-      console.error('Registration error:', error);
+      if (debugEnabled) console.error('Registration error:', error);
       const errorData = error?.response?.data;
       if (errorData && typeof errorData === 'object') {
         const entries = Object.entries(errorData as Record<string, any>);

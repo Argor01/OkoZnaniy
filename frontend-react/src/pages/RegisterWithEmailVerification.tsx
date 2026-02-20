@@ -6,6 +6,10 @@ import { apiClient } from '../api/client';
 const RegisterWithEmailVerification: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const debugEnabled =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('debug_api') === '1';
   const [step, setStep] = useState<'register' | 'verify'>('register');
   const [email, setEmail] = useState('');
   const [formData, setFormData] = useState({
@@ -64,7 +68,7 @@ const RegisterWithEmailVerification: React.FC = () => {
         navigate('/login');
       }
     } catch (err: unknown) {
-      console.error('Registration error:', err);
+      if (debugEnabled) console.error('Registration error:', err);
       const errorMessage = (() => {
         const data = (err as { response?: { data?: unknown } })?.response?.data as
           | { email?: string[]; password?: string[]; detail?: string }
@@ -89,7 +93,9 @@ const RegisterWithEmailVerification: React.FC = () => {
           <EmailVerificationForm
             email={email}
             onSuccess={handleVerificationSuccess}
-            onError={(error) => console.error('Verification error:', error)}
+            onError={(error) => {
+              if (debugEnabled) console.error('Verification error:', error);
+            }}
           />
           
           <div className="text-center mt-4">

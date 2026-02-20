@@ -50,6 +50,10 @@ type OrdersFeedOrder = Order & {
 
 const OrdersFeed: React.FC = () => {
   const navigate = useNavigate();
+  const debugEnabled =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('debug_api') === '1';
   const [searchText, setSearchText] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
   const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
@@ -84,22 +88,30 @@ const OrdersFeed: React.FC = () => {
   const { data: ordersData, isLoading: ordersLoading } = useQuery<OrdersFeedOrder[]>({
     queryKey: ['orders-feed'],
     queryFn: async () => {
-      console.log('🔄 Загрузка заказов из API...');
-      console.log('👤 Текущий пользователь:', userProfile);
-      console.log('🎭 Роль пользователя:', userProfile?.role);
+      if (debugEnabled) {
+        console.log('🔄 Загрузка заказов из API...');
+        console.log('👤 Текущий пользователь:', userProfile);
+        console.log('🎭 Роль пользователя:', userProfile?.role);
+      }
       const data = await ordersApi.getAvailableOrders();
-      console.log('📦 Получены заказы:', data);
-      console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
+      if (debugEnabled) {
+        console.log('📦 Получены заказы:', data);
+        console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
+      }
       if ((data?.results?.length || data?.length || 0) === 0) {
-        console.warn('⚠️ Заказов нет! Возможные причины:');
+        if (debugEnabled) console.warn('⚠️ Заказов нет! Возможные причины:');
         if (userProfile?.role === 'client') {
-          console.warn('   ❗ Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
-          console.warn('   💡 РЕШЕНИЕ: Перейдите на главный дашборд → https://okoznaniy.ru/expert');
-          console.warn('   📋 Там вы увидите все свои созданные заказы во вкладке "Заказы"');
+          if (debugEnabled) {
+            console.warn('   ❗ Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
+            console.warn('   💡 РЕШЕНИЕ: Перейдите на главный дашборд → https://okoznaniy.ru/expert');
+            console.warn('   📋 Там вы увидите все свои созданные заказы во вкладке "Заказы"');
+          }
         } else {
-          console.warn('   1. Все заказы уже взяты в работу');
-          console.warn('   2. Нет заказов в статусе "new"');
-          console.warn('   3. Нет заказов от других клиентов');
+          if (debugEnabled) {
+            console.warn('   1. Все заказы уже взяты в работу');
+            console.warn('   2. Нет заказов в статусе "new"');
+            console.warn('   3. Нет заказов от других клиентов');
+          }
         }
       }
       return data;
@@ -450,7 +462,9 @@ const OrdersFeed: React.FC = () => {
           {filteredOrders.map((order: OrdersFeedOrder) => {
             // Логируем данные заказа для отладки
             if (order.files) {
-              console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
+              if (debugEnabled) {
+                console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
+              }
             }
 
             const cachedMyBid = typeof order.id === 'number' ? myBidsByOrderId[order.id] : undefined;

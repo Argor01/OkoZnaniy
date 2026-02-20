@@ -25,7 +25,11 @@ export const redirectByRole = async (
           navigate(ROUTES.createOrder);
         }
       } catch (error) {
-        console.error('Error checking client orders:', error);
+        const debugEnabled =
+          import.meta.env.DEV &&
+          typeof window !== 'undefined' &&
+          window.localStorage?.getItem('debug_api') === '1';
+        if (debugEnabled) console.error('Error checking client orders:', error);
         navigate(ROUTES.dashboard);
       }
       break;

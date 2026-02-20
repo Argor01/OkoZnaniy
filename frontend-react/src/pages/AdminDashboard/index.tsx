@@ -252,11 +252,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <AllOrdersSection
             orders={allOrders}
             loading={ordersLoading}
-            onViewOrder={(orderId) => console.log('View order:', orderId)}
-            onEditOrder={(orderId) => console.log('Edit order:', orderId)}
+            onViewOrder={(orderId) => { void orderId; }}
+            onEditOrder={(orderId) => { void orderId; }}
             onChangeOrderStatus={changeOrderStatus}
-            onAssignExpert={(orderId, expertId) => console.log('Assign expert:', orderId, expertId)}
-            onContactClient={(orderId) => console.log('Contact client:', orderId)}
+            onAssignExpert={(orderId, expertId) => { void orderId; void expertId; }}
+            onContactClient={(orderId) => { void orderId; }}
           />
         );
       
@@ -265,11 +265,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <ProblemOrdersSection
             orders={problemOrders}
             loading={problemOrdersLoading}
-            onViewOrder={(orderId) => console.log('View problem order:', orderId)}
-            onResolveIssue={(orderId, resolution) => console.log('Resolve issue:', orderId, resolution)}
-            onEscalateIssue={(orderId, escalationNote) => console.log('Escalate issue:', orderId, escalationNote)}
-            onContactParticipant={(orderId, participantType) => console.log('Contact participant:', orderId, participantType)}
-            onAssignNewExpert={(orderId, expertId) => console.log('Assign new expert:', orderId, expertId)}
+            onViewOrder={(orderId) => { void orderId; }}
+            onResolveIssue={(orderId, resolution) => { void orderId; void resolution; }}
+            onEscalateIssue={(orderId, escalationNote) => { void orderId; void escalationNote; }}
+            onContactParticipant={(orderId, participantType) => { void orderId; void participantType; }}
+            onAssignNewExpert={(orderId, expertId) => { void orderId; void expertId; }}
           />
         );
 
@@ -282,9 +282,9 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             currentUserId={user?.id || 1}
             loading={supportChatsLoading}
             onSendMessage={sendSupportChatMessage}
-            onTakeChat={(chatId) => console.log('Take chat:', chatId)}
-            onCloseChat={(chatId) => console.log('Close chat:', chatId)}
-            onUploadFile={(chatId, file) => console.log('Upload file:', chatId, file)}
+            onTakeChat={(chatId) => { void chatId; }}
+            onCloseChat={(chatId) => { void chatId; }}
+            onUploadFile={(chatId, file) => { void chatId; void file; }}
           />
         );
 
@@ -324,11 +324,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             currentUserId={user?.id || 1}
             loading={chatRoomsLoading}
             onSendMessage={sendChatMessage}
-            onCreateRoom={(roomData) => console.log('Create room:', roomData)}
+            onCreateRoom={(roomData) => { void roomData; }}
             onJoinRoom={joinRoom}
             onLeaveRoom={leaveRoom}
-            onInviteUser={(roomId, userId) => console.log('Invite user:', roomId, userId)}
-            onUploadFile={(roomId, file) => console.log('Upload file:', roomId, file)}
+            onInviteUser={(roomId, userId) => { void roomId; void userId; }}
+            onUploadFile={(roomId, file) => { void roomId; void file; }}
           />
         );
       
@@ -339,10 +339,10 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <NewClaimsSection
             claims={newClaims}
             loading={newClaimsLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
+            onViewClaim={(claimId) => { void claimId; }}
             onTakeInWork={takeInWork}
             onRejectClaim={rejectClaim}
-            onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
+            onSendMessage={(claimId, claimMessage) => { void claimId; void claimMessage; }}
           />
         );
 
@@ -351,10 +351,10 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <InProgressClaimsSection
             claims={inProgressClaims}
             loading={inProgressClaimsLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
+            onViewClaim={(claimId) => { void claimId; }}
             onCompleteClaim={completeClaim}
-            onUpdateProgress={(claimId, progress) => console.log('Update progress:', claimId, progress)}
-            onSendMessage={(claimId, message) => console.log('Send message:', claimId, message)}
+            onUpdateProgress={(claimId, progress) => { void claimId; void progress; }}
+            onSendMessage={(claimId, claimMessage) => { void claimId; void claimMessage; }}
           />
         );
 
@@ -363,9 +363,9 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <CompletedClaimsSection
             claims={completedClaims}
             loading={completedClaimsLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onReopenClaim={(claimId, reason) => console.log('Reopen claim:', claimId, reason)}
-            onExportReport={(filters) => console.log('Export report:', filters)}
+            onViewClaim={(claimId) => { void claimId; }}
+            onReopenClaim={(claimId, reason) => { void claimId; void reason; }}
+            onExportReport={(filters) => { void filters; }}
           />
         );
 
@@ -374,11 +374,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <PendingApprovalSection
             claims={pendingApprovalClaims}
             loading={pendingApprovalLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onApproveClaim={(claimId, decision) => console.log('Approve claim:', claimId, decision)}
-            onRejectApproval={(claimId, reason) => console.log('Reject approval:', claimId, reason)}
-            onEscalateToDirector={(claimId) => console.log('Escalate to director:', claimId)}
-            onRequestMoreInfo={(claimId, questions) => console.log('Request more info:', claimId, questions)}
+            onViewClaim={(claimId) => { void claimId; }}
+            onApproveClaim={(claimId, decision) => { void claimId; void decision; }}
+            onRejectApproval={(claimId, reason) => { void claimId; void reason; }}
+            onEscalateToDirector={(claimId) => { void claimId; }}
+            onRequestMoreInfo={(claimId, questions) => { void claimId; void questions; }}
           />
         );
     }
@@ -428,7 +428,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         request={null}
         messages={[]}
         isOpen={false}
-        onClose={() => console.log('Close modal')}
+        onClose={() => {}}
         onTakeRequest={async (requestId: number) => {  return true; }}
         onCompleteRequest={async (requestId: number) => {  return true; }}
         onSendMessage={async (requestId: number, message: string) => {  return true; }}

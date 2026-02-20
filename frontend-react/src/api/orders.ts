@@ -1,5 +1,10 @@
 import { apiClient } from './client';
 
+const isDebugEnabled = () =>
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  window.localStorage?.getItem('debug_api') === '1';
+
 export interface OrderFile {
   id: number;
   file_url: string | null;
@@ -204,27 +209,29 @@ export const ordersApi = {
     file: File,
     options?: { file_type?: 'task' | 'solution' | 'revision'; description?: string }
   ) => {
-    console.log('📤 uploadOrderFile вызван:', {
-      orderId,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      options
-    });
+    if (isDebugEnabled()) {
+      console.log('📤 uploadOrderFile вызван:', {
+        orderId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        options,
+      });
+    }
     
     const form = new FormData();
     form.append('file', file);
     form.append('file_type', options?.file_type || 'solution');
     if (options?.description) form.append('description', options.description);
     
-    console.log('📦 FormData подготовлена, отправляем на сервер...');
+    if (isDebugEnabled()) console.log('📦 FormData подготовлена, отправляем на сервер...');
     
     const response = await apiClient.post(
       `/orders/orders/${orderId}/files/`,
       form
     );
     
-    console.log('✅ Файл успешно загружен на сервер:', response.data);
+    if (isDebugEnabled()) console.log('✅ Файл успешно загружен на сервер:', response.data);
     return response.data;
   },
 

@@ -63,8 +63,10 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
         // Вызываем callback
         onAuth(userData);
       } catch (error: any) {
-        console.error('[TelegramLoginButton] Telegram auth error:', error);
-        console.error('[TelegramLoginButton] Error response:', error.response?.data);
+        if (debugEnabled) {
+          console.error('[TelegramLoginButton] Telegram auth error:', error);
+          console.error('[TelegramLoginButton] Error response:', error.response?.data);
+        }
         const errorMessage = error.response?.data?.error || 'Ошибка авторизации через Telegram';
         if (onError) {
           onError(errorMessage);
@@ -91,7 +93,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
     };
     
     script.onerror = (error) => {
-      console.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
+      if (debugEnabled) console.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
     };
 
     const container = containerRef.current;

@@ -130,7 +130,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     } catch (error: any) {
       const errorMessage = handleError(error);
       message.error(errorMessage);
-      console.error('Login error:', error);
+      if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+        console.error('Login error:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -169,7 +171,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     } catch (error: any) {
       const errorMessage = handleError(error);
       message.error(`Ошибка входа как ${account.label}: ${errorMessage}`);
-      console.error(`Quick login error for ${account.label}:`, error);
+      if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
+        console.error(`Quick login error for ${account.label}:`, error);
+      }
     } finally {
       setLoading(false);
     }

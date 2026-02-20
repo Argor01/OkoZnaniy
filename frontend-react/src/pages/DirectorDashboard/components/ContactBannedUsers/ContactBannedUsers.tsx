@@ -47,6 +47,10 @@ interface ContactBannedUser {
 const ContactBannedUsers: React.FC = () => {
   const [users, setUsers] = useState<ContactBannedUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const debugEnabled =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('debug_api') === '1';
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<ContactBannedUser | null>(null);
@@ -64,7 +68,7 @@ const ContactBannedUsers: React.FC = () => {
       const response = await apiClient.get('/users/contact_banned_users/');
       setUsers(response.data);
     } catch (error) {
-      console.error('Ошибка загрузки забаненных пользователей:', error);
+      if (debugEnabled) console.error('Ошибка загрузки забаненных пользователей:', error);
       message.error('Не удалось загрузить список забаненных пользователей');
     } finally {
       setLoading(false);
@@ -87,7 +91,7 @@ const ContactBannedUsers: React.FC = () => {
       unbanForm.resetFields();
       fetchBannedUsers();
     } catch (error) {
-      console.error('Ошибка разбана:', error);
+      if (debugEnabled) console.error('Ошибка разбана:', error);
       message.error('Не удалось разбанить пользователя');
     }
   };

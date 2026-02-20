@@ -21,7 +21,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    const debugEnabled =
+      import.meta.env.DEV &&
+      typeof window !== 'undefined' &&
+      window.localStorage?.getItem('debug_api') === '1';
+    if (debugEnabled) console.error('Uncaught error:', error, errorInfo);
   }
 
   public render() {

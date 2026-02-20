@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Input, Button, message, Spin, Empty, Avatar, Tag } from 'antd';
 import { SendOutlined, ArrowLeftOutlined, PaperClipOutlined } from '@ant-design/icons';
@@ -6,6 +6,10 @@ import { supportApi, SupportMessage } from '../api/support';
 import DashboardLayout from '../components/layout/DashboardLayout';
 
 const { TextArea } = Input;
+const isDebugEnabled = () =>
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  window.localStorage?.getItem('debug_api') === '1';
 
 const SupportChat: React.FC = () => {
   const { chatId } = useParams<{ chatId: string }>();
@@ -24,26 +28,26 @@ const SupportChat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    loadMessages();
-    // Обновляем сообщения каждые 5 секунд
-    const interval = setInterval(loadMessages, 5000);
-    return () => clearInterval(interval);
-  }, [chatId]);
-
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!chatId) return;
     
     try {
       const data = await supportApi.getMessages(parseInt(chatId));
       setMessages(data);
     } catch (error) {
-      console.error('Ошибка загрузки сообщений:', error);
+      if (isDebugEnabled()) console.error('Ошибка загрузки сообщений:', error);
       message.error('Не удалось загрузить сообщения');
     } finally {
       setLoading(false);
     }
-  };
+  }, [chatId]);
+
+  useEffect(() => {
+    loadMessages();
+    // Обновляем сообщения каждые 5 секунд
+    const interval = setInterval(loadMessages, 5000);
+    return () => clearInterval(interval);
+  }, [loadMessages]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !chatId) return;
@@ -55,7 +59,7 @@ const SupportChat: React.FC = () => {
       setMessageText('');
       message.success('Сообщение отправлено');
     } catch (error) {
-      console.error('Ошибка отправки сообщения:', error);
+      if (isDebugEnabled()) console.error('Ошибка отправки сообщения:', error);
       message.error('Не удалось отправить сообщение');
     } finally {
       setSending(false);

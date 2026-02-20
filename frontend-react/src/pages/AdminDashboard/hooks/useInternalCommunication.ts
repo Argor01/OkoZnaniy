@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
 import { internalCommunicationApi, InternalMessage, MeetingRequest } from '../../../api/internalCommunication';
+
+const isDebugEnabled = () =>
+  import.meta.env.DEV &&
+  typeof window !== 'undefined' &&
+  window.localStorage?.getItem('debug_api') === '1';
 
 export const useInternalCommunication = () => {
   const [messages, setMessages] = useState<InternalMessage[]>([]);
@@ -8,50 +13,50 @@ export const useInternalCommunication = () => {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       const data = await internalCommunicationApi.getMessages();
       setMessages(data);
     } catch (error) {
-      console.error('Ошибка загрузки сообщений:', error);
+      if (isDebugEnabled()) console.error('Ошибка загрузки сообщений:', error);
       message.error('Не удалось загрузить сообщения');
     }
-  };
+  }, []);
 
-  const loadMeetingRequests = async () => {
+  const loadMeetingRequests = useCallback(async () => {
     try {
       const data = await internalCommunicationApi.getMeetingRequests();
       setMeetingRequests(data);
     } catch (error) {
-      console.error('Ошибка загрузки запросов на встречи:', error);
+      if (isDebugEnabled()) console.error('Ошибка загрузки запросов на встречи:', error);
       message.error('Не удалось загрузить запросы на встречи');
     }
-  };
+  }, []);
 
-  const loadUnreadCount = async () => {
+  const loadUnreadCount = useCallback(async () => {
     try {
       const count = await internalCommunicationApi.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
-      console.error('Ошибка загрузки количества непрочитанных:', error);
+      if (isDebugEnabled()) console.error('Ошибка загрузки количества непрочитанных:', error);
     }
-  };
+  }, []);
 
-  const loadAll = async () => {
+  const loadAll = useCallback(async () => {
     setLoading(true);
     try {
       await Promise.all([loadMessages(), loadMeetingRequests(), loadUnreadCount()]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadMeetingRequests, loadMessages, loadUnreadCount]);
 
   useEffect(() => {
     loadAll();
     // Обновляем каждые 30 секунд
     const interval = setInterval(loadAll, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadAll]);
 
   const sendMessage = async (data: {
     recipient_id: number;
@@ -65,7 +70,7 @@ export const useInternalCommunication = () => {
       message.success('Сообщение отправлено');
       await loadMessages();
     } catch (error) {
-      console.error('Ошибка отправки сообщения:', error);
+      if (isDebugEnabled()) console.error('Ошибка отправки сообщения:', error);
       message.error('Не удалось отправить сообщение');
       throw error;
     }
@@ -77,7 +82,7 @@ export const useInternalCommunication = () => {
       await loadMessages();
       await loadUnreadCount();
     } catch (error) {
-      console.error('Ошибка отметки сообщения:', error);
+      if (isDebugEnabled()) console.error('Ошибка отметки сообщения:', error);
       message.error('Не удалось отметить сообщение');
     }
   };
@@ -88,7 +93,7 @@ export const useInternalCommunication = () => {
       message.success('Сообщение архивировано');
       await loadMessages();
     } catch (error) {
-      console.error('Ошибка архивирования:', error);
+      if (isDebugEnabled()) console.error('Ошибка архивирования:', error);
       message.error('Не удалось архивировать сообщение');
     }
   };
@@ -104,7 +109,7 @@ export const useInternalCommunication = () => {
       message.success('Запрос на встречу отправлен');
       await loadMeetingRequests();
     } catch (error) {
-      console.error('Ошибка запроса встречи:', error);
+      if (isDebugEnabled()) console.error('Ошибка запроса встречи:', error);
       message.error('Не удалось отправить запрос на встречу');
       throw error;
     }
@@ -116,7 +121,7 @@ export const useInternalCommunication = () => {
       message.success('Встреча одобрена');
       await loadMeetingRequests();
     } catch (error) {
-      console.error('Ошибка одобрения встречи:', error);
+      if (isDebugEnabled()) console.error('Ошибка одобрения встречи:', error);
       message.error('Не удалось одобрить встречу');
     }
   };
@@ -127,7 +132,7 @@ export const useInternalCommunication = () => {
       message.success('Встреча отклонена');
       await loadMeetingRequests();
     } catch (error) {
-      console.error('Ошибка отклонения встречи:', error);
+      if (isDebugEnabled()) console.error('Ошибка отклонения встречи:', error);
       message.error('Не удалось отклонить встречу');
     }
   };
