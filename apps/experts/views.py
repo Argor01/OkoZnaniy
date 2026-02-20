@@ -139,7 +139,7 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = ExpertRating.objects.select_related('expert', 'client', 'order')
+        qs = ExpertRating.objects.select_related('expert', 'client', 'order').order_by('-created_at')
         user = self.request.user
 
         if user.is_staff:
@@ -157,21 +157,28 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
             from .serializers import ExpertRatingDetailSerializer
-
             return ExpertRatingDetailSerializer
         return ExpertRatingSerializer
 
     def create(self, request, *args, **kwargs):
+        # Проверка на дубликат перед валидацией
+        order_id = request.data.get('order')
+        if order_id and ExpertRating.objects.filter(order_id=order_id, client=request.user).exists():
+            return Response(
+                {'detail': 'Вы уже оставили отзыв на этот заказ'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             rating = self.perform_create(serializer)
             from .serializers import ExpertRatingDetailSerializer
-
             output = ExpertRatingDetailSerializer(rating, context={'request': request}).data
             headers = self.get_success_headers(output)
             return Response(output, status=status.HTTP_201_CREATED, headers=headers)
+        
         # Логируем ошибки валидации для дебага
-        print("[Expert Rating] validation errors:", serializer.errors)
+        logger.error(f"[Expert Rating] validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
@@ -179,12 +186,52 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
             client=self.request.user,
             expert=serializer.validated_data['order'].expert
         )
-        # Обновляем статистику эксперта
-        stats, _ = ExpertStatistics.objects.get_or_create(expert=rating.expert)
-        stats.update_statistics()
+        # Обновляем статистику эксперта (сигнал уже делает это, но для надежности)
+        try:
+            stats, _ = ExpertStatistics.objects.get_or_create(expert=rating.expert)
+            stats.update_statistics()
+        except Exception as e:
+            logger.error(f"Ошибка обновления статистики: {str(e)}")
+        
         # Отправляем уведомление эксперту
-        NotificationService.notify_new_rating(rating)
+        try:
+            NotificationService.notify_new_rating(rating)
+        except Exception as e:
+            logger.error(f"Ошибка отправки уведомления: {str(e)}")
+        
         return rating
+    
+    def update(self, request, *args, **kwargs):
+        """Обновление рейтинга (только комментарий)"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        # Проверка прав: только автор может редактировать
+        if instance.client != request.user and not request.user.is_staff:
+            return Response(
+                {'detail': 'Вы не можете редактировать чужой отзыв'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        return Response(serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        """Удаление рейтинга"""
+        instance = self.get_object()
+        
+        # Проверка прав: только автор или админ может удалить
+        if instance.client != request.user and not request.user.is_staff:
+            return Response(
+                {'detail': 'Вы не можете удалить чужой отзыв'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ExpertStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ExpertStatisticsSerializer
