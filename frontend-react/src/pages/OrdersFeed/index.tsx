@@ -13,6 +13,7 @@ import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
 import { formatCurrency } from '../../utils/formatters';
 import BidModal from './BidModal';
+import SurfaceCard from '../../components/common/SurfaceCard';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -464,11 +465,11 @@ const OrdersFeed: React.FC = () => {
                 : false;
             
             return (
-            <Card
+            <SurfaceCard
               key={order.id}
               hoverable
               className={styles.orderCard}
-              styles={{ body: { padding: 24 } }}
+              bodyPadding={24}
               onClick={() => navigate(`/orders/${order.id}`)}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
@@ -661,7 +662,7 @@ const OrdersFeed: React.FC = () => {
                   ) : null}
                 </Space>
               </div>
-            </Card>
+            </SurfaceCard>
           );
           })}
         </div>

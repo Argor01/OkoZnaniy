@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
 import EmailVerificationForm from '../components/auth/EmailVerificationForm';
+import { apiClient } from '../api/client';
 
 const RegisterWithEmailVerification: React.FC = () => {
   const navigate = useNavigate();
@@ -32,8 +32,6 @@ const RegisterWithEmailVerification: React.FC = () => {
     }
   }, [searchParams]);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -54,7 +52,7 @@ const RegisterWithEmailVerification: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/users/`, formData);
+      const response = await apiClient.post('/users/', formData);
       
       // Проверяем, нужна ли верификация email
       if (response.data.email_verification_required) {
@@ -68,8 +66,7 @@ const RegisterWithEmailVerification: React.FC = () => {
     } catch (err: unknown) {
       console.error('Registration error:', err);
       const errorMessage = (() => {
-        if (!axios.isAxiosError(err)) return 'Ошибка регистрации';
-        const data = err.response?.data as
+        const data = (err as { response?: { data?: unknown } })?.response?.data as
           | { email?: string[]; password?: string[]; detail?: string }
           | undefined;
         return data?.email?.[0] || data?.password?.[0] || data?.detail || 'Ошибка регистрации';

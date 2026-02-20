@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import axios from 'axios';
+import { apiClient } from '../../api/client';
 
 interface TelegramUser {
   id: number;
@@ -35,20 +35,22 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('[TelegramLoginButton] Initializing with botName:', botName);
+    const debugEnabled =
+      import.meta.env.DEV &&
+      typeof window !== 'undefined' &&
+      window.localStorage?.getItem('debug_auth') === '1';
+
+    if (debugEnabled) console.log('[TelegramLoginButton] Initializing with botName:', botName);
     
     // Создаем глобальную функцию для callback
     (window as any).onTelegramAuth = async (user: TelegramUser) => {
-      console.log('[TelegramLoginButton] Telegram auth callback received:', user);
+      if (debugEnabled) console.log('[TelegramLoginButton] Telegram auth callback received:', user);
       
       try {
-        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/users/telegram_auth/`;
-        console.log('[TelegramLoginButton] Sending request to:', apiUrl);
-        
         // Отправляем данные на бэкенд для проверки
-        const response = await axios.post(apiUrl, user);
+        const response = await apiClient.post('/users/telegram_auth/', user);
         
-        console.log('[TelegramLoginButton] Backend response:', response.data);
+        if (debugEnabled) console.log('[TelegramLoginButton] Backend response:', response.data);
 
         // Сохраняем токены
         const { access, refresh, user: userData } = response.data;
@@ -56,7 +58,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
         localStorage.setItem('refresh_token', refresh);
         localStorage.setItem('user', JSON.stringify(userData));
         
-        console.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
+        if (debugEnabled) console.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
 
         // Вызываем callback
         onAuth(userData);
@@ -85,7 +87,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
     script.async = true;
     
     script.onload = () => {
-      console.log('[TelegramLoginButton] Telegram widget script loaded successfully');
+      if (debugEnabled) console.log('[TelegramLoginButton] Telegram widget script loaded successfully');
     };
     
     script.onerror = (error) => {
@@ -96,7 +98,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
     if (container) {
       container.innerHTML = '';
       container.appendChild(script);
-      console.log('[TelegramLoginButton] Widget script added to DOM');
+      if (debugEnabled) console.log('[TelegramLoginButton] Widget script added to DOM');
     }
 
     // Cleanup

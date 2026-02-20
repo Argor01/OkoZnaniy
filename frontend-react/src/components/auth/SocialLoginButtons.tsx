@@ -9,6 +9,10 @@ interface SocialLoginButtonsProps {
 const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   const googleHref = `${API_BASE_URL}/api/accounts/google/login/?process=login`;
   const vkHref = `${API_BASE_URL}/api/accounts/vk/login/`;
+  const debugEnabled =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('debug_auth') === '1';
   
   // Очищаем старые данные авторизации при загрузке страницы
   useEffect(() => {
@@ -36,29 +40,29 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     let attempts = 0;
     const maxAttempts = 150; // 5 минут (150 * 2 секунды)
     
-    console.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
+    if (debugEnabled) console.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
     
     const checkInterval = setInterval(async () => {
       attempts++;
-      console.log(`🔄 Попытка ${attempts}/${maxAttempts}: Проверяем статус авторизации...`);
+      if (debugEnabled) console.log(`🔄 Попытка ${attempts}/${maxAttempts}: Проверяем статус авторизации...`);
       
       try {
         const response = await fetch(`${API_BASE_URL}/api/users/telegram_auth_status/${authId}/`);
-        console.log(`📡 Ответ сервера:`, response.status);
+        if (debugEnabled) console.log(`📡 Ответ сервера:`, response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`📦 Данные:`, data);
+          if (debugEnabled) console.log(`📦 Данные:`, data);
           
           if (data.authenticated) {
-            console.log(`✅ Авторизация подтверждена!`);
+            if (debugEnabled) console.log(`✅ Авторизация подтверждена!`);
             clearInterval(checkInterval);
             
             // Сохраняем токены
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
-            console.log(`💾 Токены сохранены`);
+            if (debugEnabled) console.log(`💾 Токены сохранены`);
             
             // Определяем куда перенаправить пользователя
             const user = data.user;
@@ -76,11 +80,11 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
               redirectUrl = '/arbitrator';
             }
             
-            console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
+            if (debugEnabled) console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
             // Перенаправляем пользователя
             window.location.href = redirectUrl;
           } else {
-            console.log(`⏳ Ожидаем подтверждения...`);
+            if (debugEnabled) console.log(`⏳ Ожидаем подтверждения...`);
           }
         }
       } catch (error) {
@@ -90,7 +94,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
       // Останавливаем проверку после максимального количества попыток
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
-        console.log('⏱️ Время ожидания авторизации истекло');
+        if (debugEnabled) console.log('⏱️ Время ожидания авторизации истекло');
       }
     }, 2000); // Проверяем каждые 2 секунды
   };

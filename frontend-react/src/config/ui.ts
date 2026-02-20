@@ -45,7 +45,7 @@ export const BOX_SHADOW = {
 
 // Цвета (основные)
 export const COLORS = {
-  primary: '#667eea',
+  primary: '#1890ff',
   secondary: '#764ba2',
   success: '#52c41a',
   warning: '#f59e0b',

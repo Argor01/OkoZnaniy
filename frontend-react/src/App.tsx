@@ -6,7 +6,6 @@ import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import './utils/clearAuth'; 
-import './utils/axiosConfig'; 
 
 
 import './styles/page-transitions.css';
@@ -18,7 +17,6 @@ import './styles/expert-form.css';
 import './styles/feedback-form.css';
 import './styles/partner-pages.css';
 import './styles/globals.css';
-import './styles/colors.css';
 import './styles/typography.css';
 import './styles/spacing.css';
 import './styles/tokens.css';
@@ -209,19 +207,6 @@ const App: React.FC = () => {
                     <DirectorDashboard />
                   </ProtectedRoute>
                 } 
-              />
-              {/* Legacy redirects */}
-              <Route 
-                path="/ADMIN" 
-                element={<Navigate to="/admin" replace />} 
-              />
-              <Route 
-                path="/administrator" 
-                element={<Navigate to="/admin" replace />} 
-              />
-              <Route 
-                path="/director"
-                element={<Navigate to="/admin/directordashboard" replace />} 
               />
               <Route 
                 path="/shop/ready-works"

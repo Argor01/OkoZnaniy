@@ -11,9 +11,6 @@ export * from './validators';
 // Помощники
 export * from './helpers';
 
-// API
-export * from './api';
-
 // 🆕 API для обработки запросов
 export * from './requestsApi';
 

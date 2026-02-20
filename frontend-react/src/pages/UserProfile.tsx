@@ -7,6 +7,8 @@ import { expertsApi, type ExpertReview } from '../api/experts';
 import { apiClient } from '../api/client';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '../config/api';
+import SectionHeader from '../components/common/SectionHeader';
+import SurfaceCard from '../components/common/SurfaceCard';
 
 const { Text, Paragraph } = Typography;
 
@@ -186,17 +188,7 @@ const UserProfile: FC = () => {
               </Card>
 
               {/* Рейтинг и статистика - блок на всю ширину */}
-              <Card 
-                title={
-                  <Text style={{ fontSize: 18, fontWeight: 600, color: '#1f2937' }}>
-                    РЕЙТИНГ И СТАТИСТИКА
-                  </Text>
-                }
-                style={{ 
-                  borderRadius: 12,
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
-                }}
-              >
+              <SurfaceCard title={<SectionHeader title="РЕЙТИНГ И СТАТИСТИКА" />}>
                 {(statsLoading || expertStatsLoading) ? (
                   <div style={{ textAlign: 'center', padding: '40px' }}>
                     <Spin size="large" />
@@ -274,45 +266,27 @@ const UserProfile: FC = () => {
                     <Text type="secondary" style={{ fontSize: 16 }}>Статистика недоступна</Text>
                   </div>
                 )}
-              </Card>
+              </SurfaceCard>
             </div>
 
             {/* Описание и дополнительная информация */}
             <div>
               {/* О себе */}
               {userData.bio && (
-                <Card 
-                  title="О себе" 
-                  style={{ 
-                    marginBottom: 16,
-                    borderRadius: 12
-                  }}
-                >
+                <SurfaceCard title="О себе" style={{ marginBottom: 16 }}>
                   <Paragraph>{userData.bio}</Paragraph>
-                </Card>
+                </SurfaceCard>
               )}
 
               {/* Образование (для экспертов) */}
               {userData.role === 'expert' && userData.education && (
-                <Card 
-                  title="Образование" 
-                  style={{ 
-                    marginBottom: 16,
-                    borderRadius: 12
-                  }}
-                >
+                <SurfaceCard title="Образование" style={{ marginBottom: 16 }}>
                   <Paragraph>{userData.education}</Paragraph>
-                </Card>
+                </SurfaceCard>
               )}
 
               {(userData.role === 'expert' && (userData.experience_years || userData.hourly_rate)) && (
-                <Card
-                  title="Дополнительно"
-                  style={{
-                    marginBottom: 16,
-                    borderRadius: 12,
-                  }}
-                >
+                <SurfaceCard title="Дополнительно" style={{ marginBottom: 16 }}>
                   <Space direction="vertical" size={8} style={{ width: '100%' }}>
                     {!!userData.experience_years && (
                       <Space size={8}>
@@ -327,18 +301,12 @@ const UserProfile: FC = () => {
                       </Space>
                     )}
                   </Space>
-                </Card>
+                </SurfaceCard>
               )}
 
               {/* Навыки (для экспертов) */}
               {userData.role === 'expert' && userData.skills && (
-                <Card 
-                  title="Навыки" 
-                  style={{ 
-                    marginBottom: 16,
-                    borderRadius: 12
-                  }}
-                >
+                <SurfaceCard title="Навыки" style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {userData.skills.split(',').map((skill: string, index: number) => (
                       <Tag key={index} color="green">
@@ -346,18 +314,12 @@ const UserProfile: FC = () => {
                       </Tag>
                     ))}
                   </div>
-                </Card>
+                </SurfaceCard>
               )}
 
               {/* Портфолио (для экспертов) */}
               {userData.role === 'expert' && userData.portfolio_url && (
-                <Card 
-                  title="Портфолио" 
-                  style={{ 
-                    marginBottom: 16,
-                    borderRadius: 12
-                  }}
-                >
+                <SurfaceCard title="Портфолио" style={{ marginBottom: 16 }}>
                   <Button 
                     type="link" 
                     href={userData.portfolio_url} 
@@ -366,18 +328,13 @@ const UserProfile: FC = () => {
                   >
                     Посмотреть портфолио
                   </Button>
-                </Card>
+                </SurfaceCard>
               )}
             </div>
 
             {/* Блок специализации */}
             {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
-              <Card 
-                title="Специализации" 
-                style={{ 
-                  borderRadius: 12
-                }}
-              >
+              <SurfaceCard title="Специализации">
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {userData.specializations.map(
                     (
@@ -400,7 +357,7 @@ const UserProfile: FC = () => {
                     </Tag>
                   ))}
                 </div>
-              </Card>
+              </SurfaceCard>
             )}
 
             {/* Отзывы (только для экспертов) */}

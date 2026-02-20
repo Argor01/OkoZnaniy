@@ -28,6 +28,9 @@ apiClient.interceptors.request.use((config) => {
   const normalizedUrl = url.toString();
   const isAuthEndpoint =
     normalizedUrl.includes('/users/token') || // /users/token/ и /users/token/refresh/
+    normalizedUrl.includes('/users/telegram_auth') ||
+    normalizedUrl.includes('/users/verify_email_code') ||
+    normalizedUrl.includes('/users/resend_verification_code') ||
     (normalizedUrl.endsWith('/users/') && method === 'post'); // регистрация
 
   if (token && !isAuthEndpoint) {

@@ -45,8 +45,8 @@
 
 Сейчас одновременно существуют:
 - Основной axios-инстанс `apiClient` с refresh-логикой — [api/client.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/api/client.ts)
-- Глобальный axios interceptor в utils — [utils/axiosConfig.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/utils/axiosConfig.ts)
-- Отдельный fetch-клиент в админке — [AdminDashboard/utils/api.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/AdminDashboard/utils/api.ts)
+- Раньше был глобальный axios interceptor в utils — ✅ удален (оставлен один слой интерцепторов в `apiClient`)
+- Раньше был отдельный fetch-клиент в админке — ✅ удален (админские запросы используют `apiClient`)
 
 ---
 
@@ -54,9 +54,12 @@
 
 ### 3.1 Роуты/страницы: несостыковки и “пропавшие” пути
 
-1) **Login.tsx ожидает `/admin/login` и `/admin/directorlogin`, но таких роутов нет**
+1) **Login.tsx содержит ветвления под `/admin/login` и `/admin/directorlogin`**
 - В [Login.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/Login.tsx#L46-L49) определяется “режим логина” по `window.location.pathname === '/admin/login'` и `'/admin/directorlogin'`.
-- В [App.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/App.tsx#L190-L208) роут админ-логина — это `/admin` (а директор — `/admin/directordashboard`, плюс legacy redirect `/director`).
+- В [App.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/App.tsx#L180-L214) вход в админ-зону идет через `/admin`, а дэшборды — `/admin/dashboard` и `/admin/directordashboard`.
+
+Статус:
+- ✅ Добавлены алиасы `/admin/login` и `/admin/directorlogin` (редирект на `/admin`)
 
 Риск/симптомы:
 - “Ветвления” в Login.tsx могут никогда не сработать в реальном роутинге.
@@ -110,9 +113,10 @@
 Рекомендация:
 - После получения токенов запрашивать `me` и сохранять пользователя только из ответа сервера.
 
-3) **Несогласованность “директора”: роль в UI выводится через email-хардкод**
-- В редиректе по роли есть “эвристика директора”: [roleRedirect.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/utils/roleRedirect.ts#L14-L20)
-- Похожие паттерны встречаются в админских хуках/старых файлах (см. “мусорные” файлы ниже).
+3) **Несогласованность “директора”: эвристики на фронте**
+
+Статус:
+- ✅ Исправлено — директор определяется только по `role` (без email-эвристик) — [roleRedirect.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/utils/roleRedirect.ts#L8-L15)
 
 Рекомендация:
 - Любые “особые” роли должны приходить от API (роль/claim), без email-эвристик на фронте.
@@ -121,7 +125,9 @@
 
 1) **Одновременно используются axios-интерцепторы в двух местах**
 - Основные интерцепторы/refresh в [api/client.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/api/client.ts)
-- Глобальный перехват 401 в [utils/axiosConfig.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/utils/axiosConfig.ts)
+
+Статус:
+- ✅ Исправлено — оставлен один источник интерцепторов (только `apiClient`)
 
 Риск/симптомы:
 - Трудно предсказать порядок срабатывания и “кто именно” обработал ошибку.
@@ -131,7 +137,9 @@
 - Оставить один источник (как правило, `apiClient`) и удалить/встроить вспомогательный interceptor.
 
 2) **В админке есть отдельный fetch-клиент без Authorization**
-- [AdminDashboard/utils/api.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/AdminDashboard/utils/api.ts#L14-L39)
+
+Статус:
+- ✅ Исправлено — fetch-клиент удален (используется `apiClient`)
 
 Риск/симптомы:
 - Запросы не добавляют `Authorization: Bearer ...` и не используют refresh-механику.
@@ -232,20 +240,20 @@
 ## 4. Рекомендуемый план улучшений (в порядке пользы)
 
 1) **Роуты и редиректы**
-- Вынести пути в `routes.ts` (константы).
-- Привести в соответствие: `/admin` vs `/admin/login` и директорские пути.
-- Для `/dashboard` сделать роль-редирект по `me`.
+- Вынести пути в `routes.ts` (константы). *(не сделано)*
+- Привести в соответствие: `/admin` vs `/admin/login` и директорские пути. *(✅ сделано: алиасы на `/admin/login` и `/admin/directorlogin`, чистка legacy редиректов)*
+- Для `/dashboard` сделать роль-редирект по `me`. *(не сделано)*
 
 2) **Единый API клиент**
-- Убрать fetch-клиент админки или привести его к общему `apiClient`.
-- Оставить один слой интерцепторов (в одном месте).
+- Убрать fetch-клиент админки или привести его к общему `apiClient`. *(✅ сделано: удален fetch-клиент админки)*
+- Оставить один слой интерцепторов (в одном месте). *(✅ сделано: удален глобальный interceptor в utils, запросы переведены на `apiClient`)*
 
 3) **Гигиена production**
-- Убрать/загейтить console.log в [config/api.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/config/api.ts#L6-L36).
-- Проредить console.log в компонентах/хуках (оставить только DEV-режим).
+- ✅ Убрать/загейтить console.log в [config/api.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/config/api.ts#L6-L36).
+- ✅ Проредить console.log в компонентах/хуках (оставить только DEV-режим).
 
 4) **Стили и дубли**
-- Зафиксировать дизайн-систему: Antd tokens + минимальные глобальные стили.
-- Начать вынос повторяющихся инлайнов (borderRadius/spacing/gradient-title) в базовые компоненты.
+- ✅ Зафиксировать дизайн-систему: Antd tokens + минимальные глобальные стили. *(4.1.A: удален пустой colors.css, ui.ts приведен к Antd primary, подчищен globals.css)*
+- ✅ Начать вынос повторяющихся инлайнов (borderRadius/spacing/gradient-title) в базовые компоненты. *(4.2B: добавлены базовые компоненты SurfaceCard/SectionHeader и применены в UserProfile/OrdersFeed)*
 - Свести дубли модалок к одному источнику.
 
