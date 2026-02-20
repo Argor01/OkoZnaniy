@@ -745,8 +745,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
           >
             <Select placeholder="Выберите тип чата">
               <Option value="general">Общий чат администраторов</Option>
-              <Option value="department">Департаментский чат</Option>
-              <Option value="project">Проектный чат</Option>
               <Option value="private">Чат с директором</Option>
             </Select>
           </Form.Item>
@@ -843,8 +841,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 >
                   <Select placeholder="Выберите тип чата">
                     <Option value="general">Общий</Option>
-                    <Option value="department">Отдел</Option>
-                    <Option value="project">Проект</Option>
                     <Option value="private">Личный</Option>
                   </Select>
                 </Form.Item>
