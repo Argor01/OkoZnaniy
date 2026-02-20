@@ -255,5 +255,5 @@
 4) **Стили и дубли**
 - ✅ Зафиксировать дизайн-систему: Antd tokens + минимальные глобальные стили. *(4.1.A: удален пустой colors.css, ui.ts приведен к Antd primary, подчищен globals.css)*
 - ✅ Начать вынос повторяющихся инлайнов (borderRadius/spacing/gradient-title) в базовые компоненты. *(4.2B: добавлены базовые компоненты SurfaceCard/SectionHeader и применены в UserProfile/OrdersFeed)*
-- Свести дубли модалок к одному источнику.
+- ✅ Свести дубли модалок к одному источнику. *(4.3A: удалены неиспользуемые дубли из src/components/modals и старый MessagesModal)*
 
