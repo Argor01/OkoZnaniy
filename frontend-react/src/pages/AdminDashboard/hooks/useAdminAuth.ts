@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { message, Modal } from 'antd';
 import { authApi, type User } from '../../../api/auth';
+import { ROUTES } from '../../../utils/constants';
 
-/**
- * Хук для управления аутентификацией в админской панели
- * Вынесен из монолитного AdminDashboard.tsx
- */
+
 export const useAdminAuth = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -20,9 +18,6 @@ export const useAdminAuth = () => {
     checkAuth();
   }, []);
 
-  /**
-   * Проверка текущей аутентификации
-   */
   const checkAuth = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -35,7 +30,6 @@ export const useAdminAuth = () => {
       const currentUser = await authApi.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
-      // Токен невалиден
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       setUser(null);
@@ -44,9 +38,6 @@ export const useAdminAuth = () => {
     }
   };
 
-  /**
-   * Обработчик успешного входа
-   */
   const handleLoginSuccess = (loggedInUser: User) => {
     setUser(loggedInUser);
     setLoading(false);
@@ -72,13 +63,12 @@ export const useAdminAuth = () => {
       
       // Перенаправляем в зависимости от роли
       if (currentUser.role === 'partner') {
-        navigate('/partner');
+        navigate(ROUTES.partner.root);
       } else if (currentUser.role === 'arbitrator') {
-        navigate('/arbitrator');
+        navigate(ROUTES.arbitrator.root);
       } else if (currentUser.role === 'director') {
-        navigate('/admin/directordashboard');
+        navigate(ROUTES.admin.directorDashboard);
       } else if (currentUser.role === 'admin') {
-        // Остаемся на админ-панели
         queryClient.invalidateQueries();
       }
     } catch (error: any) {
@@ -88,9 +78,7 @@ export const useAdminAuth = () => {
     }
   };
 
-  /**
-   * Выход из системы
-   */
+
   const handleLogout = () => {
     Modal.confirm({
       title: 'Выход из системы',
@@ -108,7 +96,6 @@ export const useAdminAuth = () => {
           setLoading(false);
           message.success('Вы вышли из системы');
         } catch (error) {
-          // В случае ошибки все равно выходим
           authApi.logout();
           queryClient.clear();
           setUser(null);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConfigProvider } from 'antd';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { ConfigProvider, Spin } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -53,6 +53,8 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 import SupportButton from './components/SupportButton';
+import { authApi } from './api/auth';
+import { ROUTES } from './utils/constants';
 
 // Configure dayjs
 dayjs.locale('ru');
@@ -66,6 +68,35 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const DashboardRedirect: React.FC = () => {
+  const token = localStorage.getItem('access_token');
+
+  const { data: userProfile, isLoading } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => authApi.getCurrentUser(),
+    enabled: !!token,
+  });
+
+  if (!token) return <Navigate to={ROUTES.login} replace />;
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  const role = userProfile?.role ?? '';
+
+  if (role === 'partner') return <Navigate to={ROUTES.partner.root} replace />;
+  if (role === 'admin') return <Navigate to={ROUTES.admin.dashboard} replace />;
+  if (role === 'director') return <Navigate to={ROUTES.admin.directorDashboard} replace />;
+  if (role === 'arbitrator') return <Navigate to={ROUTES.arbitrator.root} replace />;
+
+  return <Navigate to={ROUTES.expert.root} replace />;
+};
 
 const App: React.FC = () => {
   return (
@@ -81,12 +112,12 @@ const App: React.FC = () => {
         <Router>
           <div className="App">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth/google/callback" element={<GoogleCallback />} />
-              <Route path="/google-callback" element={<GoogleCallback />} />
+              <Route path={ROUTES.home} element={<Home />} />
+              <Route path={ROUTES.login} element={<Login />} />
+              <Route path={ROUTES.auth.googleCallback} element={<GoogleCallback />} />
+              <Route path={ROUTES.auth.googleCallbackLegacy} element={<GoogleCallback />} />
               <Route 
-                path="/create-order" 
+                path={ROUTES.createOrder} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -96,7 +127,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/orders/:orderId" 
+                path={ROUTES.orders.detail} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -106,7 +137,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/works/:workId" 
+                path={ROUTES.works.detail} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -116,7 +147,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/shop/works/:workId" 
+                path={ROUTES.shop.workDetail} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -126,11 +157,11 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/dashboard" 
-                element={<Navigate to="/expert" replace />} 
+                path={ROUTES.dashboard} 
+                element={<DashboardRedirect />} 
               />
               <Route 
-                path="/expert" 
+                path={ROUTES.expert.root} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -140,7 +171,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/expert-application" 
+                path={ROUTES.expert.application} 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -150,15 +181,15 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/become-expert" 
+                path={ROUTES.becomeExpert} 
                 element={<BecomeExpert />} 
               />
               <Route 
-                path="/become-partner" 
+                path={ROUTES.becomePartner} 
                 element={<BecomePartner />} 
               />
               <Route 
-                path="/expert/:userId" 
+                path={ROUTES.expert.profile} 
                 element={
                   <DashboardLayout>
                     <UserProfile />
@@ -166,7 +197,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/user/:userId" 
+                path={ROUTES.user.profile} 
                 element={
                   <DashboardLayout>
                     <UserProfile />
@@ -174,7 +205,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/partner" 
+                path={ROUTES.partner.root} 
                 element={
                   <ProtectedRoute>
                     <PartnerDashboard />
@@ -183,25 +214,25 @@ const App: React.FC = () => {
               />
               {/* Admin login page with quick links */}
               <Route 
-                path="/admin" 
+                path={ROUTES.admin.root} 
                 element={<AdminLogin />} 
               />
               <Route
-                path="/admin/login"
-                element={<Navigate to="/admin" replace />}
+                path={ROUTES.admin.login}
+                element={<Navigate to={ROUTES.admin.root} replace />}
               />
               <Route
-                path="/admin/directorlogin"
-                element={<Navigate to="/admin" replace />}
+                path={ROUTES.admin.directorLogin}
+                element={<Navigate to={ROUTES.admin.root} replace />}
               />
               {/* Admin dashboard */}
               <Route 
-                path="/admin/dashboard" 
+                path={ROUTES.admin.dashboard} 
                 element={<AdminDashboard />} 
               />
               {/* Director dashboard */}
               <Route 
-                path="/admin/directordashboard"
+                path={ROUTES.admin.directorDashboard}
                 element={
                   <ProtectedRoute>
                     <DirectorDashboard />
@@ -209,7 +240,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/shop/ready-works"
+                path={ROUTES.shop.readyWorks}
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -219,7 +250,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/shop/add-work"
+                path={ROUTES.shop.addWork}
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -229,7 +260,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/works"
+                path={ROUTES.works.list}
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -239,7 +270,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/orders-feed"
+                path={ROUTES.orders.feed}
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -249,7 +280,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/shop/purchased"
+                path={ROUTES.shop.purchased}
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -259,7 +290,7 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
-                path="/support-chat/:chatId"
+                path={ROUTES.supportChat.detail}
                 element={
                   <ProtectedRoute>
                     <SupportChat />

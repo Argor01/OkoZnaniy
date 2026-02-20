@@ -9,15 +9,9 @@ export const clearAuth = () => {
   }, 500);
 };
 
-// Делаем доступным глобально для отладки
-if (typeof window !== 'undefined') {
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as any).clearAuth = clearAuth;
-  
-  // Выводим подсказку в консоль
-  console.log(
-    '%c💡 Подсказка для разработки',
-    'color: #1890ff; font-size: 14px; font-weight: bold;'
-  );
+  console.log('%c💡 Подсказка для разработки', 'color: #1890ff; font-size: 14px; font-weight: bold;');
   console.log(
     '%cЕсли возникают ошибки 401/403, выполните в консоли: %cclearAuth()',
     'color: #666; font-size: 12px;',

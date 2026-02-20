@@ -403,7 +403,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             >
               {DEV_ACCOUNTS.filter(acc => acc.role !== 'director').map((account) => (
                 <Tooltip
-                  key={account.role}
+                  key={account.email}
                   title={`${account.email}`}
                   placement="top"
                 >
@@ -450,7 +450,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {DEV_ACCOUNTS.filter(acc => acc.role === 'director').map((account) => (
                 <Tooltip
-                  key={account.role}
+                  key={account.email}
                   title={`${account.email}`}
                   placement="top"
                 >

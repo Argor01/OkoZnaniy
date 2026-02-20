@@ -55,6 +55,57 @@ export const USER_ROLES = {
   ARBITRATOR: 'arbitrator',
 } as const;
 
+export const ROUTES = {
+  home: '/',
+  login: '/login',
+  dashboard: '/dashboard',
+  auth: {
+    googleCallback: '/auth/google/callback',
+    googleCallbackLegacy: '/google-callback',
+  },
+  createOrder: '/create-order',
+  expert: {
+    root: '/expert',
+    application: '/expert-application',
+    profile: '/expert/:userId',
+  },
+  user: {
+    profile: '/user/:userId',
+  },
+  partner: {
+    root: '/partner',
+  },
+  admin: {
+    root: '/admin',
+    login: '/admin/login',
+    directorLogin: '/admin/directorlogin',
+    dashboard: '/admin/dashboard',
+    directorDashboard: '/admin/directordashboard',
+  },
+  arbitrator: {
+    root: '/arbitrator',
+  },
+  shop: {
+    workDetail: '/shop/works/:workId',
+    readyWorks: '/shop/ready-works',
+    addWork: '/shop/add-work',
+    purchased: '/shop/purchased',
+  },
+  works: {
+    list: '/works',
+    detail: '/works/:workId',
+  },
+  orders: {
+    detail: '/orders/:orderId',
+    feed: '/orders-feed',
+  },
+  supportChat: {
+    detail: '/support-chat/:chatId',
+  },
+  becomeExpert: '/become-expert',
+  becomePartner: '/become-partner',
+} as const;
+
 export const NOTIFICATION_TYPES = {
   ORDER: 'order',
   CLAIM: 'claim',

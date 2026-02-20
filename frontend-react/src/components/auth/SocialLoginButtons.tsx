@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { API_BASE_URL } from '../../config/api';
+import { ROUTES } from '../../utils/constants';
 
 interface SocialLoginButtonsProps {
   onTelegramAuth?: (user: any) => void;
@@ -66,18 +67,18 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
             
             // Определяем куда перенаправить пользователя
             const user = data.user;
-            let redirectUrl = '/dashboard';
+            let redirectUrl: string = ROUTES.dashboard;
             
             if (user.role === 'expert') {
-              redirectUrl = '/expert';
+              redirectUrl = ROUTES.expert.root;
             } else if (user.role === 'partner') {
-              redirectUrl = '/partner';
+              redirectUrl = ROUTES.partner.root;
             } else if (user.role === 'admin') {
-              redirectUrl = '/admin/dashboard';
+              redirectUrl = ROUTES.admin.dashboard;
             } else if (user.role === 'director') {
-              redirectUrl = '/admin/directordashboard';
+              redirectUrl = ROUTES.admin.directorDashboard;
             } else if (user.role === 'arbitrator') {
-              redirectUrl = '/arbitrator';
+              redirectUrl = ROUTES.arbitrator.root;
             }
             
             if (debugEnabled) console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
@@ -88,7 +89,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
           }
         }
       } catch (error) {
-        console.error('❌ Ошибка проверки статуса:', error);
+        if (debugEnabled) console.error('❌ Ошибка проверки статуса:', error);
       }
       
       // Останавливаем проверку после максимального количества попыток

@@ -1,51 +1,45 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { authApi } from '../api/auth';
+import { redirectByRole } from '../utils/roleRedirect';
+import { ROUTES } from '../utils/constants';
 
 const GoogleCallback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Получаем токены из URL параметров
     const access = searchParams.get('access');
     const refresh = searchParams.get('refresh');
-    const userId = searchParams.get('user_id');
-    const username = searchParams.get('username');
-    const role = searchParams.get('role');
     const error = searchParams.get('error');
 
     if (error) {
-      console.error('Google auth error:', error);
-      navigate('/login?error=google_auth_failed');
+      navigate(`${ROUTES.login}?error=google_auth_failed`, { replace: true });
       return;
     }
 
-    if (access && refresh && userId && username && role) {
-      // Сохраняем токены в localStorage
+    if (access && refresh) {
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
-      localStorage.setItem('user', JSON.stringify({
-        id: parseInt(userId),
-        username,
-        role
-      }));
 
-      // Перенаправляем на соответствующую страницу в зависимости от роли
-      let redirectUrl = '/expert'; // По умолчанию все идут на ExpertDashboard
-      if (role === 'client' || role === 'expert') {
-        redirectUrl = '/expert';
-      } else if (role === 'partner') {
-        redirectUrl = '/partner';
-      } else if (role === 'admin') {
-        redirectUrl = '/admin';
-      } else if (role === 'arbitrator') {
-        redirectUrl = '/arbitrator';
-      }
+      let cancelled = false;
 
-      navigate(redirectUrl);
+      (async () => {
+        try {
+          const me = await authApi.getCurrentUser();
+          if (cancelled) return;
+          localStorage.setItem('user', JSON.stringify(me));
+          await redirectByRole(me?.role ?? '', (to) => navigate(to, { replace: true }));
+        } catch (_e) {
+          if (!cancelled) navigate(`${ROUTES.login}?error=me_failed`, { replace: true });
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
     } else {
-      console.error('Missing auth parameters');
-      navigate('/login?error=missing_params');
+      navigate(`${ROUTES.login}?error=missing_params`, { replace: true });
     }
   }, [searchParams, navigate]);
 

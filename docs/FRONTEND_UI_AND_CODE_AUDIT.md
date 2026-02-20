@@ -240,9 +240,9 @@
 ## 4. Рекомендуемый план улучшений (в порядке пользы)
 
 1) **Роуты и редиректы**
-- Вынести пути в `routes.ts` (константы). *(не сделано)*
+- ✅ Вынести пути в константы и использовать в роутинге/редиректах. *(сделано: ROUTES в frontend-react/src/utils/constants.ts + переведен App.tsx и auth-навигация)*
 - Привести в соответствие: `/admin` vs `/admin/login` и директорские пути. *(✅ сделано: алиасы на `/admin/login` и `/admin/directorlogin`, чистка legacy редиректов)*
-- Для `/dashboard` сделать роль-редирект по `me`. *(не сделано)*
+- ✅ Для `/dashboard` сделать роль-редирект по `me`. *(сделано: DashboardRedirect в App.tsx использует /users/me)*
 
 2) **Единый API клиент**
 - Убрать fetch-клиент админки или привести его к общему `apiClient`. *(✅ сделано: удален fetch-клиент админки)*
@@ -256,4 +256,23 @@
 - ✅ Зафиксировать дизайн-систему: Antd tokens + минимальные глобальные стили. *(4.1.A: удален пустой colors.css, ui.ts приведен к Antd primary, подчищен globals.css)*
 - ✅ Начать вынос повторяющихся инлайнов (borderRadius/spacing/gradient-title) в базовые компоненты. *(4.2B: добавлены базовые компоненты SurfaceCard/SectionHeader и применены в UserProfile/OrdersFeed)*
 - ✅ Свести дубли модалок к одному источнику. *(4.3A: удалены неиспользуемые дубли из src/components/modals и старый MessagesModal)*
+
+---
+
+## 5. Следующие шаги (предложение)
+
+1) **Auth/redirect: не доверять роли из URL**
+- Привести [GoogleCallback.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/GoogleCallback.tsx) к схеме: сохранить токены → запросить `/users/me/` → редирект по `role` → user в localStorage/кэше только из ответа сервера.
+
+2) **ProtectedRoute: формализовать “источник истины”**
+- Решить, делаем ли “мягкий” guard (как сейчас: только токен + 401 handling в apiClient) или “строгий” (перед показом приватных страниц проверять `me`).
+
+3) **Профили `/user/:userId` и `/expert/:userId`: публичные или приватные**
+- Зафиксировать решение и привести роуты в [App.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/App.tsx): либо завернуть в `ProtectedRoute`, либо вынести в публичный layout без ожидания токена.
+
+4) **API client: убрать смешение cookie vs bearer**
+- Перепроверить необходимость `withCredentials: true` в [api/client.ts](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/api/client.ts#L4-L10) при текущей JWT-модели (если cookie не используются — отключить).
+
+5) **Очистка `src` от артефактов**
+- Удалить/вынести из `src` файлы `*.backup`, `*.OLD` (начать с [AdminDashboard.tsx.backup](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/AdminDashboard.tsx.backup) и [ShopReadyWorks.OLD.tsx](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/frontend-react/src/pages/ShopReadyWorks.OLD.tsx)).
 

@@ -7,9 +7,10 @@ import EmailVerificationModal from '../components/auth/EmailVerificationModal';
 import PasswordResetModal from '../components/auth/PasswordResetModal';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { ordersApi } from '../api/orders';
+import { ROUTES } from '../utils/constants';
 import '../styles/login.css';
 
-// Typography helpers не используются в текущей верстке
+
 
 // Хук анимации печатания для плейсхолдера
 function useTypewriter(fullText: string, speed = 35, startDelay = 0) {
@@ -44,8 +45,8 @@ const Login: React.FC = () => {
   const location = window.location;
 
   // Определяем, с какой страницы входа мы пришли
-  const isAdminLogin = location.pathname === '/admin/login';
-  const isDirectorLogin = location.pathname === '/admin/directorlogin';
+  const isAdminLogin = location.pathname === ROUTES.admin.login;
+  const isDirectorLogin = location.pathname === ROUTES.admin.directorLogin;
 
   // Модалка подтверждения email
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
@@ -128,7 +129,7 @@ const Login: React.FC = () => {
   // Функция для определения куда перенаправить клиента
   const redirectClient = async () => {
     // Клиенты теперь идут на ExpertDashboard
-    navigate('/expert');
+    navigate(ROUTES.expert.root);
   };
 
   const onLogin = async (values: LoginRequest) => {
@@ -145,35 +146,35 @@ const Login: React.FC = () => {
       // Если вход через /admin/login, проверяем роль admin
       if (isAdminLogin) {
         if (role === 'admin') {
-          navigate('/admin/dashboard');
+          navigate(ROUTES.admin.dashboard);
         } else {
           message.error('У вас нет доступа к панели администратора');
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       } 
       // Если вход через /admin/directorlogin, проверяем роль director
       else if (isDirectorLogin) {
         if (role === 'director') {
-          navigate('/admin/directordashboard');
+          navigate(ROUTES.admin.directorDashboard);
         } else {
           message.error('У вас нет доступа к панели директора');
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       } 
       // Обычный вход
       else {
         if (role === 'client' || role === 'expert') {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         } else if (role === 'partner') {
-          navigate('/partner');
+          navigate(ROUTES.partner.root);
         } else if (role === 'admin') {
-          navigate('/admin/dashboard');
+          navigate(ROUTES.admin.dashboard);
         } else if (role === 'director') {
-          navigate('/admin/directordashboard');
+          navigate(ROUTES.admin.directorDashboard);
         } else if (role === 'arbitrator') {
-          navigate('/arbitrator');
+          navigate(ROUTES.arbitrator.root);
         } else {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       }
     } catch (error: any) {
@@ -280,27 +281,27 @@ const Login: React.FC = () => {
       // Перенаправляем в зависимости от роли и страницы входа
       if (isAdminLogin) {
         if (role === 'admin') {
-          navigate('/admin/dashboard');
+          navigate(ROUTES.admin.dashboard);
         } else {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       } else if (isDirectorLogin) {
         if (role === 'director') {
-          navigate('/admin/directordashboard');
+          navigate(ROUTES.admin.directorDashboard);
         } else {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       } else {
         if (role === 'client' || role === 'expert') {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         } else if (role === 'partner') {
-          navigate('/partner');
+          navigate(ROUTES.partner.root);
         } else if (role === 'admin') {
-          navigate('/admin/dashboard');
+          navigate(ROUTES.admin.dashboard);
         } else if (role === 'director') {
-          navigate('/admin/directordashboard');
+          navigate(ROUTES.admin.directorDashboard);
         } else {
-          navigate('/expert');
+          navigate(ROUTES.expert.root);
         }
       }
     } catch (error: any) {
@@ -386,7 +387,7 @@ const Login: React.FC = () => {
       setNewPassword('');
       setConfirmPassword('');
       // Перенаправляем
-      navigate('/expert');
+      navigate(ROUTES.expert.root);
     } catch (error: any) {
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
@@ -405,29 +406,29 @@ const Login: React.FC = () => {
     // Перенаправляем в зависимости от роли и страницы входа
     if (isAdminLogin) {
       if (role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate(ROUTES.admin.dashboard);
       } else {
-        navigate('/expert');
+        navigate(ROUTES.expert.root);
       }
     } else if (isDirectorLogin) {
       if (role === 'director') {
-        navigate('/admin/directordashboard');
+        navigate(ROUTES.admin.directorDashboard);
       } else {
-        navigate('/expert');
+        navigate(ROUTES.expert.root);
       }
     } else {
       if (role === 'client' || role === 'expert') {
-        navigate('/expert');
+        navigate(ROUTES.expert.root);
       } else if (role === 'partner') {
-        navigate('/partner');
+        navigate(ROUTES.partner.root);
       } else if (role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate(ROUTES.admin.dashboard);
       } else if (role === 'director') {
-        navigate('/admin/directordashboard');
+        navigate(ROUTES.admin.directorDashboard);
       } else if (role === 'arbitrator') {
-        navigate('/arbitrator');
+        navigate(ROUTES.arbitrator.root);
       } else {
-        navigate('/expert');
+        navigate(ROUTES.expert.root);
       }
     }
   };

@@ -1,7 +1,7 @@
 import { ordersApi } from '../api/orders';
+import { ROUTES } from './constants';
 
 /**
- * Функция для редиректа пользователя в зависимости от его роли
  * @param role - Роль пользователя
  * @param navigate - Функция навигации из react-router-dom (useNavigate hook)
  */
@@ -10,46 +10,44 @@ export const redirectByRole = async (
   navigate: (to: string) => void
 ) => {
   if (role === 'director') {
-    navigate('/admin/directordashboard');
+    navigate(ROUTES.admin.directorDashboard);
     return;
   }
 
   switch (role) {
     case 'client':
-      // Проверка наличия заказов
       try {
         const ordersData = await ordersApi.getClientOrders();
         const orders = ordersData?.results || ordersData || [];
         if (orders.length > 0) {
-          navigate('/dashboard');
+          navigate(ROUTES.dashboard);
         } else {
-          navigate('/create-order');
+          navigate(ROUTES.createOrder);
         }
       } catch (error) {
-        // В случае ошибки редиректим на dashboard
         console.error('Error checking client orders:', error);
-        navigate('/dashboard');
+        navigate(ROUTES.dashboard);
       }
       break;
       
     case 'expert':
-      navigate('/expert');
+      navigate(ROUTES.expert.root);
       break;
       
     case 'partner':
-      navigate('/partner');
+      navigate(ROUTES.partner.root);
       break;
       
     case 'admin':
-      navigate('/admin/dashboard');
+      navigate(ROUTES.admin.dashboard);
       break;
       
     case 'arbitrator':
-      navigate('/arbitrator');
+      navigate(ROUTES.arbitrator.root);
       break;
       
     default:
-      navigate('/dashboard');
+      navigate(ROUTES.dashboard);
   }
 };
 

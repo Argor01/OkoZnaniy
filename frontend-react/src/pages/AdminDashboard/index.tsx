@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminAuth, useAdminData, useAdminUI, useAdminMutations } from './hooks';
 import { useInternalCommunication } from './hooks/useInternalCommunication';
 import { User } from '../../api/auth';
+import { ROUTES } from '../../utils/constants';
 import {
   useAllUsers,
   useBlockedUsers,
@@ -84,7 +85,7 @@ const AdminDashboard: React.FC = () => {
 
   // Перенаправляем директора
   if (isDirector) {
-    navigate('/admin/directordashboard');
+    navigate(ROUTES.admin.directorDashboard);
     return null;
   }
 
