@@ -335,10 +335,15 @@ class OrderSerializer(serializers.ModelSerializer):
         return data
 
     def get_rating(self, obj):
-        """Получаем рейтинг заказа, если он есть"""
+        """Получаем рейтинг заказа с полной информацией"""
         try:
             if hasattr(obj, 'expert_rating') and obj.expert_rating:
-                return obj.expert_rating.rating
+                return {
+                    'id': obj.expert_rating.id,
+                    'rating': obj.expert_rating.rating,
+                    'comment': obj.expert_rating.comment,
+                    'created_at': obj.expert_rating.created_at
+                }
         except Exception:
             pass
         return None

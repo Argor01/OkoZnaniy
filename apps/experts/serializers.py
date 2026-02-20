@@ -89,29 +89,71 @@ class ExpertReviewSerializer(serializers.ModelSerializer):
 class ExpertRatingSerializer(serializers.ModelSerializer):
     expert = UserSerializer(read_only=True)
     client = UserSerializer(read_only=True)
+    order_info = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = ExpertRating
-        fields = ['id', 'expert', 'client', 'order', 'rating', 'comment', 'created_at']
-        read_only_fields = ['expert', 'client', 'created_at']
+        fields = ['id', 'expert', 'client', 'order', 'order_info', 'rating', 'comment', 'created_at', 'updated_at']
+        read_only_fields = ['expert', 'client', 'created_at', 'updated_at']
+
+    def get_order_info(self, obj):
+        """Возвращает краткую информацию о заказе"""
+        if obj.order:
+            return {
+                'id': obj.order.id,
+                'title': obj.order.title or 'Без названия',
+                'status': obj.order.status
+            }
+        return None
+
+    def validate_rating(self, value):
+        """Валидация рейтинга"""
+        if value < 1 or value > 5:
+            raise serializers.ValidationError(
+                'Рейтинг должен быть от 1 до 5'
+            )
+        return value
+
+    def validate_comment(self, value):
+        """Валидация комментария"""
+        if value and len(value) < 10:
+            raise serializers.ValidationError(
+                'Комментарий должен содержать минимум 10 символов'
+            )
+        if value and len(value) > 1000:
+            raise serializers.ValidationError(
+                'Комментарий не должен превышать 1000 символов'
+            )
+        return value
 
     def validate(self, data):
         # Проверяем, что заказ завершен
-        order = data['order']
+        order = data.get('order')
+        if not order:
+            raise serializers.ValidationError(
+                "Необходимо указать заказ"
+            )
+            
         if order.status != 'completed':
             raise serializers.ValidationError(
                 "Оставить отзыв можно только для завершенного заказа"
+            )
+        
+        # Проверяем, что у заказа есть эксперт
+        if not order.expert:
+            raise serializers.ValidationError(
+                "Невозможно оставить отзыв для заказа без эксперта"
             )
         
         # Проверяем, что клиент является заказчиком
         request = self.context.get('request')
         if request and request.user != order.client:
             raise serializers.ValidationError(
-                "Вы не можете оставить отзыв для этого заказа"
+                "Только клиент заказа может оставить отзыв"
             )
         
-        # Проверяем, что отзыв еще не оставлен
-        if ExpertRating.objects.filter(order=order).exists():
+        # Проверяем, что отзыв еще не оставлен (только при создании)
+        if not self.instance and ExpertRating.objects.filter(order=order).exists():
             raise serializers.ValidationError(
                 "Отзыв для этого заказа уже существует"
             )
@@ -142,7 +184,7 @@ class ExpertStatisticsSerializer(serializers.ModelSerializer):
         model = ExpertStatistics
         fields = [
             'id', 'expert', 'total_orders', 'completed_orders',
-            'average_rating', 'success_rate', 'total_earnings',
+            'average_rating', 'total_ratings', 'success_rate', 'total_earnings',
             'response_time_avg', 'last_updated'
         ]
         read_only_fields = fields 
