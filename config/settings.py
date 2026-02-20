@@ -97,10 +97,9 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-# allauth settings
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
+# allauth settings (обновлено для новой версии)
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 # URL для страницы логина (allauth)
