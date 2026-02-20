@@ -138,6 +138,18 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
     serializer_class = ExpertRatingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        """
+        Разные права доступа для разных действий
+        """
+        if self.action == 'create':
+            from .permissions import CanCreateExpertRating
+            return [CanCreateExpertRating()]
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            from .permissions import IsRatingOwnerOrReadOnly
+            return [permissions.IsAuthenticated(), IsRatingOwnerOrReadOnly()]
+        return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
         qs = ExpertRating.objects.select_related('expert', 'client', 'order').order_by('-created_at')
         user = self.request.user
