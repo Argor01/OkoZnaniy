@@ -1,13 +1,18 @@
 import axios from 'axios';
 import { API_URL } from '../config/api';
+import { ROUTES } from '../utils/constants';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
 });
+
+const redirectToLoginIfAllowed = () => {
+  if (window.location.pathname.startsWith(ROUTES.admin.root)) return;
+  window.location.assign(ROUTES.login);
+};
 
 // Добавляем токен к каждому запросу, кроме auth/регистрации
 apiClient.interceptors.request.use((config) => {
@@ -81,11 +86,8 @@ apiClient.interceptors.response.use(
         // Если обновление токена не удалось, очищаем и редиректим
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        
-        // Не делаем редирект, если мы на админ-странице - пусть /admin покажет форму входа
-        if (!window.location.pathname.startsWith('/admin')) {
-          window.location.href = '/login';
-        }
+
+        redirectToLoginIfAllowed();
         return Promise.reject(refreshError);
       }
     }
@@ -94,11 +96,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      
-      // Не делаем редирект, если мы на админ-странице - пусть /admin покажет форму входа
-      if (!window.location.pathname.startsWith('/admin')) {
-        window.location.href = '/login';
-      }
+
+      redirectToLoginIfAllowed();
     }
 
     return Promise.reject(error);

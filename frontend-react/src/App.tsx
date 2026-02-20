@@ -191,17 +191,21 @@ const App: React.FC = () => {
               <Route 
                 path={ROUTES.expert.profile} 
                 element={
-                  <DashboardLayout>
-                    <UserProfile />
-                  </DashboardLayout>
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <UserProfile />
+                    </DashboardLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
                 path={ROUTES.user.profile} 
                 element={
-                  <DashboardLayout>
-                    <UserProfile />
-                  </DashboardLayout>
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <UserProfile />
+                    </DashboardLayout>
+                  </ProtectedRoute>
                 } 
               />
               <Route 
