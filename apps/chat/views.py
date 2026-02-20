@@ -460,6 +460,25 @@ class ChatViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
+        # Создаем рейтинг эксперта для заказа, если указан rating и есть связь с заказом
+        if rating is not None and chat.order and chat.order.expert:
+            try:
+                from apps.experts.models import ExpertRating
+                ExpertRating.objects.get_or_create(
+                    order=chat.order,
+                    client=request.user,
+                    defaults={
+                        'expert': chat.order.expert,
+                        'rating': rating,
+                        'comment': ''
+                    }
+                )
+            except Exception as e:
+                # Логируем ошибку, но не ломаем основной процесс
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Ошибка создания ExpertRating: {str(e)}")
+
         return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])

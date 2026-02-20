@@ -244,12 +244,21 @@ class ExpertRating(models.Model):
         "Дата создания",
         default=timezone.now
     )
+    updated_at = models.DateTimeField(
+        "Дата обновления",
+        auto_now=True
+    )
 
     class Meta:
         verbose_name = "Рейтинг эксперта"
         verbose_name_plural = "Рейтинги экспертов"
         ordering = ['-created_at']
         unique_together = ['expert', 'order']
+        indexes = [
+            models.Index(fields=['expert', '-created_at']),
+            models.Index(fields=['client', '-created_at']),
+            models.Index(fields=['rating']),
+        ]
 
     def __str__(self):
         return f"Рейтинг {self.rating} для {self.expert.username} от {self.client.username}"
@@ -273,6 +282,10 @@ class ExpertStatistics(models.Model):
         "Средний рейтинг",
         max_digits=3,
         decimal_places=2,
+        default=0
+    )
+    total_ratings = models.PositiveIntegerField(
+        "Всего отзывов",
         default=0
     )
     success_rate = models.DecimalField(
@@ -319,8 +332,10 @@ class ExpertStatistics(models.Model):
                 avg_rating=models.Avg('rating')
             )['avg_rating']
             self.average_rating = round(float(avg_rating), 2) if avg_rating else 0
+            self.total_ratings = ratings.count()
         else:
             self.average_rating = 0
+            self.total_ratings = 0
         
         # Обновляем процент успешных заказов
         if self.total_orders > 0:
