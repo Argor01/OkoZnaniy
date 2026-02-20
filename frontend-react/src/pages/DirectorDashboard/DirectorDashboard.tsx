@@ -9,6 +9,7 @@ import {
   BankOutlined,
   MessageOutlined,
   MenuOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth';
@@ -17,6 +18,7 @@ import FinancialStatistics from './components/FinancialStatistics/FinancialStati
 import PartnerPanel from './components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from './components/GeneralStatistics/GeneralStatistics';
 import ArbitratorCommunication from './components/ArbitratorCommunication/ArbitratorCommunication';
+import ContactBannedUsers from './components/ContactBannedUsers';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -77,6 +79,12 @@ const DirectorDashboard: React.FC = () => {
       icon: <MessageOutlined />,
       label: 'Коммуникация с арбитрами',
       component: <ArbitratorCommunication />,
+    },
+    {
+      key: 'contact-bans',
+      icon: <StopOutlined />,
+      label: 'Баны за обмен контактами',
+      component: <ContactBannedUsers />,
     },
   ];
 

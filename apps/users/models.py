@@ -46,6 +46,13 @@ class User(AbstractUser):
     active_referrals = models.PositiveIntegerField(default=0, verbose_name="Активных рефералов")
     total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Общий доход")
     
+    # Поля для бана за обмен контактами
+    is_banned_for_contacts = models.BooleanField(default=False, verbose_name="Забанен за обмен контактами")
+    contact_ban_reason = models.TextField(blank=True, null=True, verbose_name="Причина бана за контакты")
+    contact_ban_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата бана за контакты")
+    contact_violations_count = models.PositiveIntegerField(default=0, verbose_name="Количество нарушений")
+    banned_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='banned_users', verbose_name="Кто забанил")
+    
     def save(self, *args, **kwargs):
         # Генерируем реферальный код для партнеров
         if self.role == 'partner' and not self.referral_code:

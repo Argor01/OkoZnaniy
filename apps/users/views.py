@@ -836,6 +836,93 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': self.get_serializer(user).data
         })
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def contact_banned_users(self, request):
+        """Получить список пользователей, забаненных за обмен контактами"""
+        if request.user.role not in ['admin', 'arbitrator']:
+            return Response(
+                {'error': 'Доступно только для администраторов и арбитров'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        banned_users = User.objects.filter(is_banned_for_contacts=True).select_related('banned_by')
+        
+        data = []
+        for user in banned_users:
+            data.append({
+                'id': user.id,
+                'username': user.username,
+                'email': user.email or '',
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': user.role,
+                'contact_ban_date': user.contact_ban_date,
+                'contact_ban_reason': user.contact_ban_reason or '',
+                'contact_violations_count': user.contact_violations_count,
+                'banned_by': user.banned_by.username if user.banned_by else 'Система',
+                'phone': user.phone or '',
+                'telegram_id': user.telegram_id,
+            })
+        
+        return Response(data)
+
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def ban_for_contacts(self, request, pk=None):
+        """Забанить пользователя за обмен контактами"""
+        if request.user.role not in ['admin', 'arbitrator']:
+            return Response(
+                {'error': 'Доступно только для администраторов и арбитров'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        from django.utils import timezone
+        
+        reason = request.data.get('reason', 'Обмен контактными данными в чате')
+        user.is_banned_for_contacts = True
+        user.contact_ban_reason = reason
+        user.contact_ban_date = timezone.now()
+        user.contact_violations_count += 1
+        user.banned_by = request.user
+        user.save()
+        
+        return Response({
+            'message': f'Пользователь {user.username} забанен за обмен контактами',
+            'user': self.get_serializer(user).data
+        })
+
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def unban_for_contacts(self, request, pk=None):
+        """Разбанить пользователя за обмен контактами"""
+        if request.user.role not in ['admin', 'arbitrator']:
+            return Response(
+                {'error': 'Доступно только для администраторов и арбитров'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.is_banned_for_contacts = False
+        user.save()
+        
+        return Response({
+            'message': f'Пользователь {user.username} разбанен',
+            'user': self.get_serializer(user).data
+        })
+
 
 # Telegram Auth Status Check
 from rest_framework.decorators import api_view, permission_classes

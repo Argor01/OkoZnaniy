@@ -210,3 +210,54 @@ class SupportMessage(models.Model):
     
     def __str__(self):
         return f"Сообщение от {self.sender.username} в чате #{self.chat.id}"
+
+
+class ContactViolationLog(models.Model):
+    """Лог нарушений обмена контактными данными"""
+    
+    ACTION_CHOICES = [
+        ('warning', 'Предупреждение'),
+        ('ban', 'Бан'),
+        ('message_blocked', 'Сообщение заблокировано'),
+    ]
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='contact_violations',
+        verbose_name='Пользователь'
+    )
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name='violations',
+        verbose_name='Чат'
+    )
+    message = models.ForeignKey(
+        Message,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='violations',
+        verbose_name='Сообщение'
+    )
+    violation_text = models.TextField(verbose_name='Текст нарушения')
+    detected_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата обнаружения')
+    action_taken = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES,
+        verbose_name='Принятое действие'
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name='Заметки')
+    
+    class Meta:
+        verbose_name = 'Лог нарушения обмена контактами'
+        verbose_name_plural = 'Логи нарушений обмена контактами'
+        ordering = ['-detected_at']
+        indexes = [
+            models.Index(fields=['user', '-detected_at']),
+            models.Index(fields=['chat', '-detected_at']),
+        ]
+    
+    def __str__(self):
+        return f"Нарушение от {self.user.username} в чате #{self.chat.id}"
