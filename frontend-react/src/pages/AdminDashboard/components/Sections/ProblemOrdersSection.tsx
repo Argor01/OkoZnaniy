@@ -41,12 +41,23 @@ const { Text, Title } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
+type NamedEntity = { name: string };
+
+const getEntityLabel = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && 'name' in value) {
+    const name = (value as { name?: unknown }).name;
+    if (typeof name === 'string') return name;
+  }
+  return '';
+};
+
 interface ProblemOrder {
   id: number;
   title: string;
   description: string;
-  subject: string;
-  work_type: string;
+  subject: string | NamedEntity | null;
+  work_type: string | NamedEntity | null;
   status: string;
   problem_type: string;
   problem_severity: string;
@@ -401,7 +412,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             {record.title}
           </div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {typeof record.subject === 'object' && record.subject?.name ? record.subject.name : record.subject} • {typeof record.work_type === 'object' && record.work_type?.name ? record.work_type.name : record.work_type}
+            {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
           </Text>
         </div>
       ),

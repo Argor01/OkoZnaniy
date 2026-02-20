@@ -75,8 +75,8 @@ export const useAdminAuth = () => {
         navigate('/partner');
       } else if (currentUser.role === 'arbitrator') {
         navigate('/arbitrator');
-      } else if (currentUser.email === 'director@test.com') {
-        navigate('/director');
+      } else if (currentUser.role === 'director') {
+        navigate('/admin/directordashboard');
       } else if (currentUser.role === 'admin') {
         // Остаемся на админ-панели
         queryClient.invalidateQueries();
@@ -121,7 +121,7 @@ export const useAdminAuth = () => {
 
   // Вычисляемые значения
   const canLoadData = hasToken && !!user && user.role === 'admin';
-  const isDirector = user?.role === 'admin' && user?.email === 'director@test.com';
+  const isDirector = user?.role === 'director';
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 

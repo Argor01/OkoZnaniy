@@ -26,7 +26,6 @@ import {
   OverviewSection, 
   PartnersSection, 
   EarningsSection, 
-  DisputesSection,
   SupportChatsSection,
   TicketSystemSection,
   UsersManagementSection,
@@ -38,7 +37,6 @@ import {
   InProgressClaimsSection,
   CompletedClaimsSection,
   PendingApprovalSection,
-  ClaimsProcessingSection,
   AdminChatsSection,
 } from './components/Sections';
 import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
@@ -190,7 +188,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             stats={adminData.stats}
             partners={adminData.partners}
             earnings={adminData.earnings}
-            disputes={adminData.disputes}
             isLoading={adminData.isLoading}
           />
         );
@@ -215,19 +212,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           />
         );
       
-      case 'disputes':
-        return (
-          <DisputesSection
-            disputes={adminData.disputes}
-            arbitrators={adminData.arbitrators}
-            loading={adminData.disputesLoading}
-            error={adminData.disputesError}
-            onViewDispute={handleViewDispute}
-            onAssignArbitrator={handleAssignArbitratorToDispute}
-            isAssigningArbitrator={isAssigningArbitrator}
-          />
-        );
-
       // Управление пользователями
       case 'all_users':
         return (
@@ -394,22 +378,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             onRejectApproval={(claimId, reason) => console.log('Reject approval:', claimId, reason)}
             onEscalateToDirector={(claimId) => console.log('Escalate to director:', claimId)}
             onRequestMoreInfo={(claimId, questions) => console.log('Request more info:', claimId, questions)}
-          />
-        );
-
-      case 'claims_processing':
-        return (
-          <ClaimsProcessingSection
-            claims={[...newClaims, ...inProgressClaims]}
-            loading={newClaimsLoading || inProgressClaimsLoading}
-            onViewClaim={(claimId) => console.log('View claim:', claimId)}
-            onAssignClaim={(claimId, adminId) => console.log('Assign claim:', claimId, adminId)}
-            onUpdateStatus={(claimId, status, notes) => console.log('Update status:', claimId, status, notes)}
-            onAddAction={(claimId, action) => console.log('Add action:', claimId, action)}
-            onResolveClaim={(claimId, resolution) => completeClaim(claimId, resolution)}
-            onSendMessage={(claimId, message, recipient) => console.log('Send message:', claimId, message, recipient)}
-            onUploadEvidence={(claimId, file, type) => console.log('Upload evidence:', claimId, file, type)}
-            onScheduleCall={(claimId, datetime, participants) => console.log('Schedule call:', claimId, datetime, participants)}
           />
         );
     }

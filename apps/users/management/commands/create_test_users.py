@@ -41,8 +41,9 @@ class Command(BaseCommand):
                     'email_verified': True,
                     'is_active': True
                 }
-                if role_value == Roles.ADMIN:
+                if role_value in (Roles.ADMIN, Roles.DIRECTOR):
                     defaults['is_staff'] = True
+                if role_value == Roles.ADMIN:
                     defaults['is_superuser'] = True
 
                 user, created = User.objects.get_or_create(username=username, defaults=defaults)
@@ -51,9 +52,8 @@ class Command(BaseCommand):
                 user.role = role_value
                 user.email_verified = True
                 user.is_active = True
-                if role_value == Roles.ADMIN:
-                    user.is_staff = True
-                    user.is_superuser = True
+                user.is_staff = role_value in (Roles.ADMIN, Roles.DIRECTOR)
+                user.is_superuser = role_value == Roles.ADMIN
                 user.save()
 
                 created_or_updated.append(user)

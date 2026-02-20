@@ -23,7 +23,7 @@ import {
   MailOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { api } from '../../../../api/api';
+import apiClient from '../../../../api/client';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -61,7 +61,7 @@ const ContactBannedUsers: React.FC = () => {
   const fetchBannedUsers = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/users/contact_banned_users/');
+      const response = await apiClient.get('/users/contact_banned_users/');
       setUsers(response.data);
     } catch (error) {
       console.error('Ошибка загрузки забаненных пользователей:', error);
@@ -80,7 +80,7 @@ const ContactBannedUsers: React.FC = () => {
     if (!selectedUser) return;
     
     try {
-      await api.patch(`/api/users/${selectedUser.id}/unban_for_contacts/`);
+      await apiClient.patch(`/users/${selectedUser.id}/unban_for_contacts/`);
       message.success(`Пользователь ${selectedUser.username} разбанен`);
       setUnbanModalVisible(false);
       setSelectedUser(null);

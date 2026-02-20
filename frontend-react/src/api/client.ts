@@ -79,8 +79,8 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         
-        // Не делаем редирект, если мы на админ-странице - пусть AdminDashboard покажет форму входа
-        if (window.location.pathname !== '/admin') {
+        // Не делаем редирект, если мы на админ-странице - пусть /admin покажет форму входа
+        if (!window.location.pathname.startsWith('/admin')) {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
@@ -92,8 +92,8 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       
-      // Не делаем редирект, если мы на админ-странице - пусть AdminDashboard покажет форму входа
-      if (window.location.pathname !== '/admin') {
+      // Не делаем редирект, если мы на админ-странице - пусть /admin покажет форму входа
+      if (!window.location.pathname.startsWith('/admin')) {
         window.location.href = '/login';
       }
     }

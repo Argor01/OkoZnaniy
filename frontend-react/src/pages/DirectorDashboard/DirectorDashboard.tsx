@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Typography, message, Modal } from 'antd';
+import { Layout, Menu, Button, Typography, message, Modal, Spin, Result } from 'antd';
 import {
   TeamOutlined,
   DollarOutlined,
@@ -34,6 +34,8 @@ const DirectorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState<string>('personnel');
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
 
   const isMobile = window.innerWidth <= 840;
   const isTablet = window.innerWidth > 840 && window.innerWidth <= 1024;
@@ -48,6 +50,76 @@ const DirectorDashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobile]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const user = await authApi.getCurrentUser();
+        if (cancelled) return;
+        setRole(user?.role ?? null);
+      } catch (_error) {
+        authApi.logout();
+        if (!cancelled) {
+          setRole(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setAuthLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (role === null) {
+    return (
+      <Result
+        status="info"
+        title="Требуется вход"
+        subTitle="Войдите в систему, чтобы открыть личный кабинет директора."
+        extra={
+          <Button type="primary" onClick={() => navigate('/admin')}>
+            Перейти ко входу
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (role !== 'director') {
+    return (
+      <Result
+        status="403"
+        title="Доступ запрещен"
+        subTitle="У вас нет прав для доступа к личному кабинету директора."
+        extra={
+          <Button type="primary" onClick={() => navigate('/')}>
+            Вернуться на главную
+          </Button>
+        }
+      />
+    );
+  }
 
   const menuItems: MenuItem[] = [
     {

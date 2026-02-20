@@ -5,10 +5,10 @@ import { ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
-import './utils/clearAuth'; // Утилита для очистки токенов (доступна через window.clearAuth())
-import './utils/axiosConfig'; // Настройка axios interceptors
+import './utils/clearAuth'; 
+import './utils/axiosConfig'; 
 
-// Import styles
+
 import './styles/page-transitions.css';
 import './styles/landing.css';
 import './styles/logo.css';
@@ -42,11 +42,7 @@ import ExpertApplication from './pages/ExpertApplication';
 import BecomeExpert from './pages/BecomeExpert';
 import BecomePartner from './pages/BecomePartner';
 import PartnerDashboard from './pages/PartnerDashboard';
-// Возвращаемся к основному AdminDashboard
 import AdminDashboard from './pages/AdminDashboard/index';
-// Временный компонент больше не нужен
-// import AdminDashboard from './pages/NewAdminDashboard';
-// Старая версия переименована в AdminDashboard.tsx.backup
 import AdminLogin from './components/admin/AdminLogin';
 import DirectorDashboard from './pages/DirectorDashboard/DirectorDashboard';
 import ShopReadyWorks from './pages/ShopReadyWorks';
@@ -191,6 +187,14 @@ const App: React.FC = () => {
               <Route 
                 path="/admin" 
                 element={<AdminLogin />} 
+              />
+              <Route
+                path="/admin/login"
+                element={<Navigate to="/admin" replace />}
+              />
+              <Route
+                path="/admin/directorlogin"
+                element={<Navigate to="/admin" replace />}
               />
               {/* Admin dashboard */}
               <Route 

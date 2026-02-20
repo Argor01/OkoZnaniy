@@ -31,12 +31,23 @@ const { Search } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
+type NamedEntity = { name: string };
+
+const getEntityLabel = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && 'name' in value) {
+    const name = (value as { name?: unknown }).name;
+    if (typeof name === 'string') return name;
+  }
+  return '';
+};
+
 interface Order {
   id: number;
   title: string;
   description: string;
-  subject: string;
-  work_type: string;
+  subject: string | NamedEntity | null;
+  work_type: string | NamedEntity | null;
   status: string;
   priority: string;
   budget: number;
@@ -102,7 +113,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       order.client.last_name.toLowerCase().includes(searchText.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    const matchesSubject = subjectFilter === 'all' || order.subject === subjectFilter;
+    const matchesSubject = subjectFilter === 'all' || getEntityLabel(order.subject) === subjectFilter;
     const matchesPriority = priorityFilter === 'all' || order.priority === priorityFilter;
     
     let matchesDate = true;
@@ -201,7 +212,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
             {record.title}
           </div>
           <Text type="secondary" style={{ fontSize: '12px' }}>
-            {typeof record.subject === 'object' && record.subject?.name ? record.subject.name : record.subject} • {typeof record.work_type === 'object' && record.work_type?.name ? record.work_type.name : record.work_type}
+            {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
           </Text>
         </div>
       ),
@@ -472,10 +483,10 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
                 {selectedOrder.description}
               </Descriptions.Item>
               <Descriptions.Item label="Предмет">
-                {typeof selectedOrder.subject === 'object' && selectedOrder.subject?.name ? selectedOrder.subject.name : selectedOrder.subject}
+                {getEntityLabel(selectedOrder.subject)}
               </Descriptions.Item>
               <Descriptions.Item label="Тип работы">
-                {typeof selectedOrder.work_type === 'object' && selectedOrder.work_type?.name ? selectedOrder.work_type.name : selectedOrder.work_type}
+                {getEntityLabel(selectedOrder.work_type)}
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
                 <Tag color={getStatusColor(selectedOrder.status)}>

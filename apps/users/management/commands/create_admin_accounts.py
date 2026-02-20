@@ -54,11 +54,11 @@ class Command(BaseCommand):
                 'username': 'director',
                 'email': 'director@test.com',
                 'password': 'test123',
-                'role': 'admin',  # Директор использует роль admin
+                'role': 'director',
                 'first_name': 'Директор',
                 'last_name': 'Тестовый',
                 'is_staff': True,
-                'is_superuser': True,
+                'is_superuser': False,
                 'balance': 0,
                 'frozen_balance': 0,
                 'email_verified': True,
@@ -168,7 +168,7 @@ class Command(BaseCommand):
         self.stdout.write("📧 Директор:")
         self.stdout.write("   Email: director@test.com")
         self.stdout.write("   Пароль: test123")
-        self.stdout.write("   Роль: admin (директор)")
+        self.stdout.write("   Роль: director")
         self.stdout.write("")
         self.stdout.write("🤝 Партнер:")
         self.stdout.write("   Email: partner@test.com")

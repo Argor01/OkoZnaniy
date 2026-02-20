@@ -69,7 +69,9 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
             } else if (user.role === 'partner') {
               redirectUrl = '/partner';
             } else if (user.role === 'admin') {
-              redirectUrl = '/admin';
+              redirectUrl = '/admin/dashboard';
+            } else if (user.role === 'director') {
+              redirectUrl = '/admin/directordashboard';
             } else if (user.role === 'arbitrator') {
               redirectUrl = '/arbitrator';
             }

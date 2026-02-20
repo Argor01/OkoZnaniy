@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Space, Divider, Tooltip } from 'antd';
 import { 
   MailOutlined, 
@@ -21,8 +21,39 @@ interface AdminLoginProps {
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setSessionLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    (async () => {
+      try {
+        const user = await authApi.getCurrentUser();
+        if (cancelled) return;
+        await redirectByRole(user?.role ?? '', navigate);
+      } catch (_error) {
+        authApi.logout();
+      } finally {
+        if (!cancelled) {
+          setSessionLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   // Функция для обработки ошибок
   const handleError = (error: any): string => {
@@ -86,21 +117,16 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       // Если есть callback (значит мы на странице личного кабинета администратора)
       if (onSuccess && auth?.user) {
-        // Только для admin показываем панель, директор должен редиректиться
+        // Только для admin показываем панель
         if (role === 'admin') {
           onSuccess(auth.user);
           // Остаемся на странице, AdminDashboard покажет панель
           return;
         }
-        // Для директора делаем редирект на его страницу (проверяем по email)
-        if (role === 'admin' && auth?.user?.email === 'director@test.com') {
-          await redirectByRole(role, navigate, auth.user.email);
-          return;
-        }
       }
       
-      // Редирект в зависимости от роли пользователя (передаем email для определения директора)
-      await redirectByRole(role, navigate, auth?.user?.email);
+      // Редирект в зависимости от роли пользователя
+      await redirectByRole(role, navigate);
     } catch (error: any) {
       const errorMessage = handleError(error);
       message.error(errorMessage);
@@ -130,16 +156,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       // Если есть callback (значит мы на странице личного кабинета администратора)
       if (onSuccess && auth?.user) {
-        // Проверяем, не директор ли это (по email)
-        const isDirector = auth.user.email === 'director@test.com';
-        
-        // Если это директор, редиректим на его страницу
-        if (isDirector || account.role === 'director') {
-          await redirectByRole(account.role, navigate, auth.user.email);
-          return;
-        }
-        
-        // Только для admin (не директор) показываем панель
+        // Только для admin показываем панель
         if (account.role === 'admin') {
           onSuccess(auth.user);
           // Остаемся на странице, AdminDashboard покажет панель
@@ -147,8 +164,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         }
       }
       
-      // Редирект в зависимости от роли (передаем email для определения директора)
-      await redirectByRole(account.role, navigate, auth?.user?.email || account.email);
+      // Редирект в зависимости от роли
+      await redirectByRole(account.role, navigate);
     } catch (error: any) {
       const errorMessage = handleError(error);
       message.error(`Ошибка входа как ${account.label}: ${errorMessage}`);
@@ -173,6 +190,22 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         return null;
     }
   };
+
+  if (sessionLoading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '40px 20px',
+        }}
+      >
+        <Card style={{ width: '100%', maxWidth: '480px', borderRadius: '20px' }} loading />
+      </div>
+    );
+  }
 
   return (
     <div

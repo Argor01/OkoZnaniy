@@ -7,6 +7,7 @@ class Roles(models.TextChoices):
     EXPERT = 'expert'
     ARBITRATOR = 'arbitrator'
     ADMIN = 'admin'
+    DIRECTOR = 'director'
     PARTNER = 'partner'
 
 class User(AbstractUser):

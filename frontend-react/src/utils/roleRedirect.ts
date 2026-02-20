@@ -4,17 +4,12 @@ import { ordersApi } from '../api/orders';
  * Функция для редиректа пользователя в зависимости от его роли
  * @param role - Роль пользователя
  * @param navigate - Функция навигации из react-router-dom (useNavigate hook)
- * @param userEmail - Email пользователя (опционально, для определения директора)
  */
 export const redirectByRole = async (
   role: string, 
-  navigate: (to: string) => void,
-  userEmail?: string
+  navigate: (to: string) => void
 ) => {
-  // Проверка: если роль admin и email director@test.com, то это директор
-  const isDirector = role === 'admin' && userEmail === 'director@test.com';
-  
-  if (isDirector || role === 'director') {
+  if (role === 'director') {
     navigate('/admin/directordashboard');
     return;
   }
