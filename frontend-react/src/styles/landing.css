@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
 html {
   font-size: 16px;
   font-family: var(--font-family-sans);
@@ -446,7 +446,7 @@ img {
     flex: 1;
     font-size: 12px;
     padding: 8px 12px;
-    margin-left: 0 !important;
+    margin-left: 0;
   }
 }
 
@@ -1600,14 +1600,14 @@ img {
       -ms-flex: 0 1 auto;
           flex: 0 1 auto;
   gap: 7px;
-  width: auto !important;
+  width: auto;
 }
 .reviews__slider-controls-pagination .swiper-pagination-bullet {
   display: block;
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
-  margin: 0 !important;
+  margin: 0;
   width: 7px;
   height: 7px;
   border-radius: 90px;
@@ -2423,7 +2423,7 @@ img {
   color: #ffb34a;
 }
 
-/* About Section */
+
 .about {
   padding: 125px 0 130px;
   background-color: #f8f9fa;
@@ -2694,3 +2694,4 @@ img {
     font-size: 14px;
   }
 }
+

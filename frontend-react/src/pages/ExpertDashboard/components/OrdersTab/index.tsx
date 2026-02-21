@@ -44,7 +44,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
   const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my');
 
-  // Загружаем профиль пользователя
+  
   const { data: userProfile, isLoading: userProfileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
@@ -52,7 +52,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
 
   const showAvailableTab = userProfile?.role === 'expert';
 
-  // Устанавливаем правильный фильтр в зависимости от роли пользователя
+  
   React.useEffect(() => {
     if (userProfile?.role === 'client') {
       setOrderFilter('my');
@@ -63,14 +63,14 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     }
   }, [userProfile?.role]);
 
-  // Загружаем размещённые заказы пользователя (заказы, где он заказчик)
+  
   const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
     queryKey: ['user-orders'],
     queryFn: () => ordersApi.getClientOrders(),
     enabled: !!userProfile,
   });
 
-  // Загружаем доступные заказы (лента)
+  
   const { data: availableOrdersData, isLoading: availableOrdersLoading } = useQuery({
     queryKey: ['available-orders'],
     queryFn: () => ordersApi.getAvailableOrders({ ordering: '-created_at' }),
@@ -79,7 +79,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
 
   const effectiveOrderFilter: 'my' | 'available' = showAvailableTab ? orderFilter : 'my';
 
-  // Определяем какие данные показывать в зависимости от фильтра
+  
   const currentOrdersData = effectiveOrderFilter === 'my' ? myOrdersData : availableOrdersData;
   const isLoading = effectiveOrderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
 
@@ -105,7 +105,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
 
   const freshOrders = availableOrdersSanitized.slice(0, 5);
 
-  // Используем реальные данные
+  
   const displayOrders = effectiveOrderFilter === 'available' ? freshOrders : orders;
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
@@ -141,7 +141,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           </Button>
         </div>
 
-        {/* Фильтр заказов */}
         {showAvailableTab && (
           <div style={{ marginBottom: 24 }}>
             <Radio.Group 

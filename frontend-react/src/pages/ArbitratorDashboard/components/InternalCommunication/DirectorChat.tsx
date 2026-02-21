@@ -43,7 +43,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  // Получение текущего пользователя
+  
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -56,7 +56,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
     fetchUser();
   }, []);
 
-  // Параметры запроса
+  
   const params: GetMessagesParams = {
     page: currentPage,
     page_size: pageSize,
@@ -64,7 +64,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
     unread_only: false,
   };
 
-  // Получение списка сообщений
+  
   const { data: messagesData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-messages', params],
     queryFn: () => arbitratorApi.getMessages(params),
@@ -72,10 +72,10 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
       if (data?.results) return data;
       return { count: 0, next: null, previous: null, results: [] };
     },
-    refetchInterval: 10000, // Обновление каждые 10 секунд
+    refetchInterval: 10000, 
   });
 
-  // Получение списка обращений для фильтрации
+  
   const { data: claimsData } = useQuery({
     queryKey: ['arbitrator-claims', 'for-messages'],
     queryFn: () => arbitratorApi.getClaims({ page_size: 100 }),
@@ -88,7 +88,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
   const messages = messagesData?.results || [];
   const claims = (claimsData || []) as Claim[];
 
-  // Фильтрация сообщений по поисковому запросу на клиенте
+  
   const filteredMessages = searchText
     ? messages.filter((msg) =>
         msg.text.toLowerCase().includes(searchText.toLowerCase())
@@ -96,7 +96,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
     : messages;
 
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -110,12 +110,12 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
 
   const handleReply = (message: InternalMessage) => {
     setReplyToMessage(message);
-    // Прокрутка к форме сообщения с небольшим отступом
+    
     setTimeout(() => {
       if (messageFormRef.current) {
         const element = messageFormRef.current;
         const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - 20; // 20px отступ сверху
+        const offsetPosition = elementPosition + window.pageYOffset - 20; 
 
         window.scrollTo({
           top: offsetPosition,
@@ -127,13 +127,13 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
 
   const handleMessageSuccess = () => {
     setReplyToMessage(null);
-    // Инвалидируем запросы сообщений для обновления списка
+    
     queryClient.invalidateQueries({ queryKey: ['arbitrator-messages'] });
   };
 
   const handleClaimClick = async (claimId: number) => {
     try {
-      // Получаем детали обращения
+      
       const claim = await arbitratorApi.getClaim(claimId);
       setSelectedClaim(claim);
       setClaimDetailsVisible(true);
@@ -151,7 +151,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
     refetch();
   };
 
-  // Получение списка обращений для формы
+  
   const claimsForForm = claims.map((claim) => ({
     id: claim.id,
     title: claim.order.title || `Обращение #${claim.id}`,
@@ -171,7 +171,6 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
           </Button>
         </div>
 
-        {/* Фильтры */}
         <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="middle">
           <Space wrap>
             <Input
@@ -214,7 +213,6 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
 
         <Divider />
 
-        {/* Список сообщений */}
         <div
           style={{
             maxHeight: '500px',
@@ -250,7 +248,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Форма отправки сообщения */}
+        
         <Divider />
         <div ref={messageFormRef}>
           <Card size="small" title={replyToMessage ? 'Ответ на сообщение' : 'Новое сообщение'}>
@@ -290,7 +288,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра обращения */}
+      
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

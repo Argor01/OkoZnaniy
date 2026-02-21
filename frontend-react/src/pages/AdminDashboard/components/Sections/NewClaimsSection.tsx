@@ -94,10 +94,10 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
   
   const [rejectForm] = Form.useForm();
 
-  // Убеждаемся, что claims - это массив
+  
   const claimsData = Array.isArray(claims) ? claims : [];
 
-  // Фильтрация данных
+  
   const filteredClaims = claimsData.filter(claim => {
     const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          claim.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -115,7 +115,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
     return matchesSearch && matchesCategory && matchesPriority && matchesDate;
   });
 
-  // Обработчики
+  
   const handleViewClaim = (claim: Claim) => {
     setSelectedClaim(claim);
     setViewModalVisible(true);
@@ -146,7 +146,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
     }
   };
 
-  // Функции для отображения
+  
   const getCategoryColor = (category: string) => {
     const colors = {
       technical: 'blue',
@@ -314,7 +314,6 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
           </Text>
         </div>
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по обращениям"
@@ -377,7 +376,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно просмотра обращения */}
+      
       <Modal
         title="Детали обращения"
         open={viewModalVisible}
@@ -457,7 +456,6 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
         )}
       </Modal>
 
-      {/* Модальное окно отклонения */}
       <Modal
         title="Отклонить обращение"
         open={rejectModalVisible}

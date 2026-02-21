@@ -1,12 +1,12 @@
-/* Центрирование всех модальных окон с учетом сайдбара (250px) */
 
-/* Общий класс для всех модальных окон на страницах с сайдбаром */
+
+
 .modal-with-sidebar .ant-modal {
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Специфичные классы для разных модальных окон */
+
 .notifications-modal,
 .messages-modal,
 .faq-modal,
@@ -17,7 +17,7 @@
   transform: translateX(-50%);
 }
 
-/* Адаптив для планшетов (сайдбар 200px) */
+
 @media (max-width: 1024px) and (min-width: 769px) {
   .modal-with-sidebar .ant-modal,
   .notifications-modal,
@@ -30,7 +30,7 @@
   }
 }
 
-/* Адаптив для мобильных (без сайдбара) */
+
 @media (max-width: 768px) {
   .modal-with-sidebar .ant-modal,
   .notifications-modal,
@@ -44,7 +44,7 @@
   }
 }
 
-/* Очень маленькие экраны */
+
 @media (max-width: 480px) {
   .modal-with-sidebar .ant-modal,
   .notifications-modal,

@@ -38,15 +38,15 @@ export interface ReferralLinkResponse {
   referral_link: string;
 }
 
-// Флаг для использования mock данных
+
 const USE_MOCK_DATA = false;
 
-// Генерация mock данных
+
 const generateMockDashboard = (): PartnerDashboardData => {
   const referralCode = 'PARTNER-2024-ABC';
   const commissionRate = 15;
 
-  // Генерируем список рефералов
+  
   const mockReferrals: Referral[] = [
     {
       id: 1,
@@ -148,7 +148,7 @@ const generateMockDashboard = (): PartnerDashboardData => {
 
   const activeReferrals = mockReferrals.filter(r => r.orders_count > 0).length;
 
-  // Генерируем историю начислений
+  
   const mockEarnings: PartnerEarning[] = [
     {
       id: 1,
@@ -303,7 +303,7 @@ const generateMockReferralLink = (): ReferralLinkResponse => {
 export const partnersApi = {
   getDashboard: async (): Promise<PartnerDashboardData> => {
     if (USE_MOCK_DATA) {
-      // Имитируем задержку сети
+      
       await new Promise(resolve => setTimeout(resolve, 500));
       return generateMockDashboard();
     }
@@ -312,7 +312,7 @@ export const partnersApi = {
       const response = await apiClient.get('/users/partner_dashboard/');
       return response.data;
     } catch (error: any) {
-      // Если API недоступен, используем mock данные
+      
       if (error.response?.status === 404 || error.code === 'ERR_NETWORK') {
         console.log('API недоступен, используем mock данные для партнерского кабинета');
         return generateMockDashboard();
@@ -323,7 +323,7 @@ export const partnersApi = {
 
   generateReferralLink: async (): Promise<ReferralLinkResponse> => {
     if (USE_MOCK_DATA) {
-      // Имитируем задержку сети
+      
       await new Promise(resolve => setTimeout(resolve, 300));
       return generateMockReferralLink();
     }
@@ -332,7 +332,7 @@ export const partnersApi = {
       const response = await apiClient.post('/users/generate_referral_link/');
       return response.data;
     } catch (error: any) {
-      // Если API недоступен, используем mock данные
+      
       if (error.response?.status === 404 || error.code === 'ERR_NETWORK') {
         console.log('API недоступен, используем mock данные для генерации ссылки');
         return generateMockReferralLink();

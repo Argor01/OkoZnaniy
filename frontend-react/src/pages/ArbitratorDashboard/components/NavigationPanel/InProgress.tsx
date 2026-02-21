@@ -40,7 +40,7 @@ const InProgress: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Параметры запроса
+  
   const params: GetClaimsParams = {
     status: 'in_progress',
     type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
@@ -49,7 +49,7 @@ const InProgress: React.FC = () => {
     search: searchText || undefined,
   };
 
-  // Получение списка обращений в работе
+  
   const { data: claimsData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-claims', 'in_progress', params],
     queryFn: () => arbitratorApi.getClaims(params),
@@ -59,20 +59,20 @@ const InProgress: React.FC = () => {
     },
   });
 
-  // Мутация для отправки на согласование
+  
   const sendForApprovalMutation = useMutation({
     mutationFn: ({ id, message }: { id: number; message: string }) =>
       arbitratorApi.sendForApproval(id, { message }),
     onMutate: async (variables) => {
       const { id: claimId } = variables;
-      // Отменяем исходящие запросы, чтобы они не перезаписали наше оптимистичное обновление
+      
       await queryClient.cancelQueries({ queryKey: ['arbitrator-claims'] });
 
-      // Сохраняем предыдущие значения для отката
+      
       const previousInProgressData = queryClient.getQueryData(['arbitrator-claims', 'in_progress', params]);
       const previousPendingApprovalData = queryClient.getQueryData(['arbitrator-claims', 'pending_approval']);
 
-      // Оптимистично обновляем данные - удаляем обращение из списка "В работе"
+      
       queryClient.setQueryData(['arbitrator-claims', 'in_progress', params], (old: any) => {
         if (!old?.results) return old;
         return {
@@ -86,15 +86,15 @@ const InProgress: React.FC = () => {
     },
     onSuccess: () => {
       message.success('Обращение отправлено на согласование');
-      // Инвалидируем запросы для обновления списков
+      
       queryClient.invalidateQueries({ queryKey: ['arbitrator-claims', 'pending_approval'] });
-      // Небольшая задержка перед инвалидацией, чтобы пользователь увидел изменения
+      
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['arbitrator-claims'] });
       }, 500);
     },
     onError: (error: any, variables, context) => {
-      // Откатываем изменения при ошибке
+      
       if (context?.previousInProgressData) {
         queryClient.setQueryData(['arbitrator-claims', 'in_progress', params], context.previousInProgressData);
       }
@@ -105,7 +105,7 @@ const InProgress: React.FC = () => {
   const claims = claimsData?.results || [];
   const total = claimsData?.count || 0;
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -123,7 +123,7 @@ const InProgress: React.FC = () => {
   };
 
   const handleSendForApproval = (claim: Claim) => {
-    // В реальном приложении здесь будет модальное окно для ввода сообщения
+    
     sendForApprovalMutation.mutate({
       id: claim.id,
       message: 'Отправлено на согласование дирекции',
@@ -135,7 +135,7 @@ const InProgress: React.FC = () => {
     setSelectedClaim(null);
   };
 
-  // Вычисление времени в работе
+  
   const getTimeInWork = (claim: Claim) => {
     if (!claim.taken_at) return 'Не указано';
     const now = dayjs();
@@ -149,7 +149,7 @@ const InProgress: React.FC = () => {
     return `${days} дн. ${hours} ч.`;
   };
 
-  // Получение цвета тега типа
+  
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
@@ -163,7 +163,7 @@ const InProgress: React.FC = () => {
     }
   };
 
-  // Получение текста типа
+  
   const getTypeText = (type: string) => {
     switch (type) {
       case 'refund':
@@ -177,7 +177,7 @@ const InProgress: React.FC = () => {
     }
   };
 
-  // Колонки таблицы
+  
   const columns = [
     {
       title: '№',
@@ -290,7 +290,6 @@ const InProgress: React.FC = () => {
           Список обращений, находящихся в обработке
         </Text>
 
-        {/* Фильтры и поиск */}
         <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
           <Col xs={24} sm={12} md={8} lg={8}>
             <Input
@@ -327,7 +326,6 @@ const InProgress: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Таблица */}
         <div style={{ overflowX: 'auto' }}>
           <Table
             columns={columns}
@@ -360,7 +358,6 @@ const InProgress: React.FC = () => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

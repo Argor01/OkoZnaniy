@@ -5,7 +5,7 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Плавная прокрутка вверх при смене страницы
+    
     window.scrollTo({
       top: 0,
       left: 0,

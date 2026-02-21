@@ -6,7 +6,7 @@ const TelegramAuthExample: React.FC = () => {
   const navigate = useNavigate();
 
   const handleTelegramAuth = (user: any) => {
-    // Перенаправляем пользователя в зависимости от роли
+    
     navigate('/expert');
   };
 
@@ -28,7 +28,7 @@ const TelegramAuthExample: React.FC = () => {
         </div>
 
         <div className="mt-8 space-y-6">
-          {/* Обычная форма входа */}
+          
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
@@ -67,7 +67,6 @@ const TelegramAuthExample: React.FC = () => {
             </button>
           </div>
 
-          {/* Разделитель */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -77,7 +76,6 @@ const TelegramAuthExample: React.FC = () => {
             </div>
           </div>
 
-          {/* Telegram Login Button */}
           <div className="flex justify-center">
             <TelegramLoginButton
               botName="oko_expert_bot"
@@ -91,7 +89,7 @@ const TelegramAuthExample: React.FC = () => {
             />
           </div>
 
-          {/* Дополнительные ссылки */}
+          
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">

@@ -1,4 +1,4 @@
-/* Стили страницы создания заказа в стиле проекта */
+﻿
 
 .container {
   width: 100%;
@@ -6,9 +6,9 @@
   background: #f3f4f6;
   padding: 24px;
   box-sizing: border-box;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .card {
@@ -21,9 +21,9 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .header {
@@ -38,14 +38,14 @@
 .title {
   font-size: 32px;
   font-weight: 700;
-  margin: 0 !important;
+  margin: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Секция стоимости */
+
 .priceSection {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -85,31 +85,31 @@
 
 .priceInput {
   flex: 0 0 300px;
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  height: 48px !important;
-  font-size: 16px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  height: 48px;
+  font-size: 16px;
 }
 
 .priceInput:hover,
 .priceInput:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .priceField {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  height: 48px !important;
-  font-size: 16px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  height: 48px;
+  font-size: 16px;
 }
 
 .priceField:hover,
 .priceField:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .priceDescription {
@@ -147,17 +147,17 @@
 }
 
 .checkboxField .ant-checkbox-wrapper {
-  color: #1f2937 !important;
+  color: #1f2937;
   font-weight: 500;
 }
 
 .checkboxField .ant-checkbox-inner {
-  border-color: rgba(102, 126, 234, 0.3) !important;
+  border-color: rgba(102, 126, 234, 0.3);
 }
 
 .checkboxField .ant-checkbox-checked .ant-checkbox-inner {
-  background: #667eea !important;
-  border-color: #667eea !important;
+  background: #667eea;
+  border-color: #667eea;
 }
 
 .uniquenessField {
@@ -175,15 +175,15 @@
 }
 
 .promoLink {
-  color: #667eea !important;
+  color: #667eea;
   text-decoration: underline;
-  padding: 0 !important;
-  height: auto !important;
+  padding: 0;
+  height: auto;
   font-size: 14px;
 }
 
 .promoLink:hover {
-  color: #5a67d8 !important;
+  color: #5a67d8;
 }
 
 .promoInput {
@@ -192,11 +192,11 @@
 }
 
 .sectionDivider {
-  border-color: rgba(102, 126, 234, 0.1) !important;
-  margin: 32px 0 !important;
+  border-color: rgba(102, 126, 234, 0.1);
+  margin: 32px 0;
 }
 
-/* Секция заказа */
+
 .orderSection {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -207,29 +207,29 @@
 }
 
 .sectionTitle {
-  font-size: 24px !important;
-  font-weight: 600 !important;
-  margin-bottom: 24px !important;
-  color: #1f2937 !important;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1f2937;
 }
 
 .titleInput {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  height: 48px !important;
-  font-size: 16px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  height: 48px;
+  font-size: 16px;
   margin-bottom: 16px;
 }
 
 .titleInput:hover,
 .titleInput:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .titleInput::placeholder {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
 .typeSubjectDateRow {
@@ -269,16 +269,16 @@
 }
 
 .dateInput {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  height: 48px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  height: 48px;
 }
 
 .dateInput:hover,
 .dateInput:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .timeGroup {
@@ -303,17 +303,17 @@
 }
 
 .timeInput {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  width: 80px !important;
-  height: 48px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  width: 80px;
+  height: 48px;
 }
 
 .timeInput:hover,
 .timeInput:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .templatesSection {
@@ -321,20 +321,20 @@
 }
 
 .templatesButton {
-  background: rgba(102, 126, 234, 0.1) !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  border-radius: 8px !important;
-  color: #667eea !important;
-  font-weight: 600 !important;
-  font-size: 12px !important;
-  height: 32px !important;
-  padding: 0 16px !important;
-  transition: all 0.3s ease !important;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 8px;
+  color: #667eea;
+  font-weight: 600;
+  font-size: 12px;
+  height: 32px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
 }
 
 .templatesButton:hover {
-  background: rgba(102, 126, 234, 0.2) !important;
-  border-color: rgba(102, 126, 234, 0.3) !important;
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.3);
 }
 
 .descriptionField {
@@ -343,23 +343,23 @@
 
 
 .descriptionTextarea {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  color: #1f2937 !important;
-  font-size: 15px !important;
-  line-height: 1.6 !important;
-  resize: none !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
 }
 
 .descriptionTextarea:hover,
 .descriptionTextarea:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .descriptionTextarea::placeholder {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
 .privateNotesField {
@@ -367,20 +367,20 @@
 }
 
 .privateNotesTextarea {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  font-size: 15px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  font-size: 15px;
 }
 
 .privateNotesTextarea:hover,
 .privateNotesTextarea:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .privateNotesTextarea::placeholder {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
 .filesField {
@@ -388,59 +388,59 @@
 }
 
 .uploadArea {
-  border-radius: 12px !important;
-  border: 2px dashed rgba(102, 126, 234, 0.3) !important;
-  transition: all 0.3s ease !important;
-  background: rgba(102, 126, 234, 0.02) !important;
+  border-radius: 12px;
+  border: 2px dashed rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  background: rgba(102, 126, 234, 0.02);
 }
 
 .uploadArea .ant-upload {
-  border: none !important;
-  background: transparent !important;
+  border: none;
+  background: transparent;
 }
 
 .uploadArea .ant-upload-btn {
-  border: none !important;
-  background: transparent !important;
-  padding: 24px !important;
+  border: none;
+  background: transparent;
+  padding: 24px;
 }
 
 .uploadArea:hover {
-  border-color: #667eea !important;
-  background: rgba(102, 126, 234, 0.05) !important;
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
 }
 
 .uploadArea .ant-upload-drag-icon {
-  color: #667eea !important;
-  font-size: 48px !important;
-  margin-bottom: 16px !important;
+  color: #667eea;
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
 .uploadArea .ant-upload-text {
-  color: #1f2937 !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  margin-bottom: 8px !important;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .uploadArea .ant-upload-hint {
-  color: #6b7280 !important;
-  font-size: 14px !important;
+  color: #6b7280;
+  font-size: 14px;
 }
 
-/* Переопределение стилей Ant Design Upload */
+
 .uploadArea .ant-upload-drag {
-  border: none !important;
-  background: transparent !important;
+  border: none;
+  background: transparent;
 }
 
 .uploadArea .ant-upload-drag-container {
-  border: none !important;
+  border: none;
 }
 
 .uploadArea::before,
 .uploadArea::after {
-  display: none !important;
+  display: none;
 }
 
 .fileUploadSection {
@@ -450,22 +450,22 @@
 }
 
 .addFilesButton {
-  background: rgba(102, 126, 234, 0.1) !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  border-radius: 12px !important;
-  color: #667eea !important;
-  height: 48px !important;
-  font-size: 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  color: #667eea;
+  height: 48px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   align-self: flex-start;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s ease;
 }
 
 .addFilesButton:hover {
-  border-color: #667eea !important;
-  background: rgba(102, 126, 234, 0.2) !important;
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.2);
 }
 
 .filesList {
@@ -493,94 +493,94 @@
 }
 
 .submitButton {
-  background: #1890ff !important;
-  border: none !important;
-  border-radius: 12px !important;
-  height: 56px !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  padding: 0 48px !important;
-  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3) !important;
-  transition: all 0.3s ease !important;
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
+  height: 56px;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 0 48px;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
 .submitButton:hover {
-  background: #40a9ff !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
 }
 
-/* Общие стили для полей */
+
 .selectField {
-  border-radius: 12px !important;
-  height: 48px !important;
+  border-radius: 12px;
+  height: 48px;
 }
 
 .selectField .ant-select-selector {
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  border-radius: 12px !important;
-  height: 48px !important;
-  padding: 0 16px !important;
-  transition: all 0.3s ease !important;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  height: 48px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
 }
 
 .selectField .ant-select-selector:hover,
 .selectField.ant-select-focused .ant-select-selector {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .selectField .ant-select-selection-placeholder {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
 .selectField .ant-select-selection-item {
-  color: #1f2937 !important;
+  color: #1f2937;
 }
 
 .selectField .ant-select-arrow {
-  color: #6b7280 !important;
+  color: #6b7280;
 }
 
 .buttonSecondary {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  border-radius: 12px !important;
-  height: 44px !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  color: #667eea !important;
-  transition: all 0.3s ease !important;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #667eea;
+  transition: all 0.3s ease;
 }
 
 .buttonSecondary:hover {
-  background: rgba(102, 126, 234, 0.1) !important;
-  border-color: rgba(102, 126, 234, 0.4) !important;
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
 }
 
-/* Переопределение стилей Ant Design */
+
 .ant-form-item-label > label {
-  color: #1f2937 !important;
+  color: #1f2937;
   font-weight: 500;
 }
 
 .ant-form-item-explain-error {
-  color: #ef4444 !important;
+  color: #ef4444;
 }
 
 .ant-picker-dropdown {
-  border-radius: 12px !important;
+  border-radius: 12px;
 }
 
 .ant-select-dropdown {
-  border-radius: 12px !important;
+  border-radius: 12px;
 }
 
 .ant-time-picker-dropdown {
-  border-radius: 12px !important;
+  border-radius: 12px;
 }
 
-/* Адаптивные стили */
+
 @media (max-width: 1024px) {
   .card {
     margin: 16px;
@@ -662,7 +662,7 @@
   }
 
   .sectionTitle {
-    font-size: 20px !important;
+    font-size: 20px;
   }
 }
 
@@ -688,39 +688,39 @@
   }
 
   .sectionTitle {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 
   .submitButton {
-    height: 48px !important;
-    font-size: 16px !important;
-    padding: 0 32px !important;
+    height: 48px;
+    font-size: 16px;
+    padding: 0 32px;
   }
 
   .priceField,
   .titleInput,
   .dateInput,
   .timeInput {
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
   .selectField {
-    height: 44px !important;
+    height: 44px;
   }
 
   .selectField .ant-select-selector {
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
   .addFilesButton {
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
   .buttonSecondary {
-    height: 40px !important;
-    font-size: 15px !important;
+    height: 40px;
+    font-size: 15px;
   }
 }

@@ -1,4 +1,4 @@
-// Константы приложения
+
 
 export const BREAKPOINTS = {
   MOBILE: 840,

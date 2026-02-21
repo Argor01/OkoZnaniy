@@ -1,4 +1,4 @@
-/* Адаптивные стили для чата поддержки с современным дизайном */
+﻿
 
 .supportChatsSection {
   height: 100%;
@@ -33,13 +33,13 @@
 }
 
 .chatItem:hover {
-  background-color: #f5f5f5 !important;
+  background-color: #f5f5f5;
   transform: translateX(4px);
 }
 
 .chatItem.selected {
-  background-color: #f0f8ff !important;
-  border-left: 4px solid #667eea !important;
+  background-color: #f0f8ff;
+  border-left: 4px solid #667eea;
 }
 
 .messagesContainer {
@@ -52,7 +52,7 @@
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
 }
 
-/* Кастомный скроллбар */
+
 .messagesContainer::-webkit-scrollbar,
 .chatScrollArea::-webkit-scrollbar {
   width: 6px;
@@ -215,7 +215,7 @@
   color: #999;
 }
 
-/* Адаптивность */
+
 @media (max-width: 768px) {
   .messageContent {
     max-width: 85%;
@@ -232,7 +232,7 @@
   }
 }
 
-/* Анимация для кнопок */
+
 .sendButton {
   transition: all 0.3s ease;
 }
@@ -255,16 +255,17 @@
   border-color: #667eea;
 }
 
-/* Выравнивание аватарки по центру */
+
 :global(.ant-list-item) {
-  align-items: center !important;
+  align-items: center;
 }
 
 :global(.ant-list-item-meta) {
-  align-items: center !important;
+  align-items: center;
 }
 
 :global(.ant-list-item-meta-avatar) {
-  align-self: center !important;
-  margin-top: 0 !important;
+  align-self: center;
+  margin-top: 0;
 }
+

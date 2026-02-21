@@ -1,6 +1,4 @@
-/**
- * Тестовые данные для системы поддержки
- */
+
 
 import { SupportRequest, SupportMessage, AdminChat, ChatMessage, SupportStats } from '../types/support.types';
 
@@ -387,11 +385,11 @@ export const mockSupportStats: SupportStats = {
   openRequests: 4,
   inProgressRequests: 2,
   completedToday: 3,
-  averageResponseTime: 45, // минут
-  customerSatisfaction: 94.5 // процент
+  averageResponseTime: 45, 
+  customerSatisfaction: 94.5 
 };
 
-// Функции для фильтрации данных
+
 export const getSupportRequestsByStatus = (status: 'open' | 'in_progress' | 'completed'): SupportRequest[] => {
   return mockSupportRequests.filter(request => request.status === status);
 };

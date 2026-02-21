@@ -113,7 +113,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Отслеживание размера окна для адаптивности
+  
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -123,7 +123,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   const isMobile = windowWidth < 768;
   const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
-  // Мок данные для демонстрации
+  
   const mockChats: SupportChat[] = [
     {
       id: 1,
@@ -322,7 +322,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
     return texts[priority as keyof typeof texts] || 'Неизвестно';
   }; 
   
-  // Используем только реальные данные из БД
+  
   const chatsData = chats;
 
   useEffect(() => {
@@ -332,7 +332,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   }, [selectedChat?.messages]);
 
   const filteredChats = chatsData.filter(chat => {
-    // Фильтр по поиску
+    
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesSearch = chat.subject.toLowerCase().includes(query) ||
@@ -342,12 +342,12 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
       if (!matchesSearch) return false;
     }
     
-    // Фильтр по статусу
+    
     if (statusFilter !== 'all' && chat.status !== statusFilter) {
       return false;
     }
     
-    // Фильтр по приоритету
+    
     if (priorityFilter !== 'all' && chat.priority !== priorityFilter) {
       return false;
     }
@@ -358,7 +358,6 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
   return (
     <div className={styles.supportChatsSection}>
       <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 16]}>
-        {/* Список чатов */}
         <Col 
           xs={24} 
           lg={8}
@@ -385,7 +384,6 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               </Badge>
             }
           >
-            {/* Поиск */}
             <Input
               prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
               placeholder="Поиск по чатам..."
@@ -398,7 +396,6 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               allowClear
             />
             
-            {/* Фильтры */}
             <div style={{ 
               display: 'flex', 
               gap: 8, 
@@ -432,7 +429,6 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               </Select>
             </div>
             
-            {/* Статистика */}
             <div style={{ 
               display: 'flex', 
               gap: 8, 
@@ -570,7 +566,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
           </Card>
         </Col>
 
-        {/* Область сообщений */}
+        
         <Col xs={24} lg={16}>
           {selectedChat ? (
             <Card 
@@ -580,7 +576,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                   flexDirection: 'column',
                   gap: 8
                 }}>
-                  {/* Первая строка: имя и кнопка назад */}
+                  
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {isMobile && (
                       <Button 
@@ -595,7 +591,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                     </span>
                   </div>
                   
-                  {/* Вторая строка: теги и тема */}
+                  
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                     <Tag color={getStatusColor(selectedChat.status)} style={{ fontSize: isMobile ? 11 : 12, margin: 0 }}>
                       {getStatusText(selectedChat.status)}
@@ -614,7 +610,7 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
               }
               size="small"
             >
-              {/* Сообщения */}
+              
               <div 
                 style={{ 
                   height: isMobile ? '300px' : '400px', 
@@ -690,14 +686,14 @@ export const SupportChatsSection: React.FC<SupportChatsSectionProps> = ({
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Форма отправки сообщения */}
+              
               <div style={{
                 padding: isMobile ? 12 : 16,
                 background: 'white',
                 borderRadius: 12,
                 boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.05)'
               }}>
-                {/* Прикрепленные файлы */}
+                
                 {attachedFiles.length > 0 && (
                   <div style={{ marginBottom: 12 }}>
                     {attachedFiles.map((file, index) => (

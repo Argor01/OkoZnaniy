@@ -1,4 +1,4 @@
-/* Стили для главного компонента AdminDashboard */
+
 
 .loading {
   display: flex;
@@ -52,7 +52,7 @@
   max-width: 400px;
 }
 
-/* Адаптивность */
+
 @media (max-width: 768px) {
   .loading p,
   .error p {

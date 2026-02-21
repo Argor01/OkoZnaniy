@@ -61,7 +61,7 @@ export const catalogApi = {
     return response.data;
   },
 
-  // Получить все предметы
+  
   getSubjects: async (): Promise<Subject[]> => {
     console.log('🔍 Запрос предметов...');
     try {
@@ -74,14 +74,14 @@ export const catalogApi = {
     }
   },
 
-  // Получить темы по предмету
+  
   getTopics: async (subjectId?: number): Promise<Topic[]> => {
     const params = subjectId ? { subject: subjectId } : {};
     const response = await apiClient.get('/catalog/topics/', { params });
     return response.data.results || response.data;
   },
 
-  // Получить типы работ
+  
   getWorkTypes: async (): Promise<WorkType[]> => {
     console.log('🔍 Запрос типов работ...');
     try {
@@ -94,7 +94,7 @@ export const catalogApi = {
     }
   },
 
-  // Создать новый предмет
+  
   createSubject: async (name: string): Promise<Subject> => {
     console.log('🆕 Создание нового предмета:', name);
     try {
@@ -111,7 +111,7 @@ export const catalogApi = {
     }
   },
 
-  // Создать новый тип работы
+  
   createWorkType: async (name: string): Promise<WorkType> => {
     console.log('🆕 Создание нового типа работы:', name);
     try {

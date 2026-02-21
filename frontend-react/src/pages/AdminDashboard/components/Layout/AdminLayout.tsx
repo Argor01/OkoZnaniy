@@ -17,10 +17,7 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-/**
- * Основной лейаут админской панели
- * Включает сайдбар, хедер и контент
- */
+
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   user,
   selectedMenu,
@@ -40,7 +37,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   return (
     <Layout className={styles.adminLayout}>
-      {/* Сайдбар для десктопа */}
       {!isMobile && (
         <AdminSidebar
           selectedMenu={selectedMenu}
@@ -51,7 +47,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         />
       )}
 
-      {/* Drawer для мобильных - рендерится только для мобильных */}
       {isMobile && (
         <AdminSidebar
           selectedMenu={selectedMenu}
@@ -65,7 +60,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       )}
 
       <Layout className={styles.contentLayout}>
-        {/* Хедер */}
         <AdminHeader
           user={user}
           selectedMenu={selectedMenu}
@@ -75,7 +69,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           isTablet={isTablet}
         />
 
-        {/* Основной контент */}
         <Content className={styles.content}>
           <div className={styles.contentInner}>
             {children}

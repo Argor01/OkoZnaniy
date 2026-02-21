@@ -33,7 +33,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
   const queryClient = useQueryClient();
   const isMobile = window.innerWidth <= 840;
 
-  // Мутация для удаления сообщения
+  
   const deleteMessageMutation = useMutation({
     mutationFn: (id: number) => directorApi.deleteMessage(id),
     onSuccess: () => {
@@ -41,7 +41,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     },
   });
 
-  // Мутация для отметки как прочитанное
+  
   const markAsReadMutation = useMutation({
     mutationFn: (id: number) => directorApi.markMessageAsRead(id),
     onSuccess: () => {
@@ -62,7 +62,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     }
   };
 
-  // Получение цвета тега приоритета
+  
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -76,7 +76,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     }
   };
 
-  // Получение текста приоритета
+  
   const getPriorityText = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -90,7 +90,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     }
   };
 
-  // Получение цвета тега статуса
+  
   const getStatusColor = (status: string, readAt?: string) => {
     if (readAt) {
       return 'green';
@@ -107,7 +107,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     }
   };
 
-  // Получение текста статуса
+  
   const getStatusText = (status: string, readAt?: string) => {
     if (readAt) {
       return 'Прочитано';

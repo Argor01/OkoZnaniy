@@ -122,7 +122,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
   const subjectsData = subjects;
   const workTypesData = workTypes;
 
-  // Обработчики для категорий
+  
   const handleCreateCategory = () => {
     setSelectedCategory(null);
     setEditMode(false);
@@ -159,7 +159,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
     message.success(`Категория "${category.name}" удалена`);
   };
 
-  // Обработчики для предметов
+  
   const handleCreateSubject = () => {
     setSelectedSubject(null);
     setEditMode(false);
@@ -196,7 +196,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
     message.success(`Предмет "${subject.name}" удален`);
   };
 
-  // Обработчики для типов работ
+  
   const handleCreateWorkType = () => {
     setSelectedWorkType(null);
     setEditMode(false);
@@ -233,7 +233,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
     message.success(`Тип работы "${workType.name}" удален`);
   };
 
-  // Колонки для таблиц
+  
   const categoryColumns = [
     {
       title: 'Категория',
@@ -572,7 +572,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
           </TabPane>
         </Tabs>
       </Card> 
-     {/* Модальное окно категории */}
+     
       <Modal
         title={editMode ? 'Редактировать категорию' : 'Создать категорию'}
         open={categoryModalVisible}
@@ -635,7 +635,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
         </Form>
       </Modal>
 
-      {/* Модальное окно предмета */}
+      
       <Modal
         title={editMode ? 'Редактировать предмет' : 'Создать предмет'}
         open={subjectModalVisible}
@@ -698,7 +698,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
         </Form>
       </Modal>
 
-      {/* Модальное окно типа работы */}
+      
       <Modal
         title={editMode ? 'Редактировать тип работы' : 'Создать тип работы'}
         open={workTypeModalVisible}

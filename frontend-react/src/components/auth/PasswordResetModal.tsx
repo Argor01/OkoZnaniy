@@ -93,7 +93,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             Введите 6-значный код из email
           </p>
           
-          {/* Поля для ввода кода */}
+          
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
             {code.map((digit, index) => (
               <input
@@ -122,7 +122,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             ))}
           </div>
 
-          {/* Кнопки */}
+          
           <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
             <Button onClick={onBackToEmail} disabled={loading}>
               ← Назад
@@ -144,7 +144,6 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             Введите новый пароль
           </p>
 
-          {/* Поля для нового пароля */}
           <Input.Password
             prefix={<LockOutlined />}
             placeholder="Новый пароль (минимум 8 символов)"
@@ -164,7 +163,6 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             disabled={loading}
           />
 
-          {/* Кнопки */}
           <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
             <Button onClick={onBackToCode} disabled={loading}>
               ← Назад

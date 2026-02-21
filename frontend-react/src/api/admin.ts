@@ -41,10 +41,10 @@ export interface Arbitrator {
   email: string;
 }
 
-// Флаг для использования mock данных
+
 const USE_MOCK_DATA = false;
 
-// Хранилище для обновленных партнеров
+
 const getUpdatedPartners = (): Map<number, Partial<Partner>> => {
   try {
     const stored = localStorage.getItem('admin_updated_partners');
@@ -69,7 +69,7 @@ const saveUpdatedPartner = (partnerId: number, updates: Partial<Partner>): void 
   }
 };
 
-// Хранилище для выплаченных начислений
+
 const getPaidEarningsIds = (): Set<number> => {
   try {
     const stored = localStorage.getItem('admin_paid_earnings');
@@ -93,7 +93,7 @@ const savePaidEarningId = (earningId: number): void => {
   }
 };
 
-// Генерация mock данных для партнеров
+
 const generateMockPartners = (): Partner[] => {
   const basePartners: Partner[] = [
     {
@@ -182,7 +182,7 @@ const generateMockPartners = (): Partner[] => {
     },
   ];
 
-  // Применяем обновления из localStorage
+  
   const updatedPartners = getUpdatedPartners();
   return basePartners.map(partner => {
     const updates = updatedPartners.get(partner.id);
@@ -190,7 +190,7 @@ const generateMockPartners = (): Partner[] => {
   });
 };
 
-// Генерация mock данных для начислений
+
 const generateMockEarnings = (): PartnerEarning[] => {
   const partners = generateMockPartners();
   const paidEarningsIds = getPaidEarningsIds();
@@ -336,7 +336,7 @@ const generateMockEarnings = (): PartnerEarning[] => {
   return earnings.sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf());
 };
 
-// Генерация mock данных для арбитров
+
 const generateMockArbitrators = (): Arbitrator[] => {
   return [
     {
@@ -371,7 +371,7 @@ const generateMockArbitrators = (): Arbitrator[] => {
 };
 
 export const adminApi = {
-  // Получить всех партнеров
+  
   getPartners: async (): Promise<Partner[]> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -390,7 +390,7 @@ export const adminApi = {
     }
   },
 
-  // Получить все начисления
+  
   getEarnings: async (): Promise<PartnerEarning[]> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -409,7 +409,7 @@ export const adminApi = {
     }
   },
 
-  // Обновить партнера
+  
   updatePartner: async (partnerId: number, data: UpdatePartnerRequest): Promise<Partner> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -440,7 +440,7 @@ export const adminApi = {
     }
   },
 
-  // Отметить начисление как выплаченное
+  
   markEarningPaid: async (earningId: number): Promise<{ message: string }> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));

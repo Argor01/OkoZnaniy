@@ -20,14 +20,7 @@ interface DashboardWithChatAndNotificationsProps {
   children?: React.ReactNode;
 }
 
-/**
- * Компонент-обертка для дашбордов с интегрированным чатом и уведомлениями
- * Использование:
- * 
- * <DashboardWithChatAndNotifications userProfile={userProfile}>
- *   <YourDashboardContent />
- * </DashboardWithChatAndNotifications>
- */
+
 const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificationsProps> = ({
   userProfile,
   onBalanceClick,
@@ -40,7 +33,7 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   
-  // Используем хуки для чата и уведомлений
+  
   const { unreadCount: unreadMessages } = useChat();
   const { 
     notifications, 
@@ -49,7 +42,7 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
     markAllAsRead 
   } = useNotifications();
 
-  // Настройки уведомлений (можно сохранять в localStorage или на бэкенде)
+  
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     orderConfirmation: true,
     claims: true,
@@ -60,18 +53,18 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
   });
 
   const handleNotificationClick = (notification: any) => {
-    // Отмечаем как прочитанное
+    
     markAsRead(notification.id);
     
-    // Если это уведомление о сообщении, открываем чат
+    
     if (notification.type === 'message') {
       setNotificationsModalOpen(false);
       setMessagesModalOpen(true);
     }
     
-    // Можно добавить навигацию по actionUrl
+    
     if (notification.actionUrl) {
-      // navigate(notification.actionUrl);
+      window.location.href = notification.actionUrl;
     }
   };
 
@@ -92,7 +85,6 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
 
       {children}
 
-      {/* Модалка чата */}
       <MessageModal
         visible={messagesModalOpen}
         onClose={() => setMessagesModalOpen(false)}
@@ -102,7 +94,6 @@ const DashboardWithChatAndNotifications: React.FC<DashboardWithChatAndNotificati
         userProfile={userProfile ? { role: userProfile.role } : undefined}
       />
 
-      {/* Модалка уведомлений */}
       <NotificationSystem
         visible={notificationsModalOpen}
         onClose={() => setNotificationsModalOpen(false)}

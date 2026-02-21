@@ -42,7 +42,7 @@ interface BlockedUser {
   blocked_at: string;
   blocked_by: string;
   block_reason: string;
-  block_duration?: string; // temporary, permanent
+  block_duration?: string; 
   unblock_date?: string;
   last_login?: string;
   registration_date: string;
@@ -71,7 +71,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
 
   const dataSource = users;
 
-  // Фильтрация данных
+  
   const filteredData = dataSource.filter(user => {
     const matchesSearch = 
       user.username.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -253,7 +253,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
           </Text>
         </div>
 
-        {/* Фильтры */}
+        
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по имени, email или username"
@@ -288,7 +288,6 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
           </Select>
         </div>
 
-        {/* Статистика */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
           <Tag color="red">
             Всего заблокированных: {filteredData.length}
@@ -318,7 +317,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно разблокировки */}
+      
       <Modal
         title={`Разблокировать пользователя ${selectedUser?.username}`}
         open={unblockModalVisible}

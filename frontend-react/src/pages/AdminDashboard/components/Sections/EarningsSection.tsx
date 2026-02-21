@@ -13,10 +13,7 @@ interface EarningsSectionProps {
   isMarkingPaid?: boolean;
 }
 
-/**
- * Секция управления начислениями
- * Отображает таблицу начислений с возможностью отметки как выплаченных
- */
+
 export const EarningsSection: React.FC<EarningsSectionProps> = ({
   earnings,
   loading,
@@ -138,7 +135,7 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
     },
   ];
 
-  // Статистика по начислениям
+  
   const totalAmount = earnings.reduce((sum, earning) => sum + earning.amount, 0);
   const paidAmount = earnings
     .filter(e => e.is_paid)
@@ -148,7 +145,6 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
 
   return (
     <div className={styles.earningsContainer}>
-      {/* Статистика */}
       <div className={styles.statsContainer}>
         <Card className={styles.statCard}>
           <div className={styles.statContent}>
@@ -182,7 +178,6 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
         </Card>
       </div>
 
-      {/* Таблица начислений */}
       <Card className={styles.earningsCard}>
         <Table
           columns={columns}

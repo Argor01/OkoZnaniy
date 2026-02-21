@@ -49,31 +49,31 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  // Вход
+  
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post('/users/token/', data);
     const { access, refresh } = response.data;
     
-    // Сохраняем токены
+    
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
     
     return response.data;
   },
 
-  // Регистрация
+  
   register: async (data: RegisterRequest): Promise<User> => {
     const response = await apiClient.post('/users/', data);
     return response.data;
   },
 
-  // Выход
+  
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
   },
 
-  // Получить текущего пользователя
+  
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get('/users/me/');
     return response.data;
@@ -84,13 +84,13 @@ export const authApi = {
     return response.data;
   },
 
-  // Получить последних активных пользователей
+  
   getRecentUsers: async (): Promise<User[]> => {
     const response = await apiClient.get('/users/recent_users/');
     return response.data;
   },
 
-  // Обновить токен
+  
   refreshToken: async (): Promise<{ access: string }> => {
     const refresh = localStorage.getItem('refresh_token');
     const response = await apiClient.post('/users/token/refresh/', { refresh });
@@ -99,13 +99,13 @@ export const authApi = {
     return response.data;
   },
 
-  // Обновить профиль
+  
   updateProfile: async (data: Partial<User>): Promise<User> => {
     const response = await apiClient.patch('/users/update_me/', data);
     return response.data;
   },
 
-  // Подать анкету эксперта
+  
   submitExpertApplication: async (data: {
     first_name: string;
     last_name: string;
@@ -119,12 +119,12 @@ export const authApi = {
     return response.data;
   },
 
-  // Подтвердить email через код
+  
   verifyEmailCode: async (email: string, code: string): Promise<AuthResponse> => {
     const response = await apiClient.post('/users/verify_email_code/', { email, code });
     const { access, refresh } = response.data;
     
-    // Сохраняем токены
+    
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
     localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -132,17 +132,17 @@ export const authApi = {
     return response.data;
   },
 
-  // Повторно отправить код подтверждения
+  
   resendVerificationCode: async (email: string): Promise<void> => {
     await apiClient.post('/users/resend_verification_code/', { email });
   },
 
-  // Запросить сброс пароля
+  
   requestPasswordReset: async (email: string): Promise<void> => {
     await apiClient.post('/users/request_password_reset/', { email });
   },
 
-  // Подтвердить сброс пароля
+  
   confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<void> => {
     await apiClient.post('/users/reset_password_with_code/', {
       email,
@@ -165,7 +165,7 @@ export const authApi = {
     });
   },
 
-  // Alias для совместимости
+  
   resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<void> => {
     await apiClient.post('/users/reset_password_with_code/', {
       email,

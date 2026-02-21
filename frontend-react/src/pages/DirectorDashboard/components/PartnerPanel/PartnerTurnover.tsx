@@ -167,7 +167,6 @@ const PartnerTurnover: React.FC = () => {
 
   return (
     <div>
-      {/* Селектор периода */}
       <Card style={{ 
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
@@ -254,7 +253,7 @@ const PartnerTurnover: React.FC = () => {
       <Spin spinning={isLoading}>
         {turnoverData && (
           <>
-            {/* Статистика */}
+            
             <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
               <Col xs={24} sm={12} md={8}>
                 <Card style={{ 
@@ -321,7 +320,7 @@ const PartnerTurnover: React.FC = () => {
               </Col>
             </Row>
 
-            {/* Графики */}
+            
             {topPartners.length > 0 && (
               <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 16 }}>
                 <Col xs={24} lg={12}>
@@ -437,7 +436,6 @@ const PartnerTurnover: React.FC = () => {
               </Row>
             )}
 
-            {/* Топ-5 партнёров */}
             {topPartners.length > 0 && (
               <Card 
                 title="Детали топ-5 партнёров" 
@@ -464,7 +462,7 @@ const PartnerTurnover: React.FC = () => {
                         }}
                       >
                         {isMobile ? (
-                          // Мобильная версия - вертикальный layout
+                          
                           <div>
                             <div style={{ 
                               display: 'flex', 
@@ -539,7 +537,7 @@ const PartnerTurnover: React.FC = () => {
                             </div>
                           </div>
                         ) : (
-                          // Десктопная версия - горизонтальный layout
+                          
                           <Row align="middle">
                             <Col span={1}>
                               <Tag color={index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : 'default'}>
@@ -574,7 +572,6 @@ const PartnerTurnover: React.FC = () => {
               </Card>
             )}
 
-            {/* Таблица с оборотами */}
             <Card 
               title="Оборот по всем партнёрам"
               style={{ 
@@ -586,7 +583,7 @@ const PartnerTurnover: React.FC = () => {
               }}
             >
               {isMobile ? (
-                // Мобильная версия - карточки
+                
                 <div>
                   <Space direction="vertical" style={{ width: '100%' }} size="middle">
                     {(turnoverData.partners || []).map((partner: any, index: number) => {
@@ -677,7 +674,7 @@ const PartnerTurnover: React.FC = () => {
                     })}
                   </Space>
                   
-                  {/* Итоговая карточка для мобильных */}
+                  
                   {(turnoverData.partners || []).length > 0 && (
                     <Card 
                       style={{
@@ -714,7 +711,7 @@ const PartnerTurnover: React.FC = () => {
                   )}
                 </div>
               ) : (
-                // Десктопная версия - таблица
+                
                 <Table
                   columns={columns}
                   dataSource={turnoverData.partners || []}

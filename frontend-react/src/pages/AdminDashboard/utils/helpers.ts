@@ -1,32 +1,24 @@
-/**
- * Вспомогательные утилиты для админ-панели
- */
+
 
 import type { Partner, Dispute } from '../types';
 
-/**
- * Генерирует уникальный ID
- */
+
 export const generateId = (): string => {
   return Math.random().toString(36).substr(2, 9);
 };
 
-/**
- * Задержка для имитации загрузки
- */
+
 export const delay = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-/**
- * Копирует текст в буфер обмена
- */
+
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // Fallback для старых браузеров
+    
     const textArea = document.createElement('textarea');
     textArea.value = text;
     document.body.appendChild(textArea);
@@ -37,9 +29,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-/**
- * Скачивает данные как JSON файл
- */
+
 export const downloadAsJson = (data: any, filename: string): void => {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: 'application/json'
@@ -54,9 +44,7 @@ export const downloadAsJson = (data: any, filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Скачивает данные как CSV файл
- */
+
 export const downloadAsCsv = (data: any[], filename: string): void => {
   if (data.length === 0) return;
   
@@ -84,9 +72,7 @@ export const downloadAsCsv = (data: any[], filename: string): void => {
   URL.revokeObjectURL(url);
 };
 
-/**
- * Дебаунс функции
- */
+
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -106,9 +92,7 @@ type SearchableUser = {
   phone?: string | null;
 };
 
-/**
- * Фильтрует пользователей по поисковому запросу
- */
+
 export const filterUsers = <T extends SearchableUser>(users: T[], searchQuery: string): T[] => {
   if (!searchQuery.trim()) return users;
   
@@ -129,9 +113,7 @@ type SearchableOrder = {
   expertName?: string | null;
 };
 
-/**
- * Фильтрует заказы по поисковому запросу
- */
+
 export const filterOrders = <T extends SearchableOrder>(orders: T[], searchQuery: string): T[] => {
   if (!searchQuery.trim()) return orders;
   
@@ -144,9 +126,7 @@ export const filterOrders = <T extends SearchableOrder>(orders: T[], searchQuery
   );
 };
 
-/**
- * Фильтрует партнеров по поисковому запросу
- */
+
 export const filterPartners = (partners: Partner[], searchQuery: string): Partner[] => {
   if (!searchQuery.trim()) return partners;
   
@@ -160,9 +140,7 @@ export const filterPartners = (partners: Partner[], searchQuery: string): Partne
   );
 };
 
-/**
- * Фильтрует споры по поисковому запросу
- */
+
 export const filterDisputes = (disputes: Dispute[], searchQuery: string): Dispute[] => {
   if (!searchQuery.trim()) return disputes;
   
@@ -175,9 +153,7 @@ export const filterDisputes = (disputes: Dispute[], searchQuery: string): Disput
   );
 };
 
-/**
- * Сортирует массив по указанному полю
- */
+
 export const sortBy = <T>(
   array: T[], 
   key: keyof T, 
@@ -193,9 +169,7 @@ export const sortBy = <T>(
   });
 };
 
-/**
- * Группирует массив по указанному полю
- */
+
 export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
   return array.reduce((groups, item) => {
     const group = String(item[key]);
@@ -205,9 +179,7 @@ export const groupBy = <T>(array: T[], key: keyof T): Record<string, T[]> => {
   }, {} as Record<string, T[]>);
 };
 
-/**
- * Проверяет, является ли значение пустым
- */
+
 export const isEmpty = (value: any): boolean => {
   if (value === null || value === undefined) return true;
   if (typeof value === 'string') return value.trim().length === 0;
@@ -216,9 +188,7 @@ export const isEmpty = (value: any): boolean => {
   return false;
 };
 
-/**
- * Безопасно парсит JSON
- */
+
 export const safeJsonParse = <T>(json: string, fallback: T): T => {
   try {
     return JSON.parse(json);

@@ -1,6 +1,6 @@
-// Типы данных для API арбитра
 
-// Вложение
+
+
 export interface Attachment {
   id: number;
   name: string;
@@ -10,7 +10,7 @@ export interface Attachment {
   uploaded_at: string;
 }
 
-// Сообщение
+
 export interface Message {
   id: number;
   sender: {
@@ -23,7 +23,7 @@ export interface Message {
   attachments?: Attachment[];
 }
 
-// Решение
+
 export interface Decision {
   id: number;
   claim_id: number;
@@ -42,7 +42,7 @@ export interface Decision {
   approval_comment?: string;
 }
 
-// Претензия/Обращение
+
 export interface Claim {
   id: number;
   type: 'refund' | 'dispute' | 'conflict';
@@ -82,7 +82,7 @@ export interface Claim {
   attachments: Attachment[];
 }
 
-// Заявка на возврат средств
+
 export interface RefundRequest extends Claim {
   type: 'refund';
   requested_amount: number;
@@ -91,7 +91,7 @@ export interface RefundRequest extends Claim {
   expert_response?: string;
 }
 
-// Спор
+
 export interface Dispute extends Claim {
   type: 'dispute' | 'conflict';
   conflict_type: 'quality' | 'deadline' | 'other';
@@ -100,7 +100,7 @@ export interface Dispute extends Claim {
   expert_complaint?: string;
 }
 
-// Внутреннее сообщение
+
 export interface InternalMessage {
   id: number;
   sender: {
@@ -122,7 +122,7 @@ export interface InternalMessage {
   status: 'sent' | 'read' | 'replied';
 }
 
-// Запрос на принятие решения
+
 export interface DecisionRequest {
   decision_type: 'full_refund' | 'partial_refund' | 'no_refund' | 'revision' | 'other';
   reasoning: string;
@@ -132,18 +132,18 @@ export interface DecisionRequest {
   refund_amount?: number;
 }
 
-// Запрос дополнительной информации
+
 export interface RequestInfoRequest {
   message: string;
   recipient: 'client' | 'expert' | 'both';
 }
 
-// Запрос на согласование
+
 export interface SendForApprovalRequest {
   message: string;
 }
 
-// Запрос на отправку сообщения дирекции
+
 export interface SendMessageRequest {
   text: string;
   claim_id?: number;
@@ -151,7 +151,7 @@ export interface SendMessageRequest {
   attachments?: File[];
 }
 
-// Параметры запроса списка претензий
+
 export interface GetClaimsParams {
   status?: 'new' | 'in_progress' | 'completed' | 'pending_approval';
   type?: 'refund' | 'dispute' | 'conflict';
@@ -162,7 +162,7 @@ export interface GetClaimsParams {
   date_to?: string;
 }
 
-// Параметры запроса списка сообщений
+
 export interface GetMessagesParams {
   page?: number;
   page_size?: number;
@@ -170,13 +170,13 @@ export interface GetMessagesParams {
   unread_only?: boolean;
 }
 
-// Параметры запроса статистики
+
 export interface GetStatisticsParams {
   date_from?: string;
   date_to?: string;
 }
 
-// Ответ со списком (пагинация)
+
 export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
@@ -184,7 +184,7 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-// Статистика
+
 export interface Statistics {
   total_claims: number;
   claims_by_status: {

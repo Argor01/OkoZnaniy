@@ -1,33 +1,33 @@
-/* MyWorks Page Styles */
+﻿
 
-/* MyWorks Page Styles - убираем лишние отступы от ant-layout-content */
 
-/* Переопределяем стили Ant Design Layout Content */
+
+
 :global(.ant-layout-content) {
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-/* Или более специфично для нашей страницы */
-.myWorksPage :global(.ant-layout-content) {
-  padding: 0 !important;
-  margin: 0 !important;
-  width: calc(100% - 250px) !important; /* Ширина минус сайдбар */
-  max-width: calc(100% - 250px) !important;
-  box-sizing: border-box !important;
-  margin-left: 250px !important; /* Отступ для сайдбара */
-  margin-top: 0 !important; /* Убираем отступ сверху */
-  min-height: 100vh !important;
-}
-
-/* Ограничиваем ширину контента */
-.contentContainer {
-  max-width: none; /* Убираем ограничение ширины */
-  margin: 0; /* Убираем центрирование */
+  padding: 0;
+  margin: 0;
   width: 100%;
-  padding: 24px; /* Убираем отступ сверху */
+  max-width: 100%;
+}
+
+
+.myWorksPage :global(.ant-layout-content) {
+  padding: 0;
+  margin: 0;
+  width: calc(100% - 250px); 
+  max-width: calc(100% - 250px);
+  box-sizing: border-box;
+  margin-left: 250px; 
+  margin-top: 0; 
+  min-height: 100vh;
+}
+
+
+.contentContainer {
+  max-width: none; 
+  margin: 0; 
+  width: 100%;
+  padding: 24px; 
   box-sizing: border-box;
 }
 
@@ -35,67 +35,67 @@
   .contentContainer {
     width: 100%;
     max-width: 100%;
-    padding: 16px; /* Убираем отступ сверху для мобильных */
+    padding: 16px; 
   }
 }
 
-/* Стили для хедера - начинается от края сайдбара */
+
 .myWorksPage :global(.ant-layout-header) {
-  margin: 0 !important;
-  padding-left: 24px !important;
-  padding-right: 24px !important;
-  width: calc(100% - 250px) !important; /* Ширина минус ширина сайдбара */
-  max-width: calc(100% - 250px) !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 250px !important; /* Начинается от правого края сайдбара */
-  z-index: 998 !important; /* Ниже сайдбара */
-  box-sizing: border-box !important;
+  margin: 0;
+  padding-left: 24px;
+  padding-right: 24px;
+  width: calc(100% - 250px); 
+  max-width: calc(100% - 250px);
+  position: fixed;
+  top: 0;
+  left: 250px; 
+  z-index: 998; 
+  box-sizing: border-box;
   backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Убираем отступы у внутреннего Layout */
+
 .myWorksPage :global(.ant-layout) {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-/* Фиксированный сайдбар - поверх хедера */
+
 .myWorksPage :global(.ant-layout-sider) {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  height: 100vh !important;
-  z-index: 1001 !important; /* Выше хедера */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1001; 
   backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
   .myWorksPage :global(.ant-layout-header) {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    width: 100% !important; /* На мобильных хедер на всю ширину */
-    max-width: 100% !important;
-    left: 0 !important; /* Начинается с левого края */
+    padding-left: 16px;
+    padding-right: 16px;
+    width: 100%; 
+    max-width: 100%;
+    left: 0; 
   }
   
-  /* На мобильных сайдбар не фиксированный */
+  
   .myWorksPage :global(.ant-layout-sider) {
-    position: relative !important;
-    height: auto !important;
-    z-index: auto !important;
+    position: relative;
+    height: auto;
+    z-index: auto;
   }
   
-  /* На мобильных убираем отступ для сайдбара */
+  
   .myWorksPage :global(.ant-layout-content) {
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -109,8 +109,8 @@
 }
 
 .worksTitle {
-  margin: 0 !important;
-  color: white !important;
+  margin: 0;
+  color: white;
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -290,7 +290,7 @@
   color: #9ca3af;
 }
 
-/* Mobile Responsive */
+
 @media (max-width: 768px) {
   .filterCard,
   .tabsContainer {
@@ -324,7 +324,7 @@
   }
 }
 
-/* Animation for loading states */
+
 .loadingContainer {
   display: flex;
   justify-content: center;
@@ -336,7 +336,7 @@
   color: #667eea;
 }
 
-/* Custom button styles */
+
 .actionButton {
   border-radius: 8px;
   font-weight: 500;
@@ -359,7 +359,7 @@
   color: white;
 }
 
-/* Search and filter inputs */
+
 .searchInput {
   border-radius: 8px;
   border: 1px solid #d1d5db;
@@ -377,18 +377,18 @@
 }
 
 .filterSelect .ant-select-selector {
-  border-radius: 8px !important;
-  border: 1px solid #d1d5db !important;
-  background: #ffffff !important;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
 }
 
 .filterSelect:hover .ant-select-selector {
-  border-color: #3b82f6 !important;
+  border-color: #3b82f6;
 }
 
 .filterSelect.ant-select-focused .ant-select-selector {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .pageHeader {
@@ -400,7 +400,7 @@
 }
 
 .pageTitle {
-  margin: 0 !important;
+  margin: 0;
 }
 
 .pageHeaderRight {
@@ -518,3 +518,4 @@
 .muted {
   color: #9ca3af;
 }
+

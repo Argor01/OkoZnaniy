@@ -1,20 +1,20 @@
-.sidebar {
+﻿.sidebar {
   background: #fff;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   position: fixed;
-  top: 64px; /* Под хедером */
+  top: 64px; 
   left: 0;
-  height: calc(100vh - 64px); /* Высота минус высота хедера */
+  height: calc(100vh - 64px); 
   width: 250px;
   border-right: 1px solid #f0f0f0;
   overflow-y: auto;
   z-index: 999;
-  /* Скрываем скроллбар */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
-/* Скрываем скроллбар для Chrome, Safari и Opera */
+
 .sidebar::-webkit-scrollbar {
   display: none;
 }
@@ -29,7 +29,7 @@
 }
 
 .sidebarMenu {
-  border-right: none !important;
+  border-right: none;
 }
 
 .logoutMenuItem {
@@ -37,32 +37,32 @@
   border-top: 1px solid #f0f0f0;
 }
 
-/* Мобильный overlay */
+
 .mobileOverlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background: rgba(0, 0, 0, 0.5) !important;
-  z-index: 99999 !important;
-  display: flex !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  display: flex;
   animation: fadeIn 0.2s ease-in-out;
 }
 
 .mobileMenu {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  background: #fff !important;
-  overflow-y: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: #fff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
-  z-index: 100000 !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 100000;
 }
 
 .mobileMenuHeader {
@@ -107,28 +107,29 @@
   }
 }
 
-/* Адаптив для планшетов */
+
 @media (max-width: 840px) {
   .sidebar {
     display: none;
   }
   
-  /* Увеличиваем шрифт для пунктов меню в мобильном меню */
+  
   .sidebarMenu :global(.ant-menu-item),
   .sidebarMenu :global(.ant-menu-submenu-title) {
-    font-size: 16px !important;
-    padding: 12px 16px !important;
-    height: auto !important;
-    line-height: 1.5 !important;
+    font-size: 16px;
+    padding: 12px 16px;
+    height: auto;
+    line-height: 1.5;
   }
   
-  /* Увеличиваем шрифт для Badge (Сообщения, Уведомления) */
+  
   .sidebarMenu :global(.ant-badge) {
-    font-size: 16px !important;
+    font-size: 16px;
   }
   
-  /* Увеличиваем иконки */
+  
   .sidebarMenu :global(.anticon) {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 }
+

@@ -34,7 +34,6 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
         {profile?.bio || defaultBio}
       </Paragraph>
 
-      {/* Опыт и ставка - только для экспертов */}
       {isExpert && (
         <div style={{ display: 'flex', gap: 24, marginTop: 24, flexWrap: 'wrap' }}>
           {(profile?.experience_years !== undefined && profile?.experience_years !== null) && (
@@ -56,7 +55,6 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
         </div>
       )}
 
-      {/* Образование - только для экспертов */}
       {isExpert && (profile?.education || defaultEducation) && (
         <div style={{ marginTop: 24 }}>
           <Title level={4} style={{ marginBottom: 12 }}>Образование</Title>
@@ -66,7 +64,6 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
         </div>
       )}
 
-      {/* Навыки - только для экспертов */}
       {isExpert && skills.length > 0 && (
         <div style={{ marginTop: 24 }}>
           <Title level={4} style={{ marginBottom: 12 }}>Навыки</Title>
@@ -80,7 +77,6 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
         </div>
       )}
 
-      {/* Портфолио - только для экспертов */}
       {isExpert && profile?.portfolio_url && (
         <div style={{ marginTop: 24 }}>
           <Title level={4} style={{ marginBottom: 12 }}>Портфолио</Title>

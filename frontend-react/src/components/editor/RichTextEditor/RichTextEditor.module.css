@@ -1,4 +1,4 @@
-/* Стили для RichTextEditor - улучшенный современный дизайн */
+﻿
 
 .editor {
   border: 2px solid #e5e7eb;
@@ -59,18 +59,18 @@
 }
 
 .textarea {
-  border: none !important;
-  border-radius: 0 !important;
+  border: none;
+  border-radius: 0;
   resize: vertical;
   font-size: 14px;
   line-height: 1.8;
-  padding: 16px !important;
+  padding: 16px;
   min-height: 120px;
 }
 
 .textarea:focus {
-  box-shadow: none !important;
-  outline: none !important;
+  box-shadow: none;
+  outline: none;
 }
 
 .textarea:empty:before {
@@ -78,3 +78,4 @@
   color: #9ca3af;
   font-style: italic;
 }
+

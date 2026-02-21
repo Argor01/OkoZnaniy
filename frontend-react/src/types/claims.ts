@@ -1,4 +1,4 @@
-// Types for Claims and Communication System
+
 
 export enum ClaimType {
   TECHNICAL = 'technical',
@@ -152,13 +152,13 @@ export interface ClaimsStatistics {
   closed: number;
   byType: Record<ClaimType, number>;
   byPriority: Record<ClaimPriority, number>;
-  avgResolutionTime: number; // в часах
+  avgResolutionTime: number; 
   pendingOver24h: number;
   topReasons: Array<{ reason: string; count: number; percentage: number }>;
   trend: Array<{ date: string; created: number; resolved: number }>;
 }
 
-// Helper functions for display
+
 export const getClaimTypeLabel = (type: ClaimType): string => {
   const labels: Record<ClaimType, string> = {
     [ClaimType.TECHNICAL]: 'Техническая проблема',

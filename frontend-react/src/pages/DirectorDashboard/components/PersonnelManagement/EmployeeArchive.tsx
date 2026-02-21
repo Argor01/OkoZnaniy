@@ -224,7 +224,6 @@ const EmployeeArchive: React.FC = () => {
         </Spin>
       </Card>
 
-      {/* Модальное окно с деталями сотрудника */}
       <Modal
         title="Детали сотрудника"
         open={detailModalVisible}

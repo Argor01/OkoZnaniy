@@ -1,95 +1,95 @@
-/* Кастомное поле поиска для мобильных */
+﻿
 .customSearchContainer {
-  display: flex !important;
-  height: 40px !important;
-  border-radius: 6px !important;
-  overflow: hidden !important;
-  border: 1px solid #d9d9d9 !important;
-  background: #fff !important;
+  display: flex;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  background: #fff;
 }
 
 .customSearchContainer:focus-within {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
 .customSearchInput {
-  flex: 1 !important;
-  height: 40px !important;
-  border: none !important;
-  outline: none !important;
-  padding: 8px 12px !important;
-  font-size: 15px !important;
-  line-height: 1.4 !important;
-  background: transparent !important;
+  flex: 1;
+  height: 40px;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 15px;
+  line-height: 1.4;
+  background: transparent;
 }
 
 .customSearchInput::placeholder {
-  color: #bfbfbf !important;
-  font-size: 15px !important;
+  color: #bfbfbf;
+  font-size: 15px;
 }
 
 .customSearchButton {
-  width: 40px !important;
-  height: 40px !important;
-  border: none !important;
-  background: #fafafa !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  color: #666 !important;
-  font-size: 16px !important;
-  transition: background-color 0.2s !important;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+  transition: background-color 0.2s;
 }
 
 .customSearchButton:hover {
-  background: #f0f0f0 !important;
+  background: #f0f0f0;
 }
 
 .customSearchButton:active {
-  background: #e6f7ff !important;
+  background: #e6f7ff;
 }
 
-/* Адаптация для малых экранов */
+
 @media screen and (max-width: 380px) {
   .customSearchButton {
-    width: 32px !important;
-    font-size: 14px !important;
+    width: 32px;
+    font-size: 14px;
   }
   
   .customSearchInput {
-    font-size: 14px !important;
+    font-size: 14px;
   }
   
   .customSearchInput::placeholder {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 }
 
 @media screen and (max-width: 320px) {
   .customSearchButton {
-    width: 28px !important;
-    font-size: 12px !important;
+    width: 28px;
+    font-size: 12px;
   }
   
   .customSearchInput {
-    font-size: 13px !important;
-    padding: 8px 10px !important;
+    font-size: 13px;
+    padding: 8px 10px;
   }
   
   .customSearchInput::placeholder {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 }
 
-/* Отступы между селекторами на мобильных */
+
 .mobileFiltersContainer {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .mobileFiltersContainer .ant-select {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }

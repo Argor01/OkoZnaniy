@@ -41,7 +41,7 @@ interface ClaimDetailsProps {
   showDecisionForm?: boolean;
 }
 
-// Вспомогательные функции для форматирования
+
 const getTypeColor = (type: string) => {
   switch (type) {
     case 'refund':
@@ -106,7 +106,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
   const [requestInfoForm] = Form.useForm();
   const [approvalForm] = Form.useForm();
 
-  // Мутация для запроса дополнительной информации
+  
   const requestInfoMutation = useMutation({
     mutationFn: (data: RequestInfoRequest) =>
       arbitratorApi.requestInfo(claim.id, data),
@@ -120,7 +120,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
     },
   });
 
-  // Мутация для отправки на согласование
+  
   const sendForApprovalMutation = useMutation({
     mutationFn: (data: SendForApprovalRequest) =>
       arbitratorApi.sendForApproval(claim.id, data),
@@ -154,7 +154,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
       label: 'Информация',
       children: (
         <div>
-          {/* Основная информация */}
           <Descriptions
             title="Основная информация"
             bordered
@@ -199,7 +198,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             </Descriptions.Item>
           </Descriptions>
 
-          {/* Информация о заказе */}
           <Title level={5}>
             <FileTextOutlined /> Информация о заказе
           </Title>
@@ -227,7 +225,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             </Descriptions.Item>
           </Descriptions>
 
-          {/* Информация о клиенте */}
           <Title level={5}>
             <UserOutlined /> Информация о клиенте
           </Title>
@@ -245,7 +242,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             )}
           </Descriptions>
 
-          {/* Информация об эксперте */}
           {claim.expert && (
             <>
               <Title level={5}>
@@ -267,7 +263,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             </>
           )}
 
-          {/* История коммуникации */}
           <Title level={5}>История коммуникации</Title>
           {claim.messages && claim.messages.length > 0 ? (
             <Timeline style={{ marginBottom: 24 }}>
@@ -293,7 +288,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             />
           )}
 
-          {/* Прикрепленные файлы */}
           {claim.attachments && claim.attachments.length > 0 && (
             <>
               <Title level={5}>Прикрепленные файлы</Title>
@@ -315,7 +309,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             </>
           )}
 
-          {/* Дополнительная информация для типов обращений */}
           {claim.type === 'refund' && 'requested_amount' in claim && (
             <>
               <Divider />
@@ -358,7 +351,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             </>
           )}
 
-          {/* Информация о решении (если есть) */}
+          
           {claim.decision && (
             <>
               <Divider />
@@ -426,9 +419,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
         </div>
       ),
     },
-  ];
-
-  // Добавляем вкладку с формой принятия решения, если нужно
+  ];
   if (showDecisionForm && claim.status !== 'completed') {
     tabItems.push({
       key: 'decision',

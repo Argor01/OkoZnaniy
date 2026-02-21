@@ -41,7 +41,7 @@ const Completed: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Параметры запроса
+  
   const params: GetClaimsParams = {
     status: 'completed',
     type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
@@ -52,7 +52,7 @@ const Completed: React.FC = () => {
     date_to: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
-  // Получение списка завершённых обращений
+  
   const { data: claimsData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-claims', 'completed', params],
     queryFn: () => arbitratorApi.getClaims(params),
@@ -66,7 +66,7 @@ const Completed: React.FC = () => {
 
   let claims = claimsData?.results || [];
   
-  // Фильтрация по типу решения на клиенте
+  
   if (decisionTypeFilter) {
     claims = claims.filter((claim) => 
       claim.decision?.decision_type === decisionTypeFilter
@@ -75,7 +75,7 @@ const Completed: React.FC = () => {
   
   const total = decisionTypeFilter ? claims.length : (claimsData?.count || 0);
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -96,7 +96,7 @@ const Completed: React.FC = () => {
 
   const handleExport = () => {
     message.info('Функция экспорта будет реализована на этапе 5');
-    // TODO: Реализовать экспорт в Excel/PDF
+    
   };
 
   const handleDetailsClose = () => {
@@ -104,7 +104,7 @@ const Completed: React.FC = () => {
     setSelectedClaim(null);
   };
 
-  // Получение цвета тега типа
+  
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
@@ -118,7 +118,7 @@ const Completed: React.FC = () => {
     }
   };
 
-  // Получение текста типа
+  
   const getTypeText = (type: string) => {
     switch (type) {
       case 'refund':
@@ -132,7 +132,7 @@ const Completed: React.FC = () => {
     }
   };
 
-  // Получение текста решения
+  
   const getDecisionText = (decisionType: string) => {
     switch (decisionType) {
       case 'full_refund':
@@ -150,7 +150,7 @@ const Completed: React.FC = () => {
     }
   };
 
-  // Получение цвета решения
+  
   const getDecisionColor = (decisionType: string) => {
     switch (decisionType) {
       case 'full_refund':
@@ -166,7 +166,7 @@ const Completed: React.FC = () => {
     }
   };
 
-  // Колонки таблицы
+  
   const columns = [
     {
       title: '№',
@@ -307,7 +307,6 @@ const Completed: React.FC = () => {
           </Tooltip>
         </div>
 
-        {/* Фильтры и поиск */}
         <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
@@ -368,7 +367,6 @@ const Completed: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Таблица */}
         <div style={{ overflowX: 'auto' }}>
           <Table
             columns={columns}
@@ -401,7 +399,6 @@ const Completed: React.FC = () => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

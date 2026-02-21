@@ -43,7 +43,7 @@ const RefundRequests: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Параметры запроса
+  
   const params: GetClaimsParams = {
     type: 'refund',
     page: currentPage,
@@ -53,7 +53,7 @@ const RefundRequests: React.FC = () => {
     date_to: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
-  // Получение списка заявок на возврат средств
+  
   const { data: claimsData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-claims', 'refund', params],
     queryFn: () => arbitratorApi.getClaims(params),
@@ -67,12 +67,12 @@ const RefundRequests: React.FC = () => {
 
   let claims = claimsData?.results || [];
 
-  // Фильтрация по статусу на клиенте
+  
   if (statusFilter) {
     claims = claims.filter((claim) => claim.status === statusFilter);
   }
 
-  // Фильтрация по сумме на клиенте
+  
   if (minAmount !== undefined || maxAmount !== undefined) {
     claims = claims.filter((claim) => {
       const amount = claim.order.amount;
@@ -86,7 +86,7 @@ const RefundRequests: React.FC = () => {
     ? claims.length
     : (claimsData?.count || 0);
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -111,7 +111,7 @@ const RefundRequests: React.FC = () => {
     setSelectedClaim(null);
   };
 
-  // Получение цвета тега статуса
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new':
@@ -127,7 +127,7 @@ const RefundRequests: React.FC = () => {
     }
   };
 
-  // Получение текста статуса
+  
   const getStatusText = (status: string) => {
     switch (status) {
       case 'new':
@@ -143,7 +143,7 @@ const RefundRequests: React.FC = () => {
     }
   };
 
-  // Получение запрошенной суммы возврата
+  
   const getRequestedAmount = (claim: Claim) => {
     if ('requested_amount' in claim) {
       return (claim as any).requested_amount;
@@ -151,7 +151,7 @@ const RefundRequests: React.FC = () => {
     return claim.order.amount;
   };
 
-  // Колонки таблицы
+  
   const columns = [
     {
       title: '№',
@@ -271,7 +271,6 @@ const RefundRequests: React.FC = () => {
           Список заявок на возврат средств от клиентов
         </Text>
 
-        {/* Фильтры и поиск */}
         <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
@@ -340,7 +339,6 @@ const RefundRequests: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Таблица */}
         <div style={{ overflowX: 'auto' }}>
           <Table
             columns={columns}
@@ -373,7 +371,6 @@ const RefundRequests: React.FC = () => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

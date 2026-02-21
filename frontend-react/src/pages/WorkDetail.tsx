@@ -89,7 +89,6 @@ const WorkDetail: React.FC = () => {
 
         <Card>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            {/* Заголовок и статус */}
             <div>
               <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{work.title}</Title>
@@ -99,9 +98,7 @@ const WorkDetail: React.FC = () => {
               </Space>
             </div>
 
-            {/* Основная информация */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Заказчик - большая плашка на всю ширину */}
               <Card 
                 style={{ 
                   background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
@@ -155,13 +152,11 @@ const WorkDetail: React.FC = () => {
                 </Space>
               </Card>
 
-              {/* Остальные плашки в сетке */}
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
                 gap: 16 
               }}>
-                {/* Дедлайн */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -182,7 +177,6 @@ const WorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Предмет */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -200,7 +194,6 @@ const WorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Стоимость */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -221,7 +214,6 @@ const WorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Тип работы */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -239,7 +231,6 @@ const WorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Выполнена */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -259,7 +250,6 @@ const WorkDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Описание */}
             <Card 
               title="Описание работы"
               style={{ 
@@ -272,7 +262,6 @@ const WorkDetail: React.FC = () => {
               </Paragraph>
             </Card>
 
-            {/* Файлы */}
             {work.files && work.files.length > 0 && (
               <Card 
                 title="Прикрепленные файлы"
@@ -296,7 +285,7 @@ const WorkDetail: React.FC = () => {
               </Card>
             )}
 
-            {/* Рейтинг работы */}
+            
             {work.expert_rating && (
               <Card 
                 title="Оценка работы"

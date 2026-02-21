@@ -120,7 +120,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
   const [resolveForm] = Form.useForm();
   const [escalateForm] = Form.useForm();
 
-  // Мок данные для демонстрации
+  
   const mockProblemOrders: ProblemOrder[] = [
     {
       id: 1,
@@ -270,7 +270,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
 
   const dataSource = orders;
 
-  // Фильтрация данных
+  
   const filteredData = dataSource.filter(order => {
     const matchesSearch = 
       order.title.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -382,7 +382,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
     return severityIcons[severity as keyof typeof severityIcons] || <ExclamationCircleOutlined />;
   };
 
-  // Статистика
+  
   const stats = {
     total: filteredData.length,
     critical: filteredData.filter(o => o.problem_severity === 'critical').length,
@@ -567,7 +567,6 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
           </Text>
         </div>
 
-        {/* Статистика */}
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={6}>
             <Statistic 
@@ -601,7 +600,6 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
           </Col>
         </Row>
 
-        {/* Предупреждение */}
         {stats.critical > 0 && (
           <Alert
             message="Внимание!"
@@ -612,7 +610,6 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
           />
         )}
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по названию или описанию проблемы"
@@ -673,7 +670,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно просмотра заказа */}
+      
       <Modal
         title={`Проблемный заказ #${selectedOrder?.id}`}
         open={orderModalVisible}
@@ -767,7 +764,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
         )}
       </Modal>
 
-      {/* Модальное окно решения проблемы */}
+      
       <Modal
         title={`Решить проблему заказа #${selectedOrder?.id}`}
         open={resolveModalVisible}
@@ -806,7 +803,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно эскалации */}
+      
       <Modal
         title={`Эскалировать проблему заказа #${selectedOrder?.id}`}
         open={escalateModalVisible}

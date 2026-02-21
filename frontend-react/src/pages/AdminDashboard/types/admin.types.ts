@@ -1,9 +1,6 @@
 import { User } from '../../../api/auth';
 
-/**
- * Типы для админской панели
- * Вынесены из монолитного AdminDashboard.tsx
- */
+
 
 export interface Partner {
   id: number;
@@ -77,27 +74,27 @@ export type MenuKey =
   | 'in_progress_claims'
   | 'completed_claims'
   | 'pending_approval'
-  | 'internal_communication'       // 🆕 Внутренняя коммуникация
-  | 'support_open'                 // 🆕 Открытые запросы поддержки
-  | 'support_in_progress'          // 🆕 Запросы поддержки в работе
-  | 'support_completed'            // 🆕 Завершенные запросы поддержки
-  | 'support_chats'                // 🆕 Чаты поддержки
-  | 'tickets'                      // 🆕 Тикеты поддержки
+  | 'internal_communication'       
+  | 'support_open'                 
+  | 'support_in_progress'          
+  | 'support_completed'            
+  | 'support_chats'                
+  | 'tickets'                      
   | 'admin_chats'
-  | 'admin_group_chats'            // 🆕 Групповые чаты администраторов
+  | 'admin_group_chats'            
   | 'request_processing'
-  | 'request_processing_open'      // 🆕 Открытые запросы
-  | 'request_processing_progress'  // 🆕 В процессе решения
-  | 'request_processing_completed' // 🆕 Выполненные запросы
-  | 'users_management'            // Управление пользователями
+  | 'request_processing_open'      
+  | 'request_processing_progress'  
+  | 'request_processing_completed' 
+  | 'users_management'            
   | 'all_users'
   | 'blocked_users'
   | 'user_roles'
-  | 'orders_management'           // Управление заказами
+  | 'orders_management'           
   | 'all_orders'
   | 'problem_orders';
 
-// Типы для таблиц
+
 export interface TableColumn {
   title: string;
   dataIndex?: string | string[];
@@ -107,7 +104,7 @@ export interface TableColumn {
   ellipsis?: boolean | { tooltip?: boolean | string };
 }
 
-// Типы для модальных окон
+
 export interface ModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -125,7 +122,7 @@ export interface DisputeModalProps extends ModalProps {
   onAssignArbitrator: (disputeId: number, arbitratorId: number) => void;
 }
 
-// Типы для поддержки
+
 export type SupportStatus = 'open' | 'in_progress' | 'completed';
 
 export interface SupportChat {

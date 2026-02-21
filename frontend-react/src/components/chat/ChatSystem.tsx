@@ -85,7 +85,6 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
       }}
     >
       <div className={styles.chatContainer}>
-        {/* Список чатов */}
         <div className={`${styles.chatList} ${selectedChat && isMobile ? styles.hidden : ''}`}>
           <div className={styles.chatListHeader}>
             <Text strong style={{ fontSize: 18 }}>Сообщения</Text>
@@ -144,7 +143,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
           </div>
         </div>
 
-        {/* Окно чата */}
+        
         <div className={`${styles.chatWindow} ${!selectedChat && isMobile ? styles.hidden : ''}`}>
           {selectedChat ? (
             <>

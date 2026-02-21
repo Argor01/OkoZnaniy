@@ -1,4 +1,4 @@
-/* Стилизация формы "Панель отправления заявки" для экспертов */
+
 
 .expert-page .leave-order {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -175,7 +175,7 @@
   box-shadow: 0 6px 15px rgba(245, 87, 108, 0.4);
 }
 
-/* Анимация для полей формы */
+
 .expert-page .leave-order__form .ant-form-item {
   animation: fadeInUp 0.6s ease-out backwards;
 }
@@ -188,14 +188,14 @@
 .expert-page .leave-order__form .ant-form-item:nth-child(6) { animation-delay: 0.9s; }
 .expert-page .leave-order__form .ant-form-item:nth-child(7) { animation-delay: 1s; }
 
-/* Стили для placeholder */
+
 .expert-page .leave-order__form .ant-input::placeholder,
 .expert-page .leave-order__form .ant-input-textarea textarea::placeholder {
   color: #a0aec0;
   font-weight: 400;
 }
 
-/* Стили для ошибок валидации */
+
 .expert-page .leave-order__form .ant-form-item-has-error .ant-input,
 .expert-page .leave-order__form .ant-form-item-has-error .ant-input-textarea textarea {
   border-color: #f5576c;
@@ -208,7 +208,7 @@
   margin-top: 8px;
 }
 
-/* Адаптивность */
+
 @media (max-width: 1024px) {
   .expert-page .leave-order {
     padding: 80px 0;
@@ -221,7 +221,7 @@
   }
 }
 
-/* Анимации */
+
 @keyframes fadeInDown {
   from {
     opacity: 0;

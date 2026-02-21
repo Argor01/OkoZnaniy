@@ -125,10 +125,10 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
   const [rejectForm] = Form.useForm();
   const [moreInfoForm] = Form.useForm();
 
-  // Убеждаемся, что claims - это массив
+  
   const claimsData = Array.isArray(claims) ? claims : [];
 
-  // Фильтрация данных
+  
   const filteredClaims = claimsData.filter(claim => {
     const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          claim.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -148,7 +148,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
     return matchesSearch && matchesCategory && matchesType && matchesImpact && matchesEscalation;
   });
 
-  // Обработчики
+  
   const handleViewClaim = (claim: Claim) => {
     setSelectedClaim(claim);
     setViewModalVisible(true);
@@ -217,7 +217,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
     }
   };
 
-  // Функции для отображения
+  
   const getCategoryColor = (category: string) => {
     const colors = {
       technical: 'blue',
@@ -471,7 +471,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
           </Text>
         </div>
 
-        {/* Предупреждение о просроченных */}
+        
         {filteredClaims.some(claim => claim.waiting_time_hours > 48) && (
           <Alert
             message="Внимание!"
@@ -482,7 +482,6 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
           />
         )}
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по обращениям"
@@ -568,7 +567,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно просмотра обращения */}
+      
       <Modal
         title="Детали обращения, ожидающего решения"
         open={viewModalVisible}
@@ -696,7 +695,6 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
         )}
       </Modal>
 
-      {/* Модальное окно одобрения */}
       <Modal
         title="Одобрить запрос"
         open={approveModalVisible}
@@ -719,7 +717,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно отклонения */}
+      
       <Modal
         title="Отклонить запрос"
         open={rejectModalVisible}
@@ -743,7 +741,7 @@ export const PendingApprovalSection: React.FC<PendingApprovalSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно запроса дополнительной информации */}
+      
       <Modal
         title="Запросить дополнительную информацию"
         open={moreInfoModalVisible}

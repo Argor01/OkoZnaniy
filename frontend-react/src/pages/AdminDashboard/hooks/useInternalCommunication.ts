@@ -53,7 +53,7 @@ export const useInternalCommunication = () => {
 
   useEffect(() => {
     loadAll();
-    // Обновляем каждые 30 секунд
+    
     const interval = setInterval(loadAll, 30000);
     return () => clearInterval(interval);
   }, [loadAll]);

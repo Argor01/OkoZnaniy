@@ -39,7 +39,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
-  // Получение текущего пользователя
+  
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -52,7 +52,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
     fetchUser();
   }, []);
 
-  // Параметры запроса
+  
   const params: GetMessagesParams = {
     page: currentPage,
     page_size: pageSize,
@@ -60,7 +60,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
     unread_only: false,
   };
 
-  // Получение списка сообщений
+  
   const { data: messagesData, isLoading, refetch } = useQuery({
     queryKey: ['director-messages', params],
     queryFn: () => directorApi.getMessages(params),
@@ -68,12 +68,12 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
       if (data?.results) return data;
       return { count: 0, next: null, previous: null, results: [] };
     },
-    refetchInterval: 10000, // Обновление каждые 10 секунд
+    refetchInterval: 10000, 
     retry: false,
     retryOnMount: false,
   });
 
-  // Получение списка обращений для фильтрации
+  
   const { data: claimsData } = useQuery({
     queryKey: ['director-claims', 'for-messages'],
     queryFn: () => directorApi.getPendingApprovalClaims(),
@@ -88,18 +88,18 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
   const messages = messagesData?.results || [];
   const claims = (claimsData || []) as Claim[];
 
-  // Фильтрация сообщений по поисковому запросу на клиенте
+  
   const filteredMessages = searchText
     ? messages.filter((msg) =>
         msg.text.toLowerCase().includes(searchText.toLowerCase())
       )
     : messages;
 
-  // Обработчик ответа на сообщение
+  
   const handleReply = (message: InternalMessage) => {
     setReplyToMessage(message);
     setSelectedClaimId(message.claim_id);
-    // Прокрутка к форме ответа
+    
     setTimeout(() => {
       if (messageFormRef.current) {
         const rect = messageFormRef.current.getBoundingClientRect();
@@ -111,7 +111,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
     }, 100);
   };
 
-  // Мутация для отправки сообщения
+  
   const sendMessageMutation = useMutation({
     mutationFn: (data: any) => directorApi.sendMessage(data),
     onSuccess: () => {
@@ -167,7 +167,6 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
 
           <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
-          {/* Фильтры и поиск */}
           <div
             style={{
               display: 'flex',
@@ -215,7 +214,6 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
 
           <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
-          {/* Список сообщений */}
           <div 
             style={{ 
               minHeight: isMobile ? '300px' : '400px', 
@@ -248,7 +246,6 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
 
           <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
 
-          {/* Форма отправки сообщения */}
           <div ref={messageFormRef}>
             <ArbitratorMessageForm
               onSuccess={handleMessageSuccess}

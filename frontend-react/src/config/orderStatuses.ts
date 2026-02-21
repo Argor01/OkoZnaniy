@@ -1,4 +1,4 @@
-// Цвета статусов заказов
+
 export const ORDER_STATUS_COLORS: Record<string, string> = {
   'new': 'green',
   'open': 'blue',
@@ -15,7 +15,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   'cancelled': 'red',
 };
 
-// Текстовые названия статусов заказов
+
 export const ORDER_STATUS_TEXTS: Record<string, string> = {
   'new': 'NEW',
   'open': 'Открыт',

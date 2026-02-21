@@ -74,7 +74,7 @@ export const useNotifications = () => {
 
   useEffect(() => {
     loadNotifications();
-    // Обновляем уведомления каждые 30 секунд
+    
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
   }, [loadNotifications]);

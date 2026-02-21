@@ -1,10 +1,10 @@
-/* Мобильные стили для анкет экспертов */
+﻿
 .mobileCard {
-  margin-bottom: 12px !important;
+  margin-bottom: 12px;
 }
 
 .mobileCard .ant-card-body {
-  padding: 12px !important;
+  padding: 12px;
 }
 
 .mobileActions {
@@ -20,8 +20,8 @@
 }
 
 .statusTag {
-  font-size: 11px !important;
-  padding: 2px 6px !important;
+  font-size: 11px;
+  padding: 2px 6px;
 }
 
 .mobileUserInfo {
@@ -54,42 +54,42 @@
   color: #8c8c8c;
 }
 
-/* Адаптация модальных окон */
+
 @media screen and (max-width: 840px) {
   .ant-modal {
-    margin: 0 !important;
-    max-width: none !important;
+    margin: 0;
+    max-width: none;
   }
   
   .ant-modal-content {
-    border-radius: 8px 8px 0 0 !important;
+    border-radius: 8px 8px 0 0;
   }
   
   .ant-descriptions-item-label {
-    font-size: 12px !important;
-    padding: 8px !important;
+    font-size: 12px;
+    padding: 8px;
   }
   
   .ant-descriptions-item-content {
-    font-size: 12px !important;
-    padding: 8px !important;
+    font-size: 12px;
+    padding: 8px;
   }
   
   .ant-tag {
-    font-size: 11px !important;
-    margin: 2px !important;
+    font-size: 11px;
+    margin: 2px;
   }
 }
 
 @media screen and (max-width: 380px) {
   .mobileCard .ant-card-body {
-    padding: 8px !important;
+    padding: 8px;
   }
   
   .mobileActions .ant-btn {
-    font-size: 11px !important;
-    padding: 4px 8px !important;
-    height: 28px !important;
+    font-size: 11px;
+    padding: 4px 8px;
+    height: 28px;
   }
   
   .mobileUserName {

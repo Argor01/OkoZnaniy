@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Card, 
   Table, 
@@ -58,11 +58,7 @@ const ContactBannedUsers: React.FC = () => {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [unbanForm] = Form.useForm();
 
-  useEffect(() => {
-    fetchBannedUsers();
-  }, []);
-
-  const fetchBannedUsers = async () => {
+  const fetchBannedUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiClient.get('/users/contact_banned_users/');
@@ -73,7 +69,11 @@ const ContactBannedUsers: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debugEnabled]);
+
+  useEffect(() => {
+    fetchBannedUsers();
+  }, [fetchBannedUsers]);
 
   const handleUnbanUser = (user: ContactBannedUser) => {
     setSelectedUser(user);
@@ -292,7 +292,7 @@ const ContactBannedUsers: React.FC = () => {
         />
       </Card>
 
-      {/* Модальное окно деталей */}
+      
       <Modal
         title={`Детали пользователя: ${selectedUser?.username}`}
         open={detailsModalVisible}
@@ -346,7 +346,6 @@ const ContactBannedUsers: React.FC = () => {
         )}
       </Modal>
 
-      {/* Модальное окно разбана */}
       <Modal
         title={`Разбанить пользователя ${selectedUser?.username}`}
         open={unbanModalVisible}

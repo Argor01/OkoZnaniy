@@ -9,9 +9,7 @@ import {
   getMessagesByRequestId
 } from '../utils/mockSupportData';
 
-/**
- * Хук для работы с запросами поддержки
- */
+
 export const useSupportRequests = () => {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
   const [loading, setLoading] = useState(false);
@@ -20,11 +18,11 @@ export const useSupportRequests = () => {
   const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null);
   const [requestMessages, setRequestMessages] = useState<SupportMessage[]>([]);
 
-  // Загрузка запросов
+  
   const fetchRequests = useCallback(async (status?: SupportStatus) => {
     setLoading(true);
     try {
-      // Имитация API запроса
+      
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const statusToFetch = status || selectedStatus;
@@ -37,10 +35,10 @@ export const useSupportRequests = () => {
     }
   }, [selectedStatus]);
 
-  // Загрузка всех запросов (для статистики)
+  
   const fetchAllRequests = useCallback(async () => {
     try {
-      // Имитация API запроса
+      
       await new Promise(resolve => setTimeout(resolve, 300));
       setRequests(mockSupportRequests);
     } catch (error) {
@@ -48,7 +46,7 @@ export const useSupportRequests = () => {
     }
   }, []);
 
-  // Загрузка сообщений для запроса
+  
   const fetchRequestMessages = useCallback(async (requestId: number) => {
     try {
       const messages = getMessagesByRequestId(requestId);
@@ -58,10 +56,10 @@ export const useSupportRequests = () => {
     }
   }, []);
 
-  // Взять запрос в работу
+  
   const takeRequest = useCallback(async (requestId: number) => {
     try {
-      // Имитация API запроса
+      
       await new Promise(resolve => setTimeout(resolve, 300));
       
       setRequests(prevRequests => 
@@ -81,14 +79,14 @@ export const useSupportRequests = () => {
         )
       );
 
-      // Обновляем статистику
+      
       setStats(prevStats => ({
         ...prevStats,
         openRequests: prevStats.openRequests - 1,
         inProgressRequests: prevStats.inProgressRequests + 1
       }));
 
-      // Если текущий статус "открытые", перезагружаем список
+      
       if (selectedStatus === 'open') {
         fetchRequests('open');
       }
@@ -100,10 +98,10 @@ export const useSupportRequests = () => {
     }
   }, [selectedStatus, fetchRequests]);
 
-  // Завершить запрос
+  
   const completeRequest = useCallback(async (requestId: number) => {
     try {
-      // Имитация API запроса
+      
       await new Promise(resolve => setTimeout(resolve, 300));
       
       setRequests(prevRequests => 
@@ -118,14 +116,14 @@ export const useSupportRequests = () => {
         )
       );
 
-      // Обновляем статистику
+      
       setStats(prevStats => ({
         ...prevStats,
         inProgressRequests: prevStats.inProgressRequests - 1,
         completedToday: prevStats.completedToday + 1
       }));
 
-      // Если текущий статус "в процессе", перезагружаем список
+      
       if (selectedStatus === 'in_progress') {
         fetchRequests('in_progress');
       }
@@ -137,16 +135,16 @@ export const useSupportRequests = () => {
     }
   }, [selectedStatus, fetchRequests]);
 
-  // Отправить сообщение
+  
   const sendMessage = useCallback(async (requestId: number, content: string, attachments?: File[]) => {
     try {
-      // Имитация API запроса
+      
       await new Promise(resolve => setTimeout(resolve, 300));
       
       const newMessage: SupportMessage = {
         id: Date.now(),
         requestId,
-        senderId: 1, // ID текущего администратора
+        senderId: 1, 
         senderType: 'admin',
         senderName: 'Текущий администратор',
         senderAvatar: 'https://randomuser.me/api/portraits/women/10.jpg',
@@ -165,7 +163,7 @@ export const useSupportRequests = () => {
 
       setRequestMessages(prevMessages => [...prevMessages, newMessage]);
 
-      // Обновляем счетчик сообщений в запросе
+      
       setRequests(prevRequests => 
         prevRequests.map(request => 
           request.id === requestId 
@@ -186,33 +184,33 @@ export const useSupportRequests = () => {
     }
   }, []);
 
-  // Изменение статуса фильтра
+  
   const handleStatusChange = useCallback((status: SupportStatus) => {
     setSelectedStatus(status);
     fetchRequests(status);
   }, [fetchRequests]);
 
-  // Выбор запроса для просмотра
+  
   const handleRequestSelect = useCallback((request: SupportRequest) => {
     setSelectedRequest(request);
     fetchRequestMessages(request.id);
   }, [fetchRequestMessages]);
 
-  // Закрытие модального окна запроса
+  
   const handleRequestClose = useCallback(() => {
     setSelectedRequest(null);
     setRequestMessages([]);
   }, []);
 
-  // Загрузка данных при монтировании
+  
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
 
-  // Обновление статистики каждые 30 секунд
+  
   useEffect(() => {
     const interval = setInterval(() => {
-      // В реальном приложении здесь был бы API запрос
+      
       setStats(mockSupportStats);
     }, 30000);
 
@@ -220,7 +218,7 @@ export const useSupportRequests = () => {
   }, []);
 
   return {
-    // Данные
+    
     requests,
     loading,
     selectedStatus,
@@ -228,7 +226,7 @@ export const useSupportRequests = () => {
     selectedRequest,
     requestMessages,
 
-    // Методы
+    
     takeRequest,
     completeRequest,
     sendMessage,

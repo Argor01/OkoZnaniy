@@ -76,7 +76,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
         display: 'flex',
         flexDirection: 'column'
       }}>
-        {/* Заголовок */}
         <Text strong style={{ 
           fontSize: isMobile ? 20 : 24, 
           color: '#1f2937', 
@@ -86,7 +85,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
           Арбитраж
         </Text>
 
-        {/* Фильтр статусов */}
         <div style={{ 
           display: 'flex', 
           gap: 0,
@@ -245,7 +243,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
           </div>
         </div>
 
-        {/* Область контента */}
         <div style={{ 
           background: '#ffffff',
           borderRadius: 12,
@@ -305,7 +302,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       }
                     }}
                   >
-                    {/* Заголовок и статус */}
                     <div style={{ 
                       display: 'flex', 
                       justifyContent: 'space-between', 
@@ -347,7 +343,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Причина */}
                     <div style={{ 
                       padding: '12px', 
                       background: '#fef3c7', 
@@ -363,7 +358,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       </Text>
                     </div>
 
-                    {/* Описание */}
                     <Paragraph 
                       ellipsis={{ rows: 2, expandable: true, symbol: 'Показать больше' }}
                       style={{ fontSize: 14, color: '#4b5563', marginBottom: 12 }}
@@ -371,7 +365,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       {arbitration.description}
                     </Paragraph>
 
-                    {/* Решение (если есть) */}
                     {arbitration.decision && (
                       <div style={{ 
                         padding: '12px', 
@@ -397,7 +390,6 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       </div>
                     )}
 
-                    {/* Документы */}
                     {arbitration.documents && arbitration.documents.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
                         <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
@@ -426,7 +418,7 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                       </div>
                     )}
 
-                    {/* Футер с информацией */}
+                    
                     <div style={{ 
                       display: 'flex', 
                       justifyContent: 'space-between', 

@@ -5,26 +5,21 @@ import { disputesApi } from '../../../api/disputes';
 import { QUERY_KEYS } from '../constants';
 import type { UpdatePartnerRequest, PartnerEarning } from '../types';
 
-/**
- * Хук для всех мутаций (изменений данных) в админской панели
- * Вынесен из монолитного AdminDashboard.tsx
- */
+
 export const useAdminMutations = () => {
   const queryClient = useQueryClient();
 
-  /**
-   * Мутация для отметки начисления как выплаченного
-   */
+  
   const markEarningPaidMutation = useMutation({
     mutationFn: adminApi.markEarningPaid,
     onMutate: async (earningId: number) => {
-      // Отменяем исходящие запросы, чтобы не перезаписать оптимистичное обновление
+      
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.ADMIN_EARNINGS });
       
-      // Сохраняем предыдущее значение для отката
+      
       const previousEarnings = queryClient.getQueryData(QUERY_KEYS.ADMIN_EARNINGS);
       
-      // Оптимистично обновляем данные
+      
       queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, (old: PartnerEarning[] | undefined) => {
         if (!old) return old;
         return old.map(earning => 
@@ -41,7 +36,7 @@ export const useAdminMutations = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_EARNINGS });
     },
     onError: (error: any, earningId, context) => {
-      // Откатываем изменения в случае ошибки
+      
       if (context?.previousEarnings) {
         queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, context.previousEarnings);
       }
@@ -50,9 +45,7 @@ export const useAdminMutations = () => {
     },
   });
 
-  /**
-   * Мутация для обновления партнера
-   */
+  
   const updatePartnerMutation = useMutation({
     mutationFn: ({ partnerId, data }: { partnerId: number; data: UpdatePartnerRequest }) =>
       adminApi.updatePartner(partnerId, data),
@@ -67,9 +60,7 @@ export const useAdminMutations = () => {
     },
   });
 
-  /**
-   * Мутация для назначения арбитра спору
-   */
+  
   const assignArbitratorMutation = useMutation({
     mutationFn: ({ disputeId, arbitratorId }: { disputeId: number; arbitratorId: number }) =>
       disputesApi.assignArbitrator(disputeId, { arbitrator_id: arbitratorId }),
@@ -83,16 +74,14 @@ export const useAdminMutations = () => {
     },
   });
 
-  /**
-   * Универсальная функция для обновления кэша
-   */
+  
   const invalidateQueries = (queryKeys?: string[][]) => {
     if (queryKeys) {
       queryKeys.forEach(key => {
         queryClient.invalidateQueries({ queryKey: key });
       });
     } else {
-      // Обновляем все админские запросы
+      
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PARTNERS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_EARNINGS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_DISPUTES });
@@ -101,25 +90,25 @@ export const useAdminMutations = () => {
   };
 
   return {
-    // Мутации для начислений
+    
     markEarningPaid: markEarningPaidMutation.mutate,
     markEarningPaidAsync: markEarningPaidMutation.mutateAsync,
     isMarkingEarningPaid: markEarningPaidMutation.isPending,
 
-    // Мутации для партнеров
+    
     updatePartner: updatePartnerMutation.mutate,
     updatePartnerAsync: updatePartnerMutation.mutateAsync,
     isUpdatingPartner: updatePartnerMutation.isPending,
 
-    // Мутации для споров
+    
     assignArbitrator: assignArbitratorMutation.mutate,
     assignArbitratorAsync: assignArbitratorMutation.mutateAsync,
     isAssigningArbitrator: assignArbitratorMutation.isPending,
 
-    // Утилиты
+    
     invalidateQueries,
     
-    // Общее состояние загрузки
+    
     isLoading: markEarningPaidMutation.isPending || 
                updatePartnerMutation.isPending || 
                assignArbitratorMutation.isPending,

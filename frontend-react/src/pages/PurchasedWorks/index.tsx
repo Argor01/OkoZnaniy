@@ -18,13 +18,13 @@ const PurchasedWorks: React.FC = () => {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<FiltersState>({ sortBy: 'date' });
 
-  // Загрузка профиля пользователя
+  
   const { data: _profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  // Загрузка справочников
+  
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
@@ -35,7 +35,7 @@ const PurchasedWorks: React.FC = () => {
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
-  // Загрузка купленных работ (пока используем mock данные)
+  
   const { data: purchasedWorks = [], isLoading } = useQuery({
     queryKey: ['purchased-works'],
     queryFn: async () => {
@@ -94,11 +94,11 @@ const PurchasedWorks: React.FC = () => {
     },
   });
 
-  // Фильтрация и сортировка работ
+  
   const filteredWorks = useMemo(() => {
     let result = [...purchasedWorks];
 
-    // Поиск
+    
     if (filters.search) {
       result = result.filter(
         (work) =>
@@ -106,17 +106,17 @@ const PurchasedWorks: React.FC = () => {
       );
     }
 
-    // Фильтр по предмету
+    
     if (typeof filters.subjectId === 'number') {
       result = result.filter((work) => work.subjectId === filters.subjectId);
     }
 
-    // Фильтр по типу работы
+    
     if (typeof filters.workTypeId === 'number') {
       result = result.filter((work) => work.workTypeId === filters.workTypeId);
     }
 
-    // Сортировка
+    
     switch (filters.sortBy) {
       case 'price-asc':
         result.sort((a, b) => a.price - b.price);

@@ -118,10 +118,10 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
   const [messageForm] = Form.useForm();
   const [progressForm] = Form.useForm();
 
-  // Убеждаемся, что claims - это массив
+  
   const claimsData = Array.isArray(claims) ? claims : [];
 
-  // Фильтрация данных
+  
   const filteredClaims = claimsData.filter(claim => {
     const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          claim.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -134,7 +134,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
     return matchesSearch && matchesCategory && matchesPriority && matchesAdmin;
   });
 
-  // Обработчики
+  
   const handleViewClaim = (claim: Claim) => {
     setSelectedClaim(claim);
     setViewModalVisible(true);
@@ -198,7 +198,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
     }
   };
 
-  // Функции для отображения
+  
   const getCategoryColor = (category: string) => {
     const colors = {
       technical: 'blue',
@@ -384,7 +384,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
           </Text>
         </div>
 
-        {/* Фильтры */}
+        
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по обращениям"
@@ -453,7 +453,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         />
       </Card>
 
-      {/* Модальное окно просмотра обращения */}
+      
       <Modal
         title="Детали обращения"
         open={viewModalVisible}
@@ -563,7 +563,6 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         )}
       </Modal>
 
-      {/* Модальное окно завершения */}
       <Modal
         title="Завершить обращение"
         open={completeModalVisible}
@@ -586,7 +585,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         </Form>
       </Modal>
 
-      {/* Модальное окно обновления прогресса */}
+      
       <Modal
         title="Обновить прогресс"
         open={progressModalVisible}
@@ -606,7 +605,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         </Form>
       </Modal>
 
-      {/* Модальное окно отправки сообщения */}
+      
       <Modal
         title="Отправить сообщение"
         open={messageModalVisible}

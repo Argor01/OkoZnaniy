@@ -1,98 +1,99 @@
-/* Стили для страниц экспертов и партнеров */
+﻿
 
-/* Исправление обрезки изображения на странице экспертов */
+
 .expert-page {
   background-color: #f0f2f5;
 }
 
 .expert-page .first-screen__wrapper,
 .partner-page .first-screen__wrapper {
-  overflow: visible !important;
+  overflow: visible;
 }
 
 .expert-page .first-screen__figure,
 .partner-page .first-screen__figure {
-  overflow: visible !important;
-  position: fixed !important;
-  top: 110px !important;
-  left: 50% !important;
-  right: auto !important;
+  overflow: visible;
+  position: fixed;
+  top: 110px;
+  left: 50%;
+  right: auto;
   bottom: 0;
-  z-index: 500 !important;
+  z-index: 500;
   display: flex;
   align-items: flex-end;
   justify-content: flex-start;
   margin: 0;
-  margin-left: 0px !important;
-  width: 50vw !important;
+  margin-left: 0px;
+  width: 50vw;
 }
 
 .expert-page .first-screen__figure-image,
 .partner-page .first-screen__figure-image {
   display: block;
-  max-width: none !important;
-  width: auto !important;
-  height: calc(100vh - 110px) !important;
-  object-fit: contain !important;
-  object-position: left bottom !important;
+  max-width: none;
+  width: auto;
+  height: calc(100vh - 110px);
+  object-fit: contain;
+  object-position: left bottom;
 }
 
-/* Улучшенное позиционирование для средних экранов */
+
 @media (max-width: 1320px) and (min-width: 1025px) {
   .expert-page .first-screen__figure,
   .partner-page .first-screen__figure {
-    top: 80px !important;
-    margin-left: 50px !important;
+    top: 80px;
+    margin-left: 50px;
   }
   
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
-    height: calc(100vh - 80px) !important;
+    height: calc(100vh - 80px);
   }
 }
 
-/* Уменьшение фото на 1315px */
+
 @media (max-width: 1315px) and (min-width: 1025px) {
     .expert-page .first-screen__figure,
     .partner-page .first-screen__figure {
-        width: 45vw !important;
+        width: 45vw;
     }
 }
 
-/* Для планшетов и мобильных устройств */
+
 @media (max-width: 1024px) {
   .expert-page .first-screen__figure,
   .partner-page .first-screen__figure {
-    position: static !important;
-    overflow: visible !important;
-    justify-content: center !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    width: 100% !important;
-    margin-left: 0 !important;
-    padding: 0 20px; /* Добавим немного отступов по бокам */
+    position: static;
+    overflow: visible;
+    justify-content: center;
+    left: auto;
+    right: auto;
+    top: auto;
+    width: 100%;
+    margin-left: 0;
+    padding: 0 20px; 
   }
   
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
-    max-width: 100% !important;
-    width: 100% !important; /* Занимает всю ширину контейнера */
-    height: auto !important;
-    object-fit: contain !important;
-    object-position: center !important;
+    max-width: 100%;
+    width: 100%; 
+    height: auto;
+    object-fit: contain;
+    object-position: center;
   }
 }
 
-/* Для маленьких экранов */
+
 @media (max-width: 576px) {
   .expert-page .first-screen__figure,
   .partner-page .first-screen__figure {
-    padding: 0 15px; /* Уменьшим отступы для маленьких экранов */
+    padding: 0 15px; 
   }
 
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
-    width: 100% !important;
+    width: 100%;
   }
 }
+

@@ -43,7 +43,7 @@ const NewClaims: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Параметры запроса
+  
   const params: GetClaimsParams = {
     status: 'new',
     type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
@@ -54,7 +54,7 @@ const NewClaims: React.FC = () => {
     date_to: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
-  // Получение списка новых обращений
+  
   const { data: claimsData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-claims', 'new', params],
     queryFn: () => arbitratorApi.getClaims(params),
@@ -66,18 +66,18 @@ const NewClaims: React.FC = () => {
     },
   });
 
-  // Мутация для взятия обращения в работу
+  
   const takeClaimMutation = useMutation({
     mutationFn: (id: number) => arbitratorApi.takeClaim(id),
     onMutate: async (claimId) => {
-      // Отменяем исходящие запросы, чтобы они не перезаписали наше оптимистичное обновление
+      
       await queryClient.cancelQueries({ queryKey: ['arbitrator-claims'] });
 
-      // Сохраняем предыдущие значения для отката
+      
       const previousClaimsData = queryClient.getQueryData(['arbitrator-claims', 'new', params]);
       const previousCount = queryClient.getQueryData(['arbitrator-claims', 'new', 'count']);
 
-      // Оптимистично обновляем данные - удаляем обращение из списка новых
+      
       queryClient.setQueryData(['arbitrator-claims', 'new', params], (old: any) => {
         if (!old?.results) return old;
         return {
@@ -87,7 +87,7 @@ const NewClaims: React.FC = () => {
         };
       });
 
-      // Обновляем счетчик новых обращений
+      
       queryClient.setQueryData(['arbitrator-claims', 'new', 'count'], (old: number | undefined) => {
         return Math.max(0, (old || 0) - 1);
       });
@@ -96,12 +96,12 @@ const NewClaims: React.FC = () => {
     },
     onSuccess: () => {
       message.success('Обращение взято в работу');
-      // Не инвалидируем запросы сразу, чтобы сохранить оптимистичное обновление
-      // Инвалидируем только запросы для "В работе", чтобы там появилось новое обращение
+      
+      
       queryClient.invalidateQueries({ queryKey: ['arbitrator-claims', 'in_progress'] });
     },
     onError: (error: any, claimId, context) => {
-      // Откатываем изменения при ошибке
+      
       if (context?.previousClaimsData) {
         queryClient.setQueryData(['arbitrator-claims', 'new', params], context.previousClaimsData);
       }
@@ -115,7 +115,7 @@ const NewClaims: React.FC = () => {
   const claims = claimsData?.results || [];
   const total = claimsData?.count || 0;
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -143,7 +143,7 @@ const NewClaims: React.FC = () => {
     setSelectedClaim(null);
   };
 
-  // Получение цвета тега типа
+  
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
@@ -157,7 +157,7 @@ const NewClaims: React.FC = () => {
     }
   };
 
-  // Получение цвета тега приоритета
+  
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -171,7 +171,7 @@ const NewClaims: React.FC = () => {
     }
   };
 
-  // Получение текста типа
+  
   const getTypeText = (type: string) => {
     switch (type) {
       case 'refund':
@@ -185,7 +185,7 @@ const NewClaims: React.FC = () => {
     }
   };
 
-  // Получение текста приоритета
+  
   const getPriorityText = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -199,7 +199,7 @@ const NewClaims: React.FC = () => {
     }
   };
 
-  // Колонки таблицы
+  
   const columns = [
     {
       title: '№',
@@ -328,7 +328,6 @@ const NewClaims: React.FC = () => {
           Список новых обращений, требующих обработки
         </Text>
 
-        {/* Фильтры и поиск */}
         <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
@@ -387,7 +386,6 @@ const NewClaims: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Таблица */}
         <div style={{ overflowX: 'auto' }}>
           <Table
             columns={columns}
@@ -420,7 +418,6 @@ const NewClaims: React.FC = () => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

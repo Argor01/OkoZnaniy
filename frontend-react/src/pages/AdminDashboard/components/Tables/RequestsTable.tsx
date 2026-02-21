@@ -1,6 +1,4 @@
-/**
- * Таблица запросов клиентов
- */
+
 
 import React from 'react';
 import { Table, Button, Tag, Avatar, Tooltip, Space, Input, Select } from 'antd';
@@ -246,7 +244,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
     },
   ];
 
-  // Фильтры над таблицей
+  
   const tableHeader = (
     <div className={styles.tableHeader}>
       <div className={styles.filters}>
@@ -321,12 +319,11 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
         className={styles.table}
         scroll={{ x: 1200 }}
         size="middle"
-        rowClassName={(record) => {
-          // Выделяем срочные запросы
+        rowClassName={(record) => {
           if (record.priority === 'urgent') {
             return styles.urgentRow;
           }
-          // Выделяем непрочитанные запросы
+          
           if (record.messagesCount === 0) {
             return styles.newRow;
           }

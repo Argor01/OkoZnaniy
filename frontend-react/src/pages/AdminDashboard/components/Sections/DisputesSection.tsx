@@ -21,10 +21,7 @@ interface DisputesSectionProps {
   isAssigningArbitrator?: boolean;
 }
 
-/**
- * Секция управления спорами
- * Отображает таблицу споров с возможностью назначения арбитров
- */
+
 export const DisputesSection: React.FC<DisputesSectionProps> = ({
   disputes,
   arbitrators,
@@ -239,7 +236,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
     },
   ];
 
-  // Статистика по спорам
+  
   const totalDisputes = disputes.length;
   const resolvedDisputes = disputes.filter(d => d.resolved).length;
   const pendingDisputes = totalDisputes - resolvedDisputes;
@@ -247,7 +244,6 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
 
   return (
     <div className={styles.disputesContainer}>
-      {/* Статистика */}
       <div className={styles.statsContainer}>
         <Card className={styles.statCard}>
           <div className={styles.statContent}>
@@ -281,7 +277,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
         </Card>
       </div>
 
-      {/* Таблица споров */}
+      
       <Card className={styles.disputesCard}>
         {error ? (
           <Alert

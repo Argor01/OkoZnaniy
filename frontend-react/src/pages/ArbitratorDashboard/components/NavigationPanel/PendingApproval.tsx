@@ -43,7 +43,7 @@ const PendingApproval: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Параметры запроса
+  
   const params: GetClaimsParams = {
     status: 'pending_approval',
     type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
@@ -54,7 +54,7 @@ const PendingApproval: React.FC = () => {
     date_to: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
-  // Получение списка обращений, ожидающих решения
+  
   const { data: claimsData, isLoading, refetch } = useQuery({
     queryKey: ['arbitrator-claims', 'pending_approval', params],
     queryFn: () => arbitratorApi.getClaims(params),
@@ -66,10 +66,10 @@ const PendingApproval: React.FC = () => {
     },
   });
 
-  // Мутация для отмены запроса на согласование
+  
   const cancelApprovalMutation = useMutation({
     mutationFn: (id: number) => {
-      // TODO: Реализовать API endpoint для отмены согласования
+      
       return Promise.resolve();
     },
     onSuccess: () => {
@@ -84,7 +84,7 @@ const PendingApproval: React.FC = () => {
 
   let claims = claimsData?.results || [];
   
-  // Фильтрация по статусу согласования на клиенте
+  
   if (approvalStatusFilter) {
     claims = claims.filter((claim) => 
       claim.decision?.approval_status === approvalStatusFilter
@@ -93,7 +93,7 @@ const PendingApproval: React.FC = () => {
   
   const total = approvalStatusFilter ? claims.length : (claimsData?.count || 0);
 
-  // Обработчики
+  
   const handleSearch = () => {
     setCurrentPage(1);
     refetch();
@@ -133,7 +133,7 @@ const PendingApproval: React.FC = () => {
     setSelectedClaim(null);
   };
 
-  // Получение цвета тега типа
+  
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
@@ -147,7 +147,7 @@ const PendingApproval: React.FC = () => {
     }
   };
 
-  // Получение текста типа
+  
   const getTypeText = (type: string) => {
     switch (type) {
       case 'refund':
@@ -161,7 +161,7 @@ const PendingApproval: React.FC = () => {
     }
   };
 
-  // Получение цвета статуса согласования
+  
   const getApprovalStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -175,7 +175,7 @@ const PendingApproval: React.FC = () => {
     }
   };
 
-  // Получение текста статуса согласования
+  
   const getApprovalStatusText = (status: string) => {
     switch (status) {
       case 'pending':
@@ -189,7 +189,7 @@ const PendingApproval: React.FC = () => {
     }
   };
 
-  // Колонки таблицы
+  
   const columns = [
     {
       title: '№',
@@ -325,7 +325,6 @@ const PendingApproval: React.FC = () => {
           Обращения, отправленные на согласование дирекции
         </Text>
 
-        {/* Фильтры и поиск */}
         <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
@@ -384,7 +383,6 @@ const PendingApproval: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Таблица */}
         <div style={{ overflowX: 'auto' }}>
           <Table
             columns={columns}
@@ -417,7 +415,6 @@ const PendingApproval: React.FC = () => {
         </div>
       </Card>
 
-      {/* Модальное окно детального просмотра */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

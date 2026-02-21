@@ -1,6 +1,4 @@
-/**
- * Хук для обработки запросов клиентов
- */
+
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,7 +17,7 @@ export const useRequestProcessing = () => {
   const [selectedRequest, setSelectedRequest] = useState<CustomerRequest | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<RequestStatus>('open');
 
-  // Получение списка запросов с фильтрацией
+  
   const {
     data: requestsResponse,
     isLoading: requestsLoading,
@@ -28,15 +26,15 @@ export const useRequestProcessing = () => {
   } = useQuery<RequestsApiResponse>({
     queryKey: ['admin-customer-requests', selectedStatus],
     queryFn: () => requestsApi.getRequests({ status: selectedStatus }),
-    refetchInterval: 30000, // Обновление каждые 30 секунд
-    staleTime: 10000, // Данные считаются свежими 10 секунд
-    gcTime: 300000, // Кэш на 5 минут
+    refetchInterval: 30000, 
+    staleTime: 10000, 
+    gcTime: 300000, 
   });
 
-  // Извлекаем массив запросов из ответа
+  
   const requests = requestsResponse?.results || [];
 
-  // Получение сообщений выбранного запроса
+  
   const {
     data: messagesResponse,
     isLoading: messagesLoading,
@@ -45,38 +43,38 @@ export const useRequestProcessing = () => {
     queryKey: ['request-messages', selectedRequest?.id],
     queryFn: () => selectedRequest ? requestsApi.getRequestMessages(selectedRequest.id) : Promise.resolve({ results: [], count: 0 }),
     enabled: !!selectedRequest,
-    refetchInterval: 5000, // Обновление каждые 5 секунд для активного запроса
-    staleTime: 2000, // Сообщения считаются свежими 2 секунды
+    refetchInterval: 5000, 
+    staleTime: 2000, 
   });
 
-  // Извлекаем массив сообщений из ответа
+  
   const requestMessages = messagesResponse?.results || [];
 
-  // Получение статистики запросов
+  
   const {
     data: requestStats,
     isLoading: statsLoading
   } = useQuery({
     queryKey: ['request-stats'],
     queryFn: () => requestsApi.getRequestStats(),
-    refetchInterval: 60000, // Обновление каждую минуту
-    staleTime: 30000, // Статистика свежая 30 секунд
+    refetchInterval: 60000, 
+    staleTime: 30000, 
   });
 
-  // Мутация: взятие запроса в работу
+  
   const takeRequestMutation = useMutation({
     mutationFn: (requestId: number) => requestsApi.takeRequest(requestId),
     onSuccess: (updatedRequest) => {
-      // Обновляем кэш
+      
       queryClient.invalidateQueries({ queryKey: ['admin-customer-requests'] });
       queryClient.invalidateQueries({ queryKey: ['request-stats'] });
       
-      // Обновляем выбранный запрос если это он
+      
       if (selectedRequest?.id === updatedRequest.id) {
         setSelectedRequest(updatedRequest);
       }
       
-      // Показываем уведомление
+      
       requestNotifications.takeSuccess();
     },
     onError: (error: any) => {
@@ -85,7 +83,7 @@ export const useRequestProcessing = () => {
     },
   });
 
-  // Мутация: отправка сообщения
+  
   const sendMessageMutation = useMutation({
     mutationFn: ({ 
       requestId, 
@@ -99,9 +97,9 @@ export const useRequestProcessing = () => {
       attachments?: File[];
     }) => requestsApi.sendMessage(requestId, content, isInternal, attachments),
     onSuccess: () => {
-      // Обновляем сообщения
+      
       queryClient.invalidateQueries({ queryKey: ['request-messages'] });
-      // Обновляем список запросов (может измениться lastMessageAt)
+      
       queryClient.invalidateQueries({ queryKey: ['admin-customer-requests'] });
       
       requestNotifications.messageSuccess();
@@ -112,16 +110,16 @@ export const useRequestProcessing = () => {
     },
   });
 
-  // Мутация: завершение запроса
+  
   const completeRequestMutation = useMutation({
     mutationFn: ({ requestId, resolution }: { requestId: number; resolution?: string }) => 
       requestsApi.completeRequest(requestId, resolution),
     onSuccess: (updatedRequest) => {
-      // Обновляем кэш
+      
       queryClient.invalidateQueries({ queryKey: ['admin-customer-requests'] });
       queryClient.invalidateQueries({ queryKey: ['request-stats'] });
       
-      // Закрываем модальное окно
+      
       setSelectedRequest(null);
       
       requestNotifications.completeSuccess();
@@ -132,15 +130,15 @@ export const useRequestProcessing = () => {
     },
   });
 
-  // Мутация: обновление запроса
+  
   const updateRequestMutation = useMutation({
     mutationFn: ({ requestId, data }: { requestId: number; data: any }) => 
       requestsApi.updateRequest(requestId, data),
     onSuccess: (updatedRequest) => {
-      // Обновляем кэш
+      
       queryClient.invalidateQueries({ queryKey: ['admin-customer-requests'] });
       
-      // Обновляем выбранный запрос если это он
+      
       if (selectedRequest?.id === updatedRequest.id) {
         setSelectedRequest(updatedRequest);
       }
@@ -153,15 +151,15 @@ export const useRequestProcessing = () => {
     },
   });
 
-  // Мутация: назначение запроса
+  
   const assignRequestMutation = useMutation({
     mutationFn: ({ requestId, adminId }: { requestId: number; adminId: number }) => 
       requestsApi.assignRequest(requestId, adminId),
     onSuccess: (updatedRequest) => {
-      // Обновляем кэш
+      
       queryClient.invalidateQueries({ queryKey: ['admin-customer-requests'] });
       
-      // Обновляем выбранный запрос если это он
+      
       if (selectedRequest?.id === updatedRequest.id) {
         setSelectedRequest(updatedRequest);
       }
@@ -175,7 +173,7 @@ export const useRequestProcessing = () => {
     },
   });
 
-  // Обработчики событий
+  
   const handleRequestSelect = useCallback((request: CustomerRequest) => {
     setSelectedRequest(request);
   }, []);
@@ -219,7 +217,7 @@ export const useRequestProcessing = () => {
     assignRequestMutation.mutate({ requestId, adminId });
   }, [assignRequestMutation]);
 
-  // Поиск запросов
+  
   const searchRequests = useCallback(async (query: string, filters?: any) => {
     try {
       const response = await requestsApi.searchRequests(query, filters);
@@ -230,12 +228,12 @@ export const useRequestProcessing = () => {
     }
   }, []);
 
-  // Экспорт запросов
+  
   const exportRequests = useCallback(async (format: 'csv' | 'excel', filters?: any) => {
     try {
       const blob = await requestsApi.exportRequests(format, filters);
       
-      // Создаем ссылку для скачивания
+      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -252,12 +250,12 @@ export const useRequestProcessing = () => {
     }
   }, []);
 
-  // Загрузка файла
+  
   const uploadFile = useCallback(async (requestId: number, file: File, description?: string) => {
     try {
       const result = await requestsApi.uploadFile(requestId, file, description);
       
-      // Обновляем сообщения
+      
       queryClient.invalidateQueries({ queryKey: ['request-messages', requestId] });
       
       requestNotifications.fileUploadSuccess(file.name);
@@ -270,14 +268,14 @@ export const useRequestProcessing = () => {
   }, [queryClient]);
 
   return {
-    // Данные
+    
     requests,
     requestMessages,
     requestStats,
     selectedRequest,
     selectedStatus,
     
-    // Состояния загрузки
+    
     requestsLoading,
     messagesLoading,
     statsLoading,
@@ -287,10 +285,10 @@ export const useRequestProcessing = () => {
     isUpdatingRequest: updateRequestMutation.isPending,
     isAssigningRequest: assignRequestMutation.isPending,
     
-    // Ошибки
+    
     requestsError,
     
-    // Обработчики
+    
     handleRequestSelect,
     handleRequestClose,
     handleStatusChange,
@@ -303,7 +301,7 @@ export const useRequestProcessing = () => {
     exportRequests,
     uploadFile,
     
-    // Методы обновления
+    
     refetchRequests,
     refetchMessages,
   };

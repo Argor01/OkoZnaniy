@@ -1,6 +1,6 @@
-/* OrdersFeed Page Styles */
+﻿
 
-/* Контейнер для контента с отступами как в MyWorks */
+
 .contentContainer {
   max-width: none;
   margin: 0;
@@ -17,7 +17,7 @@
   }
 }
 
-/* Стили для карточек заказов */
+
 .orderCard {
   background: #ffffff;
   border-radius: 16px;
@@ -34,7 +34,7 @@
   border-color: #3b82f6;
 }
 
-/* Стили для фильтров */
+
 .filterCard {
   background: #ffffff;
   border-radius: 16px;
@@ -43,7 +43,7 @@
   margin-bottom: 24px;
 }
 
-/* Стили для заголовка */
+
 .pageHeader {
   display: flex;
   justify-content: space-between;
@@ -54,11 +54,11 @@
 }
 
 .headerContent h2 {
-  margin: 0 !important;
-  margin-bottom: 8px !important;
+  margin: 0;
+  margin-bottom: 8px;
 }
 
-/* Стили для кнопок */
+
 .primaryButton {
   background: #1E90FF;
   border: none;
@@ -76,7 +76,7 @@
   box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
-/* Стили для мобильных устройств */
+
 @media (max-width: 768px) {
   .pageHeader {
     flex-direction: column;
@@ -95,14 +95,14 @@
   }
 }
 
-/* Стили для пустого состояния */
+
 .emptyState {
   text-align: center;
   padding: 60px 20px;
   color: #6b7280;
 }
 
-/* Стили для загрузки */
+
 .loadingContainer {
   display: flex;
   justify-content: center;
@@ -110,7 +110,7 @@
   padding: 60px 20px;
 }
 
-/* Стили для информационных карточек */
+
 .infoCard {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
@@ -123,7 +123,7 @@
   padding: 20px;
 }
 
-/* Стили для тегов */
+
 .statusTag {
   border-radius: 16px;
   padding: 4px 12px;
@@ -160,7 +160,7 @@
   background: #eb2f96;
 }
 
-/* Стили для файлов */
+
 .fileTag {
   cursor: pointer;
   padding: 4px 12px;
@@ -174,14 +174,14 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Стили для бюджета */
+
 .budgetText {
   font-size: 24px;
   font-weight: 600;
   color: #667eea;
 }
 
-/* Стили для действий */
+
 .actionButton {
   border-radius: 8px;
   font-weight: 500;

@@ -46,7 +46,7 @@ const EmployeeRegistration: React.FC = () => {
   });
 
   const onFinish = (values: any) => {
-    // Дополнительная валидация номера телефона
+    
     if (values.phone) {
       const phoneRegex = /^\+?[1-9]\d{1,14}$/;
       const cleanPhone = values.phone.replace(/[^\d+]/g, '');
@@ -56,7 +56,7 @@ const EmployeeRegistration: React.FC = () => {
         return;
       }
       
-      // Проверяем длину номера (от 7 до 15 цифр)
+      
       const digitsOnly = cleanPhone.replace(/^\+/, '');
       if (digitsOnly.length < 7 || digitsOnly.length > 15) {
         message.error('Номер телефона должен содержать от 7 до 15 цифр');
@@ -153,12 +153,12 @@ const EmployeeRegistration: React.FC = () => {
               placeholder="+7 (999) 123-45-67"
               size="large"
               onChange={(e) => {
-                // Разрешаем только цифры, пробелы, дефисы, скобки и знак +
+                
                 const value = e.target.value.replace(/[^+\d\s()-]/g, '');
                 form.setFieldsValue({ phone: value });
               }}
               onBlur={(e) => {
-                // При потере фокуса очищаем от всех символов кроме цифр и +
+                
                 const cleanValue = e.target.value.replace(/[^\d+]/g, '');
                 form.setFieldsValue({ phone: cleanValue });
               }}

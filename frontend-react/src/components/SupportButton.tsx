@@ -49,7 +49,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
       setIsModalVisible(false);
       setMessageText('');
       
-      // Перенаправляем в чат поддержки
+      
       navigate(`/support-chat/${chat.id}`);
     } catch (error) {
       console.error('Ошибка создания обращения:', error);
@@ -161,7 +161,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
     );
   }
 
-  // Обычная кнопка
+  
   return (
     <>
       <Button

@@ -10,7 +10,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import styles from './DashboardLayout.module.css';
 
-// Импорт модальных окон
+
 import ProfileModal from '../../pages/ExpertDashboard/modals/ProfileModal';
 import MessageModal from '../../pages/ExpertDashboard/modals/MessageModalNew';
 import NotificationsModal from '../../pages/ExpertDashboard/modals/NotificationsModalNew';
@@ -31,7 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   
-  // State для модальных окон
+  
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
@@ -48,13 +48,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const { unreadCount: unreadNotifications } = useNotifications();
 
-  // Загружаем профиль пользователя
+  
   const { data: userProfile, isLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  // Получаем баланс из профиля пользователя
+  
   const balance = userProfile?.balance ? parseFloat(userProfile.balance) : 0.00;
   const [supportUserId, setSupportUserId] = useState<number | null>(() => {
     const raw = localStorage.getItem('support_user_id');
@@ -168,7 +168,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       navigate('/expert?tab=orders');
       return;
     }
-    // Other navigation is handled by Sidebar's navigate calls or simple links
+    
   };
 
   const getSelectedKey = () => {
@@ -212,7 +212,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <DashboardContext.Provider value={contextValue}>
       <Layout style={{ minHeight: '100vh' }}>
-        {/* Header */}
+        
         {shouldShowHeader && (
           <DashboardHeader
             userProfile={userProfile ? {
@@ -268,7 +268,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         <Layout style={{ 
           marginLeft: isMobile ? 0 : 250, 
-          marginTop: shouldShowHeader ? 64 : 0, // Отступ для хедера
+          marginTop: shouldShowHeader ? 64 : 0, 
           background: '#f5f5f5',
           transition: 'all 0.2s'
         }}>
@@ -284,7 +284,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Layout>
       </Layout>
 
-      {/* Modals */}
+      
       <ProfileModal 
         visible={profileModalVisible} 
         onClose={() => setProfileModalVisible(false)} 

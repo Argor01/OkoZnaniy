@@ -55,9 +55,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     };
   }, [navigate]);
 
-  // Функция для обработки ошибок
+  
   const handleError = (error: any): string => {
-    // Ошибка сети
+    
     if (!error.response) {
       return 'Ошибка соединения с сервером. Проверьте подключение к интернету.';
     }
@@ -65,10 +65,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     const status = error.response?.status;
     const data = error.response?.data;
 
-    // Разные типы ошибок
+    
     switch (status) {
       case 400:
-        // Неверные данные
+        
         if (data?.detail) {
           return data.detail;
         }
@@ -80,23 +80,23 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         return 'Неверные данные. Проверьте введенные email и пароль.';
       
       case 401:
-        // Неавторизован
+        
         return 'Неверный email или пароль. Проверьте правильность данных.';
       
       case 403:
-        // Доступ запрещен
+        
         return 'Доступ запрещен. У вас нет прав для входа.';
       
       case 404:
-        // Пользователь не найден
+        
         return 'Пользователь с указанным email не найден.';
       
       case 500:
-        // Ошибка сервера
+        
         return 'Ошибка на сервере. Попробуйте позже.';
       
       default:
-        // Общая ошибка
+        
         if (data?.detail) {
           return data.detail;
         }
@@ -115,17 +115,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       const role = auth?.user?.role || '';
       
-      // Если есть callback (значит мы на странице личного кабинета администратора)
+      
       if (onSuccess && auth?.user) {
-        // Только для admin показываем панель
+        
         if (role === 'admin') {
           onSuccess(auth.user);
-          // Остаемся на странице, AdminDashboard покажет панель
+          
           return;
         }
       }
       
-      // Редирект в зависимости от роли пользователя
+      
       await redirectByRole(role, navigate);
     } catch (error: any) {
       const errorMessage = handleError(error);
@@ -138,17 +138,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     }
   };
 
-  // Функция быстрого входа
+  
   const handleQuickLogin = async (account: DevAccount) => {
     setLoading(true);
     try {
-      // Автозаполнение формы
+      
       form.setFieldsValue({
         username: account.email,
         password: account.password
       });
       
-      // Выполнение входа
+      
       const auth = await authApi.login({
         username: account.email,
         password: account.password
@@ -156,17 +156,17 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       
       message.success(`Успешный вход как ${account.label}!`);
       
-      // Если есть callback (значит мы на странице личного кабинета администратора)
+      
       if (onSuccess && auth?.user) {
-        // Только для admin показываем панель
+        
         if (account.role === 'admin') {
           onSuccess(auth.user);
-          // Остаемся на странице, AdminDashboard покажет панель
+          
           return;
         }
       }
       
-      // Редирект в зависимости от роли
+      
       await redirectByRole(account.role, navigate);
     } catch (error: any) {
       const errorMessage = handleError(error);
@@ -179,7 +179,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     }
   };
 
-  // Получить иконку для роли
+  
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'partner':
@@ -224,7 +224,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         overflow: 'hidden',
       }}
     >
-      {/* Декоративные элементы */}
+      
       <div
         style={{
           position: 'absolute',
@@ -383,7 +383,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           </Form.Item>
         </Form>
 
-        {/* Кнопки быстрого входа */}
         <>
           <Divider 
             style={{ 
@@ -397,7 +396,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             Быстрый вход
           </Divider>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-            {/* Первая строка - Партнер и Администратор */}
+            
             <div 
               style={{ 
                 display: 'grid',
@@ -450,7 +449,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               ))}
             </div>
             
-            {/* Вторая строка - Директор по центру */}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {DEV_ACCOUNTS.filter(acc => acc.role === 'director').map((account) => (
                 <Tooltip

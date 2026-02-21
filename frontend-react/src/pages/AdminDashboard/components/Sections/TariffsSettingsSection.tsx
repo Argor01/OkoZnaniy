@@ -104,7 +104,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
   const [tariffForm] = Form.useForm();
   const [commissionForm] = Form.useForm();
 
-  // Мок данные для демонстрации
+  
   const mockTariffs: ServiceTariff[] = [
     {
       id: 1,
@@ -202,7 +202,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
   const tariffsData = tariffs.length > 0 ? tariffs : mockTariffs;
   const commissionsData = commissions.length > 0 ? commissions : mockCommissions;
 
-  // Обработчики для тарифов
+  
   const handleCreateTariff = async () => {
     try {
       const values = await tariffForm.validateFields();
@@ -241,7 +241,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
     message.success('Тариф удален');
   };
 
-  // Обработчики для комиссий
+  
   const handleCreateCommission = async () => {
     try {
       const values = await commissionForm.validateFields();
@@ -280,7 +280,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
     message.success('Комиссия удалена');
   };
 
-  // Функции для отображения
+  
   const getCategoryColor = (category: string) => {
     const colors = {
       writing: 'blue',
@@ -320,7 +320,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
     return texts[appliesTo as keyof typeof texts] || 'Неизвестно';
   };
 
-  // Колонки для таблицы тарифов
+  
   const tariffColumns = [
     {
       title: 'Название',
@@ -412,7 +412,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
     },
   ];
 
-  // Колонки для таблицы комиссий
+  
   const commissionColumns = [
     {
       title: 'Название',
@@ -564,7 +564,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
         </TabPane>
       </Tabs>
 
-      {/* Модальное окно создания/редактирования тарифа */}
+      
       <Modal
         title={editingTariff ? 'Редактировать тариф' : 'Создать тариф'}
         open={tariffModalVisible}
@@ -696,7 +696,7 @@ export const TariffsSettingsSection: React.FC<TariffsSettingsSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно создания/редактирования комиссии */}
+      
       <Modal
         title={editingCommission ? 'Редактировать комиссию' : 'Создать комиссию'}
         open={commissionModalVisible}

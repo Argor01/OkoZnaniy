@@ -1,6 +1,6 @@
-// Правила валидации
 
-// Минимальные и максимальные значения
+
+
 export const VALIDATION_LIMITS = {
   order: {
     titleMinLength: 5,
@@ -32,7 +32,7 @@ export const VALIDATION_LIMITS = {
   },
 } as const;
 
-// Регулярные выражения
+
 export const REGEX_PATTERNS = {
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   phone: /^(\+7|8)?[\s-]?\(?[0-9]{3}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{2}[\s-]?[0-9]{2}$/,
@@ -40,7 +40,7 @@ export const REGEX_PATTERNS = {
   url: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
 } as const;
 
-// Сообщения об ошибках
+
 export const VALIDATION_MESSAGES = {
   required: 'Это поле обязательно для заполнения',
   email: 'Введите корректный email адрес',

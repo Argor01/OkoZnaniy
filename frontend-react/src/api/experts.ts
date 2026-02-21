@@ -2,7 +2,7 @@ import { apiClient } from './client';
 
 export interface CreateExpertRatingRequest {
   order: number;
-  rating: number; // 1-5
+  rating: number; 
   comment?: string;
 }
 
@@ -303,10 +303,10 @@ export const expertsApi = {
   async getMyApplication(): Promise<ExpertApplication | null> {
     try {
       const { data } = await apiClient.get('/experts/applications/my_application/');
-      // Если сервер вернул null, значит анкеты нет
+      
       return data;
     } catch (error: unknown) {
-      // Если анкета не найдена (404 или 400), это нормально - значит её ещё нет
+      
       const status = (error as { response?: { status?: number } })?.response?.status;
       if (status === 404 || status === 403 || status === 400) {
         return null;
@@ -320,7 +320,7 @@ export const expertsApi = {
     return data;
   },
 
-  // Специализации
+  
   async getSpecializations(): Promise<Specialization[]> {
     const { data } = await apiClient.get('/experts/specializations/');
     return data.results || data;

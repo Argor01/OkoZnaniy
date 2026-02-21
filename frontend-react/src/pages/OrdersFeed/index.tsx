@@ -65,7 +65,7 @@ const OrdersFeed: React.FC = () => {
   const [selectedOrderForBid, setSelectedOrderForBid] = useState<OrdersFeedOrder | null>(null);
   const [myBidsByOrderId, setMyBidsByOrderId] = useState<Record<number, boolean | 'loading'>>({});
 
-  // Загружаем профиль пользователя
+  
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
@@ -84,7 +84,7 @@ const OrdersFeed: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Загружаем заказы (все доступные заказы для всех пользователей)
+  
   const { data: ordersData, isLoading: ordersLoading } = useQuery<OrdersFeedOrder[]>({
     queryKey: ['orders-feed'],
     queryFn: async () => {
@@ -118,13 +118,13 @@ const OrdersFeed: React.FC = () => {
     },
   });
 
-  // Загружаем справочники
+  
   const { data: workTypes = [] } = useQuery<WorkType[]>({
     queryKey: ['workTypes'],
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
-  // Используем реальные данные с API
+  
   const orders = React.useMemo(() => {
     if (!Array.isArray(ordersData)) return [];
     return ordersData.filter((order) => {
@@ -179,7 +179,7 @@ const OrdersFeed: React.FC = () => {
     };
   }, [orders, userProfile?.role, userProfile?.id, myBidsByOrderId]);
 
-  // Фильтрация заказов
+  
   const filteredOrders = orders.filter((order) => {
     const matchesSearch = !searchText || 
       order.title?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -204,18 +204,18 @@ const OrdersFeed: React.FC = () => {
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
 
-  // Проверка, является ли пользователь владельцем заказа
+  
   const isOrderOwner = (order: OrdersFeedOrder) => {
     return order.client?.id === userProfile?.id || 
            order.client_id === userProfile?.id;
   };
 
-  // Удаление заказа
+  
   const handleDeleteOrder = async (orderId: number) => {
     try {
       await ordersApi.deleteOrder(orderId);
       message.success('Заказ успешно удален');
-      // Обновить список заказов
+      
       window.location.reload();
     } catch (error: unknown) {
       const errorMessage =
@@ -264,7 +264,6 @@ const OrdersFeed: React.FC = () => {
 
   return (
     <div className={styles.contentContainer}>
-      {/* Заголовок и кнопка создания */}
       {!isMobile && (
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
@@ -286,7 +285,6 @@ const OrdersFeed: React.FC = () => {
         </div>
       )}
 
-      {/* Фильтры */}
       <Card 
         className={styles.filterCard}
       >
@@ -337,7 +335,6 @@ const OrdersFeed: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Дополнительные фильтры */}
         <div style={{ marginTop: 16 }}>
           <Button 
             type="link" 
@@ -427,7 +424,7 @@ const OrdersFeed: React.FC = () => {
         )}
       </Card>
 
-      {/* Список заказов */}
+      
       {ordersLoading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
           <Spin size="large" />
@@ -460,7 +457,7 @@ const OrdersFeed: React.FC = () => {
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
           {filteredOrders.map((order: OrdersFeedOrder) => {
-            // Логируем данные заказа для отладки
+
             if (order.files) {
               if (debugEnabled) {
                 console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
@@ -555,7 +552,7 @@ const OrdersFeed: React.FC = () => {
                 {order.description}
               </Paragraph>
 
-              {/* Прикрепленные файлы */}
+              
               {order.files && order.files.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
@@ -563,7 +560,7 @@ const OrdersFeed: React.FC = () => {
                   </Text>
                   <Space size={8} wrap>
                     {order.files.map((file) => {
-                      // Определяем иконку по расширению файла
+
                       const getFileIcon = (filename: string) => {
                         const ext = filename.split('.').pop()?.toLowerCase();
                         if (ext === 'pdf') return <FilePdfOutlined style={{ color: '#ff4d4f' }} />;
@@ -651,7 +648,7 @@ const OrdersFeed: React.FC = () => {
                       icon={<DeleteOutlined />}
                       className={`${styles.actionButton} ${styles.deleteButton}`}
                       onClick={(e) => {
-                        e.stopPropagation(); // Предотвращаем переход к деталям
+                        e.stopPropagation();
                         if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
                           handleDeleteOrder(order.id);
                         }
@@ -665,7 +662,7 @@ const OrdersFeed: React.FC = () => {
                       disabled={hasMyBid || checkingMyBid}
                       className={`${styles.actionButton} ${styles.bidButton}`}
                       onClick={(e) => {
-                        e.stopPropagation(); // Предотвращаем переход к деталям
+                        e.stopPropagation();
                         if (hasMyBid || checkingMyBid) return;
                         setSelectedOrderForBid(order);
                         setBidModalVisible(true);
@@ -682,7 +679,7 @@ const OrdersFeed: React.FC = () => {
         </div>
       )}
 
-            {/* Кнопка создания для мобильных */}
+            
             {isMobile && (
               <Button 
                 type="primary" 

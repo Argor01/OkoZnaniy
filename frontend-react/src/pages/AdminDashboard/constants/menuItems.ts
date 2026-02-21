@@ -10,19 +10,16 @@ import {
   InboxOutlined,
   CustomerServiceOutlined,
   CommentOutlined,
-  UserOutlined,        // 🆕 Для обработки запросов
-  ShoppingOutlined,    // Для управления заказами
-  StopOutlined,        // Для заблокированных пользователей
-  SafetyOutlined,      // Для ролей и прав
-  UnorderedListOutlined, // Для списка заказов
-  ExclamationCircleOutlined, // Для проблемных заказов
+  UserOutlined,        
+  ShoppingOutlined,    
+  StopOutlined,        
+  SafetyOutlined,      
+  UnorderedListOutlined, 
+  ExclamationCircleOutlined, 
 } from '@ant-design/icons';
 import type { MenuKey } from '../types/admin.types';
 
-/**
- * Конфигурация меню админской панели
- * Вынесена из монолитного AdminDashboard.tsx
- */
+
 
 export interface MenuItem {
   key: MenuKey;
@@ -42,7 +39,7 @@ export const menuItems: MenuItem[] = [
     icon: DollarOutlined,
     label: 'Начисления',
   },
-  // Управление пользователями
+  
   {
     key: 'users_management' as MenuKey,
     icon: UserOutlined,
@@ -65,7 +62,7 @@ export const menuItems: MenuItem[] = [
       },
     ],
   },
-  // Управление заказами
+  
   {
     key: 'orders_management' as MenuKey,
     icon: ShoppingOutlined,
@@ -126,7 +123,7 @@ export const menuItems: MenuItem[] = [
     icon: CommentOutlined,
     label: 'Внутренняя коммуникация',
   },
-  // Новый раздел обработки запросов
+  
   {
     key: 'request_processing' as MenuKey,
     icon: UserOutlined,
@@ -155,23 +152,23 @@ export const titleMap: Record<MenuKey, string> = {
   overview: 'Обзор',
   partners: 'Партнеры',
   earnings: 'Начисления',
-  // Обращения
+  
   claims: 'Обращения',
   new_claims: 'Новые обращения',
   in_progress_claims: 'В работе',
   completed_claims: 'Завершённые',
   pending_approval: 'Ожидают решения',
   internal_communication: 'Внутренняя коммуникация',
-  // Управление пользователями
+  
   users_management: 'Управление пользователями',
   all_users: 'Все пользователи',
   blocked_users: 'Заблокированные пользователи',
   user_roles: 'Роли и права',
-  // Управление заказами
+  
   orders_management: 'Управление заказами',
   all_orders: 'Все заказы',
   problem_orders: 'Проблемные заказы',
-  // Поддержка
+  
   support_open: 'Открытые запросы поддержки',
   support_in_progress: 'Запросы поддержки в работе',
   support_completed: 'Завершенные запросы поддержки',
@@ -179,30 +176,30 @@ export const titleMap: Record<MenuKey, string> = {
   tickets: 'Тикеты поддержки',
   admin_chats: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
-  // Обработка запросов
+  
   request_processing: 'Обработка запросов',
   request_processing_open: 'Открытые запросы клиентов',
   request_processing_progress: 'Запросы в процессе решения',
   request_processing_completed: 'Выполненные запросы',
 };
 
-// Маппинг для определения родительского меню
+
 export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
   const childToParent: Partial<Record<MenuKey, MenuKey>> = {
-    // Управление пользователями
+    
     all_users: 'users_management' as MenuKey,
     blocked_users: 'users_management' as MenuKey,
     user_roles: 'users_management' as MenuKey,
-    // Управление заказами
+    
     all_orders: 'orders_management' as MenuKey,
     problem_orders: 'orders_management' as MenuKey,
 
-    // Обращения
+    
     new_claims: 'claims' as MenuKey,
     in_progress_claims: 'claims' as MenuKey,
     completed_claims: 'claims' as MenuKey,
     pending_approval: 'claims' as MenuKey,
-    // Новые дочерние пункты меню
+    
     request_processing_open: 'request_processing' as MenuKey,
     request_processing_progress: 'request_processing' as MenuKey,
     request_processing_completed: 'request_processing' as MenuKey,
@@ -211,7 +208,7 @@ export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
   return childToParent[menuKey] || null;
 };
 
-// Проверка, является ли пункт меню подменю
+
 export const isSubmenuItem = (menuKey: MenuKey): boolean => {
   return getParentMenuKey(menuKey) !== null;
 };

@@ -1,7 +1,4 @@
-/**
- * Экспорт всех секций AdminDashboard
- * Централизованный импорт для удобства
- */
+
 
 export { OverviewSection } from './OverviewSection';
 export { PartnersSection } from './PartnersSection';
@@ -10,7 +7,7 @@ export { DisputesSection } from './DisputesSection';
 export { SupportRequestsSection } from './SupportRequestsSection';
 export { SupportChatsSection } from './SupportChatsSection';
 export { TicketSystemSection } from './TicketSystemSection';
-export { UsersManagementSection } from './UsersManagementSection';
+export { UsersManagementSection } from './UserRolesSection';
 export { BlockedUsersSection } from './BlockedUsersSection';
 export { UserRolesSection } from './UserRolesSection';
 export { AllOrdersSection } from './AllOrdersSection';

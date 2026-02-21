@@ -46,14 +46,14 @@ export interface SupportMessage {
 }
 
 export const supportApi = {
-  // Получить список чатов поддержки
+  
   getChats: async (status?: string): Promise<SupportChat[]> => {
     const params = status ? { status } : {};
     const response = await apiClient.get('/chat/support/', { params });
     return response.data;
   },
 
-  // Создать новый чат поддержки
+  
   createChat: async (data: {
     subject: string;
     message: string;
@@ -63,13 +63,13 @@ export const supportApi = {
     return response.data;
   },
 
-  // Получить сообщения чата
+  
   getMessages: async (chatId: number): Promise<SupportMessage[]> => {
     const response = await apiClient.get(`/chat/support/${chatId}/messages/`);
     return response.data;
   },
 
-  // Отправить сообщение
+  
   sendMessage: async (chatId: number, text: string, file?: File): Promise<SupportMessage> => {
     const formData = new FormData();
     formData.append('text', text);
@@ -85,12 +85,12 @@ export const supportApi = {
     return response.data;
   },
 
-  // Взять чат в работу (для админов)
+  
   takeChat: async (chatId: number): Promise<void> => {
     await apiClient.post(`/chat/support/${chatId}/take_chat/`);
   },
 
-  // Закрыть чат
+  
   closeChat: async (chatId: number): Promise<void> => {
     await apiClient.post(`/chat/support/${chatId}/close_chat/`);
   },

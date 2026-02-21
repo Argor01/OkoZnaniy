@@ -22,7 +22,7 @@ interface NotificationsModalProps {
   isMobile: boolean;
 }
 
-// Маппинг типов уведомлений на иконки
+
 const getNotificationIcon = (type: string) => {
   const iconMap: Record<string, React.ReactNode> = {
     'new_order': <FileDoneOutlined style={{ color: '#3b82f6' }} />,
@@ -46,7 +46,7 @@ const getNotificationIcon = (type: string) => {
   return iconMap[type] || <BellOutlined style={{ color: '#6b7280' }} />;
 };
 
-// Маппинг типов на категории
+
 const getNotificationCategory = (type: string): string => {
   if (['new_order', 'order_taken', 'order_assigned', 'order_completed', 'status_changed'].includes(type)) {
     return 'orders';
@@ -171,7 +171,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         display: 'flex',
         flexDirection: 'column'
       }}>
-        {/* Заголовок */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 16 : 24 }}>
           <Text strong style={{ 
             fontSize: isMobile ? 20 : 24, 
@@ -193,7 +192,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           )}
         </div>
 
-        {/* Навигационные вкладки */}
         <div style={{ 
           display: 'flex', 
           gap: 0,
@@ -250,7 +248,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           ))}
         </div>
 
-        {/* Область контента */}
         <div style={{ 
           minHeight: isMobile ? '300px' : '500px',
           background: '#ffffff',
@@ -306,7 +303,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   }
                 }}
               >
-                {/* Иконка */}
+                
                 <div style={{
                   width: isMobile ? 36 : 40,
                   height: isMobile ? 36 : 40,
@@ -321,7 +318,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   {getNotificationIcon(notification.type)}
                 </div>
 
-                {/* Контент */}
+                
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ 
                     display: 'flex', 

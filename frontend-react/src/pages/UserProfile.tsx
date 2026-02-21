@@ -16,7 +16,7 @@ const UserProfile: FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
-  // Загружаем данные пользователя
+  
   const { data: userData, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['user', userId],
     queryFn: async () => {
@@ -26,7 +26,7 @@ const UserProfile: FC = () => {
     enabled: !!userId,
   });
 
-  // Загружаем статистику заказов пользователя
+  
   const { data: ordersStats, isLoading: statsLoading } = useQuery({
     queryKey: ['user-orders-stats', userId],
     queryFn: async () => {
@@ -45,14 +45,14 @@ const UserProfile: FC = () => {
     enabled: !!userId,
   });
 
-  // Загружаем статистику эксперта (если это эксперт)
+  
   const { data: expertStats, isLoading: expertStatsLoading } = useQuery({
     queryKey: ['expert-stats', userId],
     queryFn: () => expertsApi.getExpertStatistics(Number(userId)),
     enabled: !!userId && userData?.role === 'expert',
   });
 
-  // Загружаем отзывы эксперта (если это эксперт)
+  
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ['expert-reviews', userId],
     queryFn: () => expertsApi.getReviews(Number(userId)),
@@ -89,7 +89,7 @@ const UserProfile: FC = () => {
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: '24px' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        {/* Кнопка назад */}
+        
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(-1)}
@@ -101,9 +101,9 @@ const UserProfile: FC = () => {
 
         <Card>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            {/* Основная информация о пользователе */}
+            
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Аватар и ник - большая плашка на всю ширину */}
+              
               <Card 
                 style={{ 
                   background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
@@ -134,13 +134,13 @@ const UserProfile: FC = () => {
                   </div>
                   <Space align="center" size={20}>
                     {userData.avatar ? (
-                      <img 
-                        src={userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:8000${userData.avatar}`}
-                        alt="Аватар" 
-                        style={{ 
-                          width: 72, 
-                          height: 72, 
-                          borderRadius: '50%', 
+                      <img
+                        src={getMediaUrl(userData.avatar)}
+                        alt="Аватар"
+                        style={{
+                          width: 72,
+                          height: 72,
+                          borderRadius: '50%',
                           objectFit: 'cover',
                           border: '3px solid #722ed1',
                           boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
@@ -187,7 +187,7 @@ const UserProfile: FC = () => {
                 </Space>
               </Card>
 
-              {/* Рейтинг и статистика - блок на всю ширину */}
+              
               <SurfaceCard title={<SectionHeader title="РЕЙТИНГ И СТАТИСТИКА" />}>
                 {(statsLoading || expertStatsLoading) ? (
                   <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -199,7 +199,7 @@ const UserProfile: FC = () => {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                     gap: 24 
                   }}>
-                    {/* Рейтинг */}
+                    
                     <div style={{ textAlign: 'center', padding: '16px' }}>
                       <div style={{ fontSize: 48, fontWeight: 600, color: '#faad14', marginBottom: 8 }}>
                         {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
@@ -213,7 +213,7 @@ const UserProfile: FC = () => {
                       </div>
                     </div>
 
-                    {/* Статистика заказов */}
+                    
                     <div style={{ padding: '16px' }}>
                       <div style={{ marginBottom: 16 }}>
                         <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
@@ -237,7 +237,7 @@ const UserProfile: FC = () => {
                     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                     gap: 24 
                   }}>
-                    {/* Успешность */}
+                    
                     <div style={{ textAlign: 'center', padding: '16px' }}>
                       <div style={{ fontSize: 48, fontWeight: 600, color: '#1890ff', marginBottom: 8 }}>
                         {ordersStats.success_rate.toFixed(1)}%
@@ -247,7 +247,7 @@ const UserProfile: FC = () => {
                       </div>
                     </div>
 
-                    {/* Статистика заказов */}
+                    
                     <div style={{ padding: '16px' }}>
                       <div style={{ marginBottom: 16 }}>
                         <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
@@ -269,16 +269,16 @@ const UserProfile: FC = () => {
               </SurfaceCard>
             </div>
 
-            {/* Описание и дополнительная информация */}
+            
             <div>
-              {/* О себе */}
+              
               {userData.bio && (
                 <SurfaceCard title="О себе" style={{ marginBottom: 16 }}>
                   <Paragraph>{userData.bio}</Paragraph>
                 </SurfaceCard>
               )}
 
-              {/* Образование (для экспертов) */}
+              
               {userData.role === 'expert' && userData.education && (
                 <SurfaceCard title="Образование" style={{ marginBottom: 16 }}>
                   <Paragraph>{userData.education}</Paragraph>
@@ -304,7 +304,7 @@ const UserProfile: FC = () => {
                 </SurfaceCard>
               )}
 
-              {/* Навыки (для экспертов) */}
+              
               {userData.role === 'expert' && userData.skills && (
                 <SurfaceCard title="Навыки" style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -317,7 +317,7 @@ const UserProfile: FC = () => {
                 </SurfaceCard>
               )}
 
-              {/* Портфолио (для экспертов) */}
+              
               {userData.role === 'expert' && userData.portfolio_url && (
                 <SurfaceCard title="Портфолио" style={{ marginBottom: 16 }}>
                   <Button 
@@ -332,7 +332,7 @@ const UserProfile: FC = () => {
               )}
             </div>
 
-            {/* Блок специализации */}
+            
             {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
               <SurfaceCard title="Специализации">
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -360,7 +360,7 @@ const UserProfile: FC = () => {
               </SurfaceCard>
             )}
 
-            {/* Отзывы (только для экспертов) */}
+            
             {userData.role === 'expert' && (
               <Card 
                 title={`Отзывы (${reviews.length})`} 

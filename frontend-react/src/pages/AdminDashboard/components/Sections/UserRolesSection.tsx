@@ -100,7 +100,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
   const [permissionForm] = Form.useForm();
   const [createRoleForm] = Form.useForm();
 
-  // Мок данные для демонстрации
+  
   const mockUsers: User[] = [
     {
       id: 1,
@@ -180,26 +180,26 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
   ];
 
   const mockPermissions: Permission[] = [
-    // Заказы
+    
     { id: 'view_orders', name: 'view_orders', display_name: 'Просмотр заказов', category: 'orders', description: 'Может просматривать заказы' },
     { id: 'create_orders', name: 'create_orders', display_name: 'Создание заказов', category: 'orders', description: 'Может создавать новые заказы' },
     { id: 'accept_orders', name: 'accept_orders', display_name: 'Принятие заказов', category: 'orders', description: 'Может принимать заказы в работу' },
     { id: 'cancel_orders', name: 'cancel_orders', display_name: 'Отмена заказов', category: 'orders', description: 'Может отменять заказы' },
     
-    // Работы
+    
     { id: 'upload_works', name: 'upload_works', display_name: 'Загрузка работ', category: 'works', description: 'Может загружать работы в магазин' },
     { id: 'buy_works', name: 'buy_works', display_name: 'Покупка работ', category: 'works', description: 'Может покупать работы из магазина' },
     { id: 'moderate_works', name: 'moderate_works', display_name: 'Модерация работ', category: 'works', description: 'Может модерировать работы' },
     
-    // Партнерство
+    
     { id: 'view_referrals', name: 'view_referrals', display_name: 'Просмотр рефералов', category: 'partnership', description: 'Может просматривать своих рефералов' },
     { id: 'view_earnings', name: 'view_earnings', display_name: 'Просмотр доходов', category: 'partnership', description: 'Может просматривать свои доходы' },
     
-    // Профиль
+    
     { id: 'view_profile', name: 'view_profile', display_name: 'Просмотр профиля', category: 'profile', description: 'Может просматривать свой профиль' },
     { id: 'edit_profile', name: 'edit_profile', display_name: 'Редактирование профиля', category: 'profile', description: 'Может редактировать свой профиль' },
     
-    // Администрирование
+    
     { id: 'manage_users', name: 'manage_users', display_name: 'Управление пользователями', category: 'admin', description: 'Может управлять пользователями' },
     { id: 'manage_roles', name: 'manage_roles', display_name: 'Управление ролями', category: 'admin', description: 'Может управлять ролями и правами' },
     { id: 'view_analytics', name: 'view_analytics', display_name: 'Просмотр аналитики', category: 'admin', description: 'Может просматривать аналитику' },
@@ -209,7 +209,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
   const rolesData = roles.length > 0 ? roles : mockRoles;
   const permissionsData = permissions.length > 0 ? permissions : mockPermissions;
 
-  // Фильтрация пользователей
+  
   const filteredUsers = dataSource.filter(user => {
     const matchesSearch = 
       user.username.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -493,7 +493,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
 
         <Tabs defaultActiveKey="users">
           <TabPane tab="Пользователи" key="users">
-            {/* Фильтры для пользователей */}
+            
             <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Search
                 placeholder="Поиск по имени, email или username"
@@ -533,33 +533,11 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
             />
           </TabPane>
 
-          {/* Временно отключена вкладка "Роли" из-за проблем с данными */}
-          {/*
-          <TabPane tab="Роли" key="roles">
-            <div style={{ marginBottom: 16 }}>
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />}
-                onClick={() => setCreateRoleModalVisible(true)}
-              >
-                Создать роль
-              </Button>
-            </div>
-
-            <Table
-              columns={roleColumns}
-              dataSource={rolesData}
-              rowKey="id"
-              loading={loading}
-              pagination={false}
-              locale={{ emptyText: 'Роли не найдены' }}
-            />
-          </TabPane>
-          */}
+          
+          
         </Tabs>
       </Card>
 
-      {/* Модальное окно изменения роли */}
       <Modal
         title={`Изменить роль пользователя ${selectedUser?.username}`}
         open={roleModalVisible}
@@ -592,7 +570,6 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно редактирования прав роли */}
       <Modal
         title={`Права роли: ${selectedRole?.display_name}`}
         open={permissionModalVisible}
@@ -645,7 +622,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Модальное окно создания роли */}
+      
       <Modal
         title="Создать новую роль"
         open={createRoleModalVisible}
@@ -716,3 +693,23 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
     </div>
   );
 };
+
+export interface UsersManagementSectionProps {
+  users?: User[];
+  loading?: boolean;
+  onBlockUser?: (userId: number) => void | Promise<void>;
+  onUnblockUser?: (userId: number) => void | Promise<void>;
+  onChangeRole?: (userId: number, role: string) => void | Promise<void>;
+}
+
+export const UsersManagementSection: React.FC<UsersManagementSectionProps> = ({
+  users,
+  loading,
+  onChangeRole,
+}) => (
+  <UserRolesSection
+    users={users}
+    loading={loading}
+    onChangeUserRole={onChangeRole}
+  />
+);

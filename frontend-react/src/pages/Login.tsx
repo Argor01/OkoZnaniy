@@ -12,7 +12,7 @@ import '../styles/login.css';
 
 
 
-// Хук анимации печатания для плейсхолдера
+
 function useTypewriter(fullText: string, speed = 35, startDelay = 0) {
   const [text, setText] = useState('');
   React.useEffect(() => {
@@ -48,17 +48,17 @@ const Login: React.FC = () => {
     typeof window !== 'undefined' &&
     window.localStorage?.getItem('debug_api') === '1';
 
-  // Определяем, с какой страницы входа мы пришли
+  
   const isAdminLogin = location.pathname === ROUTES.admin.login;
   const isDirectorLogin = location.pathname === ROUTES.admin.directorLogin;
 
-  // Модалка подтверждения email
+  
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | undefined>(undefined);
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
 
-  // Модалка восстановления пароля
+  
   const [passwordResetModalVisible, setPasswordResetModalVisible] = useState(false);
   const [resetStep, setResetStep] = useState<'email' | 'code' | 'password'>('email');
   const [resetEmail, setResetEmail] = useState('');
@@ -67,7 +67,7 @@ const Login: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
 
-  // Плейсхолдеры с анимацией
+  
   const loginUsernamePh = useTypewriter('Email', 35, 100);
   const loginPasswordPh = useTypewriter('Пароль', 35, 250);
   const regEmailPh = useTypewriter('Email', 35, 120);
@@ -75,25 +75,25 @@ const Login: React.FC = () => {
   const regPassword2Ph = useTypewriter('Подтвердите пароль', 35, 560);
   const regReferralPh = useTypewriter('Реферальный код', 35, 700);
   
-  // Тексты для анимации диалога на левой панели
+  
   const bubbleQuestionText = 'Можете сделать курсовую за час?';
   const bubbleAnswerText = 'Без проблем!';
-  // Параметры печати для синхронизации анимаций
+  
   const leftDelay = 600;
   const leftSpeed = 65;
   const leftLen = bubbleQuestionText.length;
-  // Анимация отправки троеточием: появляется после завершения печати слева
+  
   const sendDuration = 1200;
   const sendDelay = leftDelay + leftSpeed * leftLen + 150;
-  // Ответ справа стартует после завершения анимации отправки
+  
   const rightDelay = sendDelay + sendDuration + 100;
   const answerLen = bubbleAnswerText.length;
   const answerSpeed = 65;
-  // Пауза с троеточием внутри правого пузыря перед печатью
+  
   const answerDotsDuration = 1200;
   const answerStartDelay = rightDelay + answerDotsDuration;
-  const thumbDotsDelay = answerStartDelay + answerSpeed * answerLen + 150; // троеточие в третьем блоке после ответа
-  const thumbDotsDuration = 1200; // длительность показа троеточия
+  const thumbDotsDelay = answerStartDelay + answerSpeed * answerLen + 150; 
+  const thumbDotsDuration = 1200; 
 
   const [thumbStage, setThumbStage] = useState<'idle' | 'dots' | 'emoji'>('idle');
   useEffect(() => {
@@ -110,7 +110,7 @@ const Login: React.FC = () => {
   const bubbleAnswer = useTypewriter(bubbleAnswerText, answerSpeed, answerStartDelay);
   const isAnswerLoading = bubbleAnswer.length === 0;
   
-  // Автоматически подставляем реферальный код при загрузке
+  
   React.useEffect(() => {
     const savedReferralCode = localStorage.getItem('referral_code');
     if (savedReferralCode) {
@@ -118,7 +118,7 @@ const Login: React.FC = () => {
     }
   }, [registerForm]);
 
-  // Функция для проверки наличия заказов у клиента
+  
   const checkClientOrders = async (): Promise<boolean> => {
     try {
       const ordersData = await ordersApi.getClientOrders();
@@ -130,9 +130,9 @@ const Login: React.FC = () => {
     }
   };
 
-  // Функция для определения куда перенаправить клиента
+  
   const redirectClient = async () => {
-    // Клиенты теперь идут на ExpertDashboard
+    
     navigate(ROUTES.expert.root);
   };
 
@@ -142,12 +142,12 @@ const Login: React.FC = () => {
       const auth = await authApi.login(values);
       message.success('Успешный вход!');
       
-      // Закрываем модалку подтверждения если она была открыта
+      
       setVerificationModalVisible(false);
       
       const role = auth?.user?.role;
       
-      // Если вход через /admin/login, проверяем роль admin
+      
       if (isAdminLogin) {
         if (role === 'admin') {
           navigate(ROUTES.admin.dashboard);
@@ -156,7 +156,7 @@ const Login: React.FC = () => {
           navigate(ROUTES.expert.root);
         }
       } 
-      // Если вход через /admin/directorlogin, проверяем роль director
+      
       else if (isDirectorLogin) {
         if (role === 'director') {
           navigate(ROUTES.admin.directorDashboard);
@@ -165,7 +165,7 @@ const Login: React.FC = () => {
           navigate(ROUTES.expert.root);
         }
       } 
-      // Обычный вход
+      
       else {
         if (role === 'client' || role === 'expert') {
           navigate(ROUTES.expert.root);
@@ -187,7 +187,7 @@ const Login: React.FC = () => {
       
       message.error(errorMessage);
       
-      // Если ошибка связана с неверными учетными данными, предлагаем сброс пароля
+      
       if (errorMessage.includes('учетные данные') || errorMessage.includes('credentials')) {
         setTimeout(() => {
           message.info('Забыли пароль? Используйте функцию "Забыли пароль?" ниже');
@@ -201,7 +201,7 @@ const Login: React.FC = () => {
   const onRegister = async (values: RegisterRequest) => {
     setLoading(true);
     try {
-      // Очищаем пустые поля перед отправкой
+      
       const cleanValues = {
         email: values.email || undefined,
         phone: values.phone || undefined,
@@ -212,14 +212,14 @@ const Login: React.FC = () => {
       
       await authApi.register(cleanValues);
       
-      // Показываем модалку подтверждения только если указан email
+      
       if (values.email) {
         message.success('Регистрация успешна! Мы отправили вам код на email.');
         setVerificationEmail(values.email);
         setVerificationCode('');
         setVerificationModalVisible(true);
       } else {
-        // Если email не указан, просто входим
+        
         message.success('Регистрация успешна!');
         const loginData = {
           username: values.phone || values.email,
@@ -241,7 +241,7 @@ const Login: React.FC = () => {
                 const errorMsg = String(msg);
                 message.error(errorMsg);
                 
-                // Если email уже существует и подтвержден, предлагаем войти
+                
                 if (field === 'email' && errorMsg.includes('уже существует')) {
                   setTimeout(() => {
                     message.info('Попробуйте войти с этим email на вкладке "Вход"');
@@ -274,15 +274,15 @@ const Login: React.FC = () => {
     }
     setVerificationLoading(true);
     try {
-      // verifyEmailCode уже возвращает токены и сохраняет их
+      
       const auth = await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
       message.success('Email подтвержден! Вход выполнен.');
       
-      // Токены уже сохранены в authApi.verifyEmailCode
+      
       const role = auth?.user?.role;
       setVerificationModalVisible(false);
       
-      // Перенаправляем в зависимости от роли и страницы входа
+      
       if (isAdminLogin) {
         if (role === 'admin') {
           navigate(ROUTES.admin.dashboard);
@@ -325,7 +325,7 @@ const Login: React.FC = () => {
     }
   };
 
-  // Функции восстановления пароля
+  
   const handleRequestPasswordReset = async () => {
     if (!resetEmail) {
       message.error('Введите email');
@@ -360,8 +360,8 @@ const Login: React.FC = () => {
       message.error('Введите 6-значный код');
       return;
     }
-    // Просто переходим к следующему шагу
-    // Проверка кода произойдет при сбросе пароля
+    
+    
     setResetStep('password');
   };
 
@@ -384,30 +384,30 @@ const Login: React.FC = () => {
       const response = await authApi.resetPasswordWithCode(resetEmail, codeString, newPassword);
       message.success('Пароль успешно изменен!');
       setPasswordResetModalVisible(false);
-      // Сбрасываем состояние
+      
       setResetStep('email');
       setResetEmail('');
       setResetCode(['', '', '', '', '', '']);
       setNewPassword('');
       setConfirmPassword('');
-      // Перенаправляем
+      
       navigate(ROUTES.expert.root);
     } catch (error: any) {
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
-      // Возвращаем на шаг ввода кода при ошибке
+      
       setResetStep('code');
     } finally {
       setResetLoading(false);
     }
   };
 
-  // Обработчик успешной авторизации через Telegram
+  
   const handleTelegramAuth = async (user: any) => {
     message.success('Успешный вход через Telegram!');
     const role = user?.role;
     
-    // Перенаправляем в зависимости от роли и страницы входа
+    
     if (isAdminLogin) {
       if (role === 'admin') {
         navigate(ROUTES.admin.dashboard);
@@ -437,7 +437,7 @@ const Login: React.FC = () => {
     }
   };
 
-  // Обработчик ошибки авторизации через Telegram
+  
   const handleTelegramError = (error: string) => {
     message.error(`Ошибка авторизации через Telegram: ${error}`);
   };
@@ -588,7 +588,7 @@ const Login: React.FC = () => {
                   </span>
                 )}
               </div>
-              {/* Троеточие отправки: появляется между левым и правым блоками */}
+              
               <div className="send-ellipsis" style={{ animationDelay: `${sendDelay}ms` }} aria-hidden="true">
                 <span className="dot"></span>
                 <span className="dot"></span>

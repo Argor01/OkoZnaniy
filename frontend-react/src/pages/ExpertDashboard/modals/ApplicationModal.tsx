@@ -25,11 +25,11 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Блокировка скролла основного контента при открытом модальном окне
+  
   useEffect(() => {
     if (visible && isMobile) {
       document.body.style.overflow = 'hidden';
-      // Убираем position: fixed, так как это может ломать скролл на некоторых устройствах
+      
     } else {
       document.body.style.overflow = '';
     }
@@ -105,7 +105,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           backdropFilter: isMobile ? 'none' : 'blur(10px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          // height и maxHeight теперь управляются через CSS класс .ant-modal-content
+          
           display: 'flex',
           flexDirection: 'column'
         },
@@ -138,7 +138,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         layout="vertical"
         initialValues={{ educations: [{}] }}
         onFinish={(values) => {
-          // Filter out empty education entries
+          
           const educations = values.educations?.filter((edu: Education) => 
             edu.university && edu.start_year
           ) || [];
@@ -148,17 +148,17 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             return;
           }
           
-          // Формируем full_name из отдельных полей
+          
           const full_name = [values.last_name, values.first_name, values.middle_name]
             .filter(Boolean)
             .join(' ');
           
-          // Преобразуем массив специализаций в строку
+          
           const specializations = Array.isArray(values.specializations)
             ? values.specializations.join(', ')
             : values.specializations;
           
-          // Отправляем только нужные поля
+          
           createApplicationMutation.mutate({
             full_name,
             work_experience_years: values.work_experience_years,
@@ -235,7 +235,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             }}
             onChange={(e) => {
               const value = e.target.value;
-              // Удаляем все нецифровые символы
+              
               const numericValue = value.replace(/[^0-9]/g, '');
               if (numericValue !== value) {
                 e.target.value = numericValue;
@@ -259,7 +259,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
               <>
                 {fields.map(({ key, name, ...restField }) => (
                   <div key={key} className={styles.modalEducationRow}>
-                    {/* Название ВУЗа - отдельная строка */}
+                    
                     <Row gutter={16}>
                       <Col span={22}>
                         <Form.Item
@@ -286,7 +286,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                       </Col>
                     </Row>
                     
-                    {/* Годы - в одной строке */}
                     <Row gutter={16}>
                       <Col span={12}>
                         <Form.Item
@@ -345,7 +344,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                       </Col>
                     </Row>
                     
-                    {/* Степень - отдельная строка */}
+                    
                     <Row gutter={16}>
                       <Col span={24}>
                         <Form.Item

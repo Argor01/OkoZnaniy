@@ -44,7 +44,7 @@ const DirectorDashboard: React.FC = () => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 840;
       if (mobile !== isMobile) {
-        window.location.reload(); // Простой способ обновить состояние
+        window.location.reload(); 
       }
     };
     window.addEventListener('resize', handleResize);
@@ -237,10 +237,8 @@ const DirectorDashboard: React.FC = () => {
         </Sider>
       )}
 
-      {/* Drawer для мобильных */}
       {isMobile && (
         <>
-          {/* Overlay */}
           {drawerVisible && (
             <div
               onClick={() => setDrawerVisible(false)}
@@ -257,7 +255,6 @@ const DirectorDashboard: React.FC = () => {
               }}
             />
           )}
-          {/* Sidebar */}
           <div
             style={{
               position: 'fixed',

@@ -19,10 +19,7 @@ interface AdminSidebarProps {
   onDrawerClose?: () => void;
 }
 
-/**
- * Боковая панель админской панели
- * Поддерживает как обычный сайдбар, так и drawer для мобильных
- */
+
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   selectedMenu,
   openKeys,
@@ -33,7 +30,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   drawerVisible = false,
   onDrawerClose,
 }) => {
-  // Преобразуем menuItems для Ant Design Menu
+  
   const antMenuItems = menuItems.map(item => ({
     key: item.key,
     icon: React.createElement(item.icon),
@@ -45,7 +42,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     })),
   }));
 
-  // 🆕 Временный лог для отладки
+  
   console.log('🔍 Menu items loaded:', menuItems.length, menuItems.map(i => i.label));
   console.log('🔍 Full menu structure:', JSON.stringify(menuItems, null, 2));
 
@@ -72,9 +69,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         ЛК администратора
       </Title>
     </div>
-  );
-
-  // Для мобильных устройств используем Drawer
+  );
   if (isMobile) {
     return (
       <Drawer
@@ -90,9 +85,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         {renderMenu()}
       </Drawer>
     );
-  }
-
-  // Для десктопа и планшета используем обычный Sider
+  }
   return (
     <Sider
       width={isTablet ? 200 : 250}

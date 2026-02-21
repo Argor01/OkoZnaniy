@@ -1,4 +1,4 @@
-.card {
+﻿.card {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s;
@@ -47,7 +47,7 @@
 }
 
 .title {
-  margin: 12px 0 8px 0 !important;
+  margin: 12px 0 8px 0;
   color: #1f2937;
 }
 
@@ -92,3 +92,4 @@
 .discount {
   margin-left: 8px;
 }
+

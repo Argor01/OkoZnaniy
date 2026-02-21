@@ -7,7 +7,7 @@ const isDebugEnabled = () =>
   typeof window !== 'undefined' &&
   window.localStorage?.getItem('debug_api') === '1';
 
-// ============= ПОЛЬЗОВАТЕЛИ =============
+
 
 export const useAllUsers = (enabled: boolean = true) => {
   const [users, setUsers] = useState([]);
@@ -25,7 +25,7 @@ export const useAllUsers = (enabled: boolean = true) => {
       const response = await apiClient.get(`${API_BASE}/users/`);
       setUsers(response.data);
     } catch (err: any) {
-      // Игнорируем тихие ошибки и 401 (не авторизован)
+      
       if (!err.silent && err.response?.status !== 401) {
         if (isDebugEnabled()) console.error('❌ useAllUsers - error:', err);
         setError(err.message);
@@ -90,7 +90,7 @@ export const useUserActions = () => {
   return { blockUser, unblockUser, changeUserRole };
 };
 
-// ============= ЗАКАЗЫ =============
+
 
 export const useAllOrders = (enabled: boolean = true) => {
   const [orders, setOrders] = useState([]);
@@ -160,7 +160,7 @@ export const useOrderActions = () => {
   return { changeOrderStatus };
 };
 
-// ============= ПОДДЕРЖКА =============
+
 
 export const useSupportRequests = (status?: string) => {
   const [requests, setRequests] = useState([]);
@@ -238,7 +238,7 @@ export const useSupportActions = () => {
   return { takeRequest, completeRequest, sendMessage, sendChatMessage };
 };
 
-// ============= ОБРАЩЕНИЯ =============
+
 
 export const useClaims = (status?: string, enabled: boolean = true) => {
   const [claims, setClaims] = useState([]);
@@ -254,13 +254,13 @@ export const useClaims = (status?: string, enabled: boolean = true) => {
         ? `${API_BASE}/claims/?status=${status}`
         : `${API_BASE}/claims/`;
       const response = await apiClient.get(url);
-      // Убеждаемся, что данные - это массив
+      
       setClaims(Array.isArray(response.data) ? response.data : []);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
         if (isDebugEnabled()) console.error('Error fetching claims:', err);
       }
-      setClaims([]); // Устанавливаем пустой массив при ошибке
+      setClaims([]); 
     } finally {
       setLoading(false);
     }
@@ -291,7 +291,7 @@ export const useClaimActions = () => {
   return { takeInWork, completeClaim, rejectClaim };
 };
 
-// ============= ЧАТЫ АДМИНИСТРАТОРОВ =============
+
 
 export const useAdminChatRooms = (enabled: boolean = true) => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -304,13 +304,13 @@ export const useAdminChatRooms = (enabled: boolean = true) => {
     setLoading(true);
     try {
       const response = await apiClient.get(`${API_BASE}/chat-rooms/`);
-      // Убеждаемся, что данные - это массив
+      
       setChatRooms(Array.isArray(response.data) ? response.data : []);
     } catch (err: any) {
       if (!err.silent && err.response?.status !== 401) {
         if (isDebugEnabled()) console.error('Error fetching chat rooms:', err);
       }
-      setChatRooms([]); // Устанавливаем пустой массив при ошибке
+      setChatRooms([]); 
     } finally {
       setLoading(false);
     }
@@ -341,7 +341,7 @@ export const useChatRoomActions = () => {
   return { sendMessage, joinRoom, leaveRoom };
 };
 
-// ============= СТАТИСТИКА =============
+
 
 export const useAdminStats = () => {
   const [stats, setStats] = useState<any>(null);
@@ -367,7 +367,7 @@ export const useAdminStats = () => {
 };
 
 
-// ============= ТИКЕТЫ ПОДДЕРЖКИ =============
+
 
 export const useTickets = (enabled: boolean = true) => {
   const [tickets, setTickets] = useState([]);
@@ -379,13 +379,13 @@ export const useTickets = (enabled: boolean = true) => {
     
     setLoading(true);
     try {
-      // Получаем и SupportRequest и Claim
+      
       const [supportRequests, claims] = await Promise.all([
         apiClient.get(`${API_BASE}/support-requests/`),
         apiClient.get(`${API_BASE}/claims/`)
       ]);
       
-      // Объединяем и нормализуем данные
+      
       const allTickets = [
         ...supportRequests.data.map((req: any) => ({
           ...req,
@@ -398,7 +398,7 @@ export const useTickets = (enabled: boolean = true) => {
         }))
       ];
       
-      // Сортируем по дате создания (новые первые)
+      
       allTickets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       
       setTickets(allTickets);

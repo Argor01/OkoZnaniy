@@ -34,7 +34,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
 
-  // Загрузка данных из API
+  
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
@@ -45,7 +45,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
-  // Мутации для создания новых типов работ и предметов
+  
   const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
     onSuccess: () => {
@@ -114,7 +114,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           </Col>
         </Row>
 
-        {/* Тип и предмет */}
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Text strong className={styles.label}>
@@ -247,7 +246,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           )}
         </div>
 
-        {/* Загрузка файлов работы */}
         <div>
           <Text strong className={styles.label}>
             Файлы работы (необязательно)
@@ -306,7 +304,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           )}
         </div>
 
-        {/* Кнопки */}
+        
         <div className={styles.actions}>
           <Button onClick={onCancel} className={styles.cancelButton}>
             Отмена
@@ -317,7 +315,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
       </Space>
 
-      {/* Модальное окно для добавления нового типа работы */}
+      
       <Modal
         title="Добавить новый тип работы"
         open={newWorkTypeModalVisible}
@@ -346,7 +344,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         />
       </Modal>
 
-      {/* Модальное окно для добавления нового предмета */}
+      
       <Modal
         title="Добавить новый предмет"
         open={newSubjectModalVisible}

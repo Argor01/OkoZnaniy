@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --max-width: 1200px;
   --border-radius: 8px;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
@@ -37,7 +37,7 @@ a {
   text-decoration: none;
 }
 
-/* Антд кастомизация */
+
 .ant-layout {
   min-height: 100vh;
 }
@@ -49,31 +49,32 @@ a {
   width: 100%;
 }
 
-/* Принудительные стили для кнопки баланса */
+
 .ant-btn.balanceButton,
 .ant-btn.balanceButton:hover,
 .ant-btn.balanceButton:focus,
 .ant-btn.balanceButton:active {
-  background: #1890ff !important;
-  color: white !important;
-  border: none !important;
+  background: #1890ff;
+  color: white;
+  border: none;
 }
 
 .ant-btn.balanceButton:hover {
-  background: #40a9ff !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 }
 
 .ant-btn.balanceButton .anticon,
 .ant-btn.balanceButton:hover .anticon,
 .ant-btn.balanceButton span,
 .ant-btn.balanceButton:hover span {
-  color: white !important;
+  color: white;
 }
 
 .balanceText,
 .balanceText:hover {
-  color: white !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+

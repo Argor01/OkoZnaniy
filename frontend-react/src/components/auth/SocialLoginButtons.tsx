@@ -15,13 +15,13 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     typeof window !== 'undefined' &&
     window.localStorage?.getItem('debug_auth') === '1';
   
-  // Очищаем старые данные авторизации при загрузке страницы
+  
   useEffect(() => {
-    // Очищаем localStorage от старых попыток авторизации
+    
     localStorage.removeItem('telegram_auth_id');
   }, []);
   
-  // Генерируем уникальный ID для сессии авторизации
+  
   const generateAuthId = () => {
     return `auth_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   };
@@ -29,17 +29,14 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   const handleTelegramAuth = (e: React.MouseEvent) => {
     e.preventDefault();
     const authId = generateAuthId();
-    
-    // Открываем бота с параметром auth_id (authId уже содержит префикс auth_)
-    window.open(`https://t.me/okoznaniybot?start=${authId}`, '_blank');
-    
-    // Начинаем проверять статус авторизации
+
+    window.open(`https://t.me/oko_expert_bot?start=${authId}`, '_blank', 'noopener,noreferrer');
     checkAuthStatus(authId);
   };
 
   const checkAuthStatus = (authId: string) => {
     let attempts = 0;
-    const maxAttempts = 150; // 5 минут (150 * 2 секунды)
+    const maxAttempts = 150; 
     
     if (debugEnabled) console.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
     
@@ -58,14 +55,12 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
           if (data.authenticated) {
             if (debugEnabled) console.log(`✅ Авторизация подтверждена!`);
             clearInterval(checkInterval);
-            
-            // Сохраняем токены
+
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
             if (debugEnabled) console.log(`💾 Токены сохранены`);
-            
-            // Определяем куда перенаправить пользователя
+
             const user = data.user;
             let redirectUrl: string = ROUTES.dashboard;
             
@@ -82,7 +77,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
             }
             
             if (debugEnabled) console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
-            // Перенаправляем пользователя
+
             window.location.href = redirectUrl;
           } else {
             if (debugEnabled) console.log(`⏳ Ожидаем подтверждения...`);
@@ -91,13 +86,12 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
       } catch (error) {
         if (debugEnabled) console.error('❌ Ошибка проверки статуса:', error);
       }
-      
-      // Останавливаем проверку после максимального количества попыток
+
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
         if (debugEnabled) console.log('⏱️ Время ожидания авторизации истекло');
       }
-    }, 2000); // Проверяем каждые 2 секунды
+    }, 2000);
   };
   
   return (

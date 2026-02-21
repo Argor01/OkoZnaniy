@@ -13,7 +13,7 @@ import {
   DirectorMessage,
 } from '../types/claims';
 
-// Mock Users
+
 export const mockUsers: User[] = [
   {
     id: 1,
@@ -113,7 +113,7 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock Orders
+
 export const mockOrders: Order[] = [
   {
     id: 101,
@@ -164,7 +164,7 @@ export const mockOrders: Order[] = [
   },
 ];
 
-// Mock Claims
+
 export const mockClaims: Claim[] = [
   {
     id: 1,
@@ -858,7 +858,7 @@ export const mockClaims: Claim[] = [
   },
 ];
 
-// Mock Director Communications
+
 export const mockDirectorCommunications: DirectorCommunication[] = [
   {
     id: 1,
@@ -1048,7 +1048,7 @@ export const mockDirectorCommunications: DirectorCommunication[] = [
   },
 ];
 
-// Mock Response Templates
+
 export const mockResponseTemplates: ResponseTemplate[] = [
   {
     id: 1,
@@ -1172,7 +1172,7 @@ export const mockResponseTemplates: ResponseTemplate[] = [
   },
 ];
 
-// Mock Statistics
+
 export const mockClaimsStatistics: ClaimsStatistics = {
   total: 15,
   new: 5,
@@ -1194,7 +1194,7 @@ export const mockClaimsStatistics: ClaimsStatistics = {
     [ClaimPriority.HIGH]: 5,
     [ClaimPriority.CRITICAL]: 2,
   },
-  avgResolutionTime: 16.5, // часов
+  avgResolutionTime: 16.5, 
   pendingOver24h: 2,
   topReasons: [
     { reason: 'Технические проблемы', count: 4, percentage: 26.7 },
@@ -1217,7 +1217,7 @@ export const mockClaimsStatistics: ClaimsStatistics = {
   ],
 };
 
-// Helper functions to get mock data
+
 export const getMockClaims = (): Claim[] => allMockClaims;
 
 export const getMockClaimsByStatus = (status: ClaimStatus): Claim[] => {
@@ -1242,7 +1242,7 @@ export const getMockResponseTemplatesByType = (type: ClaimType): ResponseTemplat
 
 export const getMockClaimsStatistics = (): ClaimsStatistics => mockClaimsStatistics;
 
-// Дополнительные тестовые обращения
+
 export const additionalMockClaims: Claim[] = [
   {
     id: 8,
@@ -1593,5 +1593,5 @@ export const additionalMockClaims: Claim[] = [
   },
 ];
 
-// Объединяем все обращения
+
 export const allMockClaims = [...mockClaims, ...additionalMockClaims];

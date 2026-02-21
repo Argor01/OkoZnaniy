@@ -184,7 +184,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
   const claimsData = claims;
 
-  // Фильтрация данных
+  
   const filteredClaims = claimsData.filter(claim => {
     const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          claim.claim_number.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -204,7 +204,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
     return matchesSearch && matchesType && matchesStatus && matchesPriority && matchesAdmin && matchesDate;
   });
 
-  // Статистика
+  
   const stats = {
     total: filteredClaims.length,
     new: filteredClaims.filter(c => c.status === 'new').length,
@@ -213,7 +213,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
     avgDaysOpen: filteredClaims.reduce((sum, c) => sum + c.days_open, 0) / filteredClaims.length || 0,
   };
 
-  // Обработчики
+  
   const handleViewClaim = (claim: Claim) => {
     setSelectedClaim(claim);
     setActiveTab('overview');
@@ -298,7 +298,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
     }
   };
 
-  // Функции для отображения
+  
   const getTypeColor = (type: string) => {
     const colors = {
       quality_issue: 'red',
@@ -555,7 +555,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           </Text>
         </div>
 
-        {/* Статистика */}
+        
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={6}>
             <Statistic title="Всего претензий" value={stats.total} />
@@ -575,7 +575,6 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           </Col>
         </Row>
 
-        {/* Предупреждение о просроченных */}
         {stats.overdue > 0 && (
           <Alert
             message="Внимание!"
@@ -586,7 +585,6 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           />
         )}
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по претензиям"
@@ -681,7 +679,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         />
       </Card>
 
-      {/* Модальное окно просмотра претензии */}
+      
       <Modal
         title={`Претензия ${selectedClaim?.claim_number}`}
         open={viewModalVisible}
@@ -870,8 +868,8 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         )}
       </Modal>
 
-      {/* Остальные модальные окна... */}
-      {/* Модальное окно добавления действия */}
+      
+      
       <Modal
         title="Добавить действие"
         open={actionModalVisible}
@@ -919,7 +917,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </Form>
       </Modal>
 
-      {/* Модальное окно разрешения претензии */}
+      
       <Modal
         title="Разрешить претензию"
         open={resolveModalVisible}
@@ -963,7 +961,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </Form>
       </Modal>
 
-      {/* Модальное окно отправки сообщения */}
+      
       <Modal
         title="Отправить сообщение"
         open={messageModalVisible}
@@ -997,7 +995,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </Form>
       </Modal>
 
-      {/* Модальное окно планирования звонка */}
+      
       <Modal
         title="Запланировать звонок"
         open={callModalVisible}

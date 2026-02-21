@@ -28,12 +28,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Блокировка скролла основного контента при открытом модальном окне
+  
   useEffect(() => {
     if (visible && isMobile) {
       document.body.style.overflow = 'hidden';
-      // Убираем position: fixed, так как это может ломать скролл на некоторых устройствах
-      // и вызывать "прыжок" страницы вверх
+      
+      
     } else {
       document.body.style.overflow = '';
     }
@@ -51,7 +51,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         return Number.isFinite(num) ? num : undefined;
       };
 
-      // Преобразуем строку навыков в массив для Select
+      
       const formValues: Record<string, unknown> = { ...profile };
       formValues.experience_years = toNumberOrUndefined(profile.experience_years);
       formValues.hourly_rate = toNumberOrUndefined(profile.hourly_rate);
@@ -60,7 +60,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       }
       form.setFieldsValue(formValues);
     }
-    // Устанавливаем текущую аватарку при открытии модального окна
+    
     if (visible) {
       if (userProfile?.avatar && userProfile.avatar !== '') {
         setImageUrl(userProfile.avatar);
@@ -126,7 +126,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           margin: isMobile ? 0 : 'auto',
           maxWidth: '100%',
-          // height и maxHeight теперь управляются через CSS класс .ant-modal-content
+          
           display: 'flex',
           flexDirection: 'column'
         },
@@ -136,21 +136,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           padding: isMobile ? '16px 20px' : '24px 32px',
           borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
           borderRadius: isMobile ? 0 : '24px 24px 0 0',
-          flexShrink: 0 // Заголовок не должен сжиматься
+          flexShrink: 0 
         },
         body: {
           padding: isMobile ? '20px 24px' : '32px',
           background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           overflowY: 'auto',
-          flex: '1 1 auto', // Важно для правильного скролла
-          minHeight: 0 // Критично для Flexbox скролла
+          flex: '1 1 auto', 
+          minHeight: 0 
         },
         footer: {
           padding: isMobile ? '16px 20px' : '24px 32px',
           background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
           borderTop: '1px solid rgba(102, 126, 234, 0.1)',
           borderRadius: isMobile ? 0 : '0 0 24px 24px',
-          flexShrink: 0 // Футер не должен сжиматься
+          flexShrink: 0 
         }
       }}
     >
@@ -171,7 +171,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               portfolio_url?: string;
               skills?: string;
             };
-            // Подготавливаем данные для отправки
+            
             const profileData: UpdateProfilePayload = {
               username: values.username,
               first_name: values.first_name,
@@ -179,14 +179,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               bio: values.bio,
             };
 
-            // Добавляем поля только для экспертов
+            
             if (userProfile?.role === 'expert') {
               profileData.experience_years = values.experience_years;
               profileData.education = values.education;
               profileData.hourly_rate = values.hourly_rate;
               profileData.portfolio_url = values.portfolio_url;
               
-              // Преобразуем массив навыков в строку
+              
               if (Array.isArray(values.skills)) {
                 profileData.skills = values.skills.join(', ');
               } else if (values.skills) {
@@ -234,8 +234,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               if (!isLt2M) {
                 message.error('Размер файла должен быть меньше 2MB!');
                 return false;
-              }
-              // Показываем превью сразу после выбора файла
+              }
               const reader = new FileReader();
               reader.onload = (e) => {
                 setImageUrl(e.target?.result as string);
@@ -257,8 +256,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 if (result) {
                   form.setFieldsValue({ avatar: result.avatar });
                   onSuccess?.(result);
-                  message.success('Аватар обновлен!');
-                  // Инвалидируем кэш и принудительно перезапрашиваем данные
+                  message.success('Аватар обновлен!');
                   queryClient.setQueryData(['user-profile'], result);
                   await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
                   await queryClient.refetchQueries({ queryKey: ['user-profile'] });
@@ -304,8 +302,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             className={styles.inputField} 
             size="large" 
             placeholder="Ваш_никнейм"
-            onChange={(e) => {
-              // Автоматически заменяем пробелы на подчеркивания
+            onChange={(e) => {
               const value = e.target.value.replace(/\s+/g, '_');
               form.setFieldValue('username', value);
             }}
@@ -320,7 +317,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           />
         </Form.Item>
         
-        {/* Поля только для экспертов */}
+        
         {isExpert && (
           <>
             <div style={{ 

@@ -103,7 +103,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
 
   const dataSource = orders;
 
-  // Фильтрация данных
+  
   const filteredData = dataSource.filter(order => {
     const matchesSearch = 
       order.title.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -187,7 +187,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
     return priorityColors[priority as keyof typeof priorityColors] || 'default';
   };
 
-  // Статистика
+  
   const stats = {
     total: filteredData.length,
     new: filteredData.filter(o => o.status === 'new').length,
@@ -340,7 +340,6 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
           </Text>
         </div>
 
-        {/* Статистика */}
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={4}>
             <Statistic title="Всего заказов" value={stats.total} />
@@ -367,7 +366,6 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
           </Col>
         </Row>
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по названию, описанию или клиенту"
@@ -446,7 +444,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно просмотра заказа */}
+      
       <Modal
         title={`Заказ #${selectedOrder?.id}`}
         open={orderModalVisible}

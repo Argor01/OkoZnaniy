@@ -22,7 +22,7 @@ const RegisterWithEmailVerification: React.FC = () => {
   const [error, setError] = useState('');
   const [fromGoogle, setFromGoogle] = useState(false);
 
-  // Проверяем, пришли ли мы из Google OAuth
+  
   useEffect(() => {
     const emailParam = searchParams.get('email');
     const fromParam = searchParams.get('from');
@@ -58,13 +58,13 @@ const RegisterWithEmailVerification: React.FC = () => {
     try {
       const response = await apiClient.post('/users/', formData);
       
-      // Проверяем, нужна ли верификация email
+      
       if (response.data.email_verification_required) {
-        // Переходим к шагу подтверждения
+        
         setEmail(formData.email);
         setStep('verify');
       } else {
-        // Email не требуется или уже подтвержден
+        
         navigate('/login');
       }
     } catch (err: unknown) {
@@ -82,7 +82,7 @@ const RegisterWithEmailVerification: React.FC = () => {
   };
 
   const handleVerificationSuccess = (_user: unknown, _tokens: { access: string; refresh: string }) => {
-    // Перенаправляем в зависимости от роли
+    
     navigate('/expert');
   };
 

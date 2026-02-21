@@ -1,4 +1,4 @@
-/* Стили для таблицы запросов */
+﻿
 
 .tableContainer {
   background: #fff;
@@ -44,7 +44,7 @@
   font-weight: 500;
 }
 
-/* Основная таблица */
+
 .table {
   .ant-table-thead > tr > th {
     background: #fafafa;
@@ -63,7 +63,7 @@
   }
 }
 
-/* Стили для ячеек */
+
 .requestId {
   font-weight: 600;
   color: #1890ff;
@@ -166,7 +166,7 @@
   font-style: italic;
 }
 
-/* Кнопки действий */
+
 .actionButton {
   color: #1890ff;
   border-color: transparent;
@@ -184,25 +184,25 @@
   border-radius: 4px;
 }
 
-/* Специальные строки */
+
 .urgentRow {
-  background: #fff2f0 !important;
+  background: #fff2f0;
   border-left: 3px solid #ff4d4f;
   
   &:hover {
-    background: #ffebe8 !important;
+    background: #ffebe8;
   }
 }
 
 .newRow {
-  background: #f6ffed !important;
+  background: #f6ffed;
   
   &:hover {
-    background: #f0f9e8 !important;
+    background: #f0f9e8;
   }
 }
 
-/* Адаптивность */
+
 @media (max-width: 1200px) {
   .tableHeader {
     flex-direction: column;
@@ -286,7 +286,7 @@
   }
 }
 
-/* Состояния загрузки */
+
 .table .ant-table-placeholder {
   padding: 40px 20px;
   
@@ -299,7 +299,7 @@
   min-height: 200px;
 }
 
-/* Пагинация */
+
 .table .ant-pagination {
   margin: 16px 0;
   text-align: center;
@@ -310,7 +310,7 @@
   font-size: 14px;
 }
 
-/* Сортировка */
+
 .table .ant-table-column-sorter {
   color: #bfbfbf;
 }
@@ -320,7 +320,7 @@
   color: #1890ff;
 }
 
-/* Фильтры */
+
 .table .ant-table-filter-trigger {
   color: #bfbfbf;
 }
@@ -329,7 +329,7 @@
   color: #1890ff;
 }
 
-/* Скроллбар */
+
 .table .ant-table-body::-webkit-scrollbar {
   height: 6px;
 }

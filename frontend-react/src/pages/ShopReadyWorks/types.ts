@@ -1,4 +1,4 @@
-// Типы для ShopReadyWorks
+
 
 export interface Work {
   id: number;
@@ -12,9 +12,9 @@ export interface Work {
   work_type: number;
   subjectId?: number;
   workTypeId?: number;
-  subject_name?: string; // Название предмета из API
+  subject_name?: string; 
   workType: string;
-  work_type_name?: string; // Название типа работы из API
+  work_type_name?: string; 
   rating: number;
   reviewsCount: number;
   viewsCount: number;
@@ -26,14 +26,14 @@ export interface Work {
     avatar?: string;
     rating: number;
   };
-  author_name?: string; // Имя автора из API
-  preview?: string; // URL изображения превью
+  author_name?: string; 
+  preview?: string; 
   files: WorkFile[];
   tags?: string[];
   createdAt: string;
-  created_at?: string; // Дата создания из API
+  created_at?: string; 
   updatedAt: string;
-  updated_at?: string; // Дата обновления из API
+  updated_at?: string; 
   isFavorite?: boolean;
   is_active?: boolean;
 }
@@ -41,12 +41,12 @@ export interface Work {
 export interface WorkFile {
   id: number;
   name: string;
-  file?: string; // URL файла
-  file_type?: string; // Тип файла из API
-  file_size?: number; // Размер файла из API
-  type?: string; // Для совместимости
-  size?: number; // Для совместимости
-  url?: string; // Для совместимости
+  file?: string; 
+  file_type?: string; 
+  file_size?: number; 
+  type?: string; 
+  size?: number; 
+  url?: string; 
 }
 
 export interface Filters {

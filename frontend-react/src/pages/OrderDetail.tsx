@@ -182,7 +182,6 @@ const OrderDetail: React.FC = () => {
 
         <Card>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            {/* Заголовок и статус */}
             <div>
               <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{order.title}</Title>
@@ -192,9 +191,7 @@ const OrderDetail: React.FC = () => {
               </Space>
             </div>
 
-            {/* Основная информация */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Заказчик - большая плашка на всю ширину */}
               <Card 
                 style={{ 
                   background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
@@ -241,13 +238,11 @@ const OrderDetail: React.FC = () => {
                 </Space>
               </Card>
 
-              {/* Остальные плашки в сетке */}
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
                 gap: 16 
               }}>
-                {/* Дедлайн */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -268,7 +263,6 @@ const OrderDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Предмет */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -286,7 +280,6 @@ const OrderDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Бюджет */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -307,7 +300,6 @@ const OrderDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Тип работы */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -325,7 +317,6 @@ const OrderDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Создан */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -345,7 +336,6 @@ const OrderDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Описание */}
             <div>
               <Title level={4}>Описание заказа</Title>
               <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
@@ -353,7 +343,7 @@ const OrderDetail: React.FC = () => {
               </Paragraph>
             </div>
 
-            {/* Файлы */}
+            
             {order.files && order.files.length > 0 && (
               <div>
                 <Title level={4}>Прикрепленные файлы</Title>
@@ -374,7 +364,7 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Кнопка отклика для эксперта */}
+            
             {userProfile?.role === 'expert' && 
              !order.expert && 
              !userHasBid && 
@@ -391,7 +381,7 @@ const OrderDetail: React.FC = () => {
                 </div>
             )}
             
-            {/* Сообщение для автора заказа */}
+            
             {order.client?.id === userProfile?.id && (
                 <div style={{ marginTop: 24 }}>
                     <Tag color="blue" style={{ fontSize: 16, padding: '8px 16px' }}>
@@ -408,7 +398,7 @@ const OrderDetail: React.FC = () => {
                 </div>
             )}
 
-            {/* Отклики экспертов */}
+            
             {isOrderOwner && Array.isArray(bids) && (
               <div>
                 <Divider />
@@ -528,7 +518,6 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Эксперт (если назначен) */}
             {order.expert && (
               <div>
                 <Divider />

@@ -1,10 +1,7 @@
-/**
- * API Configuration
- * Централизованная конфигурация для API endpoints
- */
 
-// Получаем базовый URL API из переменной окружения или используем текущий origin
-// Всегда используем тот же протокол что и сайт (http/https)
+
+
+
 const getApiBaseUrl = () => {
   const debugEnabled =
     import.meta.env.DEV &&
@@ -22,17 +19,17 @@ const getApiBaseUrl = () => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
-// Полный URL для API endpoints
+
 export const API_URL = `${API_BASE_URL}/api`;
 
-// Вспомогательная функция для получения полного URL медиа файлов
+
 export const getMediaUrl = (path: string | undefined | null): string | undefined => {
   if (!path) return undefined;
-  // Если путь уже полный URL, возвращаем как есть
+  
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  // Иначе добавляем базовый URL
+  
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
 };

@@ -78,7 +78,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         description: editingSpecialization.description,
       };
       
-      // Преобразуем строку навыков в массив
+      
       if (editingSpecialization.skills && typeof editingSpecialization.skills === 'string') {
         formValues.skills = editingSpecialization.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s);
       } else if (Array.isArray(editingSpecialization.skills)) {

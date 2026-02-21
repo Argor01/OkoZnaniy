@@ -1,6 +1,6 @@
-/* Стили для AddWorkToShop */
+﻿
 
-/* Контейнер для контента с отступами как в MyWorks */
+
 .container {
   max-width: none;
   margin: 0;
@@ -17,7 +17,7 @@
   }
 }
 
-/* Стили для заголовка */
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -28,10 +28,10 @@
 .title {
   color: #1f2937;
   font-weight: 600;
-  margin: 0 !important;
+  margin: 0;
 }
 
-/* Стили для формы */
+
 .formContainer {
   background: #ffffff;
   border-radius: 12px;
@@ -52,7 +52,7 @@
   }
 }
 
-/* Стили для кнопок */
+
 .actionButton {
   border-radius: 8px;
   font-weight: 500;
@@ -75,7 +75,7 @@
   color: white;
 }
 
-/* Стили для полей формы */
+
 .formField {
   margin-bottom: 24px;
 }
@@ -99,3 +99,4 @@
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
+

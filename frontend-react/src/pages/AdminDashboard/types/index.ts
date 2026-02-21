@@ -1,9 +1,6 @@
-/**
- * Экспорт всех типов AdminDashboard
- * Централизованный импорт для удобства
- */
 
-// Основные типы админки
+
+
 export type {
   Partner,
   PartnerEarning,
@@ -18,7 +15,7 @@ export type {
   DisputeModalProps,
 } from './admin.types';
 
-// Типы для обращений
+
 export type {
   Claim,
   ClaimMessage,
@@ -27,7 +24,7 @@ export type {
   DirectorMessage,
 } from './claims.types';
 
-// Типы для поддержки
+
 export type {
   SupportRequest,
   SupportMessage,
@@ -39,7 +36,7 @@ export type {
   SupportCategory,
 } from './support.types';
 
-// 🆕 Типы для обработки запросов клиентов
+
 export type {
   CustomerRequest,
   RequestMessage,

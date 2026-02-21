@@ -1,10 +1,6 @@
-/**
- * Утилиты для форматирования данных в админ-панели
- */
 
-/**
- * Форматирует дату в читаемый формат
- */
+
+
 export const formatDate = (date: string | Date): string => {
   const d = new Date(date);
   return d.toLocaleDateString('ru-RU', {
@@ -16,17 +12,13 @@ export const formatDate = (date: string | Date): string => {
   });
 };
 
-/**
- * Форматирует дату в короткий формат
- */
+
 export const formatDateShort = (date: string | Date): string => {
   const d = new Date(date);
   return d.toLocaleDateString('ru-RU');
 };
 
-/**
- * Форматирует валюту
- */
+
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -36,9 +28,7 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-/**
- * Форматирует большие числа (1000 -> 1K)
- */
+
 export const formatNumber = (num: number): string => {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
@@ -49,16 +39,12 @@ export const formatNumber = (num: number): string => {
   return num.toString();
 };
 
-/**
- * Форматирует процент
- */
+
 export const formatPercent = (value: number): string => {
   return `${value.toFixed(1)}%`;
 };
 
-/**
- * Форматирует размер файла
- */
+
 export const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   if (bytes === 0) return '0 Bytes';
@@ -66,9 +52,7 @@ export const formatFileSize = (bytes: number): string => {
   return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
 };
 
-/**
- * Форматирует время относительно текущего момента
- */
+
 export const formatRelativeTime = (date: string | Date): string => {
   const now = new Date();
   const target = new Date(date);
@@ -85,19 +69,15 @@ export const formatRelativeTime = (date: string | Date): string => {
   return formatDateShort(date);
 };
 
-/**
- * Обрезает текст до указанной длины
- */
+
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
 
-// 🆕 Форматтеры для системы обработки запросов
 
-/**
- * Получает цвет для приоритета запроса
- */
+
+
 export const getPriorityColor = (priority: string): string => {
   const colors = {
     urgent: 'red',
@@ -108,9 +88,7 @@ export const getPriorityColor = (priority: string): string => {
   return colors[priority as keyof typeof colors] || 'default';
 };
 
-/**
- * Получает цвет для статуса запроса
- */
+
 export const getStatusColor = (status: string): string => {
   const colors = {
     open: 'blue',
@@ -121,9 +99,7 @@ export const getStatusColor = (status: string): string => {
   return colors[status as keyof typeof colors] || 'default';
 };
 
-/**
- * Получает цвет для категории запроса
- */
+
 export const getCategoryColor = (category: string): string => {
   const colors = {
     technical: 'purple',
@@ -135,9 +111,7 @@ export const getCategoryColor = (category: string): string => {
   return colors[category as keyof typeof colors] || 'blue';
 };
 
-/**
- * Получает читаемое название категории
- */
+
 export const getCategoryLabel = (category: string): string => {
   const labels = {
     technical: 'Техническая',
@@ -149,9 +123,7 @@ export const getCategoryLabel = (category: string): string => {
   return labels[category as keyof typeof labels] || category;
 };
 
-/**
- * Получает читаемое название статуса
- */
+
 export const getStatusLabel = (status: string): string => {
   const labels = {
     open: 'Открыт',
@@ -162,9 +134,7 @@ export const getStatusLabel = (status: string): string => {
   return labels[status as keyof typeof labels] || status;
 };
 
-/**
- * Получает читаемое название приоритета
- */
+
 export const getPriorityLabel = (priority: string): string => {
   const labels = {
     low: 'Низкий',
@@ -175,9 +145,7 @@ export const getPriorityLabel = (priority: string): string => {
   return labels[priority as keyof typeof labels] || priority;
 };
 
-/**
- * Форматирует время ответа в читаемый вид
- */
+
 export const formatResponseTime = (minutes: number): string => {
   if (minutes < 60) {
     return `${Math.round(minutes)} мин`;
@@ -196,9 +164,7 @@ export const formatResponseTime = (minutes: number): string => {
   return remainingHours > 0 ? `${days}д ${remainingHours}ч` : `${days}д`;
 };
 
-/**
- * Форматирует время создания запроса
- */
+
 export const formatRequestTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -213,9 +179,7 @@ export const formatRequestTime = (dateString: string): string => {
   return date.toLocaleDateString('ru-RU');
 };
 
-/**
- * Получает иконку для типа сообщения
- */
+
 export const getMessageTypeIcon = (type: string): string => {
   const icons = {
     text: '💬',
@@ -226,28 +190,20 @@ export const getMessageTypeIcon = (type: string): string => {
   return icons[type as keyof typeof icons] || '💬';
 };
 
-/**
- * Форматирует список тегов
- */
+
 export const formatTags = (tags: string[]): string => {
   if (!tags || tags.length === 0) return 'Без тегов';
   if (tags.length <= 3) return tags.join(', ');
   return `${tags.slice(0, 3).join(', ')} +${tags.length - 3}`;
 };
 
-/**
- * Получает цвет прогресса на основе процента выполнения
- */
 export const getProgressColor = (percent: number): string => {
-  if (percent >= 80) return '#52c41a'; // Зеленый
-  if (percent >= 60) return '#faad14'; // Оранжевый
-  if (percent >= 40) return '#1890ff'; // Синий
-  return '#ff4d4f'; // Красный
+  if (percent >= 80) return '#52c41a';
+  if (percent >= 60) return '#faad14';
+  if (percent >= 40) return '#1890ff';
+  return '#ff4d4f';
 };
 
-/**
- * Форматирует статистику запросов
- */
 export const formatRequestStats = (stats: {
   total: number;
   completed: number;
@@ -260,9 +216,6 @@ export const formatRequestStats = (stats: {
   return `Всего: ${total}, Выполнено: ${completed} (${completionRate}%), В работе: ${inProgress}, Открыто: ${open}`;
 };
 
-/**
- * Получает статус активности пользователя
- */
 export const getUserActivityStatus = (lastSeen?: string): {
   status: 'online' | 'away' | 'offline';
   label: string;
@@ -291,16 +244,12 @@ export const getUserActivityStatus = (lastSeen?: string): {
   };
 };
 
-/**
- * Форматирует название чата
- */
 export const formatChatName = (chat: {
   name: string;
   type: string;
   participants: any[];
 }): string => {
-  if (chat.type === 'private' && chat.participants.length === 2) {
-    // Для приватных чатов показываем имя собеседника
+  if (chat.type === 'private' && chat.participants.length === 2) {
     const otherParticipant = chat.participants.find(p => p.id !== getCurrentUserId());
     return otherParticipant?.name || chat.name;
   }
@@ -308,11 +257,6 @@ export const formatChatName = (chat: {
   return chat.name;
 };
 
-/**
- * Получает ID текущего пользователя (заглушка)
- */
-const getCurrentUserId = (): number => {
-  // Здесь должна быть логика получения ID текущего пользователя
-  // Пока возвращаем заглушку
+const getCurrentUserId = (): number => {
   return 1;
 };

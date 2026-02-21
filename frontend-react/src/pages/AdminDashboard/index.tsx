@@ -46,16 +46,11 @@ import type { MenuKey } from './types';
 
 const { Content } = Layout;
 
-/**
- * Новый модульный AdminDashboard
- * 
- * Этот компонент заменяет монолитный AdminDashboard.tsx
- * Старый файл переименован в AdminDashboard.tsx.backup
- */
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   
-  // Используем новые хуки
+  
   const { 
     user, 
     loading, 
@@ -67,7 +62,7 @@ const AdminDashboard: React.FC = () => {
     handleLogout
   } = useAdminAuth();
 
-  // Показываем спиннер во время загрузки
+  
   if (loading) {
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -78,18 +73,18 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // Показываем форму входа если не авторизован
+  
   if (!hasToken || !user) {
     return <AdminLogin onSuccess={handleLoginSuccess} />;
   }
 
-  // Перенаправляем директора
+  
   if (isDirector) {
     navigate(ROUTES.admin.directorDashboard);
     return null;
   }
 
-  // Проверяем права доступа
+  
   if (user.role !== 'admin') {
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -109,16 +104,13 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // Рендерим основной контент только после успешной авторизации
+  
   return <AdminDashboardContent user={user} onLogout={handleLogout} />;
 };
 
-/**
- * Компонент с основным контентом админ-панели
- * Рендерится только после успешной авторизации
- */
+
 const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
-  const adminData = useAdminData(true); // Всегда true, т.к. компонент рендерится только после авторизации
+  const adminData = useAdminData(true); 
   
   const { 
     selectedMenu, 
@@ -144,7 +136,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     isAssigningArbitrator 
   } = useAdminMutations();
 
-  // Реальные данные из API - загружаем только если пользователь авторизован
+  
   const { users: allUsers, loading: usersLoading } = useAllUsers(true);
   const { users: blockedUsers, loading: blockedUsersLoading } = useBlockedUsers(true);
   const { blockUser, unblockUser, changeUserRole } = useUserActions();
@@ -156,7 +148,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   const { chats: supportChats, loading: supportChatsLoading } = useSupportChats(true);
   const { sendChatMessage: sendSupportChatMessage } = useSupportActions();
   
-  // Тикеты
+  
   const { tickets, loading: ticketsLoading, refetch: refetchTickets } = useTickets(true);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
   
@@ -169,7 +161,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms(true);
   const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
 
-  // Обработчики для модальных окон
+  
   const handleUpdatePartner = (partnerId: number, data: any) => {
     updatePartner({ partnerId, data });
     closePartnerModals();
@@ -180,7 +172,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     closeDisputeModals();
   };
 
-  // Рендерим соответствующую секцию
+  
   const renderSection = () => {
     switch (selectedMenu) {
       case 'overview':
@@ -213,7 +205,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           />
         );
       
-      // Управление пользователями
+      
       case 'all_users':
         return (
           <UsersManagementSection
@@ -246,7 +238,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           />
         );
 
-      // Управление заказами
+      
       case 'all_orders':
         return (
           <AllOrdersSection
@@ -274,7 +266,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         );
 
 
-      // Новые секции поддержки
+      
       case 'support_chats':
         return (
           <SupportChatsSection
@@ -332,7 +324,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           />
         );
       
-      // Обращения
+      
       case 'new_claims':
         
         return (
@@ -384,7 +376,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     }
   };
 
-  // Используем новый AdminLayout
+  
   return (
     <AdminLayout
       user={user}
@@ -394,7 +386,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     >
       {renderSection()}
       
-      {/* Модальные окна */}
       <PartnerModal
         visible={partnerEditModalVisible}
         partner={selectedPartner}
@@ -418,12 +409,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         dispute={selectedDispute}
         onCancel={closeDisputeModals}
         onAssignArbitrator={(dispute) => {
-          // Логика назначения арбитра уже в DisputesSection
+          
           closeDisputeModals();
         }}
       />
       
-      {/* Модальное окно поддержки */}
       <SupportRequestModal
         request={null}
         messages={[]}

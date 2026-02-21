@@ -44,7 +44,7 @@ const SupportChat: React.FC = () => {
 
   useEffect(() => {
     loadMessages();
-    // Обновляем сообщения каждые 5 секунд
+    
     const interval = setInterval(loadMessages, 5000);
     return () => clearInterval(interval);
   }, [loadMessages]);
@@ -97,7 +97,6 @@ const SupportChat: React.FC = () => {
         }
         style={{ maxWidth: '900px', margin: '0 auto' }}
       >
-        {/* Область сообщений */}
         <div
           style={{
             height: '500px',
@@ -168,7 +167,6 @@ const SupportChat: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Форма отправки */}
         <div style={{ display: 'flex', gap: '8px' }}>
           <TextArea
             value={messageText}

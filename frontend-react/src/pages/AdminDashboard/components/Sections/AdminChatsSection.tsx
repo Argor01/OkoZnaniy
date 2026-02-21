@@ -118,7 +118,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const [inviteUserForm] = Form.useForm();
   const [editRoomForm] = Form.useForm();
 
-  // Отслеживание размера окна для адаптивности
+  
   React.useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -128,10 +128,10 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const isMobile = windowWidth < 768;
   const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
-  // Используем только реальные данные из БД
+  
   const chatRoomsData = chatRooms;
 
-  // Мок сообщения для выбранной комнаты
+  
   const mockMessages: ChatMessage[] = selectedRoom ? [
     {
       id: 1,
@@ -186,13 +186,13 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
     },
   ] : [];
 
-  // Фильтрация комнат
+  
   const filteredRooms = chatRoomsData.filter(room =>
     room.name.toLowerCase().includes(searchText.toLowerCase()) ||
     room.description.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Обработчики
+  
   const handleSendMessage = () => {
     if (!messageText.trim() || !selectedRoom) return;
     
@@ -232,7 +232,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       onUploadFile?.(selectedRoom.id, file);
       message.success('Файл загружен');
     }
-    return false; // Предотвращаем автоматическую загрузку
+    return false; 
   };
 
   const handleEditRoom = () => {
@@ -249,10 +249,10 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const handleSaveRoomChanges = async () => {
     try {
       const values = await editRoomForm.validateFields();
-      // Здесь будет вызов API для обновления чата
       
       
-      // Обновляем локальное состояние (в реальном приложении это будет через API)
+      
+      
       if (selectedRoom) {
         const updatedRoom = { ...selectedRoom, ...values };
         setSelectedRoom(updatedRoom);
@@ -269,7 +269,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
     setIsEditingRoom(false);
     editRoomForm.resetFields();
   }; 
- // Функции для отображения
+ 
   const getRoomTypeColor = (type: string) => {
     const colors = {
       general: 'blue',
@@ -300,7 +300,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
         gap: isMobile ? 8 : 16
       }}
     >
-      {/* Левая панель - список чатов */}
       <Card 
         className={styles.chatListCard}
         style={{ 
@@ -405,7 +404,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
         </div>
       </Card>
 
-      {/* Правая панель - чат */}
+      
       {selectedRoom ? (
         <Card 
           style={{ 
@@ -415,7 +414,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
           }}
           styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
         >
-          {/* Заголовок чата */}
+          
           <div style={{ 
             padding: isMobile ? 12 : 16, 
             borderBottom: '1px solid #f0f0f0',
@@ -461,7 +460,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
               </Tooltip>
             </Space>
           </div>       
-   {/* Список участников */}
+   
           <div style={{ 
             padding: isMobile ? '6px 12px' : '8px 16px', 
             borderBottom: '1px solid #f0f0f0',
@@ -519,7 +518,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             </div>
           </div>
 
-          {/* Область сообщений */}
           <div style={{ 
             flex: 1, 
             overflow: 'auto', 
@@ -552,7 +550,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 </div>
                 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  {/* Информация об отправителе */}
+                  
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -575,7 +573,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                       <PushpinOutlined style={{ color: '#faad14', fontSize: isMobile ? 11 : 12 }} />
                     )}
                   </div>  
-                {/* Текст сообщения */}
+                
                   <div style={{ 
                     backgroundColor: msg.is_system ? '#f6f6f6' : 'white',
                     padding: isMobile ? '8px 12px' : '10px 14px',
@@ -600,7 +598,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             ))}
           </div>
 
-          {/* Поле ввода сообщения */}
           <div style={{ 
             padding: isMobile ? 12 : 16, 
             borderTop: '1px solid #f0f0f0',
@@ -708,9 +705,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
           </div>
         </Card>
       )}     
- {/* Модальные окна */}
       
-      {/* Создание нового чата */}
       <Modal
         title="Создать новый чат"
         open={createRoomModalVisible}
@@ -751,7 +746,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Приглашение пользователя */}
+      
       <Modal
         title="Пригласить пользователя"
         open={inviteUserModalVisible}
@@ -777,7 +772,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
           </Form.Item>
         </Form>
       </Modal>      
-{/* Настройки чата */}
       <Modal
         title={isEditingRoom ? "Редактировать чат" : "Настройки чата"}
         open={roomSettingsModalVisible}
@@ -811,8 +805,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       >
         {selectedRoom && (
           <div>
-            {isEditingRoom ? (
-              // Режим редактирования
+            {isEditingRoom ? (
               <Form form={editRoomForm} layout="vertical">
                 <Title level={5}>Редактирование чата</Title>
                 
@@ -851,7 +844,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 </div>
               </Form>
             ) : (
-              // Режим просмотра
+              
               <div>
                 <Title level={5}>Информация о чате</Title>
                 <Row gutter={16}>

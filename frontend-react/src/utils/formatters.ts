@@ -1,8 +1,6 @@
-// Утилиты для форматирования данных
 
-/**
- * Форматирует число как валюту
- */
+
+
 export const formatCurrency = (amount: number | string, currency: string = '₽'): string => {
   const numeric = typeof amount === 'number' ? amount : Number(String(amount).replace(',', '.'));
   const safe = Number.isFinite(numeric) ? numeric : 0;
@@ -10,9 +8,6 @@ export const formatCurrency = (amount: number | string, currency: string = '₽'
   return `${rounded.toLocaleString('ru-RU')} ${currency}`;
 };
 
-/**
- * Форматирует дату
- */
 export const formatDate = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString('ru-RU', {
@@ -22,9 +17,6 @@ export const formatDate = (date: string | Date): string => {
   });
 };
 
-/**
- * Форматирует дату и время
- */
 export const formatDateTime = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleString('ru-RU', {
@@ -36,9 +28,6 @@ export const formatDateTime = (date: string | Date): string => {
   });
 };
 
-/**
- * Форматирует относительное время (например, "2 часа назад")
- */
 export const formatRelativeTime = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
@@ -54,17 +43,11 @@ export const formatRelativeTime = (date: string | Date): string => {
   return formatDate(d);
 };
 
-/**
- * Обрезает текст до указанной длины
- */
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 };
 
-/**
- * Форматирует имя пользователя
- */
 export const formatUserName = (user: {
   first_name?: string;
   last_name?: string;
@@ -77,9 +60,6 @@ export const formatUserName = (user: {
   return user.username || 'Пользователь';
 };
 
-/**
- * Форматирует размер файла
- */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Б';
   const k = 1024;

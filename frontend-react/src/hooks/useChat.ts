@@ -11,7 +11,7 @@ export const useChat = () => {
     try {
       const apiChats = await chatApi.getChats();
       setChats(apiChats);
-      // Подсчитываем общее количество непрочитанных
+      
       const totalUnread = apiChats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0);
       setUnreadCount(totalUnread);
     } catch (error) {
@@ -33,7 +33,7 @@ export const useChat = () => {
 
   useEffect(() => {
     loadChats();
-    // Обновляем чаты каждые 15 секунд
+    
     const interval = setInterval(loadChats, 15000);
     return () => clearInterval(interval);
   }, [loadChats]);

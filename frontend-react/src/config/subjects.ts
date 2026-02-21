@@ -1,4 +1,4 @@
-// Константы предметов
+
 export const SUBJECTS = [
   { id: 1, name: 'Математика' },
   { id: 2, name: 'Физика' },

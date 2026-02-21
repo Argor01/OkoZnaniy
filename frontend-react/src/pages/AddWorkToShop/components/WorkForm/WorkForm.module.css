@@ -1,4 +1,4 @@
-/* Стили для WorkForm - улучшенный современный дизайн */
+﻿
 
 .card {
   border-radius: 20px;
@@ -29,7 +29,7 @@
   height: 44px;
 }
 
-/* Стили для InputNumber */
+
 .input :global(.ant-input-number-input) {
   height: 40px;
 }
@@ -49,16 +49,16 @@
 }
 
 .select :global(.ant-select-selector) {
-  border-radius: 10px !important;
-  border: 2px solid #e5e7eb !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  height: 44px !important;
-  padding: 4px 11px !important;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 44px;
+  padding: 4px 11px;
 }
 
 .select:hover :global(.ant-select-selector) {
-  border-color: #93c5fd !important;
-  background: #f8fafc !important;
+  border-color: #93c5fd;
+  background: #f8fafc;
 }
 
 .actions {
@@ -132,15 +132,15 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-/* Стили для загрузки превью */
+
 .previewUpload {
   width: 200px;
   height: 200px;
 }
 
 .previewUpload :global(.ant-upload) {
-  width: 200px !important;
-  height: 200px !important;
+  width: 200px;
+  height: 200px;
   border-radius: 12px;
   border: 2px dashed #e5e7eb;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -152,12 +152,12 @@
 }
 
 .previewUpload :global(.ant-upload-select) {
-  width: 100% !important;
-  height: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: column !important;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .uploadArea {
@@ -190,7 +190,7 @@
   font-size: 14px;
 }
 
-/* Адаптив для мобильных */
+
 @media (max-width: 768px) {
   .card {
     border-radius: 16px;
@@ -214,7 +214,7 @@
   }
 
   .select :global(.ant-select-selector) {
-    height: 42px !important;
+    height: 42px;
   }
 
   .actions {
@@ -236,7 +236,7 @@
   }
 
   .previewUpload :global(.ant-upload) {
-    width: 150px !important;
-    height: 150px !important;
+    width: 150px;
+    height: 150px;
   }
 }

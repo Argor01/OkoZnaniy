@@ -25,7 +25,7 @@ const NetProfit: React.FC = () => {
   ]);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Получаем данные из API
+  
   const { data: profitData, isLoading } = useQuery({
     queryKey: ['net-profit', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
     queryFn: () => getNetProfit(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),

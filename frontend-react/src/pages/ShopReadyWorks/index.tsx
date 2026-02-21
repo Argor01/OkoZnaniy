@@ -20,7 +20,7 @@ const ShopReadyWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
   const [works, setWorks] = useState<Work[]>([]);
 
-  // Загрузка данных
+  
   const { data: apiWorks } = useQuery({
     queryKey: ['shop-works'],
     queryFn: () => shopApi.getWorks(),
@@ -78,11 +78,11 @@ const ShopReadyWorks: React.FC = () => {
     }
   };
 
-  // Фильтрация и сортировка работ
+  
   const filteredWorks = React.useMemo(() => {
     let result = [...works];
 
-    // Поиск
+    
     if (filters.search) {
       result = result.filter(
         (work) =>
@@ -90,17 +90,17 @@ const ShopReadyWorks: React.FC = () => {
       );
     }
 
-    // Фильтр по типу работы
+    
     if (filters.category) {
       result = result.filter((work) => work.work_type === filters.category);
     }
 
-    // Фильтр по предмету
+    
     if (filters.subject) {
       result = result.filter((work) => work.subject === filters.subject);
     }
 
-    // Сортировка
+    
     switch (filters.sortBy) {
       case 'price-asc':
         result.sort((a, b) => a.price - b.price);
@@ -132,7 +132,7 @@ const ShopReadyWorks: React.FC = () => {
     }
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : mockWorks;
     
-    // Преобразуем данные из API в нужный формат
+    
     const transformedBase = base.map((work: Work) => {
       const extended = work as Work & { subject_id?: number; work_type_id?: number };
       const subject = Number(work.subject ?? work.subjectId ?? extended.subject_id ?? 0);

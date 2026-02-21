@@ -1,4 +1,4 @@
-// Типы для ShopReadyWorks
+
 
 export interface PurchasedWork {
   id: number;

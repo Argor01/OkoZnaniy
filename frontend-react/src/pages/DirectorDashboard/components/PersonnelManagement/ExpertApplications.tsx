@@ -56,14 +56,14 @@ const ExpertApplications: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const [statusFilter, setStatusFilter] = useState<string>('pending'); // pending, approved, rejected, all
+  const [statusFilter, setStatusFilter] = useState<string>('pending'); 
 
   const { data: allApplications, isLoading } = useQuery({
     queryKey: ['director-expert-applications'],
     queryFn: getExpertApplications,
   });
 
-  // Фильтруем анкеты по статусу
+  
   const applications = React.useMemo(() => {
     if (!allApplications) return [];
     
@@ -71,7 +71,7 @@ const ExpertApplications: React.FC = () => {
     
     return allApplications.filter(app => {
       if (statusFilter === 'pending') {
-        // Показываем только новые и на рассмотрении
+        
         return app.status === 'new' || app.status === 'under_review' || 
                (!app.status && !app.application_approved && !app.application_reviewed_at);
       }
@@ -167,7 +167,7 @@ const ExpertApplications: React.FC = () => {
   };
 
   const getStatusTag = (status: string, user?: any) => {
-    // Если пользователь активен, показываем "Активирована" вместо "Деактивирована"
+    
     if (status === 'deactivated' && user?.is_active) {
       return <Tag color="green">Активирована</Tag>;
     }
@@ -216,7 +216,7 @@ const ExpertApplications: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string | undefined, record: ExpertApplication) => {
-        // Приоритет: status > application_approved > по датам
+        
         if (status) return getStatusTag(status, record.user);
         if (record.application_approved) return getStatusTag('approved', record.user);
         if (record.application_reviewed_at || record.application_submitted_at) return getStatusTag('under_review', record.user);
@@ -228,7 +228,7 @@ const ExpertApplications: React.FC = () => {
       key: 'actions',
       width: 140,
       render: (_: any, record: ExpertApplication) => {
-        // Определяем, можно ли выполнять действия (только для новых или на рассмотрении)
+        
         const canModify = record.status === 'new' || record.status === 'under_review' || (!record.status && !record.application_approved);
         return (
           <Space>
@@ -354,7 +354,6 @@ const ExpertApplications: React.FC = () => {
       <Card>
         <Title level={4}>Анкеты экспертов</Title>
         
-        {/* Фильтры по статусу */}
         <Space style={{ marginBottom: 16 }} wrap>
           <Button
             type={statusFilter === 'pending' ? 'primary' : 'default'}
@@ -407,7 +406,6 @@ const ExpertApplications: React.FC = () => {
         </Spin>
       </Card>
 
-      {/* Модальное окно с деталями анкеты */}
       <Modal
         title="Детали анкеты эксперта"
         open={detailModalVisible}
@@ -563,7 +561,6 @@ const ExpertApplications: React.FC = () => {
         )}
       </Modal>
 
-      {/* Модальное окно отклонения */}
       <Modal
         title="Отклонить анкету"
         open={rejectModalVisible}
@@ -595,7 +592,7 @@ const ExpertApplications: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* Модальное окно отправки на доработку */}
+      
       <Modal
         title="Отправить на доработку"
         open={reworkModalVisible}

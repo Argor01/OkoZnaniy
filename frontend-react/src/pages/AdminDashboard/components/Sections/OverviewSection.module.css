@@ -1,4 +1,4 @@
-/* Секция обзора */
+
 .overviewContainer {
   padding: 0;
 }
@@ -55,7 +55,7 @@
 
 
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .infoCard :global(.ant-card-head) {
     padding: 12px 16px;
@@ -76,7 +76,7 @@
 
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .infoCard :global(.ant-card-head-title) {
     font-size: 14px;

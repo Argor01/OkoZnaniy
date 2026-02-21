@@ -1,6 +1,4 @@
-/**
- * Типы данных для системы обработки запросов клиентов
- */
+
 
 export interface CustomerRequest {
   id: number;
@@ -43,7 +41,7 @@ export interface RequestMessage {
   attachments?: MessageAttachment[];
   createdAt: string;
   isRead: boolean;
-  isInternal: boolean; // Внутренние сообщения между админами
+  isInternal: boolean; 
 }
 
 export interface RequestAttachment {
@@ -64,7 +62,7 @@ export interface MessageAttachment {
 
 export interface InternalCommunication {
   id: number;
-  requestId?: number; // Связь с запросом (опционально)
+  requestId?: number; 
   fromDepartment: string;
   toDepartment: string;
   subject: string;
@@ -117,18 +115,18 @@ export interface RequestStats {
   openRequests: number;
   inProgressRequests: number;
   completedToday: number;
-  averageResponseTime: number; // в минутах
-  customerSatisfaction: number; // процент
+  averageResponseTime: number; 
+  customerSatisfaction: number; 
   totalRequests: number;
   completionRate: number;
 }
 
-// Типы для фильтрации и сортировки
+
 export type RequestStatus = 'open' | 'in_progress' | 'completed' | 'closed';
 export type RequestPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type RequestCategory = 'technical' | 'billing' | 'account' | 'order' | 'general';
 
-// Типы для форм
+
 export interface CreateRequestForm {
   title: string;
   description: string;
@@ -155,7 +153,7 @@ export interface SendMessageForm {
   attachments?: File[];
 }
 
-// Типы для API ответов
+
 export interface RequestsApiResponse {
   results: CustomerRequest[];
   count: number;

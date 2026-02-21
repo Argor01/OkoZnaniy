@@ -1,7 +1,7 @@
 import type { Employee, ExpertApplication, MonthlyTurnover, NetProfit, IncomeDetail, ExpenseDetail, Partner, PartnerTurnoverResponse, KPI, StatisticsSummary } from './types';
 import dayjs from 'dayjs';
 
-// Тестовые данные для активных сотрудников
+
 export const mockEmployees: Employee[] = [
   {
     id: 1000,
@@ -17,7 +17,7 @@ export const mockEmployees: Employee[] = [
   },
 ];
 
-// Тестовые данные для анкет экспертов
+
 export const mockExpertApplications: ExpertApplication[] = [
   {
     id: 1,
@@ -44,26 +44,26 @@ export const mockExpertApplications: ExpertApplication[] = [
   },
 ];
 
-// Тестовые данные для архивированных сотрудников
+
 export const mockArchivedEmployees: Employee[] = [];
 
-// Функции для генерации тестовых финансовых данных
 
-// Генерация месячного оборота
+
+
 export const generateMonthlyTurnover = (period: string): MonthlyTurnover => {
   const month = dayjs(period).startOf('month');
   const daysInMonth = month.daysInMonth();
   const dailyData: Array<{ date: string; amount: number }> = [];
   
-  // Базовый дневной оборот с небольшими колебаниями
+  
   let total = 0;
   for (let i = 0; i < daysInMonth; i++) {
     const date = month.add(i, 'day');
-    // Выходные дни имеют меньший оборот
+    
     const dayOfWeek = date.day();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const baseAmount = isWeekend ? 35000 : 50000;
-    // Добавляем случайные колебания
+    
     const amount = baseAmount + Math.random() * 20000 - 10000;
     dailyData.push({
       date: date.format('YYYY-MM-DD'),
@@ -73,7 +73,7 @@ export const generateMonthlyTurnover = (period: string): MonthlyTurnover => {
   }
   
   const previousMonth = month.subtract(1, 'month');
-  const previousTotal = total * (0.85 + Math.random() * 0.15); // Предыдущий месяц на 0-15% меньше
+  const previousTotal = total * (0.85 + Math.random() * 0.15); 
   const change = total - previousTotal;
   const changePercent = (change / previousTotal) * 100;
   
@@ -90,13 +90,13 @@ export const generateMonthlyTurnover = (period: string): MonthlyTurnover => {
   };
 };
 
-// Генерация чистой прибыли
+
 export const generateNetProfit = (startDate: string, endDate: string): NetProfit => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
   const days = end.diff(start, 'day') + 1;
   
-  // Доходы по категориям
+  
   const incomeCategories = [
     { category: 'Выполнение заказов', baseAmount: 800000 },
     { category: 'Подписки', baseAmount: 150000 },
@@ -105,7 +105,7 @@ export const generateNetProfit = (startDate: string, endDate: string): NetProfit
     { category: 'Прочее', baseAmount: 30000 },
   ];
   
-  // Расходы по категориям
+  
   const expenseCategories = [
     { category: 'Зарплаты сотрудников', baseAmount: 400000 },
     { category: 'Комиссии экспертам', baseAmount: 200000 },
@@ -132,7 +132,7 @@ export const generateNetProfit = (startDate: string, endDate: string): NetProfit
   const totalExpense = expenseBreakdown.reduce((sum, item) => sum + item.amount, 0);
   const totalProfit = totalIncome - totalExpense;
   
-  // Рассчитываем проценты
+  
   incomeBreakdown.forEach(item => {
     item.percentage = Math.round((item.amount / totalIncome) * 100 * 100) / 100;
   });
@@ -141,7 +141,7 @@ export const generateNetProfit = (startDate: string, endDate: string): NetProfit
     item.percentage = Math.round((item.amount / totalExpense) * 100 * 100) / 100;
   });
   
-  // Генерируем ежедневные данные
+  
   const dailyData: Array<{ date: string; profit: number }> = [];
   for (let i = 0; i < days; i++) {
     const date = start.add(i, 'day');
@@ -153,7 +153,7 @@ export const generateNetProfit = (startDate: string, endDate: string): NetProfit
     });
   }
   
-  // Предыдущий период
+  
   const prevDays = days;
   const previousPeriodTotal = totalProfit * (0.8 + Math.random() * 0.3);
   const change = totalProfit - previousPeriodTotal;
@@ -181,7 +181,7 @@ export const generateNetProfit = (startDate: string, endDate: string): NetProfit
   };
 };
 
-// Генерация детализации доходов
+
 export const generateIncomeDetails = (startDate: string, endDate: string): IncomeDetail[] => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
@@ -266,11 +266,11 @@ export const generateIncomeDetails = (startDate: string, endDate: string): Incom
     });
   }
   
-  // Сортируем по дате
+  
   return incomeDetails.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
 };
 
-// Генерация детализации расходов
+
 export const generateExpenseDetails = (startDate: string, endDate: string): ExpenseDetail[] => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
@@ -383,11 +383,11 @@ export const generateExpenseDetails = (startDate: string, endDate: string): Expe
     });
   }
   
-  // Сортируем по дате
+  
   return expenseDetails.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
 };
 
-// Тестовые данные для партнёров
+
 export const mockPartners: Partner[] = [
   {
     id: 1,
@@ -621,7 +621,7 @@ export const mockPartners: Partner[] = [
   },
 ];
 
-// Генерация оборота по партнёрам
+
 export const generatePartnersTurnover = (period: string | [string, string]): PartnerTurnoverResponse => {
   let startDate: string;
   let endDate: string;
@@ -637,11 +637,11 @@ export const generatePartnersTurnover = (period: string | [string, string]): Par
   
   const days = dayjs(endDate).diff(dayjs(startDate), 'day') + 1;
   
-  // Генерируем оборот для каждого партнёра
+  
   const partnersTurnover = mockPartners.map(partner => {
-    // Базовый оборот зависит от количества рефералов и активности партнёра
+    
     const baseTurnover = partner.totalReferrals * 50000 * (days / 30);
-    const turnover = baseTurnover * (0.7 + Math.random() * 0.6); // Вариация ±30%
+    const turnover = baseTurnover * (0.7 + Math.random() * 0.6); 
     const commission = (turnover * partner.commissionPercent) / 100;
     const referralsCount = partner.activeReferrals;
     
@@ -659,19 +659,19 @@ export const generatePartnersTurnover = (period: string | [string, string]): Par
       referrals_count: referralsCount,
       turnover: Math.round(turnover),
       commission: Math.round(commission),
-      percentageOfTotal: 0, // Будет рассчитано после
+      percentageOfTotal: 0, 
     };
   });
   
-  // Рассчитываем общий оборот
+  
   const totalTurnover = partnersTurnover.reduce((sum, p) => sum + p.turnover, 0);
   
-  // Рассчитываем проценты
+  
   partnersTurnover.forEach(partner => {
     partner.percentageOfTotal = Math.round((partner.turnover / totalTurnover) * 100 * 100) / 100;
   });
   
-  // Сортируем по обороту (от большего к меньшему)
+  
   partnersTurnover.sort((a, b) => b.turnover - a.turnover);
   
   return {
@@ -681,37 +681,37 @@ export const generatePartnersTurnover = (period: string | [string, string]): Par
   };
 };
 
-// Генерация KPI
+
 export const generateKPI = (startDate: string, endDate: string): KPI => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
   const days = end.diff(start, 'day') + 1;
   
-  // Базовые значения
+  
   const baseTurnover = 1500000 * (days / 30);
   const baseProfit = 350000 * (days / 30);
   const baseOrders = Math.round(450 * (days / 30));
   const baseAverageCheck = 3500;
   
-  // Добавляем вариацию
+  
   const totalTurnover = baseTurnover * (0.9 + Math.random() * 0.2);
   const netProfit = baseProfit * (0.8 + Math.random() * 0.4);
   const activeOrders = Math.round(baseOrders * (0.85 + Math.random() * 0.3));
   const averageOrderValue = baseAverageCheck * (0.9 + Math.random() * 0.2);
   
-  // Предыдущий период (для расчета изменений)
+  
   const prevTurnover = totalTurnover * (0.85 + Math.random() * 0.15);
   const prevProfit = netProfit * (0.8 + Math.random() * 0.3);
   const prevOrders = activeOrders * (0.9 + Math.random() * 0.2);
   const prevAverageCheck = averageOrderValue * (0.95 + Math.random() * 0.1);
   
-  // Рассчитываем изменения
+  
   const turnoverChange = ((totalTurnover - prevTurnover) / prevTurnover) * 100;
   const profitChange = ((netProfit - prevProfit) / prevProfit) * 100;
   const ordersChange = ((activeOrders - prevOrders) / prevOrders) * 100;
   const averageCheckChange = ((averageOrderValue - prevAverageCheck) / prevAverageCheck) * 100;
   
-  // Количество пользователей (из тестовых данных)
+  
   const totalClients = 1250 + Math.floor(Math.random() * 200);
   const totalExperts = mockEmployees.filter(e => e.role === 'expert' && e.is_active).length;
   const totalPartners = mockPartners.filter(p => p.isActive || p.is_active).length;
@@ -747,27 +747,27 @@ export const generateKPI = (startDate: string, endDate: string): KPI => {
   };
 };
 
-// Генерация сводной статистики
+
 export const generateStatisticsSummary = (startDate: string, endDate: string): StatisticsSummary => {
   const start = dayjs(startDate);
   const end = dayjs(endDate);
   const days = end.diff(start, 'day') + 1;
   
-  // Генерируем текущий период KPI
+  
   const currentKPI = generateKPI(startDate, endDate);
   
-  // Генерируем предыдущий период
+  
   const prevStart = start.subtract(days, 'day');
   const prevEnd = start.subtract(1, 'day');
   const previousKPI = generateKPI(prevStart.format('YYYY-MM-DD'), prevEnd.format('YYYY-MM-DD'));
   
-  // Рассчитываем изменения
+  
   const turnoverChange = ((currentKPI.totalTurnover! - previousKPI.totalTurnover!) / previousKPI.totalTurnover!) * 100;
   const profitChange = ((currentKPI.netProfit! - previousKPI.netProfit!) / previousKPI.netProfit!) * 100;
   const ordersChange = ((currentKPI.activeOrders! - previousKPI.activeOrders!) / previousKPI.activeOrders!) * 100;
   const averageCheckChange = ((currentKPI.averageCheck! - previousKPI.averageCheck!) / previousKPI.averageCheck!) * 100;
   
-  // Генерируем тренды (ежедневные данные)
+  
   const trends = {
     turnover: [] as Array<{ date: string; value: number }>,
     profit: [] as Array<{ date: string; value: number }>,

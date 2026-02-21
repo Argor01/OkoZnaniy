@@ -1,6 +1,4 @@
-/**
- * Валидаторы для форм системы обработки запросов
- */
+
 
 import type { 
   CreateRequestForm, 
@@ -8,7 +6,7 @@ import type {
   SendMessageForm 
 } from '../types/requests.types';
 
-// Типы для результатов валидации
+
 export interface ValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
@@ -19,13 +17,11 @@ export interface FileValidationResult {
   error?: string;
 }
 
-/**
- * Валидация создания нового запроса
- */
+
 export const validateCreateRequest = (data: Partial<CreateRequestForm>): ValidationResult => {
   const errors: Record<string, string> = {};
 
-  // Проверка заголовка
+  
   if (!data.title || data.title.trim().length === 0) {
     errors.title = 'Заголовок обязателен для заполнения';
   } else if (data.title.trim().length < 5) {
@@ -34,7 +30,7 @@ export const validateCreateRequest = (data: Partial<CreateRequestForm>): Validat
     errors.title = 'Заголовок не должен превышать 200 символов';
   }
 
-  // Проверка описания
+  
   if (!data.description || data.description.trim().length === 0) {
     errors.description = 'Описание обязательно для заполнения';
   } else if (data.description.trim().length < 10) {
@@ -43,26 +39,26 @@ export const validateCreateRequest = (data: Partial<CreateRequestForm>): Validat
     errors.description = 'Описание не должно превышать 5000 символов';
   }
 
-  // Проверка категории
+  
   if (!data.category) {
     errors.category = 'Категория обязательна для выбора';
   } else if (!['technical', 'billing', 'account', 'order', 'general'].includes(data.category)) {
     errors.category = 'Недопустимая категория';
   }
 
-  // Проверка приоритета
+  
   if (!data.priority) {
     errors.priority = 'Приоритет обязателен для выбора';
   } else if (!['low', 'medium', 'high', 'urgent'].includes(data.priority)) {
     errors.priority = 'Недопустимый приоритет';
   }
 
-  // Проверка ID клиента
+  
   if (!data.customerId || data.customerId <= 0) {
     errors.customerId = 'Необходимо выбрать клиента';
   }
 
-  // Проверка тегов
+  
   if (data.tags && data.tags.length > 10) {
     errors.tags = 'Максимальное количество тегов: 10';
   }
@@ -86,13 +82,11 @@ export const validateCreateRequest = (data: Partial<CreateRequestForm>): Validat
   };
 };
 
-/**
- * Валидация обновления запроса
- */
+
 export const validateUpdateRequest = (data: Partial<UpdateRequestForm>): ValidationResult => {
   const errors: Record<string, string> = {};
 
-  // Проверка заголовка (если передан)
+  
   if (data.title !== undefined) {
     if (data.title.trim().length === 0) {
       errors.title = 'Заголовок не может быть пустым';
@@ -103,7 +97,7 @@ export const validateUpdateRequest = (data: Partial<UpdateRequestForm>): Validat
     }
   }
 
-  // Проверка описания (если передано)
+  
   if (data.description !== undefined) {
     if (data.description.trim().length === 0) {
       errors.description = 'Описание не может быть пустым';
@@ -114,33 +108,33 @@ export const validateUpdateRequest = (data: Partial<UpdateRequestForm>): Validat
     }
   }
 
-  // Проверка статуса (если передан)
+  
   if (data.status !== undefined) {
     if (!['open', 'in_progress', 'completed', 'closed'].includes(data.status)) {
       errors.status = 'Недопустимый статус';
     }
   }
 
-  // Проверка приоритета (если передан)
+  
   if (data.priority !== undefined) {
     if (!['low', 'medium', 'high', 'urgent'].includes(data.priority)) {
       errors.priority = 'Недопустимый приоритет';
     }
   }
 
-  // Проверка категории (если передана)
+  
   if (data.category !== undefined) {
     if (!['technical', 'billing', 'account', 'order', 'general'].includes(data.category)) {
       errors.category = 'Недопустимая категория';
     }
   }
 
-  // Проверка ID назначенного администратора (если передан)
+  
   if (data.assignedAdminId !== undefined && data.assignedAdminId <= 0) {
     errors.assignedAdminId = 'Недопустимый ID администратора';
   }
 
-  // Проверка тегов (если переданы)
+  
   if (data.tags !== undefined) {
     if (data.tags.length > 10) {
       errors.tags = 'Максимальное количество тегов: 10';
@@ -158,7 +152,7 @@ export const validateUpdateRequest = (data: Partial<UpdateRequestForm>): Validat
     }
   }
 
-  // Проверка времени решения (если передано)
+  
   if (data.estimatedResolutionTime !== undefined) {
     const resolutionDate = new Date(data.estimatedResolutionTime);
     const now = new Date();
@@ -176,25 +170,23 @@ export const validateUpdateRequest = (data: Partial<UpdateRequestForm>): Validat
   };
 };
 
-/**
- * Валидация отправки сообщения
- */
+
 export const validateSendMessage = (data: Partial<SendMessageForm>): ValidationResult => {
   const errors: Record<string, string> = {};
 
-  // Проверка содержимого сообщения
+  
   if (!data.content || data.content.trim().length === 0) {
     errors.content = 'Сообщение не может быть пустым';
   } else if (data.content.trim().length > 10000) {
     errors.content = 'Сообщение не должно превышать 10000 символов';
   }
 
-  // Проверка флага внутреннего сообщения
+  
   if (data.isInternal !== undefined && typeof data.isInternal !== 'boolean') {
     errors.isInternal = 'Недопустимое значение для внутреннего сообщения';
   }
 
-  // Проверка вложений (если есть)
+  
   if (data.attachments && data.attachments.length > 5) {
     errors.attachments = 'Максимальное количество файлов: 5';
   }
@@ -205,14 +197,12 @@ export const validateSendMessage = (data: Partial<SendMessageForm>): ValidationR
   };
 };
 
-/**
- * Валидация файла для загрузки
- */
+
 export const validateFile = (file: File): FileValidationResult => {
-  // Максимальный размер файла: 10MB
+  
   const maxSize = 10 * 1024 * 1024;
   
-  // Разрешенные типы файлов
+  
   const allowedTypes = [
     'image/jpeg',
     'image/png',
@@ -229,7 +219,7 @@ export const validateFile = (file: File): FileValidationResult => {
     'application/x-rar-compressed',
   ];
 
-  // Проверка размера
+  
   if (file.size > maxSize) {
     return {
       isValid: false,
@@ -237,7 +227,7 @@ export const validateFile = (file: File): FileValidationResult => {
     };
   }
 
-  // Проверка типа
+  
   if (!allowedTypes.includes(file.type)) {
     return {
       isValid: false,
@@ -245,7 +235,7 @@ export const validateFile = (file: File): FileValidationResult => {
     };
   }
 
-  // Проверка имени файла
+  
   if (file.name.length > 255) {
     return {
       isValid: false,
@@ -253,7 +243,7 @@ export const validateFile = (file: File): FileValidationResult => {
     };
   }
 
-  // Проверка на вредоносные расширения
+  
   const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com'];
   const fileName = file.name.toLowerCase();
   
@@ -269,9 +259,7 @@ export const validateFile = (file: File): FileValidationResult => {
   return { isValid: true };
 };
 
-/**
- * Валидация множественных файлов
- */
+
 export const validateFiles = (files: File[]): ValidationResult => {
   const errors: Record<string, string> = {};
 
@@ -284,16 +272,16 @@ export const validateFiles = (files: File[]): ValidationResult => {
     return { isValid: false, errors };
   }
 
-  // Проверяем общий размер всех файлов
+  
   const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-  const maxTotalSize = 50 * 1024 * 1024; // 50MB
+  const maxTotalSize = 50 * 1024 * 1024; 
 
   if (totalSize > maxTotalSize) {
     errors.files = `Общий размер файлов превышает допустимый лимит (${Math.round(maxTotalSize / 1024 / 1024)}MB)`;
     return { isValid: false, errors };
   }
 
-  // Проверяем каждый файл
+  
   for (let i = 0; i < files.length; i++) {
     const fileValidation = validateFile(files[i]);
     if (!fileValidation.isValid) {
@@ -305,9 +293,7 @@ export const validateFiles = (files: File[]): ValidationResult => {
   return { isValid: true, errors };
 };
 
-/**
- * Валидация поискового запроса
- */
+
 export const validateSearchQuery = (query: string): ValidationResult => {
   const errors: Record<string, string> = {};
 
@@ -319,7 +305,7 @@ export const validateSearchQuery = (query: string): ValidationResult => {
     errors.query = 'Поисковый запрос не должен превышать 100 символов';
   }
 
-  // Проверка на потенциально опасные символы
+  
   if (/[<>"'%;()&+]/.test(query)) {
     errors.query = 'Поисковый запрос содержит недопустимые символы';
   }
@@ -330,9 +316,7 @@ export const validateSearchQuery = (query: string): ValidationResult => {
   };
 };
 
-/**
- * Валидация создания чата
- */
+
 export const validateCreateChat = (data: {
   name?: string;
   type?: string;
@@ -341,7 +325,7 @@ export const validateCreateChat = (data: {
 }): ValidationResult => {
   const errors: Record<string, string> = {};
 
-  // Проверка названия
+  
   if (!data.name || data.name.trim().length === 0) {
     errors.name = 'Название чата обязательно для заполнения';
   } else if (data.name.trim().length < 3) {
@@ -350,21 +334,21 @@ export const validateCreateChat = (data: {
     errors.name = 'Название чата не должно превышать 100 символов';
   }
 
-  // Проверка типа
+  
   if (!data.type) {
     errors.type = 'Тип чата обязателен для выбора';
   } else if (!['general', 'department', 'private'].includes(data.type)) {
     errors.type = 'Недопустимый тип чата';
   }
 
-  // Проверка участников
+  
   if (!data.participantIds || data.participantIds.length === 0) {
     errors.participantIds = 'Необходимо выбрать хотя бы одного участника';
   } else if (data.participantIds.length > 50) {
     errors.participantIds = 'Максимальное количество участников: 50';
   }
 
-  // Проверка описания (если передано)
+  
   if (data.description && data.description.length > 500) {
     errors.description = 'Описание не должно превышать 500 символов';
   }
@@ -375,9 +359,7 @@ export const validateCreateChat = (data: {
   };
 };
 
-/**
- * Валидация диапазона дат
- */
+
 export const validateDateRange = (dateFrom?: string, dateTo?: string): ValidationResult => {
   const errors: Record<string, string> = {};
 
@@ -397,7 +379,7 @@ export const validateDateRange = (dateFrom?: string, dateTo?: string): Validatio
       errors.dateRange = 'Дата начала должна быть раньше даты окончания';
     }
 
-    // Проверка на слишком большой диапазон (больше года)
+    
     if (!errors.dateFrom && !errors.dateTo && !errors.dateRange) {
       const diffMs = to.getTime() - from.getTime();
       const diffDays = diffMs / (1000 * 60 * 60 * 24);

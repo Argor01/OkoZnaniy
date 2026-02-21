@@ -81,7 +81,6 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         dangerouslySetInnerHTML={{ __html: work.description }}
       />
 
-      {/* Автор работы */}
       {work.author && (
         <div className={styles.author}>
           <Space size={8}>

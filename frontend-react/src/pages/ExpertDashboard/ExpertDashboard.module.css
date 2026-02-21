@@ -1,4 +1,4 @@
-/* Container and layout */
+﻿
 .container {
   height: 100vh;
   background: #f3f4f6;
@@ -7,50 +7,50 @@
   overflow: hidden;
 }
 
-/* Фиксированная навигация для ExpertDashboard */
+
 .expertDashboardPage :global(.ant-layout-sider) {
-  position: fixed !important;
-  top: 64px !important; /* Начинается под хедером (высота хедера 64px) */
-  left: 0 !important;
-  height: calc(100vh - 64px) !important; /* Высота минус высота хедера */
-  z-index: 999 !important; /* Ниже хедера */
+  position: fixed;
+  top: 64px; 
+  left: 0;
+  height: calc(100vh - 64px); 
+  z-index: 999; 
   backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Фиксированный хедер - на всю ширину */
+
 .expertDashboardPage :global(.ant-layout-header) {
-  margin: 0 !important;
-  padding-left: 24px !important; /* Обычный отступ слева */
-  padding-right: 24px !important;
-  width: 100% !important; /* Полная ширина */
-  max-width: 100% !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important; /* Начинается с левого края */
-  z-index: 1000 !important; /* Выше сайдбара */
-  box-sizing: border-box !important;
+  margin: 0;
+  padding-left: 24px; 
+  padding-right: 24px;
+  width: 100%; 
+  max-width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0; 
+  z-index: 1000; 
+  box-sizing: border-box;
   backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Контент с отступами для фиксированных элементов */
+
 .expertDashboardPage :global(.ant-layout-content) {
-  width: 100% !important; /* Полная ширина */
-  max-width: 100% !important;
-  margin-left: 0 !important; /* Убираем левый отступ */
-  margin-top: 0 !important; /* Убираем отступ сверху */
-  min-height: 100vh !important;
-  box-sizing: border-box !important;
+  width: 100%; 
+  max-width: 100%;
+  margin-left: 0; 
+  margin-top: 0; 
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-/* Ограничиваем ширину контента в ExpertDashboard */
+
 .expertContentContainer {
-  max-width: none; /* Убираем ограничение ширины */
-  margin: 0; /* Убираем центрирование */
+  max-width: none; 
+  margin: 0; 
   width: 100%;
-  padding: 24px; /* Убираем отступ сверху */
+  padding: 24px; 
   box-sizing: border-box;
 }
 
@@ -58,7 +58,7 @@
   .expertContentContainer {
     width: 100%;
     max-width: 100%;
-    padding: 16px; /* Убираем отступ сверху для мобильных */
+    padding: 16px; 
   }
 }
 
@@ -72,7 +72,7 @@
   overflow: hidden;
 }
 
-/* Sidebar */
+
 .sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -130,11 +130,11 @@
 }
 
 .sidebar.collapsed .sidebarProfile > div:nth-child(2) {
-  display: none !important;
+  display: none;
 }
 
 .sidebar.collapsed .sidebarProfile > button {
-  display: none !important;
+  display: none;
 }
 
 .sidebarProfile {
@@ -147,18 +147,18 @@
 }
 
 .logoutMenuItem {
-  margin-top: auto !important;
-  border-top: 1px solid #e5e7eb !important;
-  padding-top: 8px !important;
+  margin-top: auto;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 8px;
 }
 
 .logoutMenuItem.ant-menu-item-danger {
-  color: #ef4444 !important;
+  color: #ef4444;
 }
 
 .logoutMenuItem.ant-menu-item-danger:hover {
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1);
+  border-left-color: #ef4444;
 }
 
 .sidebarMenu {
@@ -172,41 +172,41 @@
 }
 
 .sidebar.collapsed .sidebarMenu .ant-menu-item {
-  padding-left: 28px !important;
+  padding-left: 28px;
   justify-content: center;
 }
 
 .sidebar.collapsed:hover .sidebarMenu .ant-menu-item {
-  padding-left: 16px !important;
+  padding-left: 16px;
   justify-content: flex-start;
 }
 
 .sidebar.collapsed .sidebarMenu .ant-menu-item > span:not(.anticon) {
-  display: none !important;
+  display: none;
 }
 
 .sidebar.collapsed:hover .sidebarMenu .ant-menu-item > span:not(.anticon) {
-  display: inline !important;
+  display: inline;
 }
 
 .sidebar.collapsed .sidebarMenu .ant-menu-submenu-title {
-  padding-left: 28px !important;
+  padding-left: 28px;
   text-align: center;
   justify-content: center;
 }
 
 .sidebar.collapsed:hover .sidebarMenu .ant-menu-submenu-title {
-  padding-left: 16px !important;
+  padding-left: 16px;
   text-align: left;
   justify-content: flex-start;
 }
 
 .sidebar.collapsed .sidebarMenu .ant-menu-submenu-title > span:not(.anticon) {
-  display: none !important;
+  display: none;
 }
 
 .sidebar.collapsed:hover .sidebarMenu .ant-menu-submenu-title > span:not(.anticon) {
-  display: inline !important;
+  display: inline;
 }
 
 .sidebar.collapsed .sidebarMenu .ant-menu-submenu-arrow {
@@ -228,7 +228,7 @@
   line-height: 44px;
   font-size: 14px;
   font-weight: 400;
-  padding-left: 16px !important;
+  padding-left: 16px;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
 }
@@ -265,7 +265,7 @@
   line-height: 44px;
   font-size: 14px;
   font-weight: 400;
-  padding-left: 16px !important;
+  padding-left: 16px;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
 }
@@ -306,7 +306,7 @@
 }
 
 .sidebarMenu .ant-menu-sub .ant-menu-item {
-  padding-left: 48px !important;
+  padding-left: 48px;
   font-size: 13px;
   height: 36px;
   line-height: 36px;
@@ -325,7 +325,7 @@
   font-weight: 500;
 }
 
-/* Main Content */
+
 .mainContent {
   flex: 1;
   min-width: 0;
@@ -335,7 +335,7 @@
   background: #ffffff;
 }
 
-/* Header and Profile Container */
+
 .headerProfileContainer {
   margin-bottom: 32px;
   box-shadow: 0 10px 40px rgba(17, 24, 39, 0.12);
@@ -343,7 +343,7 @@
   overflow: hidden;
 }
 
-/* Header */
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -354,7 +354,7 @@
   backdrop-filter: blur(10px);
   border-radius: 0;
   box-shadow: none;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.5); /* Разделительная линия */
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5); 
 }
 
 .headerTitle {
@@ -367,61 +367,61 @@
   background-clip: text;
 }
 
-/* Buttons */
+
 .buttonPrimary {
-  background: #1890ff !important;
-  border: none !important;
-  border-radius: 12px !important;
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
   height: 44px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3) !important;
-  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
 .buttonPrimary:hover {
-  background: #40a9ff !important;
+  background: #40a9ff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
 }
 
 .buttonSecondary {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
   height: 44px;
-  color: #667eea !important;
+  color: #667eea;
   font-weight: 500;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s ease;
 }
 
 .buttonSecondary:hover {
-  background: rgba(102, 126, 234, 0.1) !important;
-  border-color: rgba(102, 126, 234, 0.4) !important;
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
 }
 
 .buttonDanger {
-  background: rgba(239, 68, 68, 0.1) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  border-radius: 12px !important;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
   height: 44px;
-  color: #ef4444 !important;
+  color: #ef4444;
   font-weight: 500;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s ease;
 }
 
 .buttonDanger:hover {
-  background: rgba(239, 68, 68, 0.2) !important;
-  border-color: rgba(239, 68, 68, 0.5) !important;
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
-/* Application Card */
+
 .applicationCard {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 32px;
-  margin-top: 24px; /* Добавляем отступ сверху */
+  margin-top: 24px; 
   margin-bottom: 32px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -483,7 +483,7 @@
   text-align: center;
 }
 
-/* Section Cards */
+
 .sectionCard {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -507,7 +507,7 @@
   color: #1f2937;
 }
 
-/* Order Cards */
+
 .orderCard {
   background: #f9fafb;
   border-radius: 16px;
@@ -639,39 +639,39 @@
   color: #6b7280;
 }
 
-/* Form fields */
+
 .inputField {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  padding: 12px 16px !important;
-  transition: all 0.3s ease !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
 }
 
 .inputNumberField {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.3s ease !important;
-  width: 100% !important;
-  padding: 8px 11px !important; /* Меньший паддинг для InputNumber */
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  width: 100%;
+  padding: 8px 11px; 
 }
 
 .inputNumberField:hover, .inputNumberField:focus-within {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .inputField {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  padding: 12px 16px !important;
-  transition: all 0.3s ease !important;
-  font-size: 15px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
 }
 
 .inputField:focus,
 .inputField:hover {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .inputField.ant-input-number {
@@ -691,21 +691,21 @@
 }
 
 .textareaField {
-  border-radius: 12px !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
-  padding: 12px 16px !important;
-  transition: all 0.3s ease !important;
-  font-size: 15px !important;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
   resize: vertical;
 }
 
 .textareaField:focus,
 .textareaField:hover {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* Modal */
+
 .modalContent {
   border-radius: 24px;
 }
@@ -724,7 +724,7 @@
 }
 
 .modalEducationRow .ant-form-item {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
   height: 100%;
 }
 
@@ -737,7 +737,7 @@
   min-height: auto;
 }
 
-/* Стили для формы образования - новая структура */
+
 .modalEducationRow {
   background: #f9fafb;
   padding: 16px;
@@ -751,44 +751,44 @@
   background: #ffffff;
 }
 
-/* Отступы между рядами инпутов */
+
 .modalEducationRow :global(.ant-row) {
-  margin: 0 0 8px 0 !important;
+  margin: 0 0 8px 0;
 }
 
 .modalEducationRow :global(.ant-row:last-child) {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
 .modalEducationRow :global(.ant-col) {
-  padding-left: 8px !important;
-  padding-right: 8px !important;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .modalEducationRow :global(.ant-col:first-child) {
-  padding-left: 0 !important;
+  padding-left: 0;
 }
 
 .modalEducationRow :global(.ant-col:last-child) {
-  padding-right: 0 !important;
+  padding-right: 0;
 }
 
 .modalEducationRow :global(.ant-form-item) {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
-/* На мобильных увеличиваем отступы */
+
 @media (max-width: 480px) {
   .modalEducationRow {
-    padding: 20px 16px !important;
+    padding: 20px 16px;
   }
   
   .modalEducationRow :global(.ant-row) {
-    margin: 0 0 12px 0 !important;
+    margin: 0 0 12px 0;
   }
 }
 
-/* Card (general) */
+
 .card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -798,7 +798,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Profile Block */
+
 .profileBlock {
   position: relative;
   background: rgba(255, 255, 255, 0.95);
@@ -846,28 +846,28 @@
   gap: 8px;
 }
 
-/* Status Input */
+
 .statusInput {
-  border: 2px solid #fbbf24 !important;
-  border-radius: 8px !important;
-  background-color: #fffbeb !important;
-  font-size: 14px !important;
-  padding: 8px 12px !important;
-  transition: all 0.2s ease !important;
+  border: 2px solid #fbbf24;
+  border-radius: 8px;
+  background-color: #fffbeb;
+  font-size: 14px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
 }
 
 .statusInput:hover {
-  border-color: #f59e0b !important;
-  background-color: #fef3c7 !important;
+  border-color: #f59e0b;
+  background-color: #fef3c7;
 }
 
 .statusInput:focus,
 .statusInput:focus-within {
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
 }
 
-/* Save Button Text */
+
 .saveButtonText {
   color: #9ca3af;
   font-size: 14px;
@@ -883,7 +883,7 @@
   text-decoration-color: #667eea;
 }
 
-/* Stats Numbers with colored underlines */
+
 .statsNumber {
   color: #1f2937;
   text-decoration: underline;
@@ -916,7 +916,7 @@
   text-underline-offset: 3px;
 }
 
-/* Tablet and Mobile Responsive */
+
 @media (max-width: 1024px) {
   .sidebar {
     width: 240px;
@@ -983,8 +983,8 @@
     justify-content: center;
     min-width: 70px;
     height: 60px;
-    padding: 8px !important;
-    border-left: none !important;
+    padding: 8px;
+    border-left: none;
     border-bottom: 3px solid transparent;
     font-size: 11px;
     text-align: center;
@@ -1011,9 +1011,9 @@
   }
 
   .logoutMenuItem {
-    margin-top: 0 !important;
-    border-top: none !important;
-    padding-top: 0 !important;
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
   }
 
   .mainContent {
@@ -1114,7 +1114,7 @@
 
 
 
-/* Mobile Responsive */
+
 @media (max-width: 480px) {
   .mainContent {
     padding: 12px;
@@ -1189,8 +1189,8 @@
 
   .actionButtons button {
     width: 100%;
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
   .applicationCard,
@@ -1206,8 +1206,8 @@
   .buttonPrimary,
   .buttonSecondary,
   .buttonDanger {
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
   .sidebarMenu .ant-menu-item,
@@ -1224,11 +1224,9 @@
 }
 
 
-/* ========================================
-   АДАПТИВНЫЕ СТИЛИ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
-   ======================================== */
 
-/* Планшеты и маленькие ноутбуки (до 1024px) */
+
+
 @media (max-width: 1024px) {
   .mainContent {
     padding: 16px;
@@ -1248,7 +1246,7 @@
   }
 }
 
-/* Планшеты (до 840px) */
+
 @media (max-width: 840px) {
   .container {
     flex-direction: column;
@@ -1303,33 +1301,33 @@
     flex-wrap: wrap;
   }
 
-  /* Модальные окна на планшетах */
+  
   :global(.ant-modal) {
-    max-width: 90% !important;
-    margin: 20px auto !important;
+    max-width: 90%;
+    margin: 20px auto;
   }
 
   :global(.ant-modal-body) {
-    padding: 20px !important;
-    max-height: calc(100vh - 200px) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    padding: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   :global(.ant-modal-header) {
-    padding: 16px 20px !important;
+    padding: 16px 20px;
   }
 
   :global(.ant-modal-footer) {
-    padding: 16px 20px !important;
+    padding: 16px 20px;
   }
 }
 
-/* Мобильные устройства (до 480px) */
+
 @media (max-width: 480px) {
-  /* Увеличиваем базовый размер текста на мобильных */
+  
   :global(.ant-typography) {
-    font-size: 15px !important;
+    font-size: 15px;
   }
 
   :global(p), :global(span), :global(div) {
@@ -1359,16 +1357,16 @@
   }
 
   .profileAvatar {
-    width: 60px !important;
-    height: 60px !important;
+    width: 60px;
+    height: 60px;
   }
 
   .profileName {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 
   .profileRole {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   .profileActions {
@@ -1385,11 +1383,11 @@
   }
 
   .statsValue {
-    font-size: 20px !important;
+    font-size: 20px;
   }
 
   .statsLabel {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .ordersSection {
@@ -1397,7 +1395,7 @@
   }
 
   .sectionTitle {
-    font-size: 16px !important;
+    font-size: 16px;
   }
 
   .orderCard {
@@ -1411,7 +1409,7 @@
   }
 
   .orderTitle {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   .orderMeta {
@@ -1430,141 +1428,141 @@
     width: 100%;
   }
 
-  /* Модальные окна на мобильных */
+  
   :global(.ant-modal) {
-    max-width: 95% !important;
-    margin: 10px auto !important;
-    top: 10px !important;
+    max-width: 95%;
+    margin: 10px auto;
+    top: 10px;
   }
 
   :global(.ant-modal-content) {
-    border-radius: 12px !important;
+    border-radius: 12px;
   }
 
   :global(.ant-modal-body) {
-    padding: 16px !important;
-    max-height: calc(100vh - 180px) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    padding: 16px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   :global(.ant-modal-header) {
-    padding: 16px !important;
+    padding: 16px;
   }
 
   :global(.ant-modal-title) {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 
   :global(.ant-modal-footer) {
-    padding: 16px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   :global(.ant-modal-footer button) {
-    width: 100% !important;
-    margin: 0 !important;
-    height: 44px !important;
+    width: 100%;
+    margin: 0;
+    height: 44px;
   }
 
-  /* Формы в модальных окнах */
+  
   :global(.ant-form-item) {
-    margin-bottom: 16px !important;
+    margin-bottom: 16px;
   }
 
   :global(.ant-form-item-label) {
-    padding-bottom: 6px !important;
+    padding-bottom: 6px;
   }
 
   :global(.ant-form-item-label > label) {
-    font-size: 15px !important;
+    font-size: 15px;
   }
 
   :global(.ant-input),
   :global(.ant-input-number),
   :global(.ant-select-selector),
   :global(.ant-picker) {
-    font-size: 16px !important;
-    min-height: 44px !important;
+    font-size: 16px;
+    min-height: 44px;
   }
 
   :global(.ant-input-number-input) {
-    height: 44px !important;
+    height: 44px;
   }
 
   :global(.ant-btn) {
-    height: 44px !important;
-    font-size: 15px !important;
+    height: 44px;
+    font-size: 15px;
   }
 
-  /* Drawer на мобильных */
+  
   :global(.ant-drawer-content-wrapper) {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
   }
 
   :global(.ant-drawer-body) {
-    padding: 12px !important;
+    padding: 12px;
   }
 
   :global(.ant-drawer-header) {
-    padding: 12px !important;
+    padding: 12px;
   }
 
-  /* Tabs на мобильных */
+  
   :global(.ant-tabs-nav) {
-    margin-bottom: 12px !important;
+    margin-bottom: 12px;
   }
 
   :global(.ant-tabs-tab) {
-    padding: 8px 12px !important;
-    font-size: 13px !important;
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
-  /* Table на мобильных */
+  
   :global(.ant-table) {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   :global(.ant-table-thead > tr > th) {
-    padding: 8px !important;
-    font-size: 12px !important;
+    padding: 8px;
+    font-size: 12px;
   }
 
   :global(.ant-table-tbody > tr > td) {
-    padding: 8px !important;
-    font-size: 12px !important;
+    padding: 8px;
+    font-size: 12px;
   }
 
-  /* Badge на мобильных */
+  
   :global(.ant-badge) {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
-  /* Select dropdown на мобильных */
+  
   :global(.ant-select-dropdown) {
-    max-height: 50vh !important;
+    max-height: 50vh;
   }
 
-  /* DatePicker на мобильных */
+  
   :global(.ant-picker-dropdown) {
-    max-width: 95vw !important;
+    max-width: 95vw;
   }
 
-  /* Message/Notification на мобильных */
+  
   :global(.ant-message) {
-    top: 60px !important;
+    top: 60px;
   }
 
   :global(.ant-notification) {
-    margin-right: 8px !important;
-    max-width: calc(100vw - 16px) !important;
+    margin-right: 8px;
+    max-width: calc(100vw - 16px);
   }
 }
 
-/* Очень маленькие экраны (до 360px) */
+
 @media (max-width: 360px) {
   .mainContent {
     padding: 4px;
@@ -1591,17 +1589,17 @@
   }
 
   :global(.ant-modal-body) {
-    padding: 8px !important;
+    padding: 8px;
   }
 
   :global(.ant-btn) {
-    height: 32px !important;
-    font-size: 13px !important;
-    padding: 0 12px !important;
+    height: 32px;
+    font-size: 13px;
+    padding: 0 12px;
   }
 }
 
-/* Адаптивные стили для Avatar */
+
 :global(.ant-avatar) {
   width: 100px;
   height: 100px;
@@ -1612,13 +1610,13 @@
   flex-shrink: 0;
 }
 
-/* Исключение для аватарки в хедере - оставляем размер по умолчанию */
+
 :global(.ant-layout-header .ant-avatar) {
-  width: auto !important;
-  height: auto !important;
-  font-size: inherit !important;
-  border: 2px solid #667eea !important;
-  box-shadow: none !important;
+  width: auto;
+  height: auto;
+  font-size: inherit;
+  border: 2px solid #667eea;
+  box-shadow: none;
 }
 
 :global(.ant-avatar.ant-avatar-icon) {
@@ -1627,337 +1625,334 @@
 
 @media (max-width: 840px) {
   :global(.ant-avatar) {
-    /* width: 40px !important; */
-    /* height: 40px !important; */
+    
+    
   }
 }
 
 @media (max-width: 480px) {
   :global(.ant-avatar) {
-    /* width: 36px !important; */
-    /* height: 36px !important; */
+    
+    
   }
 }
 
-/* Landscape режим на мобильных */
+
 @media (max-width: 840px) and (orientation: landscape) {
   .mainContent {
     height: calc(100vh - 50px);
   }
 
   :global(.ant-modal-body) {
-    max-height: calc(100vh - 100px) !important;
+    max-height: calc(100vh - 100px);
   }
 }
 
-/* Скрываем все стандартные кнопки меню от Ant Design на мобильных */
+
 @media (max-width: 840px) {
   :global(.ant-layout-sider-trigger) {
-    display: none !important;
+    display: none;
   }
   
   :global(.ant-btn.mobileMenuButton) {
-    display: none !important;
+    display: none;
   }
 }
 
 
-/* Улучшенный адаптив для мобильных */
+
 @media (max-width: 840px) {
   .header {
-    padding: 20px 16px 20px 88px !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    padding: 20px 16px 20px 88px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .headerTitle {
-    font-size: 24px !important;
-    flex: 1 !important;
+    font-size: 24px;
+    flex: 1;
   }
 
   .mainContent {
-    padding: 16px !important;
-    padding-bottom: 90px !important;
+    padding: 16px;
+    padding-bottom: 90px;
   }
 }
 
 @media (max-width: 480px) {
   .header {
-    padding: 16px 12px 16px 84px !important;
+    padding: 16px 12px 16px 84px;
   }
 
   .headerTitle {
-    font-size: 20px !important;
+    font-size: 20px;
   }
 
   .mainContent {
-    padding: 12px !important;
-    padding-bottom: 90px !important;
+    padding: 12px;
+    padding-bottom: 90px;
   }
 
   .profileBlock {
-    padding: 20px !important;
+    padding: 20px;
   }
 
   .sectionCard {
-    padding: 20px !important;
-    margin-bottom: 16px !important;
-    border-radius: 20px !important;
+    padding: 20px;
+    margin-bottom: 16px;
+    border-radius: 20px;
   }
 
   .sectionTitle {
-    font-size: 20px !important;
+    font-size: 20px;
   }
 
   .orderCard {
-    padding: 16px !important;
-    margin-bottom: 16px !important;
+    padding: 16px;
+    margin-bottom: 16px;
   }
 
   .orderTitle {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 
   .orderBudget {
-    font-size: 22px !important;
+    font-size: 22px;
   }
 
   .tag,
   .tagBlue,
   .tagGreen {
-    padding: 6px 12px !important;
-    font-size: 13px !important;
+    padding: 6px 12px;
+    font-size: 13px;
   }
 
   .buttonPrimary,
   .buttonSecondary,
   .buttonDanger {
-    height: 44px !important;
-    font-size: 15px !important;
-    padding: 0 20px !important;
+    height: 44px;
+    font-size: 15px;
+    padding: 0 20px;
   }
 
   .sidebarMenu .ant-menu-item,
   .sidebarMenu .ant-menu-submenu-title {
-    min-width: 70px !important;
-    height: 60px !important;
-    font-size: 12px !important;
+    min-width: 70px;
+    height: 60px;
+    font-size: 12px;
   }
 
   .sidebarMenu .ant-menu-item .anticon,
   .sidebarMenu .ant-menu-submenu-title .anticon {
-    font-size: 22px !important;
-    margin-bottom: 6px !important;
+    font-size: 22px;
+    margin-bottom: 6px;
   }
 }
 
-/* ========================================
-   СТИЛИ ДЛЯ ПОЛЕЙ ФОРМЫ АНКЕТЫ ЭКСПЕРТА
-   ======================================== */
 
-/* Стили для поля опыта работы */
+
+
 .experienceField {
   position: relative;
 }
 
 .experienceField :global(.ant-input) {
-  text-align: left !important;
-  font-weight: 500 !important;
+  text-align: left;
+  font-weight: 500;
 }
 
 .experienceField :global(.ant-input::placeholder) {
-  color: #9ca3af !important;
-  font-weight: 400 !important;
+  color: #9ca3af;
+  font-weight: 400;
 }
 
-/* Стили для поля специальностей */
+
 .specializationsField :global(.ant-input) {
-  resize: vertical !important;
+  resize: vertical;
 }
 
-/* На мобильных устройствах поле специальностей автоматически расширяется */
+
 @media (max-width: 480px) {
   .specializationsField :global(.ant-input) {
-    min-height: 100px !important;
-    max-height: 200px !important;
-    resize: vertical !important;
-    overflow-y: auto !important;
+    min-height: 100px;
+    max-height: 200px;
+    resize: vertical;
+    overflow-y: auto;
   }
   
   .textareaField :global(.ant-input) {
-    min-height: 80px !important;
-    height: auto !important;
-    resize: vertical !important;
+    min-height: 80px;
+    height: auto;
+    resize: vertical;
   }
   
-  /* Улучшенные стили для поля опыта работы на мобильных */
+  
   .experienceField :global(.ant-input) {
-    height: 48px !important;
-    line-height: 46px !important;
-    font-size: 16px !important;
-    padding: 0 16px !important;
+    height: 48px;
+    line-height: 46px;
+    font-size: 16px;
+    padding: 0 16px;
   }
 }
 
-/* ========================================
-   СТИЛИ ДЛЯ ЧАТОВ НА МОБИЛЬНЫХ УСТРОЙСТВАХ
-   ======================================== */
 
-/* Обеспечиваем правильное отображение чатов на мобильных */
+
+
 @media (max-width: 840px) {
-  /* Модальное окно чатов на мобильных */
+  
   :global(.ant-modal-wrap) {
-    padding: 0 !important;
+    padding: 0;
   }
   
   :global(.ant-modal) {
-    margin: 0 !important;
-    padding: 0 !important;
-    top: 0 !important;
-    max-width: 100vw !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    max-width: 100vw;
+    width: 100vw;
+    height: 100vh;
   }
   
   :global(.ant-modal-content) {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
+    height: 100vh;
+    max-height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
   }
   
   :global(.ant-modal-body) {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    background: #ffffff !important;
+    height: 100vh;
+    max-height: 100vh;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #ffffff;
   }
   
-  /* Область чата должна занимать всю доступную высоту */
+  
   .chatContainer {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   .chatMessagesArea {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    min-height: 0 !important;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
   
   .chatInputArea {
-    flex-shrink: 0 !important;
-    padding: 8px 12px 12px 12px !important;
-    background: #ffffff !important;
-    border-top: 1px solid #e5e7eb !important;
+    flex-shrink: 0;
+    padding: 8px 12px 12px 12px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
   }
 }
 
 @media (max-width: 480px) {
-  /* Дополнительные стили для очень маленьких экранов */
+  
   .chatInputArea {
-    padding: 6px 8px 10px 8px !important;
+    padding: 6px 8px 10px 8px;
   }
   
   .chatInputArea :global(.ant-input) {
-    font-size: 14px !important;
+    font-size: 14px;
   }
   
   .chatInputArea :global(.ant-btn) {
-    width: 32px !important;
-    height: 32px !important;
+    width: 32px;
+    height: 32px;
   }
 }
 
-/* Дополнительные стили для полного удаления отступов в модальном окне чатов */
+
 @media (max-width: 840px) {
-  /* Убираем все возможные отступы и границы */
+  
   :global(.ant-modal-root) {
-    padding: 0 !important;
+    padding: 0;
   }
   
   :global(.ant-modal-mask) {
-    padding: 0 !important;
+    padding: 0;
   }
   
-  /* Убираем отступы у контейнера модального окна */
+  
   :global(.ant-modal-wrap) {
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 0;
+    margin: 0;
   }
   
-  /* Убираем все отступы у самого модального окна */
+  
   :global(.ant-modal.ant-modal) {
-    margin: 0 !important;
-    padding: 0 !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
   }
   
-  /* Убираем отступы у содержимого */
+  
   :global(.ant-modal-content.ant-modal-content) {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    background: #ffffff !important;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    background: #ffffff;
   }
   
-  /* Убираем отступы у тела модального окна */
+  
   :global(.ant-modal-body.ant-modal-body) {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    background: #ffffff !important;
-    overflow: hidden !important;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    background: #ffffff;
+    overflow: hidden;
   }
 }
 
-/* Мобильные стили для фиксированной навигации */
+
 @media (max-width: 840px) {
   .expertDashboardPage :global(.ant-layout-header) {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    width: 100% !important; /* На мобильных хедер на всю ширину */
-    max-width: 100% !important;
-    left: 0 !important; /* Начинается с левого края */
-    z-index: 1000 !important; /* Выше сайдбара на мобильных тоже */
+    padding-left: 16px;
+    padding-right: 16px;
+    width: 100%; 
+    max-width: 100%;
+    left: 0; 
+    z-index: 1000; 
   }
   
-  /* На мобильных сайдбар не фиксированный */
+  
   .expertDashboardPage :global(.ant-layout-sider) {
-    position: relative !important;
-    height: auto !important;
-    z-index: auto !important;
+    position: relative;
+    height: auto;
+    z-index: auto;
   }
   
-  /* На мобильных убираем отступ для сайдбара */
+  
   .expertDashboardPage :global(.ant-layout-content) {
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
   }
 }
+

@@ -18,7 +18,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
   const [resendCooldown, setResendCooldown] = useState(0);
   const [message, setMessage] = useState('');
 
-  // Таймер для повторной отправки
+  
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
@@ -26,7 +26,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
     }
   }, [resendCooldown]);
 
-  // Автофокус на первое поле
+  
   useEffect(() => {
     const firstInput = document.getElementById('code-0');
     if (firstInput) {
@@ -35,7 +35,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
   }, []);
 
   const handleChange = (index: number, value: string) => {
-    // Разрешаем только цифры
+    
     if (value && !/^\d$/.test(value)) return;
 
     const newCode = [...code];
@@ -43,7 +43,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
     setCode(newCode);
     setError('');
 
-    // Автоматический переход к следующему полю
+    
     if (value && index < 5) {
       const nextInput = document.getElementById(`code-${index + 1}`);
       if (nextInput) {
@@ -51,14 +51,14 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
       }
     }
 
-    // Автоматическая отправка при заполнении всех полей
+    
     if (newCode.every(digit => digit !== '') && index === 5) {
       handleSubmit(newCode.join(''));
     }
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    // Backspace - переход к предыдущему полю
+    
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       const prevInput = document.getElementById(`code-${index - 1}`);
       if (prevInput) {
@@ -71,18 +71,18 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').trim();
     
-    // Проверяем, что вставлено 6 цифр
+    
     if (/^\d{6}$/.test(pastedData)) {
       const newCode = pastedData.split('');
       setCode(newCode);
       
-      // Фокус на последнее поле
+      
       const lastInput = document.getElementById('code-5');
       if (lastInput) {
         (lastInput as HTMLInputElement).focus();
       }
       
-      // Автоматическая отправка
+      
       handleSubmit(pastedData);
     }
   };
@@ -106,14 +106,14 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
 
       const { access, refresh, user } = response.data;
       
-      // Сохраняем токены
+      
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
       localStorage.setItem('user', JSON.stringify(user));
 
       setMessage('Email успешно подтвержден!');
       
-      // Вызываем callback
+      
       onSuccess(user, { access, refresh });
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || 'Ошибка подтверждения кода';
@@ -122,7 +122,7 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
         onError(errorMessage);
       }
       
-      // Очищаем код при ошибке
+      
       setCode(['', '', '', '', '', '']);
       const firstInput = document.getElementById('code-0');
       if (firstInput) {
@@ -146,9 +146,9 @@ const EmailVerificationForm: React.FC<EmailVerificationFormProps> = ({
       });
 
       setMessage('Код отправлен повторно');
-      setResendCooldown(60); // 60 секунд до следующей отправки
+      setResendCooldown(60); 
       
-      // Очищаем поля
+      
       setCode(['', '', '', '', '', '']);
       const firstInput = document.getElementById('code-0');
       if (firstInput) {

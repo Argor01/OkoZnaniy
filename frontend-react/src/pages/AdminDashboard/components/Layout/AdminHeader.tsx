@@ -21,10 +21,7 @@ interface AdminHeaderProps {
   isTablet?: boolean;
 }
 
-/**
- * Шапка админской панели
- * Содержит заголовок, информацию о пользователе и кнопку выхода
- */
+
 export const AdminHeader: React.FC<AdminHeaderProps> = ({
   user,
   selectedMenu,
@@ -35,7 +32,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 }) => {
   const currentTitle = titleMap[selectedMenu] || 'Личный кабинет администратора';
 
-  // Меню пользователя для dropdown
+  
   const userMenuItems = [
     {
       key: 'logout',
@@ -49,7 +46,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   return (
     <Header className={styles.header}>
       <div className={styles.leftSection}>
-        {/* Кнопка меню для мобильных */}
         {isMobile && (
           <Button
             type="text"
@@ -59,7 +55,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           />
         )}
 
-        {/* Заголовок */}
         <Title 
           level={isMobile ? 5 : 3} 
           className={styles.title}
@@ -69,10 +64,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className={styles.rightSection}>
-        {/* Информация о пользователе - убрано приветствие */}
-        {/* Приветственное сообщение убрано по запросу */}
 
-        {/* Dropdown с меню пользователя */}
         <Dropdown
           menu={{ items: userMenuItems }}
           placement="bottomRight"
@@ -88,7 +80,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           </Button>
         </Dropdown>
 
-        {/* Кнопка выхода (для мобильных как отдельная кнопка) */}
         {isMobile && (
           <Button
             type="text"

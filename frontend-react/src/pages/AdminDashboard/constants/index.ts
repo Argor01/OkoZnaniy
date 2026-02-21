@@ -1,9 +1,6 @@
-/**
- * Экспорт всех констант AdminDashboard
- * Централизованный импорт для удобства
- */
 
-// Элементы меню
+
+
 export {
   menuItems,
   titleMap,
@@ -13,7 +10,7 @@ export {
 
 export type { MenuItem } from './menuItems';
 
-// Общие константы
+
 export {
   LAYOUT_CONSTANTS,
   BREAKPOINTS,
@@ -32,7 +29,7 @@ export {
   QUERY_CONFIG,
 } from './adminConstants';
 
-// 🆕 Константы для обработки запросов
+
 export {
   REQUEST_STATUSES,
   REQUEST_PRIORITIES,

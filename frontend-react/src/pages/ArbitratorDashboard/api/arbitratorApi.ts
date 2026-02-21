@@ -16,9 +16,9 @@ import type {
   Statistics,
 } from './types';
 
-// Генерация тестовых данных
 
-// Хранилище для отслеживания взятых в работу обращений
+
+
 const getTakenClaimsIds = (): Set<number> => {
   try {
     const stored = localStorage.getItem('arbitrator_taken_claims');
@@ -42,7 +42,7 @@ const saveTakenClaimId = (id: number): void => {
   }
 };
 
-// Хранилище для отслеживания обращений, отправленных на согласование
+
 const getPendingApprovalClaimsIds = (): Set<number> => {
   try {
     const stored = localStorage.getItem('arbitrator_pending_approval_claims');
@@ -66,7 +66,7 @@ const savePendingApprovalClaimId = (id: number): void => {
   }
 };
 
-// Хранилище для решений
+
 const getDecisions = (): Map<number, Decision> => {
   try {
     const stored = localStorage.getItem('arbitrator_decisions');
@@ -90,7 +90,7 @@ const saveDecision = (claimId: number, decision: Decision): void => {
   }
 };
 
-// Хранилище для сообщений
+
 const getSavedMessages = (): InternalMessage[] => {
   try {
     const stored = localStorage.getItem('arbitrator_messages');
@@ -113,9 +113,7 @@ const saveMessage = (message: InternalMessage): void => {
   }
 };
 
-/**
- * Генерация тестовых претензий
- */
+
 const generateMockClaims = (): Claim[] => {
   const now = new Date();
   const claims: Claim[] = [];
@@ -123,7 +121,7 @@ const generateMockClaims = (): Claim[] => {
   const pendingApprovalClaimsIds = getPendingApprovalClaimsIds();
   const decisions = getDecisions();
   
-  // Новые обращения
+  
   claims.push(
       {
         id: 1001,
@@ -287,7 +285,7 @@ const generateMockClaims = (): Claim[] => {
       },
     );
 
-  // В работе
+  
   claims.push(
       {
         id: 2001,
@@ -426,7 +424,7 @@ const generateMockClaims = (): Claim[] => {
       },
     );
 
-  // Завершённые
+  
   claims.push(
       {
         id: 3001,
@@ -620,7 +618,7 @@ const generateMockClaims = (): Claim[] => {
       },
     );
 
-  // Ожидают решения
+  
   claims.push(
       {
         id: 4001,
@@ -721,9 +719,7 @@ const generateMockClaims = (): Claim[] => {
   return claims;
 };
 
-/**
- * Генерация тестовых сообщений
- */
+
 const generateMockMessages = (params?: GetMessagesParams): InternalMessage[] => {
   const now = new Date();
   const savedMessages = getSavedMessages();
@@ -829,20 +825,20 @@ const generateMockMessages = (params?: GetMessagesParams): InternalMessage[] => 
     },
   ];
 
-  // Фильтрация по обращению
+  
   let filteredMessages = messages;
   if (params?.claim_id) {
     filteredMessages = filteredMessages.filter((m) => m.claim_id === params.claim_id);
   }
 
-  // Фильтрация непрочитанных
+  
   if (params?.unread_only) {
     filteredMessages = filteredMessages.filter((m) => !m.read_at);
   }
 
-  // Добавляем сохраненные сообщения
+  
   if (savedMessages.length > 0) {
-    // Фильтруем сохраненные сообщения по параметрам
+    
     let savedFiltered = savedMessages;
     if (params?.claim_id) {
       savedFiltered = savedFiltered.filter((m) => m.claim_id === params.claim_id);
@@ -850,18 +846,16 @@ const generateMockMessages = (params?: GetMessagesParams): InternalMessage[] => 
     if (params?.unread_only) {
       savedFiltered = savedFiltered.filter((m) => !m.read_at);
     }
-    // Добавляем сохраненные сообщения в начало списка
+    
     filteredMessages = [...savedFiltered, ...filteredMessages];
-    // Сортируем по дате создания (новые первыми)
+    
     filteredMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
   return filteredMessages;
 };
 
-/**
- * Генерация тестовой статистики
- */
+
 const generateMockStatistics = (): Statistics => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -874,7 +868,7 @@ const generateMockStatistics = (): Statistics => {
       completed: 17,
       pending_approval: 2,
     },
-    average_processing_time: 4.5, // дней
+    average_processing_time: 4.5, 
     decisions_by_type: {
       full_refund: 8,
       partial_refund: 5,
@@ -889,33 +883,31 @@ const generateMockStatistics = (): Statistics => {
   };
 };
 
-// Претензии и обращения
 
-/**
- * Получение списка претензий/обращений
- */
+
+
 export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResponse<Claim>> => {
-  // Используем тестовые данные, если API недоступен (для разработки)
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
   
-  // Генерируем тестовые данные (используется всегда, если USE_MOCK_DATA = true, или как fallback при ошибке API)
+  const USE_MOCK_DATA = false; 
+  
+  
   const generateMockResponse = (): PaginatedResponse<Claim> => {
     const allMockClaims = generateMockClaims();
     
-    // Применяем фильтры
+    
     let filteredClaims = allMockClaims;
     
-    // Фильтр по статусу
+    
     if (params?.status) {
       filteredClaims = filteredClaims.filter((c) => c.status === params.status);
     }
     
-    // Фильтрация по типу
+    
     if (params?.type) {
       filteredClaims = filteredClaims.filter((c) => c.type === params.type);
     }
 
-    // Фильтрация по поиску
+    
     if (params?.search) {
       const searchLower = params.search.toLowerCase();
       filteredClaims = filteredClaims.filter(
@@ -929,7 +921,7 @@ export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResp
       );
     }
 
-    // Фильтрация по датам
+    
     if (params?.date_from) {
       const dateFrom = new Date(params.date_from);
       filteredClaims = filteredClaims.filter((c) => new Date(c.created_at) >= dateFrom);
@@ -942,7 +934,7 @@ export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResp
     
     const totalCount = filteredClaims.length;
     
-    // Пагинация
+    
     const page = params?.page || 1;
     const pageSize = params?.page_size || 10;
     const startIndex = (page - 1) * pageSize;
@@ -957,19 +949,19 @@ export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResp
     };
   };
   
-  // Если используем моковые данные, просто возвращаем их
+  
   if (USE_MOCK_DATA) {
     const result = generateMockResponse();
     console.log('Using mock data (USE_MOCK_DATA=true):', { params, totalCount: result.count, resultsCount: result.results.length });
     return result;
   }
   
-  // Иначе пытаемся получить данные из API
+  
   try {
     const response = await apiClient.get('/arbitrator/claims/', { params });
     return response.data;
   } catch (error: any) {
-    // Если ошибка 404 или API недоступен, используем тестовые данные
+    
     if (error?.response?.status === 404 || error?.code === 'ERR_NETWORK') {
       console.warn('API endpoint not found, using mock data:', error?.response?.status || error?.code);
     } else {
@@ -982,16 +974,14 @@ export const getClaims = async (params?: GetClaimsParams): Promise<PaginatedResp
   }
 };
 
-/**
- * Получение детальной информации о претензии/обращении
- */
+
 export const getClaim = async (id: number): Promise<Claim> => {
   try {
     const response = await apiClient.get(`/arbitrator/claims/${id}/`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching claim ${id}:`, error);
-    // Возвращаем тестовые данные для наглядности
+    
     const allClaims = generateMockClaims();
     const claim = allClaims.find((c) => c.id === id);
     if (claim) {
@@ -1001,22 +991,20 @@ export const getClaim = async (id: number): Promise<Claim> => {
   }
 };
 
-/**
- * Взять претензию/обращение в работу
- */
-export const takeClaim = async (id: number): Promise<Claim> => {
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
-  // Mock-реализация
+export const takeClaim = async (id: number): Promise<Claim> => {
+  const USE_MOCK_DATA = false; 
+
+  
   const mockTakeClaim = (): Claim => {
-    // Сохраняем ID в localStorage перед генерацией данных
+    
     saveTakenClaimId(id);
     
-    // Генерируем данные после сохранения - теперь статус будет правильным
+    
     const allMockClaims = generateMockClaims();
     const claim = allMockClaims.find((c) => c.id === id);
     if (claim) {
-      // Убеждаемся, что статус правильный
+      
       const updatedClaim: Claim = {
         ...claim,
         status: 'in_progress',
@@ -1046,16 +1034,14 @@ export const takeClaim = async (id: number): Promise<Claim> => {
   }
 };
 
-/**
- * Принять решение по претензии/обращению
- */
-export const makeDecision = async (id: number, data: DecisionRequest): Promise<Decision> => {
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
-  // Mock-реализация
+export const makeDecision = async (id: number, data: DecisionRequest): Promise<Decision> => {
+  const USE_MOCK_DATA = false; 
+
+  
   const mockMakeDecision = (): Decision => {
     const decision: Decision = {
-      id: Date.now(), // Простой ID на основе времени
+      id: Date.now(), 
       claim_id: id,
       decision_type: data.decision_type,
       reasoning: data.reasoning,
@@ -1072,10 +1058,10 @@ export const makeDecision = async (id: number, data: DecisionRequest): Promise<D
       approval_comment: data.require_approval ? 'Ожидает согласования дирекции' : undefined,
     };
 
-    // Сохраняем решение в localStorage
+    
     saveDecision(id, decision);
 
-    // Если требуется согласование, добавляем в список ожидающих согласования
+    
     if (data.require_approval) {
       savePendingApprovalClaimId(id);
     }
@@ -1101,9 +1087,7 @@ export const makeDecision = async (id: number, data: DecisionRequest): Promise<D
   }
 };
 
-/**
- * Запросить дополнительную информацию
- */
+
 export const requestInfo = async (id: number, data: RequestInfoRequest): Promise<void> => {
   try {
     await apiClient.post(`/arbitrator/claims/${id}/request-info/`, data);
@@ -1113,15 +1097,13 @@ export const requestInfo = async (id: number, data: RequestInfoRequest): Promise
   }
 };
 
-/**
- * Отправить на согласование дирекции
- */
-export const sendForApproval = async (id: number, data: SendForApprovalRequest): Promise<void> => {
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
-  // Mock-реализация
+export const sendForApproval = async (id: number, data: SendForApprovalRequest): Promise<void> => {
+  const USE_MOCK_DATA = false; 
+
+  
   const mockSendForApproval = (): void => {
-    // Сохраняем ID в localStorage
+    
     savePendingApprovalClaimId(id);
     console.log('Using mock data for sendForApproval:', { id, message: data.message });
   };
@@ -1144,20 +1126,18 @@ export const sendForApproval = async (id: number, data: SendForApprovalRequest):
   }
 };
 
-// Внутренняя коммуникация
 
-/**
- * Получение списка сообщений с дирекцией
- */
+
+
 export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
-  // Используем тестовые данные, если API недоступен (для разработки)
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
+  
+  const USE_MOCK_DATA = false; 
   
   if (USE_MOCK_DATA) {
     const allMockMessages = generateMockMessages(params);
     const totalCount = allMockMessages.length;
     
-    // Пагинация
+    
     const page = params?.page || 1;
     const pageSize = params?.page_size || 20;
     const startIndex = (page - 1) * pageSize;
@@ -1178,11 +1158,11 @@ export const getMessages = async (params?: GetMessagesParams): Promise<Paginated
     return response.data;
   } catch (error) {
     console.error('Error fetching messages:', error);
-    // Возвращаем тестовые данные для наглядности
+    
     const allMockMessages = generateMockMessages(params);
     const totalCount = allMockMessages.length;
     
-    // Пагинация
+    
     const page = params?.page || 1;
     const pageSize = params?.page_size || 20;
     const startIndex = (page - 1) * pageSize;
@@ -1198,16 +1178,14 @@ export const getMessages = async (params?: GetMessagesParams): Promise<Paginated
   }
 };
 
-/**
- * Отправка сообщения дирекции
- */
-export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
-  const USE_MOCK_DATA = false; // Установите в false, когда API будет готов
 
-  // Mock-реализация
+export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
+  const USE_MOCK_DATA = false; 
+
+  
   const mockSendMessage = (): InternalMessage => {
     const message: InternalMessage = {
-      id: Date.now(), // Простой ID на основе времени
+      id: Date.now(), 
       sender: {
         id: 1,
         username: 'Арбитр Системный',
@@ -1224,7 +1202,7 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
       attachments: data.attachments?.map((file, index) => ({
         id: Date.now() + index,
         name: file.name,
-        url: '#', // В реальном приложении URL будет получен от сервера
+        url: '#', 
         size: file.size,
         file_type: file.type,
         uploaded_at: new Date().toISOString(),
@@ -1233,7 +1211,7 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
       status: 'sent',
     };
 
-    // Сохраняем сообщение в localStorage
+    
     saveMessage(message);
 
     console.log('Using mock data for sendMessage:', { message });
@@ -1275,9 +1253,7 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
   }
 };
 
-/**
- * Получение детальной информации о сообщении
- */
+
 export const getMessage = async (id: number): Promise<InternalMessage> => {
   try {
     const response = await apiClient.get(`/arbitrator/messages/${id}/`);
@@ -1288,9 +1264,7 @@ export const getMessage = async (id: number): Promise<InternalMessage> => {
   }
 };
 
-/**
- * Отметить сообщение как прочитанное
- */
+
 export const markMessageAsRead = async (id: number): Promise<void> => {
   try {
     await apiClient.post(`/arbitrator/messages/${id}/read/`);
@@ -1300,9 +1274,7 @@ export const markMessageAsRead = async (id: number): Promise<void> => {
   }
 };
 
-/**
- * Удалить сообщение (только свои)
- */
+
 export const deleteMessage = async (id: number): Promise<void> => {
   try {
     await apiClient.delete(`/arbitrator/messages/${id}/`);
@@ -1312,37 +1284,35 @@ export const deleteMessage = async (id: number): Promise<void> => {
   }
 };
 
-// Статистика
 
-/**
- * Получение статистики
- */
+
+
 export const getStatistics = async (params?: GetStatisticsParams): Promise<Statistics> => {
   try {
     const response = await apiClient.get('/arbitrator/statistics/', { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching statistics:', error);
-    // Возвращаем тестовую статистику для наглядности
+    
     return generateMockStatistics();
   }
 };
 
-// Экспорт всех функций
+
 export const arbitratorApi = {
-  // Претензии
+  
   getClaims,
   getClaim,
   takeClaim,
   makeDecision,
   requestInfo,
   sendForApproval,
-  // Сообщения
+  
   getMessages,
   sendMessage,
   getMessage,
   markMessageAsRead,
   deleteMessage,
-  // Статистика
+  
   getStatistics,
 };

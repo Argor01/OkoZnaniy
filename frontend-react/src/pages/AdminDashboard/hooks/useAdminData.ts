@@ -6,10 +6,7 @@ import { disputesApi } from '../../../api/disputes';
 import { QUERY_KEYS, QUERY_CONFIG } from '../constants';
 import type { Partner, PartnerEarning, Dispute, Arbitrator, AdminStats } from '../types';
 
-/**
- * Хук для получения всех данных админской панели
- * Вынесен из монолитного AdminDashboard.tsx
- */
+
 export const useAdminData = (canLoadData: boolean): {
   partners: Partner[];
   earnings: PartnerEarning[];
@@ -39,7 +36,7 @@ export const useAdminData = (canLoadData: boolean): {
     arbitrators?: unknown;
   }>({});
 
-  // Партнеры
+  
   const partnersQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_PARTNERS,
     queryFn: adminApi.getPartners,
@@ -49,7 +46,7 @@ export const useAdminData = (canLoadData: boolean): {
     staleTime: QUERY_CONFIG.STALE_TIME,
     gcTime: QUERY_CONFIG.CACHE_TIME,
     select: (data: unknown): Partner[] => {
-      // Обрабатываем разные форматы ответа
+      
       if (Array.isArray(data)) return data;
       if (
         typeof data === 'object' &&
@@ -71,7 +68,7 @@ export const useAdminData = (canLoadData: boolean): {
     },
   });
 
-  // Начисления
+  
   const earningsQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_EARNINGS,
     queryFn: adminApi.getEarnings,
@@ -102,7 +99,7 @@ export const useAdminData = (canLoadData: boolean): {
     },
   });
 
-  // Споры
+  
   const disputesQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_DISPUTES,
     queryFn: disputesApi.getDisputes,
@@ -112,7 +109,7 @@ export const useAdminData = (canLoadData: boolean): {
     staleTime: QUERY_CONFIG.STALE_TIME,
     gcTime: QUERY_CONFIG.CACHE_TIME,
     select: (data: unknown): Dispute[] => {
-      // API возвращает пагинированный ответ: {count: 2, next: null, previous: null, results: Array}
+      
       if (
         typeof data === 'object' &&
         data !== null &&
@@ -125,7 +122,7 @@ export const useAdminData = (canLoadData: boolean): {
         return ((data as { data: { results: Dispute[] } }).data.results);
       }
       
-      // Обрабатываем разные форматы ответа
+      
       if (Array.isArray(data)) return data;
       if (
         typeof data === 'object' &&
@@ -147,7 +144,7 @@ export const useAdminData = (canLoadData: boolean): {
     },
   });
 
-  // Арбитры
+  
   const arbitratorsQuery = useQuery({
     queryKey: QUERY_KEYS.ADMIN_ARBITRATORS,
     queryFn: adminApi.getArbitrators,
@@ -214,7 +211,7 @@ export const useAdminData = (canLoadData: boolean): {
     if (status !== 401) message.error('Ошибка при загрузке данных арбитров');
   }, [arbitratorsQuery.error]);
 
-  // Вычисляем статистику на основе полученных данных
+  
   const calculateStats = (): AdminStats => {
     const partners = partnersQuery.data || [];
     const earnings = earningsQuery.data || [];
@@ -239,7 +236,7 @@ export const useAdminData = (canLoadData: boolean): {
     };
   };
 
-  // Проверяем состояние загрузки
+  
   const isLoading = partnersQuery.isLoading || earningsQuery.isLoading || 
                    disputesQuery.isLoading || arbitratorsQuery.isLoading;
 
@@ -247,28 +244,28 @@ export const useAdminData = (canLoadData: boolean): {
                    disputesQuery.error || arbitratorsQuery.error;
 
   return {
-    // Данные
+    
     partners: partnersQuery.data || [] as Partner[],
     earnings: earningsQuery.data || [] as PartnerEarning[],
     disputes: disputesQuery.data || [] as Dispute[],
     arbitrators: arbitratorsQuery.data || [] as Arbitrator[],
     stats: calculateStats(),
 
-    // Состояние загрузки
+    
     partnersLoading: partnersQuery.isLoading,
     earningsLoading: earningsQuery.isLoading,
     disputesLoading: disputesQuery.isLoading,
     arbitratorsLoading: arbitratorsQuery.isLoading,
     isLoading,
 
-    // Ошибки
+    
     partnersError: partnersQuery.error,
     earningsError: earningsQuery.error,
     disputesError: disputesQuery.error,
     arbitratorsError: arbitratorsQuery.error,
     hasErrors,
 
-    // Методы для обновления
+    
     refetchPartners: partnersQuery.refetch,
     refetchEarnings: earningsQuery.refetch,
     refetchDisputes: disputesQuery.refetch,

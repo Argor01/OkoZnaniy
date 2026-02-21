@@ -247,8 +247,7 @@ const PartnerList: React.FC = () => {
       width: 120,
       render: (_, record) => {
         const amount = record.totalEarnings || record.total_earnings || 0;
-        const formatted = formatCurrency(amount);
-        // Сокращаем отображение для больших сумм с подсказкой
+        const formatted = formatCurrency(amount);
         if (amount >= 1000000) {
           return (
             <Tooltip title={formatted}>
@@ -351,7 +350,7 @@ const PartnerList: React.FC = () => {
 
   return (
     <div>
-      {/* Карточка с общим количеством партнёров */}
+      
       <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={8}>
           <Card style={{ 
@@ -417,7 +416,7 @@ const PartnerList: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Фильтры и поиск */}
+      
       <Card style={{ 
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
@@ -427,8 +426,7 @@ const PartnerList: React.FC = () => {
           style={{ width: '100%' }} 
           size={isMobile ? "middle" : "large"}
         >
-          {isMobile ? (
-            // Мобильная версия - вертикальное расположение
+          {isMobile ? (
             <>
               <Input
                 placeholder="Поиск по имени или email"
@@ -479,8 +477,7 @@ const PartnerList: React.FC = () => {
                 />
               </div>
             </>
-          ) : (
-            // Десктопная версия - горизонтальное расположение
+          ) : (
             <Space wrap>
               <Input
                 placeholder="Поиск по имени или email"
@@ -517,7 +514,7 @@ const PartnerList: React.FC = () => {
         </Space>
       </Card>
 
-      {/* Таблица с партнёрами */}
+      
       <Card style={{ 
         borderRadius: isMobile ? 8 : 12,
         overflow: 'auto'
@@ -543,7 +540,7 @@ const PartnerList: React.FC = () => {
         </Spin>
       </Card>
 
-      {/* Модальное окно с детальной информацией */}
+      
       <Modal
         title="Детальная информация о партнёре"
         open={detailModalVisible}
@@ -621,7 +618,7 @@ const PartnerList: React.FC = () => {
         )}
       </Modal>
 
-      {/* Модальное окно для изменения комиссии */}
+      
       <Modal
         title="Изменить процент комиссии"
         open={commissionModalVisible}
@@ -689,7 +686,7 @@ const PartnerList: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* Модальное окно со списком рефералов */}
+      
       <Modal
         title="Список рефералов"
         open={referralsModalVisible}

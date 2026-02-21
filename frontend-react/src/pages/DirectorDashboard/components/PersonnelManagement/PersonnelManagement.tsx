@@ -13,11 +13,11 @@ const PersonnelManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('list');
   const queryClient = useQueryClient();
 
-  // Обновляем данные при переключении табов
+  
   const handleTabChange = (key: string) => {
     setActiveTab(key);
     
-    // Обновляем данные в зависимости от таба
+    
     if (key === 'list') {
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     } else if (key === 'applications') {

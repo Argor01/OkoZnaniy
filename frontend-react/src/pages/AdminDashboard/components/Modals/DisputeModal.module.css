@@ -1,4 +1,4 @@
-/* Модальное окно спора */
+﻿
 .disputeModal :global(.ant-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
@@ -45,7 +45,7 @@
 }
 
 .section h4 {
-  margin-bottom: 16px !important;
+  margin-bottom: 16px;
   color: #262626;
   font-weight: 600;
 }
@@ -105,7 +105,7 @@
 }
 
 .reasonText {
-  margin: 0 !important;
+  margin: 0;
   color: #262626;
   line-height: 1.6;
 }
@@ -136,7 +136,7 @@
 }
 
 .resultText {
-  margin: 0 !important;
+  margin: 0;
   color: #262626;
   line-height: 1.6;
 }
@@ -153,7 +153,7 @@
   border-left: 2px solid #f0f0f0;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .disputeModal :global(.ant-modal-body) {
     padding: 20px;
@@ -181,7 +181,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .disputeModal :global(.ant-modal-body) {
     padding: 16px;
@@ -194,7 +194,7 @@
   
   .section h4 {
     font-size: 16px;
-    margin-bottom: 12px !important;
+    margin-bottom: 12px;
   }
   
   .statusTag {

@@ -1,9 +1,6 @@
 import { User } from '../../../api/auth';
 
-/**
- * Типы для системы обращений
- * Используются в секциях Claims
- */
+
 
 export enum ClaimStatus {
   NEW = 'new',
@@ -89,7 +86,7 @@ export interface DirectorMessage {
   createdAt: string;
 }
 
-// Утилитарные функции для типов
+
 export const getClaimTypeLabel = (type: ClaimType): string => {
   const labels: Record<ClaimType, string> = {
     [ClaimType.TECHNICAL_SUPPORT]: 'Техническая поддержка',

@@ -21,7 +21,7 @@ import styles from './Sidebar.module.css';
 const { Sider } = Layout;
 const { Text, Title } = Typography;
 
-// Экспортируем кнопку для использования в хедере
+
 export const MobileMenuButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
     onClick={onClick}
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    // Закрываем drawer на мобильных после клика
+    
     if (isMobile && onMobileDrawerChange) {
       onMobileDrawerChange(false);
     }
@@ -140,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       onLogout();
       return;
     }
-    // Безопасные обработчики для удаленных пунктов меню
+    
     if (key === 'works') {
       console.log('Works navigation disabled');
       return;
@@ -230,29 +230,29 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <ShoppingOutlined />,
       label: 'Заказы',
     } : null,
-    // Убираем "Лента работ", "Мои работы" и "Авторский магазин" для экспертов
-    // {
-    //   key: 'orders-feed',
-    //   icon: <UnorderedListOutlined />,
-    //   label: 'Лента работ',
-    // },
-    // "Мои работы" - убрано для экспертов
-    // isExpert ? {
-    //   key: 'works',
-    //   icon: <FileDoneOutlined />,
-    //   label: 'Мои работы',
-    // } : null,
-    // "Авторский магазин" - убрано для экспертов
-    // (isExpert && !isMobile) ? {
-    //   key: 'shop',
-    //   icon: <ShopOutlined />,
-    //   label: 'Авторский магазин',
-    //   children: [
-    //     { key: 'shop-ready-works', label: 'Магазин готовых работ' },
-    //     { key: 'shop-add-work', label: 'Добавить работу в магазин' },
-    //     { key: 'shop-purchased', label: 'Купленные работы' },
-    //   ],
-    // } : null,
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     {
       key: 'friends',
       icon: <TeamOutlined />,
@@ -331,7 +331,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Overlay для мобильных */}
       {isMobile && (
         <>
           <div
@@ -371,7 +370,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </>
       )}
 
-      {/* Десктопный Sider */}
       {!isMobile && (
         <Sider
           width={250}
@@ -380,9 +378,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             background: '#fff',
             boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
             position: 'fixed',
-            top: 64, // Под хедером
+            top: 64, 
             left: 0,
-            height: 'calc(100vh - 64px)', // Высота минус высота хедера
+            height: 'calc(100vh - 64px)', 
             borderRight: '1px solid #f0f0f0',
             zIndex: 999,
           }}

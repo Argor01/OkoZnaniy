@@ -31,16 +31,16 @@ const ArbitratorMessageForm: React.FC<ArbitratorMessageFormProps> = ({
   const textAreaRef = useRef<any>(null);
   const uploadRef = useRef<any>(null);
 
-  // Установка начального текста при ответе и фокус на поле
+  
   useEffect(() => {
     if (replyTo) {
       form.setFieldsValue({
         text: `Ответ на сообщение от ${replyTo.sender}:\n${replyTo.text}\n\n`,
       });
-      // Фокус на поле ввода после небольшой задержки
+      
       setTimeout(() => {
         textAreaRef.current?.focus();
-        // Установка курсора в конец текста
+        
         if (textAreaRef.current?.resizableTextArea?.textArea) {
           const textArea = textAreaRef.current.resizableTextArea.textArea;
           textArea.setSelectionRange(textArea.value.length, textArea.value.length);
@@ -66,7 +66,7 @@ const ArbitratorMessageForm: React.FC<ArbitratorMessageFormProps> = ({
       message.success('Сообщение успешно отправлено');
       form.resetFields();
       setFileList([]);
-      // Небольшая задержка для обновления UI
+      
       setTimeout(() => {
         if (onSuccess) {
           onSuccess();
@@ -90,7 +90,7 @@ const ArbitratorMessageForm: React.FC<ArbitratorMessageFormProps> = ({
       
       form.setFieldsValue({ text: newText });
       
-      // Устанавливаем курсор после эмодзи
+      
       setTimeout(() => {
         const newPosition = start + emojiData.emoji.length;
         textArea.setSelectionRange(newPosition, newPosition);

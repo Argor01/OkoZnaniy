@@ -23,7 +23,7 @@ const ArbitratorCommunication: React.FC = () => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const isMobile = window.innerWidth <= 840;
 
-  // Получение списка обращений, отправленных на согласование
+  
   const { data: claimsData } = useQuery({
     queryKey: ['director-claims', 'pending_approval'],
     queryFn: () => directorApi.getPendingApprovalClaims(),

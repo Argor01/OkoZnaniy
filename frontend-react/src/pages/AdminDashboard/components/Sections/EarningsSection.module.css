@@ -1,4 +1,4 @@
-/* Секция начислений */
+﻿
 .earningsContainer {
   padding: 0;
   padding-right: 24px;
@@ -71,7 +71,7 @@
   border-radius: 8px;
 }
 
-/* Стили для ячеек таблицы */
+
 .partnerName {
   font-weight: 600;
   color: #262626;
@@ -117,7 +117,7 @@
   padding: 0 8px;
 }
 
-/* Кастомизация таблицы */
+
 .earningsTable :global(.ant-table-thead > tr > th) {
   background: #fafafa;
   font-weight: 600;
@@ -139,21 +139,21 @@
   text-align: center;
 }
 
-/* Центрирование пагинации */
+
 .earningsTable :global(.ant-table-pagination-right) {
-  justify-content: center !important;
+  justify-content: center;
 }
 
 .earningsTable :global(.ant-table-pagination) {
-  display: flex !important;
-  justify-content: center !important;
+  display: flex;
+  justify-content: center;
 }
 
 :where(.css-1odpy5d).ant-table-wrapper .ant-table-pagination-right {
   justify-content: center;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .statsContainer {
     grid-template-columns: repeat(2, 1fr);
@@ -174,7 +174,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .statsContainer {
     grid-template-columns: 1fr;

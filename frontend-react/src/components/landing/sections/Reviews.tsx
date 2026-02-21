@@ -104,7 +104,7 @@ const Reviews: React.FC = () => {
   useEffect(() => {
     if (!swiper) return;
 
-    // Инициализация navigation
+    
     if (prevRef.current && nextRef.current) {
       (swiper.params as any).navigation = (swiper.params as any).navigation || {};
       (swiper.params as any).navigation.prevEl = prevRef.current;
@@ -114,7 +114,7 @@ const Reviews: React.FC = () => {
       swiper.navigation.update();
     }
 
-    // Инициализация pagination
+    
     if (paginationRef.current) {
       (swiper.params as any).pagination = (swiper.params as any).pagination || {};
       (swiper.params as any).pagination.el = paginationRef.current;

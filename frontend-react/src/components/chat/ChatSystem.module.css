@@ -177,7 +177,7 @@
   display: none;
 }
 
-/* Mobile styles */
+
 @media (max-width: 840px) {
   .chatList {
     width: 100%;

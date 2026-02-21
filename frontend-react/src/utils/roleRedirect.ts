@@ -1,10 +1,7 @@
 import { ordersApi } from '../api/orders';
 import { ROUTES } from './constants';
 
-/**
- * @param role - Роль пользователя
- * @param navigate - Функция навигации из react-router-dom (useNavigate hook)
- */
+
 export const redirectByRole = async (
   role: string, 
   navigate: (to: string) => void

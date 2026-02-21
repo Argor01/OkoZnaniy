@@ -29,7 +29,7 @@ const CreateOrder: React.FC = () => {
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
 
-  // Загрузка данных из API
+  
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
@@ -48,7 +48,7 @@ const CreateOrder: React.FC = () => {
     String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'ru', { sensitivity: 'base' })
   );
 
-  // Мутации для создания новых типов работ и предметов
+  
   const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
     onSuccess: () => {
@@ -75,7 +75,7 @@ const CreateOrder: React.FC = () => {
     },
   });
 
-  // Мутация для создания заказа (редирект делаем в onFinish после загрузки всех файлов)
+  
   const createOrderMutation = useMutation({
     mutationFn: (data: any) => ordersApi.createOrder(data),
     onSuccess: () => {
@@ -106,7 +106,7 @@ const CreateOrder: React.FC = () => {
         const total = fileList.length;
         for (let i = 0; i < fileList.length; i++) {
           const item = fileList[i];
-          // Ant Design Upload хранит реальный File в originFileObj
+          
           const rawFile = (item as any)?.originFileObj ?? item;
           if (!(rawFile instanceof File)) {
             message.warning(`Файл ${i + 1}: неверный объект, пропуск`);
@@ -161,9 +161,9 @@ const CreateOrder: React.FC = () => {
             deadline: dayjs().add(7, 'day'),
           }}
         >
-          {/* Основная секция заказа */}
+          
           <div className={styles.orderSection}>
-            {/* Название работы */}
+            
             <Form.Item
               name="title"
               label="Название работы"
@@ -175,7 +175,7 @@ const CreateOrder: React.FC = () => {
               />
             </Form.Item>
 
-            {/* Простые поля без сложной логики */}
+            
             <div className={styles.typeSubjectDateRow}>
               <Form.Item
                 name="work_type"
@@ -268,7 +268,7 @@ const CreateOrder: React.FC = () => {
               </Form.Item>
             </div>
 
-            {/* Описание работы */}
+            
             <Form.Item
               name="description"
               label="Описание работы"
@@ -281,7 +281,7 @@ const CreateOrder: React.FC = () => {
               />
             </Form.Item>
 
-            {/* Стоимость */}
+            
             <Form.Item
               name="budget"
               label="Стоимость (₽)"
@@ -305,7 +305,7 @@ const CreateOrder: React.FC = () => {
               />
             </Form.Item>
 
-            {/* Загрузка файлов */}
+            
             <Form.Item
               name="files"
               label="Прикрепить файлы (необязательно)"
@@ -328,7 +328,7 @@ const CreateOrder: React.FC = () => {
                   }
                   
                   setFileList(prev => [...prev, file]);
-                  return false; // Предотвращаем автоматическую загрузку
+                  return false;
                 }}
                 onRemove={(file) => {
                   setFileList(prev => prev.filter(f => f.uid !== file.uid));
@@ -346,7 +346,7 @@ const CreateOrder: React.FC = () => {
             </Form.Item>
           </div>
 
-          {/* Кнопка отправки */}
+          
           <Form.Item className={styles.submitSection}>
             <Button 
               type="primary" 
@@ -362,7 +362,7 @@ const CreateOrder: React.FC = () => {
         </Form>
       </Card>
 
-      {/* Модальное окно для добавления нового типа работы */}
+      
       <Modal
         title="Добавить новый тип работы"
         open={newWorkTypeModalVisible}
@@ -391,7 +391,7 @@ const CreateOrder: React.FC = () => {
         />
       </Modal>
 
-      {/* Модальное окно для добавления нового предмета */}
+      
       <Modal
         title="Добавить новый предмет"
         open={newSubjectModalVisible}

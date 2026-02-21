@@ -1,4 +1,4 @@
-// Список популярных навыков
+
 export const POPULAR_SKILLS = [
   'JavaScript', 'TypeScript', 'React', 'Node.js', 'Django', 'FastAPI',
   'HTML', 'CSS', 'SQL', 'PostgreSQL', 'MongoDB', 'Docker', 'Git',

@@ -13,7 +13,7 @@ interface FriendsTabProps {
   onOpenProfile: (friend: User) => void;
 }
 
-// Цвета для аватаров
+
 const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];

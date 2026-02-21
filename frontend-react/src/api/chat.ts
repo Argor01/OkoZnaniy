@@ -71,7 +71,7 @@ export interface ChatDetail {
 }
 
 export const chatApi = {
-  // Получить список всех чатов
+  
   getAll: async (): Promise<ChatListItem[]> => {
     const response = await apiClient.get('/chat/chats/');
     if (response.data && Array.isArray(response.data.results)) {
@@ -92,7 +92,7 @@ export const chatApi = {
     return chat.messages ?? [];
   },
 
-  // Получить или создать чат по ID заказа
+  
   getOrCreateByOrder: async (orderId: number): Promise<ChatDetail> => {
     const response = await apiClient.post('/chat/chats/get_or_create_by_order/', {
       order_id: orderId,
@@ -100,7 +100,7 @@ export const chatApi = {
     return response.data;
   },
 
-  // Получить или создать чат по ID заказа и ID пользователя (эксперт/клиент)
+  
   getOrCreateByOrderAndUser: async (orderId: number, userId: number): Promise<ChatDetail> => {
     const response = await apiClient.post('/chat/chats/get_or_create_by_order_and_user/', {
       order_id: orderId,
@@ -109,7 +109,7 @@ export const chatApi = {
     return response.data;
   },
 
-  // Получить или создать чат с конкретным пользователем
+  
   getOrCreateByUser: async (userId: number, contextTitle?: string): Promise<ChatDetail> => {
     const response = await apiClient.post('/chat/chats/get_or_create_by_user/', {
       user_id: userId,
@@ -118,7 +118,7 @@ export const chatApi = {
     return response.data;
   },
 
-  // Отправить сообщение (текст и/или файл, или предложение)
+  
   sendMessage: async (
     chatId: number,
     text: string,
@@ -187,7 +187,7 @@ export const chatApi = {
     return response.data;
   },
 
-  // Отправить группу файлов одним действием (создаёт несколько сообщений на бэке)
+  
   sendMessageWithFiles: async (chatId: number, text: string, files: File[]): Promise<Message[]> => {
     const filesToSend = Array.isArray(files) ? files : [];
     const results: Message[] = [];
@@ -195,7 +195,7 @@ export const chatApi = {
     for (let i = 0; i < filesToSend.length; i++) {
       const file = filesToSend[i];
       const textForThis = i === 0 ? text : '';
-      // Используем существующую реализацию, чтобы гарантировать multipart
+      
       const msg = await chatApi.sendMessage(chatId, textForThis, file);
       results.push(msg);
     }
@@ -203,7 +203,7 @@ export const chatApi = {
     return results;
   },
 
-  // Отметить все сообщения в чате как прочитанные
+  
   markAsRead: async (chatId: number): Promise<void> => {
     await apiClient.post(`/chat/chats/${chatId}/mark_read/`);
   },
@@ -212,13 +212,13 @@ export const chatApi = {
     await apiClient.delete(`/chat/chats/${chatId}/`);
   },
 
-  // Получить общее количество непрочитанных сообщений
+  
   getUnreadCount: async (): Promise<number> => {
     const response = await apiClient.get('/chat/chats/unread_count/');
     return response.data.unread_count;
   },
 
-  // Создать претензию
+  
   createClaim: async (data: {
     order_id?: number;
     claim_type: string;

@@ -6,7 +6,7 @@ import styles from './OverviewSection.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
-// Интерфейс пропсов для секции обзора (без споров)
+
 interface OverviewSectionProps {
   stats: AdminStats;
   partners: Partner[];
@@ -14,17 +14,14 @@ interface OverviewSectionProps {
   isLoading: boolean;
 }
 
-/**
- * Секция обзора админской панели
- * Отображает основную статистику и краткую информацию
- */
+
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   stats,
   partners,
   earnings,
   isLoading,
 }) => {
-  // Вычисляем дополнительную статистику
+  
   const recentEarnings = earnings
     .filter(e => !e.is_paid)
     .slice(0, 5);
@@ -35,12 +32,9 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
 
   return (
     <div className={styles.overviewContainer}>
-      {/* Основная статистика */}
       <StatisticsCards stats={stats} loading={isLoading} />
 
-      {/* Детальная информация */}
       <Row gutter={[16, 16]}>
-        {/* Топ партнеры */}
         <Col xs={24} lg={12}>
           <Card 
             title="Топ партнеры" 
@@ -66,7 +60,6 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
           </Card>
         </Col>
 
-        {/* Невыплаченные начисления */}
         <Col xs={24} lg={12}>
           <Card 
             title="Ожидают выплаты" 

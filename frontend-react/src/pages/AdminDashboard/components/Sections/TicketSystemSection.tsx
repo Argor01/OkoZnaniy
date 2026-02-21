@@ -130,7 +130,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
     try {
       const newMessage = await onSendMessage?.(selectedTicket.id, messageText);
       
-      // Обновляем локально список сообщений
+      
       if (newMessage && selectedTicket) {
         setSelectedTicket({
           ...selectedTicket,
@@ -249,7 +249,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
   return (
     <div style={{ padding: isMobile ? 12 : 24 }}>
       <Row gutter={[16, 16]}>
-        {/* Список тикетов */}
         <Col 
           xs={24} 
           lg={10}
@@ -271,7 +270,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               />
             }
           >
-            {/* Статистика */}
             <div style={{ 
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
@@ -299,7 +297,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               </div>
             </div>
 
-            {/* Поиск */}
             <Input
               prefix={<SearchOutlined />}
               placeholder="Поиск по номеру, теме, клиенту..."
@@ -309,7 +306,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               allowClear
             />
             
-            {/* Фильтры */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
               <Select
                 value={statusFilter}
@@ -338,7 +334,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               </Select>
             </div>
             
-            {/* Список тикетов */}
             <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
               <List
                 loading={loading}
@@ -409,7 +404,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
           </Card>
         </Col>
 
-        {/* Детали тикета */}
         <Col xs={24} lg={14}>
           {selectedTicket ? (
             <Card 
@@ -455,7 +449,6 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                 </Space>
               }
             >
-              {/* Информация о тикете */}
               <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
                 <Descriptions.Item label="Клиент">
                   <Space>
@@ -486,7 +479,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                 )}
               </Descriptions>
 
-              {/* Описание проблемы */}
+              
               <Card 
                 size="small" 
                 title="Описание проблемы" 
@@ -497,7 +490,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
 
               <Divider>Переписка</Divider>
 
-              {/* Сообщения */}
+              
               <div 
                 style={{ 
                   height: '400px', 
@@ -542,7 +535,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Форма ответа */}
+              
               <div style={{ display: 'flex', gap: 8 }}>
                 <TextArea
                   value={messageText}

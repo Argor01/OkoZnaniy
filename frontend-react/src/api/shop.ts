@@ -60,7 +60,7 @@ export const shopApi = {
       formData.append('preview', data.preview);
     }
     
-    // Добавляем файлы работы
+    
     if (data.files && data.files.length > 0) {
       data.files.forEach((file) => {
         formData.append(`work_files`, file);

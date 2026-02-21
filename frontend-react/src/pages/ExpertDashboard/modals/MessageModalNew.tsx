@@ -35,8 +35,8 @@ interface MessageModalProps {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  selectedUserId?: number; // ID пользователя для открытия чата
-  selectedOrderId?: number; // ID заказа для открытия чата (чат по заказу+пользователю)
+  selectedUserId?: number; 
+  selectedOrderId?: number; 
   chatContextTitle?: string;
   supportUserId?: number;
   userProfile?: { role?: string };
@@ -146,15 +146,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [overdueDeadlineValue, setOverdueDeadlineValue] = useState<Dayjs | null>(null);
   const [overdueExtending, setOverdueExtending] = useState(false);
   const [overdueCancelling, setOverdueCancelling] = useState(false);
-  const [orderRelevance, setOrderRelevance] = useState<string>(''); // Заказ актуален/не актуален
-  const [refundType, setRefundType] = useState<string>(''); // Тип возврата средств
+  const [orderRelevance, setOrderRelevance] = useState<string>(''); 
+  const [refundType, setRefundType] = useState<string>(''); 
   const [contextChat, setContextChat] = useState<{ userId: number; title: string } | null>(null);
   const [orderIntroByChatId, setOrderIntroByChatId] = useState<Record<number, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   
-  // Категории претензий
+  
   const claimCategories = [
     'Заказ не выполнен',
     'Заказ выполнен некачественно/частично', 
@@ -512,12 +512,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   useEffect(() => {
     if (visible) {
       loadChats();
-      // Если передан orderId+userId, открываем чат по заказу (важно для откликов)
+
       if (selectedOrderId && selectedUserId) {
         loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
         return;
       }
-      // Если передан selectedUserId, автоматически открываем чат с этим пользователем
+
       if (selectedUserId) {
         loadOrCreateChatWithUser(selectedUserId);
       }
@@ -1080,7 +1080,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       return;
     }
 
-    // Дополнительная валидация для категории "Заказ не выполнен"
     if (selectedClaimCategory === 'Заказ не выполнен') {
       if (!orderRelevance) {
         antMessage.warning('Укажите актуальность заказа');
@@ -1104,7 +1103,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     setClaimSubmitting(true);
     try {
-      // Маппинг категорий претензий на типы БД
+
       const claimTypeMap: Record<string, string> = {
         'Заказ не выполнен': 'refund',
         'Заказ выполнен некачественно/частично': 'quality',
@@ -1115,19 +1114,16 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       };
       
       const claimType = claimTypeMap[selectedClaimCategory] || 'other';
-      
-      // Создаем претензию в БД
+
       const claim = await chatApi.createClaim({
         order_id: effectiveOrderId || undefined,
         claim_type: claimType,
         subject: selectedClaimCategory,
         description: claimText.trim(),
       });
-      
-      // Формируем сообщение со ссылкой на претензию
+
       let claimMessage = `🚨 ПРЕТЕНЗИЯ #${claim.id}: ${selectedClaimCategory}\n\n`;
-      
-      // Добавляем дополнительные поля для категории "Заказ не выполнен"
+
       if (selectedClaimCategory === 'Заказ не выполнен') {
         claimMessage += `Актуальность заказа: ${orderRelevance}\n`;
         claimMessage += `Возврат средств: ${refundType}\n\n`;
@@ -1136,16 +1132,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       claimMessage += claimText.trim();
       
       let createdMessages: Message[] = [];
-      
-      // Если есть файлы, отправляем с файлами
+
       if (claimFiles.length > 0) {
         createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, claimMessage, claimFiles);
       } else {
         const msg = await chatApi.sendMessage(selectedChat.id, claimMessage);
         createdMessages = msg ? [msg] : [];
       }
-      
-      // Обновляем чат с реальными сообщениями от сервера
+
       if (createdMessages.length > 0) {
         const lastMessage = createdMessages[createdMessages.length - 1];
         
@@ -1154,7 +1148,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           messages: [...prev.messages, ...createdMessages]
         } : null);
 
-        // Обновляем список чатов
         setChatList(prev => prev.map(chat =>
           chat.id === selectedChat.id
             ? {
@@ -1191,7 +1184,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       return false;
     }
 
-    const maxSize = 10 * 1024 * 1024; // 10 МБ
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       antMessage.error('Размер файла не должен превышать 10 МБ');
       return false;
@@ -1282,14 +1275,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       return false;
     }
 
-    // Проверяем размер файла (максимум 10 МБ)
-    const maxSize = 10 * 1024 * 1024; // 10 МБ
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       antMessage.error('Размер файла не должен превышать 10 МБ');
       return false;
     }
 
-    // Проверяем, что файл еще не добавлен
     if (attachedFiles.find(f => f.name === file.name && f.size === file.size)) {
       antMessage.warning('Этот файл уже прикреплен');
       return false;
@@ -1297,7 +1288,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     setAttachedFiles(prev => [...prev, file]);
     antMessage.success(`Файл "${file.name}" прикреплен`);
-    return false; // Предотвращаем автоматическую загрузку
+    return false;
   };
 
   const removeAttachedFile = (fileToRemove: File) => {
@@ -1469,7 +1460,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const filteredChats = safeChatList.filter(chat => {
-    // Поиск
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const userName = chat.other_user?.username?.toLowerCase() || '';
@@ -1567,7 +1558,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             />
           </Dropdown>
         )}
-        {/* Left Sidebar */}
+        
         <div style={{ 
           width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
           background: '#f3f4f6', 
@@ -1577,7 +1568,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           flexDirection: 'column',
           height: isMobile ? '100%' : 'auto'
         }}>
-          {/* Search */}
+          
           <div style={{ padding: isMobile ? '8px' : '12px', background: '#ffffff' }}>
             <Input
               prefix={<SearchOutlined style={{ color: '#9ca3af', fontSize: isMobile ? 12 : 14 }} />}
@@ -1589,7 +1580,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             />
           </div>
 
-          {/* Contact List */}
+          
           <div style={{ 
             flex: 1, 
             overflowY: 'auto',
@@ -1755,7 +1746,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           </div>
         </div>
 
-        {/* Right Content Area */}
+        
         <div 
           key={selectedChat ? `chat-${selectedChat.id}` : 'no-chat'}
           style={{ 
@@ -1767,7 +1758,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             overflow: 'hidden'
           }}
         >
-          {/* Header */}
+          
           <div style={{
             background: selectedChat ? '#ffffff' : '#e0f2fe',
             padding: isMobile ? '8px 12px' : '12px 16px',
@@ -2007,7 +1998,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             </>
           ) : null}
 
-          {/* Messages Area */}
+          
           <div style={{ 
             flex: 1, 
             overflowY: 'auto',
@@ -2410,7 +2401,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             )}
           </div>
 
-          {/* Input Area */}
+          
           {selectedChat && (
             <div style={{ 
               padding: isMobile ? '8px 12px 12px 12px' : '16px',
@@ -2418,7 +2409,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               background: '#ffffff',
               flexShrink: 0
             }}>
-              {/* Claim Categories Carousel - only for support chat */}
+              
               {isSupportChatSelected && (
                 <div style={{ 
                   marginBottom: isMobile ? 8 : 12,
@@ -2451,7 +2442,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       paddingBottom: 4
                     }}
                   >
-                    {/* Дублируем категории для бесшовного loop эффекта */}
+                    
                     {[...claimCategories, ...claimCategories].map((category, index) => (
                       <Button
                         key={index}
@@ -2525,7 +2516,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   alignItems: 'center',
                   flexShrink: 0
                 }}>
-                  {/* File Attachment Button */}
+                  
                   <Upload
                     beforeUpload={handleFileSelect}
                     showUploadList={false}
@@ -2699,7 +2690,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </Modal>
       
-      {/* Claim Modal */}
+      
       <Modal
         open={claimModalOpen}
         centered
@@ -2741,7 +2732,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             </Text>
           </div>
           
-          {/* Категории претензий */}
+          
           <div>
             <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               Категория претензии *
@@ -2750,7 +2741,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               value={selectedClaimCategory || undefined}
               onChange={(value) => {
                 setSelectedClaimCategory(value);
-                // Сбрасываем дополнительные поля при смене категории
+
                 if (value !== 'Заказ не выполнен') {
                   setOrderRelevance('');
                   setRefundType('');
@@ -2766,7 +2757,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             />
           </div>
           
-          {/* Дополнительные поля для категории "Заказ не выполнен" */}
+          
           {selectedClaimCategory === 'Заказ не выполнен' && (
             <>
               <div>
@@ -2806,7 +2797,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             </>
           )}
           
-          {/* Текст претензии */}
+          
           <div>
             <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               Описание претензии *
@@ -2822,7 +2813,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             />
           </div>
           
-          {/* Прикрепление файлов */}
+          
           <div>
             <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               Прикрепить файлы (необязательно)

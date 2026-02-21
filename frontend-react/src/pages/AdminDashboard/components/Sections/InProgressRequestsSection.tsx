@@ -159,11 +159,11 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
   const [pauseForm] = Form.useForm();
   const [noteForm] = Form.useForm();
   const [followUpForm] = Form.useForm(); 
- // Мок данные для демонстрации
+ 
 
   const requestsData = requests;
   
-  // Фильтрация данных
+  
   const filteredRequests = requestsData.filter(request => {
     const matchesSearch = request.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          request.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -178,7 +178,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
     return matchesSearch && matchesType && matchesStatus && matchesAdmin && matchesPriority;
   });
 
-  // Статистика
+  
   const stats = {
     total: filteredRequests.length,
     overdue: filteredRequests.filter(r => r.is_overdue).length,
@@ -187,7 +187,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
     avgProgress: filteredRequests.reduce((sum, r) => sum + r.progress_percentage, 0) / filteredRequests.length || 0,
   };
 
-  // Обработчики
+  
   const handleViewRequest = (request: CustomerRequest) => {
     setSelectedRequest(request);
     setViewModalVisible(true);
@@ -294,7 +294,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
     }
   };
 
-  // Функции для отображения
+  
   const getTypeColor = (type: string) => {
     const colors = {
       technical_support: 'blue',
@@ -571,7 +571,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
           </Text>
         </div>
 
-        {/* Статистика */}
+        
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={6}>
             <Statistic title="Всего в работе" value={stats.total} />
@@ -595,7 +595,6 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
           </Col>
         </Row>
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по запросам"
@@ -681,9 +680,9 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
           }
         />
       </Card> 
-     {/* Модальные окна */}
+     
       
-      {/* Просмотр запроса */}
+      
       <Modal
         title={`Запрос ${selectedRequest?.request_number}`}
         open={viewModalVisible}
@@ -838,7 +837,6 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         )}
       </Modal>
 
-      {/* Обновление прогресса */}
       <Modal
         title="Обновить прогресс"
         open={progressModalVisible}
@@ -858,7 +856,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </Form>
       </Modal>
 
-      {/* Отправка ответа */}
+      
       <Modal
         title="Отправить ответ"
         open={responseModalVisible}
@@ -881,7 +879,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </Form>
       </Modal>
 
-      {/* Завершение запроса */}
+      
       <Modal
         title="Завершить запрос"
         open={completeModalVisible}
@@ -904,7 +902,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </Form>
       </Modal>
 
-      {/* Постановка на паузу */}
+      
       <Modal
         title="Поставить запрос на паузу"
         open={pauseModalVisible}
@@ -927,7 +925,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </Form>
       </Modal>
 
-      {/* Добавление заметки */}
+      
       <Modal
         title="Добавить заметку"
         open={noteModalVisible}

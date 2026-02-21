@@ -1,6 +1,6 @@
-// UI константы и настройки
 
-// Брейкпоинты для адаптивности
+
+
 export const BREAKPOINTS = {
   mobile: 840,
   tablet: 1024,
@@ -8,15 +8,15 @@ export const BREAKPOINTS = {
   wide: 1920,
 } as const;
 
-// Размеры сайдбара
+
 export const SIDEBAR_WIDTH = 250;
 export const SIDEBAR_COLLAPSED_WIDTH = 80;
 
-// Размеры хедера
+
 export const HEADER_HEIGHT = 64;
 export const MOBILE_HEADER_HEIGHT = 56;
 
-// Отступы
+
 export const SPACING = {
   xs: 8,
   sm: 12,
@@ -26,7 +26,7 @@ export const SPACING = {
   xxl: 48,
 } as const;
 
-// Радиусы скругления
+
 export const BORDER_RADIUS = {
   sm: 8,
   md: 12,
@@ -35,7 +35,7 @@ export const BORDER_RADIUS = {
   round: '50%',
 } as const;
 
-// Тени
+
 export const BOX_SHADOW = {
   sm: '0 2px 8px rgba(0,0,0,0.08)',
   md: '0 4px 12px rgba(0,0,0,0.1)',
@@ -43,7 +43,7 @@ export const BOX_SHADOW = {
   xl: '0 12px 32px rgba(0,0,0,0.15)',
 } as const;
 
-// Цвета (основные)
+
 export const COLORS = {
   primary: '#1890ff',
   secondary: '#764ba2',
@@ -68,7 +68,7 @@ export const COLORS = {
   },
 } as const;
 
-// Градиенты
+
 export const GRADIENTS = {
   primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -76,7 +76,7 @@ export const GRADIENTS = {
   info: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
 } as const;
 
-// Z-индексы
+
 export const Z_INDEX = {
   dropdown: 1000,
   sticky: 1020,
@@ -87,7 +87,7 @@ export const Z_INDEX = {
   tooltip: 1070,
 } as const;
 
-// Анимации
+
 export const TRANSITIONS = {
   fast: '0.15s ease',
   normal: '0.3s ease',

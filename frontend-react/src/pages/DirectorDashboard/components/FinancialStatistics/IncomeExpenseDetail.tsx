@@ -25,7 +25,7 @@ const IncomeExpenseDetail: React.FC = () => {
 
   const isMobile = window.innerWidth <= 840;
 
-  // Получаем данные из API
+  
   const { data: incomeData, isLoading: incomeLoading } = useQuery({
     queryKey: ['income-detail', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
     queryFn: () => getIncomeDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
@@ -38,7 +38,7 @@ const IncomeExpenseDetail: React.FC = () => {
 
   const isLoading = incomeLoading || expenseLoading;
 
-  // Группируем данные по дням для графика
+  
   const chartData = React.useMemo(() => {
     if (!incomeData || !expenseData) return [];
     

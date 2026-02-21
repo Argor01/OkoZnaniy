@@ -261,7 +261,6 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile }) => {
           />
         </div>
 
-        {/* Раздел Финансы */}
         <div style={{ marginBottom: 16 }}>
           <Text strong style={{ fontSize: 18, color: '#1f2937', display: 'block', marginBottom: 16 }}>
             Финансы
@@ -341,7 +340,6 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile }) => {
           />
         </div>
 
-        {/* Раздел Профиль */}
         <div style={{ marginBottom: 16 }}>
           <Text strong style={{ fontSize: 18, color: '#1f2937', display: 'block', marginBottom: 16 }}>
             Профиль

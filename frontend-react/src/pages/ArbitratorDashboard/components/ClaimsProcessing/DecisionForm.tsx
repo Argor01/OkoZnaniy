@@ -41,7 +41,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
         refund_amount: values.refund_amount,
       };
 
-      // Вызов API для принятия решения
+      
       await arbitratorApi.makeDecision(claimId, decisionData);
 
       message.success('Решение успешно принято');
@@ -58,7 +58,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
   const handleDecisionTypeChange = (value: string) => {
     setDecisionType(value);
-    // Сброс суммы возврата при изменении типа решения
+    
     if (value !== 'partial_refund') {
       form.setFieldsValue({ refund_amount: undefined });
     }

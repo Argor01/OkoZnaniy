@@ -25,7 +25,7 @@ const MonthlyTurnover: React.FC = () => {
   ]);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Получаем данные из API
+  
   const { data: turnoverData, isLoading } = useQuery({
     queryKey: ['monthly-turnover', dateRange[0].format('YYYY-MM')],
     queryFn: () => getMonthlyTurnover(dateRange[0].format('YYYY-MM')),

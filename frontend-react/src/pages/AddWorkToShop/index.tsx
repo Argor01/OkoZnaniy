@@ -13,7 +13,7 @@ const AddWorkToShop: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Мутация для создания работы
+  
   const createWorkMutation = useMutation({
     mutationFn: (data: any) => shopApi.createWork(data),
     onSuccess: () => {
@@ -27,7 +27,7 @@ const AddWorkToShop: React.FC = () => {
   });
 
   const handleSubmit = (formData: WorkFormData) => {
-    // Преобразуем данные для API
+    
     const apiData = {
       title: formData.title,
       description: formData.description,

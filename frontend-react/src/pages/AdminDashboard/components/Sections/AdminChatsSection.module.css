@@ -1,4 +1,4 @@
-/* Адаптивные стили для чата администратора */
+﻿
 
 .chatContainer {
   height: 80vh;
@@ -21,12 +21,12 @@
 }
 
 .chatRoomItem:hover {
-  background-color: #f5f5f5 !important;
+  background-color: #f5f5f5;
 }
 
 .chatRoomItemActive {
-  background-color: #f0f8ff !important;
-  border-left: 3px solid #1890ff !important;
+  background-color: #f0f8ff;
+  border-left: 3px solid #1890ff;
 }
 
 .messageContainer {
@@ -63,14 +63,14 @@
 
 .sendButton:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.25);
 }
 
 .sendButton:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-/* Мобильная адаптация */
+
 @media (max-width: 768px) {
   .chatContainer {
     flex-direction: column;
@@ -79,53 +79,53 @@
   }
 
   .chatListCard {
-    width: 100% !important;
-    height: auto !important;
+    width: 100%;
+    height: auto;
   }
 
   .chatMainCard {
-    width: 100% !important;
-    height: 85vh !important;
+    width: 100%;
+    height: 85vh;
   }
 
   .messageContainer {
-    padding: 12px !important;
+    padding: 12px;
   }
 
   .participantAvatar {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 10px !important;
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
   }
 
   .backButton {
-    display: flex !important;
+    display: flex;
   }
 }
 
-/* Планшетная адаптация */
+
 @media (min-width: 769px) and (max-width: 1024px) {
   .chatListCard {
-    width: 280px !important;
+    width: 280px;
   }
 
   .messageContainer {
-    padding: 14px !important;
+    padding: 14px;
   }
 }
 
-/* Десктопная версия */
+
 @media (min-width: 1025px) {
   .chatListCard {
-    width: 350px !important;
+    width: 350px;
   }
 
   .messageContainer {
-    padding: 16px !important;
+    padding: 16px;
   }
 }
 
-/* Скроллбар */
+
 .chatScrollArea::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -145,7 +145,7 @@
   background: #a8a8a8;
 }
 
-/* Анимация для уведомлений */
+
 .unreadBadge {
   animation: pulse 2s infinite;
 }
@@ -159,7 +159,7 @@
   }
 }
 
-/* Статус онлайн */
+
 .onlineIndicator {
   animation: blink 3s infinite;
 }
@@ -173,7 +173,7 @@
   }
 }
 
-/* Плавное появление модальных окон */
+
 .modalContent {
   animation: slideUp 0.3s ease;
 }
@@ -189,31 +189,32 @@
   }
 }
 
-/* Адаптивная типографика */
+
 @media (max-width: 768px) {
   .chatTitle {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   .messageText {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 
   .timestamp {
-    font-size: 10px !important;
+    font-size: 10px;
   }
 }
 
 @media (min-width: 769px) {
   .chatTitle {
-    font-size: 16px !important;
+    font-size: 16px;
   }
 
   .messageText {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   .timestamp {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 }
+

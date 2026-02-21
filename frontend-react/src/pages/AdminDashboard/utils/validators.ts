@@ -1,26 +1,18 @@
-/**
- * Утилиты для валидации данных в админ-панели
- */
 
-/**
- * Валидация email
- */
+
+
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-/**
- * Валидация телефона
- */
+
 export const validatePhone = (phone: string): boolean => {
   const phoneRegex = /^(\+7|8)?[\s-]?\(?[489][0-9]{2}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{2}[\s-]?[0-9]{2}$/;
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
-/**
- * Валидация пароля
- */
+
 export const validatePassword = (password: string): {
   isValid: boolean;
   errors: string[];
@@ -49,25 +41,19 @@ export const validatePassword = (password: string): {
   };
 };
 
-/**
- * Валидация суммы
- */
+
 export const validateAmount = (amount: string | number): boolean => {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
   return !isNaN(num) && num > 0;
 };
 
-/**
- * Валидация процента
- */
+
 export const validatePercent = (percent: string | number): boolean => {
   const num = typeof percent === 'string' ? parseFloat(percent) : percent;
   return !isNaN(num) && num >= 0 && num <= 100;
 };
 
-/**
- * Валидация URL
- */
+
 export const validateUrl = (url: string): boolean => {
   try {
     new URL(url);
@@ -77,9 +63,7 @@ export const validateUrl = (url: string): boolean => {
   }
 };
 
-/**
- * Валидация обязательного поля
- */
+
 export const validateRequired = (value: any): boolean => {
   if (typeof value === 'string') {
     return value.trim().length > 0;
@@ -87,9 +71,7 @@ export const validateRequired = (value: any): boolean => {
   return value !== null && value !== undefined;
 };
 
-/**
- * Валидация длины строки
- */
+
 export const validateLength = (
   value: string, 
   min: number = 0, 
@@ -98,9 +80,7 @@ export const validateLength = (
   return value.length >= min && value.length <= max;
 };
 
-/**
- * Валидация формы пользователя
- */
+
 export const validateUserForm = (data: {
   email: string;
   firstName: string;

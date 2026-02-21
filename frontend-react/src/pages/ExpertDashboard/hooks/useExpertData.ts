@@ -1,17 +1,17 @@
-// Хук для загрузки данных эксперта
+
 import { useQuery } from '@tanstack/react-query';
 import { authApi } from '../../../api/auth';
 import { ordersApi } from '../../../api/orders';
 import { expertsApi } from '../../../api/experts';
 
 export const useExpertData = () => {
-  // Загружаем профиль пользователя
+  
   const { data: userProfile, isLoading: profileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  // Загружаем заказы
+  
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ['user-orders', userProfile?.role],
     queryFn: () => {
@@ -25,7 +25,7 @@ export const useExpertData = () => {
     enabled: !!userProfile,
   });
 
-  // Загружаем анкету эксперта
+  
   const { data: application, isLoading: applicationLoading } = useQuery({
     queryKey: ['expert-application'],
     queryFn: async () => {
@@ -38,13 +38,13 @@ export const useExpertData = () => {
     retry: false,
   });
 
-  // Загружаем специализации
+  
   const { data: specializations = [], isLoading: specializationsLoading } = useQuery({
     queryKey: ['expert-specializations'],
     queryFn: () => expertsApi.getSpecializations(),
   });
 
-  // Загружаем статистику эксперта
+  
   const { data: expertStats } = useQuery({
     queryKey: ['expert-statistics', userProfile?.id],
     queryFn: () => expertsApi.getExpertStatistics(userProfile!.id),
@@ -64,7 +64,7 @@ export const useExpertData = () => {
 
   const orders = ordersRaw.filter(hasStatus);
 
-  // Подсчет заказов по статусам
+  
   const ordersCount = {
     all: orders.length,
     new: orders.filter((o) => o.status === 'new').length,

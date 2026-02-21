@@ -24,10 +24,7 @@ interface ConfirmModalProps {
   danger?: boolean;
 }
 
-/**
- * Универсальное модальное окно подтверждения
- * Используется для подтверждения различных действий
- */
+
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   visible,
   type = 'info',

@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -67,7 +67,7 @@ button:focus-visible {
   }
 }
 
-/* Fix for modal close icon alignment */
+
 .ant-modal-close {
   display: flex;
   align-items: center;
@@ -88,7 +88,7 @@ button:focus-visible {
   justify-content: center;
 }
 
-/* Fix for all anticon alignment */
+
 .anticon {
   display: inline-flex;
   align-items: center;
@@ -100,84 +100,85 @@ button:focus-visible {
   display: block;
 }
 
-/* Fix modal scroll on mobile devices */
+
 @media (max-width: 768px) {
-  /* Allow scrolling in modal wrap */
+  
   .ant-modal-wrap {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    position: fixed !important;
-    inset: 0 !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: fixed;
+    inset: 0;
   }
   
   .ant-modal {
-    top: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-    position: relative !important;
+    top: 0;
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    position: relative;
   }
   
   .ant-modal-content {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 100vh !important;
-    height: auto !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    position: relative !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: auto;
+    max-height: none;
+    border-radius: 0;
+    position: relative;
   }
   
   .ant-modal-header {
-    flex-shrink: 0 !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 10 !important;
-    background: rgba(255, 255, 255, 0.95) !important;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
   }
   
   .ant-modal-body {
-    flex: 1 1 auto !important;
-    overflow-y: visible !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 20px !important;
-    min-height: auto !important;
+    flex: 1 1 auto;
+    overflow-y: visible;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+    min-height: auto;
   }
   
   .ant-modal-footer {
-    flex-shrink: 0 !important;
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 10 !important;
-    background: rgba(255, 255, 255, 0.95) !important;
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
   }
   
-  /* Prevent body scroll lock on mobile - CRITICAL */
+  
   body.ant-scrolling-effect,
   html.ant-scrolling-effect {
-    overflow: visible !important;
-    width: auto !important;
-    position: static !important;
-    height: auto !important;
+    overflow: visible;
+    width: auto;
+    position: static;
+    height: auto;
   }
   
-  /* Fix input placeholder alignment on mobile */
+  
   .ant-input::placeholder,
   .ant-input-search input::placeholder {
-    line-height: normal !important;
-    transform: translateY(0) !important;
+    line-height: normal;
+    transform: translateY(0);
   }
   
   .ant-input,
   .ant-input-search input {
-    display: flex !important;
-    align-items: center !important;
+    display: flex;
+    align-items: center;
   }
   
-  /* Larger font for sidebar menu items on mobile */
+  
   .ant-menu-item .ant-badge,
   .ant-menu-title-content .ant-badge {
-    font-size: 16px !important;
+    font-size: 16px;
   }
 }
+

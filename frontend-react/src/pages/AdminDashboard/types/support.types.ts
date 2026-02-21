@@ -1,6 +1,4 @@
-/**
- * Типы данных для системы обработки запросов поддержки
- */
+
 
 export interface SupportRequest {
   id: number;
@@ -95,8 +93,8 @@ export interface SupportStats {
   openRequests: number;
   inProgressRequests: number;
   completedToday: number;
-  averageResponseTime: number; // в минутах
-  customerSatisfaction: number; // процент
+  averageResponseTime: number; 
+  customerSatisfaction: number; 
 }
 
 export type SupportStatus = 'open' | 'in_progress' | 'completed';

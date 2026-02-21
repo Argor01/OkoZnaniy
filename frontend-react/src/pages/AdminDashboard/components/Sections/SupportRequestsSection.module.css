@@ -1,4 +1,4 @@
-/* Стили для SupportRequestsSection */
+
 
 .container {
   padding: 24px;
@@ -140,7 +140,7 @@
   font-size: 11px;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .container {
     padding: 20px;
@@ -155,7 +155,7 @@
   }
 }
 
-/* Адаптивность для мобильных устройств */
+
 @media (max-width: 768px) {
   .container {
     padding: 16px;
@@ -216,7 +216,7 @@
   }
 }
 
-/* Адаптивность для очень маленьких экранов */
+
 @media (max-width: 480px) {
   .container {
     padding: 12px;
@@ -256,7 +256,7 @@
   }
 }
 
-/* Анимации */
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -272,12 +272,12 @@
   animation: slideIn 0.3s ease-out;
 }
 
-/* Состояния загрузки */
+
 .requestsList .ant-spin-container {
   min-height: 200px;
 }
 
-/* Кастомизация Badge */
+
 .badge .ant-badge-count {
   font-size: 11px;
   min-width: 18px;
@@ -288,7 +288,7 @@
   box-shadow: 0 0 0 1px #fff;
 }
 
-/* Кастомизация Empty */
+
 .requestsList .ant-empty {
   padding: 40px 20px;
 }
@@ -298,7 +298,7 @@
   font-size: 14px;
 }
 
-/* Hover эффекты для кнопок */
+
 .tabButton.ant-btn-primary {
   background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   border: none;
@@ -310,7 +310,7 @@
   box-shadow: 0 4px 16px rgba(24, 144, 255, 0.4);
 }
 
-/* Индикатор приоритета */
+
 .requestItem[data-priority="urgent"] {
   border-left: 4px solid #ff4d4f;
 }

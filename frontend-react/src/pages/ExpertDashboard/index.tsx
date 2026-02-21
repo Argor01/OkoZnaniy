@@ -18,7 +18,7 @@ import { UserProfile } from './types';
 import { mockArbitrationCases } from './mockData';
 import styles from './ExpertDashboard.module.css';
 
-// Импорт модальных окон
+
 import ProfileModal from './modals/ProfileModal';
 import ApplicationModal from './modals/ApplicationModal';
 import WelcomeModal from './modals/WelcomeModal';
@@ -34,10 +34,10 @@ import FriendProfileModal from './modals/FriendProfileModal';
 const ExpertDashboard: FC = () => {
   const queryClient = useQueryClient();
   
-  // Загружаем уведомления
+  
   useNotifications();
   
-  // State для модальных окон
+  
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
   const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
@@ -51,7 +51,7 @@ const ExpertDashboard: FC = () => {
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
   
-  // Остальной state
+  
   const [activeTab, setActiveTab] = useState<string>('about');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
@@ -75,7 +75,7 @@ const ExpertDashboard: FC = () => {
     setSelectedUserIdForChat(undefined);
   };
 
-  // Загрузка данных
+  
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
@@ -168,7 +168,7 @@ const ExpertDashboard: FC = () => {
                   />
                 ),
               },
-              // Специализации только для экспертов
+              
               ...(userProfile?.role === 'expert' ? [{
                 key: 'specializations',
                 label: `Специализации ${specializations.length || 0}`,
@@ -194,7 +194,7 @@ const ExpertDashboard: FC = () => {
                   />
                 ),
               }] : []),
-              // Отзывы только для экспертов
+              
               ...(userProfile?.role === 'expert' ? [{
                 key: 'reviews',
                 label: 'Отзывы',
@@ -205,7 +205,7 @@ const ExpertDashboard: FC = () => {
                 label: 'Заказы',
                 children: <OrdersTab isMobile={isMobile} />,
               },
-              // Работы только для экспертов
+              
               ...(userProfile?.role === 'expert' ? [{
                 key: 'works',
                 label: 'Работы',
@@ -239,7 +239,6 @@ const ExpertDashboard: FC = () => {
         </div>
       </div>
 
-      {/* Модальные окна */}
       <ProfileModal
         visible={profileModalVisible}
         onClose={() => setProfileModalVisible(false)}

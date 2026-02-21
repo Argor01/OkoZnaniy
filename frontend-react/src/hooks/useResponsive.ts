@@ -1,4 +1,4 @@
-// Хук для определения размера экрана
+
 import { useState, useEffect } from 'react';
 
 interface ResponsiveState {

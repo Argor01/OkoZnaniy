@@ -1,4 +1,4 @@
-/* Стили для логотипа с эффектом сияния */
+
 
 .header__logo-circle {
   position: relative;
@@ -51,7 +51,7 @@
   height: auto;
 }
 
-/* Адаптивность */
+
 @media (max-width: 1024px) {
   .header__logo-circle {
     width: 80px;

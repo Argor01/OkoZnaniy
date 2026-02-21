@@ -16,17 +16,13 @@ interface StatisticsCardsProps {
   loading?: boolean;
 }
 
-/**
- * Карточки статистики для обзорной страницы
- * Отображает основные метрики админской панели
- */
+
 export const StatisticsCards: React.FC<StatisticsCardsProps> = ({ 
   stats, 
   loading = false 
 }) => {
   return (
     <div className={styles.statisticsContainer}>
-      {/* Первая строка - основные метрики */}
       <Row gutter={[16, 16]} className={styles.row}>
         <Col xs={24} sm={12} md={8}>
           <Card className={styles.card}>
@@ -63,7 +59,6 @@ export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
         </Col>
       </Row>
 
-      {/* Вторая строка - споры */}
       <Row gutter={[16, 16]} className={styles.row}>
         <Col xs={24} sm={8} md={8}>
           <Card className={styles.card}>

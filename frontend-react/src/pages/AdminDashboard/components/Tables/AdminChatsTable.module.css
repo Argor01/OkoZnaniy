@@ -1,4 +1,4 @@
-/* Стили для таблицы чатов администраторов */
+﻿
 
 .tableContainer {
   background: #fff;
@@ -52,7 +52,7 @@
   font-weight: 500;
 }
 
-/* Основная таблица */
+
 .table {
   .ant-table-thead > tr > th {
     background: #fafafa;
@@ -71,7 +71,7 @@
   }
 }
 
-/* Ячейка чата */
+
 .chatCell {
   display: flex;
   align-items: center;
@@ -109,7 +109,7 @@
   margin-top: 4px;
 }
 
-/* Ячейка участников */
+
 .participantsCell {
   display: flex;
   align-items: center;
@@ -130,7 +130,7 @@
   white-space: nowrap;
 }
 
-/* Ячейка последнего сообщения */
+
 .lastMessageCell {
   .messageContent {
     margin-bottom: 4px;
@@ -159,7 +159,7 @@
   font-style: italic;
 }
 
-/* Ячейка активности */
+
 .activityCell {
   text-align: center;
   
@@ -174,7 +174,7 @@
   }
 }
 
-/* Кнопки действий */
+
 .actionButton {
   color: #1890ff;
   border-color: transparent;
@@ -204,26 +204,26 @@
   }
 }
 
-/* Специальные строки */
+
 .unreadRow {
-  background: #f6ffed !important;
+  background: #f6ffed;
   border-left: 3px solid #52c41a;
   
   &:hover {
-    background: #f0f9e8 !important;
+    background: #f0f9e8;
   }
 }
 
 .inactiveRow {
-  background: #fafafa !important;
+  background: #fafafa;
   opacity: 0.7;
   
   &:hover {
-    background: #f0f0f0 !important;
+    background: #f0f0f0;
   }
 }
 
-/* Развернутый контент */
+
 .expandedContent {
   padding: 16px 24px;
   background: #fafafa;
@@ -296,7 +296,7 @@
   }
 }
 
-/* Адаптивность */
+
 @media (max-width: 1200px) {
   .tableHeader {
     flex-direction: column;
@@ -392,7 +392,7 @@
   }
 }
 
-/* Состояния загрузки */
+
 .table .ant-table-placeholder {
   padding: 40px 20px;
   
@@ -405,7 +405,7 @@
   min-height: 200px;
 }
 
-/* Пагинация */
+
 .table .ant-pagination {
   margin: 16px 0;
   text-align: center;
@@ -416,7 +416,7 @@
   font-size: 14px;
 }
 
-/* Развертывание строк */
+
 .table .ant-table-expand-icon-th,
 .table .ant-table-expand-icon-col {
   width: 48px;
@@ -430,7 +430,7 @@
   }
 }
 
-/* Скроллбар */
+
 .table .ant-table-body::-webkit-scrollbar {
   height: 6px;
 }

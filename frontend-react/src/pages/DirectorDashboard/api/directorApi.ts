@@ -19,10 +19,10 @@ import type {
   Claim,
 } from './types';
 
-// Управление персоналом
+
 export const getPersonnel = async (): Promise<Employee[]> => {
   try {
-    // Загружаем все страницы пагинации
+    
     let allEmployees: Employee[] = [];
     let nextUrl: string | null = '/director/personnel/';
     
@@ -33,10 +33,10 @@ export const getPersonnel = async (): Promise<Employee[]> => {
       if (Array.isArray(results)) {
         allEmployees = [...allEmployees, ...results];
       }
-      // Получаем URL следующей страницы (убираем /api из пути, т.к. apiClient уже добавляет его)
+      
       if (data?.next) {
         const url = new URL(data.next);
-        // Убираем /api из начала пути, если он есть
+        
         nextUrl = url.pathname.replace(/^\/api/, '') + url.search;
       } else {
         nextUrl = null;
@@ -52,7 +52,7 @@ export const getPersonnel = async (): Promise<Employee[]> => {
 
 export const registerEmployee = async (data: RegisterEmployeeRequest): Promise<Employee> => {
   try {
-    // Преобразуем данные в формат, ожидаемый API
+    
     const requestData = {
       email: data.email,
       first_name: data.first_name,
@@ -60,7 +60,7 @@ export const registerEmployee = async (data: RegisterEmployeeRequest): Promise<E
       phone: data.phone || '',
       role: data.role,
       password: data.password,
-      username: data.username || data.email, // Используем email как username, если не указан
+      username: data.username || data.email, 
     };
     const response = await apiClient.post('/director/personnel/register/', requestData);
     return response.data;
@@ -199,7 +199,7 @@ export const deleteEmployee = async (id: number): Promise<void> => {
   }
 };
 
-// Финансовая статистика
+
 export const getMonthlyTurnover = async (period?: string): Promise<MonthlyTurnover> => {
   try {
     const params = period ? { period } : {};
@@ -264,7 +264,7 @@ export const exportFinancialData = async (
   }
 };
 
-// Панель партнёров
+
 export const getPartners = async (): Promise<Partner[]> => {
   try {
     const response = await apiClient.get('/director/partners/');
@@ -297,7 +297,7 @@ export const getAllPartnersTurnover = async (
   try {
     let params: any = {};
     if (typeof period === 'string') {
-      // Если передан месяц в формате YYYY-MM, преобразуем в диапазон дат
+      
       const startDate = dayjs(period).startOf('month').format('YYYY-MM-DD');
       const endDate = dayjs(period).endOf('month').format('YYYY-MM-DD');
       params = { start_date: startDate, end_date: endDate };
@@ -339,7 +339,7 @@ export const togglePartnerStatus = async (partnerId: number): Promise<Partner> =
   }
 };
 
-// Общая статистика (из БД)
+
 export const getKPI = async (startDate: string, endDate: string): Promise<KPI> => {
   try {
     const response = await apiClient.get('/director/statistics/kpi/', {
@@ -378,7 +378,7 @@ export const exportStatisticsReport = async (
       responseType: 'blob',
     });
     
-    // Скачиваем файл
+    
     const blob = new Blob([response.data]);
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -393,9 +393,7 @@ export const exportStatisticsReport = async (
     console.error('Error exporting statistics report:', error);
     throw error;
   }
-};
-
-// Коммуникация с арбитрами (заглушки для совместимости)
+};
 export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
   try {
     const queryParams = new URLSearchParams();
@@ -455,8 +453,7 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
   }
 };
 
-export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
-  // Заглушка - возвращаем пустой список
+export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
   return [];
 };
 
@@ -476,11 +473,8 @@ export const deleteMessage = async (id: number): Promise<void> => {
     console.error('Error deleting message:', error);
     throw error;
   }
-};
-
-// Экспорт всех функций в виде объекта
-export const directorApi = {
-  // Управление персоналом
+};
+export const directorApi = {
   getPersonnel,
   registerEmployee,
   getExpertApplications,
@@ -492,24 +486,20 @@ export const directorApi = {
   archiveEmployee,
   getArchivedEmployees,
   restoreEmployee,
-  deleteEmployee,
-  // Финансовая статистика
+  deleteEmployee,
   getMonthlyTurnover,
   getNetProfit,
   getIncomeDetail,
   getExpenseDetail,
-  exportFinancialData,
-  // Панель партнёров
+  exportFinancialData,
   getPartners,
   getPartnerTurnover,
   getAllPartnersTurnover,
   updatePartnerCommission,
-  togglePartnerStatus,
-  // Общая статистика
+  togglePartnerStatus,
   getKPI,
   getStatisticsSummary,
-  exportStatisticsReport,
-  // Коммуникация с арбитрами
+  exportStatisticsReport,
   getMessages,
   sendMessage,
   getPendingApprovalClaims,

@@ -1,20 +1,16 @@
-/**
- * Утилиты для работы с уведомлениями в системе обработки запросов
- */
+
 
 import { notification } from 'antd';
 import type { NotificationPlacement } from 'antd/es/notification/interface';
 
-// Настройки уведомлений
+
 const NOTIFICATION_CONFIG = {
   duration: 4.5,
   placement: 'topRight' as NotificationPlacement,
   maxCount: 3,
 };
 
-/**
- * Показать уведомление об успехе
- */
+
 export const showSuccessNotification = (
   message: string, 
   description?: string,
@@ -28,9 +24,7 @@ export const showSuccessNotification = (
   });
 };
 
-/**
- * Показать уведомление об ошибке
- */
+
 export const showErrorNotification = (
   message: string, 
   description?: string,
@@ -44,9 +38,7 @@ export const showErrorNotification = (
   });
 };
 
-/**
- * Показать информационное уведомление
- */
+
 export const showInfoNotification = (
   message: string, 
   description?: string,
@@ -60,9 +52,7 @@ export const showInfoNotification = (
   });
 };
 
-/**
- * Показать предупреждение
- */
+
 export const showWarningNotification = (
   message: string, 
   description?: string,
@@ -76,9 +66,7 @@ export const showWarningNotification = (
   });
 };
 
-/**
- * Уведомления для операций с запросами
- */
+
 export const requestNotifications = {
   takeSuccess: () => showSuccessNotification(
     'Запрос взят в работу',
@@ -158,9 +146,6 @@ export const requestNotifications = {
   ),
 };
 
-/**
- * Уведомления для операций с чатами
- */
 export const chatNotifications = {
   messageSuccess: () => showSuccessNotification(
     'Сообщение отправлено',
@@ -211,14 +196,11 @@ export const chatNotifications = {
   ),
 };
 
-/**
- * Уведомления для системных событий
- */
 export const systemNotifications = {
   connectionLost: () => showWarningNotification(
     'Соединение потеряно',
     'Проверьте подключение к интернету. Попытка переподключения...',
-    0 // Не скрывать автоматически
+    0
   ),
   
   connectionRestored: () => showSuccessNotification(
@@ -229,13 +211,13 @@ export const systemNotifications = {
   sessionExpired: () => showErrorNotification(
     'Сессия истекла',
     'Ваша сессия истекла. Необходимо войти в систему заново',
-    0 // Не скрывать автоматически
+    0
   ),
   
   maintenanceMode: () => showWarningNotification(
     'Техническое обслуживание',
     'Система находится в режиме технического обслуживания',
-    0 // Не скрывать автоматически
+    0
   ),
   
   updateAvailable: () => showInfoNotification(
@@ -245,9 +227,6 @@ export const systemNotifications = {
   ),
 };
 
-/**
- * Уведомления для операций с файлами
- */
 export const fileNotifications = {
   uploadStart: (fileName: string) => showInfoNotification(
     'Загрузка файла',
@@ -256,8 +235,8 @@ export const fileNotifications = {
   ),
   
   uploadProgress: (fileName: string, progress: number) => {
-    // Для прогресса лучше использовать отдельный компонент
-    // Здесь просто заглушка
+
+
     console.log(`Upload progress for ${fileName}: ${progress}%`);
   },
   
@@ -293,16 +272,10 @@ export const fileNotifications = {
   ),
 };
 
-/**
- * Закрыть все уведомления
- */
 export const closeAllNotifications = () => {
   notification.destroy();
 };
 
-/**
- * Настроить глобальные параметры уведомлений
- */
 export const configureNotifications = (config: {
   duration?: number;
   placement?: NotificationPlacement;

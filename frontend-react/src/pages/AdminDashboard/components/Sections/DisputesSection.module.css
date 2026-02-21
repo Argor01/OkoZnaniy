@@ -1,4 +1,4 @@
-/* Секция споров */
+﻿
 .disputesContainer {
   padding: 0;
 }
@@ -70,7 +70,7 @@
   border-radius: 8px;
 }
 
-/* Стили для ячеек таблицы */
+
 .orderInfo {
   display: flex;
   flex-direction: column;
@@ -148,7 +148,7 @@
   padding: 0 8px;
 }
 
-/* Стили для модальных окон */
+
 .disputeModal {
   line-height: 1.6;
 }
@@ -173,7 +173,7 @@
   margin-bottom: 8px;
 }
 
-/* Кастомизация таблицы */
+
 .disputesTable :global(.ant-table-thead > tr > th) {
   background: #fafafa;
   font-weight: 600;
@@ -195,21 +195,21 @@
   text-align: center;
 }
 
-/* Центрирование пагинации */
+
 .disputesTable :global(.ant-table-pagination-right) {
-  justify-content: center !important;
+  justify-content: center;
 }
 
 .disputesTable :global(.ant-table-pagination) {
-  display: flex !important;
-  justify-content: center !important;
+  display: flex;
+  justify-content: center;
 }
 
 :where(.css-1odpy5d).ant-table-wrapper .ant-table-pagination-right {
   justify-content: center;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .statsContainer {
     grid-template-columns: repeat(2, 1fr);
@@ -234,7 +234,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .statsContainer {
     grid-template-columns: 1fr;

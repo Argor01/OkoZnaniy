@@ -112,10 +112,10 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
   
   const [reopenForm] = Form.useForm();
 
-  // Убеждаемся, что claims - это массив
+  
   const claimsData = Array.isArray(claims) ? claims : [];
 
-  // Фильтрация данных
+  
   const filteredClaims = claimsData.filter(claim => {
     const matchesSearch = claim.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          claim.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -143,7 +143,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
     return matchesSearch && matchesCategory && matchesPriority && matchesAdmin && matchesRating && matchesDate;
   });
 
-  // Статистика
+  
   const stats = {
     total: filteredClaims.length,
     avgResolutionTime: filteredClaims.reduce((sum, claim) => sum + claim.resolution.resolution_time_hours, 0) / filteredClaims.length || 0,
@@ -151,7 +151,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
     withFeedback: filteredClaims.filter(claim => claim.resolution.user_feedback).length,
   };
 
-  // Обработчики
+  
   const handleViewClaim = (claim: Claim) => {
     setSelectedClaim(claim);
     setViewModalVisible(true);
@@ -190,7 +190,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
     message.success('Отчет экспортируется...');
   };
 
-  // Функции для отображения
+  
   const getCategoryColor = (category: string) => {
     const colors = {
       technical: 'blue',
@@ -396,7 +396,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
           </Text>
         </div>
 
-        {/* Статистика */}
+        
         <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
           <Statistic title="Всего" value={stats.total} />
           <Statistic 
@@ -411,7 +411,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
           <Statistic title="С отзывами" value={stats.withFeedback} />
         </div>
 
-        {/* Фильтры */}
+        
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по обращениям"
@@ -508,7 +508,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
         />
       </Card>
 
-      {/* Модальное окно просмотра обращения */}
+      
       <Modal
         title="Детали завершённого обращения"
         open={viewModalVisible}
@@ -634,7 +634,7 @@ export const CompletedClaimsSection: React.FC<CompletedClaimsSectionProps> = ({
         )}
       </Modal>
 
-      {/* Модальное окно переоткрытия */}
+      
       <Modal
         title="Переоткрыть обращение"
         open={reopenModalVisible}

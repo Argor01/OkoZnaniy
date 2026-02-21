@@ -1,6 +1,4 @@
-/**
- * Таблица чатов администраторов
- */
+
 
 import React from 'react';
 import { Table, Button, Tag, Avatar, Tooltip, Space, Badge, Input } from 'antd';
@@ -212,9 +210,7 @@ export const AdminChatsTable: React.FC<AdminChatsTableProps> = ({
         );
       },
     },
-  ];
-
-  // Заголовок таблицы с поиском и кнопкой создания
+  ];
   const tableHeader = (
     <div className={styles.tableHeader}>
       <div className={styles.headerLeft}>
@@ -246,18 +242,14 @@ export const AdminChatsTable: React.FC<AdminChatsTableProps> = ({
         )}
       </div>
     </div>
-  );
-
-  // Группировка чатов по типам для лучшего отображения
+  );
   const groupedChats = chats.reduce((acc, chat) => {
     if (!acc[chat.type]) {
       acc[chat.type] = [];
     }
     acc[chat.type].push(chat);
     return acc;
-  }, {} as Record<string, AdminChatGroup[]>);
-
-  // Сортировка: сначала общие, потом отделы, потом приватные
+  }, {} as Record<string, AdminChatGroup[]>);
   const sortedChats = [
     ...(groupedChats.general || []),
     ...(groupedChats.department || []),
@@ -283,12 +275,10 @@ export const AdminChatsTable: React.FC<AdminChatsTableProps> = ({
         className={styles.table}
         scroll={{ x: 800 }}
         size="middle"
-        rowClassName={(record) => {
-          // Выделяем чаты с непрочитанными сообщениями
+        rowClassName={(record) => {
           if (record.unreadCount > 0) {
             return styles.unreadRow;
-          }
-          // Выделяем неактивные чаты
+          }
           if (!record.isActive) {
             return styles.inactiveRow;
           }

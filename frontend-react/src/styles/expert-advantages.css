@@ -1,4 +1,4 @@
-/* Стилизация блока "Наши условия" для экспертов */
+
 
 .expert-page .place-task {
   background: #f0f2f5;
@@ -83,7 +83,7 @@
   margin: 0 auto;
 }
 
-/* Центрирование последней карточки если она одна в ряду */
+
 .expert-page .place-task__advantages-card:nth-child(7) {
   grid-column: 1 / -1;
   max-width: 470px;
@@ -214,7 +214,7 @@
   }
 }
 
-/* Анимации */
+
 @keyframes slideInDown {
   from {
     opacity: 0;
@@ -248,7 +248,7 @@
   }
 }
 
-/* Дополнительные эффекты */
+
 .expert-page .place-task__advantages-card::after {
   content: '';
   position: absolute;
@@ -267,7 +267,7 @@
   height: 300px;
 }
 
-/* Адаптивность */
+
 @media (max-width: 1024px) {
   .expert-page .place-task {
     padding: 60px 0;

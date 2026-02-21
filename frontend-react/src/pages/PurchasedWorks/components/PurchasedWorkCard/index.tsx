@@ -1,9 +1,9 @@
-// PurchasedWorkCard.tsx
+
 import React from 'react';
 import { Card, Tag, Button, Space, Typography, Rate, Badge } from 'antd';
 import { EyeOutlined, DownloadOutlined, HeartOutlined, HeartFilled, CheckOutlined, CalendarOutlined } from '@ant-design/icons';
 import { PurchasedWork } from '../../types';
-import styles from './PurchasedWorkCard.module.css'; // Используем те же стили!
+import styles from './PurchasedWorkCard.module.css'; 
 
 const { Text, Title } = Typography;
 
@@ -77,7 +77,6 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
         {work.description}
       </Text>
 
-      {/* Новая секция: Информация о покупке */}
       <div style={{ 
         padding: '8px 0', 
         margin: '12px 0', 

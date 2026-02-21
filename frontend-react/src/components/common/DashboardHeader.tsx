@@ -162,7 +162,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
       <div className={styles.headerRight}>
         <Space size={isMobile ? 8 : 16}>
-          {/* Баланс */}
           <Button
             type="text"
             icon={<WalletOutlined style={{ color: 'white' }} />}
@@ -177,7 +176,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             )}
           </Button>
 
-          {/* Сообщения */}
           <Badge count={unreadMessages} offset={[-5, 5]}>
             <Button
               type="text"
@@ -187,7 +185,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             />
           </Badge>
 
-          {/* Уведомления */}
+          
           <Badge count={unreadNotifications} offset={[-5, 5]}>
             <Button
               type="text"
@@ -197,7 +195,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             />
           </Badge>
 
-          {/* Поддержка */}
+          
           <Dropdown
             menu={{
               items: [
@@ -210,7 +208,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                           Служба поддержки
                         </Text>
                         
-                        {/* Телефон */}
+                        
                         <div 
                           style={{ 
                             marginBottom: 8, 
@@ -241,7 +239,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                           <CopyOutlined style={{ fontSize: 12, color: '#9ca3af' }} />
                         </div>
                         
-                        {/* Email */}
+                        
                         <div 
                           style={{ 
                             marginBottom: 8, 
@@ -273,7 +271,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         </div>
                       </div>
                       
-                      {/* График работы */}
+                      
                       <div style={{ 
                         marginBottom: 4, 
                         paddingTop: 12, 
@@ -317,7 +315,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             />
           </Dropdown>
 
-          {/* Профиль */}
+          
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
             <div className={styles.profileSection}>
               {!isMobile && (

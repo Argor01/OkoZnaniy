@@ -184,7 +184,6 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
       destroyOnClose
     >
       <div className={styles.container}>
-        {/* Заголовок запроса */}
         <Card className={styles.header}>
           <div className={styles.requestInfo}>
             <div className={styles.customerInfo}>
@@ -258,7 +257,6 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
           )}
         </Card>
 
-        {/* Сообщения */}
         <Card title="Переписка" className={styles.messages}>
           <List
             dataSource={messages}
@@ -300,7 +298,7 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
           />
         </Card>
 
-        {/* Форма ответа */}
+        
         {request.status !== 'completed' && (
           <Card className={styles.replyForm}>
             <TextArea

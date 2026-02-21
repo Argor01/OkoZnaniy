@@ -43,25 +43,23 @@ export const useAdminAuth = () => {
     setLoading(false);
   };
 
-  /**
-   * Быстрый вход для тестирования
-   */
+  
   const handleQuickLogin = async (email: string, password: string) => {
     try {
       setLoading(true);
       const response = await authApi.login({ username: email, password });
       
-      // Сохраняем токены
+      
       localStorage.setItem('access_token', response.access);
       localStorage.setItem('refresh_token', response.refresh);
       
-      // Получаем данные пользователя
+      
       const currentUser = await authApi.getCurrentUser();
       setUser(currentUser);
       
       message.success(`Вход выполнен как ${currentUser.username}`);
       
-      // Перенаправляем в зависимости от роли
+      
       if (currentUser.role === 'partner') {
         navigate(ROUTES.partner.root);
       } else if (currentUser.role === 'arbitrator') {
@@ -106,14 +104,14 @@ export const useAdminAuth = () => {
     });
   };
 
-  // Вычисляемые значения
+  
   const canLoadData = hasToken && !!user && user.role === 'admin';
   const isDirector = user?.role === 'director';
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 
   return {
-    // Состояние
+    
     user,
     loading,
     hasToken,
@@ -122,7 +120,7 @@ export const useAdminAuth = () => {
     canLoadData,
     isDirector,
     
-    // Методы
+    
     checkAuth,
     handleLoginSuccess,
     handleQuickLogin,

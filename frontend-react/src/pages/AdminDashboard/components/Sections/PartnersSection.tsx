@@ -13,10 +13,7 @@ interface PartnersSectionProps {
   onView: (partner: Partner) => void;
 }
 
-/**
- * Секция управления партнерами
- * Отображает таблицу партнеров с возможностью редактирования
- */
+
 export const PartnersSection: React.FC<PartnersSectionProps> = ({
   partners,
   loading,

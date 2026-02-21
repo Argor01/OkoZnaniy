@@ -9,7 +9,7 @@ import { getMediaUrl } from '../config/api';
 
 const { Title, Text, Paragraph } = Typography;
 
-// Тестовые данные для демонстрации удалены
+
 
 const ExpertProfile: React.FC = () => {
   const { expertId } = useParams<{ expertId: string }>();
@@ -17,11 +17,11 @@ const ExpertProfile: React.FC = () => {
   const [expertStats, setExpertStats] = React.useState<ExpertStatistics | null>(null);
   const [expert, setExpert] = React.useState<any>(null);
 
-  // Загружаем данные эксперта
+  
   const { data: expertData, isLoading: expertLoading, error: expertError } = useQuery({
     queryKey: ['expert', expertId],
     queryFn: async () => {
-      // Получаем данные эксперта через API пользователей
+      
       const response = await fetch(`http://localhost:8000/api/users/${expertId}/`);
       if (!response.ok) throw new Error('Эксперт не найден');
       return response.json();
@@ -29,14 +29,14 @@ const ExpertProfile: React.FC = () => {
     enabled: !!expertId,
   });
 
-  // Загружаем статистику эксперта
+  
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['expert-stats', expertId],
     queryFn: () => expertsApi.getExpertStatistics(Number(expertId)),
     enabled: !!expertId,
   });
 
-  // Загружаем отзывы эксперта
+  
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
     queryKey: ['expert-reviews', expertId],
     queryFn: () => expertsApi.getReviews(Number(expertId)),
@@ -89,7 +89,7 @@ const ExpertProfile: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 800, margin: '24px auto', padding: '0 24px' }}>
-      {/* Заголовок */}
+      
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
           Назад
@@ -97,16 +97,16 @@ const ExpertProfile: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
             {expert.avatar ? (
-              <img 
-                src={`http://localhost:8000${expert.avatar}`} 
-                alt="Аватар" 
-                style={{ 
-                  width: 60, 
-                  height: 60, 
-                  borderRadius: '50%', 
+              <img
+                src={getMediaUrl(expert.avatar)}
+                alt="Аватар"
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
                   objectFit: 'cover',
                   border: '2px solid #f0f0f0'
-                }} 
+                }}
               />
             ) : (
               <div style={{ 
@@ -135,23 +135,19 @@ const ExpertProfile: React.FC = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
-        {/* Основная информация */}
         <div>
-          {/* О себе */}
           {expert.bio && (
             <Card title="О себе" style={{ marginBottom: 16 }}>
               <Paragraph>{expert.bio}</Paragraph>
             </Card>
           )}
 
-          {/* Образование */}
           {expert.education && (
             <Card title="Образование" style={{ marginBottom: 16 }}>
               <Paragraph>{expert.education}</Paragraph>
             </Card>
           )}
 
-          {/* Навыки */}
           {expert.skills && (
             <Card title="Навыки" style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -164,7 +160,6 @@ const ExpertProfile: React.FC = () => {
             </Card>
           )}
 
-          {/* Портфолио */}
           {expert.portfolio_url && (
             <Card title="Портфолио" style={{ marginBottom: 16 }}>
               <Button 
@@ -179,9 +174,7 @@ const ExpertProfile: React.FC = () => {
           )}
         </div>
 
-        {/* Боковая панель */}
         <div>
-          {/* Рейтинг и статистика */}
           <Card title="Рейтинг и статистика" style={{ marginBottom: 16 }}>
             {statsLoading ? (
               <Spin />
@@ -224,7 +217,6 @@ const ExpertProfile: React.FC = () => {
             )}
           </Card>
 
-          {/* Контактная информация */}
           <Card title="Контактная информация">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div>
@@ -249,7 +241,6 @@ const ExpertProfile: React.FC = () => {
             </div>
           </Card>
 
-          {/* Дополнительная информация */}
           <Card title="Дополнительно" style={{ marginTop: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {expert.experience_years && (
@@ -276,7 +267,6 @@ const ExpertProfile: React.FC = () => {
         </div>
       </div>
 
-      {/* Отзывы */}
       <Card title={`Отзывы (${reviews.length})`} style={{ marginTop: 24 }}>
         {reviewsLoading ? (
           <div style={{ textAlign: 'center', padding: '20px' }}>

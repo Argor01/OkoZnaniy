@@ -33,7 +33,7 @@ const GeneralStatistics: React.FC = () => {
   ]);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Получаем данные из API
+  
   const { data: kpiData, isLoading } = useQuery({
     queryKey: ['kpi', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
     queryFn: () => getKPI(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
@@ -57,7 +57,7 @@ const GeneralStatistics: React.FC = () => {
     );
   }
 
-  // Извлекаем данные из API
+  
   const totalTurnover = kpiData?.total_turnover ?? kpiData?.totalTurnover ?? 0;
   const turnoverChange = kpiData?.turnover_change ?? kpiData?.turnoverChange ?? 0;
   const netProfit = kpiData?.net_profit ?? kpiData?.netProfit ?? 0;
@@ -114,10 +114,10 @@ const GeneralStatistics: React.FC = () => {
       message.loading({ content: 'Подготовка данных для экспорта...', key: 'export' });
 
       if (format === 'excel') {
-        // Импортируем библиотеку динамически
+        
         const XLSX = await import('xlsx');
 
-        // Подготавливаем данные для экспорта
+        
         const exportData = [
           {
             'Показатель': 'Общий оборот',
@@ -155,39 +155,32 @@ const GeneralStatistics: React.FC = () => {
             'Значение': totalPartners,
             'Изменение': '',
           },
-        ];
-
-        // Создаем рабочую книгу
+        ];
         const wb = XLSX.utils.book_new();
         
-        // Создаем лист из данных
+        
         const ws = XLSX.utils.json_to_sheet(exportData);
 
-        // Настраиваем ширину колонок
+        
         ws['!cols'] = [
-          { wch: 25 }, // Показатель
-          { wch: 20 }, // Значение
-          { wch: 15 }, // Изменение
+          { wch: 25 }, 
+          { wch: 20 }, 
+          { wch: 15 }, 
         ];
 
-        // Добавляем лист в книгу
+        
         XLSX.utils.book_append_sheet(wb, ws, 'Статистика');
 
-        // Формируем имя файла
-        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
-
-        // Сохраняем файл
+        
+        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
         XLSX.writeFile(wb, fileName);
 
         message.success({ content: 'Данные успешно экспортированы!', key: 'export', duration: 2 });
-      } else if (format === 'pdf') {
-        // Импортируем pdfmake для лучшей поддержки кириллицы
+      } else if (format === 'pdf') {
         const pdfMakeModule = await import('pdfmake/build/pdfmake');
         const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
         
-        const pdfMake = pdfMakeModule.default || pdfMakeModule;
-        
-        // Устанавливаем шрифты
+        const pdfMake = pdfMakeModule.default || pdfMakeModule;
         if (pdfFontsModule.default && pdfFontsModule.default.pdfMake) {
           pdfMake.vfs = pdfFontsModule.default.pdfMake.vfs;
         } else if (pdfFontsModule.pdfMake) {
@@ -196,9 +189,7 @@ const GeneralStatistics: React.FC = () => {
           pdfMake.vfs = pdfFontsModule.default;
         } else {
           pdfMake.vfs = pdfFontsModule;
-        }
-
-        // Подготавливаем данные для таблицы
+        }
         const tableBody = [
           [
             { text: 'Показатель', style: 'tableHeader' },
@@ -235,9 +226,7 @@ const GeneralStatistics: React.FC = () => {
           ['Всего клиентов', totalClients.toString()],
           ['Всего экспертов', totalExperts.toString()],
           ['Всего партнеров', totalPartners.toString()]
-        ];
-
-        // Определяем структуру документа
+        ];
         const docDefinition: any = {
           content: [
             { text: 'Общая статистика', style: 'header' },
@@ -299,9 +288,7 @@ const GeneralStatistics: React.FC = () => {
               ]
             };
           }
-        };
-
-        // Создаем и скачиваем PDF
+        };
         pdfMake.createPdf(docDefinition).download(
           `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.pdf`
         );
@@ -317,7 +304,7 @@ const GeneralStatistics: React.FC = () => {
   return (
     <div>
 
-      {/* Селектор периода */}
+      
       <Card style={{ 
         marginBottom: 16,
         borderRadius: isMobile ? 8 : 12
@@ -469,7 +456,7 @@ const GeneralStatistics: React.FC = () => {
         </Space>
       </Card>
 
-      {/* KPI карточки */}
+      
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={6}>
           <Card style={{ 
@@ -606,7 +593,7 @@ const GeneralStatistics: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Графики */}
+      
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginTop: 24 }}>
       </Row>
     </div>

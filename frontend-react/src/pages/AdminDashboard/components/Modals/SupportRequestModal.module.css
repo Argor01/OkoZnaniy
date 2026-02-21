@@ -1,4 +1,4 @@
-/* Стили для SupportRequestModal */
+﻿
 
 .modal {
   top: 20px;
@@ -21,7 +21,7 @@
   gap: 0;
 }
 
-/* Заголовок запроса */
+
 .header {
   border-radius: 0;
   border-bottom: 1px solid #f0f0f0;
@@ -82,7 +82,7 @@
   gap: 4px;
 }
 
-/* Сообщения */
+
 .messages {
   border-radius: 0;
   border-top: none;
@@ -181,7 +181,7 @@
   text-decoration: underline;
 }
 
-/* Форма ответа */
+
 .replyForm {
   border-radius: 0;
   border-top: none;
@@ -206,10 +206,10 @@
   gap: 8px;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .modal {
-    width: 90% !important;
+    width: 90%;
     max-width: 700px;
   }
   
@@ -223,10 +223,10 @@
   }
 }
 
-/* Адаптивность для мобильных устройств */
+
 @media (max-width: 768px) {
   .modal {
-    width: 100% !important;
+    width: 100%;
     max-width: none;
     margin: 0;
     top: 0;
@@ -281,7 +281,7 @@
   }
 }
 
-/* Адаптивность для очень маленьких экранов */
+
 @media (max-width: 480px) {
   .header .ant-card-body,
   .messages .ant-card-body,
@@ -326,7 +326,7 @@
   }
 }
 
-/* Анимации */
+
 .messageItem {
   animation: fadeInUp 0.3s ease-out;
 }
@@ -342,7 +342,7 @@
   }
 }
 
-/* Скроллбар для сообщений */
+
 .messages::-webkit-scrollbar {
   width: 6px;
 }
@@ -361,22 +361,22 @@
   background: #a8a8a8;
 }
 
-/* Кастомизация Badge */
+
 .requestMeta .ant-badge {
   font-size: 12px;
 }
 
-/* Кастомизация Upload */
+
 .attachments .ant-upload {
   display: inline-block;
 }
 
-/* Состояния загрузки */
+
 .replyActions .ant-btn-loading {
   pointer-events: none;
 }
 
-/* Hover эффекты */
+
 .messageContent {
   transition: all 0.2s ease;
 }

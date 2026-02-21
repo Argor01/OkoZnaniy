@@ -137,11 +137,11 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
   const [escalateForm] = Form.useForm();
   const [assignForm] = Form.useForm();
   const [callForm] = Form.useForm(); 
- // Мок данные для демонстрации
+ 
 
   const requestsData = requests;
   
-  // Фильтрация данных
+  
   const filteredRequests = requestsData.filter(request => {
     const matchesSearch = request.title.toLowerCase().includes(searchText.toLowerCase()) ||
                          request.description.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -163,7 +163,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
     return matchesSearch && matchesType && matchesPriority && matchesSource && matchesUserType && matchesOverdue && matchesDate;
   });
 
-  // Статистика
+  
   const stats = {
     total: filteredRequests.length,
     overdue: filteredRequests.filter(r => r.is_overdue).length,
@@ -172,7 +172,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
     avgWaitingTime: filteredRequests.reduce((sum, r) => sum + r.waiting_time_hours, 0) / filteredRequests.length || 0,
   };
 
-  // Обработчики
+  
   const handleViewRequest = (request: CustomerRequest) => {
     setSelectedRequest(request);
     setViewModalVisible(true);
@@ -260,7 +260,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
     }
   };
 
-  // Функции для отображения
+  
   const getTypeColor = (type: string) => {
     const colors = {
       technical_support: 'blue',
@@ -533,7 +533,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           </Text>
         </div>
 
-        {/* Статистика */}
+        
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={6}>
             <Statistic title="Всего запросов" value={stats.total} />
@@ -556,7 +556,6 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           </Col>
         </Row>
 
-        {/* Предупреждения */}
         {stats.overdue > 0 && (
           <Alert
             message="Внимание!"
@@ -567,7 +566,6 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           />
         )}
 
-        {/* Фильтры */}
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Search
             placeholder="Поиск по запросам"
@@ -670,9 +668,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         />
       </Card>
       
-      {/* Модальные окна */}
       
-      {/* Просмотр запроса */}
+      
+      
       <Modal
         title={`Запрос ${selectedRequest?.request_number}`}
         open={viewModalVisible}
@@ -811,7 +809,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         )}
       </Modal>
 
-      {/* Отправка ответа */}
+      
       <Modal
         title="Отправить ответ"
         open={responseModalVisible}
@@ -841,7 +839,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Эскалация запроса */}
+      
       <Modal
         title="Эскалировать запрос"
         open={escalateModalVisible}
@@ -864,7 +862,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Назначение администратора */}
+      
       <Modal
         title="Назначить администратора"
         open={assignModalVisible}
@@ -889,7 +887,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </Form>
       </Modal>
 
-      {/* Планирование звонка */}
+      
       <Modal
         title="Запланировать звонок"
         open={callModalVisible}

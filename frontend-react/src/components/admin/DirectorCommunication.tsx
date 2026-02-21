@@ -66,7 +66,7 @@ const DirectorCommunication: React.FC = () => {
     return colors[status] || 'default';
   };
 
-  // Для мобильных используем табы
+  
   if (isMobile) {
     return (
       <div>
@@ -259,13 +259,12 @@ const DirectorCommunication: React.FC = () => {
     );
   }
 
-  // Десктоп версия
+  
   return (
     <div>
       <Card>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <div style={{ display: 'flex', gap: '16px' }}>
-            {/* Список обсуждений */}
             <div style={{ width: '350px', borderRight: '1px solid #f0f0f0', paddingRight: '16px' }}>
               <Title level={5}>Обсуждения ({communications.length})</Title>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
@@ -311,7 +310,7 @@ const DirectorCommunication: React.FC = () => {
               </Space>
             </div>
 
-            {/* Чат */}
+            
             <div style={{ flex: 1 }}>
               {!selectedComm ? (
                 <div style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -322,7 +321,7 @@ const DirectorCommunication: React.FC = () => {
                 </div>
               ) : (
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                  {/* Заголовок обсуждения */}
+                  
                   <div>
                     <Title level={5} style={{ marginBottom: 8 }}>
                       {selectedComm.subject}
@@ -342,7 +341,6 @@ const DirectorCommunication: React.FC = () => {
 
                   <Divider style={{ margin: '8px 0' }} />
 
-                  {/* Сообщения */}
                   <div
                     style={{
                       maxHeight: '400px',
@@ -392,7 +390,7 @@ const DirectorCommunication: React.FC = () => {
                     </Space>
                   </div>
 
-                  {/* Решение (если есть) */}
+                  
                   {selectedComm.decision && (
                     <div
                       style={{
@@ -409,7 +407,7 @@ const DirectorCommunication: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Форма отправки сообщения */}
+                  
                   {selectedComm.status !== 'resolved' && selectedComm.status !== 'closed' && (
                     <>
                       <Divider style={{ margin: '8px 0' }} />

@@ -191,13 +191,13 @@ const EmployeeList: React.FC = () => {
     
     const isDeactivatedExpert = employee.role === 'client' && employee.application_approved === false;
     
-    // Фильтр по роли: деактивированные эксперты показываются при фильтре "Эксперт"
+    
     const matchesRole = 
       roleFilter === 'all' || 
       employee.role === roleFilter ||
       (roleFilter === 'expert' && isDeactivatedExpert);
     
-    const isActive = employee.is_active !== false; // По умолчанию считаем активным, если поле не указано
+    const isActive = employee.is_active !== false; 
     
     const matchesStatus =
       statusFilter === 'all' ||
@@ -241,18 +241,16 @@ const EmployeeList: React.FC = () => {
       title: 'Статус',
       dataIndex: 'is_active',
       key: 'is_active',
-      render: (isActive: boolean | undefined, record: Employee) => {
-        // Деактивированный эксперт - это клиент с application_approved = false
+      render: (isActive: boolean | undefined, record: Employee) => {
         const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
-        const active = isActive !== false; // По умолчанию активен
+        const active = isActive !== false; 
         
         if (!active) {
-          // Заархивированный
+          
           return <Tag color="red">Неактивен</Tag>;
         }
         
-        if (isDeactivatedExpert) {
-          // Деактивированный эксперт
+        if (isDeactivatedExpert) {
           return <Tag color="orange">Неактивен (эксперт)</Tag>;
         }
         
@@ -265,7 +263,7 @@ const EmployeeList: React.FC = () => {
       width: 120,
       render: (_: any, record: Employee) => {
         const isActive = record.is_active !== false;
-        // Деактивированный эксперт - это клиент с application_approved = false
+        
         const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
         
         return (
@@ -277,8 +275,7 @@ const EmployeeList: React.FC = () => {
                 onClick={() => handleViewDetails(record)}
               />
             </Tooltip>
-            {!isActive ? (
-              // Заархивированный сотрудник
+            {!isActive ? (
               <Tooltip title="Активировать">
                 <Button
                   type="text"
@@ -287,8 +284,7 @@ const EmployeeList: React.FC = () => {
                   style={{ color: '#52c41a' }}
                 />
               </Tooltip>
-            ) : isDeactivatedExpert ? (
-              // Деактивированный эксперт (можно активировать обратно)
+            ) : isDeactivatedExpert ? (
               <Tooltip title="Активировать как эксперта">
                 <Button
                   type="text"
@@ -297,8 +293,7 @@ const EmployeeList: React.FC = () => {
                   style={{ color: '#52c41a' }}
                 />
               </Tooltip>
-            ) : (
-              // Активный сотрудник
+            ) : (
               <>
                 <Tooltip title="Деактивировать">
                   <Button
@@ -459,7 +454,7 @@ const EmployeeList: React.FC = () => {
         </Spin>
       </Card>
 
-      {/* Модальное окно с деталями сотрудника */}
+      
       <Modal
         title="Детали сотрудника"
         open={detailModalVisible}

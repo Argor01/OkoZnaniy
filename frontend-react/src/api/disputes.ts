@@ -28,10 +28,10 @@ export interface ResolveDisputeRequest {
   result: string;
 }
 
-// Флаг для использования mock данных
+
 const USE_MOCK_DATA = false;
 
-// Хранилище для назначенных арбитров
+
 const getAssignedArbitrators = (): Map<number, number> => {
   try {
     const stored = localStorage.getItem('admin_assigned_arbitrators');
@@ -55,7 +55,7 @@ const saveAssignedArbitrator = (disputeId: number, arbitratorId: number): void =
   }
 };
 
-// Генерация mock данных для споров
+
 const generateMockDisputes = (): Dispute[] => {
   const assignedArbitrators = getAssignedArbitrators();
   const arbitrators = [
@@ -168,7 +168,7 @@ const generateMockDisputes = (): Dispute[] => {
 };
 
 export const disputesApi = {
-  // Получить все споры (для админов)
+  
   getDisputes: async (): Promise<Dispute[]> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -178,7 +178,7 @@ export const disputesApi = {
     try {
       const response = await apiClient.get('/orders/disputes/');
       const data = response.data;
-      // Обрабатываем разные форматы ответа
+      
       if (data?.data?.results && Array.isArray(data.data.results)) {
         return data.data.results;
       }
@@ -198,7 +198,7 @@ export const disputesApi = {
     }
   },
 
-  // Получить споры для арбитра
+  
   getMyDisputes: async (): Promise<Dispute[]> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -217,7 +217,7 @@ export const disputesApi = {
     }
   },
 
-  // Получить спор по ID
+  
   getDispute: async (id: number): Promise<Dispute> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -246,11 +246,11 @@ export const disputesApi = {
     }
   },
 
-  // Создать спор по заказу
+  
   createDispute: async (orderId: number, data: CreateDisputeRequest): Promise<Dispute> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));
-      // В реальном приложении здесь был бы запрос к API для создания спора
+      
       throw new Error('Создание спора через mock данные не поддерживается');
     }
 
@@ -258,7 +258,7 @@ export const disputesApi = {
     return response.data;
   },
 
-  // Назначить арбитра на спор
+  
   assignArbitrator: async (disputeId: number, data: AssignArbitratorRequest): Promise<Dispute> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -309,11 +309,11 @@ export const disputesApi = {
     }
   },
 
-  // Решить спор
+  
   resolveDispute: async (disputeId: number, data: ResolveDisputeRequest): Promise<Dispute> => {
     if (USE_MOCK_DATA) {
       await new Promise(resolve => setTimeout(resolve, 300));
-      // В реальном приложении здесь был бы запрос к API для решения спора
+      
       throw new Error('Решение спора через mock данные не поддерживается');
     }
 

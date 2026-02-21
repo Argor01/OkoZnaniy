@@ -1,4 +1,4 @@
-// Централизованный экспорт всех конфигов
+
 
 export * from './api';
 export * from './devAccounts';

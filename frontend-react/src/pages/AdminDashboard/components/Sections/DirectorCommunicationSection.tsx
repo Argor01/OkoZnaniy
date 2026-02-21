@@ -166,7 +166,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
   const messagesData = messages;
   const meetingRequestsData = meetingRequests;
 
-  // Фильтрация сообщений
+  
   const filteredMessages = messagesData.filter(message => {
     if (messageFilter === 'all') return true;
     if (messageFilter === 'unread') return message.status === 'sent';
@@ -175,7 +175,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
     return message.status === messageFilter;
   });
 
-  // Статистика
+  
   const stats = {
     total: messagesData.length,
     unread: messagesData.filter(m => m.status === 'sent').length,
@@ -184,7 +184,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
     pendingMeetings: meetingRequestsData.filter(m => m.status === 'pending').length,
   };
 
-  // Обработчики
+  
   const handleSendMessage = async () => {
     try {
       const values = await messageForm.validateFields();
@@ -232,7 +232,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
     }
   };
 
-  // Функции для отображения
+  
   const getMessageTypeColor = (type: string) => {
     const colors = {
       report: 'blue',
@@ -289,7 +289,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
     return texts[status as keyof typeof texts] || 'Неизвестно';
   };
 
-  // Колонки для таблицы сообщений
+  
   const messageColumns = [
     {
       title: 'Тема',
@@ -424,7 +424,6 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         style={{ marginBottom: 16 }}
       />
 
-      {/* Статистические панели */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={4}>
           <Card>
@@ -612,7 +611,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         </TabPane>
       </Tabs>
 
-      {/* Модальное окно создания сообщения */}
+      
       <Modal
         title="Написать сообщение директору"
         open={messageModalVisible}
@@ -729,7 +728,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         </Form>
       </Modal>
 
-      {/* Модальное окно запроса встречи */}
+      
       <Modal
         title="Запросить встречу с директором"
         open={meetingModalVisible}
@@ -816,7 +815,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         </Form>
       </Modal>
 
-      {/* Модальное окно просмотра сообщения */}
+      
       <Modal
         title="Просмотр сообщения"
         open={viewMessageModalVisible}
@@ -919,7 +918,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         )}
       </Modal>
 
-      {/* Модальное окно ответа */}
+      
       <Modal
         title="Ответить на сообщение"
         open={replyModalVisible}

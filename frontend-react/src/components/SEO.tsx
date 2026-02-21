@@ -22,10 +22,10 @@ const SEO: React.FC<SEOProps> = ({
   canonical
 }) => {
   useEffect(() => {
-    // Устанавливаем title
+    
     document.title = title;
     
-    // Функция для установки или обновления мета-тега
+    
     const setMetaTag = (name: string, content: string, isProperty = false) => {
       const attribute = isProperty ? 'property' : 'name';
       let element = document.querySelector(`meta[${attribute}="${name}"]`);
@@ -39,7 +39,7 @@ const SEO: React.FC<SEOProps> = ({
       element.setAttribute('content', content);
     };
     
-    // Основные мета-теги
+    
     setMetaTag('description', description);
     setMetaTag('keywords', keywords);
     setMetaTag('robots', 'index, follow');
@@ -49,7 +49,7 @@ const SEO: React.FC<SEOProps> = ({
     setMetaTag('geo.region', 'RU');
     setMetaTag('geo.placename', 'Россия');
     
-    // Open Graph
+    
     setMetaTag('og:type', 'website', true);
     setMetaTag('og:url', ogUrl, true);
     setMetaTag('og:title', ogTitle || title, true);
@@ -58,14 +58,14 @@ const SEO: React.FC<SEOProps> = ({
     setMetaTag('og:site_name', 'Око Знаний', true);
     setMetaTag('og:locale', 'ru_RU', true);
     
-    // Twitter
+    
     setMetaTag('twitter:card', 'summary_large_image');
     setMetaTag('twitter:url', ogUrl);
     setMetaTag('twitter:title', ogTitle || title);
     setMetaTag('twitter:description', ogDescription || description);
     setMetaTag('twitter:image', ogImage);
     
-    // Canonical URL
+    
     if (canonical) {
       let linkElement = document.querySelector('link[rel="canonical"]');
       if (!linkElement) {
@@ -76,7 +76,7 @@ const SEO: React.FC<SEOProps> = ({
       linkElement.setAttribute('href', canonical);
     }
     
-    // Structured Data - Organization
+    
     const orgScript = document.createElement('script');
     orgScript.type = 'application/ld+json';
     orgScript.text = JSON.stringify({
@@ -98,7 +98,7 @@ const SEO: React.FC<SEOProps> = ({
     });
     document.head.appendChild(orgScript);
     
-    // Structured Data - WebSite
+    
     const websiteScript = document.createElement('script');
     websiteScript.type = 'application/ld+json';
     websiteScript.text = JSON.stringify({
@@ -114,7 +114,7 @@ const SEO: React.FC<SEOProps> = ({
     });
     document.head.appendChild(websiteScript);
     
-    // Cleanup
+    
     return () => {
       document.head.removeChild(orgScript);
       document.head.removeChild(websiteScript);

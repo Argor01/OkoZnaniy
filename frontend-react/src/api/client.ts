@@ -14,7 +14,7 @@ const redirectToLoginIfAllowed = () => {
   window.location.assign(ROUTES.login);
 };
 
-// Добавляем токен к каждому запросу, кроме auth/регистрации
+
 apiClient.interceptors.request.use((config) => {
 
   if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
@@ -28,14 +28,14 @@ apiClient.interceptors.request.use((config) => {
   const url = config.url || '';
   const method = (config.method || 'get').toLowerCase();
 
-  // Эндпоинты аутентификации, для которых не нужен Authorization
+  
   const normalizedUrl = url.toString();
   const isAuthEndpoint =
-    normalizedUrl.includes('/users/token') || // /users/token/ и /users/token/refresh/
+    normalizedUrl.includes('/users/token') || 
     normalizedUrl.includes('/users/telegram_auth') ||
     normalizedUrl.includes('/users/verify_email_code') ||
     normalizedUrl.includes('/users/resend_verification_code') ||
-    (normalizedUrl.endsWith('/users/') && method === 'post'); // регистрация
+    (normalizedUrl.endsWith('/users/') && method === 'post'); 
 
   if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -55,18 +55,18 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Обрабатываем ошибки аутентификации
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Если ошибка 401 и это не повторный запрос
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // Пытаемся обновить токен
+        
         const refreshToken = localStorage.getItem('refresh_token');
         
         if (refreshToken) {
@@ -77,12 +77,12 @@ apiClient.interceptors.response.use(
           const { access } = response.data;
           localStorage.setItem('access_token', access);
 
-          // Повторяем оригинальный запрос с новым токеном
+          
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // Если обновление токена не удалось, очищаем и редиректим
+        
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
 
@@ -91,7 +91,7 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Для других ошибок 401 (например, refresh token истек)
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');

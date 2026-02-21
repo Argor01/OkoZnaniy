@@ -41,7 +41,7 @@ const ShopWorkDetail: React.FC = () => {
     queryFn: () => shopApi.getPurchases(),
   });
 
-  // Находим работу по ID
+  
   const work = React.useMemo(() => {
     if (!works || !workId) return null;
     return works.find((w) => w.id === Number(workId));
@@ -128,7 +128,6 @@ const ShopWorkDetail: React.FC = () => {
 
         <Card>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            {/* Заголовок и превью */}
             <div>
               <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                 <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{work.title}</Title>
@@ -138,7 +137,6 @@ const ShopWorkDetail: React.FC = () => {
               </Space>
             </div>
 
-            {/* Превью изображение */}
             {work.preview && (
               <div style={{ textAlign: 'center' }}>
                 <img 
@@ -154,9 +152,7 @@ const ShopWorkDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Основная информация */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Автор - большая плашка на всю ширину */}
               <Card 
                 style={{ 
                   background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
@@ -203,14 +199,12 @@ const ShopWorkDetail: React.FC = () => {
                 </Space>
               </Card>
 
-              {/* Остальные плашки в сетке */}
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
                 gap: 16 
               }}>
 
-                {/* Просмотры */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -231,7 +225,6 @@ const ShopWorkDetail: React.FC = () => {
                   </div>
                 </Card>
 
-                {/* Предмет */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -248,7 +241,6 @@ const ShopWorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Цена */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -280,7 +272,7 @@ const ShopWorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Рейтинг */}
+                
                 <Card 
                   size="small" 
                   style={{ 
@@ -301,7 +293,6 @@ const ShopWorkDetail: React.FC = () => {
                   </Space>
                 </Card>
 
-                {/* Дата создания */}
                 <Card 
                   size="small" 
                   style={{ 
@@ -323,7 +314,6 @@ const ShopWorkDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Описание */}
             <Card 
               title="Описание работы"
               style={{ 
@@ -339,7 +329,7 @@ const ShopWorkDetail: React.FC = () => {
               />
             </Card>
 
-            {/* Прикрепленные файлы */}
+            
             {work.files && work.files.length > 0 && (
               <Card 
                 title="Прикрепленные файлы"
@@ -379,10 +369,9 @@ const ShopWorkDetail: React.FC = () => {
               </Card>
             )}
 
-            {/* Кнопки действий */}
+            
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              {userProfile?.id === work.author?.id ? (
-                // Если это работа текущего пользователя - показываем кнопку удаления
+              {userProfile?.id === work.author?.id ? (
                 <Popconfirm
                   title="Удалить работу?"
                   description="Вы уверены, что хотите удалить эту работу? Это действие нельзя отменить."
@@ -424,8 +413,7 @@ const ShopWorkDetail: React.FC = () => {
                 >
                   Скачать
                 </Button>
-              ) : (
-                // Если это чужая работа - показываем кнопку покупки
+              ) : (
                 <Button 
                   type="primary" 
                   size="large" 

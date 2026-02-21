@@ -1,6 +1,6 @@
-/* Стили для страницы партнеров */
 
-/* Преимущества партнерства - 2x2 сетка */
+
+
 .partner-benefits__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -51,7 +51,7 @@
   max-width: 90%;
 }
 
-/* Как проходит работа - 2x3 сетка */
+
 .partner-page .advantages__wrapper {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -114,14 +114,14 @@
 }
 
 
-/* Стили для иконки Ant Design в блоке advantages */
+
 .partner-page .advantages__card-icon-antd {
   font-size: 61px;
   color: #ffb34a;
   font-weight: 300;
 }
 
-/* Стили для иконки Flaticon в блоке advantages */
+
 .partner-page .advantages__card-icon-flaticon {
   font-size: 61px;
   color: #ffb34a;

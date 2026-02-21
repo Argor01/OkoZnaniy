@@ -21,9 +21,7 @@ interface DisputeModalProps {
   onResolveDispute?: (dispute: Dispute) => void;
 }
 
-/**
- * Модальное окно для просмотра деталей спора
- */
+
 export const DisputeModal: React.FC<DisputeModalProps> = ({
   visible,
   dispute,
@@ -45,7 +43,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
     }
   };
 
-  // Создаем временную линию событий
+  
   const timelineItems = [
     {
       color: 'red',
@@ -123,7 +121,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
       ].filter(Boolean)}
     >
       <div className={styles.modalContent}>
-        {/* Статус спора */}
+        
         <div className={styles.statusSection}>
           <Tag 
             color={dispute.resolved ? 'green' : 'orange'} 
@@ -145,7 +143,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
 
         <Divider />
 
-        {/* Информация о заказе */}
         <div className={styles.section}>
           <Title level={4}>Информация о заказе</Title>
           <Row gutter={[16, 16]}>
@@ -166,7 +163,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
 
         <Divider />
 
-        {/* Участники спора */}
         <div className={styles.section}>
           <Title level={4}>Участники спора</Title>
           <Row gutter={[16, 16]}>
@@ -213,7 +209,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
 
         <Divider />
 
-        {/* Причина спора */}
         <div className={styles.section}>
           <Title level={4}>Причина спора</Title>
           <div className={styles.reasonContainer}>
@@ -223,7 +218,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
           </div>
         </div>
 
-        {/* Арбитр */}
         {dispute.arbitrator && (
           <>
             <Divider />
@@ -245,7 +239,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
           </>
         )}
 
-        {/* Решение спора */}
         {dispute.resolved && dispute.result && (
           <>
             <Divider />
@@ -262,7 +255,6 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
 
         <Divider />
 
-        {/* Временная линия */}
         <div className={styles.section}>
           <Title level={4}>История спора</Title>
           <Timeline items={timelineItems} className={styles.timeline} />

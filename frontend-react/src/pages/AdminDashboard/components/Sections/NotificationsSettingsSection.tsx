@@ -123,7 +123,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
   const settingsData = settings;
   const schedulesData = schedules;
 
-  // Обработчики для шаблонов
+  
   const handleCreateTemplate = async () => {
     try {
       const values = await templateForm.validateFields();
@@ -183,7 +183,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
     }
   };
 
-  // Функции для отображения
+  
   const getTypeIcon = (type: string) => {
     const icons = {
       email: <MailOutlined />,
@@ -236,7 +236,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
     return texts[recipient as keyof typeof texts] || 'Неизвестно';
   };
 
-  // Колонки для таблицы шаблонов
+  
   const templateColumns = [
     {
       title: 'Название',
@@ -392,8 +392,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                         {typeof setting.setting_value === 'boolean' ? (
                           <Switch 
                             checked={setting.setting_value}
-                            onChange={(checked) => {
-                              // Обновление настройки
+                            onChange={(checked) => {
                               console.log('Update setting:', setting.setting_key, checked);
                             }}
                           />
@@ -402,7 +401,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                             value={setting.setting_value as string}
                             style={{ width: 200 }}
                             onChange={(e) => {
-                              // Обновление настройки
+                              
                               console.log('Update setting:', setting.setting_key, e.target.value);
                             }}
                           />
@@ -487,7 +486,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         </TabPane>
       </Tabs>
 
-      {/* Модальное окно создания/редактирования шаблона */}
+      
       <Modal
         title={editingTemplate ? 'Редактировать шаблон' : 'Создать шаблон'}
         open={templateModalVisible}
@@ -596,7 +595,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         </Form>
       </Modal>
 
-      {/* Модальное окно тестирования шаблона */}
+      
       <Modal
         title="Тестировать шаблон"
         open={testModalVisible}

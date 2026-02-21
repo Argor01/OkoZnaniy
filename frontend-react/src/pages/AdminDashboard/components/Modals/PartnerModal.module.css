@@ -1,4 +1,4 @@
-/* Модальное окно партнера */
+﻿
 .partnerModal :global(.ant-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
@@ -34,7 +34,7 @@
 }
 
 .section h4 {
-  margin-bottom: 16px !important;
+  margin-bottom: 16px;
   color: #262626;
   font-weight: 600;
 }
@@ -102,12 +102,12 @@
   color: #262626;
 }
 
-/* Кастомизация Switch */
+
 .form :global(.ant-switch) {
   margin-top: 4px;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .partnerModal :global(.ant-modal-body) {
     padding: 20px;
@@ -131,7 +131,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .partnerModal :global(.ant-modal-body) {
     padding: 16px;
@@ -144,7 +144,7 @@
   
   .section h4 {
     font-size: 16px;
-    margin-bottom: 12px !important;
+    margin-bottom: 12px;
   }
   
   .infoItem {

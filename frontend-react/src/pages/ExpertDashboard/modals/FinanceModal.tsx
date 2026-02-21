@@ -67,13 +67,11 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
       }}
     >
       <div style={{ display: 'flex', gap: isMobile ? 16 : 24, minHeight: isMobile ? 'auto' : '600px', flexDirection: isMobile ? 'column' : 'row' }}>
-        {/* Левая часть - История операций */}
         <div style={{ flex: 1, minWidth: 0, order: isMobile ? 2 : 1 }}>
           <Text strong style={{ fontSize: isMobile ? 18 : 20, color: '#1f2937', display: 'block', marginBottom: isMobile ? 16 : 20 }}>
             История операций
           </Text>
 
-          {/* Фильтры */}
           <div style={{ display: 'flex', gap: isMobile ? 8 : 12, marginBottom: isMobile ? 16 : 24, flexWrap: 'wrap' }}>
             <Select
               defaultValue="all"
@@ -101,7 +99,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
             />
           </div>
 
-          {/* Статистика за период */}
           <div style={{ 
             background: '#f9fafb', 
             borderRadius: 12, 
@@ -128,7 +125,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
             </div>
           </div>
 
-          {/* Область для списка операций */}
           <div style={{ 
             minHeight: '400px',
             background: '#ffffff',
@@ -145,7 +141,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
           </div>
         </div>
 
-        {/* Правая часть - Боковая панель */}
         <div style={{ width: isMobile ? '100%' : 300, flexShrink: 0, order: isMobile ? 1 : 2 }}>
           <div style={{ 
             background: '#f9fafb', 
@@ -153,7 +148,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
             padding: isMobile ? '16px' : '24px',
             border: '1px solid #e5e7eb'
           }}>
-            {/* Текущий баланс */}
             <div style={{ marginBottom: isMobile ? 16 : 24 }}>
               <Text style={{ fontSize: isMobile ? 13 : 14, color: '#6b7280', display: 'block', marginBottom: 8 }}>
                 Текущий баланс:
@@ -173,7 +167,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
               </Button>
             </div>
 
-            {/* Детализация баланса */}
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
                 <div style={{ 
@@ -218,7 +211,6 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
               </Text>
             </div>
 
-            {/* Быстрые ссылки */}
             <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
               <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block', marginBottom: 12 }}>
                 Быстрые ссылки:

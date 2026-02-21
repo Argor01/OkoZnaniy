@@ -15,14 +15,14 @@ const ExpertApplication: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [welcomeModalVisible, setWelcomeModalVisible] = useState(false);
 
-  // Проверяем статус пользователя при загрузке
+  
   useEffect(() => {
     const checkUserStatus = async () => {
       try {
         const user = await authApi.getCurrentUser();
         setCurrentUser(user);
         
-        // Если анкета уже подана, заполняем форму
+        
         if (user.has_submitted_application) {
           form.setFieldsValue({
             first_name: user.first_name,
@@ -47,9 +47,9 @@ const ExpertApplication: React.FC = () => {
     setLoading(true);
     try {
       const updatedUser = await authApi.submitExpertApplication(values);
-      // Обновляем данные пользователя
+      
       setCurrentUser(updatedUser);
-      // Показываем модальное окно с приветствием
+      
       setWelcomeModalVisible(true);
     } catch (error: any) {
       console.error('Error submitting application:', error);
@@ -121,7 +121,6 @@ const ExpertApplication: React.FC = () => {
       paddingTop: '150px',
       paddingBottom: '100px'
     }}>
-      {/* Декоративные элементы */}
       <div style={{
         position: 'absolute',
         top: 50,
@@ -152,7 +151,6 @@ const ExpertApplication: React.FC = () => {
           background: '#fff',
           overflow: 'hidden'
         }}>
-          {/* Заголовок с градиентом */}
           <div style={{
             background: 'linear-gradient(146deg, var(--color-brand-blue-500) 0%, #97d0ff 100%)',
             padding: '60px 40px 40px',
@@ -176,9 +174,7 @@ const ExpertApplication: React.FC = () => {
             </Paragraph>
           </div>
 
-          {/* Содержимое карточки */}
           <div style={{ padding: '40px' }}>
-            {/* Статус анкеты */}
             {hasSubmitted && (
               <Alert
                 message="Анкета подана"
@@ -394,7 +390,6 @@ const ExpertApplication: React.FC = () => {
         </div>
       </div>
 
-      {/* Модальное окно приветствия после регистрации */}
       <Modal
         title={
           <div style={{ 
@@ -411,7 +406,7 @@ const ExpertApplication: React.FC = () => {
         open={welcomeModalVisible}
         onCancel={() => {
           setWelcomeModalVisible(false);
-          // Обновляем данные пользователя после закрытия модального окна
+          
           setTimeout(() => {
             window.location.reload();
           }, 100);
@@ -423,7 +418,7 @@ const ExpertApplication: React.FC = () => {
             size="large"
             onClick={() => {
               setWelcomeModalVisible(false);
-              // Обновляем данные пользователя после закрытия модального окна
+              
               setTimeout(() => {
                 window.location.reload();
               }, 100);

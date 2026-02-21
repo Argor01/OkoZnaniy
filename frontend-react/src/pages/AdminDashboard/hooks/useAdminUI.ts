@@ -1,20 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Grid } from 'antd';
 import type { MenuKey, Partner, Dispute } from '../types';
-import type { CustomerRequest, AdminChatGroup } from '../types/requests.types'; // 🆕
+import type { CustomerRequest, AdminChatGroup } from '../types/requests.types'; 
 import { useConfirmModal } from './useConfirmModal';
 
 const { useBreakpoint } = Grid;
 
-/**
- * Хук для управления UI состоянием админской панели
- * Управляет модальными окнами, выбранными элементами, состоянием меню
- */
+
 export const useAdminUI = () => {
   const screens = useBreakpoint();
   const confirmModal = useConfirmModal();
   
-  // Загружаем сохраненную вкладку из localStorage или используем 'overview' по умолчанию
+  
   const getSavedMenu = (): MenuKey => {
     try {
       const saved = localStorage.getItem('adminDashboard_selectedMenu');
@@ -24,44 +21,44 @@ export const useAdminUI = () => {
     }
   };
   
-  // Состояние меню
+  
   const [selectedMenu, setSelectedMenu] = useState<MenuKey>(getSavedMenu());
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
-  // Состояние модальных окон партнеров (старые)
+  
   const [partnerEditModalVisible, setPartnerEditModalVisible] = useState(false);
   const [partnerViewModalVisible, setPartnerViewModalVisible] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
 
-  // Состояние модальных окон споров (старые)
+  
   const [disputeModalVisible, setDisputeModalVisible] = useState(false);
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
 
-  // Новые состояния модальных окон
+  
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
   
-  // 🆕 Состояния модальных окон для запросов
+  
   const [requestModalVisible, setRequestModalVisible] = useState(false);
   const [selectedCustomerRequest, setSelectedCustomerRequest] = useState<CustomerRequest | null>(null);
   
-  // 🆕 Состояния модальных окон для чатов администраторов
+  
   const [adminChatModalVisible, setAdminChatModalVisible] = useState(false);
   const [selectedAdminChat, setSelectedAdminChat] = useState<AdminChatGroup | null>(null);
   
-  // 🆕 Состояние модального окна создания чата
+  
   const [createChatModalVisible, setCreateChatModalVisible] = useState(false);
   
-  // 🆕 Состояние модального окна внутренней коммуникации
+  
   const [internalCommModalVisible, setInternalCommModalVisible] = useState(false);
 
-  // Адаптивность
+  
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
   const isDesktop = screens.lg;
 
-  // Автоматически открываем нужное подменю при загрузке
+  
   useEffect(() => {
     const menu = selectedMenu;
     
@@ -78,44 +75,39 @@ export const useAdminUI = () => {
     }
   }, [selectedMenu]);
 
-  /**
-   * Обработчик выбора пункта меню
-   * Сохраняет выбранную вкладку в localStorage
-   */
+  
   const handleMenuClick = useCallback((key: MenuKey) => {
     setSelectedMenu(key);
     
-    // Сохраняем выбранную вкладку в localStorage
+    
     try {
       localStorage.setItem('adminDashboard_selectedMenu', key);
     } catch (error) {
       console.error('Failed to save menu selection:', error);
     }
     
-    // Если выбран подпункт обращений, открываем меню "Обращения"
+    
     if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(key)) {
       setOpenKeys(['claims']);
     }
     
-    // 🆕 Если выбран подпункт поддержки, открываем меню "Поддержка клиентов"
+    
     if (['support_open', 'support_in_progress', 'support_completed'].includes(key)) {
       setOpenKeys(['support']);
     }
     
-    // 🆕 Если выбран подпункт обработки запросов, открываем меню "Обработка запросов"
+    
     if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(key)) {
       setOpenKeys(['request_processing']);
     }
     
-    // Закрываем drawer на мобильных после выбора
+    
     if (isMobile) {
       setDrawerVisible(false);
     }
   }, [isMobile]);
 
-  /**
-   * Обработчики для партнеров (старые)
-   */
+  
   const handleEditPartner = useCallback((partner: Partner) => {
     setSelectedPartner(partner);
     setPartnerEditModalVisible(true);
@@ -135,9 +127,7 @@ export const useAdminUI = () => {
     setSelectedPartner(null);
   }, []);
 
-  /**
-   * Новые обработчики для партнеров
-   */
+  
   const closePartnerModal = useCallback(() => {
     setIsPartnerModalOpen(false);
     setSelectedPartner(null);
@@ -145,7 +135,7 @@ export const useAdminUI = () => {
 
   const handlePartnerSave = useCallback(async (data: Partial<Partner>) => {
     try {
-      // Здесь будет логика сохранения партнера
+      
       console.log('Saving partner:', data);
       closePartnerModal();
     } catch (error) {
@@ -162,7 +152,7 @@ export const useAdminUI = () => {
 
     if (confirmed) {
       try {
-        // Здесь будет логика подтверждения партнера
+        
         console.log('Approving partner:', partnerId);
         closePartnerModal();
       } catch (error) {
@@ -180,7 +170,7 @@ export const useAdminUI = () => {
 
     if (confirmed) {
       try {
-        // Здесь будет логика отклонения партнера
+        
         console.log('Rejecting partner:', partnerId, reason);
         closePartnerModal();
       } catch (error) {
@@ -198,7 +188,7 @@ export const useAdminUI = () => {
 
     if (confirmed) {
       try {
-        // Здесь будет логика блокировки партнера
+        
         console.log('Blocking partner:', partnerId);
         closePartnerModal();
       } catch (error) {
@@ -207,9 +197,7 @@ export const useAdminUI = () => {
     }
   }, [confirmModal, closePartnerModal]);
 
-  /**
-   * Обработчики для споров (старые)
-   */
+  
   const handleViewDispute = useCallback((dispute: Dispute) => {
     setSelectedDispute(dispute);
     setDisputeModalVisible(true);
@@ -222,9 +210,7 @@ export const useAdminUI = () => {
     setSelectedDispute(null);
   }, []);
 
-  /**
-   * Новые обработчики для споров
-   */
+  
   const closeDisputeModal = useCallback(() => {
     setIsDisputeModalOpen(false);
     setSelectedDispute(null);
@@ -232,7 +218,7 @@ export const useAdminUI = () => {
 
   const handleAssignArbitrator = useCallback(async (disputeId: number, arbitratorId: number) => {
     try {
-      // Здесь будет логика назначения арбитра
+      
       console.log('Assigning arbitrator:', disputeId, arbitratorId);
     } catch (error) {
       console.error('Error assigning arbitrator:', error);
@@ -247,8 +233,7 @@ export const useAdminUI = () => {
     });
 
     if (confirmed) {
-      try {
-        // Здесь будет логика разрешения спора
+      try {
         console.log('Resolving dispute:', disputeId, resolution, winner);
         closeDisputeModal();
       } catch (error) {
@@ -258,26 +243,20 @@ export const useAdminUI = () => {
   }, [confirmModal, closeDisputeModal]);
 
   const handleAddDisputeComment = useCallback(async (disputeId: number, comment: string) => {
-    try {
-      // Здесь будет логика добавления комментария
+    try {
       console.log('Adding comment to dispute:', disputeId, comment);
     } catch (error) {
       console.error('Error adding comment:', error);
     }
   }, []);
 
-  /**
-   * Управление drawer'ом
-   */
   const openDrawer = useCallback(() => {
     setDrawerVisible(true);
   }, []);
 
   const closeDrawer = useCallback(() => {
     setDrawerVisible(false);
-  }, []);
-
-  // 🆕 Обработчики для модальных окон запросов
+  }, []);
   const handleViewRequest = useCallback((request: CustomerRequest) => {
     setSelectedCustomerRequest(request);
     setRequestModalVisible(true);
@@ -286,9 +265,7 @@ export const useAdminUI = () => {
   const closeRequestModal = useCallback(() => {
     setRequestModalVisible(false);
     setSelectedCustomerRequest(null);
-  }, []);
-
-  // 🆕 Обработчики для модальных окон чатов администраторов
+  }, []);
   const handleViewAdminChat = useCallback((chat: AdminChatGroup) => {
     setSelectedAdminChat(chat);
     setAdminChatModalVisible(true);
@@ -297,18 +274,14 @@ export const useAdminUI = () => {
   const closeAdminChatModal = useCallback(() => {
     setAdminChatModalVisible(false);
     setSelectedAdminChat(null);
-  }, []);
-
-  // 🆕 Обработчики для модального окна создания чата
+  }, []);
   const openCreateChatModal = useCallback(() => {
     setCreateChatModalVisible(true);
   }, []);
 
   const closeCreateChatModal = useCallback(() => {
     setCreateChatModalVisible(false);
-  }, []);
-
-  // 🆕 Обработчики для модального окна внутренней коммуникации
+  }, []);
   const openInternalCommModal = useCallback(() => {
     setInternalCommModalVisible(true);
   }, []);
@@ -317,9 +290,6 @@ export const useAdminUI = () => {
     setInternalCommModalVisible(false);
   }, []);
 
-  /**
-   * Сброс всех состояний UI
-   */
   const resetUI = useCallback(() => {
     setSelectedMenu('overview');
     setOpenKeys([]);
@@ -339,76 +309,53 @@ export const useAdminUI = () => {
     closeInternalCommModal,
   ]);
 
-  return {
-    // Состояние меню
+  return {
     selectedMenu,
     openKeys,
     setOpenKeys,
-    handleMenuClick,
-
-    // Состояние drawer
+    handleMenuClick,
     drawerVisible,
     openDrawer,
-    closeDrawer,
-
-    // Адаптивность
+    closeDrawer,
     isMobile,
     isTablet,
     isDesktop,
-    screens,
-
-    // Модальные окна партнеров (старые - для совместимости)
+    screens,
     partnerEditModalVisible,
     partnerViewModalVisible,
     selectedPartner,
     handleEditPartner,
     handleViewPartner,
-    closePartnerModals,
-
-    // Модальные окна споров (старые - для совместимости)
+    closePartnerModals,
     disputeModalVisible,
     selectedDispute,
     handleViewDispute,
-    closeDisputeModals,
-
-    // Новые модальные окна
+    closeDisputeModals,
     isPartnerModalOpen,
     isDisputeModalOpen,
     closePartnerModal,
-    closeDisputeModal,
-    
-    // 🆕 Модальные окна запросов
+    closeDisputeModal,
     requestModalVisible,
     selectedCustomerRequest,
     handleViewRequest,
-    closeRequestModal,
-    
-    // 🆕 Модальные окна чатов администраторов
+    closeRequestModal,
     adminChatModalVisible,
     selectedAdminChat,
     handleViewAdminChat,
-    closeAdminChatModal,
-    
-    // 🆕 Модальное окно создания чата
+    closeAdminChatModal,
     createChatModalVisible,
     openCreateChatModal,
-    closeCreateChatModal,
-    
-    // 🆕 Модальное окно внутренней коммуникации
+    closeCreateChatModal,
     internalCommModalVisible,
     openInternalCommModal,
-    closeInternalCommModal,
-    
-    // Обработчики действий
+    closeInternalCommModal,
     handlePartnerSave,
     handlePartnerApprove,
     handlePartnerReject,
     handlePartnerBlock,
     handleAssignArbitrator,
     handleResolveDispute,
-    handleAddDisputeComment,
-
-    // Утилиты
+    handleAddDisputeComment,
     resetUI,
   };
 };

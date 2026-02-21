@@ -5,7 +5,7 @@ import ProfileModal from './pages/ExpertDashboard/modals/ProfileModal';
 const TestProfileModal: React.FC = () => {
   const [visible, setVisible] = useState(false);
 
-  // Тестовые данные эксперта
+  
   const mockUserProfile = {
     id: 1,
     username: 'test_expert',

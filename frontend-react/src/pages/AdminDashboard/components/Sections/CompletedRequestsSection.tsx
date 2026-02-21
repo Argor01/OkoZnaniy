@@ -123,7 +123,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
 
   const requestsData = requests;
 
-  // Фильтрация запросов
+  
   const filteredRequests = requestsData.filter(request => {
     const matchesSearch = searchText === '' || 
       request.title.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -144,7 +144,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
     return matchesSearch && matchesType && matchesPriority && matchesResolutionType && matchesDateRange;
   });
 
-  // Статистика
+  
   const stats = {
     total: filteredRequests.length,
     resolved: filteredRequests.filter(r => r.resolution_type === 'resolved').length,
@@ -156,7 +156,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
     followUpRequired: filteredRequests.filter(r => r.follow_up_required).length,
   };
 
-  // Обработчики
+  
   const handleViewRequest = (request: CompletedRequest) => {
     setSelectedRequest(request);
     setDetailsModalVisible(true);
@@ -196,7 +196,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
     message.success('Отчет экспортируется...');
   };
 
-  // Функции для отображения
+  
   const getTypeColor = (type: string) => {
     const colors = {
       technical: 'blue',
@@ -447,7 +447,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
 
   return (
     <div>
-      {/* Статистические панели */}
+      
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Card>
@@ -491,7 +491,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         </Col>
       </Row>
 
-      {/* Фильтры и поиск */}
+      
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={16} align="middle">
           <Col span={6}>
@@ -569,7 +569,6 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         </Row>
       </Card>
 
-      {/* Таблица завершенных запросов */}
       <Card>
         <Table
           columns={columns}
@@ -588,7 +587,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         />
       </Card>
 
-      {/* Модальное окно с подробностями запроса */}
+      
       <Modal
         title="Подробности завершенного запроса"
         open={detailsModalVisible}
@@ -676,7 +675,6 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         )}
       </Modal>
 
-      {/* Модальное окно переоткрытия запроса */}
       <Modal
         title="Переоткрыть запрос"
         open={reopenModalVisible}
@@ -698,7 +696,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         />
       </Modal>
 
-      {/* Модальное окно планирования контроля */}
+      
       <Modal
         title="Запланировать последующий контроль"
         open={followUpModalVisible}

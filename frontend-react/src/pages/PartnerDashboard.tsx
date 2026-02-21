@@ -22,7 +22,7 @@ const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
 
-// Компонент статистики
+
 const StatisticsPanel: React.FC<{ 
   data: PartnerDashboardData;
   dateRange: [Dayjs, Dayjs] | null;
@@ -30,7 +30,7 @@ const StatisticsPanel: React.FC<{
 }> = ({ data, dateRange, onDateRangeChange }) => {
   const partnerInfo = data.partner_info;
 
-  // Фильтруем данные по выбранному периоду
+  
   const filteredEarnings = dateRange 
     ? data.recent_earnings.filter(earning => {
         const earningDate = dayjs(earning.created_at);
@@ -43,7 +43,7 @@ const StatisticsPanel: React.FC<{
     ? data.referrals.reduce((sum, ref) => sum + ref.orders_count, 0)
     : data.referrals.reduce((sum, ref) => sum + ref.orders_count, 0);
 
-  // Предустановленные периоды
+  
   const rangePresets = [
     { label: 'Последние 7 дней', value: [dayjs().subtract(7, 'day'), dayjs()] as [Dayjs, Dayjs] },
     { label: 'Последние 30 дней', value: [dayjs().subtract(30, 'day'), dayjs()] as [Dayjs, Dayjs] },
@@ -125,7 +125,7 @@ const StatisticsPanel: React.FC<{
   );
 };
 
-// Компонент реферальной программы
+
 const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
   const queryClient = useQueryClient();
   const [linkModalVisible, setLinkModalVisible] = useState(false);
@@ -216,7 +216,7 @@ const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   );
 };
 
-// Компонент списка рефералов
+
 const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
   const referrals = data.referrals;
 
@@ -286,7 +286,7 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
   );
 };
 
-// Компонент истории начислений
+
 const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
   const earnings = data.recent_earnings;
 
@@ -529,7 +529,7 @@ const PartnerDashboard: React.FC = () => {
         </Sider>
       )}
 
-      {/* Drawer для мобильных */}
+      
       <Drawer
         title="Меню"
         placement="left"

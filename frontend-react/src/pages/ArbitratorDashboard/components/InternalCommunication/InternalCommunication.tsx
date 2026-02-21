@@ -23,7 +23,7 @@ const InternalCommunication: React.FC = () => {
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
-  // Получение списка обращений, отправленных на согласование
+  
   const { data: claimsData } = useQuery({
     queryKey: ['arbitrator-claims', 'pending_approval'],
     queryFn: () => arbitratorApi.getClaims({ status: 'pending_approval', page_size: 50 }),
@@ -184,7 +184,6 @@ const InternalCommunication: React.FC = () => {
         />
       </Card>
 
-      {/* Модальное окно детального просмотра обращения */}
       {selectedClaim && (
         <ClaimDetails
           claim={selectedClaim}

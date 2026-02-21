@@ -52,7 +52,7 @@ export interface MeetingRequest {
 }
 
 export const internalCommunicationApi = {
-  // Получить список сообщений
+  
   getMessages: async (isArchived = false): Promise<InternalMessage[]> => {
     const response = await apiClient.get('/director/internal-communication/', {
       params: { is_archived: isArchived },
@@ -60,7 +60,7 @@ export const internalCommunicationApi = {
     return response.data;
   },
 
-  // Отправить сообщение
+  
   sendMessage: async (data: {
     recipient_id: number;
     subject: string;
@@ -73,23 +73,23 @@ export const internalCommunicationApi = {
     return response.data;
   },
 
-  // Отметить как прочитанное
+  
   markAsRead: async (messageId: number): Promise<void> => {
     await apiClient.post(`/director/internal-communication/${messageId}/mark_as_read/`);
   },
 
-  // Архивировать сообщение
+  
   archiveMessage: async (messageId: number): Promise<void> => {
     await apiClient.post(`/director/internal-communication/${messageId}/archive/`);
   },
 
-  // Получить количество непрочитанных
+  
   getUnreadCount: async (): Promise<number> => {
     const response = await apiClient.get('/director/internal-communication/unread_count/');
     return response.data.unread_count;
   },
 
-  // Получить список запросов на встречи
+  
   getMeetingRequests: async (status?: string): Promise<MeetingRequest[]> => {
     const response = await apiClient.get('/director/meeting-requests/', {
       params: status ? { status } : {},
@@ -97,7 +97,7 @@ export const internalCommunicationApi = {
     return response.data;
   },
 
-  // Запросить встречу
+  
   requestMeeting: async (data: {
     director_id: number;
     subject: string;
@@ -108,14 +108,14 @@ export const internalCommunicationApi = {
     return response.data;
   },
 
-  // Одобрить встречу
+  
   approveMeeting: async (meetingId: number, approvedDate?: string): Promise<void> => {
     await apiClient.post(`/director/meeting-requests/${meetingId}/approve/`, {
       approved_date: approvedDate,
     });
   },
 
-  // Отклонить встречу
+  
   rejectMeeting: async (meetingId: number, reason: string): Promise<void> => {
     await apiClient.post(`/director/meeting-requests/${meetingId}/reject/`, {
       reason,

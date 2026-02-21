@@ -1,6 +1,6 @@
-// Типы для API директора
 
-// Внутреннее сообщение (используется для коммуникации с арбитрами)
+
+
 export interface InternalMessage {
   id: number;
   sender: {
@@ -30,7 +30,7 @@ export interface Attachment {
   type: string;
 }
 
-// Параметры запроса списка сообщений
+
 export interface GetMessagesParams {
   page?: number;
   page_size?: number;
@@ -38,7 +38,7 @@ export interface GetMessagesParams {
   unread_only?: boolean;
 }
 
-// Пагинированный ответ
+
 export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
@@ -46,7 +46,7 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-// Запрос на отправку сообщения
+
 export interface SendMessageRequest {
   text: string;
   claim_id?: number;
@@ -54,7 +54,7 @@ export interface SendMessageRequest {
   attachments?: File[];
 }
 
-// Обращение/претензия
+
 export interface Claim {
   id: number;
   type: 'refund' | 'dispute' | 'conflict';

@@ -1,216 +1,215 @@
-/* Стили для непрочитанных сообщений */
+﻿
 
-/* Фон карточки с непрочитанным сообщением - зеленый заменен на синий с прозрачностью */
+
 .ant-card.unread-message,
 [style*="background: rgb(240, 253, 244)"],
 [style*="background-color: rgb(240, 253, 244)"] {
-  background: rgba(59, 130, 246, 0.1) !important;
+  background: rgba(59, 130, 246, 0.1);
 }
 
-/* Аватар пользователя с непрочитанными сообщениями - зеленый заменен на синий */
+
 .ant-avatar.unread-avatar,
 .ant-avatar[style*="background-color: rgb(16, 185, 129)"] {
-  background-color: rgba(59, 130, 246, 0.9) !important;
+  background-color: rgba(59, 130, 246, 0.9);
 }
 
-/* Бейдж с количеством непрочитанных сообщений - зеленый заменен на синий */
+
 .ant-badge-count.unread-badge,
 .ant-badge-count[style*="background-color: rgb(16, 185, 129)"] {
-  background-color: rgba(59, 130, 246, 0.9) !important;
+  background-color: rgba(59, 130, 246, 0.9);
 }
 
-/* Текст непрочитанного сообщения - зеленый заменен на синий */
+
 .unread-message-text,
 [style*="color: rgb(5, 150, 105)"] {
-  color: rgba(59, 130, 246, 1) !important;
+  color: rgba(59, 130, 246, 1);
   font-weight: 500;
 }
 
-/* Точка индикатора непрочитанных - зеленый заменен на синий */
+
 .ant-badge-dot.unread-indicator,
 .ant-badge-dot[style*="background"] {
-  background-color: rgba(59, 130, 246, 0.9) !important;
+  background-color: rgba(59, 130, 246, 0.9);
 }
 
-/* Глобальное переопределение зеленых цветов на синие для непрочитанных элементов */
+
 .ant-list-item[style*="background"],
 .ant-card[style*="background: rgb(240, 253, 244)"] {
-  background: rgba(59, 130, 246, 0.1) !important;
+  background: rgba(59, 130, 246, 0.1);
 }
 
 
-/* ========================================
-   АДАПТИВНЫЕ СТИЛИ ДЛЯ МОДАЛЬНЫХ ОКОН СООБЩЕНИЙ
-   ======================================== */
 
-/* Планшеты (до 840px) */
+
+
 @media (max-width: 840px) {
-  /* Модальное окно сообщений */
+  
   .ant-modal.messages-modal {
-    max-width: 90% !important;
+    max-width: 90%;
   }
 
   .ant-modal.messages-modal .ant-modal-body {
-    padding: 12px !important;
+    padding: 12px;
   }
 
-  /* Список чатов */
+  
   .ant-list-item {
-    padding: 12px !important;
+    padding: 12px;
   }
 
   .ant-avatar {
-    width: 40px !important;
-    height: 40px !important;
+    width: 40px;
+    height: 40px;
   }
 
-  /* Сообщения в чате */
+  
   .ant-comment {
-    padding: 8px !important;
+    padding: 8px;
   }
 
   .ant-comment-content {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
-  /* Форма отправки сообщения */
+  
   .ant-input-textarea textarea {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 }
 
-/* Мобильные устройства (до 480px) */
+
 @media (max-width: 480px) {
-  /* Модальное окно на весь экран */
+  
   .ant-modal.messages-modal {
-    max-width: 100% !important;
-    margin: 0 !important;
-    top: 0 !important;
-    padding: 0 !important;
+    max-width: 100%;
+    margin: 0;
+    top: 0;
+    padding: 0;
   }
 
   .ant-modal.messages-modal .ant-modal-content {
-    height: 100vh !important;
-    border-radius: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .ant-modal.messages-modal .ant-modal-header {
-    padding: 12px !important;
-    flex-shrink: 0 !important;
+    padding: 12px;
+    flex-shrink: 0;
   }
 
   .ant-modal.messages-modal .ant-modal-body {
-    padding: 8px !important;
-    flex: 1 !important;
-    overflow-y: auto !important;
+    padding: 8px;
+    flex: 1;
+    overflow-y: auto;
   }
 
   .ant-modal.messages-modal .ant-modal-footer {
-    padding: 8px !important;
-    flex-shrink: 0 !important;
+    padding: 8px;
+    flex-shrink: 0;
   }
 
-  /* Список чатов */
+  
   .ant-list-item {
-    padding: 8px !important;
+    padding: 8px;
   }
 
   .ant-avatar {
-    width: 36px !important;
-    height: 36px !important;
+    width: 36px;
+    height: 36px;
   }
 
   .ant-list-item-meta-title {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   .ant-list-item-meta-description {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
-  /* Badge с количеством сообщений */
+  
   .ant-badge-count {
-    font-size: 11px !important;
-    min-width: 18px !important;
-    height: 18px !important;
-    line-height: 18px !important;
+    font-size: 11px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
   }
 
-  /* Сообщения в чате */
+  
   .ant-comment {
-    padding: 6px !important;
+    padding: 6px;
   }
 
   .ant-comment-avatar {
-    margin-right: 8px !important;
+    margin-right: 8px;
   }
 
   .ant-comment-content {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 
   .ant-comment-content-author {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   .ant-comment-content-author-time {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
-  /* Форма отправки сообщения */
+  
   .ant-input-textarea textarea {
-    font-size: 13px !important;
-    min-height: 60px !important;
+    font-size: 13px;
+    min-height: 60px;
   }
 
   .ant-btn {
-    height: 32px !important;
-    font-size: 13px !important;
+    height: 32px;
+    font-size: 13px;
   }
 
-  /* Tabs для переключения между чатами */
+  
   .ant-tabs-tab {
-    padding: 8px 12px !important;
-    font-size: 13px !important;
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
-  /* Поиск в сообщениях */
+  
   .ant-input-search {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 
   .ant-input-search .ant-input {
-    height: 32px !important;
+    height: 32px;
   }
 }
 
-/* Очень маленькие экраны (до 360px) */
+
 @media (max-width: 360px) {
   .ant-list-item {
-    padding: 6px !important;
+    padding: 6px;
   }
 
   .ant-avatar {
-    width: 64px !important;
-    height: 64px !important;
+    width: 64px;
+    height: 64px;
   }
 
   .ant-list-item-meta-title {
-    font-size: 13px !important;
+    font-size: 13px;
   }
 
   .ant-list-item-meta-description {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   .ant-comment-content {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   .ant-input-textarea textarea {
-    font-size: 12px !important;
-    min-height: 50px !important;
+    font-size: 12px;
+    min-height: 50px;
   }
 }
+

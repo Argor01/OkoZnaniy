@@ -113,97 +113,97 @@ export interface OrderComment {
 }
 
 export const ordersApi = {
-  // Получить заказы клиента
+  
   getClientOrders: async (params?: { status?: string; ordering?: string }) => {
     const response = await apiClient.get('/users/client_orders/', { params });
     return response.data;
   },
 
-  // Доступные заказы для эксперта
+  
   getAvailableOrders: async (params?: { ordering?: string }) => {
     const response = await apiClient.get('/orders/orders/available/', { params });
     return response.data.results || response.data;
   },
 
-  // Мои заказы (фильтры по статусу)
+  
   getMyOrders: async (params?: { status?: string; ordering?: string }) => {
     const response = await apiClient.get('/orders/orders/', { params });
     return response.data.results || response.data;
   },
 
-  // Создать заказ
+  
   createOrder: async (data: CreateOrderRequest) => {
     const response = await apiClient.post('/orders/orders/', data);
     return response.data;
   },
 
-  // Получить заказ по ID
+  
   getById: async (id: number) => {
     const response = await apiClient.get(`/orders/orders/${id}/`);
     return response.data;
   },
 
-  // Получить заказ по ID (альтернативное название)
+  
   getOrder: async (id: number) => {
     const response = await apiClient.get(`/orders/orders/${id}/`);
     return response.data;
   },
 
-  // Обновить заказ
+  
   updateOrder: async (id: number, data: Partial<CreateOrderRequest>) => {
     const response = await apiClient.patch(`/orders/orders/${id}/`, data);
     return response.data;
   },
 
-  // Удалить заказ
+  
   deleteOrder: async (id: number) => {
     const response = await apiClient.delete(`/orders/orders/${id}/`);
     return response.data;
   },
 
-  // Взять заказ в работу (для экспертов)
+  
   takeOrder: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/take/`);
     return response.data;
   },
 
-  // Завершить заказ (для экспертов)
+  
   completeOrder: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/complete/`);
     return response.data;
   },
 
-  // Отправить на проверку (эксперт)
+  
   submitOrder: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/submit/`);
     return response.data;
   },
 
-  // Принять работу (клиент)
+  
   approveOrder: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/approve/`);
     return response.data;
   },
 
-  // Отправить на доработку (клиент)
+  
   requestRevision: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/revision/`);
     return response.data;
   },
 
-  // Продлить дедлайн просроченного заказа (клиент)
+  
   extendDeadline: async (id: number, deadline: string) => {
     const response = await apiClient.post(`/orders/orders/${id}/extend_deadline/`, { deadline });
     return response.data;
   },
 
-  // Отменить просроченный заказ (клиент)
+  
   cancelOverdue: async (id: number) => {
     const response = await apiClient.post(`/orders/orders/${id}/cancel_overdue/`);
     return response.data;
   },
 
-  // Загрузка файла к заказу (клиент/эксперт)
+  
   uploadOrderFile: async (
     orderId: number,
     file: File,
@@ -235,7 +235,7 @@ export const ordersApi = {
     return response.data;
   },
 
-  // Ставки экспертов: получить список
+  
   getBids: async (orderId: number): Promise<Bid[]> => {
     const response = await apiClient.get(`/orders/orders/${orderId}/bids/`);
     if (response.data && Array.isArray(response.data.results)) {
@@ -244,37 +244,37 @@ export const ordersApi = {
     return Array.isArray(response.data) ? response.data : [];
   },
 
-  // Ставка эксперта: создать/обновить
+  
   placeBid: async (orderId: number, data: { amount: number; comment?: string }): Promise<Bid> => {
     const response = await apiClient.post(`/orders/orders/${orderId}/bids/`, data);
     return response.data;
   },
 
-  // Клиент принимает ставку
+  
   acceptBid: async (orderId: number, bidId: number) => {
     const response = await apiClient.post(`/orders/orders/${orderId}/accept_bid/`, { bid_id: bidId });
     return response.data;
   },
 
-  // Клиент отклоняет ставку
+  
   rejectBid: async (orderId: number, bidId: number) => {
     const response = await apiClient.post(`/orders/orders/${orderId}/reject_bid/`, { bid_id: bidId });
     return response.data;
   },
 
-  // Эксперт отменяет ставку
+  
   cancelBid: async (orderId: number) => {
     const response = await apiClient.post(`/orders/orders/${orderId}/cancel_bid/`);
     return response.data;
   },
 
-  // Комментарии (чат): список
+  
   getComments: async (orderId: number): Promise<OrderComment[]> => {
     const response = await apiClient.get(`/orders/orders/${orderId}/comments/`);
     return response.data;
   },
 
-  // Комментарии (чат): отправить сообщение
+  
   addComment: async (orderId: number, text: string): Promise<OrderComment> => {
     const response = await apiClient.post(`/orders/orders/${orderId}/comments/`, { text });
     return response.data;

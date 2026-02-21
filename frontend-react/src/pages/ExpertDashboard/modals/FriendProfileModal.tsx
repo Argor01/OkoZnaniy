@@ -73,7 +73,6 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
       }}
     >
       <div>
-        {/* Header with gradient background */}
         <div style={{ 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           padding: '40px 32px',
@@ -127,9 +126,9 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
           </div>
         </div>
 
-        {/* Content */}
+        
         <div style={{ padding: '32px' }}>
-          {/* Bio Section */}
+          
           <div style={{ marginBottom: 32 }}>
             <div style={{ 
               display: 'flex', 
@@ -147,7 +146,6 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             </Text>
           </div>
 
-          {/* Education Section */}
           <div style={{ marginBottom: 32 }}>
             <div style={{ 
               display: 'flex', 
@@ -165,7 +163,6 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             </Text>
           </div>
 
-          {/* Experience Section */}
           <div style={{ marginBottom: 32 }}>
             <div style={{ 
               display: 'flex', 
@@ -183,7 +180,6 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             </Text>
           </div>
 
-          {/* Skills Section */}
           <div style={{ marginBottom: 32 }}>
             <div style={{ 
               display: 'flex', 
@@ -215,7 +211,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
+          
           <div style={{ 
             display: 'flex', 
             gap: 12,

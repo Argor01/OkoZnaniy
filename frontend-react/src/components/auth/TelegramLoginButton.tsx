@@ -42,17 +42,17 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
 
     if (debugEnabled) console.log('[TelegramLoginButton] Initializing with botName:', botName);
     
-    // Создаем глобальную функцию для callback
+    
     (window as any).onTelegramAuth = async (user: TelegramUser) => {
       if (debugEnabled) console.log('[TelegramLoginButton] Telegram auth callback received:', user);
       
       try {
-        // Отправляем данные на бэкенд для проверки
+        
         const response = await apiClient.post('/users/telegram_auth/', user);
         
         if (debugEnabled) console.log('[TelegramLoginButton] Backend response:', response.data);
 
-        // Сохраняем токены
+        
         const { access, refresh, user: userData } = response.data;
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
@@ -60,7 +60,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
         
         if (debugEnabled) console.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
 
-        // Вызываем callback
+        
         onAuth(userData);
       } catch (error: any) {
         if (debugEnabled) {
@@ -74,7 +74,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
       }
     };
 
-    // Создаем скрипт для Telegram Widget
+    
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.setAttribute('data-telegram-login', botName);
@@ -103,7 +103,7 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
       if (debugEnabled) console.log('[TelegramLoginButton] Widget script added to DOM');
     }
 
-    // Cleanup
+    
     return () => {
       if (container) {
         container.innerHTML = '';

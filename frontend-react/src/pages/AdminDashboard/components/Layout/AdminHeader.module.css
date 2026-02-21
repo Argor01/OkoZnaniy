@@ -1,4 +1,4 @@
-/* Хедер админской панели */
+﻿
 .header {
   background: #fff;
   padding: 0 24px;
@@ -34,7 +34,7 @@
 }
 
 .title {
-  margin: 0 !important;
+  margin: 0;
   color: #262626;
 }
 
@@ -75,7 +75,7 @@
   color: #ff4d4f;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .header {
     padding: 0 16px;
@@ -86,7 +86,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .header {
     padding: 0 16px;
@@ -109,7 +109,7 @@
   }
 }
 
-/* Кастомизация dropdown */
+
 :global(.ant-dropdown) {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

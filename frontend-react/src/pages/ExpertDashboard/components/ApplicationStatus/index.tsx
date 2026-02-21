@@ -37,7 +37,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
     );
   }
 
-  // Проверяем, что application это объект с полем status
+  
   const hasValidApplication = application && 
     typeof application === 'object' && 
     !Array.isArray(application) &&

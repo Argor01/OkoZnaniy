@@ -1,9 +1,6 @@
-/**
- * Общие константы для админской панели
- * Вынесены из монолитного AdminDashboard.tsx
- */
 
-// Размеры и отступы
+
+
 export const LAYOUT_CONSTANTS = {
   SIDER_WIDTH: 250,
   SIDER_WIDTH_TABLET: 200,
@@ -15,21 +12,21 @@ export const LAYOUT_CONSTANTS = {
   CONTENT_PADDING_MOBILE: 12,
 } as const;
 
-// Размеры экранов
+
 export const BREAKPOINTS = {
   MOBILE: 768,
   TABLET: 1024,
   DESKTOP: 1200,
 } as const;
 
-// Настройки таблиц
+
 export const TABLE_CONSTANTS = {
   DEFAULT_PAGE_SIZE: 10,
   PAGE_SIZE_OPTIONS: ['10', '20', '50', '100'],
   SCROLL_Y: 400,
 } as const;
 
-// Настройки модальных окон
+
 export const MODAL_CONSTANTS = {
   DEFAULT_WIDTH: 600,
   LARGE_WIDTH: 800,
@@ -39,7 +36,7 @@ export const MODAL_CONSTANTS = {
   },
 } as const;
 
-// Цвета статусов
+
 export const STATUS_COLORS = {
   SUCCESS: '#52c41a',
   WARNING: '#faad14',
@@ -49,7 +46,7 @@ export const STATUS_COLORS = {
   DEFAULT: '#d9d9d9',
 } as const;
 
-// Типы заработков партнеров
+
 export const EARNING_TYPES = {
   ORDER: 'order',
   REGISTRATION: 'registration',
@@ -62,7 +59,7 @@ export const EARNING_TYPE_LABELS = {
   [EARNING_TYPES.BONUS]: 'Бонус',
 } as const;
 
-// Статусы заказов
+
 export const ORDER_STATUSES = {
   NEW: 'new',
   WAITING_PAYMENT: 'waiting_payment',
@@ -73,7 +70,7 @@ export const ORDER_STATUSES = {
   CANCELLED: 'cancelled',
 } as const;
 
-// Роли пользователей
+
 export const USER_ROLES = {
   ADMIN: 'admin',
   CLIENT: 'client',
@@ -83,7 +80,7 @@ export const USER_ROLES = {
   DIRECTOR: 'director',
 } as const;
 
-// Настройки уведомлений
+
 export const NOTIFICATION_CONSTANTS = {
   SUCCESS_DURATION: 3,
   ERROR_DURATION: 5,
@@ -91,7 +88,7 @@ export const NOTIFICATION_CONSTANTS = {
   INFO_DURATION: 3,
 } as const;
 
-// Форматы дат
+
 export const DATE_FORMATS = {
   DATE: 'DD.MM.YYYY',
   DATETIME: 'DD.MM.YYYY HH:mm',
@@ -99,15 +96,15 @@ export const DATE_FORMATS = {
   MONTH_YEAR: 'MM.YYYY',
 } as const;
 
-// Лимиты
+
 export const LIMITS = {
-  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  MAX_FILE_SIZE: 10 * 1024 * 1024, 
   MAX_MESSAGE_LENGTH: 1000,
   MAX_SUBJECT_LENGTH: 200,
   MAX_DESCRIPTION_LENGTH: 2000,
 } as const;
 
-// API endpoints (относительные пути)
+
 export const API_ENDPOINTS = {
   PARTNERS: '/api/admin/partners/',
   EARNINGS: '/api/admin/earnings/',
@@ -116,7 +113,7 @@ export const API_ENDPOINTS = {
   CLAIMS: '/api/admin/claims/',
 } as const;
 
-// Ключи для React Query
+
 export const QUERY_KEYS = {
   ADMIN_PARTNERS: ['admin-partners'],
   ADMIN_EARNINGS: ['admin-earnings'],
@@ -125,10 +122,10 @@ export const QUERY_KEYS = {
   ADMIN_CLAIMS: ['admin-claims'],
 } as const;
 
-// Настройки React Query
+
 export const QUERY_CONFIG = {
-  STALE_TIME: 5 * 60 * 1000, // 5 минут
-  CACHE_TIME: 10 * 60 * 1000, // 10 минут
+  STALE_TIME: 5 * 60 * 1000, 
+  CACHE_TIME: 10 * 60 * 1000, 
   RETRY: 2,
   RETRY_DELAY: 1000,
 } as const;

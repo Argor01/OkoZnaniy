@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-// Тестовые данные заказов для ленты работ
+
 export const MOCK_ORDERS = [
   {
     id: 1001,

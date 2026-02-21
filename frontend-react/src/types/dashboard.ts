@@ -1,4 +1,4 @@
-// Типы для системы дашбордов
+
 
 export interface UserProfile {
   id: number;

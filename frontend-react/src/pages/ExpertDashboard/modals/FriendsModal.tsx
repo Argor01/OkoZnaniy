@@ -14,7 +14,7 @@ interface FriendsModalProps {
   onOpenProfile: (friend: User) => void;
 }
 
-// Цвета для аватаров
+
 const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
@@ -44,10 +44,10 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   const { data: recentUsers, isLoading } = useQuery({
     queryKey: ['recent-users'],
     queryFn: () => authApi.getRecentUsers(),
-    enabled: visible, // Загружаем только когда модалка открыта
+    enabled: visible, 
   });
 
-  // Фильтрация по поиску
+  
   const filteredUsers = recentUsers?.filter((user: User) => {
     if (!searchText) return true;
     const search = searchText.toLowerCase();

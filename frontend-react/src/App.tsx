@@ -26,7 +26,7 @@ import './styles/modals.css';
 import './styles/modals-centered.css';
 import './styles/avatar.css';
 
-// Import pages
+
 import OrderDetail from './pages/OrderDetail';
 import WorkDetail from './pages/WorkDetail';
 import ShopWorkDetail from './pages/ShopWorkDetail';
@@ -56,10 +56,10 @@ import SupportButton from './components/SupportButton';
 import { authApi } from './api/auth';
 import { ROUTES } from './utils/constants';
 
-// Configure dayjs
+
 dayjs.locale('ru');
 
-// Create a client
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -216,7 +216,6 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
-              {/* Admin login page with quick links */}
               <Route 
                 path={ROUTES.admin.root} 
                 element={<AdminLogin />} 
@@ -229,12 +228,10 @@ const App: React.FC = () => {
                 path={ROUTES.admin.directorLogin}
                 element={<Navigate to={ROUTES.admin.root} replace />}
               />
-              {/* Admin dashboard */}
               <Route 
                 path={ROUTES.admin.dashboard} 
                 element={<AdminDashboard />} 
               />
-              {/* Director dashboard */}
               <Route 
                 path={ROUTES.admin.directorDashboard}
                 element={
@@ -301,7 +298,6 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
-              {/* 404 - должен быть последним */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <SupportButton />

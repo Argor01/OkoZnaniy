@@ -1,4 +1,4 @@
-/* Основной лейаут админской панели */
+
 .adminLayout {
   min-height: 100vh;
 }
@@ -11,7 +11,7 @@
   margin: 0;
   padding: 0;
   background: #f0f2f5;
-  min-height: calc(100vh - 112px); /* Высота экрана минус хедер и футер */
+  min-height: calc(100vh - 112px); 
 }
 
 .contentInner {
@@ -23,7 +23,7 @@
   min-height: calc(100vh - 160px);
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .contentInner {
     margin: 16px;
@@ -32,10 +32,10 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .content {
-    min-height: calc(100vh - 64px); /* Только хедер */
+    min-height: calc(100vh - 64px); 
   }
   
   .contentInner {

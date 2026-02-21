@@ -1,4 +1,4 @@
-/* Карточки статистики */
+
 .statisticsContainer {
   margin-bottom: 24px;
 }
@@ -28,7 +28,7 @@
   margin-right: 8px;
 }
 
-/* Кастомизация Ant Design Statistic */
+
 .card :global(.ant-statistic-title) {
   font-size: 14px;
   color: #666;
@@ -47,7 +47,7 @@
   font-size: 28px;
 }
 
-/* Адаптивность для планшетов */
+
 @media (max-width: 1024px) {
   .statisticsContainer {
     margin-bottom: 20px;
@@ -66,7 +66,7 @@
   }
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
   .statisticsContainer {
     margin-bottom: 16px;

@@ -18,7 +18,7 @@ const Home: React.FC = () => {
   const [searchParams] = useSearchParams();
   
   useEffect(() => {
-    // Сохраняем реферальный код из URL в localStorage
+    
     const refCode = searchParams.get('ref');
     if (refCode) {
       localStorage.setItem('referral_code', refCode);

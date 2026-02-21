@@ -16,9 +16,7 @@ interface PartnerModalProps {
   mode: 'view' | 'edit';
 }
 
-/**
- * Модальное окно для просмотра и редактирования партнера
- */
+
 export const PartnerModal: React.FC<PartnerModalProps> = ({
   visible,
   partner,
@@ -88,7 +86,6 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
       }
     >
       <div className={styles.modalContent}>
-        {/* Основная информация */}
         <div className={styles.section}>
           <Title level={4}>Основная информация</Title>
           <Row gutter={[16, 16]}>
@@ -135,7 +132,6 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
 
         <Divider />
 
-        {/* Статистика */}
         <div className={styles.section}>
           <Title level={4}>Статистика</Title>
           <Row gutter={[16, 16]}>
@@ -162,7 +158,6 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
 
         <Divider />
 
-        {/* Настройки */}
         <div className={styles.section}>
           <Title level={4}>Настройки</Title>
           <Form
@@ -208,7 +203,6 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
           </Form>
         </div>
 
-        {/* Дополнительная информация */}
         {isViewMode && (
           <>
             <Divider />

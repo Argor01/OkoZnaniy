@@ -36,14 +36,14 @@ const ArbitratorDashboard: React.FC = () => {
   const [newClaimsCount, setNewClaimsCount] = useState(0);
   const [openKeys, setOpenKeys] = useState<string[]>(['claims']);
 
-  // Получение количества новых обращений для отображения в навигации
+  
   const { data: newClaimsData } = useQuery({
     queryKey: ['arbitrator-claims', 'new', 'count'],
     queryFn: () => arbitratorApi.getClaims({ status: 'new', page_size: 1 }),
     select: (data) => data?.count || 0,
     retry: false,
     retryOnMount: false,
-    refetchInterval: 30000, // Обновление каждые 30 секунд
+    refetchInterval: 30000, 
   });
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const ArbitratorDashboard: React.FC = () => {
     }
   }, [newClaimsData]);
 
-  // Проверка аутентификации и роли
+  
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -64,7 +64,7 @@ const ArbitratorDashboard: React.FC = () => {
       const currentUser = await authApi.getCurrentUser();
       setUser(currentUser);
 
-      // Проверка роли
+      
       if (currentUser.role !== 'arbitrator') {
         message.error('У вас нет доступа к этой странице');
         navigate('/expert');
@@ -111,18 +111,18 @@ const ArbitratorDashboard: React.FC = () => {
   const handleMenuClick = (key: string) => {
     if (key === 'claims_processing') {
       setMainSection('claims');
-      setOpenKeys([]); // Закрываем меню "Обращения" при переходе в другую секцию
+      setOpenKeys([]); 
     } else if (key === 'communication') {
       setMainSection('communication');
-      setOpenKeys([]); // Закрываем меню "Обращения" при переходе в другую секцию
+      setOpenKeys([]); 
     } else if (['new', 'in_progress', 'completed', 'pending_approval'].includes(key)) {
       setSelectedTab(key as NavigationTab);
       setMainSection('navigation');
-      setOpenKeys(['claims']); // Открываем меню "Обращения" при выборе подпункта
+      setOpenKeys(['claims']); 
     }
   };
 
-  // Если загрузка - показываем спиннер
+  
   if (loading) {
     return (
       <div
@@ -138,12 +138,12 @@ const ArbitratorDashboard: React.FC = () => {
     );
   }
 
-  // Если пользователь не авторизован - редирект на login
+  
   if (!user) {
-    return null; // ProtectedRoute перенаправит на /login
+    return null; 
   }
 
-  // Если пользователь не имеет роли arbitrator - показываем ошибку доступа
+  
   if (user.role !== 'arbitrator') {
     return (
       <Result
@@ -159,7 +159,7 @@ const ArbitratorDashboard: React.FC = () => {
     );
   }
 
-  // Рендер контента в зависимости от выбранной секции
+  
   const renderContent = () => {
     if (mainSection === 'navigation') {
       switch (selectedTab) {
@@ -182,7 +182,7 @@ const ArbitratorDashboard: React.FC = () => {
     return <NewClaims />;
   };
 
-  // Получение заголовка текущей секции
+  
   const getSectionTitle = (): string => {
     if (mainSection === 'navigation') {
       switch (selectedTab) {
@@ -234,7 +234,6 @@ const ArbitratorDashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Главное меню навигации */}
         <Menu
           mode="inline"
           selectedKeys={[
@@ -320,7 +319,7 @@ const ArbitratorDashboard: React.FC = () => {
               type="default"
               icon={<UserOutlined />}
               onClick={() => {
-                // Можно добавить переход к профилю
+                
                 message.info('Профиль пользователя');
               }}
             >
