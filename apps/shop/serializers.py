@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.html import strip_tags
 from .models import ReadyWork, ReadyWorkFile, Purchase
 from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 
@@ -17,8 +18,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         return obj.get_full_name() or obj.username
     
     def get_rating(self, obj):
-        # Здесь можно добавить логику для расчета рейтинга автора
-        # Пока возвращаем 0 по умолчанию
+
         return 0
 
 
@@ -70,6 +70,11 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     def get_viewsCount(self, obj):
         return int(getattr(obj, 'views_count', None) or 0)
     
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['description'] = strip_tags(data.get('description') or '')
+        return data
+
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
@@ -90,6 +95,9 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
             'preview', 'work_files'
         ]
     
+    def validate_description(self, value):
+        return strip_tags(value or '')
+
     def create(self, validated_data):
         work_files = validated_data.pop('work_files', [])
         validated_data['author'] = self.context['request'].user

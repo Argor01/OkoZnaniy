@@ -86,11 +86,6 @@ const OrderDetail: React.FC = () => {
       const filename = file?.filename || file?.file_name || 'file';
 
       if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
-        const url = file?.view_url || file?.file_url;
-        if (url) {
-          window.open(url, '_blank', 'noopener,noreferrer');
-          return;
-        }
         message.error('Не удалось скачать файл');
         return;
       }

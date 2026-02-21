@@ -11,6 +11,13 @@ from .serializers import (
 )
 
 
+class IsExpertOrStaff(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        role = getattr(user, 'role', None)
+        return bool(user and user.is_authenticated and (user.is_staff or role == 'expert'))
+
+
 class ReadyWorkViewSet(viewsets.ModelViewSet):
     """ViewSet для готовых работ"""
     
@@ -49,6 +56,11 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return CreateReadyWorkSerializer
         return ReadyWorkSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated(), IsExpertOrStaff()]
+        return super().get_permissions()
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

@@ -32,16 +32,15 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     
     def post(self, request, *args, **kwargs):
         import logging
+        from django.conf import settings
         from django.utils import timezone
         logger = logging.getLogger(__name__)
         try:
-            logger.info(f"[Token View] Login request received: {request.data}")
-            print(f"[Token View] Login request received: {request.data}")
+            if settings.DEBUG:
+                logger.debug("[Token View] Login request received")
             
-            # Получаем ответ от родительского класса
             response = super().post(request, *args, **kwargs)
             
-            # Если логин успешен, обновляем last_login
             if response.status_code == 200:
                 username = request.data.get('username')
                 if username:
@@ -49,14 +48,14 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                         user = User.objects.get(username=username)
                         user.last_login = timezone.now()
                         user.save(update_fields=['last_login'])
-                        logger.info(f"[Token View] Updated last_login for user: {username}")
+                        if settings.DEBUG:
+                            logger.debug(f"[Token View] Updated last_login for user_id: {user.id}")
                     except User.DoesNotExist:
                         pass
             
             return response
         except Exception as e:
             logger.error(f"[Token View] Error in post: {str(e)}")
-            print(f"[Token View] Error in post: {str(e)}")
             raise
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -67,6 +66,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
+        elif self.action == 'retrieve':
+            return SimpleUserSerializer
         elif self.action in ['update', 'partial_update']:
             return UserUpdateSerializer
         return UserSerializer
