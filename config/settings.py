@@ -22,17 +22,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [host for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host]
 # Добавляем testserver для тестов
 if 'testserver' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('testserver')
+
+if not DEBUG:
+    if not SECRET_KEY:
+        raise RuntimeError("SECRET_KEY is required when DEBUG is False")
+    allowed_hosts = [host for host in ALLOWED_HOSTS if host != 'testserver']
+    if not allowed_hosts:
+        raise RuntimeError("ALLOWED_HOSTS is required when DEBUG is False")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-tcu$-ps(+2&ky=7io4q#ypq-ct34oy4zw=pu#rizg^j%#@&j51'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = True
@@ -390,21 +396,21 @@ ALLOWED_EXTENSIONS = [
 MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50MB
 
 # Настройки платежных систем
-ALFABANK_API_URL = 'https://payment.alfabank.ru/payment/rest/'
-ALFABANK_USERNAME = 'your-username'  # Замените на реальные данные
-ALFABANK_PASSWORD = 'your-password'  # Замените на реальные данные
-ALFABANK_TEST_MODE = True  # В продакшене установить в False
+ALFABANK_API_URL = os.getenv('ALFABANK_API_URL', 'https://payment.alfabank.ru/payment/rest/')
+ALFABANK_USERNAME = os.getenv('ALFABANK_USERNAME')
+ALFABANK_PASSWORD = os.getenv('ALFABANK_PASSWORD')
+ALFABANK_TEST_MODE = os.getenv('ALFABANK_TEST_MODE', 'True') == 'True'
 
 # Настройки СБП
-SBP_API_URL = 'https://qr.nspk.ru/'
-SBP_MERCHANT_ID = 'your-merchant-id'  # Замените на реальные данные
-SBP_API_KEY = 'your-api-key'  # Замените на реальные данные
-SBP_TEST_MODE = True  # В продакшене установить в False
+SBP_API_URL = os.getenv('SBP_API_URL', 'https://qr.nspk.ru/')
+SBP_MERCHANT_ID = os.getenv('SBP_MERCHANT_ID')
+SBP_API_KEY = os.getenv('SBP_API_KEY')
+SBP_TEST_MODE = os.getenv('SBP_TEST_MODE', 'True') == 'True'
 
 # URL для обработки платежей
-PAYMENT_SUCCESS_URL = 'https://your-domain.com/payment/success/'  # Замените на реальный URL
-PAYMENT_FAIL_URL = 'https://your-domain.com/payment/fail/'  # Замените на реальный URL
-PAYMENT_NOTIFICATION_URL = 'https://your-domain.com/api/payments/callback/'  # Замените на реальный URL
+PAYMENT_SUCCESS_URL = os.getenv('PAYMENT_SUCCESS_URL')
+PAYMENT_FAIL_URL = os.getenv('PAYMENT_FAIL_URL')
+PAYMENT_NOTIFICATION_URL = os.getenv('PAYMENT_NOTIFICATION_URL')
 
 # Настройки шифрования платежных данных
 PAYMENT_ENCRYPTION_KEY = os.getenv('PAYMENT_ENCRYPTION_KEY', Fernet.generate_key().decode())
