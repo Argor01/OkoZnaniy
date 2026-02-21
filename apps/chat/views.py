@@ -8,6 +8,7 @@ from django.db.models import Q, Max, Count, Prefetch
 from .models import Chat, Message
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer
 from apps.orders.models import Order
+from decimal import Decimal, InvalidOperation
 
 class ChatViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -224,9 +225,6 @@ class ChatViewSet(viewsets.ModelViewSet):
         if request.user == message.sender:
             return Response({'detail': 'Нельзя принять свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if getattr(request.user, 'role', None) == 'expert' and not getattr(request.user, 'is_staff', False):
-            return Response({'detail': 'Только покупатель может принять предложение'}, status=status.HTTP_403_FORBIDDEN)
-
         offer_data = message.offer_data or {}
         if offer_data.get('status') != 'new':
             return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
@@ -255,9 +253,6 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         if request.user == message.sender:
             return Response({'detail': 'Нельзя отклонить свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if getattr(request.user, 'role', None) == 'expert' and not getattr(request.user, 'is_staff', False):
-            return Response({'detail': 'Только покупатель может отклонить предложение'}, status=status.HTTP_403_FORBIDDEN)
 
         offer_data = message.offer_data or {}
         if offer_data.get('status') != 'new':
@@ -379,9 +374,6 @@ class ChatViewSet(viewsets.ModelViewSet):
         if request.user == offer_message.sender:
             return Response({'detail': 'Нельзя принять свою собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if getattr(request.user, 'role', None) == 'expert' and not getattr(request.user, 'is_staff', False):
-            return Response({'detail': 'Только покупатель может принять работу'}, status=status.HTTP_403_FORBIDDEN)
-
         rating = request.data.get('rating', None)
         if rating is not None and rating != '':
             try:
@@ -498,9 +490,6 @@ class ChatViewSet(viewsets.ModelViewSet):
         if request.user == offer_message.sender:
             return Response({'detail': 'Нельзя отклонить свою собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if getattr(request.user, 'role', None) == 'expert' and not getattr(request.user, 'is_staff', False):
-            return Response({'detail': 'Только покупатель может отклонить работу'}, status=status.HTTP_403_FORBIDDEN)
-
         offer_data = offer_message.offer_data or {}
         if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'delivered':
             return Response({'detail': 'Сейчас нельзя отклонить работу по этому предложению'}, status=status.HTTP_400_BAD_REQUEST)
@@ -534,7 +523,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
-            
+
         # Проверка срока действия (2 дня)
         from django.utils import timezone
         import datetime
@@ -542,11 +531,16 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Срок действия предложения истек'}, status=status.HTTP_400_BAD_REQUEST)
             
         offer_data = message.offer_data
-        if offer_data.get('status') == 'accepted':
-             return Response({'detail': 'Предложение уже принято'}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(offer_data, dict):
+            return Response({'detail': 'Некорректные данные предложения'}, status=status.HTTP_400_BAD_REQUEST)
+        if offer_data.get('status', 'new') != 'new':
+            return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Создаем заказ
         try:
+            if not getattr(message.sender, 'is_staff', False) and getattr(message.sender, 'role', None) != 'expert':
+                return Response({'detail': 'Предложение может быть только от эксперта'}, status=status.HTTP_400_BAD_REQUEST)
+
             # Парсим дедлайн. Предполагаем, что фронт шлет ISO строку или что-то понятное.
             deadline_str = offer_data.get('deadline')
             deadline = None
@@ -559,20 +553,41 @@ class ChatViewSet(viewsets.ModelViewSet):
                     try:
                         deadline = timezone.datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
                     except ValueError:
-                        pass
+                        return Response({'detail': 'Некорректный формат deadline'}, status=status.HTTP_400_BAD_REQUEST)
             
             if not deadline:
-                 # Дефолт - через 3 дня, если не удалось распарсить (или вернуть ошибку)
-                 deadline = timezone.now() + datetime.timedelta(days=3)
+                deadline = timezone.now() + datetime.timedelta(days=3)
 
             subject_id = offer_data.get('subject_id')
+            if subject_id is not None and subject_id != '':
+                try:
+                    subject_id = int(subject_id)
+                except (TypeError, ValueError):
+                    return Response({'detail': 'subject_id должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                subject_id = None
+
             work_type_id = offer_data.get('work_type_id')
+            if work_type_id is not None and work_type_id != '':
+                try:
+                    work_type_id = int(work_type_id)
+                except (TypeError, ValueError):
+                    return Response({'detail': 'work_type_id должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                work_type_id = None
+
+            cost_raw = offer_data.get('cost')
+            if cost_raw is None or cost_raw == '':
+                return Response({'detail': 'cost обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                cost = Decimal(str(cost_raw))
+            except (InvalidOperation, ValueError, TypeError):
+                return Response({'detail': 'cost должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+            if cost < 0:
+                return Response({'detail': 'cost не может быть отрицательным'}, status=status.HTTP_400_BAD_REQUEST)
 
             client_user = chat.client or request.user
             expert_user = chat.expert or message.sender
-
-            if chat.client_id and request.user.id != chat.client_id:
-                return Response({'detail': 'Только заказчик может принять предложение'}, status=status.HTTP_403_FORBIDDEN)
 
             if not chat.client_id:
                 chat.client = client_user
@@ -590,7 +605,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 custom_work_type=offer_data.get('work_type') if not work_type_id else None,
                 title=offer_data.get('title') or None,
                 description=offer_data.get('description'),
-                budget=offer_data.get('cost', 0),
+                budget=cost,
                 deadline=deadline,
                 status='in_progress'
             )

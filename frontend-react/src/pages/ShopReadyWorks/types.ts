@@ -5,8 +5,6 @@ export interface Work {
   title: string;
   description: string;
   price: number;
-  originalPrice?: number;
-  discount?: number;
   category?: string;
   subject: number;
   work_type: number;

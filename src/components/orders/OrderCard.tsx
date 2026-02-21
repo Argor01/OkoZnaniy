@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, Space, Button } from 'antd';
 import { useRouter } from 'next/router';
 import { OrderStatus } from './OrderStatus';
-import { DiscountedPrice } from '../shared/Price/DiscountedPrice';
 import { formatDate } from '@/utils/formatters';
 import { Order } from '@/store/slices/ordersSlice';
 import { FileOutlined, EditOutlined } from '@ant-design/icons';
@@ -61,13 +60,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order }: OrderCardProps) =
           </div>
           <div className="info-item">
             <span className="label">Стоимость:</span>
-            <span className="value">
-              <DiscountedPrice
-                originalPrice={order.original_price || order.budget}
-                discountAmount={order.discount_amount}
-                finalPrice={order.final_price}
-              />
-            </span>
+            <span className="value">{order.budget} ₽</span>
           </div>
         </div>
 

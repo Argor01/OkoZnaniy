@@ -210,6 +210,10 @@ const OrdersFeed: React.FC = () => {
            order.client_id === userProfile?.id;
   };
 
+  const isOrderParticipant = (order: OrdersFeedOrder) => {
+    return isOrderOwner(order) || order.expert?.id === userProfile?.id;
+  };
+
   
   const handleDeleteOrder = async (orderId: number) => {
     try {
@@ -469,6 +473,7 @@ const OrdersFeed: React.FC = () => {
                       ? true
                       : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
                 : false;
+            const isParticipant = isOrderParticipant(order);
             
             return (
             <SurfaceCard
@@ -544,11 +549,11 @@ const OrdersFeed: React.FC = () => {
                 ellipsis={{ rows: 2 }}
                 style={{ color: '#666', marginBottom: 16 }}
               >
-                {order.description}
+                {isParticipant ? (order.description || 'Описание не указано') : 'Описание скрыто'}
               </Paragraph>
 
               
-              {order.files && order.files.length > 0 && (
+              {isParticipant && order.files && order.files.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
                     Прикрепленные файлы ({order.files.length}):
@@ -620,19 +625,21 @@ const OrdersFeed: React.FC = () => {
                 <Space size={10}>
                   <Avatar 
                     size={48}
-                    src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
+                    src={isParticipant ? (order.client?.avatar || order.client_avatar || userProfile?.avatar) : undefined}
                     icon={<UserOutlined />}
                     style={{ backgroundColor: '#1890ff' }}
                   />
                   <div>
                     <Text strong style={{ display: 'block', fontSize: 14 }}>
-                      {order.client?.username || order.client_name || 
-                       (order.client?.first_name && order.client?.last_name 
-                         ? `${order.client.first_name} ${order.client.last_name}` 
-                         : userProfile?.username || 'Заказчик')}
+                      {isParticipant
+                        ? (order.client?.username || order.client_name || 
+                          (order.client?.first_name && order.client?.last_name 
+                            ? `${order.client.first_name} ${order.client.last_name}` 
+                            : userProfile?.username || 'Заказчик'))
+                        : 'Заказчик скрыт'}
                     </Text>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                      Заказов: {order.client_orders_count || 1}
+                      Заказов: {isParticipant ? (order.client_orders_count || 1) : '—'}
                     </Text>
                   </div>
                 </Space>

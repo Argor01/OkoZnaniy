@@ -31,7 +31,7 @@ const features = [
   {
     icon: <DollarOutlined style={{ fontSize: 32 }} />,
     title: 'Выгодные цены',
-    description: 'Система скидок и бонусов для постоянных клиентов',
+    description: 'Прозрачная стоимость без скрытых условий',
   },
 ];
 

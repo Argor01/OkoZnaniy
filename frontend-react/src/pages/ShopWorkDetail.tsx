@@ -253,21 +253,9 @@ const ShopWorkDetail: React.FC = () => {
                     </Text>
                     <Space align="center">
                       <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                      <Space direction="vertical" size={0}>
-                        {work.discount && work.originalPrice && (
-                          <Text delete type="secondary" style={{ fontSize: 12 }}>
-                            {formatCurrency(work.originalPrice)}
-                          </Text>
-                        )}
-                        <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
-                          {formatCurrency(work.price)}
-                        </Text>
-                      </Space>
-                      {work.discount && (
-                        <Tag color="red" style={{ marginLeft: 8 }}>
-                          -{work.discount}%
-                        </Tag>
-                      )}
+                      <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
+                        {formatCurrency(work.price)}
+                      </Text>
                     </Space>
                   </Space>
                 </Card>

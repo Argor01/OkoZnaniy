@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
 from apps.catalog.models import Subject, Topic, WorkType, Complexity
-from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTypeSerializer, ComplexitySerializer, DiscountRuleSerializer
+from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTypeSerializer, ComplexitySerializer
 from apps.catalog.services import PricingService
 from apps.users.serializers import UserSerializer
 from django.utils import timezone
@@ -95,6 +95,26 @@ class OrderPriceBreakdownSerializer(serializers.Serializer):
     requirements_adjustment = serializers.DecimalField(max_digits=10, decimal_places=2)
     final_price = serializers.DecimalField(max_digits=10, decimal_places=2)
 
+class AvailableOrderSerializer(serializers.ModelSerializer):
+    subject = SubjectSerializer(read_only=True)
+    work_type = WorkTypeSerializer(read_only=True)
+    responses_count = serializers.IntegerField(read_only=True)
+    user_has_bid = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'title', 'budget', 'deadline', 'status', 'created_at',
+            'subject', 'work_type', 'responses_count', 'user_has_bid'
+        ]
+
+    def get_user_has_bid(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if not user or getattr(user, 'role', None) != 'expert':
+            return False
+        return Bid.objects.filter(order=obj, expert=user).exists()
+
 class OrderSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
     expert = UserSerializer(read_only=True)
@@ -106,7 +126,6 @@ class OrderSerializer(serializers.ModelSerializer):
     comments = OrderCommentSerializer(many=True, read_only=True)
     bids = BidSerializer(many=True, read_only=True)
     price_breakdown = OrderPriceBreakdownSerializer(read_only=True)
-    discount = DiscountRuleSerializer(read_only=True)
     rating = serializers.SerializerMethodField()
     user_has_bid = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
@@ -137,14 +156,12 @@ class OrderSerializer(serializers.ModelSerializer):
             'status', 'created_at', 'updated_at', 'files', 'comments', 'bids',
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
             'custom_topic', 'custom_subject', 'custom_work_type', 
-            'additional_requirements', 'price_breakdown', 'discount',
-            'original_price', 'discount_amount', 'final_price', 'rating',
+            'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
-            'updated_at', 'discount', 'original_price',
-            'discount_amount', 'final_price'
+            'updated_at'
         ]
 
     def validate(self, data):

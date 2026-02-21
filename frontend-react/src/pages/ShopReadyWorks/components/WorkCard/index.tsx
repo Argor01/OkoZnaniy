@@ -117,19 +117,9 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
 
       <div className={styles.footer}>
         <div className={styles.price}>
-          {work.discount && (
-            <Text delete type="secondary" className={styles.originalPrice}>
-              {work.originalPrice} ₽
-            </Text>
-          )}
           <Text strong className={styles.currentPrice}>
             {work.price} ₽
           </Text>
-          {work.discount && (
-            <Tag color="red" className={styles.discount}>
-              -{work.discount}%
-            </Tag>
-          )}
         </div>
         <Button
           type="primary"

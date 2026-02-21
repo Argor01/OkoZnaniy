@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { OrderStatus } from '@/components/orders/OrderStatus';
-import { DiscountedPrice } from '@/components/shared/Price/DiscountedPrice';
 import { fetchOrderById, Order } from '@/store/slices/ordersSlice';
 import { formatDate } from '@/utils/formatters';
 
@@ -75,11 +74,7 @@ const OrderPage: React.FC = () => {
             {formatDate(order.deadline)}
           </Descriptions.Item>
           <Descriptions.Item label="Стоимость">
-            <DiscountedPrice
-              originalPrice={order.original_price || order.budget}
-              discountAmount={order.discount_amount}
-              finalPrice={order.final_price}
-            />
+            {order.budget} ₽
           </Descriptions.Item>
           <Descriptions.Item label="Дата создания">
             {formatDate(order.created_at)}

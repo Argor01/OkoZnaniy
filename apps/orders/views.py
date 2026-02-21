@@ -8,13 +8,11 @@ from django.db import models
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
-from .serializers import OrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
+from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from apps.notifications.services import NotificationService
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse
 import mimetypes
-from .services import DiscountService
-from .models import DiscountRule
 
 # Create your views here.
 
@@ -32,11 +30,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             base_queryset = queryset
         else:
-            # Клиент видит свои заказы, эксперт — назначенные заказы.
-            # Дополнительно любой авторизованный пользователь может просматривать доступные заказы
-            # (new + без назначенного эксперта), чтобы работал переход из ленты заказов на страницу заказа
-            # без 404 для других клиентов.
-            base_filter = models.Q(client=user) | models.Q(expert=user) | models.Q(status='new', expert__isnull=True)
+            base_filter = models.Q(client=user) | models.Q(expert=user)
             base_queryset = queryset.filter(base_filter)
         
         # Добавляем фильтрацию по статусу
@@ -50,6 +44,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return base_queryset
 
+    def get_serializer_class(self):
+        if self.action == 'available':
+            return AvailableOrderSerializer
+        return super().get_serializer_class()
+
     def perform_create(self, serializer):
         # Дополнительная валидация дедлайна
         deadline = serializer.validated_data.get('deadline')
@@ -59,16 +58,19 @@ class OrderViewSet(viewsets.ModelViewSet):
                 'deadline': 'Дедлайн не может быть в прошлом'
             })
         
-        order = serializer.save(client=self.request.user)
-        # Автоматически применяем лучшую доступную скидку
-        DiscountService.apply_best_discount(order)
+        serializer.save(client=self.request.user)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def available(self, request):
         """Список доступных заказов для исполнителя (новые, без назначенного эксперта)."""
         user = request.user
-        # Убрали exclude(client=user), чтобы клиент видел свой заказ в общей ленте
-        queryset = self.queryset.filter(status='new', expert__isnull=True).prefetch_related('bids__expert', 'files', 'comments')
+        if not user.is_staff and getattr(user, 'role', None) != 'expert':
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        queryset = (
+            self.queryset.filter(status='new', expert__isnull=True)
+            .select_related('subject', 'work_type')
+            .annotate(responses_count=models.Count('bids', distinct=True))
+        )
         
         try:
             page = self.paginate_queryset(queryset)
@@ -328,44 +330,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             message.full_clean()
             message.save()
         return Response(self.get_serializer(order).data)
-
-    @action(detail=True, methods=['post'])
-    def apply_discount(self, request, pk=None):
-        """
-        Применить конкретную скидку к заказу
-        """
-        order = self.get_object()
-        discount_id = request.data.get('discount_id')
-
-        if not discount_id:
-            return Response(
-                {'error': 'Не указан ID скидки'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            discount = DiscountRule.objects.get(id=discount_id)
-        except DiscountRule.DoesNotExist:
-            return Response(
-                {'error': 'Скидка не найдена'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if order.apply_discount(discount):
-            return Response(OrderSerializer(order).data)
-        return Response(
-            {'error': 'Невозможно применить скидку'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    @action(detail=True, methods=['post'])
-    def remove_discount(self, request, pk=None):
-        """
-        Удалить скидку с заказа
-        """
-        order = self.get_object()
-        order.remove_discount()
-        return Response(OrderSerializer(order).data)
 
     @action(detail=True, methods=['post'])
     def take_order(self, request, pk=None):

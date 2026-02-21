@@ -8,9 +8,6 @@ export interface Order {
   status: 'new' | 'in_progress' | 'review' | 'completed' | 'cancelled';
   deadline: string;
   budget: number;
-  original_price?: number;
-  discount_amount?: number;
-  final_price?: number;
   files: Array<{
     id: number;
     name: string;

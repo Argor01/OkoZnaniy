@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.db.models import Avg, Count
 from django.http import FileResponse
 import mimetypes
+from django.conf import settings
 from .models import ReadyWork, Purchase
 from .serializers import (
     ReadyWorkSerializer, 
@@ -77,6 +78,27 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         
         # Обрабатываем множественные файлы
         work_files = request.FILES.getlist('work_files')
+        if work_files:
+            max_files = getattr(settings, 'MAX_READY_WORK_FILES', 5)
+            if len(work_files) > max_files:
+                return Response(
+                    {'detail': f'Максимум файлов на работу: {max_files}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [])
+            max_size = getattr(settings, 'MAX_UPLOAD_SIZE', 50 * 1024 * 1024)
+            for uploaded_file in work_files:
+                ext = (uploaded_file.name.split('.')[-1].lower() if '.' in uploaded_file.name else '') or ''
+                if allowed_extensions and ext not in allowed_extensions:
+                    return Response(
+                        {'detail': f'Недопустимый тип файла. Разрешены: {", ".join(allowed_extensions)}'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if uploaded_file.size > max_size:
+                    return Response(
+                        {'detail': f'Размер файла не должен превышать {max_size // (1024*1024)} МБ.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
         
         # Добавляем файлы в validated_data
         if work_files:

@@ -7,7 +7,6 @@ import { logout } from '@/store/slices/authSlice';
 import {
   HomeOutlined,
   FileTextOutlined,
-  TagOutlined,
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
@@ -32,11 +31,6 @@ export const Navigation: React.FC = () => {
       key: '/orders',
       icon: <FileTextOutlined />,
       label: 'Мои заказы',
-    },
-    {
-      key: '/discounts',
-      icon: <TagOutlined />,
-      label: 'Скидки',
     },
     {
       key: '/profile',
