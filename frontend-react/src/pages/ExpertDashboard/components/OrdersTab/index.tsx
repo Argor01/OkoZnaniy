@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message } from 'antd';
-import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm } from 'antd';
+import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '../../../../api/orders';
 import { authApi } from '../../../../api/auth';
@@ -42,6 +42,7 @@ const isOrdersListItem = (o: unknown): o is OrdersListItem => {
 
 const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my');
 
   
@@ -110,6 +111,23 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_TEXTS[status] || status;
+
+  const handleDeleteOrder = async (orderId: number) => {
+    try {
+      await ordersApi.deleteOrder(orderId);
+      message.success('Заказ удален');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
+      ]);
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Ошибка при удалении заказа';
+      message.error(errorMessage);
+    }
+  };
 
   if (userProfileLoading || isLoading) {
     return (
@@ -243,6 +261,25 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                           }}
                         />
                       </Tooltip>
+                      {effectiveOrderFilter === 'my' && userProfile?.role === 'client' && (
+                        <Popconfirm
+                          title="Удалить заказ?"
+                          okText="Удалить"
+                          cancelText="Отмена"
+                          onConfirm={(e) => {
+                            e?.stopPropagation();
+                            handleDeleteOrder(order.id);
+                          }}
+                        >
+                          <Button
+                            type="text"
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </Popconfirm>
+                      )}
                     </div>
                     <div style={{ fontSize: 20, fontWeight: 600, color: '#667eea' }}>
                       {order.budget ? `${order.budget} ₽` : 'Договорная'}

@@ -98,14 +98,19 @@ class OrderPriceBreakdownSerializer(serializers.Serializer):
 class AvailableOrderSerializer(serializers.ModelSerializer):
     subject = SubjectSerializer(read_only=True)
     work_type = WorkTypeSerializer(read_only=True)
+    topic = TopicSerializer(read_only=True)
+    complexity = ComplexitySerializer(read_only=True)
+    client = UserSerializer(read_only=True)
+    files = OrderFileSerializer(many=True, read_only=True)
     responses_count = serializers.IntegerField(read_only=True)
     user_has_bid = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
-            'id', 'title', 'budget', 'deadline', 'status', 'created_at',
-            'subject', 'work_type', 'responses_count', 'user_has_bid'
+            'id', 'title', 'description', 'budget', 'deadline', 'status', 'created_at',
+            'subject', 'topic', 'work_type', 'complexity', 'custom_subject', 'custom_work_type',
+            'additional_requirements', 'client', 'files', 'responses_count', 'user_has_bid'
         ]
 
     def get_user_has_bid(self, obj):

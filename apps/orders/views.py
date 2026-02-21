@@ -21,6 +21,17 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def retrieve(self, request, *args, **kwargs):
+        order = get_object_or_404(self.serializer_class.Meta.model, pk=kwargs.get('pk'))
+        user = request.user
+        if user.is_staff or order.client_id == user.id or order.expert_id == user.id:
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
+        if getattr(user, 'role', None) == 'expert' and order.status == 'new' and order.expert_id is None:
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
+        return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+
     def get_queryset(self):
         user = self.request.user
         queryset = self.queryset.prefetch_related(
@@ -68,7 +79,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         queryset = (
             self.queryset.filter(status='new', expert__isnull=True)
-            .select_related('subject', 'work_type')
+            .select_related('subject', 'topic', 'work_type', 'complexity', 'client')
+            .prefetch_related('files__uploaded_by')
             .annotate(responses_count=models.Count('bids', distinct=True))
         )
         
@@ -554,7 +566,11 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         user = self.request.user
         # Только клиент или эксперт заказа (или staff) могут видеть/скачивать файлы
         order = get_object_or_404(Order, pk=order_pk)
-        if not (user.is_staff or order.client_id == user.id or order.expert_id == user.id):
+        is_participant = user.is_staff or order.client_id == user.id or order.expert_id == user.id
+        is_public_expert = (
+            getattr(user, 'role', None) == 'expert' and order.status == 'new' and order.expert_id is None
+        )
+        if not (is_participant or is_public_expert):
             return OrderFile.objects.none()
         return OrderFile.objects.filter(
             order_id=order_pk
