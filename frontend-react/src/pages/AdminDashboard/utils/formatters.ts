@@ -249,7 +249,8 @@ export const formatChatName = (chat: {
   type: string;
   participants: any[];
 }): string => {
-  if (chat.type === 'private' && chat.participants.length === 2) {
+  if (chat.type === 'private' && chat.participants.length === 2) {
+
     const otherParticipant = chat.participants.find(p => p.id !== getCurrentUserId());
     return otherParticipant?.name || chat.name;
   }
@@ -257,6 +258,8 @@ export const formatChatName = (chat: {
   return chat.name;
 };
 
-const getCurrentUserId = (): number => {
+const getCurrentUserId = (): number => {
+
+
   return 1;
 };

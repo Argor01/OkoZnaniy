@@ -64,9 +64,26 @@ const ShopReadyWorks: React.FC = () => {
 
   const handleDownload = (id: number) => {
     const purchase = (Array.isArray(purchases) ? purchases : []).find((p) => p.work === id);
-    const url = purchase?.delivered_file_url;
-    if (!url) return;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (!purchase?.delivered_file_available) return;
+    shopApi.downloadPurchaseFile(purchase.id)
+      .then((blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = purchase.delivered_file_name || 'file';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      })
+      .catch((e: unknown) => {
+        const status = (e as { response?: { status?: number } })?.response?.status;
+        if (status === 401) {
+          message.error('Не авторизовано для скачивания файла');
+        } else {
+          message.error('Ошибка при скачивании файла');
+        }
+      });
   };
 
   const handleDelete = async (id: number) => {

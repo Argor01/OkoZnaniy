@@ -116,6 +116,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
         <Button
           type="primary"
           icon={<DownloadOutlined />}
+          disabled={!work.deliveredFileAvailable}
           onClick={(e) => {
             e.stopPropagation();
             onDownload(work.id);

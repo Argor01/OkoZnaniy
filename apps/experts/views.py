@@ -87,7 +87,7 @@ class ExpertDocumentViewSet(viewsets.ModelViewSet):
             return ExpertDocument.objects.all()
         if self.request.user.role == 'expert':
             return ExpertDocument.objects.filter(expert=self.request.user)
-        return ExpertDocument.objects.filter(is_verified=True)
+        return ExpertDocument.objects.none()
 
     def perform_create(self, serializer):
         if self.request.user.role != 'expert':
@@ -112,7 +112,7 @@ class ExpertDocumentViewSet(viewsets.ModelViewSet):
         
         NotificationService.notify_document_verified(document)
         
-        return Response(ExpertDocumentSerializer(document).data)
+        return Response(ExpertDocumentSerializer(document, context={'request': request}).data)
 
 class ExpertReviewViewSet(viewsets.ModelViewSet):
     """API для работы с отзывами о экспертах"""
@@ -297,7 +297,7 @@ class ExpertStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
             expert=request.user
         )
         
-        return Response(ExpertStatisticsSerializer(statistics).data)
+        return Response(ExpertStatisticsSerializer(statistics, context={'request': request}).data)
 
     @action(detail=True, methods=['post'])
     def update_stats(self, request, pk=None):

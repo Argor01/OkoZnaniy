@@ -19,7 +19,7 @@ export interface Purchase {
   price_paid: string | number;
   rating?: number | null;
   rated_at?: string | null;
-  delivered_file_url?: string | null;
+  delivered_file_available?: boolean;
   delivered_file_name?: string;
   delivered_file_type?: string;
   delivered_file_size?: number;
@@ -44,6 +44,13 @@ export const shopApi = {
 
   ratePurchase: async (purchaseId: number, rating: number): Promise<Purchase> => {
     const response = await apiClient.post(`/shop/purchases/${purchaseId}/rate/`, { rating });
+    return response.data;
+  },
+
+  downloadPurchaseFile: async (purchaseId: number): Promise<Blob> => {
+    const response = await apiClient.get(`/shop/purchases/${purchaseId}/download/`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 

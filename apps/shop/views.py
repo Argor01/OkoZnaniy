@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 from django.db.models import Avg, Count
+from django.http import FileResponse
+import mimetypes
 from .models import ReadyWork, Purchase
 from .serializers import (
     ReadyWorkSerializer, 
@@ -162,3 +164,20 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         purchase.rated_at = timezone.now()
         purchase.save(update_fields=['rating', 'rated_at'])
         return Response(PurchaseSerializer(purchase, context={'request': request}).data)
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        purchase = self.get_object()
+        if not purchase.delivered_file:
+            return Response({'detail': 'Файл недоступен'}, status=status.HTTP_404_NOT_FOUND)
+
+        file_handle = purchase.delivered_file.open()
+        content_type, _ = mimetypes.guess_type(purchase.delivered_file.name)
+        if not content_type:
+            content_type = 'application/octet-stream'
+
+        filename = purchase.delivered_file_name or purchase.delivered_file.name.split('/')[-1]
+        response = FileResponse(file_handle, content_type=content_type)
+        response['Content-Length'] = purchase.delivered_file.size
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response

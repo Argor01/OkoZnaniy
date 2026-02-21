@@ -25,19 +25,14 @@ export interface PurchasedWork {
   };
 
   preview?: string;
-  files: WorkFile[];
+  deliveredFileAvailable: boolean;
+  deliveredFileName?: string;
+  deliveredFileType?: string;
+  deliveredFileSize?: number;
   tags: string[];
   createdAt: string;
   updatedAt: string;
   isFavorite?: boolean;
-}
-
-export interface WorkFile {
-  id: number;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
 }
 
 export interface FiltersState {

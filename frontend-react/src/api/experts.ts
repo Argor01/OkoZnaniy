@@ -13,7 +13,7 @@ export interface ExpertStatistics {
   completed_orders: number;
   average_rating: number;
   success_rate: number;
-  total_earnings: number;
+  total_earnings: number | null;
   response_time_avg: number;
   last_updated: string;
 }
@@ -294,9 +294,17 @@ export const expertsApi = {
         : typeof average_rating_raw === 'string'
           ? Number(average_rating_raw)
           : 0;
+    const total_earnings_raw = (raw as { total_earnings?: unknown }).total_earnings;
+    const total_earnings =
+      typeof total_earnings_raw === 'number'
+        ? total_earnings_raw
+        : typeof total_earnings_raw === 'string'
+          ? Number(total_earnings_raw)
+          : null;
     return {
       ...(raw as ExpertStatistics),
       average_rating: Number.isFinite(average_rating) ? average_rating : 0,
+      total_earnings: Number.isFinite(total_earnings ?? NaN) ? total_earnings : null,
     };
   },
 

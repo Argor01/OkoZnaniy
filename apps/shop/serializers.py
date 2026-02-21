@@ -120,7 +120,7 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
 class PurchaseSerializer(serializers.ModelSerializer):
     work_title = serializers.CharField(source='work.title', read_only=True)
     work_detail = ReadyWorkSerializer(source='work', read_only=True)
-    delivered_file_url = serializers.SerializerMethodField()
+    delivered_file_available = serializers.SerializerMethodField()
     
     class Meta:
         model = Purchase
@@ -132,7 +132,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
             'price_paid',
             'rating',
             'rated_at',
-            'delivered_file_url',
+            'delivered_file_available',
             'delivered_file_name',
             'delivered_file_type',
             'delivered_file_size',
@@ -140,10 +140,5 @@ class PurchaseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['buyer', 'created_at']
 
-    def get_delivered_file_url(self, obj):
-        if not obj.delivered_file:
-            return None
-        request = self.context.get('request')
-        if request:
-            return request.build_absolute_uri(obj.delivered_file.url)
-        return obj.delivered_file.url
+    def get_delivered_file_available(self, obj):
+        return bool(obj.delivered_file)

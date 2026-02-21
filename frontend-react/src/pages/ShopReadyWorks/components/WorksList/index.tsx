@@ -52,7 +52,7 @@ const WorksList: React.FC<WorksListProps> = ({
           {(() => {
             const purchase = purchasesByWorkId?.[work.id];
             const isPurchased = !!purchase;
-            const canDownload = !!purchase?.delivered_file_url;
+            const canDownload = !!purchase?.delivered_file_available;
             return (
           <WorkCard
             work={work}

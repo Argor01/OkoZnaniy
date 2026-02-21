@@ -371,7 +371,8 @@ const ShopWorkDetail: React.FC = () => {
 
             
             <div style={{ textAlign: 'center', marginTop: 16 }}>
-              {userProfile?.id === work.author?.id ? (
+              {userProfile?.id === work.author?.id ? (
+
                 <Popconfirm
                   title="Удалить работу?"
                   description="Вы уверены, что хотите удалить эту работу? Это действие нельзя отменить."
@@ -398,10 +399,27 @@ const ShopWorkDetail: React.FC = () => {
                   type="primary"
                   size="large"
                   icon={<DownloadOutlined />}
-                  disabled={!purchase.delivered_file_url}
-                  onClick={() => {
-                    if (!purchase.delivered_file_url) return;
-                    window.open(purchase.delivered_file_url, '_blank', 'noopener,noreferrer');
+                  disabled={!purchase.delivered_file_available}
+                  onClick={async () => {
+                    if (!purchase.delivered_file_available) return;
+                    try {
+                      const blob = await shopApi.downloadPurchaseFile(purchase.id);
+                      const blobUrl = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = blobUrl;
+                      a.download = purchase.delivered_file_name || 'file';
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      window.URL.revokeObjectURL(blobUrl);
+                    } catch (e: unknown) {
+                      const status = (e as { response?: { status?: number } })?.response?.status;
+                      if (status === 401) {
+                        message.error('Не авторизовано для скачивания файла');
+                      } else {
+                        message.error('Ошибка при скачивании файла');
+                      }
+                    }
                   }}
                   style={{
                     minWidth: isMobile ? '100%' : 200,
@@ -413,7 +431,8 @@ const ShopWorkDetail: React.FC = () => {
                 >
                   Скачать
                 </Button>
-              ) : (
+              ) : (
+
                 <Button 
                   type="primary" 
                   size="large" 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Typography } from 'antd';
+import { Typography, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
@@ -45,17 +45,6 @@ const PurchasedWorks: React.FC = () => {
           const w = (p.work_detail ?? {}) as any;
           const subjectId = Number(w.subject ?? w.subject_id ?? 0);
           const workTypeId = Number(w.work_type ?? w.work_type_id ?? 0);
-          const deliveredFile =
-            p.delivered_file_url
-              ? [{
-                  id: 1,
-                  name: p.delivered_file_name || 'Файл',
-                  type: p.delivered_file_type || '',
-                  size: typeof p.delivered_file_size === 'number' ? p.delivered_file_size : 0,
-                  url: p.delivered_file_url,
-                }]
-              : [];
-
           return {
             id: p.id,
             workId: p.work,
@@ -80,7 +69,10 @@ const PurchasedWorks: React.FC = () => {
               rating: typeof w.author?.rating === 'number' ? w.author.rating : 0,
             },
             preview: w.preview ?? undefined,
-            files: deliveredFile,
+            deliveredFileAvailable: !!p.delivered_file_available,
+            deliveredFileName: p.delivered_file_name || undefined,
+            deliveredFileType: p.delivered_file_type || undefined,
+            deliveredFileSize: typeof p.delivered_file_size === 'number' ? p.delivered_file_size : undefined,
             tags: Array.isArray(w.tags) ? w.tags : [],
             createdAt: String(w.created_at ?? w.createdAt ?? p.created_at),
             updatedAt: String(w.updated_at ?? w.updatedAt ?? p.created_at),
@@ -136,11 +128,27 @@ const PurchasedWorks: React.FC = () => {
     return result;
   }, [purchasedWorks, filters]);
 
-  const handleDownload = (workId: number) => {
-    const work = purchasedWorks.find((w) => w.id === workId);
-    const url = work?.files?.[0]?.url;
-    if (!url) return;
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const handleDownload = async (purchaseId: number) => {
+    const work = purchasedWorks.find((w) => w.id === purchaseId);
+    if (!work?.deliveredFileAvailable) return;
+    try {
+      const blob = await shopApi.downloadPurchaseFile(purchaseId);
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = work.deliveredFileName || 'file';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e: unknown) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
+        message.error('Не авторизовано для скачивания файла');
+      } else {
+        message.error('Ошибка при скачивании файла');
+      }
+    }
   };
 
   const handleViewDetails = (workId: number) => {

@@ -28,7 +28,7 @@ class SpecializationSerializer(serializers.ModelSerializer):
         read_only_fields = ['expert', 'is_verified']
 
 class ExpertDocumentSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
     document_type_display = serializers.CharField(
         source='get_document_type_display',
         read_only=True
@@ -43,13 +43,16 @@ class ExpertDocumentSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         request = self.context.get('request')
-        if obj.file and request:
+        if not obj.file or not request:
+            return None
+        user = request.user
+        if user and (user.is_staff or obj.expert == user):
             return request.build_absolute_uri(obj.file.url)
         return None
 
 class ExpertReviewSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
-    client = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
+    client = SimpleUserSerializer(read_only=True)
     # Используем PrimaryKeyRelatedField для записи, чтобы валидация работала корректно
     order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
 
@@ -87,8 +90,8 @@ class ExpertReviewSerializer(serializers.ModelSerializer):
         return data
 
 class ExpertRatingSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
-    client = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
+    client = SimpleUserSerializer(read_only=True)
     order_info = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
@@ -178,7 +181,8 @@ class ExpertRatingDetailSerializer(serializers.ModelSerializer):
         }
 
 class ExpertStatisticsSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
+    total_earnings = serializers.SerializerMethodField()
     
     class Meta:
         model = ExpertStatistics
@@ -189,8 +193,17 @@ class ExpertStatisticsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields 
 
+    def get_total_earnings(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+        user = request.user
+        if user and (user.is_staff or obj.expert == user):
+            return obj.total_earnings
+        return None
+
 class ExpertMatchSerializer(serializers.ModelSerializer):
-    expert = UserSerializer()
+    expert = SimpleUserSerializer()
     relevance_score = serializers.FloatField()
     current_workload = serializers.IntegerField()
     avg_rating = serializers.FloatField()
@@ -240,13 +253,13 @@ class EducationSerializer(serializers.ModelSerializer):
 
 
 class ExpertApplicationSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
+    expert = SimpleUserSerializer(read_only=True)
     educations = EducationSerializer(many=True, read_only=True)
     status_display = serializers.CharField(
         source='get_status_display',
         read_only=True
     )
-    reviewed_by = UserSerializer(read_only=True)
+    reviewed_by = SimpleUserSerializer(read_only=True)
 
     class Meta:
         model = ExpertApplication
@@ -301,7 +314,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class ExpertReviewDetailSerializer(serializers.ModelSerializer):
     """Детальный сериализатор для отзывов о эксперте"""
-    client = UserSerializer(read_only=True)
+    client = SimpleUserSerializer(read_only=True)
     order = serializers.SerializerMethodField()
     
     class Meta:

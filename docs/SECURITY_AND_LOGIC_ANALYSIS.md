@@ -247,6 +247,8 @@
 
 **Где:** `apps/shop/serializers.py` — `PurchaseSerializer.get_delivered_file_url`.
 
+**Статус:** ✅ сделано
+
 **Риск:** если `MEDIA_URL`/storage настроены как публичные, любой обладатель ссылки сможет скачать “доставленный файл” покупки без авторизации, обходя логику “только покупатель”.
 
 **Доказательство:** возвращается `obj.delivered_file.url`/`build_absolute_uri(...)`: [serializers.py:L112-L141](file:///c:/Users/omen/Desktop/Projects/OkoZnaniy/apps/shop/serializers.py#L112-L141)
@@ -258,6 +260,8 @@
 #### Эксперты: статистика/документы раскрывают финансовые и PII-поля через вложенный UserSerializer
 
 **Где:** `apps/experts/views.py`, `apps/experts/serializers.py`, `apps/users/serializers.py`.
+
+**Статус:** ✅ сделано
 
 **Риск:**
 - `ExpertStatisticsViewSet` для “обычных пользователей” возвращает статистику без ограничения по владельцу. При `?expert=<id>` любой авторизованный может получить статистику любого эксперта, включая `total_earnings` (финансовые данные).
