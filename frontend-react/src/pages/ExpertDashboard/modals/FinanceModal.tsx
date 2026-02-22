@@ -3,6 +3,7 @@ import { Modal, Typography, Select, DatePicker, Input, Button, Space } from 'ant
 import { DownOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { formatCurrency } from '../../../utils/formatters';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -25,15 +26,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
   return (
     <Modal
       title={
-        <div style={{ 
-          fontSize: 24, 
-          fontWeight: 600, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: 8
-        }}>
+        <div className={styles.financeModalTitle}>
           Финансы
         </div>
       }
@@ -42,40 +35,18 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: isMobile ? '16px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          margin: isMobile ? 0 : undefined,
-          maxWidth: isMobile ? '100vw' : undefined,
-          width: isMobile ? '100vw' : undefined,
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
-        },
-        body: {
-          padding: '0',
-          maxHeight: isMobile ? 'calc(100vh - 100px)' : '80vh',
-          overflowY: 'auto'
-        }
-      }}
+      wrapClassName={`${styles.financeModalWrap} ${isMobile ? styles.financeModalWrapMobile : styles.financeModalWrapDesktop}`}
     >
-      <div style={{ display: 'flex', gap: isMobile ? 16 : 24, minHeight: isMobile ? 'auto' : '600px', flexDirection: isMobile ? 'column' : 'row' }}>
-        <div style={{ flex: 1, minWidth: 0, order: isMobile ? 2 : 1 }}>
-          <Text strong style={{ fontSize: isMobile ? 18 : 20, color: '#1f2937', display: 'block', marginBottom: isMobile ? 16 : 20 }}>
+      <div className={`${styles.financeModalLayout} ${isMobile ? styles.financeModalLayoutMobile : styles.financeModalLayoutDesktop}`}>
+        <div className={`${styles.financeModalMain} ${isMobile ? styles.financeModalMainMobile : styles.financeModalMainDesktop}`}>
+          <Text strong className={`${styles.financeModalHeading} ${isMobile ? styles.financeModalHeadingMobile : styles.financeModalHeadingDesktop}`}>
             История операций
           </Text>
 
-          <div style={{ display: 'flex', gap: isMobile ? 8 : 12, marginBottom: isMobile ? 16 : 24, flexWrap: 'wrap' }}>
+          <div className={`${styles.financeModalFilters} ${isMobile ? styles.financeModalFiltersMobile : styles.financeModalFiltersDesktop}`}>
             <Select
               defaultValue="all"
-              style={{ width: isMobile ? '100%' : 180 }}
+              className={`${styles.financeModalSelect} ${isMobile ? styles.financeModalSelectMobile : styles.financeModalSelectDesktop}`}
               suffixIcon={<DownOutlined />}
               size={isMobile ? 'middle' : 'middle'}
             >
@@ -87,160 +58,119 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
             <RangePicker
               defaultValue={[dayjs().startOf('month'), dayjs().endOf('month')]}
               format="DD.MM.YYYY"
-              style={{ width: isMobile ? '100%' : 280 }}
+              className={`${styles.financeModalRange} ${isMobile ? styles.financeModalRangeMobile : styles.financeModalRangeDesktop}`}
               size={isMobile ? 'middle' : 'middle'}
             />
 
             <Input
               placeholder="Поиск по операциям"
-              prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
-              style={{ flex: 1, minWidth: isMobile ? '100%' : 200, maxWidth: isMobile ? '100%' : 400 }}
+              prefix={<SearchOutlined className={styles.financeModalSearchIcon} />}
+              className={`${styles.financeModalSearch} ${isMobile ? styles.financeModalSearchMobile : styles.financeModalSearchDesktop}`}
               size={isMobile ? 'middle' : 'middle'}
             />
           </div>
 
-          <div style={{ 
-            background: '#f9fafb', 
-            borderRadius: 12, 
-            padding: '16px', 
-            marginBottom: 24,
-            border: '1px solid #e5e7eb'
-          }}>
-            <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block', marginBottom: 12 }}>
+          <div className={styles.financeModalSummary}>
+            <Text strong className={styles.financeModalSummaryTitle}>
               Операции за данный период:
             </Text>
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                Всего заказов: <Text strong style={{ color: '#1f2937' }}>0</Text>
+            <div className={styles.financeModalSummaryRow}>
+              <Text className={styles.financeModalSummaryText}>
+                Всего заказов: <Text strong className={styles.financeModalSummaryValue}>0</Text>
               </Text>
-              <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                Выполнено заказов: <Text strong style={{ color: '#1f2937' }}>0</Text>
+              <Text className={styles.financeModalSummaryText}>
+                Выполнено заказов: <Text strong className={styles.financeModalSummaryValue}>0</Text>
               </Text>
-              <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                Поступлений: <Text strong style={{ color: '#10b981' }}>0</Text>
+              <Text className={styles.financeModalSummaryText}>
+                Поступлений: <Text strong className={styles.financeModalSummarySuccess}>0</Text>
               </Text>
-              <Text style={{ fontSize: 13, color: '#6b7280' }}>
-                Списаний: <Text strong style={{ color: '#ef4444' }}>0</Text>
+              <Text className={styles.financeModalSummaryText}>
+                Списаний: <Text strong className={styles.financeModalSummaryDanger}>0</Text>
               </Text>
             </div>
           </div>
 
-          <div style={{ 
-            minHeight: '400px',
-            background: '#ffffff',
-            borderRadius: 12,
-            border: '1px solid #e5e7eb',
-            padding: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Text type="secondary" style={{ fontSize: 14 }}>
+          <div className={styles.financeModalEmptyState}>
+            <Text type="secondary" className={styles.financeModalEmptyText}>
               Нет операций за выбранный период
             </Text>
           </div>
         </div>
 
-        <div style={{ width: isMobile ? '100%' : 300, flexShrink: 0, order: isMobile ? 1 : 2 }}>
-          <div style={{ 
-            background: '#f9fafb', 
-            borderRadius: isMobile ? 12 : 16, 
-            padding: isMobile ? '16px' : '24px',
-            border: '1px solid #e5e7eb'
-          }}>
-            <div style={{ marginBottom: isMobile ? 16 : 24 }}>
-              <Text style={{ fontSize: isMobile ? 13 : 14, color: '#6b7280', display: 'block', marginBottom: 8 }}>
+        <div className={`${styles.financeModalSidebar} ${isMobile ? styles.financeModalSidebarMobile : styles.financeModalSidebarDesktop}`}>
+          <div className={`${styles.financeModalSidebarCard} ${isMobile ? styles.financeModalSidebarCardMobile : styles.financeModalSidebarCardDesktop}`}>
+            <div className={`${styles.financeModalBalanceBlock} ${isMobile ? styles.financeModalBalanceBlockMobile : styles.financeModalBalanceBlockDesktop}`}>
+              <Text className={`${styles.financeModalBalanceLabel} ${isMobile ? styles.financeModalBalanceLabelMobile : styles.financeModalBalanceLabelDesktop}`}>
                 Текущий баланс:
               </Text>
-              <Text strong style={{ fontSize: isMobile ? 28 : 32, color: '#1f2937', display: 'block', marginBottom: isMobile ? 12 : 16 }}>
+              <Text strong className={`${styles.financeModalBalanceValue} ${isMobile ? styles.financeModalBalanceValueMobile : styles.financeModalBalanceValueDesktop}`}>
                 {formatCurrency(Number(profile?.balance ?? 0))}
               </Text>
               <Button 
                 type="primary"
                 block
-                style={{
-                  borderRadius: 8,
-                  height: 40
-                }}
+                className={styles.financeModalBalanceButton}
               >
                 Пополнить баланс
               </Button>
             </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ 
-                  width: 12, 
-                  height: 12, 
-                  background: '#10b981', 
-                  borderRadius: 2, 
-                  marginRight: 8 
-                }} />
-                <Text style={{ fontSize: 13, color: '#6b7280' }}>Доступно к выводу:</Text>
+            <div className={styles.financeModalBreakdown}>
+              <div className={styles.financeModalBreakdownRow}>
+                <div className={`${styles.financeModalLegend} ${styles.financeModalLegendSuccess}`} />
+                <Text className={styles.financeModalBreakdownLabel}>Доступно к выводу:</Text>
               </div>
-              <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+              <Text strong className={styles.financeModalBreakdownValue}>
                 {formatCurrency(Number(profile?.balance ?? 0))}
               </Text>
 
-              <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
-                <div style={{ 
-                  width: 12, 
-                  height: 12, 
-                  background: '#ef4444', 
-                  borderRadius: 2, 
-                  marginRight: 8 
-                }} />
-                <Text style={{ fontSize: 13, color: '#6b7280' }}>Заблокировано:</Text>
+              <div className={styles.financeModalBreakdownRow}>
+                <div className={`${styles.financeModalLegend} ${styles.financeModalLegendDanger}`} />
+                <Text className={styles.financeModalBreakdownLabel}>Заблокировано:</Text>
               </div>
-              <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+              <Text strong className={styles.financeModalBreakdownValue}>
                 {formatCurrency(Number(profile?.frozen_balance ?? 0))}
               </Text>
 
-              <div style={{ display: 'flex', alignItems: 'center', marginTop: 16, marginBottom: 12 }}>
-                <div style={{ 
-                  width: 12, 
-                  height: 12, 
-                  background: '#6b7280', 
-                  borderRadius: 2, 
-                  marginRight: 8 
-                }} />
-                <Text style={{ fontSize: 13, color: '#6b7280' }}>Удерживается:</Text>
+              <div className={styles.financeModalBreakdownRow}>
+                <div className={`${styles.financeModalLegend} ${styles.financeModalLegendMuted}`} />
+                <Text className={styles.financeModalBreakdownLabel}>Удерживается:</Text>
               </div>
-              <Text strong style={{ fontSize: 16, color: '#1f2937', marginLeft: 20, display: 'block' }}>
+              <Text strong className={styles.financeModalBreakdownValue}>
                 {formatCurrency(0)}
               </Text>
             </div>
 
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
-              <Text strong style={{ fontSize: 14, color: '#1f2937', display: 'block', marginBottom: 12 }}>
+            <div className={styles.financeModalQuickLinks}>
+              <Text strong className={styles.financeModalQuickLinksTitle}>
                 Быстрые ссылки:
               </Text>
-              <Space direction="vertical" style={{ width: '100%' }} size={8}>
+              <Space direction="vertical" className={styles.financeModalQuickLinksList} size={8}>
                 <Button 
                   type="text" 
                   block 
-                  style={{ textAlign: 'left', height: 36 }}
+                  className={styles.financeModalQuickLinkButton}
                 >
                   История операций
                 </Button>
                 <Button 
                   type="text" 
                   block 
-                  style={{ textAlign: 'left', height: 36 }}
+                  className={styles.financeModalQuickLinkButton}
                 >
                   Заблокировано
                 </Button>
                 <Button 
                   type="text" 
                   block 
-                  style={{ textAlign: 'left', height: 36 }}
+                  className={styles.financeModalQuickLinkButton}
                 >
                   Удерживается
                 </Button>
                 <Button 
                   type="text" 
                   block 
-                  style={{ textAlign: 'left', height: 36 }}
+                  className={styles.financeModalQuickLinkButton}
                 >
                   Платные услуги
                 </Button>

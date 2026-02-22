@@ -123,11 +123,7 @@ export const SupportRequestsSection: React.FC<SupportRequestsSectionProps> = ({
               {tab.count > 0 && (
                 <Badge 
                   count={tab.count} 
-                  className={styles.badge}
-                  style={{ 
-                    backgroundColor: selectedStatus === tab.key ? '#fff' : '#1890ff',
-                    color: selectedStatus === tab.key ? '#1890ff' : '#fff'
-                  }}
+                  className={`${styles.badge} ${selectedStatus === tab.key ? styles.badgeActive : styles.badgeInactive}`}
                 />
               )}
             </Button>

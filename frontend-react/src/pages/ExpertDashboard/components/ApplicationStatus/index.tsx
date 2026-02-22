@@ -31,7 +31,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
 }) => {
   if (applicationLoading) {
     return (
-      <div className={styles.card} style={{ textAlign: 'center', padding: '48px' }}>
+      <div className={`${styles.card} ${styles.applicationLoadingCard}`}>
         <Spin size="large" />
       </div>
     );
@@ -75,14 +75,14 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
           </div>
         </div>
         {application.status === 'rejected' && application.rejection_reason && (
-          <div style={{ marginTop: 16, padding: 12, background: 'rgba(239, 68, 68, 0.1)', borderRadius: 12 }}>
-            <Text type="danger" style={{ fontSize: 14 }}>
+          <div className={styles.applicationRejectBox}>
+            <Text type="danger" className={styles.applicationRejectText}>
               <strong>Причина отклонения:</strong> {application.rejection_reason}
             </Text>
           </div>
         )}
         {application.status === 'rejected' && (
-          <div style={{ marginTop: 16 }}>
+          <div className={styles.applicationActionRow}>
             <Button
               type="primary"
               className={styles.buttonPrimary}
@@ -100,17 +100,16 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
 
   
   return (
-    <div className={styles.emptyApplicationCard} style={{ position: 'relative', zIndex: 1 }}>
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Text style={{ fontSize: 16, color: '#6b7280' }}>
+    <div className={`${styles.emptyApplicationCard} ${styles.applicationEmptyCard}`}>
+      <Space direction="vertical" className={styles.applicationEmptyStack} size="large">
+        <Text className={styles.applicationEmptyText}>
           У вас ещё нет анкеты. Заполните анкету для работы на платформе.
         </Text>
         <Button 
           type="primary" 
           size="large"
-          className={styles.buttonPrimary}
           onClick={onOpenApplicationModal}
-          style={{ marginTop: 8, position: 'relative', zIndex: 10 }}
+          className={`${styles.buttonPrimary} ${styles.applicationEmptyButton}`}
         >
           Заполнить анкету
         </Button>

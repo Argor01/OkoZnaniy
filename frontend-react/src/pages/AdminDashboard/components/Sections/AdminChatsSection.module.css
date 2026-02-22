@@ -1,23 +1,64 @@
-﻿
+
 
 .chatContainer {
   height: 80vh;
   display: flex;
   transition: all 0.3s ease;
+  gap: 16px;
 }
 
 .chatListCard {
   transition: all 0.3s ease;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+.chatListCard :global(.ant-card-body) {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .chatListCard:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.chatListCardHidden {
+  display: none;
+}
+
+.chatListHeader {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.chatListHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chatListTitle {
+  margin: 0;
+}
+
+.chatListSearch {
+  width: 100%;
+}
+
+.chatListScroll {
+  flex: 1;
+  overflow: auto;
+}
+
 .chatRoomItem {
   transition: all 0.2s ease;
   cursor: pointer;
+  padding: 12px 16px;
 }
 
 .chatRoomItem:hover {
@@ -27,6 +68,226 @@
 .chatRoomItemActive {
   background-color: #f0f8ff;
   border-left: 3px solid #1890ff;
+}
+
+.chatRoomAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+
+.roomTypeGeneral {
+  background-color: #1890ff;
+}
+
+.roomTypeDepartment {
+  background-color: #52c41a;
+}
+
+.roomTypeProject {
+  background-color: #faad14;
+}
+
+.roomTypePrivate {
+  background-color: #722ed1;
+}
+
+.chatRoomTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatRoomNameUnread {
+  font-weight: 700;
+}
+
+.chatRoomMutedIcon {
+  color: #ccc;
+  margin-left: 4px;
+}
+
+.chatRoomLastMessage {
+  font-size: 12px;
+  color: #666;
+}
+
+.chatRoomLastMessageUnread {
+  font-weight: 700;
+}
+
+.chatRoomMeta {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.chatMainCard {
+  flex: 1;
+  height: 100%;
+  width: auto;
+}
+
+.chatMainCard :global(.ant-card-body) {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatHeader {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+}
+
+.chatHeaderInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatBackButton {
+  flex-shrink: 0;
+}
+
+.chatHeaderTitleWrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.chatHeaderTitle {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatHeaderSubtitle {
+  font-size: 12px;
+}
+
+.chatParticipantsBar {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fff;
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+}
+
+.chatParticipantsRow {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.participantAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.participantOnline {
+  background-color: #52c41a;
+}
+
+.participantOffline {
+  background-color: #d9d9d9;
+}
+
+.participantMore {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.chatMessagesArea {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  background-color: #f5f5f5;
+}
+
+.messageRow {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.messageAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.messageAvatarSystem {
+  background-color: #666;
+}
+
+.messageAvatarUser {
+  background-color: #1890ff;
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.messageHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.messageSenderName {
+  font-size: 13px;
+}
+
+.messageRoleTag {
+  font-size: 11px;
+}
+
+.messageTime {
+  font-size: 11px;
+}
+
+.messagePin {
+  color: #faad14;
+  font-size: 12px;
 }
 
 .messageContainer {
@@ -47,10 +308,132 @@
 .messageBubble {
   transition: all 0.2s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  position: relative;
+  max-width: 100%;
+  word-break: break-word;
 }
 
 .messageBubble:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+.messageBubbleSystem {
+  background-color: #f6f6f6;
+}
+
+.messageBubblePinned {
+  border-color: #faad14;
+}
+
+.messageText {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.messageTextSystem {
+  font-style: italic;
+  color: #666;
+}
+
+.chatComposer {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fff;
+}
+
+.chatComposerRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.chatComposerInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.chatInput {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 15px;
+  padding: 10px 14px;
+  resize: none;
+}
+
+.chatComposerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chatUploadButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatSendButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1890ff;
+  border-color: #1890ff;
+  transition: all 0.2s ease;
+}
+
+.chatComposerHint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.chatEmptyCard {
+  flex: 1;
+  height: 100%;
+}
+
+.chatEmptyState {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #999;
+}
+
+.chatEmptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.roomCreatedInfo {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f6f6f6;
+  border-radius: 6px;
+}
+
+.roomInfoBlock {
+  margin-top: 8px;
+}
+
+.participantStatusText {
+  font-size: 11px;
+  margin-left: 8px;
 }
 
 .inputArea {
@@ -80,16 +463,12 @@
 
   .chatListCard {
     width: 100%;
-    height: auto;
+    height: 50vh;
   }
 
   .chatMainCard {
     width: 100%;
     height: 85vh;
-  }
-
-  .messageContainer {
-    padding: 12px;
   }
 
   .participantAvatar {
@@ -98,8 +477,104 @@
     font-size: 10px;
   }
 
-  .backButton {
-    display: flex;
+  .participantMore {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .chatListHeader {
+    padding: 12px;
+  }
+
+  .chatRoomItem {
+    padding: 10px 12px;
+  }
+
+  .chatRoomAvatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .chatHeader {
+    padding: 12px;
+  }
+
+  .chatHeaderSubtitle {
+    font-size: 11px;
+  }
+
+  .chatParticipantsBar {
+    padding: 6px 12px;
+  }
+
+  .chatParticipantsRow {
+    gap: 6px;
+  }
+
+  .chatMessagesArea {
+    padding: 12px;
+  }
+
+  .messageRow {
+    margin-bottom: 12px;
+    gap: 6px;
+  }
+
+  .messageAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+
+  .messageHeaderRow {
+    gap: 4px;
+  }
+
+  .messageSenderName {
+    font-size: 12px;
+  }
+
+  .messageTime {
+    font-size: 10px;
+  }
+
+  .messagePin {
+    font-size: 11px;
+  }
+
+  .messageBubble {
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+
+  .messageText {
+    font-size: 13px;
+  }
+
+  .chatComposer {
+    padding: 12px;
+  }
+
+  .chatComposerRow {
+    gap: 6px;
+  }
+
+  .chatInput {
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .chatComposerActions {
+    gap: 4px;
+  }
+
+  .chatSendButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
   }
 }
 
@@ -108,20 +583,12 @@
   .chatListCard {
     width: 280px;
   }
-
-  .messageContainer {
-    padding: 14px;
-  }
 }
 
 
 @media (min-width: 1025px) {
   .chatListCard {
     width: 350px;
-  }
-
-  .messageContainer {
-    padding: 16px;
   }
 }
 

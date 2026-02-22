@@ -1,4 +1,4 @@
-﻿
+
 .container {
   height: 100vh;
   background: #f3f4f6;
@@ -528,6 +528,45 @@
   padding-bottom: 20px;
 }
 
+.sectionCardLoading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.reviewGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.reviewAvatarIcon {
+  font-size: 16px;
+}
+
+.reviewUserName {
+  font-size: 16px;
+}
+
+.reviewUserNameMobile {
+  font-size: 14px;
+}
+
+.reviewUserMeta {
+  font-size: 12px;
+}
+
+.reviewRate {
+  font-size: 16px;
+}
+
+.reviewRateMobile {
+  font-size: 14px;
+}
+
+.reviewDate {
+  font-size: 12px;
+}
+
 .reviewHeaderRow {
   display: flex;
   justify-content: space-between;
@@ -827,9 +866,88 @@
   flex: 1;
 }
 
+.profileAvatar {
+  background-color: #1890ff;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.profileAvatarTransparent {
+  background-color: transparent;
+}
+
 .profileInfo {
   display: flex;
   flex-direction: column;
+}
+
+.profileNameRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.profileNameTitle {
+  margin: 0;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.profileOnlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  display: inline-block;
+}
+
+.profileOnlineText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.profileStatsRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+  flex-wrap: nowrap;
+  overflow: auto;
+}
+
+.profileStatsRowMobile {
+  gap: 16px;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.profileStatColumn {
+  flex: 1;
+  min-width: 150px;
+}
+
+.profileStatColumnMobile {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.profileStatSpace {
+  width: 100%;
+}
+
+.profileStatLabel {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.profileStatRate {
+  font-size: 16px;
+}
+
+.profileStatSubtext {
+  font-size: 12px;
 }
 
 .profileRight {
@@ -844,6 +962,18 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+}
+
+.profileStatsMeta {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.profileStatsLine {
+  font-size: 14px;
+  color: #1f2937;
 }
 
 
@@ -1954,5 +2084,3925 @@
     width: 100%;
     max-width: 100%;
   }
+}
+
+.chatModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.chatModalWrap :global(.ant-modal-header) {
+  display: none;
+}
+
+.chatModalWrap :global(.ant-modal-content) {
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 80px);
+}
+
+.chatModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+.chatModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  box-shadow: none;
+}
+
+.chatModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+  max-width: 1400px;
+}
+
+.chatModalWrapTablet :global(.ant-modal-content) {
+  border-radius: 24px;
+  max-width: 1200px;
+}
+
+.chatModalContainer {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: row;
+  overflow: hidden;
+  position: relative;
+}
+
+.chatModalContainerMobile {
+  flex-direction: column;
+}
+
+.chatMenuButton {
+  position: absolute;
+  top: 10px;
+  right: 48px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+}
+
+.chatSidebar {
+  background: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatSidebarMobile {
+  width: 100%;
+  border-right: none;
+  border-bottom: 1px solid #e5e7eb;
+  height: 100%;
+}
+
+.chatSidebarTablet {
+  width: 250px;
+}
+
+.chatSidebarDesktop {
+  width: 300px;
+}
+
+.chatSidebarHidden {
+  display: none;
+}
+
+.chatSearchHeader {
+  padding: 12px;
+  background: #ffffff;
+}
+
+.chatSearchHeaderMobile {
+  padding: 8px;
+}
+
+.chatSearchIcon {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.chatSearchIconMobile {
+  font-size: 12px;
+}
+
+.chatSearchInput {
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.chatSearchInput :global(.ant-input) {
+  font-size: 14px;
+}
+
+.chatSearchInputMobile {
+  font-size: 12px;
+}
+
+.chatSearchInputMobile :global(.ant-input) {
+  font-size: 12px;
+}
+
+.chatList {
+  flex: 1;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.chatListItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  background: #ffffff;
+  transition: background 0.2s;
+}
+
+.chatListItemMobile {
+  padding: 8px;
+}
+
+.chatListItem:hover {
+  background: #f9fafb;
+}
+
+.chatListItemSelected {
+  background: #eff6ff;
+}
+
+.chatListItemSelected:hover {
+  background: #eff6ff;
+}
+
+.chatListItemUnread {
+  background: #f0fdf4;
+}
+
+.chatListItemUnread:hover {
+  background: #f9fafb;
+}
+
+.chatListContent {
+  flex: 1;
+  margin-left: 12px;
+  overflow: hidden;
+}
+
+.chatListContentMobile {
+  margin-left: 8px;
+}
+
+.chatListHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.chatListName {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.chatListNameMobile {
+  font-size: 13px;
+}
+
+.chatListNameUnread {
+  font-weight: 600;
+}
+
+.chatListTime {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.chatListTimeMobile {
+  font-size: 10px;
+}
+
+.chatListMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatListPreview {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.chatListPreviewMobile {
+  font-size: 11px;
+  max-width: 140px;
+}
+
+.chatListPreviewDesktop {
+  max-width: 180px;
+}
+
+.chatListPreviewUnread {
+  color: #059669;
+  font-weight: 500;
+}
+
+.chatBadge :global(.ant-badge-dot) {
+  background-color: #3b82f6;
+}
+
+.chatListLoading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.chatListEmpty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 40px 20px;
+  font-size: 14px;
+}
+
+.chatListEmptyMobile {
+  font-size: 12px;
+}
+
+.chatListEmptyIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.chatListEmptyIconMobile {
+  font-size: 36px;
+}
+
+.chatAvatar {
+  background-color: #6b7280;
+}
+
+.chatPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chatPanelHidden {
+  display: none;
+}
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.chatHeaderActive {
+  background: #ffffff;
+}
+
+.chatHeaderEmpty {
+  background: #e0f2fe;
+  border-bottom-color: #bae6fd;
+}
+
+.chatHeaderPaddingMobileActive {
+  padding: 8px 12px;
+  padding-right: 96px;
+}
+
+.chatHeaderPaddingDesktopActive {
+  padding: 12px 16px;
+  padding-right: 140px;
+}
+
+.chatHeaderPaddingMobileEmpty {
+  padding: 8px 12px;
+}
+
+.chatHeaderPaddingDesktopEmpty {
+  padding: 12px 16px;
+  padding-right: 56px;
+}
+
+.chatHeaderAvatar {
+  background-color: #6b7280;
+}
+
+.chatHeaderTitle {
+  font-size: 15px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.chatHeaderTitleMobile {
+  font-size: 13px;
+}
+
+.chatHeaderSubtitle {
+  font-size: 12px;
+  color: #6b7280;
+  display: block;
+}
+
+.chatHeaderSubtitleMobile {
+  font-size: 11px;
+}
+
+.chatClaimButton {
+  position: absolute;
+  right: 40px;
+  top: 8px;
+  font-size: 22px;
+  color: #ef4444;
+  z-index: 10;
+  padding: 6px;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatClaimButtonMobile {
+  right: 36px;
+  top: 6px;
+  font-size: 20px;
+  padding: 4px;
+  height: 32px;
+  width: 32px;
+}
+
+.chatHeaderEmptyText {
+  font-size: 14px;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+.chatHeaderEmptyTextMobile {
+  font-size: 12px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.buttonSuccess {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.orderTabsHeader {
+  padding: 8px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.orderTabsHeaderMobile {
+  padding: 8px 12px;
+}
+
+.orderTabs :global(.ant-tabs-nav) {
+  margin: 0;
+  flex: 1;
+}
+
+.orderToggleButton {
+  border-radius: 999px;
+}
+
+.orderPanel {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.orderPanelMobile {
+  padding: 10px 12px;
+}
+
+.orderLoading {
+  text-align: center;
+  padding: 8px;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orderInfoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.orderInfoMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.textSuccess {
+  color: #10b981;
+}
+
+.orderDescription {
+  white-space: pre-wrap;
+}
+
+.orderUploadWrapper {
+  margin-top: 6px;
+}
+
+.chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f9fafb;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatMessagesMobile {
+  padding: 12px;
+}
+
+.chatMessagesContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatMessagesContentMobile {
+  gap: 8px;
+}
+
+.chatIntroWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.chatIntroBubble {
+  max-width: 520px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 13px;
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+.chatIntroBubbleMobile {
+  max-width: 92%;
+  font-size: 12px;
+}
+
+.chatEmptyState {
+  text-align: center;
+  color: #9ca3af;
+  padding-top: 100px;
+  font-size: 14px;
+}
+
+.chatEmptyStateMobile {
+  padding-top: 50px;
+  font-size: 12px;
+}
+
+.chatEmptyStateIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.chatEmptyStateIconMobile {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.chatInputContainer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.chatInputContainerMobile {
+  padding: 8px 12px 12px 12px;
+}
+
+.claimCarouselWrapper {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+  position: relative;
+  overflow: hidden;
+}
+
+.claimCarouselWrapperMobile {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+@keyframes scroll-carousel {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.claimCarouselTrack {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+  animation: scroll-carousel 20s linear infinite;
+}
+
+.claimCarouselTrack:hover {
+  animation-play-state: paused;
+}
+
+.claimCarouselButton {
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background: #ffffff;
+  color: #ef4444;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.claimCarouselButton:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.claimCarouselButtonMobile {
+  font-size: 11px;
+}
+
+.chatInputRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.chatInputRowMobile {
+  gap: 8px;
+}
+
+.chatInputField {
+  flex: 1;
+  min-width: 0;
+}
+
+.chatInputActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chatInputActionsMobile {
+  gap: 6px;
+}
+
+.chatInput {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 15px;
+  padding: 10px 14px;
+  resize: none;
+}
+
+.chatInputMobile {
+  font-size: 14px;
+}
+
+.chatAttachButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+
+.chatAttachButton:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+}
+
+.chatAttachButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.chatSendButton {
+  width: 44px;
+  height: 44px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.chatSendButton:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+.chatSendButtonDisabled {
+  background: #9ca3af;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.chatSendButtonDisabled:hover {
+  background: #9ca3af;
+  transform: scale(1);
+}
+
+.chatSendButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.attachedFiles {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attachedFileItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  max-width: 100%;
+  transition: all 0.2s;
+}
+
+.attachedFileIcon {
+  color: #0284c7;
+  font-size: 16px;
+}
+
+.attachedFileName {
+  font-size: 13px;
+  color: #0c4a6e;
+  max-width: 220px;
+  font-weight: 500;
+}
+
+.attachedFileNameMobile {
+  max-width: 140px;
+}
+
+.attachedFileSize {
+  font-size: 11px;
+  color: #0369a1;
+  white-space: nowrap;
+}
+
+.attachedFileRemoveButton {
+  color: #ef4444;
+  padding: 0;
+  height: 24px;
+  width: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.attachedFileRemoveButton:hover {
+  background: #fee2e2;
+}
+
+.attachedFileRemoveIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.messageRow {
+  display: flex;
+}
+
+.messageRowMine {
+  justify-content: flex-end;
+}
+
+.messageRowOther {
+  justify-content: flex-start;
+}
+
+.messageBubble {
+  display: block;
+}
+
+.messageBubbleCard {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.messageBubbleRegular {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.messageBubbleRegularMobile {
+  max-width: 85%;
+  padding: 8px 12px;
+}
+
+.messageBubbleRegularDesktop {
+  max-width: 70%;
+  padding: 10px 14px;
+}
+
+.messageBubbleCardMobile {
+  max-width: 92%;
+}
+
+.messageBubbleCardDesktop {
+  max-width: 420px;
+}
+
+.messageBubbleMine {
+  border-radius: 16px 16px 4px 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+
+.messageBubbleOther {
+  border-radius: 16px 16px 16px 4px;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.messageCard {
+  width: 420px;
+}
+
+.messageCardMobile {
+  width: 100%;
+}
+
+.messageCardDesktop {
+  width: 420px;
+}
+
+.messageCardTitle {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.messageCardSection {
+  margin-bottom: 10px;
+}
+
+.messageCardSectionSm {
+  margin-bottom: 6px;
+}
+
+.messageCardSectionTop {
+  margin-top: 4px;
+}
+
+.messageCardLink {
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.messageCardLinkMobile {
+  font-size: 13px;
+}
+
+.messageCardInfo {
+  color: #2563eb;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.messageCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.messageCardActionsTop {
+  margin-top: 12px;
+}
+
+.messageCardTime {
+  margin-top: 8px;
+}
+
+.messageCardTimeText {
+  font-size: 11px;
+}
+
+.messageCardRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.messageCardPrice {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.messageCardDescription {
+  white-space: pre-wrap;
+}
+
+.messageStatusSuccess {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.messageStatusDanger {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.messageStatusMuted {
+  color: #9ca3af;
+}
+
+.messageStatusInfo {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.messageText {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.messageTextMobile {
+  font-size: 15px;
+}
+
+.messageTextMine {
+  color: #ffffff;
+}
+
+.messageTextOther {
+  color: #1f2937;
+}
+
+.messageFile {
+  margin-bottom: 4px;
+}
+
+.messageFileWithText {
+  margin-top: 8px;
+}
+
+.messageFileLink {
+  font-size: 14px;
+}
+
+.messageFileLinkMobile {
+  font-size: 13px;
+}
+
+.messageFileLinkMine {
+  color: #ffffff;
+}
+
+.messageFileLinkOther {
+  color: #1890ff;
+}
+
+.messageActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.messageTime {
+  font-size: 12px;
+}
+
+.messageTimeMobile {
+  font-size: 11px;
+}
+
+.messageTimeMine {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.messageTimeOther {
+  color: #9ca3af;
+}
+
+.messageReadStatus {
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(1px);
+}
+
+.messageReadStatusRead {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.messageReadStatusUnread {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.messageReadIcons {
+  position: relative;
+  display: inline-block;
+}
+
+.messageReadIconsMobile {
+  width: 16px;
+  height: 12px;
+}
+
+.messageReadIconsDesktop {
+  width: 18px;
+  height: 14px;
+}
+
+.messageReadCheck {
+  position: absolute;
+  top: 0;
+}
+
+.messageReadCheckFirst {
+  left: 0;
+}
+
+.messageReadCheckSecond {
+  top: 0;
+}
+
+.messageReadCheckSecondMobile {
+  left: 6px;
+}
+
+.messageReadCheckSecondDesktop {
+  left: 7px;
+}
+
+.messageReadCheckMobile {
+  font-size: 11px;
+}
+
+.messageReadCheckDesktop {
+  font-size: 12px;
+}
+
+.messageReadCheckSingle {
+  font-size: 12px;
+}
+
+.simpleModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.claimModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claimModalTitleIcon {
+  color: #ef4444;
+}
+
+.claimModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.claimWarningBox {
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+}
+
+.claimWarningText {
+  font-size: 13px;
+  color: #991b1b;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.formLabelSmall {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.claimTextArea {
+  font-size: 14px;
+}
+
+.claimFiles {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claimFileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.claimFileIcon {
+  color: #6b7280;
+}
+
+.claimFileName {
+  font-size: 12px;
+  color: #374151;
+  flex: 1;
+}
+
+.claimFileSize {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.claimFileRemoveButton {
+  color: #ef4444;
+  padding: 0;
+  height: 20px;
+  min-width: 20px;
+  line-height: 20px;
+}
+
+.profileModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.profileModalWrapMobile :global(.ant-modal) {
+  padding: 0;
+  top: 0;
+}
+
+.profileModalWrapDesktop :global(.ant-modal) {
+  top: 20px;
+}
+
+.profileModalWrap :global(.ant-modal-content) {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin: auto;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  background: #ffffff;
+  backdrop-filter: none;
+  margin: 0;
+}
+
+.profileModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.profileModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+  flex-shrink: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-header) {
+  background: #ffffff;
+  backdrop-filter: none;
+  padding: 16px 20px;
+  border-radius: 0;
+}
+
+.profileModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-body) {
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+.profileModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+  flex-shrink: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-footer) {
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.profileModalTitle {
+  font-weight: 600;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 50%, #40a9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profileModalTitleMobile {
+  font-size: 18px;
+}
+
+.profileModalTitleDesktop {
+  font-size: 24px;
+}
+
+.profileModalButton {
+  font-weight: 500;
+}
+
+.profileModalButtonMobile {
+  border-radius: 8px;
+  height: 40px;
+  font-size: 14px;
+}
+
+.profileModalButtonDesktop {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.profileModalAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileModalUploadLabel {
+  margin-top: 8px;
+}
+
+.profileModalTextarea {
+  font-size: 15px;
+}
+
+.profileModalExpertInfo {
+  padding: 16px;
+  background-color: #f0f9ff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #0ea5e9;
+}
+
+.profileModalExpertTitle {
+  margin: 0 0 8px 0;
+  color: #0369a1;
+}
+
+.profileModalExpertText {
+  margin: 0;
+  font-size: 14px;
+  color: #0369a1;
+}
+
+.profileModalExpertGrid {
+  display: flex;
+  gap: 16px;
+  flex-direction: row;
+}
+
+.profileModalExpertGridMobile {
+  flex-direction: column;
+}
+
+.profileModalFlexField {
+  flex: 1;
+}
+
+.profileModalFullWidth {
+  width: 100%;
+}
+
+.applicationModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.applicationModalWrapMobile :global(.ant-modal) {
+  padding: 0;
+  top: 0;
+}
+
+.applicationModalWrapDesktop :global(.ant-modal) {
+  top: 20px;
+}
+
+.applicationModalWrap :global(.ant-modal-content) {
+  padding: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.applicationModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+.applicationModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.applicationModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+}
+
+.applicationModalWrapMobile :global(.ant-modal-header) {
+  background: #ffffff;
+  backdrop-filter: none;
+  padding: 16px;
+  border-radius: 0;
+}
+
+.applicationModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.applicationModalWrapMobile :global(.ant-modal-body) {
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+.applicationModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+}
+
+.applicationModalWrapMobile :global(.ant-modal-footer) {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.applicationModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.applicationModalButton {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.applicationModalItemSpacing {
+  margin-bottom: 12px;
+}
+
+.applicationModalItemTight {
+  margin-bottom: 0;
+}
+
+.applicationModalDeleteCol {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.applicationModalDeleteButton {
+  margin-top: 0;
+}
+
+.applicationModalAddButton {
+  border-radius: 12px;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 500;
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #667eea;
+}
+
+.friendsModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.friendsModalWrapMobile :global(.ant-modal) {
+  top: 0;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.friendsModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.friendsModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  padding: 16px;
+  height: 100vh;
+}
+
+.friendsModalWrap :global(.ant-modal-body) {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.friendsModalWrapMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 80px);
+}
+
+.friendsModalTitle {
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.friendsModalTitleMobile {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.friendsModalTitleDesktop {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.friendsModalContent {
+  padding-top: 16px;
+}
+
+.friendsModalContentMobile {
+  padding-top: 12px;
+}
+
+.friendsModalSearchRow {
+  display: flex;
+  align-items: stretch;
+}
+
+.friendsModalSearch {
+  width: 100%;
+}
+
+.friendsModalSearchMobile {
+  margin-bottom: 16px;
+  height: 44px;
+}
+
+.friendsModalSearchDesktop {
+  margin-bottom: 24px;
+}
+
+.friendsModalSearchMobile :global(.ant-input) {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px 11px;
+  height: 100%;
+}
+
+.friendsModalSearchDesktop :global(.ant-input) {
+  font-size: 16px;
+}
+
+.friendsModalLoading {
+  text-align: center;
+  padding: 40px;
+}
+
+.friendsModalLoadingText {
+  display: block;
+  margin-top: 16px;
+}
+
+.friendsModalGrid {
+  display: grid;
+  align-items: stretch;
+}
+
+.friendsModalGridMobile {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.friendsModalGridDesktop {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.friendsModalCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.friendsModalCardMobile {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.friendsModalCardDesktop {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.friendsModalCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.friendsModalCardHeaderMobile {
+  gap: 10px;
+}
+
+.friendsModalAvatar {
+  flex-shrink: 0;
+}
+
+.friendsModalAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendsModalAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendsModalAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendsModalAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendsModalAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendsModalAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendsModalAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendsModalCardInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendsModalName {
+  display: block;
+  line-height: 22px;
+}
+
+.friendsModalNameMobile {
+  font-size: 15px;
+}
+
+.friendsModalNameDesktop {
+  font-size: 16px;
+}
+
+.friendsModalRole {
+  display: block;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.friendsModalRoleMobile {
+  font-size: 11px;
+}
+
+.friendsModalRoleDesktop {
+  font-size: 12px;
+}
+
+.friendsModalBio {
+  display: block;
+  margin-top: 4px;
+}
+
+.friendsModalBioMobile {
+  font-size: 11px;
+}
+
+.friendsModalBioDesktop {
+  font-size: 12px;
+}
+
+.friendsModalActions {
+  display: flex;
+}
+
+.friendsModalActionsMobile {
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.friendsModalActionsDesktop {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.friendsModalActionButton {
+  font-size: 14px;
+}
+
+.friendsModalActionButtonMobile {
+  font-size: 12px;
+  flex: 1;
+}
+
+.friendsModalActionButtonDesktop {
+  font-size: 14px;
+  flex: 1;
+}
+
+.welcomeModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.welcomeModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.welcomeModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+}
+
+.welcomeModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.welcomeModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+}
+
+.welcomeModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcomeModalButton {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.welcomeModalContent {
+  line-height: 1.8;
+  font-size: 15px;
+  color: #333333;
+}
+
+.welcomeModalIntro {
+  font-size: 16px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.welcomeModalName {
+  font-size: 16px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.welcomeModalText {
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.welcomeModalList {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.welcomeModalListItem {
+  margin-bottom: 12px;
+}
+
+.welcomeModalListItemLast {
+  margin-bottom: 0;
+}
+
+.welcomeModalFooter {
+  font-size: 15px;
+  margin-top: 20px;
+  font-weight: 600;
+  color: #667eea;
+  text-align: center;
+}
+
+.specializationModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.specializationModalWrap :global(.ant-modal-content) {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin: auto;
+}
+
+.specializationModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 16px;
+  margin: 16px;
+  max-width: calc(100% - 32px);
+}
+
+.specializationModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+  max-width: 600px;
+}
+
+.specializationModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+}
+
+.specializationModalWrapMobile :global(.ant-modal-header) {
+  padding: 16px 20px;
+  border-radius: 16px 16px 0 0;
+}
+
+.specializationModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.specializationModalWrapMobile :global(.ant-modal-body) {
+  padding: 20px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.specializationModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+}
+
+.specializationModalWrapMobile :global(.ant-modal-footer) {
+  padding: 16px 20px;
+  border-radius: 0 0 16px 16px;
+}
+
+.specializationModalTitle {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.specializationModalTitleMobile {
+  font-size: 18px;
+}
+
+.specializationModalTitleDesktop {
+  font-size: 24px;
+}
+
+.specializationModalButton {
+  font-weight: 500;
+}
+
+.specializationModalButtonMobile {
+  border-radius: 8px;
+  height: 40px;
+  font-size: 14px;
+}
+
+.specializationModalButtonDesktop {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.specializationModalGrid {
+  display: grid;
+}
+
+.specializationModalGridMobile {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.specializationModalGridDesktop {
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.specializationModalFullWidth {
+  width: 100%;
+}
+
+.specializationModalTextareaMobile {
+  font-size: 14px;
+}
+
+.specializationModalTextareaDesktop {
+  font-size: 15px;
+}
+
+.financeModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.financeModalWrap :global(.ant-modal-content) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  height: calc(100vh - 80px);
+}
+
+.financeModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  padding: 16px;
+  margin: 0;
+  max-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+}
+
+.financeModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.financeModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.financeModalWrapMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 100px);
+}
+
+.financeModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.financeModalLayout {
+  display: flex;
+  gap: 24px;
+  min-height: 600px;
+}
+
+.financeModalLayoutMobile {
+  flex-direction: column;
+  gap: 16px;
+  min-height: auto;
+}
+
+.financeModalLayoutDesktop {
+  flex-direction: row;
+}
+
+.financeModalMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.financeModalMainMobile {
+  order: 2;
+}
+
+.financeModalMainDesktop {
+  order: 1;
+}
+
+.financeModalHeading {
+  display: block;
+  color: #1f2937;
+}
+
+.financeModalHeadingMobile {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.financeModalHeadingDesktop {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.financeModalFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.financeModalFiltersMobile {
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.financeModalSelectMobile {
+  width: 100%;
+}
+
+.financeModalSelectDesktop {
+  width: 180px;
+}
+
+.financeModalRangeMobile {
+  width: 100%;
+}
+
+.financeModalRangeDesktop {
+  width: 280px;
+}
+
+.financeModalSearch {
+  flex: 1;
+}
+
+.financeModalSearchMobile {
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.financeModalSearchDesktop {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.financeModalSearchIcon {
+  color: #9ca3af;
+}
+
+.financeModalSummary {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.financeModalSummaryTitle {
+  font-size: 14px;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.financeModalSummaryRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.financeModalSummaryText {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.financeModalSummaryValue {
+  color: #1f2937;
+}
+
+.financeModalSummarySuccess {
+  color: #10b981;
+}
+
+.financeModalSummaryDanger {
+  color: #ef4444;
+}
+
+.financeModalEmptyState {
+  min-height: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.financeModalEmptyText {
+  font-size: 14px;
+}
+
+.financeModalSidebar {
+  flex-shrink: 0;
+}
+
+.financeModalSidebarMobile {
+  width: 100%;
+  order: 1;
+}
+
+.financeModalSidebarDesktop {
+  width: 300px;
+  order: 2;
+}
+
+.financeModalSidebarCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.financeModalSidebarCardMobile {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.financeModalSidebarCardDesktop {
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.financeModalBalanceBlockMobile {
+  margin-bottom: 16px;
+}
+
+.financeModalBalanceBlockDesktop {
+  margin-bottom: 24px;
+}
+
+.financeModalBalanceLabel {
+  color: #6b7280;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.financeModalBalanceLabelMobile {
+  font-size: 13px;
+}
+
+.financeModalBalanceLabelDesktop {
+  font-size: 14px;
+}
+
+.financeModalBalanceValue {
+  color: #1f2937;
+  display: block;
+}
+
+.financeModalBalanceValueMobile {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.financeModalBalanceValueDesktop {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.financeModalBalanceButton {
+  border-radius: 8px;
+  height: 40px;
+}
+
+.financeModalBreakdown {
+  margin-bottom: 24px;
+}
+
+.financeModalBreakdownRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.financeModalLegend {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.financeModalLegendSuccess {
+  background: #10b981;
+}
+
+.financeModalLegendDanger {
+  background: #ef4444;
+}
+
+.financeModalLegendMuted {
+  background: #6b7280;
+}
+
+.financeModalBreakdownLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.financeModalBreakdownValue {
+  font-size: 16px;
+  color: #1f2937;
+  margin-left: 20px;
+  display: block;
+}
+
+.financeModalQuickLinks {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.financeModalQuickLinksTitle {
+  font-size: 14px;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.financeModalQuickLinksList {
+  width: 100%;
+}
+
+.financeModalQuickLinkButton {
+  text-align: left;
+  height: 36px;
+}
+
+.faqModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.faqModalWrap :global(.ant-modal-content) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  height: calc(100vh - 80px);
+}
+
+.faqModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  padding: 16px;
+  margin: 0;
+  max-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+}
+
+.faqModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.faqModalWrap :global(.ant-modal-body) {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.faqModalWrapMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 100px);
+}
+
+.faqModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.faqModalContent {
+  padding-top: 16px;
+}
+
+.faqModalIntro {
+  font-size: 15px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 24px;
+}
+
+.faqModalSection {
+  margin-bottom: 16px;
+}
+
+.faqModalSectionTitle {
+  font-size: 18px;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.faqModalCollapse {
+  background: transparent;
+  border: none;
+}
+
+.faqModalExpandIcon {
+  font-size: 16px;
+  color: #667eea;
+  transition: transform 0.3s;
+}
+
+.faqModalExpandIconActive {
+  transform: rotate(45deg);
+}
+
+.faqModalItem {
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.faqModalItemTitle {
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.faqModalItemText {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.friendProfileModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.friendProfileModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.friendProfileModalWrap :global(.ant-modal-body) {
+  padding: 0;
+}
+
+.friendProfileHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 32px;
+  position: relative;
+}
+
+.friendProfileHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.friendProfileAvatar {
+  font-size: 36px;
+  font-weight: 600;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.friendProfileAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendProfileAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendProfileAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendProfileAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendProfileAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendProfileAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendProfileAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendProfileHeaderInfo {
+  flex: 1;
+}
+
+.friendProfileName {
+  font-size: 28px;
+  display: block;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.friendProfileRole {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.friendProfileRatingRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.friendProfileRating {
+  font-size: 16px;
+  color: #fbbf24;
+}
+
+.friendProfileContent {
+  padding: 32px;
+}
+
+.friendProfileSection {
+  margin-bottom: 32px;
+}
+
+.friendProfileSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.friendProfileSectionIcon {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.friendProfileSectionTitle {
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.friendProfileSectionText {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.friendProfileTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.friendProfileTag {
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+  border: 1px solid #e0e7ff;
+  background: #f5f7ff;
+  color: #667eea;
+}
+
+.friendProfileActions {
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.friendProfilePrimaryButton {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.friendProfileSecondaryButton {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.notificationsModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.notificationsModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 80px);
+}
+
+.notificationsModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  box-shadow: none;
+}
+
+.notificationsModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.notificationsModalWrap :global(.ant-modal-header) {
+  display: none;
+}
+
+.notificationsModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notificationsModalContent {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.notificationsModalContentMobile {
+  padding: 16px;
+}
+
+.notificationsModalContentDesktop {
+  padding: 32px;
+}
+
+.notificationsModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notificationsModalHeaderMobile {
+  margin-bottom: 16px;
+}
+
+.notificationsModalHeaderDesktop {
+  margin-bottom: 24px;
+}
+
+.notificationsModalTitle {
+  color: #1f2937;
+}
+
+.notificationsModalTitleMobile {
+  font-size: 20px;
+}
+
+.notificationsModalTitleDesktop {
+  font-size: 24px;
+}
+
+.notificationsModalMarkAll {
+  color: #3b82f6;
+  cursor: pointer;
+}
+
+.notificationsModalMarkAllMobile {
+  font-size: 12px;
+}
+
+.notificationsModalMarkAllDesktop {
+  font-size: 14px;
+}
+
+.notificationsModalTabs {
+  display: flex;
+  gap: 0;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.notificationsModalTabsMobile {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.notificationsModalTabsDesktop {
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.notificationsModalTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.notificationsModalTabMobile {
+  flex: 0 0 auto;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.notificationsModalTabDesktop {
+  flex: 1;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.notificationsModalTabActive {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.notificationsModalTabInactive {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+}
+
+.notificationsModalTabIcon {
+  flex-shrink: 0;
+}
+
+.notificationsModalTabIconMobile {
+  font-size: 16px;
+}
+
+.notificationsModalTabIconDesktop {
+  font-size: 18px;
+}
+
+.notificationsModalTabIconActive {
+  color: #3b82f6;
+}
+
+.notificationsModalTabIconInactive {
+  color: #6b7280;
+}
+
+.notificationsModalTabLabel {
+  white-space: nowrap;
+}
+
+.notificationsModalTabLabelMobile {
+  font-size: 13px;
+}
+
+.notificationsModalTabLabelDesktop {
+  font-size: 14px;
+}
+
+.notificationsModalTabLabelActive {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.notificationsModalTabLabelInactive {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.notificationsModalList {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.notificationsModalListMobile {
+  min-height: 300px;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.notificationsModalListDesktop {
+  min-height: 500px;
+  padding: 16px;
+}
+
+.notificationsModalLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.notificationsModalEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  min-height: 400px;
+}
+
+.notificationsModalEmptyIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.notificationsModalEmptyText {
+  font-size: 14px;
+}
+
+.notificationsModalItem {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.notificationsModalItemMobile {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.notificationsModalItemDesktop {
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+}
+
+.notificationsModalItemRead {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.notificationsModalItemUnread {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .notificationsModalItem:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.notificationsModalItem:last-child {
+  margin-bottom: 0;
+}
+
+.notificationsModalItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notificationsModalItemIconMobile {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.notificationsModalItemIconDesktop {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 20px;
+}
+
+.notificationsModalItemIconRead {
+  background: #f3f4f6;
+}
+
+.notificationsModalItemIconUnread {
+  background: #dbeafe;
+}
+
+.notificationsModalItemBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationsModalItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.notificationsModalItemTitle {
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.notificationsModalItemTitleMobile {
+  font-size: 14px;
+}
+
+.notificationsModalItemTitleDesktop {
+  font-size: 15px;
+}
+
+.notificationsModalItemTitleRead {
+  font-weight: 500;
+}
+
+.notificationsModalItemTitleUnread {
+  font-weight: 600;
+}
+
+.notificationsModalUnreadDot {
+  border-radius: 50%;
+  background: #3b82f6;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.notificationsModalUnreadDotMobile {
+  width: 6px;
+  height: 6px;
+  margin-top: 4px;
+}
+
+.notificationsModalUnreadDotDesktop {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+}
+
+.notificationsModalItemText {
+  color: #6b7280;
+  display: block;
+  line-height: 1.5;
+}
+
+.notificationsModalItemTextMobile {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.notificationsModalItemTextDesktop {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.notificationsModalItemTime {
+  color: #9ca3af;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notificationsModalItemTimeMobile {
+  font-size: 11px;
+}
+
+.notificationsModalItemTimeDesktop {
+  font-size: 12px;
+}
+
+.notificationsModalItemTimeIcon {
+  margin-right: 4px;
+}
+
+.notificationsIconPrimary {
+  color: #3b82f6;
+}
+
+.notificationsIconSuccess {
+  color: #10b981;
+}
+
+.notificationsIconInfo {
+  color: #8b5cf6;
+}
+
+.notificationsIconWarning {
+  color: #f59e0b;
+}
+
+.notificationsIconDanger {
+  color: #ef4444;
+}
+
+.notificationsIconHighlight {
+  color: #fbbf24;
+}
+
+.notificationsIconMuted {
+  color: #6b7280;
+}
+
+.arbitrationModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.arbitrationModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 80px);
+}
+
+.arbitrationModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  box-shadow: none;
+}
+
+.arbitrationModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.arbitrationModalWrap :global(.ant-modal-header) {
+  display: none;
+}
+
+.arbitrationModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.arbitrationModalContent {
+  background: #f3f4f6;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.arbitrationModalContentMobile {
+  padding: 16px;
+}
+
+.arbitrationModalContentDesktop {
+  padding: 32px;
+}
+
+.arbitrationModalTitle {
+  color: #1f2937;
+  display: block;
+}
+
+.arbitrationModalTitleMobile {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalTitleDesktop {
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.arbitrationModalTabs {
+  display: flex;
+  gap: 0;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.arbitrationModalTabsMobile {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.arbitrationModalTabsDesktop {
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.arbitrationModalTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.arbitrationModalTabInactive {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+}
+
+.arbitrationModalTabActiveAll {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.arbitrationModalTabActivePending {
+  background: #ffffff;
+  border-bottom: 2px solid #f59e0b;
+}
+
+.arbitrationModalTabActiveInReview {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.arbitrationModalTabActiveResolved {
+  background: #ffffff;
+  border-bottom: 2px solid #10b981;
+}
+
+.arbitrationModalTabActiveRejected {
+  background: #ffffff;
+  border-bottom: 2px solid #ef4444;
+}
+
+.arbitrationModalTabIcon {
+  font-size: 16px;
+}
+
+.arbitrationModalTabIconInactive {
+  color: #6b7280;
+}
+
+.arbitrationModalTabIconAll {
+  color: #3b82f6;
+}
+
+.arbitrationModalTabIconPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalTabIconInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalTabIconResolved {
+  color: #10b981;
+}
+
+.arbitrationModalTabIconRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalTabLabel {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.arbitrationModalTabLabelActive {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.arbitrationModalTabLabelInactive {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.arbitrationModalList {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  min-height: 350px;
+}
+
+.arbitrationModalListInner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.arbitrationModalCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arbitrationModalCardMobile {
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.arbitrationModalCardDesktop {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .arbitrationModalCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.arbitrationModalCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalCardHeaderMobile {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arbitrationModalCardHeaderDesktop {
+  flex-direction: row;
+}
+
+.arbitrationModalCardHeaderInfo {
+  flex: 1;
+}
+
+.arbitrationModalCardHeaderInfoMobile {
+  width: 100%;
+}
+
+.arbitrationModalCardHeaderInfoDesktop {
+  width: auto;
+}
+
+.arbitrationModalCardTitle {
+  color: #1f2937;
+  display: block;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.arbitrationModalCardTitleMobile {
+  font-size: 14px;
+}
+
+.arbitrationModalCardTitleDesktop {
+  font-size: 16px;
+}
+
+.arbitrationModalCardMetaMobile {
+  font-size: 12px;
+}
+
+.arbitrationModalCardMetaDesktop {
+  font-size: 13px;
+}
+
+.arbitrationModalStatusBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+}
+
+.arbitrationModalStatusBadgeMobile {
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+
+.arbitrationModalStatusBadgeDesktop {
+  padding: 6px 12px;
+  margin-left: 16px;
+}
+
+.arbitrationModalStatusBadgePending {
+  background: #fef3c7;
+}
+
+.arbitrationModalStatusBadgeInReview {
+  background: #dbeafe;
+}
+
+.arbitrationModalStatusBadgeResolved {
+  background: #d1fae5;
+}
+
+.arbitrationModalStatusBadgeRejected {
+  background: #fee2e2;
+}
+
+.arbitrationModalStatusBadgeDefault {
+  background: #f3f4f6;
+}
+
+.arbitrationModalStatusIcon {
+  display: inline-flex;
+}
+
+.arbitrationModalStatusIconMobile {
+  font-size: 12px;
+}
+
+.arbitrationModalStatusIconDesktop {
+  font-size: 14px;
+}
+
+.arbitrationModalStatusIconPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalStatusIconInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalStatusIconResolved {
+  color: #10b981;
+}
+
+.arbitrationModalStatusIconRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalStatusIconDefault {
+  color: #6b7280;
+}
+
+.arbitrationModalStatusText {
+  font-weight: 500;
+}
+
+.arbitrationModalStatusTextMobile {
+  font-size: 11px;
+}
+
+.arbitrationModalStatusTextDesktop {
+  font-size: 13px;
+}
+
+.arbitrationModalStatusTextPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalStatusTextInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalStatusTextResolved {
+  color: #10b981;
+}
+
+.arbitrationModalStatusTextRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalStatusTextDefault {
+  color: #6b7280;
+}
+
+.arbitrationModalReason {
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 3px solid #f59e0b;
+}
+
+.arbitrationModalReasonTitle {
+  font-size: 13px;
+  color: #92400e;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arbitrationModalReasonText {
+  font-size: 13px;
+  color: #78350f;
+}
+
+.arbitrationModalDescription {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDecision {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDecisionResolved {
+  background: #d1fae5;
+  border-left: 3px solid #10b981;
+}
+
+.arbitrationModalDecisionRejected {
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+}
+
+.arbitrationModalDecisionTitle {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arbitrationModalDecisionTitleResolved {
+  color: #065f46;
+}
+
+.arbitrationModalDecisionTitleRejected {
+  color: #991b1b;
+}
+
+.arbitrationModalDecisionText {
+  font-size: 13px;
+}
+
+.arbitrationModalDecisionTextResolved {
+  color: #047857;
+}
+
+.arbitrationModalDecisionTextRejected {
+  color: #b91c1c;
+}
+
+.arbitrationModalDocuments {
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDocumentsTitle {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.arbitrationModalDocumentsList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.arbitrationModalDocumentItem {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.arbitrationModalDocumentIcon {
+  font-size: 12px;
+}
+
+.arbitrationModalFooter {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.arbitrationModalFooterMobile {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arbitrationModalFooterDesktop {
+  align-items: center;
+  flex-direction: row;
+}
+
+.arbitrationModalFooterMeta {
+  display: flex;
+}
+
+.arbitrationModalFooterMetaMobile {
+  gap: 12px;
+  flex-direction: column;
+  width: 100%;
+}
+
+.arbitrationModalFooterMetaDesktop {
+  gap: 16px;
+  flex-direction: row;
+}
+
+.arbitrationModalFooterText {
+  white-space: nowrap;
+}
+
+.arbitrationModalFooterTextMobile {
+  font-size: 11px;
+}
+
+.arbitrationModalFooterTextDesktop {
+  font-size: 12px;
+}
+
+.arbitrationModalFooterIcon {
+  margin-right: 4px;
+}
+
+.arbitrationModalAmount {
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+.arbitrationModalAmountMobile {
+  font-size: 16px;
+}
+
+.arbitrationModalAmountDesktop {
+  font-size: 15px;
+}
+
+.arbitrationModalAmountIcon {
+  margin-right: 4px;
+}
+
+.arbitrationModalEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  min-height: 350px;
+}
+
+.arbitrationModalEmptyIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalEmptyText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.aboutBio {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #4b5563;
+}
+
+.aboutHighlights {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.aboutHighlightItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aboutHighlightIcon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.aboutHighlightText {
+  font-size: 16px;
+  color: #4b5563;
+}
+
+.aboutSection {
+  margin-top: 24px;
+}
+
+.aboutSectionTitle {
+  margin-bottom: 12px;
+}
+
+.aboutSectionText {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #4b5563;
+}
+
+.aboutSkillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aboutSkillTag {
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.aboutPortfolioLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #667eea;
+  text-decoration: none;
+}
+
+.worksEmptyContainer {
+  padding: 24px;
+}
+
+.specializationsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.specializationsGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.specializationHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.specializationTitle {
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.specializationVerifiedIcon {
+  color: #10b981;
+  margin-left: 8px;
+}
+
+.specializationMeta {
+  font-size: 14px;
+}
+
+.specializationDescription {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.specializationSkills {
+  margin-top: 12px;
+}
+
+.specializationSkillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.specializationSkillTag {
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.applicationLoadingCard {
+  text-align: center;
+  padding: 48px;
+}
+
+.applicationRejectBox {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+}
+
+.applicationRejectText {
+  font-size: 14px;
+}
+
+.applicationActionRow {
+  margin-top: 16px;
+}
+
+.applicationEmptyCard {
+  position: relative;
+  z-index: 1;
+}
+
+.applicationEmptyStack {
+  width: 100%;
+}
+
+.applicationEmptyText {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.applicationEmptyButton {
+  margin-top: 8px;
+  position: relative;
+  z-index: 10;
+}
+
+.friendsLoadingCard {
+  text-align: center;
+  padding: 40px;
+}
+
+.friendsLoadingText {
+  display: block;
+  margin-top: 16px;
+}
+
+.friendsSubtitle {
+  font-size: 14px;
+}
+
+.friendsGrid {
+  display: grid;
+}
+
+.friendsGridMobile {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.friendsGridDesktop {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.friendCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.friendCardMobile {
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.friendCardDesktop {
+  border-radius: 16px;
+  padding: 20px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .friendCard:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-4px);
+    border-color: #667eea;
+  }
+}
+
+.friendCardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.friendAvatar {
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.friendAvatarMobile {
+  font-size: 28px;
+}
+
+.friendAvatarDesktop {
+  font-size: 32px;
+}
+
+.friendAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendName {
+  display: block;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.friendNameMobile {
+  font-size: 16px;
+}
+
+.friendNameDesktop {
+  font-size: 18px;
+}
+
+.friendRole {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.friendRoleMobile {
+  font-size: 12px;
+}
+
+.friendRoleDesktop {
+  font-size: 13px;
+}
+
+.friendBio {
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+
+.friendActions {
+  display: flex;
+  gap: 8px;
+}
+
+.friendMessageButton {
+  flex: 1;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.friendMessageButtonMobile {
+  height: 36px;
+}
+
+.friendMessageButtonDesktop {
+  height: 40px;
+}
+
+.friendProfileButton {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.friendProfileButtonMobile {
+  height: 36px;
+  min-width: 44px;
+}
+
+.friendProfileButtonDesktop {
+  height: 40px;
+  min-width: 48px;
+}
+
+.ordersLoading {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.ordersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ordersCreateButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+}
+
+.ordersFilterRow {
+  margin-bottom: 24px;
+}
+
+.ordersFilterGroup {
+  width: 100%;
+}
+
+.ordersFilterButton {
+  font-weight: 500;
+  text-align: center;
+}
+
+.ordersFilterButtonLeft {
+  border-radius: 8px 0 0 8px;
+}
+
+.ordersFilterButtonRight {
+  border-radius: 0 8px 8px 0;
+}
+
+.ordersFilterButtonMobile {
+  min-width: auto;
+}
+
+.ordersFilterButtonDesktop {
+  min-width: 150px;
+}
+
+.ordersEmptyText {
+  font-size: 16px;
+  color: #999;
+}
+
+.ordersEmpty {
+  padding: 60px 0;
+}
+
+.ordersGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.orderCard {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.orderCard :global(.ant-card-body) {
+  padding: 20px;
+}
+
+.orderCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orderCardHeaderInfo {
+  flex: 1;
+}
+
+.orderTitle {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.orderCardActions {
+  text-align: right;
+}
+
+.orderCardActionsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.orderBudget {
+  font-size: 20px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.orderDescription {
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.orderMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orderMetaIcon {
+  color: #999;
+}
+
+.orderMetaText {
+  font-size: 14px;
+}
+
+.orderBidButton {
+  border: none;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.orderBidButtonActive {
+  background: #52c41a;
+  color: #ffffff;
+}
+
+.orderBidButtonDisabled {
+  background: #e5e7eb;
+  color: #6b7280;
 }
 

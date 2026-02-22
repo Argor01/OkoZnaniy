@@ -181,12 +181,12 @@ const CancelledOrders: React.FC = () => {
         if ('conflict_type' in record) {
           const conflictType = (record as any).conflict_type;
           return (
-            <Tag color={getConflictTypeColor(conflictType)} style={{ margin: 0 }}>
+            <Tag color={getConflictTypeColor(conflictType)} className="arbitratorTagNoMargin">
               {getConflictTypeText(conflictType)}
             </Tag>
           );
         }
-        return <Text type="secondary" style={{ fontSize: '12px' }}>-</Text>;
+        return <Text type="secondary" className="arbitratorTextXs">-</Text>;
       },
     },
     {
@@ -195,7 +195,7 @@ const CancelledOrders: React.FC = () => {
       key: 'status',
       width: 120,
       render: (status: string) => (
-        <Tag color={getStatusColor(status)} style={{ margin: 0 }}>
+        <Tag color={getStatusColor(status)} className="arbitratorTagNoMargin">
           {getStatusText(status)}
         </Tag>
       ),
@@ -208,10 +208,10 @@ const CancelledOrders: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -227,16 +227,16 @@ const CancelledOrders: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
@@ -245,7 +245,7 @@ const CancelledOrders: React.FC = () => {
       width: 100,
       align: 'right' as const,
       render: (record: Claim) => (
-        <Text style={{ fontSize: '12px' }}>{record.order.amount.toLocaleString()} ₽</Text>
+        <Text className="arbitratorAmountText">{record.order.amount.toLocaleString()} ₽</Text>
       ),
     },
     {
@@ -255,7 +255,7 @@ const CancelledOrders: React.FC = () => {
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span style={{ fontSize: '12px' }}>
+          <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
         </Tooltip>
@@ -281,15 +281,15 @@ const CancelledOrders: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <Title level={4} style={{ marginBottom: '8px' }}>
+      <Card className="arbitratorCard">
+        <Title level={4} className="arbitratorSectionTitle">
           <CloseCircleOutlined /> Отменённые обращения
         </Title>
-        <Text type="secondary" style={{ fontSize: '13px' }}>
+        <Text type="secondary" className="arbitratorSectionSubtitle">
           Список отменённых заказов, требующих арбитража
         </Text>
 
-        <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -303,7 +303,7 @@ const CancelledOrders: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип конфликта"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={conflictTypeFilter}
               onChange={setConflictTypeFilter}
               allowClear
@@ -316,7 +316,7 @@ const CancelledOrders: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Статус"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={statusFilter}
               onChange={setStatusFilter}
               allowClear
@@ -328,7 +328,7 @@ const CancelledOrders: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               format="DD.MM.YYYY"
@@ -347,7 +347,7 @@ const CancelledOrders: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

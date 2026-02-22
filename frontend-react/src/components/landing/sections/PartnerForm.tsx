@@ -33,7 +33,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="ФИО" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -47,7 +47,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Email" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -58,7 +58,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Телефон" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -69,7 +69,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Город" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -77,7 +77,7 @@ const PartnerForm: React.FC = () => {
                 <Input.TextArea 
                   rows={4} 
                   placeholder="Расскажите о вашем опыте в бизнесе или образовательной сфере"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__textarea"
                 />
               </Form.Item>
 
@@ -85,7 +85,7 @@ const PartnerForm: React.FC = () => {
                 <Input.TextArea 
                   rows={3} 
                   placeholder="Есть ли у вас офис? Планируете работать онлайн или офлайн?"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__textarea"
                 />
               </Form.Item>
 
@@ -95,12 +95,7 @@ const PartnerForm: React.FC = () => {
                   htmlType="submit" 
                   size="large"
                   block
-                  className="button"
-                  style={{ 
-                    height: '56px',
-                    fontSize: '17px',
-                    borderRadius: '12px'
-                  }}
+                  className="button partner-form__submit"
                 >
                   Отправить заявку
                 </Button>

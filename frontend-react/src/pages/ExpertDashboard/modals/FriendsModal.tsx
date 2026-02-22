@@ -3,6 +3,7 @@ import { Modal, Input, Button, Avatar, Spin, Empty, Typography } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '../../../api/auth';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
@@ -15,9 +16,15 @@ interface FriendsModalProps {
 }
 
 
-const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-
-const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+const avatarColorClasses = [
+  styles.friendsModalAvatarColor0,
+  styles.friendsModalAvatarColor1,
+  styles.friendsModalAvatarColor2,
+  styles.friendsModalAvatarColor3,
+  styles.friendsModalAvatarColor4,
+  styles.friendsModalAvatarColor5,
+  styles.friendsModalAvatarColor6
+];
 
 const getInitials = (firstName?: string, lastName?: string, username?: string) => {
   if (firstName && lastName) {
@@ -59,15 +66,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   return (
     <Modal
       title={
-        <div style={{ 
-          fontSize: isMobile ? 20 : 24, 
-          fontWeight: 600, 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: isMobile ? 4 : 8
-        }}>
+        <div className={`${styles.friendsModalTitle} ${isMobile ? styles.friendsModalTitleMobile : styles.friendsModalTitleDesktop}`}>
           Последние пользователи
         </div>
       }
@@ -75,119 +74,64 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : 800}
-      style={isMobile ? {
-        top: 0,
-        padding: 0,
-        maxWidth: '100%',
-        margin: 0
-      } : {}}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: isMobile ? '16px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          height: isMobile ? '100vh' : 'auto'
-        },
-        body: {
-          maxHeight: isMobile ? 'calc(100vh - 80px)' : '70vh',
-          overflowY: 'auto',
-          padding: '0'
-        }
-      }}
+      wrapClassName={`${styles.friendsModalWrap} ${isMobile ? styles.friendsModalWrapMobile : styles.friendsModalWrapDesktop}`}
     >
-      <div style={{ paddingTop: isMobile ? 12 : 16 }}>
-        <div style={{ display: 'flex', alignItems: 'stretch' }}>
+      <div className={`${styles.friendsModalContent} ${isMobile ? styles.friendsModalContentMobile : ''}`}>
+        <div className={styles.friendsModalSearchRow}>
           <Input.Search
             placeholder={isMobile ? "Поиск..." : "Поиск пользователей..."}
             allowClear
             size={isMobile ? 'middle' : 'large'}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ 
-              marginBottom: isMobile ? 16 : 24,
-              width: '100%',
-              height: isMobile ? 44 : undefined
-            }}
-            styles={{
-              input: {
-                fontSize: isMobile ? 14 : 16,
-                lineHeight: isMobile ? '1.5' : 'normal',
-                padding: isMobile ? '10px 11px' : undefined,
-                height: isMobile ? '100%' : 'auto'
-              }
-            }}
+            className={`${styles.friendsModalSearch} ${isMobile ? styles.friendsModalSearchMobile : styles.friendsModalSearchDesktop}`}
           />
         </div>
         
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>
+          <div className={styles.friendsModalLoading}>
             <Spin size="large" />
-            <Text style={{ display: 'block', marginTop: 16 }}>Загрузка пользователей...</Text>
+            <Text className={styles.friendsModalLoadingText}>Загрузка пользователей...</Text>
           </div>
         ) : filteredUsers.length === 0 ? (
           <Empty description={searchText ? "Пользователи не найдены" : "Пока нет активных пользователей"} />
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(340px, 1fr))', 
-            gap: isMobile ? 12 : 16, 
-            alignItems: 'stretch' 
-          }}>
+          <div className={`${styles.friendsModalGrid} ${isMobile ? styles.friendsModalGridMobile : styles.friendsModalGridDesktop}`}>
             {filteredUsers.map((user: User) => (
               <div 
                 key={user.id}
-                style={{ 
-                  background: '#ffffff',
-                  borderRadius: isMobile ? 8 : 12,
-                  border: '1px solid #e5e7eb',
-                  padding: isMobile ? '12px' : '16px',
-                  transition: 'all 0.3s',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%'
-                }}
+                className={`${styles.friendsModalCard} ${isMobile ? styles.friendsModalCardMobile : styles.friendsModalCardDesktop}`}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 10 : 12, flex: 1 }}>
+                <div className={`${styles.friendsModalCardHeader} ${isMobile ? styles.friendsModalCardHeaderMobile : ''}`}>
                   <Avatar 
                     size={isMobile ? 48 : 56} 
                     src={user.avatar}
-                    style={{ 
-                      backgroundColor: getAvatarColor(user.id), 
-                      flexShrink: 0 
-                    }}
+                    className={`${styles.friendsModalAvatar} ${avatarColorClasses[user.id % avatarColorClasses.length]}`}
                   >
                     {!user.avatar && getInitials(user.first_name, user.last_name, user.username)}
                   </Avatar>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text strong style={{ fontSize: isMobile ? 15 : 16, display: 'block', lineHeight: '22px' }}>
+                  <div className={styles.friendsModalCardInfo}>
+                    <Text strong className={`${styles.friendsModalName} ${isMobile ? styles.friendsModalNameMobile : styles.friendsModalNameDesktop}`}>
                       {user.first_name && user.last_name 
                         ? `${user.first_name} ${user.last_name}`
                         : user.username || 'Пользователь'}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', lineHeight: '18px', marginTop: 2 }}>
+                    <Text type="secondary" className={`${styles.friendsModalRole} ${isMobile ? styles.friendsModalRoleMobile : styles.friendsModalRoleDesktop}`}>
                       {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
                     </Text>
                     {user.bio && (
-                      <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', marginTop: 4 }}>
+                      <Text type="secondary" className={`${styles.friendsModalBio} ${isMobile ? styles.friendsModalBioMobile : styles.friendsModalBioDesktop}`}>
                         {user.bio.length > 60 ? `${user.bio.slice(0, 60)}...` : user.bio}
                       </Text>
                     )}
                   </div>
                 </div>
-                <div style={{ marginTop: isMobile ? 10 : 12, display: 'flex', gap: isMobile ? 6 : 8 }}>
+                <div className={`${styles.friendsModalActions} ${isMobile ? styles.friendsModalActionsMobile : styles.friendsModalActionsDesktop}`}>
                   <Button 
                     type="primary" 
                     size="small" 
                     icon={<MessageOutlined />} 
-                    style={{ flex: 1, fontSize: isMobile ? 12 : 14 }}
+                    className={`${styles.friendsModalActionButton} ${isMobile ? styles.friendsModalActionButtonMobile : styles.friendsModalActionButtonDesktop}`}
                     onClick={() => {
                       onOpenChat(user);
                       onClose();
@@ -198,7 +142,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                   <Button 
                     size="small" 
                     icon={<UserOutlined />}
-                    style={{ fontSize: isMobile ? 12 : 14 }}
+                    className={`${styles.friendsModalActionButton} ${isMobile ? styles.friendsModalActionButtonMobile : styles.friendsModalActionButtonDesktop}`}
                     onClick={() => {
                       onOpenProfile(user);
                       onClose();

@@ -9,7 +9,6 @@ interface SkillsSelectProps {
   onChange?: (value: string[]) => void;
   placeholder?: string;
   size?: 'small' | 'middle' | 'large';
-  style?: React.CSSProperties;
   className?: string;
 }
 
@@ -18,9 +17,9 @@ const SkillsSelect: React.FC<SkillsSelectProps> = ({
   onChange,
   placeholder = 'Выберите или введите свои навыки',
   size = 'large',
-  style,
   className
 }) => {
+  const selectClassName = [className, 'fullWidthSelect'].filter(Boolean).join(' ');
   const queryClient = useQueryClient();
 
   const { data: dbSkills = [] } = useQuery({
@@ -60,8 +59,7 @@ const SkillsSelect: React.FC<SkillsSelectProps> = ({
       mode="tags"
       size={size}
       placeholder={placeholder}
-      style={{ width: '100%', ...style }}
-      className={className}
+      className={selectClassName}
       value={value}
       onChange={(vals) => {
         const cleaned = (vals || []).map((v) => String(v).trim()).filter(Boolean);

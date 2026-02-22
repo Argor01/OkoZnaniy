@@ -1,0 +1,195 @@
+.pageContainer {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+.loadingState {
+  text-align: center;
+  padding: 50px;
+}
+
+.errorState {
+  padding: 24px;
+}
+
+.headerRow {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.headerAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f0f0f0;
+}
+
+.headerAvatarFallback {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #999;
+}
+
+.headerTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verifiedIcon {
+  color: #52c41a;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+}
+
+.cardSpacing {
+  margin-bottom: 16px;
+}
+
+.cardTopSpacing {
+  margin-top: 16px;
+}
+
+.skillsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statsHeader {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.statsValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1890ff;
+}
+
+.statsRate {
+  font-size: 16px;
+}
+
+.statsMeta {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.statsRowLast {
+  display: flex;
+  justify-content: space-between;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewsCard {
+  margin-top: 24px;
+}
+
+.reviewsLoading {
+  text-align: center;
+  padding: 20px;
+}
+
+.reviewsEmpty {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reviewCard {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.reviewAuthor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.reviewAvatarIcon {
+  font-size: 16px;
+}
+
+.reviewAuthorName {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.reviewAuthorMeta {
+  font-size: 12px;
+}
+
+.reviewRating {
+  text-align: right;
+}
+
+.reviewRatingValue {
+  font-size: 14px;
+}
+
+.reviewDate {
+  font-size: 12px;
+}
+
+.reviewOrder {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.reviewText {
+  margin: 0;
+  font-size: 14px;
+}

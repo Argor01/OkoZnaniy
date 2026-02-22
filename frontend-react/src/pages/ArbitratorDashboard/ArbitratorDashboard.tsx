@@ -90,10 +90,6 @@ const ArbitratorDashboard: React.FC = () => {
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-      },
       onOk: async () => {
         try {
           authApi.logout();
@@ -125,14 +121,7 @@ const ArbitratorDashboard: React.FC = () => {
   
   if (loading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
+      <div className="fullScreenCenter">
         <Spin size="large" />
       </div>
     );
@@ -206,29 +195,22 @@ const ArbitratorDashboard: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className="arbitratorLayout">
       <Sider
         width={280}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-        }}
+        className="arbitratorSider"
       >
         <div
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-          }}
+          className="arbitratorSiderHeader"
         >
           <FileTextOutlined
-            style={{ fontSize: '32px', color: '#1890ff', marginBottom: '8px' }}
+            className="arbitratorSiderIcon"
           />
-          <Title level={4} style={{ margin: 0, fontSize: '16px' }}>
+          <Title level={4} className="arbitratorSiderTitle">
             Личный кабинет арбитра
           </Title>
           {user && (
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
+            <div className="arbitratorSiderUser">
               {user.first_name} {user.last_name}
             </div>
           )}
@@ -246,9 +228,7 @@ const ArbitratorDashboard: React.FC = () => {
           openKeys={openKeys}
           onClick={({ key }) => handleMenuClick(key as string)}
           onOpenChange={(keys) => setOpenKeys(keys)}
-          style={{
-            borderRight: 0,
-          }}
+          className="arbitratorMenu"
           items={[
             {
               key: 'claims',
@@ -262,7 +242,7 @@ const ArbitratorDashboard: React.FC = () => {
                     <span>
                       Новые обращения
                       {newClaimsCount > 0 && (
-                        <span style={{ marginLeft: 8, color: '#1890ff' }}>
+                        <span className="arbitratorNavCount">
                           ({newClaimsCount})
                         </span>
                       )}
@@ -302,16 +282,9 @@ const ArbitratorDashboard: React.FC = () => {
 
       <Layout>
         <Header
-          style={{
-            background: '#fff',
-            padding: '0 24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
+          className="arbitratorHeader"
         >
-          <Title level={3} style={{ margin: 0 }}>
+          <Title level={3} className="arbitratorSectionHeaderTitle">
             {getSectionTitle()}
           </Title>
           <Space>
@@ -336,16 +309,11 @@ const ArbitratorDashboard: React.FC = () => {
           </Space>
         </Header>
         <Content
-          style={{
-            margin: '16px',
-            padding: '0',
-            background: 'transparent',
-            minHeight: 'calc(100vh - 112px)',
-          }}
+          className="arbitratorContent"
         >
           {renderContent()}
         </Content>
-        <Footer style={{ textAlign: 'center', background: '#fff' }}>
+        <Footer className="arbitratorFooter">
           Личный кабинет арбитра © {new Date().getFullYear()}
         </Footer>
       </Layout>

@@ -85,7 +85,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
   return (
     <Card className={styles.card}>
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
+      <Space direction="vertical" className={styles.spaceFullWidth} size="large">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Text strong className={styles.label}>
@@ -106,8 +106,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               placeholder="Введите стоимость работы"
               value={formData.price}
               onChange={(value) => setFormData({ ...formData, price: value || 0 })}
-              
-              style={{ width: '120px' }}
+              className={styles.priceInput}
               min={0}
               addonAfter="₽"
             />
@@ -129,12 +128,12 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               dropdownRender={(menu) => (
                 <>
                   {menu}
-                  <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                  <div className={styles.selectDropdownFooter}>
                     <Button
                       type="text"
                       icon={<PlusOutlined />}
                       onClick={() => setNewWorkTypeModalVisible(true)}
-                      style={{ width: '100%', textAlign: 'left' }}
+                      className={styles.selectDropdownButton}
                     >
                       Добавить новый тип работы
                     </Button>
@@ -163,12 +162,12 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               dropdownRender={(menu) => (
                 <>
                   {menu}
-                  <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                  <div className={styles.selectDropdownFooter}>
                     <Button
                       type="text"
                       icon={<PlusOutlined />}
                       onClick={() => setNewSubjectModalVisible(true)}
-                      style={{ width: '100%', textAlign: 'left' }}
+                      className={styles.selectDropdownButton}
                     >
                       Добавить новый предмет
                     </Button>
@@ -223,15 +222,15 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             }}
           >
             {formData.preview ? (
-              <img 
+              <img
                 src={URL.createObjectURL(formData.preview)} 
                 alt="preview" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                className={styles.previewImage}
               />
             ) : (
               <div>
                 <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить</div>
+                <div className={styles.previewHint}>Загрузить</div>
               </div>
             )}
           </Upload>
@@ -239,7 +238,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             <Button 
               type="link" 
               onClick={() => setFormData({ ...formData, preview: null })}
-              style={{ marginTop: 8 }}
+              className={styles.removePreviewButton}
             >
               Удалить изображение
             </Button>
@@ -298,7 +297,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </p>
           </Upload.Dragger>
           {formData.files && formData.files.length > 0 && (
-            <div style={{ marginTop: 8 }}>
+            <div className={styles.uploadedFilesInfo}>
               <Text type="secondary">Загружено файлов: {formData.files.length}</Text>
             </div>
           )}

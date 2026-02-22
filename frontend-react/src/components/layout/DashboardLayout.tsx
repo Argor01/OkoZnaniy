@@ -203,15 +203,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className={styles.loadingScreen}>
         <Spin size="large" />
       </div>
     );
   }
 
+  const dashboardLayoutClassName = [
+    styles.dashboardLayout,
+    isMobile ? styles.dashboardLayoutMobile : styles.dashboardLayoutDesktop,
+    shouldShowHeader ? styles.dashboardLayoutHeader : styles.dashboardLayoutNoHeader,
+  ].join(' ');
+
+  const contentClassName = [
+    styles.mainContent,
+    styles.contentBase,
+    isMobile ? styles.contentPaddingMobile : styles.contentPaddingDesktop,
+    shouldShowHeader ? styles.contentWithHeader : styles.contentNoHeader,
+  ].join(' ');
+
   return (
     <DashboardContext.Provider value={contextValue}>
-      <Layout style={{ minHeight: '100vh' }}>
+      <Layout className={styles.layoutRoot}>
         
         {shouldShowHeader && (
           <DashboardHeader
@@ -266,19 +279,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           } : undefined}
         />
         
-        <Layout style={{ 
-          marginLeft: isMobile ? 0 : 250, 
-          marginTop: shouldShowHeader ? 64 : 0, 
-          background: '#f5f5f5',
-          transition: 'all 0.2s'
-        }}>
-          <Content className={styles.mainContent} style={{ 
-            padding: isMobile ? '16px' : '24px', 
-            minHeight: shouldShowHeader ? 'calc(100vh - 64px)' : '100vh',
-            display: 'block',
-            visibility: 'visible',
-            opacity: 1
-          }}>
+        <Layout className={dashboardLayoutClassName}>
+          <Content className={contentClassName}>
             {children}
           </Content>
         </Layout>

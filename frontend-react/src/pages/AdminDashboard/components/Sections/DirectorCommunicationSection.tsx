@@ -296,14 +296,14 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       key: 'subject',
       render: (record: DirectorMessage) => (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            {record.is_confidential && <FlagOutlined style={{ color: '#ff4d4f' }} />}
-            {record.requires_response && <ExclamationCircleOutlined style={{ color: '#faad14' }} />}
-            <span style={{ fontWeight: record.status === 'sent' ? 'bold' : 'normal' }}>
+          <div className="directorCommSubjectRow">
+            {record.is_confidential && <FlagOutlined className="directorCommFlagIcon" />}
+            {record.requires_response && <ExclamationCircleOutlined className="directorCommUrgentIcon" />}
+            <span className={record.status === 'sent' ? 'directorCommSubjectText directorCommSubjectTextSent' : 'directorCommSubjectText'}>
               {record.subject}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <div className="directorCommTagsRow">
             <Tag color={getMessageTypeColor(record.message_type)}>
               {getMessageTypeText(record.message_type)}
             </Tag>
@@ -324,12 +324,12 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       title: 'Отправитель',
       key: 'sender',
       render: (record: DirectorMessage) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="directorCommSenderRow">
           <div>
-            <div style={{ fontWeight: 'bold' }}>
+            <div className="directorCommSenderName">
               {record.sender.first_name} {record.sender.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px' }}>
+            <Text type="secondary" className="directorCommSenderMeta">
               {record.sender.role} • {record.sender.department}
             </Text>
           </div>
@@ -347,10 +347,12 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
             {getStatusText(status)}
           </Tag>
           {record.requires_response && !record.replied_at && (
-            <div style={{ fontSize: '11px', color: '#faad14', marginTop: 2 }}>
+            <div className="directorCommStatusWarning">
               <ClockCircleOutlined /> Требует ответа
               {record.response_deadline && (
-                <div>до {dayjs(record.response_deadline).format('DD.MM HH:mm')}</div>
+                <div className="directorCommStatusWarningTime">
+                  до {dayjs(record.response_deadline).format('DD.MM HH:mm')}
+                </div>
               )}
             </div>
           )}
@@ -364,11 +366,11 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       render: (record: DirectorMessage) => (
         <div>
           <div>{dayjs(record.sent_at || record.created_at).format('DD.MM.YYYY')}</div>
-          <Text type="secondary" style={{ fontSize: '11px' }}>
+          <Text type="secondary" className="directorCommDateTime">
             {dayjs(record.sent_at || record.created_at).format('HH:mm')}
           </Text>
           {record.replies.length > 0 && (
-            <div style={{ fontSize: '11px', color: '#52c41a', marginTop: 2 }}>
+            <div className="directorCommRepliesMeta">
               <RollbackOutlined /> {record.replies.length} ответов
             </div>
           )}
@@ -421,10 +423,10 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         description="Канал связи с руководством компании для отчетов, предложений и решения важных вопросов."
         type="info"
         showIcon
-        style={{ marginBottom: 16 }}
+        className="directorCommAlert"
       />
 
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={16} className="directorCommStatsRow">
         <Col span={4}>
           <Card>
             <Statistic
@@ -439,7 +441,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
             <Statistic
               title="Непрочитанные"
               value={stats.unread}
-              prefix={<BellOutlined style={{ color: '#1890ff' }} />}
+              prefix={<BellOutlined className="directorCommStatIconInfo" />}
             />
           </Card>
         </Col>
@@ -448,7 +450,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
             <Statistic
               title="Срочные"
               value={stats.urgent}
-              prefix={<ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />}
+              prefix={<ExclamationCircleOutlined className="directorCommStatIconAlert" />}
             />
           </Card>
         </Col>
@@ -457,7 +459,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
             <Statistic
               title="Требуют ответа"
               value={stats.requiresResponse}
-              prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />}
+              prefix={<ClockCircleOutlined className="directorCommStatIconWarn" />}
             />
           </Card>
         </Col>
@@ -466,18 +468,18 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
             <Statistic
               title="Запросы встреч"
               value={stats.pendingMeetings}
-              prefix={<CalendarOutlined style={{ color: '#52c41a' }} />}
+              prefix={<CalendarOutlined className="directorCommStatIconSuccess" />}
             />
           </Card>
         </Col>
         <Col span={4}>
           <Card>
-            <div style={{ textAlign: 'center' }}>
+            <div className="directorCommActionsCard">
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />}
                 onClick={() => setMessageModalVisible(true)}
-                style={{ marginBottom: 8 }}
+                className="directorCommActionPrimary"
               >
                 Написать директору
               </Button>
@@ -497,12 +499,12 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         <TabPane tab="Сообщения" key="messages">
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="directorCommMessagesHeader">
                 <span>Переписка с дирекцией</span>
                 <Select
                   value={messageFilter}
                   onChange={setMessageFilter}
-                  style={{ width: 200 }}
+                  className="directorCommMessagesFilter"
                 >
                   <Option value="all">Все сообщения</Option>
                   <Option value="unread">Непрочитанные</Option>
@@ -709,7 +711,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
           >
             <DatePicker 
               showTime 
-              style={{ width: '100%' }}
+              className="directorCommDeadlinePicker"
               placeholder="Выберите срок ответа"
             />
           </Form.Item>
@@ -798,7 +800,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
           >
             <DatePicker.RangePicker 
               showTime 
-              style={{ width: '100%' }}
+              className="directorCommMeetingRange"
               placeholder={['Начало периода', 'Конец периода']}
             />
           </Form.Item>
@@ -841,9 +843,9 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       >
         {selectedMessage && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className="directorCommViewHeader">
               <Title level={4}>{selectedMessage.subject}</Title>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <div className="directorCommViewTagsRow">
                 <Tag color={getMessageTypeColor(selectedMessage.message_type)}>
                   {getMessageTypeText(selectedMessage.message_type)}
                 </Tag>
@@ -866,17 +868,17 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
 
             <Divider />
 
-            <div style={{ marginBottom: 16 }}>
-              <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
+            <div className="directorCommViewSection">
+              <Paragraph className="directorCommViewContent">
                 {selectedMessage.content}
               </Paragraph>
             </div>
 
             {selectedMessage.attachments.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="directorCommViewSection">
                 <Title level={5}>Вложения:</Title>
                 {selectedMessage.attachments.map(attachment => (
-                  <div key={attachment.id} style={{ marginBottom: 8 }}>
+                  <div key={attachment.id} className="directorCommAttachmentItem">
                     <Button 
                       icon={<DownloadOutlined />}
                       href={attachment.url}
@@ -900,11 +902,11 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
                         <Text strong>
                           {reply.sender.first_name} {reply.sender.last_name}
                         </Text>
-                        <Text type="secondary" style={{ marginLeft: 8 }}>
+                        <Text type="secondary" className="directorCommReplyTime">
                           {dayjs(reply.sent_at).format('DD.MM.YYYY HH:mm')}
                         </Text>
-                        <div style={{ marginTop: 8 }}>
-                          <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
+                        <div className="directorCommReplyBlock">
+                          <Paragraph className="directorCommReplyContent">
                             {reply.content}
                           </Paragraph>
                         </div>
@@ -938,7 +940,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
               message={`Ответ на: ${selectedMessage.subject}`}
               description={`От: ${selectedMessage.sender.first_name} ${selectedMessage.sender.last_name}`}
               type="info"
-              style={{ marginBottom: 16 }}
+              className="directorCommReplyAlert"
             />
             
             <Form form={replyForm} layout="vertical">

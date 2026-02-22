@@ -1,0 +1,289 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 24px;
+}
+
+.pageInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: 16px;
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 50px;
+}
+
+.errorContainer {
+  padding: 24px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.profileStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.headerCard {
+  background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
+  border: 2px solid #d3adf7;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
+  padding: 8px 16px;
+}
+
+.headerCard :global(.ant-card-body) {
+  padding: 16px 20px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profileLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #722ed1;
+}
+
+.roleTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  background-color: rgba(114, 46, 209, 0.1);
+  color: #722ed1;
+  border: 1px solid rgba(114, 46, 209, 0.2);
+  border-radius: 12px;
+}
+
+.avatarImage {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #722ed1;
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.2);
+}
+
+.avatarImageHidden {
+  display: none;
+}
+
+.avatarFallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #722ed1;
+  border: 3px solid #722ed1;
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.2);
+}
+
+.avatarFallbackHidden {
+  display: none;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.nameText {
+  font-size: 20px;
+  font-weight: 700;
+  color: #722ed1;
+  margin: 0;
+}
+
+.verifiedIcon {
+  color: #52c41a;
+  font-size: 20px;
+}
+
+.usernameText {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 6px;
+}
+
+.statsLoading {
+  text-align: center;
+  padding: 40px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.statCardCenter {
+  text-align: center;
+  padding: 16px;
+}
+
+.statCardBlock {
+  padding: 16px;
+}
+
+.statValueRating {
+  font-size: 48px;
+  font-weight: 600;
+  color: #faad14;
+  margin-bottom: 8px;
+}
+
+.statValuePrimary {
+  font-size: 48px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.statNumberLarge {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.rateLarge {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #666;
+}
+
+.statSubLabel {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.statBlockTitle {
+  margin-bottom: 16px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statRowSpacing {
+  margin-bottom: 8px;
+}
+
+.statSuccess {
+  color: #52c41a;
+}
+
+.statsEmpty {
+  text-align: center;
+  padding: 40px;
+}
+
+.statsEmptyText {
+  font-size: 16px;
+}
+
+.sectionMargin {
+  margin-bottom: 16px;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reviewsCard {
+  border-radius: 12px;
+}
+
+.reviewsLoading {
+  text-align: center;
+  padding: 20px;
+}
+
+.reviewsEmpty {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reviewItem {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.reviewUser {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.reviewUserName {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.reviewUserMeta {
+  font-size: 12px;
+}
+
+.reviewDate {
+  text-align: right;
+}
+
+.reviewRate {
+  font-size: 14px;
+}
+
+.reviewOrderTitle {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.reviewText {
+  margin: 0;
+  font-size: 14px;
+}
+
+.reviewAvatarIcon {
+  font-size: 16px;
+}

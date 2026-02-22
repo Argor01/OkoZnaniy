@@ -6,6 +6,7 @@ import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-desig
 import { expertsApi, type ExpertStatistics, type ExpertReview } from '../api/experts';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '../config/api';
+import styles from './ExpertProfile.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -62,7 +63,7 @@ const ExpertProfile: React.FC = () => {
 
   if (expertLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className={styles.loadingState}>
         <Spin size="large" />
         <p>Загрузка профиля...</p>
       </div>
@@ -71,7 +72,7 @@ const ExpertProfile: React.FC = () => {
 
   if (expertError || !expert) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className={styles.errorState}>
         <Alert
           message="Эксперт не найден"
           description="Профиль эксперта не существует или был удален."
@@ -88,45 +89,29 @@ const ExpertProfile: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '24px auto', padding: '0 24px' }}>
+    <div className={styles.pageContainer}>
       
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div className={styles.headerRow}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
           Назад
         </Button>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+          <div className={styles.headerMeta}>
             {expert.avatar ? (
               <img
                 src={getMediaUrl(expert.avatar)}
                 alt="Аватар"
-                style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  border: '2px solid #f0f0f0'
-                }}
+                className={styles.headerAvatar}
               />
             ) : (
-              <div style={{ 
-                width: 60, 
-                height: 60, 
-                borderRadius: '50%', 
-                backgroundColor: '#f0f0f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 24,
-                color: '#999'
-              }}>
+              <div className={styles.headerAvatarFallback}>
                 <UserOutlined />
               </div>
             )}
             <div>
-              <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Title level={2} className={styles.headerTitle}>
                 {expert.first_name} {expert.last_name}
-                {expert.is_verified && <CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                {expert.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
               </Title>
               <Text type="secondary">@{expert.username}</Text>
             </div>
@@ -134,23 +119,23 @@ const ExpertProfile: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
+      <div className={styles.contentGrid}>
         <div>
           {expert.bio && (
-            <Card title="О себе" style={{ marginBottom: 16 }}>
+            <Card title="О себе" className={styles.cardSpacing}>
               <Paragraph>{expert.bio}</Paragraph>
             </Card>
           )}
 
           {expert.education && (
-            <Card title="Образование" style={{ marginBottom: 16 }}>
+            <Card title="Образование" className={styles.cardSpacing}>
               <Paragraph>{expert.education}</Paragraph>
             </Card>
           )}
 
           {expert.skills && (
-            <Card title="Навыки" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Card title="Навыки" className={styles.cardSpacing}>
+              <div className={styles.skillsWrap}>
                 {expert.skills.split(',').map((skill: string, index: number) => (
                   <Tag key={index} color="blue">
                     {skill.trim()}
@@ -161,7 +146,7 @@ const ExpertProfile: React.FC = () => {
           )}
 
           {expert.portfolio_url && (
-            <Card title="Портфолио" style={{ marginBottom: 16 }}>
+            <Card title="Портфолио" className={styles.cardSpacing}>
               <Button 
                 type="link" 
                 href={expert.portfolio_url} 
@@ -175,34 +160,34 @@ const ExpertProfile: React.FC = () => {
         </div>
 
         <div>
-          <Card title="Рейтинг и статистика" style={{ marginBottom: 16 }}>
+          <Card title="Рейтинг и статистика" className={styles.cardSpacing}>
             {statsLoading ? (
               <Spin />
             ) : expertStats ? (
               <div>
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                  <div style={{ fontSize: 32, fontWeight: 'bold', color: '#1890ff' }}>
+                <div className={styles.statsHeader}>
+                  <div className={styles.statsValue}>
                     {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
                   </div>
-                  <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 16 }} />
-                  <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                  <Rate disabled value={Number(expertStats.average_rating) || 0} className={styles.statsRate} />
+                  <div className={styles.statsMeta}>
                     на основе {expertStats.completed_orders} заказов
                   </div>
                 </div>
                 <Divider />
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div className={styles.statsRow}>
                   <Text>Всего заказов:</Text>
                   <Text strong>{expertStats.total_orders}</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div className={styles.statsRow}>
                   <Text>Завершено:</Text>
                   <Text strong>{expertStats.completed_orders}</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div className={styles.statsRow}>
                   <Text>Успешность:</Text>
                   <Text strong>{(expertStats.success_rate * 100).toFixed(1)}%</Text>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className={styles.statsRowLast}>
                   <Text>Заработано:</Text>
                   <Text strong>
                     {(() => {
@@ -222,7 +207,7 @@ const ExpertProfile: React.FC = () => {
           </Card>
 
           <Card title="Контактная информация">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className={styles.infoList}>
               <div>
                 <Text strong>Email:</Text>
                 <br />
@@ -245,8 +230,8 @@ const ExpertProfile: React.FC = () => {
             </div>
           </Card>
 
-          <Card title="Дополнительно" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Card title="Дополнительно" className={styles.cardTopSpacing}>
+            <div className={styles.infoList}>
               {expert.experience_years && (
                 <div>
                   <Text strong>Опыт работы:</Text>
@@ -271,28 +256,23 @@ const ExpertProfile: React.FC = () => {
         </div>
       </div>
 
-      <Card title={`Отзывы (${reviews.length})`} style={{ marginTop: 24 }}>
+      <Card title={`Отзывы (${reviews.length})`} className={styles.reviewsCard}>
         {reviewsLoading ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div className={styles.reviewsLoading}>
             <Spin />
           </div>
         ) : reviews.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+          <div className={styles.reviewsEmpty}>
             Нет отзывов
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className={styles.reviewsList}>
             {reviews.map((review: ExpertReview) => (
               <div 
                 key={review.id}
-                style={{
-                  padding: 16,
-                  background: '#fafafa',
-                  borderRadius: 8,
-                  border: '1px solid #f0f0f0'
-                }}
+                className={styles.reviewCard}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div className={styles.reviewHeader}>
                   <div
                     role="button"
                     tabIndex={0}
@@ -300,35 +280,35 @@ const ExpertProfile: React.FC = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
                     }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                    className={styles.reviewAuthor}
                   >
                     <Avatar
                       size={32}
                       src={getMediaUrl(review.client.avatar)}
-                      icon={<UserOutlined style={{ fontSize: 16 }} />}
+                      icon={<UserOutlined className={styles.reviewAvatarIcon} />}
                     />
                     <div>
-                      <Text strong style={{ fontSize: 15, lineHeight: 1.2 }}>
+                      <Text strong className={styles.reviewAuthorName}>
                         @{review.client.username || `user${review.client.id}`}
                       </Text>
                       <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
+                      <Text type="secondary" className={styles.reviewAuthorMeta}>
                         {review.client.first_name} {review.client.last_name}
                       </Text>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
+                  <div className={styles.reviewRating}>
+                    <Rate disabled value={review.rating} className={styles.reviewRatingValue} />
                     <br />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text type="secondary" className={styles.reviewDate}>
                       {dayjs(review.created_at).format('DD.MM.YYYY')}
                     </Text>
                   </div>
                 </div>
-                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
+                <Text type="secondary" className={styles.reviewOrder}>
                   {review.order?.title}
                 </Text>
-                <Paragraph style={{ margin: 0, fontSize: 14 }}>
+                <Paragraph className={styles.reviewText}>
                   {review.text || review.comment}
                 </Paragraph>
               </div>

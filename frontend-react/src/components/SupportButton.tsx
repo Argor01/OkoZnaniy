@@ -8,11 +8,10 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 interface SupportButtonProps {
-  style?: React.CSSProperties;
   type?: 'float' | 'button';
 }
 
-const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) => {
+const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [subject, setSubject] = useState('Помощь в размещении заказа');
   const [messageText, setMessageText] = useState('');
@@ -62,27 +61,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
   if (type === 'float') {
     return (
       <>
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '30px',
-            right: '30px',
-            zIndex: 1000,
-            ...style,
-          }}
-        >
+        <div className="supportButtonFloatWrapper">
           <Button
             type="primary"
             shape="circle"
             size="large"
             icon={<CustomerServiceOutlined />}
             onClick={showModal}
-            style={{
-              width: '60px',
-              height: '60px',
-              fontSize: '24px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-            }}
+            className="supportButtonFloat"
             title="Техническая поддержка"
           />
         </div>
@@ -106,14 +92,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
           ]}
           width={600}
         >
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+          <div className="supportField">
+            <label className="supportLabel">
               Тема обращения
             </label>
             <Select
               value={subject}
               onChange={setSubject}
-              style={{ width: '100%' }}
+              className="supportSelect"
             >
               <Option value="Помощь в размещении заказа">Помощь в размещении заказа</Option>
               <Option value="Вопрос по оплате">Вопрос по оплате</Option>
@@ -123,14 +109,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
             </Select>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+          <div className="supportField">
+            <label className="supportLabel">
               Приоритет
             </label>
             <Select
               value={priority}
               onChange={setPriority}
-              style={{ width: '100%' }}
+              className="supportSelect"
             >
               <Option value="low">Низкий</Option>
               <Option value="medium">Средний</Option>
@@ -140,7 +126,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+            <label className="supportLabel">
               Опишите ваш вопрос
             </label>
             <TextArea
@@ -153,7 +139,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
             />
           </div>
 
-          <div style={{ marginTop: '12px', color: '#666', fontSize: '12px' }}>
+          <div className="supportHint">
             💡 Администратор ответит вам в ближайшее время. Вы получите уведомление о новом сообщении.
           </div>
         </Modal>
@@ -168,7 +154,6 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
         type="default"
         icon={<CustomerServiceOutlined />}
         onClick={showModal}
-        style={style}
       >
         Поддержка
       </Button>
@@ -192,14 +177,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
         ]}
         width={600}
       >
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+        <div className="supportField">
+          <label className="supportLabel">
             Тема обращения
           </label>
           <Select
             value={subject}
             onChange={setSubject}
-            style={{ width: '100%' }}
+            className="supportSelect"
           >
             <Option value="Помощь в размещении заказа">Помощь в размещении заказа</Option>
             <Option value="Вопрос по оплате">Вопрос по оплате</Option>
@@ -209,14 +194,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
           </Select>
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+        <div className="supportField">
+          <label className="supportLabel">
             Приоритет
           </label>
           <Select
             value={priority}
             onChange={setPriority}
-            style={{ width: '100%' }}
+            className="supportSelect"
           >
             <Option value="low">Низкий</Option>
             <Option value="medium">Средний</Option>
@@ -226,7 +211,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+          <label className="supportLabel">
             Опишите ваш вопрос
           </label>
           <TextArea
@@ -239,7 +224,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ style, type = 'float' }) 
           />
         </div>
 
-        <div style={{ marginTop: '12px', color: '#666', fontSize: '12px' }}>
+        <div className="supportHint">
           💡 Администратор ответит вам в ближайшее время. Вы получите уведомление о новом сообщении.
         </div>
       </Modal>

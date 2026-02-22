@@ -47,7 +47,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         <Space size={4}>
           <Button
             type="text"
-            icon={work.isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+            icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
             onClick={(e) => {
               e.stopPropagation();
               onFavorite(work.id);
@@ -84,18 +84,13 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
       {work.author && (
         <div className={styles.author}>
           <Space size={8}>
-            <UserOutlined style={{ color: '#8c8c8c' }} />
+            <UserOutlined className={styles.authorIcon} />
             <Button 
               type="link" 
+              className={styles.authorLink}
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/user/${work.author.id}`);
-              }}
-              style={{ 
-                padding: 0, 
-                height: 'auto',
-                fontSize: 13,
-                color: '#1890ff'
               }}
             >
               {work.author.name || work.author.username || work.author_name || 'Неизвестен'}
@@ -106,7 +101,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
 
       <div className={styles.meta}>
         <Space size={4}>
-          <Rate disabled value={work.rating} style={{ fontSize: 14 }} />
+          <Rate disabled value={work.rating} className={styles.rating} />
           <Text type="secondary">({work.reviewsCount})</Text>
         </Space>
         <Space size={8}>

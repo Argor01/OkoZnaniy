@@ -28,7 +28,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
 
   if (isLoading) {
     return (
-      <div className={styles.sectionCard} style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+      <div className={`${styles.sectionCard} ${styles.sectionCardLoading}`}>
         <Spin size="large" />
       </div>
     );
@@ -42,7 +42,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
       {reviews.length === 0 ? (
         <Empty description="Нет отзывов" />
       ) : (
-        <div style={{ display: 'grid', gap: 16 }}>
+        <div className={styles.reviewGrid}>
           {reviews.map((review: ExpertReview) => (
             <div key={review.id} className={`${styles.orderCard} ${styles.reviewCard}`}>
               <div className={styles.reviewHeaderRow}>
@@ -58,21 +58,21 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                   <Avatar
                     size={48}
                     src={getMediaUrl(review.client.avatar)}
-                    icon={<UserOutlined style={{ fontSize: 16 }} />}
+                    icon={<UserOutlined className={styles.reviewAvatarIcon} />}
                   />
                   <div className={styles.reviewUserText}>
-                    <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>
+                    <Text strong className={isMobile ? styles.reviewUserNameMobile : styles.reviewUserName}>
                       @{review.client.username || `user${review.client.id}`}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text type="secondary" className={styles.reviewUserMeta}>
                       {review.client.first_name} {review.client.last_name}
                     </Text>
                   </div>
                 </div>
 
                 <div className={styles.reviewMeta}>
-                  <Rate disabled value={review.rating} style={{ fontSize: isMobile ? 14 : 16 }} />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Rate disabled value={review.rating} className={isMobile ? styles.reviewRateMobile : styles.reviewRate} />
+                  <Text type="secondary" className={styles.reviewDate}>
                     {dayjs(review.created_at).format('DD.MM.YYYY')}
                   </Text>
                 </div>

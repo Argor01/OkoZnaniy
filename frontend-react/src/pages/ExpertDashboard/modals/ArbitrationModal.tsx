@@ -12,6 +12,7 @@ import {
   PaperClipOutlined
 } from '@ant-design/icons';
 import { ArbitrationCase } from '../types';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -29,6 +30,43 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
   isMobile
 }) => {
   const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<string>('all');
+  const statusConfigMap = {
+    pending: {
+      badge: styles.arbitrationStatusBadgePending,
+      icon: styles.arbitrationStatusIconPending,
+      text: styles.arbitrationStatusTextPending,
+      label: 'Ожидает рассмотрения',
+      Icon: ClockCircleOutlined,
+    },
+    in_review: {
+      badge: styles.arbitrationStatusBadgeInReview,
+      icon: styles.arbitrationStatusIconInReview,
+      text: styles.arbitrationStatusTextInReview,
+      label: 'На рассмотрении',
+      Icon: FileDoneOutlined,
+    },
+    resolved: {
+      badge: styles.arbitrationStatusBadgeResolved,
+      icon: styles.arbitrationStatusIconResolved,
+      text: styles.arbitrationStatusTextResolved,
+      label: 'Решено',
+      Icon: CheckCircleOutlined,
+    },
+    rejected: {
+      badge: styles.arbitrationStatusBadgeRejected,
+      icon: styles.arbitrationStatusIconRejected,
+      text: styles.arbitrationStatusTextRejected,
+      label: 'Отклонено',
+      Icon: CloseCircleOutlined,
+    },
+    default: {
+      badge: styles.arbitrationStatusBadgeDefault,
+      icon: styles.arbitrationStatusIconDefault,
+      text: styles.arbitrationStatusTextDefault,
+      label: 'Неизвестно',
+      Icon: QuestionCircleOutlined,
+    },
+  } as const;
 
   return (
     <Modal
@@ -38,379 +76,139 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : 'calc(100vw - 300px)'}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: 0,
-          margin: isMobile ? 0 : 'auto',
-          overflow: 'hidden',
-          background: '#ffffff',
-          boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-          width: isMobile ? '100vw' : undefined,
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
-        },
-        header: {
-          display: 'none'
-        },
-        body: {
-          padding: 0,
-          margin: 0,
-          background: '#ffffff',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }
-      }}
+      wrapClassName={`${styles.arbitrationModalWrap} ${isMobile ? styles.arbitrationModalWrapMobile : styles.arbitrationModalWrapDesktop}`}
     >
-      <div style={{ 
-        background: '#f3f4f6',
-        height: '100%',
-        padding: isMobile ? '16px' : '32px',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <Text strong style={{ 
-          fontSize: isMobile ? 20 : 24, 
-          color: '#1f2937', 
-          display: 'block', 
-          marginBottom: isMobile ? 16 : 24 
-        }}>
+      <div className={`${styles.arbitrationModalContent} ${isMobile ? styles.arbitrationModalContentMobile : styles.arbitrationModalContentDesktop}`}>
+        <Text strong className={`${styles.arbitrationModalTitle} ${isMobile ? styles.arbitrationModalTitleMobile : styles.arbitrationModalTitleDesktop}`}>
           Арбитраж
         </Text>
 
-        <div style={{ 
-          display: 'flex', 
-          gap: 0,
-          background: '#f9fafb',
-          borderRadius: isMobile ? 8 : 12,
-          padding: '4px',
-          border: '1px solid #e5e7eb',
-          overflowX: isMobile ? 'auto' : 'visible',
-          flexWrap: isMobile ? 'nowrap' : 'wrap',
-          marginBottom: isMobile ? 16 : 24
-        }}>
+        <div className={`${styles.arbitrationModalTabs} ${isMobile ? styles.arbitrationModalTabsMobile : styles.arbitrationModalTabsDesktop}`}>
           <div
             onClick={() => setArbitrationStatusFilter('all')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '12px 8px',
-              cursor: 'pointer',
-              borderRadius: 8,
-              background: arbitrationStatusFilter === 'all' ? '#ffffff' : 'transparent',
-              borderBottom: arbitrationStatusFilter === 'all' ? '2px solid #3b82f6' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabActiveAll : styles.arbitrationModalTabInactive}`}
           >
-            <TrophyOutlined style={{ 
-              fontSize: 16, 
-              color: arbitrationStatusFilter === 'all' ? '#3b82f6' : '#6b7280' 
-            }} />
-            <Text style={{ 
-              fontSize: 12, 
-              color: arbitrationStatusFilter === 'all' ? '#1f2937' : '#6b7280',
-              fontWeight: arbitrationStatusFilter === 'all' ? 500 : 400,
-              whiteSpace: 'nowrap'
-            }}>
+            <TrophyOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabIconAll : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Все
             </Text>
           </div>
           <div
             onClick={() => setArbitrationStatusFilter('pending')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '12px 8px',
-              cursor: 'pointer',
-              borderRadius: 8,
-              background: arbitrationStatusFilter === 'pending' ? '#ffffff' : 'transparent',
-              borderBottom: arbitrationStatusFilter === 'pending' ? '2px solid #f59e0b' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'pending' ? styles.arbitrationModalTabActivePending : styles.arbitrationModalTabInactive}`}
           >
-            <ClockCircleOutlined style={{ 
-              fontSize: 16, 
-              color: arbitrationStatusFilter === 'pending' ? '#f59e0b' : '#6b7280' 
-            }} />
-            <Text style={{ 
-              fontSize: 12, 
-              color: arbitrationStatusFilter === 'pending' ? '#1f2937' : '#6b7280',
-              fontWeight: arbitrationStatusFilter === 'pending' ? 500 : 400,
-              whiteSpace: 'nowrap'
-            }}>
+            <ClockCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'pending' ? styles.arbitrationModalTabIconPending : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'pending' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Ожидает
             </Text>
           </div>
           <div
             onClick={() => setArbitrationStatusFilter('in_review')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '12px 8px',
-              cursor: 'pointer',
-              borderRadius: 8,
-              background: arbitrationStatusFilter === 'in_review' ? '#ffffff' : 'transparent',
-              borderBottom: arbitrationStatusFilter === 'in_review' ? '2px solid #3b82f6' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'in_review' ? styles.arbitrationModalTabActiveInReview : styles.arbitrationModalTabInactive}`}
           >
-            <FileDoneOutlined style={{ 
-              fontSize: 16, 
-              color: arbitrationStatusFilter === 'in_review' ? '#3b82f6' : '#6b7280' 
-            }} />
-            <Text style={{ 
-              fontSize: 12, 
-              color: arbitrationStatusFilter === 'in_review' ? '#1f2937' : '#6b7280',
-              fontWeight: arbitrationStatusFilter === 'in_review' ? 500 : 400,
-              whiteSpace: 'nowrap'
-            }}>
+            <FileDoneOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'in_review' ? styles.arbitrationModalTabIconInReview : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'in_review' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               На рассмотрении
             </Text>
           </div>
           <div
             onClick={() => setArbitrationStatusFilter('resolved')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '12px 8px',
-              cursor: 'pointer',
-              borderRadius: 8,
-              background: arbitrationStatusFilter === 'resolved' ? '#ffffff' : 'transparent',
-              borderBottom: arbitrationStatusFilter === 'resolved' ? '2px solid #10b981' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabActiveResolved : styles.arbitrationModalTabInactive}`}
           >
-            <CheckCircleOutlined style={{ 
-              fontSize: 16, 
-              color: arbitrationStatusFilter === 'resolved' ? '#10b981' : '#6b7280' 
-            }} />
-            <Text style={{ 
-              fontSize: 12, 
-              color: arbitrationStatusFilter === 'resolved' ? '#1f2937' : '#6b7280',
-              fontWeight: arbitrationStatusFilter === 'resolved' ? 500 : 400,
-              whiteSpace: 'nowrap'
-            }}>
+            <CheckCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabIconResolved : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Решено
             </Text>
           </div>
           <div
             onClick={() => setArbitrationStatusFilter('rejected')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '12px 8px',
-              cursor: 'pointer',
-              borderRadius: 8,
-              background: arbitrationStatusFilter === 'rejected' ? '#ffffff' : 'transparent',
-              borderBottom: arbitrationStatusFilter === 'rejected' ? '2px solid #ef4444' : '2px solid transparent',
-              transition: 'all 0.2s ease'
-            }}
+            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'rejected' ? styles.arbitrationModalTabActiveRejected : styles.arbitrationModalTabInactive}`}
           >
-            <CloseCircleOutlined style={{ 
-              fontSize: 16, 
-              color: arbitrationStatusFilter === 'rejected' ? '#ef4444' : '#6b7280' 
-            }} />
-            <Text style={{ 
-              fontSize: 12, 
-              color: arbitrationStatusFilter === 'rejected' ? '#1f2937' : '#6b7280',
-              fontWeight: arbitrationStatusFilter === 'rejected' ? 500 : 400,
-              whiteSpace: 'nowrap'
-            }}>
+            <CloseCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'rejected' ? styles.arbitrationModalTabIconRejected : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'rejected' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Отклонено
             </Text>
           </div>
         </div>
 
-        <div style={{ 
-          background: '#ffffff',
-          borderRadius: 12,
-          border: '1px solid #e5e7eb',
-          padding: '16px',
-          minHeight: '350px'
-        }}>
+        <div className={styles.arbitrationModalList}>
           {(cases || []).filter(arbitration => {
             if (arbitrationStatusFilter === 'all') return true;
             return arbitration.status === arbitrationStatusFilter;
           }).length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className={styles.arbitrationModalListInner}>
               {(cases || [])
                 .filter(arbitration => {
                   if (arbitrationStatusFilter === 'all') return true;
                   return arbitration.status === arbitrationStatusFilter;
                 })
                 .map((arbitration) => {
-                const getStatusConfig = (status: string) => {
-                  switch (status) {
-                    case 'pending':
-                      return { color: '#f59e0b', bg: '#fef3c7', text: 'Ожидает рассмотрения', icon: <ClockCircleOutlined /> };
-                    case 'in_review':
-                      return { color: '#3b82f6', bg: '#dbeafe', text: 'На рассмотрении', icon: <FileDoneOutlined /> };
-                    case 'resolved':
-                      return { color: '#10b981', bg: '#d1fae5', text: 'Решено', icon: <CheckCircleOutlined /> };
-                    case 'rejected':
-                      return { color: '#ef4444', bg: '#fee2e2', text: 'Отклонено', icon: <CloseCircleOutlined /> };
-                    default:
-                      return { color: '#6b7280', bg: '#f3f4f6', text: 'Неизвестно', icon: <QuestionCircleOutlined /> };
-                  }
-                };
-
-                const statusConfig = getStatusConfig(arbitration.status);
+                const statusConfig = statusConfigMap[arbitration.status as keyof typeof statusConfigMap] || statusConfigMap.default;
+                const StatusIcon = statusConfig.Icon;
 
                 return (
                   <div
                     key={arbitration.id}
-                    style={{
-                      padding: isMobile ? '16px' : '20px',
-                      background: '#ffffff',
-                      borderRadius: isMobile ? 8 : 12,
-                      border: '1px solid #e5e7eb',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isMobile) {
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isMobile) {
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                      }
-                    }}
+                    className={`${styles.arbitrationModalCard} ${isMobile ? styles.arbitrationModalCardMobile : styles.arbitrationModalCardDesktop}`}
                   >
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'flex-start', 
-                      marginBottom: 12,
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: isMobile ? 8 : 0
-                    }}>
-                      <div style={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
-                        <Text strong style={{ 
-                          fontSize: isMobile ? 14 : 16, 
-                          color: '#1f2937', 
-                          display: 'block', 
-                          marginBottom: 4,
-                          lineHeight: 1.4
-                        }}>
+                    <div className={`${styles.arbitrationModalCardHeader} ${isMobile ? styles.arbitrationModalCardHeaderMobile : styles.arbitrationModalCardHeaderDesktop}`}>
+                      <div className={`${styles.arbitrationModalCardHeaderInfo} ${isMobile ? styles.arbitrationModalCardHeaderInfoMobile : styles.arbitrationModalCardHeaderInfoDesktop}`}>
+                        <Text strong className={`${styles.arbitrationModalCardTitle} ${isMobile ? styles.arbitrationModalCardTitleMobile : styles.arbitrationModalCardTitleDesktop}`}>
                           Заказ #{arbitration.orderId}: {arbitration.orderTitle}
                         </Text>
-                        <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13 }}>
+                        <Text type="secondary" className={`${styles.arbitrationModalCardMeta} ${isMobile ? styles.arbitrationModalCardMetaMobile : styles.arbitrationModalCardMetaDesktop}`}>
                           Заказчик: {arbitration.clientName}
                         </Text>
                       </div>
-                      <div style={{
-                        padding: isMobile ? '4px 10px' : '6px 12px',
-                        borderRadius: 8,
-                        background: statusConfig.bg,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        marginLeft: isMobile ? 0 : 16,
-                        alignSelf: isMobile ? 'flex-start' : 'auto'
-                      }}>
-                        <span style={{ color: statusConfig.color, fontSize: isMobile ? 12 : 14 }}>
-                          {statusConfig.icon}
+                      <div className={`${styles.arbitrationModalStatusBadge} ${statusConfig.badge} ${isMobile ? styles.arbitrationModalStatusBadgeMobile : styles.arbitrationModalStatusBadgeDesktop}`}>
+                        <span className={`${styles.arbitrationModalStatusIcon} ${statusConfig.icon} ${isMobile ? styles.arbitrationModalStatusIconMobile : styles.arbitrationModalStatusIconDesktop}`}>
+                          <StatusIcon />
                         </span>
-                        <Text style={{ fontSize: isMobile ? 11 : 13, color: statusConfig.color, fontWeight: 500 }}>
-                          {statusConfig.text}
+                        <Text className={`${styles.arbitrationModalStatusText} ${statusConfig.text} ${isMobile ? styles.arbitrationModalStatusTextMobile : styles.arbitrationModalStatusTextDesktop}`}>
+                          {statusConfig.label}
                         </Text>
                       </div>
                     </div>
 
-                    <div style={{ 
-                      padding: '12px', 
-                      background: '#fef3c7', 
-                      borderRadius: 8, 
-                      marginBottom: 12,
-                      borderLeft: '3px solid #f59e0b'
-                    }}>
-                      <Text strong style={{ fontSize: 13, color: '#92400e', display: 'block', marginBottom: 4 }}>
+                    <div className={styles.arbitrationModalReason}>
+                      <Text strong className={styles.arbitrationModalReasonTitle}>
                         Причина претензии:
                       </Text>
-                      <Text style={{ fontSize: 13, color: '#78350f' }}>
+                      <Text className={styles.arbitrationModalReasonText}>
                         {arbitration.reason}
                       </Text>
                     </div>
 
                     <Paragraph 
                       ellipsis={{ rows: 2, expandable: true, symbol: 'Показать больше' }}
-                      style={{ fontSize: 14, color: '#4b5563', marginBottom: 12 }}
+                      className={styles.arbitrationModalDescription}
                     >
                       {arbitration.description}
                     </Paragraph>
 
                     {arbitration.decision && (
-                      <div style={{ 
-                        padding: '12px', 
-                        background: arbitration.status === 'resolved' ? '#d1fae5' : '#fee2e2', 
-                        borderRadius: 8, 
-                        marginBottom: 12,
-                        borderLeft: `3px solid ${arbitration.status === 'resolved' ? '#10b981' : '#ef4444'}`
-                      }}>
-                        <Text strong style={{ 
-                          fontSize: 13, 
-                          color: arbitration.status === 'resolved' ? '#065f46' : '#991b1b', 
-                          display: 'block', 
-                          marginBottom: 4 
-                        }}>
+                      <div className={`${styles.arbitrationModalDecision} ${arbitration.status === 'resolved' ? styles.arbitrationModalDecisionResolved : styles.arbitrationModalDecisionRejected}`}>
+                        <Text strong className={`${styles.arbitrationModalDecisionTitle} ${arbitration.status === 'resolved' ? styles.arbitrationModalDecisionTitleResolved : styles.arbitrationModalDecisionTitleRejected}`}>
                           Решение арбитража:
                         </Text>
-                        <Text style={{ 
-                          fontSize: 13, 
-                          color: arbitration.status === 'resolved' ? '#047857' : '#b91c1c' 
-                        }}>
+                        <Text className={`${styles.arbitrationModalDecisionText} ${arbitration.status === 'resolved' ? styles.arbitrationModalDecisionTextResolved : styles.arbitrationModalDecisionTextRejected}`}>
                           {arbitration.decision}
                         </Text>
                       </div>
                     )}
 
                     {arbitration.documents && arbitration.documents.length > 0 && (
-                      <div style={{ marginBottom: 12 }}>
-                        <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                      <div className={styles.arbitrationModalDocuments}>
+                        <Text type="secondary" className={styles.arbitrationModalDocumentsTitle}>
                           Прикрепленные документы:
                         </Text>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <div className={styles.arbitrationModalDocumentsList}>
                           {arbitration.documents.map((doc, index) => (
                             <div
                               key={index}
-                              style={{
-                                padding: '6px 12px',
-                                background: '#f3f4f6',
-                                borderRadius: 6,
-                                fontSize: 12,
-                                color: '#4b5563',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
+                              className={styles.arbitrationModalDocumentItem}
                             >
-                              <PaperClipOutlined style={{ fontSize: 12 }} />
+                              <PaperClipOutlined className={styles.arbitrationModalDocumentIcon} />
                               {doc}
                             </div>
                           ))}
@@ -419,27 +217,19 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                     )}
 
                     
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: isMobile ? 'flex-start' : 'center',
-                      paddingTop: 12,
-                      borderTop: '1px solid #e5e7eb',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: isMobile ? 12 : 0
-                    }}>
-                      <div style={{ display: 'flex', gap: isMobile ? 12 : 16, flexDirection: isMobile ? 'column' : 'row', width: isMobile ? '100%' : 'auto' }}>
-                        <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>
-                          <CalendarOutlined style={{ marginRight: 4 }} />
+                    <div className={`${styles.arbitrationModalFooter} ${isMobile ? styles.arbitrationModalFooterMobile : styles.arbitrationModalFooterDesktop}`}>
+                      <div className={`${styles.arbitrationModalFooterMeta} ${isMobile ? styles.arbitrationModalFooterMetaMobile : styles.arbitrationModalFooterMetaDesktop}`}>
+                        <Text type="secondary" className={`${styles.arbitrationModalFooterText} ${isMobile ? styles.arbitrationModalFooterTextMobile : styles.arbitrationModalFooterTextDesktop}`}>
+                          <CalendarOutlined className={styles.arbitrationModalFooterIcon} />
                           Создано: {arbitration.createdAt}
                         </Text>
-                        <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>
-                          <ClockCircleOutlined style={{ marginRight: 4 }} />
+                        <Text type="secondary" className={`${styles.arbitrationModalFooterText} ${isMobile ? styles.arbitrationModalFooterTextMobile : styles.arbitrationModalFooterTextDesktop}`}>
+                          <ClockCircleOutlined className={styles.arbitrationModalFooterIcon} />
                           Обновлено: {arbitration.updatedAt}
                         </Text>
                       </div>
-                      <Text strong style={{ fontSize: isMobile ? 16 : 15, color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        <DollarOutlined style={{ marginRight: 4 }} />
+                      <Text strong className={`${styles.arbitrationModalAmount} ${isMobile ? styles.arbitrationModalAmountMobile : styles.arbitrationModalAmountDesktop}`}>
+                        <DollarOutlined className={styles.arbitrationModalAmountIcon} />
                         {arbitration.amount.toLocaleString('ru-RU')} ₽
                       </Text>
                     </div>
@@ -448,16 +238,9 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
               })}
             </div>
           ) : (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '48px 24px',
-              minHeight: '350px'
-            }}>
-              <TrophyOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16 }} />
-              <Text type="secondary" style={{ fontSize: 14, color: '#6b7280' }}>
+            <div className={styles.arbitrationModalEmpty}>
+              <TrophyOutlined className={styles.arbitrationModalEmptyIcon} />
+              <Text type="secondary" className={styles.arbitrationModalEmptyText}>
                 {arbitrationStatusFilter === 'all' 
                   ? 'У вас нет арбитражей' 
                   : `Нет арбитражей со статусом "${

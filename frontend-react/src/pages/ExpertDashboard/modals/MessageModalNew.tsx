@@ -26,6 +26,7 @@ import { getMediaUrl } from '../../../config/api';
 import IndividualOfferModal from '../../../components/modals/IndividualOfferModal';
 import { ordersApi } from '../../../api/orders';
 import { expertsApi } from '../../../api/experts';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
@@ -1487,45 +1488,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: 0,
-          margin: isMobile ? 0 : 'auto',
-          overflow: 'hidden',
-          background: '#ffffff',
-          boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-          width: isMobile ? '100vw' : undefined,
-          maxWidth: isMobile ? undefined : (isDesktop ? 1400 : 1200),
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
-        },
-        header: {
-          display: 'none'
-        },
-        body: {
-          padding: 0,
-          margin: 0,
-          background: '#ffffff',
-          height: '100%',
-          display: 'flex',
-          overflow: 'hidden'
-        }
-      }}
+      wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
     >
       <ErrorBoundary>
-      <div style={{ 
-        display: 'flex', 
-        height: '100%', 
-        width: '100%', 
-        flexDirection: isMobile ? 'column' : 'row', 
-        overflow: 'hidden',
-        position: 'relative'
-      }}>
+      <div
+        className={`${styles.chatModalContainer} ${isMobile ? styles.chatModalContainerMobile : ''}`}
+      >
         {selectedChat && !isSupportChatSelected && (
           <Dropdown
             key={`dropdown-${selectedChat.id}`}
@@ -1547,45 +1515,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             <Button
               type="text"
               icon={<MoreOutlined />}
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 48,
-                zIndex: 10,
-                width: 40,
-                height: 40,
-              }}
+              className={styles.chatMenuButton}
             />
           </Dropdown>
         )}
         
-        <div style={{ 
-          width: isMobile ? '100%' : isTablet ? '250px' : '300px', 
-          background: '#f3f4f6', 
-          borderRight: isMobile ? 'none' : '1px solid #e5e7eb',
-          borderBottom: isMobile ? '1px solid #e5e7eb' : 'none',
-          display: selectedChat && isMobile ? 'none' : 'flex',
-          flexDirection: 'column',
-          height: isMobile ? '100%' : 'auto'
-        }}>
+        <div
+          className={`${styles.chatSidebar} ${isMobile ? styles.chatSidebarMobile : isTablet ? styles.chatSidebarTablet : styles.chatSidebarDesktop} ${selectedChat && isMobile ? styles.chatSidebarHidden : ''}`}
+        >
           
-          <div style={{ padding: isMobile ? '8px' : '12px', background: '#ffffff' }}>
+          <div className={`${styles.chatSearchHeader} ${isMobile ? styles.chatSearchHeaderMobile : ''}`}>
             <Input
-              prefix={<SearchOutlined style={{ color: '#9ca3af', fontSize: isMobile ? 12 : 14 }} />}
+              prefix={<SearchOutlined className={`${styles.chatSearchIcon} ${isMobile ? styles.chatSearchIconMobile : ''}`} />}
               placeholder={isMobile ? 'Поиск...' : 'Поиск пользователя'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ borderRadius: 8, fontSize: isMobile ? 12 : 14 }}
+              className={`${styles.chatSearchInput} ${isMobile ? styles.chatSearchInputMobile : ''}`}
               size={isMobile ? 'small' : 'middle'}
             />
           </div>
 
           
-          <div style={{ 
-            flex: 1, 
-            overflowY: 'auto',
-            background: '#ffffff'
-          }}>
+          <div className={styles.chatList}>
             {showPinnedSupport && (
               <div 
                 onClick={() => {
@@ -1597,25 +1548,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     loadOrCreateChatWithUser(supportUserId);
                   }
                 }}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  padding: isMobile ? '8px' : '12px',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid #f3f4f6',
-                  background: isSupportChatSelected ? '#eff6ff' : (supportChat?.unread_count ? '#f0fdf4' : '#ffffff'),
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSupportChatSelected) {
-                    e.currentTarget.style.background = '#f9fafb';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSupportChatSelected) {
-                    e.currentTarget.style.background = supportChat?.unread_count ? '#f0fdf4' : '#ffffff';
-                  }
-                }}
+                className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
               >
                 <Avatar
                   className="support-avatar"
@@ -1623,37 +1556,29 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   icon={<CustomerServiceOutlined />}
                   src={supportAvatarSrc}
                 />
-                <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                    <Text strong style={{ 
-                      fontSize: isMobile ? 13 : 14, 
-                      color: '#1f2937',
-                      fontWeight: (supportChat?.unread_count ?? 0) > 0 ? 600 : 500
-                    }}>
+                <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
+                  <div className={styles.chatListHeaderRow}>
+                    <Text
+                      strong
+                      className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListNameUnread : ''}`}
+                    >
                       Техническая поддержка
                     </Text>
-                    <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
+                    <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
                       {supportChat?.last_message ? formatTimestamp(supportChat.last_message.created_at) : ''}
                     </Text>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className={styles.chatListMetaRow}>
                     <Text 
                       ellipsis 
-                      style={{ 
-                        fontSize: isMobile ? 11 : 12, 
-                        color: (supportChat?.unread_count ?? 0) > 0 ? '#059669' : '#6b7280',
-                        fontWeight: (supportChat?.unread_count ?? 0) > 0 ? 500 : 400,
-                        maxWidth: isMobile ? '140px' : '180px'
-                      }}
+                      className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
                     >
                       {supportChat?.last_message?.text || 'Написать в поддержку'}
                     </Text>
                     {(supportChat?.unread_count ?? 0) > 0 && (
                       <Badge 
                         dot
-                        style={{ 
-                          backgroundColor: '#3b82f6'
-                        }} 
+                        className={styles.chatBadge}
                       />
                     )}
                   </div>
@@ -1661,17 +1586,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               </div>
             )}
             {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+              <div className={styles.chatListLoading}>
                 <Spin />
               </div>
             ) : filteredChatsWithoutSupport.length === 0 && !showPinnedSupport ? (
-              <div style={{ 
-                textAlign: 'center', 
-                color: '#9ca3af', 
-                padding: '40px 20px',
-                fontSize: isMobile ? 12 : 14
-              }}>
-                <MessageOutlined style={{ fontSize: isMobile ? 36 : 48, color: '#d1d5db', marginBottom: 12, display: 'block' }} />
+              <div className={`${styles.chatListEmpty} ${isMobile ? styles.chatListEmptyMobile : ''}`}>
+                <MessageOutlined className={`${styles.chatListEmptyIcon} ${isMobile ? styles.chatListEmptyIconMobile : ''}`} />
                 {searchQuery ? 'Ничего не найдено' : 'Нет чатов'}
               </div>
             ) : (
@@ -1679,63 +1599,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 <div 
                   key={chat.id}
                   onClick={() => loadChatDetail(chat.id)}
-                  style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    padding: isMobile ? '8px' : '12px',
-                    cursor: 'pointer',
-                    borderBottom: '1px solid #f3f4f6',
-                    background: selectedChat?.id === chat.id ? '#eff6ff' : (chat.unread_count > 0 ? '#f0fdf4' : '#ffffff'),
-                    transition: 'background 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedChat?.id !== chat.id) {
-                      e.currentTarget.style.background = '#f9fafb';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedChat?.id !== chat.id) {
-                      e.currentTarget.style.background = chat.unread_count > 0 ? '#f0fdf4' : '#ffffff';
-                    }
-                  }}
+                  className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${selectedChat?.id === chat.id ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''}`}
                 >
                   <Avatar
                     size={isMobile ? 36 : 40}
                     icon={<UserOutlined />}
                     src={getMediaUrl(chat.other_user?.avatar)}
-                    style={{ backgroundColor: '#6b7280' }}
+                    className={styles.chatAvatar}
                   />
-                  <div style={{ flex: 1, marginLeft: isMobile ? 8 : 12, overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                      <Text strong style={{ 
-                        fontSize: isMobile ? 13 : 14, 
-                        color: '#1f2937',
-                        fontWeight: chat.unread_count > 0 ? 600 : 500
-                      }}>
+                  <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
+                    <div className={styles.chatListHeaderRow}>
+                      <Text
+                        strong
+                        className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
+                      >
                         {chat.other_user?.username || 'Пользователь'}
                       </Text>
-                      <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, color: '#9ca3af' }}>
+                      <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
                         {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}
                       </Text>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className={styles.chatListMetaRow}>
                       <Text 
                         ellipsis 
-                        style={{ 
-                          fontSize: isMobile ? 11 : 12, 
-                          color: chat.unread_count > 0 ? '#059669' : '#6b7280',
-                          fontWeight: chat.unread_count > 0 ? 500 : 400,
-                          maxWidth: isMobile ? '140px' : '180px'
-                        }}
+                        className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${chat.unread_count > 0 ? styles.chatListPreviewUnread : ''}`}
                       >
                         {chat.last_message?.text || 'Нет сообщений'}
                       </Text>
                       {chat.unread_count > 0 && (
                         <Badge 
                           dot
-                          style={{ 
-                            backgroundColor: '#3b82f6'
-                          }} 
+                          className={styles.chatBadge}
                         />
                       )}
                     </div>
@@ -1749,25 +1643,16 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         
         <div 
           key={selectedChat ? `chat-${selectedChat.id}` : 'no-chat'}
-          style={{ 
-            flex: 1, 
-            display: (!selectedChat && isMobile) ? 'none' : 'flex',
-            flexDirection: 'column',
-            background: '#ffffff',
-            minHeight: 0,
-            overflow: 'hidden'
-          }}
+          className={`${styles.chatPanel} ${(!selectedChat && isMobile) ? styles.chatPanelHidden : ''}`}
         >
           
-          <div style={{
-            background: selectedChat ? '#ffffff' : '#e0f2fe',
-            padding: isMobile ? '8px 12px' : '12px 16px',
-            paddingRight: selectedChat ? (isMobile ? '96px' : '140px') : (isMobile ? '12px' : '56px'),
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: `1px solid ${selectedChat ? '#e5e7eb' : '#bae6fd'}`
-          }}>
+          <div
+            className={`${styles.chatHeader} ${selectedChat ? styles.chatHeaderActive : styles.chatHeaderEmpty} ${
+              selectedChat
+                ? (isMobile ? styles.chatHeaderPaddingMobileActive : styles.chatHeaderPaddingDesktopActive)
+                : (isMobile ? styles.chatHeaderPaddingMobileEmpty : styles.chatHeaderPaddingDesktopEmpty)
+            }`}
+          >
             {selectedChat ? (
               <>
                 <Space>
@@ -1783,24 +1668,23 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     size={isMobile ? 32 : 36}
                     icon={<UserOutlined />}
                     src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat.other_user?.avatar)}
-                    className={isSupportChatSelected ? 'support-avatar' : undefined}
-                    style={isSupportChatSelected ? undefined : { backgroundColor: '#6b7280' }}
+                    className={isSupportChatSelected ? 'support-avatar' : styles.chatHeaderAvatar}
                   />
                   <div>
-                    <Text style={{ fontSize: isMobile ? 13 : 15, color: '#1f2937', fontWeight: 500 }}>
+                    <Text className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
                       {isSupportChatSelected ? 'Техническая поддержка' : (selectedChat.other_user?.username || 'Пользователь')}
                     </Text>
                     {!isSupportChatSelected ? (
                       effectiveOrderId && !isClosedOrder ? (
-                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
                           {headerOrder.title || order?.title || `Заказ #${effectiveOrderId}`}
                         </Text>
                       ) : headerContextTitle ? (
-                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
                           {headerContextTitle}
                         </Text>
                       ) : (
-                        <Text style={{ fontSize: isMobile ? 11 : 12, color: '#6b7280', display: 'block' }}>
+                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
                           Без заказа
                         </Text>
                       )
@@ -1810,7 +1694,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 <input
                   ref={workOfferFileInputRef}
                   type="file"
-                  style={{ display: 'none' }}
+                  className={styles.hiddenInput}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
                     if (f) handleOfferWorkUpload(f);
@@ -1834,7 +1718,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           setWorkOfferModalOpen(true);
                         }
                       }}
-                      style={{ background: '#10B981', borderColor: '#10B981' }}
+                      className={styles.buttonSuccess}
                     >
                       {(() => {
                         if (uploadableWorkOffer) return isMobile ? 'Работа' : 'Отправить работу';
@@ -1846,7 +1730,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       type="primary"
                       size={isMobile ? 'small' : 'middle'}
                       icon={<FileTextOutlined />}
-                      style={{ background: '#10B981', borderColor: '#10B981' }}
+                      className={styles.buttonSuccess}
                       onClick={() => setOfferModalOpen(true)}
                     >
                       {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
@@ -1861,27 +1745,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     icon={<ExclamationCircleOutlined />}
                     size={isMobile ? 'middle' : 'large'}
                     onClick={() => setClaimModalOpen(true)}
-                    style={{
-                      position: 'absolute',
-                      right: isMobile ? 36 : 40,
-                      top: isMobile ? 6 : 8,
-                      fontSize: isMobile ? 20 : 22,
-                      color: '#ef4444',
-                      zIndex: 10,
-                      padding: isMobile ? '4px' : '6px',
-                      height: isMobile ? 32 : 40,
-                      width: isMobile ? 32 : 40,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
+                    className={`${styles.chatClaimButton} ${isMobile ? styles.chatClaimButtonMobile : ''}`}
                     title="Подать претензию"
                   />
                 ) : null}
               </>
             ) : (
               <Space>
-                <Text style={{ fontSize: isMobile ? 12 : 14, color: '#0369a1', fontWeight: 500 }}>
+                <Text className={`${styles.chatHeaderEmptyText} ${isMobile ? styles.chatHeaderEmptyTextMobile : ''}`}>
                   Выберите чат
                 </Text>
               </Space>
@@ -1893,13 +1764,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               <input
                 ref={workFileInputRef}
                 type="file"
-                style={{ display: 'none' }}
+                className={styles.hiddenInput}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) handleUploadWork(f);
                 }}
               />
-              <div style={{ padding: isMobile ? '8px 12px' : '8px 16px', borderBottom: '1px solid #e5e7eb', background: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <div className={`${styles.orderTabsHeader} ${isMobile ? styles.orderTabsHeaderMobile : ''}`}>
                 <Tabs
                   size="small"
                   activeKey={
@@ -1912,26 +1783,26 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     if (Number.isFinite(next) && next > 0) setActiveOrderId(next);
                     setOrderPanelOpen(true);
                   }}
-                  tabBarStyle={{ margin: 0, flex: 1 }}
+                  className={styles.orderTabs}
                   items={tabsOrderIds.map((id) => ({
                     key: String(id),
                     label: `Заказ #${id}${effectiveOrderId === id && remainingLabel ? ` • ${remainingLabel}` : ''}`,
                   }))}
                 />
-                <Button size="small" disabled={isClosedOrder} onClick={() => setOrderPanelOpen((v) => !v)} style={{ borderRadius: 999 }}>
+                <Button size="small" disabled={isClosedOrder} onClick={() => setOrderPanelOpen((v) => !v)} className={styles.orderToggleButton}>
                   {orderPanelOpen ? 'Скрыть' : 'Показать'}
                 </Button>
               </div>
               {orderPanelOpen && !isClosedOrder ? (
-                <div style={{ padding: isMobile ? '10px 12px' : '12px 16px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                <div className={`${styles.orderPanel} ${isMobile ? styles.orderPanelMobile : ''}`}>
                   {orderLoading ? (
-                    <div style={{ textAlign: 'center', padding: 8 }}>
+                    <div className={styles.orderLoading}>
                       <Spin size="small" />
                     </div>
                   ) : order ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div className={styles.orderInfo}>
+                      <div className={styles.orderInfoRow}>
+                        <div className={styles.orderInfoMeta}>
                           <Text strong>{order.title || `Заказ #${order.id}`}</Text>
                           <Text type="secondary">{formatOrderStatus(order.status)}</Text>
                         </div>
@@ -1972,18 +1843,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         Предмет: {order.subject?.name || order.custom_subject || '—'} · Тип: {order.work_type?.name || order.custom_work_type || '—'}
                       </Text>
                       <Text>
-                        Стоимость: <Text strong style={{ color: '#10B981' }}>{order.budget ? `${Number(order.budget).toLocaleString('ru-RU')} ₽` : '—'}</Text>
+                        Стоимость: <Text strong className={styles.textSuccess}>{order.budget ? `${Number(order.budget).toLocaleString('ru-RU')} ₽` : '—'}</Text>
                       </Text>
-                      {order.description ? <Text style={{ whiteSpace: 'pre-wrap' }}>{order.description}</Text> : null}
+                      {order.description ? <Text className={styles.orderDescription}>{order.description}</Text> : null}
                       {showExpertUploadButton ? (
-                        <div style={{ marginTop: 6 }}>
+                        <div className={styles.orderUploadWrapper}>
                           <Button
                             type="primary"
                             icon={<UploadOutlined />}
                             loading={workUploading}
                             disabled={isDeadlineExpired(order?.deadline)}
                             onClick={() => workFileInputRef.current?.click()}
-                            style={{ background: '#10B981', borderColor: '#10B981' }}
+                            className={styles.buttonSuccess}
                           >
                             Выгрузить работу
                           </Button>
@@ -1999,31 +1870,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           ) : null}
 
           
-          <div style={{ 
-            flex: 1, 
-            overflowY: 'auto',
-            padding: isMobile ? '12px' : '20px',
-            background: '#f9fafb',
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
+          <div className={`${styles.chatMessages} ${isMobile ? styles.chatMessagesMobile : ''}`}>
             {selectedChat ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 12 }}>
+              <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
                 {orderIntroByChatId[selectedChat.id] ? (
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div className={styles.chatIntroWrapper}>
                     <div
-                      style={{
-                        maxWidth: isMobile ? '92%' : 520,
-                        padding: '8px 12px',
-                        background: '#f3f4f6',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        color: '#6b7280',
-                        fontSize: isMobile ? 12 : 13,
-                        whiteSpace: 'pre-wrap',
-                        textAlign: 'center'
-                      }}
+                      className={`${styles.chatIntroBubble} ${isMobile ? styles.chatIntroBubbleMobile : ''}`}
                     >
                       {orderIntroByChatId[selectedChat.id]}
                     </div>
@@ -2064,49 +1917,49 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     currentRole === 'expert' &&
                     workOfferStatus === 'accepted' &&
                     workDeliveryStatus === 'awaiting_upload';
+                  const messageRowClass = `${styles.messageRow} ${msg.is_mine ? styles.messageRowMine : styles.messageRowOther}`;
+                  const messageBubbleClass = `${styles.messageBubble} ${
+                    isCardMessage ? styles.messageBubbleCard : styles.messageBubbleRegular
+                  } ${
+                    isCardMessage
+                      ? (isMobile ? styles.messageBubbleCardMobile : styles.messageBubbleCardDesktop)
+                      : (isMobile ? styles.messageBubbleRegularMobile : styles.messageBubbleRegularDesktop)
+                  } ${
+                    !isCardMessage ? (msg.is_mine ? styles.messageBubbleMine : styles.messageBubbleOther) : ''
+                  }`;
+                  const messageCardClass = `${styles.messageCard} ${isMobile ? styles.messageCardMobile : styles.messageCardDesktop}`;
 
                   return (
                     <div
                       key={msg.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: msg.is_mine ? 'flex-end' : 'flex-start'
-                      }}
+                      className={messageRowClass}
                     >
                       <div
-                        style={{
-                          maxWidth: isCardMessage ? (isMobile ? '92%' : 420) : (isMobile ? '85%' : '70%'),
-                          padding: isCardMessage ? 0 : (isMobile ? '8px 12px' : '10px 14px'),
-                          borderRadius: isCardMessage ? 0 : (msg.is_mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px'),
-                          background: isCardMessage ? 'transparent' : (msg.is_mine ? '#3b82f6' : '#ffffff'),
-                          color: msg.is_mine ? '#ffffff' : '#1f2937',
-                          boxShadow: isCardMessage ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
-                          border: isCardMessage ? 'none' : (msg.is_mine ? 'none' : '1px solid #e5e7eb')
-                        }}
+                        className={messageBubbleClass}
                       >
                         {showWorkActions ? (
-                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
-                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Работа по заказу</div>
-                            <div style={{ marginBottom: 10 }}>
+                          <Card size="small" className={messageCardClass}>
+                            <div className={styles.messageCardTitle}>Работа по заказу</div>
+                            <div className={styles.messageCardSection}>
                               <Text type="secondary">Файл</Text>
-                              <div style={{ marginTop: 4 }}>
+                              <div className={styles.messageCardSectionTop}>
                                 <a
                                   href={msg.file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  style={{ color: '#1890ff', fontSize: isMobile ? 13 : 14 }}
+                                  className={`${styles.messageCardLink} ${isMobile ? styles.messageCardLinkMobile : ''}`}
                                 >
                                   📎 {msg.file_name || 'Скачать файл'}
                                 </a>
                               </div>
                             </div>
-                            <div style={{ color: '#2563eb', fontWeight: 500, marginBottom: 10 }}>
+                            <div className={styles.messageCardInfo}>
                               Работа отправлена, ожидает решения заказчика
                             </div>
-                            <div style={{ display: 'flex', gap: 8 }}>
+                            <div className={styles.messageCardActions}>
                               <Button
                                 type="primary"
-                                style={{ background: '#10B981', borderColor: '#10B981' }}
+                                className={styles.buttonSuccess}
                                 onClick={handleApproveOrder}
                                 block
                               >
@@ -2116,31 +1969,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 На доработку
                               </Button>
                             </div>
-                            <div style={{ marginTop: 8 }}>
-                              <Text type="secondary" style={{ fontSize: 11 }}>
+                            <div className={styles.messageCardTime}>
+                              <Text type="secondary" className={styles.messageCardTimeText}>
                                 {formatMessageTime(msg.created_at)}
                               </Text>
                             </div>
                           </Card>
                         ) : isOffer ? (
-                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
-                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Индивидуальное предложение</div>
-                            <div style={{ marginBottom: 6 }}>
+                          <Card size="small" className={messageCardClass}>
+                            <div className={styles.messageCardTitle}>Индивидуальное предложение</div>
+                            <div className={styles.messageCardSectionSm}>
                               <Text type="secondary">Тип работы</Text>
                               <div>{msg.offer_data?.work_type}</div>
                             </div>
-                            <div style={{ marginBottom: 6 }}>
+                            <div className={styles.messageCardSectionSm}>
                               <Text type="secondary">Предмет</Text>
                               <div>{msg.offer_data?.subject}</div>
                             </div>
-                            <div style={{ marginBottom: 10 }}>
+                            <div className={styles.messageCardSection}>
                               <Text type="secondary">Описание</Text>
-                              <div style={{ whiteSpace: 'pre-wrap' }}>{msg.offer_data?.description}</div>
+                              <div className={styles.messageCardDescription}>{msg.offer_data?.description}</div>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                            <div className={styles.messageCardRow}>
                               <div>
                                 <Text type="secondary">Стоимость</Text>
-                                <div style={{ fontWeight: 600, color: '#10B981' }}>
+                                <div className={styles.messageCardPrice}>
                                   {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
                                 </div>
                               </div>
@@ -2153,20 +2006,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             </div>
 
                             {offerStatus === 'accepted' ? (
-                              <div style={{ color: '#10B981', fontWeight: 500 }}>
+                              <div className={styles.messageStatusSuccess}>
                                 <CheckCircleOutlined /> Предложение принято
                               </div>
                             ) : offerStatus === 'rejected' ? (
-                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                              <div className={styles.messageStatusDanger}>
                                 <CloseCircleOutlined /> Предложение отклонено
                               </div>
                             ) : offerExpired ? (
-                              <div style={{ color: '#9CA3AF' }}>Срок предложения истек</div>
+                              <div className={styles.messageStatusMuted}>Срок предложения истек</div>
                             ) : showOfferActions ? (
-                              <div style={{ display: 'flex', gap: 8 }}>
+                              <div className={styles.messageCardActions}>
                                 <Button
                                   type="primary"
-                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  className={styles.buttonSuccess}
                                   onClick={() => handleAcceptOffer(msg.id)}
                                   block
                                 >
@@ -2177,37 +2030,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 </Button>
                               </div>
                             ) : (
-                              <div style={{ color: '#9CA3AF' }}>Ожидает решения получателя</div>
+                              <div className={styles.messageStatusMuted}>Ожидает решения получателя</div>
                             )}
 
-                            <div style={{ marginTop: 8 }}>
-                              <Text type="secondary" style={{ fontSize: 11 }}>
+                            <div className={styles.messageCardTime}>
+                              <Text type="secondary" className={styles.messageCardTimeText}>
                                 {formatMessageTime(msg.created_at)}
                               </Text>
                             </div>
                           </Card>
                         ) : isWorkOffer ? (
-                          <Card size="small" style={{ width: isMobile ? '100%' : 420 }}>
-                            <div style={{ marginBottom: 8, fontWeight: 600 }}>Предложение готовой работы</div>
-                            <div style={{ marginBottom: 10 }}>
+                          <Card size="small" className={messageCardClass}>
+                            <div className={styles.messageCardTitle}>Предложение готовой работы</div>
+                            <div className={styles.messageCardSection}>
                               <Text type="secondary">Название</Text>
-                              <div style={{ whiteSpace: 'pre-wrap' }}>
+                              <div className={styles.messageCardDescription}>
                                 {(msg.offer_data as WorkOfferData | null)?.title || headerContextTitle || 'Готовая работа'}
                               </div>
                             </div>
                             {(msg.offer_data as WorkOfferData | null)?.description ? (
-                              <div style={{ marginBottom: 10 }}>
+                              <div className={styles.messageCardSection}>
                                 <Text type="secondary">Описание</Text>
-                                <div style={{ whiteSpace: 'pre-wrap' }}>
+                                <div className={styles.messageCardDescription}>
                                   {(msg.offer_data as WorkOfferData | null)?.description}
                                 </div>
                               </div>
                             ) : null}
                             {typeof (msg.offer_data as WorkOfferData | null)?.cost === 'number' ? (
-                              <div style={{ marginBottom: 10 }}>
+                              <div className={styles.messageCardSection}>
                                 <Text type="secondary">Стоимость</Text>
                                 <div>
-                                  <Text strong style={{ color: '#10B981' }}>
+                                  <Text strong className={styles.textSuccess}>
                                     {Number((msg.offer_data as WorkOfferData | null)?.cost).toLocaleString('ru-RU')} ₽
                                   </Text>
                                 </div>
@@ -2215,34 +2068,34 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             ) : null}
 
                             {workOfferStatus === 'rejected' ? (
-                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                              <div className={styles.messageStatusDanger}>
                                 <CloseCircleOutlined /> Предложение отклонено
                               </div>
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'accepted' ? (
-                              <div style={{ color: '#10B981', fontWeight: 500 }}>
+                              <div className={styles.messageStatusSuccess}>
                                 <CheckCircleOutlined /> Работа принята
                               </div>
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'rejected' ? (
-                              <div style={{ color: '#EF4444', fontWeight: 500 }}>
+                              <div className={styles.messageStatusDanger}>
                                 <CloseCircleOutlined /> Работа отклонена
                               </div>
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'delivered' ? (
-                              <div style={{ color: '#2563eb', fontWeight: 500 }}>
+                              <div className={styles.messageStatusInfo}>
                                 Работа отправлена, ожидает решения покупателя
                               </div>
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'awaiting_upload' ? (
-                              <div style={{ color: '#2563eb', fontWeight: 500 }}>
+                              <div className={styles.messageStatusInfo}>
                                 Ожидается отправка работы экспертом
                               </div>
                             ) : (
-                              <div style={{ color: '#9CA3AF' }}>Ожидает решения покупателя</div>
+                              <div className={styles.messageStatusMuted}>Ожидает решения покупателя</div>
                             )}
 
                             {showWorkOfferActions ? (
-                              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                              <div className={`${styles.messageCardActions} ${styles.messageCardActionsTop}`}>
                                 <Button
                                   type="primary"
-                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  className={styles.buttonSuccess}
                                   onClick={() => handleAcceptWorkOffer(msg.id)}
                                   block
                                 >
@@ -2255,11 +2108,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             ) : null}
 
                             {showExpertUploadForWorkOffer ? (
-                              <div style={{ marginTop: 12 }}>
+                              <div className={styles.messageCardActionsTop}>
                                 <Button
                                   type="primary"
                                   icon={<UploadOutlined />}
-                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  className={styles.buttonSuccess}
                                   onClick={() => workOfferFileInputRef.current?.click()}
                                   loading={workOfferUploading}
                                   block
@@ -2270,10 +2123,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             ) : null}
 
                             {showWorkDeliveryActions ? (
-                              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                              <div className={`${styles.messageCardActions} ${styles.messageCardActionsTop}`}>
                                 <Button
                                   type="primary"
-                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  className={styles.buttonSuccess}
                                   onClick={() => handleAcceptWorkDelivery(msg.id)}
                                   block
                                 >
@@ -2285,8 +2138,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                               </div>
                             ) : null}
 
-                            <div style={{ marginTop: 8 }}>
-                              <Text type="secondary" style={{ fontSize: 11 }}>
+                            <div className={styles.messageCardTime}>
+                              <Text type="secondary" className={styles.messageCardTimeText}>
                                 {formatMessageTime(msg.created_at)}
                               </Text>
                             </div>
@@ -2294,35 +2147,33 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                         ) : (
                           <>
                             {msg.text ? (
-                              <Text style={{ 
-                                fontSize: isMobile ? 15 : 16, 
-                                color: msg.is_mine ? '#ffffff' : '#1f2937',
-                                display: 'block',
-                                marginBottom: 4
-                              }}>
+                              <Text
+                                className={`${styles.messageText} ${isMobile ? styles.messageTextMobile : ''} ${
+                                  msg.is_mine ? styles.messageTextMine : styles.messageTextOther
+                                }`}
+                              >
                                 {msg.text}
                               </Text>
                             ) : null}
                             {msg.file_url && msg.file_name ? (
-                              <div style={{ marginTop: msg.text ? 8 : 0, marginBottom: 4 }}>
+                              <div className={`${styles.messageFile} ${msg.text ? styles.messageFileWithText : ''}`}>
                                 <a
                                   href={msg.file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  style={{ 
-                                    color: msg.is_mine ? '#fff' : '#1890ff',
-                                    fontSize: isMobile ? 13 : 14
-                                  }}
+                                  className={`${styles.messageFileLink} ${isMobile ? styles.messageFileLinkMobile : ''} ${
+                                    msg.is_mine ? styles.messageFileLinkMine : styles.messageFileLinkOther
+                                  }`}
                                 >
                                   📎 {msg.file_name}
                                 </a>
                               </div>
                             ) : null}
                             {showWorkActions ? (
-                              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                              <div className={styles.messageActions}>
                                 <Button
                                   type="primary"
-                                  style={{ background: '#10B981', borderColor: '#10B981' }}
+                                  className={styles.buttonSuccess}
                                   onClick={handleApproveOrder}
                                   block
                                 >
@@ -2333,49 +2184,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 </Button>
                               </div>
                             ) : null}
-                            <Text style={{ 
-                              fontSize: isMobile ? 11 : 12, 
-                              color: msg.is_mine ? 'rgba(255, 255, 255, 0.7)' : '#9ca3af'
-                            }}>
+                            <Text
+                              className={`${styles.messageTime} ${isMobile ? styles.messageTimeMobile : ''} ${
+                                msg.is_mine ? styles.messageTimeMine : styles.messageTimeOther
+                              }`}
+                            >
                               {formatMessageTime(msg.created_at)}
                               {msg.is_mine && (
                                 <span
-                                  style={{
-                                    marginLeft: 6,
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    transform: 'translateY(1px)',
-                                    color: msg.is_read ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.75)'
-                                  }}
+                                  className={`${styles.messageReadStatus} ${
+                                    msg.is_read ? styles.messageReadStatusRead : styles.messageReadStatusUnread
+                                  }`}
                                 >
                                   {msg.is_read ? (
                                     <span
-                                      style={{
-                                        position: 'relative',
-                                        width: isMobile ? 16 : 18,
-                                        height: isMobile ? 12 : 14,
-                                        display: 'inline-block'
-                                      }}
+                                      className={`${styles.messageReadIcons} ${
+                                        isMobile ? styles.messageReadIconsMobile : styles.messageReadIconsDesktop
+                                      }`}
                                     >
                                       <CheckOutlined
-                                        style={{
-                                          position: 'absolute',
-                                          left: 0,
-                                          top: 0,
-                                          fontSize: isMobile ? 11 : 12
-                                        }}
+                                        className={`${styles.messageReadCheck} ${styles.messageReadCheckFirst} ${
+                                          isMobile ? styles.messageReadCheckMobile : styles.messageReadCheckDesktop
+                                        }`}
                                       />
                                       <CheckOutlined
-                                        style={{
-                                          position: 'absolute',
-                                          left: isMobile ? 6 : 7,
-                                          top: 0,
-                                          fontSize: isMobile ? 11 : 12
-                                        }}
+                                        className={`${styles.messageReadCheck} ${styles.messageReadCheckSecond} ${
+                                          isMobile ? styles.messageReadCheckSecondMobile : styles.messageReadCheckSecondDesktop
+                                        } ${isMobile ? styles.messageReadCheckMobile : styles.messageReadCheckDesktop}`}
                                       />
                                     </span>
                                   ) : (
-                                    <CheckOutlined style={{ fontSize: isMobile ? 11 : 12 }} />
+                                    <CheckOutlined className={`${styles.messageReadCheckSingle} ${isMobile ? styles.messageReadCheckMobile : styles.messageReadCheckDesktop}`} />
                                   )}
                                 </span>
                               )}
@@ -2389,13 +2228,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 <div ref={messagesEndRef} />
               </div>
             ) : (
-              <div style={{ 
-                textAlign: 'center', 
-                color: '#9ca3af', 
-                paddingTop: isMobile ? '50px' : '100px',
-                fontSize: isMobile ? 12 : 14
-              }}>
-                <MessageOutlined style={{ fontSize: isMobile ? 36 : 48, color: '#d1d5db', marginBottom: isMobile ? 12 : 16, display: 'block' }} />
+              <div className={`${styles.chatEmptyState} ${isMobile ? styles.chatEmptyStateMobile : ''}`}>
+                <MessageOutlined className={`${styles.chatEmptyStateIcon} ${isMobile ? styles.chatEmptyStateIconMobile : ''}`} />
                 Выберите чат для начала общения
               </div>
             )}
@@ -2403,45 +2237,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
           
           {selectedChat && (
-            <div style={{ 
-              padding: isMobile ? '8px 12px 12px 12px' : '16px',
-              borderTop: '1px solid #e5e7eb',
-              background: '#ffffff',
-              flexShrink: 0
-            }}>
+            <div className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}>
               
               {isSupportChatSelected && (
-                <div style={{ 
-                  marginBottom: isMobile ? 8 : 12,
-                  paddingBottom: isMobile ? 8 : 12,
-                  borderBottom: '1px solid #f3f4f6',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <style>{`
-                    @keyframes scroll-carousel {
-                      0% {
-                        transform: translateX(0);
-                      }
-                      100% {
-                        transform: translateX(-50%);
-                      }
-                    }
-                    .carousel-scroll {
-                      animation: scroll-carousel 20s linear infinite;
-                    }
-                    .carousel-scroll:hover {
-                      animation-play-state: paused;
-                    }
-                  `}</style>
-                  <div 
-                    className="carousel-scroll"
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      paddingBottom: 4
-                    }}
-                  >
+                <div className={`${styles.claimCarouselWrapper} ${isMobile ? styles.claimCarouselWrapperMobile : ''}`}>
+                  <div className={styles.claimCarouselTrack}>
                     
                     {[...claimCategories, ...claimCategories].map((category, index) => (
                       <Button
@@ -2452,26 +2252,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           setSelectedClaimCategory(category);
                           setClaimModalOpen(true);
                         }}
-                        style={{
-                          borderRadius: 6,
-                          border: '1px solid #ef4444',
-                          background: '#ffffff',
-                          color: '#ef4444',
-                          fontSize: isMobile ? 11 : 12,
-                          whiteSpace: 'nowrap',
-                          flexShrink: 0,
-                          fontWeight: 500,
-                          transition: 'all 0.2s',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#fef2f2';
-                          e.currentTarget.style.borderColor = '#dc2626';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = '#ffffff';
-                          e.currentTarget.style.borderColor = '#ef4444';
-                        }}
+                        className={`${styles.claimCarouselButton} ${isMobile ? styles.claimCarouselButtonMobile : ''}`}
                       >
                         {category}
                       </Button>
@@ -2480,26 +2261,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 </div>
               )}
               
-              <div style={{ 
-                display: 'flex',
-                gap: isMobile ? 8 : 10,
-                alignItems: 'flex-end',
-                width: '100%'
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
+              <div className={`${styles.chatInputRow} ${isMobile ? styles.chatInputRowMobile : ''}`}>
+                <div className={styles.chatInputField}>
                   <Input.TextArea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Введите сообщение..."
                     autoSize={{ minRows: isMobile ? 1 : 1, maxRows: isMobile ? 4 : 4 }}
-                    style={{ 
-                      width: '100%',
-                      borderRadius: 12,
-                      border: '1px solid #e5e7eb',
-                      fontSize: isMobile ? 14 : 15,
-                      padding: '10px 14px',
-                      resize: 'none'
-                    }}
+                    className={`${styles.chatInput} ${isMobile ? styles.chatInputMobile : ''}`}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -2510,12 +2279,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   />
                 </div>
                 
-                <div style={{ 
-                  display: 'flex', 
-                  gap: isMobile ? 6 : 8,
-                  alignItems: 'center',
-                  flexShrink: 0
-                }}>
+                <div className={`${styles.chatInputActions} ${isMobile ? styles.chatInputActionsMobile : ''}`}>
                   
                   <Upload
                     beforeUpload={handleFileSelect}
@@ -2526,132 +2290,48 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     <Button
                       type="default"
                       icon={<PaperClipOutlined />}
-                      style={{ 
-                        width: isMobile ? 40 : 44, 
-                        height: isMobile ? 40 : 44,
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        color: '#6b7280',
-                        fontSize: isMobile ? 16 : 18,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: '#ffffff',
-                        transition: 'all 0.2s'
-                      }}
+                      className={`${styles.chatAttachButton} ${isMobile ? styles.chatAttachButtonMobile : ''}`}
                       disabled={sending}
                       title="Прикрепить файл"
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#f9fafb';
-                        e.currentTarget.style.borderColor = '#3b82f6';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#ffffff';
-                        e.currentTarget.style.borderColor = '#e5e7eb';
-                      }}
                     />
                   </Upload>
 
                   <Button
                     type="primary"
                     icon={<SendOutlined />}
-                    style={{ 
-                      width: isMobile ? 40 : 44, 
-                      height: isMobile ? 40 : 44,
-                      background: (!messageText.trim() && attachedFiles.length === 0) ? '#9ca3af' : '#3b82f6',
-                      border: 'none',
-                      borderRadius: 12,
-                      fontSize: isMobile ? 16 : 18,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: (!messageText.trim() && attachedFiles.length === 0) ? 'none' : '0 2px 8px rgba(59, 130, 246, 0.3)',
-                      transition: 'all 0.2s',
-                      cursor: (!messageText.trim() && attachedFiles.length === 0) ? 'not-allowed' : 'pointer'
-                    }}
+                    className={`${styles.chatSendButton} ${isMobile ? styles.chatSendButtonMobile : ''} ${
+                      (!messageText.trim() && attachedFiles.length === 0) ? styles.chatSendButtonDisabled : ''
+                    }`}
                     onClick={sendMessage}
                     loading={sending}
                     disabled={!messageText.trim() && attachedFiles.length === 0}
-                    onMouseEnter={(e) => {
-                      if (!sending && (messageText.trim() || attachedFiles.length > 0)) {
-                        e.currentTarget.style.background = '#2563eb';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (messageText.trim() || attachedFiles.length > 0) {
-                        e.currentTarget.style.background = '#3b82f6';
-                      } else {
-                        e.currentTarget.style.background = '#9ca3af';
-                      }
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}
                   />
                 </div>
               </div>
 
               {attachedFiles.length > 0 && (
-                <div style={{
-                  marginTop: 12,
-                  paddingTop: 12,
-                  borderTop: '1px solid #e5e7eb',
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 8
-                }}>
+                <div className={styles.attachedFiles}>
                   {attachedFiles.map((file, index) => (
                     <div
                       key={`${file.name}-${file.size}-${index}`}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        padding: '8px 12px',
-                        background: '#f0f9ff',
-                        border: '1px solid #bae6fd',
-                        borderRadius: 12,
-                        maxWidth: '100%',
-                        transition: 'all 0.2s'
-                      }}
+                      className={styles.attachedFileItem}
                     >
-                      <FileOutlined style={{ color: '#0284c7', fontSize: 16 }} />
+                      <FileOutlined className={styles.attachedFileIcon} />
                       <Text
-                        style={{
-                          fontSize: 13,
-                          color: '#0c4a6e',
-                          maxWidth: isMobile ? 140 : 220,
-                          fontWeight: 500
-                        }}
+                        className={`${styles.attachedFileName} ${isMobile ? styles.attachedFileNameMobile : ''}`}
                         ellipsis
                       >
                         {file.name}
                       </Text>
-                      <Text style={{ fontSize: 11, color: '#0369a1', whiteSpace: 'nowrap' }}>
+                      <Text className={styles.attachedFileSize}>
                         {(file.size / 1024 / 1024).toFixed(2)} МБ
                       </Text>
                       <Button
                         type="text"
                         size="small"
                         onClick={() => removeAttachedFile(file)}
-                        icon={<span style={{ fontSize: 18, lineHeight: 1 }}>×</span>}
-                        style={{
-                          color: '#ef4444',
-                          padding: 0,
-                          height: 24,
-                          width: 24,
-                          minWidth: 24,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 6,
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#fee2e2';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'transparent';
-                        }}
+                        icon={<span className={styles.attachedFileRemoveIcon}>×</span>}
+                        className={styles.attachedFileRemoveButton}
                       />
                     </div>
                   ))}
@@ -2678,11 +2358,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         destroyOnClose
         width={isMobile ? '90%' : 520}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={styles.simpleModalContent}>
           <Text type="secondary">Выберите новый дедлайн</Text>
           <DatePicker
             showTime
-            style={{ width: '100%' }}
+            className={styles.fullWidth}
             value={overdueDeadlineValue}
             onChange={(v) => setOverdueDeadlineValue(v)}
             format="DD.MM.YYYY HH:mm"
@@ -2710,23 +2390,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         okText="Подать претензию"
         cancelText="Отмена"
         title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <ExclamationCircleOutlined style={{ color: '#ef4444' }} />
+          <div className={styles.claimModalTitle}>
+            <ExclamationCircleOutlined className={styles.claimModalTitleIcon} />
             Подача претензии
           </div>
         }
         destroyOnClose
         width={isMobile ? '90%' : 600}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ 
-            padding: '12px 16px', 
-            background: '#fef2f2', 
-            border: '1px solid #fecaca', 
-            borderRadius: 8,
-            color: '#991b1b'
-          }}>
-            <Text style={{ fontSize: 13, color: '#991b1b' }}>
+        <div className={styles.claimModalContent}>
+          <div className={styles.claimWarningBox}>
+            <Text className={styles.claimWarningText}>
               Претензия будет отправлена в техническую поддержку для рассмотрения. 
               Опишите подробно суть вашей проблемы.
             </Text>
@@ -2734,7 +2408,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           
           
           <div>
-            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+            <Text className={styles.formLabel}>
               Категория претензии *
             </Text>
             <Select
@@ -2749,7 +2423,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               }}
               placeholder="Выберите категорию претензии"
               size="large"
-              style={{ width: '100%' }}
+              className={styles.fullWidth}
               options={claimCategories.map(category => ({
                 label: category,
                 value: category
@@ -2761,7 +2435,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           {selectedClaimCategory === 'Заказ не выполнен' && (
             <>
               <div>
-                <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+                <Text className={styles.formLabel}>
                   Актуальность заказа *
                 </Text>
                 <Select
@@ -2769,7 +2443,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   onChange={(value) => setOrderRelevance(value)}
                   placeholder="Выберите актуальность заказа"
                   size="large"
-                  style={{ width: '100%' }}
+                  className={styles.fullWidth}
                   options={[
                     { label: 'Заказ актуален', value: 'Заказ актуален' },
                     { label: 'Заказ не актуален', value: 'Заказ не актуален' }
@@ -2778,7 +2452,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               </div>
               
               <div>
-                <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+                <Text className={styles.formLabel}>
                   Возврат средств *
                 </Text>
                 <Select
@@ -2786,7 +2460,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   onChange={(value) => setRefundType(value)}
                   placeholder="Выберите тип возврата средств"
                   size="large"
-                  style={{ width: '100%' }}
+                  className={styles.fullWidth}
                   options={[
                     { label: 'Возврат предоплаты', value: 'Возврат предоплаты' },
                     { label: 'Возврат предоплаты и неустойка', value: 'Возврат предоплаты и неустойка' },
@@ -2799,7 +2473,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           
           
           <div>
-            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+            <Text className={styles.formLabel}>
               Описание претензии *
             </Text>
             <Input.TextArea
@@ -2809,13 +2483,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               autoSize={{ minRows: 4, maxRows: 8 }}
               maxLength={1000}
               showCount
-              style={{ fontSize: 14 }}
+              className={styles.claimTextArea}
             />
           </div>
           
           
           <div>
-            <Text style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+            <Text className={styles.formLabel}>
               Прикрепить файлы (необязательно)
             </Text>
             <Upload
@@ -2826,57 +2500,34 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             >
               <Button
                 icon={<PaperClipOutlined />}
-                style={{ width: '100%' }}
+                className={styles.fullWidth}
               >
                 Выбрать файлы
               </Button>
             </Upload>
             
             {claimFiles.length > 0 && (
-              <div style={{
-                marginTop: 10,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8
-              }}>
+              <div className={styles.claimFiles}>
                 {claimFiles.map((file, index) => (
                   <div
                     key={`${file.name}-${file.size}-${index}`}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 10px',
-                      background: '#f9fafb',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: 6
-                    }}
+                    className={styles.claimFileItem}
                   >
-                    <FileOutlined style={{ color: '#6b7280' }} />
+                    <FileOutlined className={styles.claimFileIcon} />
                     <Text
-                      style={{
-                        fontSize: 12,
-                        color: '#374151',
-                        flex: 1
-                      }}
+                      className={styles.claimFileName}
                       ellipsis
                     >
                       {file.name}
                     </Text>
-                    <Text style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                    <Text className={styles.claimFileSize}>
                       {(file.size / 1024 / 1024).toFixed(2)} МБ
                     </Text>
                     <Button
                       type="text"
                       size="small"
                       onClick={() => removeClaimFile(file)}
-                      style={{
-                        color: '#ef4444',
-                        padding: 0,
-                        height: 20,
-                        minWidth: 20,
-                        lineHeight: '20px'
-                      }}
+                      className={styles.claimFileRemoveButton}
                     >
                       ×
                     </Button>
@@ -2902,13 +2553,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         title="Оставьте отзыв об эксперте"
         destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={styles.simpleModalContent}>
           <div>
-            <Text style={{ display: 'block', marginBottom: 6 }}>Оценка</Text>
+            <Text className={styles.formLabelSmall}>Оценка</Text>
             <Rate value={reviewRating} onChange={(v) => setReviewRating(v)} />
           </div>
           <div>
-            <Text style={{ display: 'block', marginBottom: 6 }}>Комментарий</Text>
+            <Text className={styles.formLabelSmall}>Комментарий</Text>
             <Input.TextArea
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
@@ -2931,9 +2582,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         title="Оцените работу"
         destroyOnClose
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className={styles.simpleModalContent}>
           <div>
-            <Text style={{ display: 'block', marginBottom: 6 }}>Оценка</Text>
+            <Text className={styles.formLabelSmall}>Оценка</Text>
             <Rate value={acceptWorkDeliveryRating} onChange={(v) => setAcceptWorkDeliveryRating(v)} />
           </div>
         </div>

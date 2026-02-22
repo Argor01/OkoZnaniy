@@ -1,4 +1,4 @@
-﻿
+
 
 .ant-modal-mask {
   backdrop-filter: blur(4px);
@@ -16,6 +16,2838 @@
 .ant-modal-confirm-wrap .ant-modal-mask {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+.fullScreenCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.arbitratorNavCount {
+  margin-left: 8px;
+  color: #1890ff;
+}
+
+.arbitratorNavMenu {
+  border-right: 0;
+  height: 100%;
+}
+
+.arbitratorCard .ant-card-body {
+  padding: 16px;
+}
+
+.arbitratorSectionTitle {
+  margin-bottom: 8px;
+}
+
+.arbitratorSectionTitleCompact {
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.arbitratorSectionSubtitle {
+  font-size: 13px;
+}
+
+.arbitratorFiltersRow {
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.arbitratorFiltersRowCompact {
+  margin-bottom: 12px;
+}
+
+.arbitratorTableScroll {
+  overflow-x: auto;
+}
+
+.arbitratorSelectFull {
+  width: 100%;
+}
+
+.arbitratorTagNoMargin {
+  margin: 0;
+}
+
+.arbitratorTextEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arbitratorTextEllipsisSmall {
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.arbitratorTextXs {
+  font-size: 12px;
+}
+
+.arbitratorTextEllipsisXs {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.arbitratorHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.arbitratorTableContainer {
+  overflow-x: auto;
+}
+
+.arbitratorLayout {
+  min-height: 100vh;
+}
+
+.arbitratorSider {
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.arbitratorSiderHeader {
+  padding: 24px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.arbitratorSiderIcon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.arbitratorSiderTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.arbitratorSiderUser {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.arbitratorMenu {
+  border-right: 0;
+}
+
+.arbitratorHeader {
+  background: #fff;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arbitratorSectionHeaderTitle {
+  margin: 0;
+}
+
+.arbitratorContent {
+  margin: 16px;
+  padding: 0;
+  background: transparent;
+  min-height: calc(100vh - 112px);
+}
+
+.arbitratorFooter {
+  text-align: center;
+  background: #fff;
+}
+
+.arbitratorEmptyState {
+  text-align: center;
+  padding: 40px;
+}
+
+.arbitratorClaimsList {
+  margin-top: 16px;
+}
+
+.arbitratorClaimCard {
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.arbitratorClaimRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.arbitratorClaimContent {
+  flex: 1;
+}
+
+.arbitratorSpaceFull {
+  width: 100%;
+}
+.centeredColumnFullHeight {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  gap: 20px;
+}
+.googleRedirectPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7f9fc;
+}
+.googleRedirectCard {
+  max-width: 520px;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  text-align: center;
+}
+.googleRedirectLogo {
+  margin-bottom: 12px;
+}
+.googleRedirectTitle {
+  margin: 0;
+  font-size: 22px;
+}
+.googleRedirectText {
+  margin-top: 8px;
+  color: #667085;
+}
+.googleRedirectAction {
+  margin-top: 16px;
+}
+.googleRedirectLink {
+  display: inline-block;
+  background: #1a73e8;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.notFoundPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.notFoundTitle {
+  color: #fff;
+  font-size: 72px;
+  font-weight: 700;
+}
+.notFoundSubtitle {
+  color: #fff;
+  font-size: 20px;
+}
+.notFoundButton {
+  background: #fff;
+  color: #667eea;
+  border: none;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0 32px;
+}
+.errorBoundaryContainer {
+  padding: 20px;
+  text-align: center;
+}
+.errorBoundaryDebug {
+  margin-top: 20px;
+  text-align: left;
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  overflow: auto;
+}
+.testProfileModalContainer {
+  padding: 20px;
+}
+.testProfileModalData {
+  margin-top: 20px;
+}
+.adminPageLayout {
+  min-height: 100vh;
+}
+.adminPageCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.adminPageCenterPadded {
+  padding: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.allOrdersHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.allOrdersTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.allOrdersMetaText {
+  font-size: 12px;
+}
+.allOrdersPersonName {
+  font-size: 13px;
+  font-weight: 500;
+}
+.allOrdersPersonHandle {
+  font-size: 11px;
+}
+.allOrdersDeadline {
+  color: inherit;
+}
+.allOrdersDeadlineOverdue {
+  color: #ff4d4f;
+}
+.allOrdersDeadlineNear {
+  color: #faad14;
+}
+.allOrdersDeadlineDate {
+  font-size: 12px;
+}
+.allOrdersDeadlineTime {
+  font-size: 11px;
+}
+.allOrdersSectionHeader {
+  margin-bottom: 16px;
+}
+.allOrdersStatsRow {
+  margin-bottom: 24px;
+}
+.allOrdersStatNew .ant-statistic-content-value {
+  color: #1890ff;
+}
+.allOrdersStatInProgress .ant-statistic-content-value {
+  color: #faad14;
+}
+.allOrdersStatCompleted .ant-statistic-content-value {
+  color: #52c41a;
+}
+.allOrdersStatCancelled .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.allOrdersFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.allOrdersSearch {
+  width: 300px;
+}
+.allOrdersSelectStatus {
+  width: 150px;
+}
+.allOrdersSelectSubject {
+  width: 150px;
+}
+.allOrdersSelectPriority {
+  width: 120px;
+}
+.allOrdersRangePicker {
+  width: 240px;
+}
+.allOrdersModalActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.userRolesMetaText {
+  font-size: 12px;
+}
+.userRolesSystemTag {
+  margin-left: 8px;
+}
+.userRolesSectionHeader {
+  margin-bottom: 16px;
+}
+.userRolesFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.userRolesSearch {
+  width: 300px;
+}
+.userRolesRoleSelect {
+  width: 150px;
+}
+.userRolesModalUserSummary {
+  margin-bottom: 16px;
+}
+.userRolesPermissionsAlert {
+  margin-bottom: 16px;
+}
+.userRolesCategoryGroup {
+  margin-bottom: 16px;
+}
+.userRolesPermissionList {
+  width: 100%;
+}
+.userRolesPermissionItem {
+  margin-bottom: 8px;
+}
+.problemOrdersHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.problemOrdersTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.problemOrdersMetaText {
+  font-size: 12px;
+}
+.problemOrdersProblemTagRow {
+  margin-bottom: 4px;
+}
+.problemOrdersProblemText {
+  font-size: 12px;
+}
+.problemOrdersParticipantRow {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+.problemOrdersParticipantEmpty {
+  font-size: 12px;
+}
+.problemOrdersProgressText {
+  font-size: 11px;
+}
+.problemOrdersActivity {
+  font-size: 12px;
+}
+.problemOrdersActivityMeta {
+  font-size: 11px;
+}
+.problemOrdersSectionHeader {
+  margin-bottom: 16px;
+}
+.problemOrdersStatsRow {
+  margin-bottom: 24px;
+}
+.problemOrdersStatCritical .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.problemOrdersStatOverdue .ant-statistic-content-value {
+  color: #faad14;
+}
+.problemOrdersCriticalAlert {
+  margin-bottom: 16px;
+}
+.problemOrdersFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.problemOrdersSearch {
+  width: 300px;
+}
+.problemOrdersSelectType {
+  width: 180px;
+}
+.problemOrdersSelectSeverity {
+  width: 150px;
+}
+.problemOrdersModalAlert {
+  margin-bottom: 16px;
+}
+.problemOrdersOverdueTag {
+  margin-left: 8px;
+}
+.problemOrdersResolveAlertWrap {
+  margin-bottom: 16px;
+}
+.problemOrdersEscalateAlert {
+  margin-bottom: 16px;
+}
+.critical-row {
+  background-color: #fff2f0 !important;
+}
+.high-priority-row {
+  background-color: #fff7e6 !important;
+}
+.tariffsSettingsTariffName {
+  font-weight: bold;
+}
+.tariffsSettingsTariffDescription {
+  font-size: 12px;
+}
+.tariffsSettingsUrgencyText {
+  font-size: 11px;
+}
+.tariffsSettingsAlert {
+  margin-bottom: 16px;
+}
+.tariffsSettingsCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tariffsSettingsNumberInput {
+  width: 100%;
+}
+.worksModerationTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.worksModerationMetaText {
+  font-size: 12px;
+}
+.worksModerationMetaSubtext {
+  font-size: 11px;
+  color: #666;
+}
+.worksModerationAuthorName {
+  font-size: 13px;
+  font-weight: 500;
+}
+.worksModerationAuthorMeta {
+  font-size: 11px;
+  color: #666;
+}
+.worksModerationDate {
+  font-size: 12px;
+}
+.worksModerationDateTime {
+  color: #666;
+}
+.worksModerationSectionHeader {
+  margin-bottom: 16px;
+}
+.worksModerationStatsRow {
+  margin-bottom: 24px;
+}
+.worksModerationStatPending .ant-statistic-content-value {
+  color: #faad14;
+}
+.worksModerationStatApproved .ant-statistic-content-value {
+  color: #52c41a;
+}
+.worksModerationStatRejected .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.worksModerationAlert {
+  margin-bottom: 16px;
+}
+.worksModerationFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.worksModerationSearch {
+  width: 300px;
+}
+.worksModerationStatusSelect {
+  width: 150px;
+}
+.pendingApprovalClaimTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.pendingApprovalDescription {
+  font-size: 12px;
+}
+.pendingApprovalTagRow {
+  margin-top: 8px;
+}
+.pendingApprovalUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pendingApprovalUserName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.pendingApprovalUserHandle {
+  font-size: 10px;
+}
+.pendingApprovalCenterCell {
+  text-align: center;
+}
+.pendingApprovalWaitingTime {
+  font-weight: 500;
+  font-size: 13px;
+}
+.pendingApprovalWaitingCritical {
+  color: #ff4d4f;
+}
+.pendingApprovalWaitingWarning {
+  color: #faad14;
+}
+.pendingApprovalWaitingOk {
+  color: #52c41a;
+}
+.pendingApprovalMessageIcon {
+  font-size: 16px;
+  color: #faad14;
+}
+.pendingApprovalSectionHeader {
+  margin-bottom: 16px;
+}
+.pendingApprovalAlert {
+  margin-bottom: 16px;
+}
+.pendingApprovalFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.pendingApprovalSearch {
+  width: 300px;
+}
+.pendingApprovalSelectCategory {
+  width: 150px;
+}
+.pendingApprovalSelectType {
+  width: 150px;
+}
+.pendingApprovalSelectImpact {
+  width: 120px;
+}
+.pendingApprovalSelectEscalation {
+  width: 120px;
+}
+.pendingApprovalModalHeader {
+  margin-bottom: 16px;
+}
+.pendingApprovalModalAlert {
+  margin-bottom: 16px;
+}
+.pendingApprovalModalUserRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.pendingApprovalModalColumn {
+  flex: 1;
+}
+.pendingApprovalModalUserInfo {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pendingApprovalSectionBlock {
+  margin-bottom: 16px;
+}
+.pendingApprovalParagraphSpacing {
+  margin-top: 8px;
+}
+.pendingApprovalReasonBox {
+  margin-top: 8px;
+  background-color: #fff7e6;
+  padding: 12px;
+  border-radius: 6px;
+}
+.pendingApprovalActionBox {
+  margin-top: 8px;
+  background-color: #f6ffed;
+  padding: 12px;
+  border-radius: 6px;
+}
+.pendingApprovalAttachmentsRow {
+  margin-top: 8px;
+}
+.pendingApprovalMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.pendingApprovalMetaSummary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+.openRequestsRequestNumber {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.openRequestsTitle {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.openRequestsTagRow {
+  margin-top: 8px;
+}
+.openRequestsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.openRequestsUserName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.openRequestsUserHandle {
+  font-size: 10px;
+}
+.openRequestsUserTypeRow {
+  margin-top: 2px;
+}
+.openRequestsCenterCell {
+  text-align: center;
+}
+.openRequestsSourceIcon {
+  font-size: 16px;
+}
+.openRequestsWaitingTime {
+  font-weight: 500;
+  font-size: 13px;
+}
+.openRequestsWaitingOverdue {
+  color: #ff4d4f;
+}
+.openRequestsWaitingWarning {
+  color: #faad14;
+}
+.openRequestsWaitingOk {
+  color: #52c41a;
+}
+.openRequestsSlaMeta {
+  font-size: 10px;
+  color: #999;
+}
+.openRequestsTagItem {
+  margin-bottom: 2px;
+}
+.openRequestsCreatedCell {
+  font-size: 11px;
+  text-align: center;
+}
+.openRequestsSectionHeader {
+  margin-bottom: 16px;
+}
+.openRequestsStatsRow {
+  margin-bottom: 16px;
+}
+.openRequestsStatOverdue .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.openRequestsStatOk .ant-statistic-content-value {
+  color: #52c41a;
+}
+.openRequestsStatUrgent .ant-statistic-content-value {
+  color: #faad14;
+}
+.openRequestsAlert {
+  margin-bottom: 16px;
+}
+.openRequestsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.openRequestsSearch {
+  width: 300px;
+}
+.openRequestsSelectType {
+  width: 150px;
+}
+.openRequestsSelectPriority {
+  width: 120px;
+}
+.openRequestsSelectSource {
+  width: 120px;
+}
+.openRequestsSelectUserType {
+  width: 130px;
+}
+.openRequestsRangePicker {
+  width: 250px;
+}
+.openRequestsModalHeader {
+  margin-bottom: 16px;
+}
+.openRequestsSectionBlock {
+  margin-bottom: 16px;
+}
+.openRequestsParagraphSpacing {
+  margin-top: 8px;
+}
+.openRequestsUserInfo {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.openRequestsInfoList {
+  margin-top: 8px;
+}
+.openRequestsVipText {
+  color: #faad14;
+}
+.openRequestsRelatedOrderBox {
+  margin-top: 8px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+.openRequestsAttachmentsRow {
+  margin-top: 8px;
+}
+.openRequestsTagsRow {
+  margin-top: 8px;
+}
+.openRequestsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.openRequestsMetaSummary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+.openRequestsDatePicker {
+  width: 100%;
+}
+.overdue-row {
+  background-color: #fff2f0 !important;
+}
+.urgent-row {
+  background-color: #fff7e6 !important;
+}
+.notificationsTemplateTitleRow {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notificationsTemplateDescription {
+  font-size: 12px;
+}
+.notificationsAlertSpacing {
+  margin-bottom: 16px;
+}
+.notificationsCardTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notificationsSettingsCol {
+  margin-bottom: 16px;
+}
+.notificationsSettingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notificationsSettingName {
+  font-weight: bold;
+}
+.notificationsSettingDescription {
+  font-size: 12px;
+}
+.notificationsSettingInput {
+  width: 200px;
+}
+.notificationsTestAlert {
+  margin-bottom: 16px;
+}
+.ticketSystemWrapper {
+  padding: 24px;
+}
+.ticketSystemWrapperMobile {
+  padding: 12px;
+}
+.ticketSystemListCol {
+  display: block;
+}
+.ticketSystemListColHidden {
+  display: none;
+}
+.ticketSystemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ticketSystemTitleIcon {
+  font-size: 18px;
+  color: #1890ff;
+}
+.ticketSystemStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+.ticketSystemStatItem {
+  text-align: center;
+}
+.ticketSystemStatValue {
+  font-size: 20px;
+  font-weight: 600;
+}
+.ticketSystemStatTotal {
+  color: #1890ff;
+}
+.ticketSystemStatOpen {
+  color: #fa8c16;
+}
+.ticketSystemStatInProgress {
+  color: #1890ff;
+}
+.ticketSystemStatCompleted {
+  color: #52c41a;
+}
+.ticketSystemStatLabel {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+.ticketSystemSearch {
+  margin-bottom: 12px;
+}
+.ticketSystemFiltersRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.ticketSystemFilterSelect {
+  flex: 1;
+}
+.ticketSystemListBody {
+  max-height: 600px;
+  overflow-y: auto;
+}
+.ticketSystemTicketCard {
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid #d9d9d9;
+  background: white;
+  transition: all 0.2s;
+}
+.ticketSystemTicketCardSelected {
+  border: 2px solid #1890ff;
+  background: #e6f7ff;
+}
+.ticketSystemTicketHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ticketSystemTicketNumber {
+  font-size: 13px;
+}
+.ticketSystemTicketTags {
+  display: flex;
+  gap: 4px;
+}
+.ticketSystemTag {
+  margin: 0;
+  font-size: 10px;
+}
+.ticketSystemTicketSubject {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
+}
+.ticketSystemTicketUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.ticketSystemTicketUserName {
+  font-size: 12px;
+}
+.ticketSystemTicketFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ticketSystemTicketTime {
+  font-size: 11px;
+}
+.ticketSystemMessageBadge .ant-badge-count {
+  background-color: #1890ff;
+}
+.ticketSystemBackButton {
+  margin-right: 8px;
+}
+.ticketSystemDetailTitle {
+  font-size: 16px;
+}
+.ticketSystemStatusSelect {
+  width: 140px;
+}
+.ticketSystemPrioritySelect {
+  width: 120px;
+}
+.ticketSystemDetails {
+  margin-bottom: 16px;
+}
+.ticketSystemDescriptionCard {
+  margin-bottom: 16px;
+  background: #fafafa;
+}
+.ticketSystemMessages {
+  height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.ticketSystemMessageBubble {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.ticketSystemMessageHeader {
+  margin-bottom: 8px;
+}
+.ticketSystemMessageTime {
+  font-size: 11px;
+  margin-left: 8px;
+}
+.ticketSystemSupportTag {
+  margin-left: 8px;
+  font-size: 10px;
+}
+.ticketSystemReplyRow {
+  display: flex;
+  gap: 8px;
+}
+.ticketSystemReplyInput {
+  flex: 1;
+}
+.ticketSystemSendButton {
+  height: auto;
+}
+.ticketSystemHint {
+  font-size: 11px;
+  display: block;
+  margin-top: 8px;
+}
+.categoriesSubjectsCategoryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.categoriesSubjectsCategoryIcon {
+  font-size: 18px;
+}
+.categoriesSubjectsCategoryName {
+  font-weight: 500;
+}
+.categoriesSubjectsCategoryDescription {
+  font-size: 12px;
+}
+.categoriesSubjectsSubjectName {
+  font-weight: 500;
+}
+.categoriesSubjectsSubjectDescription {
+  font-size: 12px;
+}
+.categoriesSubjectsWorkTypeName {
+  font-weight: 500;
+}
+.categoriesSubjectsWorkTypeDescription {
+  font-size: 12px;
+}
+.categoriesSubjectsWorkTypePrice {
+  font-size: 12px;
+}
+.categoriesSubjectsHeader {
+  margin-bottom: 16px;
+}
+.categoriesSubjectsActionsRow {
+  margin-bottom: 16px;
+}
+.categoriesSubjectsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+.categoriesSubjectsSearch {
+  width: 250px;
+}
+.categoriesSubjectsNumberInput {
+  width: 100%;
+}
+.categoriesSubjectsPriceRow {
+  display: flex;
+  gap: 16px;
+}
+.categoriesSubjectsPriceField {
+  flex: 1;
+}
+.inProgressClaimsTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.inProgressClaimsDescription {
+  font-size: 12px;
+}
+.inProgressClaimsTagRow {
+  margin-top: 8px;
+}
+.inProgressClaimsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inProgressClaimsUserName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.inProgressClaimsUserHandle {
+  font-size: 10px;
+}
+.inProgressClaimsAdminName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.inProgressClaimsAdminHandle {
+  font-size: 10px;
+}
+.inProgressClaimsMessageIcon {
+  font-size: 16px;
+  color: #1890ff;
+}
+.inProgressClaimsActivityCell {
+  font-size: 11px;
+}
+.inProgressClaimsHeader {
+  margin-bottom: 16px;
+}
+.inProgressClaimsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.inProgressClaimsSearch {
+  width: 300px;
+}
+.inProgressClaimsSelectCategory {
+  width: 150px;
+}
+.inProgressClaimsSelectPriority {
+  width: 120px;
+}
+.inProgressClaimsSelectAdmin {
+  width: 150px;
+}
+.inProgressClaimsModalHeader {
+  margin-bottom: 16px;
+}
+.inProgressClaimsSectionBlock {
+  margin-bottom: 16px;
+}
+.inProgressClaimsProgress {
+  margin-top: 8px;
+}
+.inProgressClaimsDetailsRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.inProgressClaimsDetailsColumn {
+  flex: 1;
+}
+.inProgressClaimsInfoRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inProgressClaimsParagraph {
+  margin-top: 8px;
+}
+.inProgressClaimsAttachmentsRow {
+  margin-top: 8px;
+}
+.inProgressClaimsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.inProgressClaimsMetaSummary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+.completedClaimsTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.completedClaimsDescription {
+  font-size: 12px;
+}
+.completedClaimsTagRow {
+  margin-top: 8px;
+}
+.completedClaimsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.completedClaimsUserName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.completedClaimsUserHandle {
+  font-size: 10px;
+}
+.completedClaimsAdminName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.completedClaimsAdminHandle {
+  font-size: 10px;
+}
+.completedClaimsResolutionCell {
+  text-align: center;
+}
+.completedClaimsResolutionValue {
+  font-weight: 500;
+  font-size: 13px;
+}
+.completedClaimsResolutionDate {
+  font-size: 10px;
+}
+.completedClaimsRatingCell {
+  text-align: center;
+}
+.completedClaimsRatingStars {
+  font-size: 12px;
+}
+.completedClaimsRatingValue {
+  font-size: 10px;
+  color: #666;
+}
+.completedClaimsRatingEmpty {
+  font-size: 11px;
+}
+.completedClaimsMessagesCell {
+  text-align: center;
+}
+.completedClaimsMessageIcon {
+  font-size: 16px;
+  color: #52c41a;
+}
+.completedClaimsHeader {
+  margin-bottom: 16px;
+}
+.completedClaimsStatsRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+.completedClaimsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.completedClaimsSearch {
+  width: 300px;
+}
+.completedClaimsSelectCategory {
+  width: 150px;
+}
+.completedClaimsSelectPriority {
+  width: 120px;
+}
+.completedClaimsSelectAdmin {
+  width: 150px;
+}
+.completedClaimsSelectRating {
+  width: 120px;
+}
+.completedClaimsDateRange {
+  width: 250px;
+}
+.completedClaimsModalHeader {
+  margin-bottom: 16px;
+}
+.completedClaimsDetailsRow {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.completedClaimsDetailsColumn {
+  flex: 1;
+}
+.completedClaimsInfoRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.completedClaimsSectionBlock {
+  margin-bottom: 16px;
+}
+.completedClaimsParagraph {
+  margin-top: 8px;
+}
+.completedClaimsSolution {
+  margin-top: 8px;
+  background-color: #f6ffed;
+  padding: 12px;
+  border-radius: 6px;
+}
+.completedClaimsRatingRow {
+  margin-top: 8px;
+}
+.completedClaimsRatingScore {
+  margin-left: 8px;
+}
+.completedClaimsFeedback {
+  margin-top: 8px;
+  font-style: italic;
+  color: #666;
+}
+.completedClaimsAttachmentsRow {
+  margin-top: 8px;
+}
+.completedClaimsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.completedClaimsMetaSummary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+.completedRequestsTitle {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.completedRequestsDescription {
+  font-size: 12px;
+}
+.completedRequestsTagRow {
+  margin-top: 4px;
+}
+.completedRequestsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.completedRequestsUserName {
+  font-weight: bold;
+}
+.completedRequestsVipTag {
+  margin-left: 4px;
+}
+.completedRequestsUserMeta {
+  font-size: 11px;
+}
+.completedRequestsPriorityTag {
+  margin-top: 4px;
+}
+.completedRequestsAdminRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.completedRequestsAdminName {
+  font-size: 13px;
+}
+.completedRequestsTimingLine {
+  font-size: 12px;
+}
+.completedRequestsTimingLineOffset {
+  margin-top: 2px;
+}
+.completedRequestsRatingRow {
+  margin-top: 4px;
+}
+.completedRequestsRatingStars {
+  font-size: 12px;
+}
+.completedRequestsFollowUpTag {
+  margin-top: 4px;
+}
+.completedRequestsCompletedTime {
+  font-size: 11px;
+}
+.completedRequestsStatsRow {
+  margin-bottom: 16px;
+}
+.completedRequestsResolvedIcon {
+  color: #52c41a;
+}
+.completedRequestsRatingIcon {
+  color: #faad14;
+}
+.completedRequestsFiltersCard {
+  margin-bottom: 16px;
+}
+.completedRequestsFilterField {
+  width: 100%;
+}
+.completedRequestsModalUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.completedRequestsResolutionBox {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.completedRequestsFeedback {
+  margin-top: 8px;
+  font-style: italic;
+}
+.completedRequestsFollowUpBlock {
+  margin-bottom: 16px;
+}
+.completedRequestsFollowUpDate {
+  width: 100%;
+  margin-top: 4px;
+}
+.completedRequestsFollowUpNotes {
+  margin-top: 4px;
+}
+.inProgressRequestsNumber {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.inProgressRequestsTitle {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.inProgressRequestsTagRow {
+  margin-top: 8px;
+}
+.inProgressRequestsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inProgressRequestsUserName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.inProgressRequestsUserHandle {
+  font-size: 10px;
+}
+.inProgressRequestsAdminName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.inProgressRequestsAdminRole {
+  font-size: 10px;
+}
+.inProgressRequestsStatusCell {
+  text-align: center;
+}
+.inProgressRequestsOverdueLabel {
+  font-size: 10px;
+  color: #ff4d4f;
+  margin-top: 2px;
+}
+.inProgressRequestsProgressMeta {
+  font-size: 11px;
+  color: #666;
+}
+.inProgressRequestsResponsesCell {
+  text-align: center;
+}
+.inProgressRequestsResponseIcon {
+  font-size: 16px;
+  color: #1890ff;
+}
+.inProgressRequestsResponseTime {
+  font-size: 10px;
+  color: #999;
+  margin-top: 2px;
+}
+.inProgressRequestsDeadlineCell {
+  text-align: center;
+}
+.inProgressRequestsDeadlineDate {
+  font-size: 12px;
+  color: #666;
+}
+.inProgressRequestsDeadlineOverdue {
+  color: #ff4d4f;
+}
+.inProgressRequestsDeadlineTime {
+  font-size: 10px;
+  color: #999;
+}
+.inProgressRequestsDeadlineEstimate {
+  font-size: 10px;
+  color: #52c41a;
+  margin-top: 2px;
+}
+.inProgressRequestsHeader {
+  margin-bottom: 16px;
+}
+.inProgressRequestsStatsRow {
+  margin-bottom: 16px;
+}
+.inProgressRequestsStatOverdue .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.inProgressRequestsStatOk .ant-statistic-content-value {
+  color: #52c41a;
+}
+.inProgressRequestsStatWaiting .ant-statistic-content-value {
+  color: #faad14;
+}
+.inProgressRequestsStatProgressHigh .ant-statistic-content-value {
+  color: #52c41a;
+}
+.inProgressRequestsStatProgressMedium .ant-statistic-content-value {
+  color: #faad14;
+}
+.inProgressRequestsStatProgressLow .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.inProgressRequestsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.inProgressRequestsSearch {
+  width: 300px;
+}
+.inProgressRequestsSelectType {
+  width: 150px;
+}
+.inProgressRequestsSelectStatus {
+  width: 150px;
+}
+.inProgressRequestsSelectAdmin {
+  width: 150px;
+}
+.inProgressRequestsSelectPriority {
+  width: 120px;
+}
+.inProgressRequestsModalHeader {
+  margin-bottom: 16px;
+}
+.inProgressRequestsSectionBlock {
+  margin-bottom: 16px;
+}
+.inProgressRequestsProgress {
+  margin-top: 8px;
+}
+.inProgressRequestsParagraph {
+  margin-top: 8px;
+}
+.inProgressRequestsInfoRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inProgressRequestsRelatedOrder {
+  margin-top: 8px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+.inProgressRequestsNotesBox {
+  margin-top: 8px;
+  padding: 12px;
+  background-color: #fff7e6;
+  border-radius: 6px;
+}
+.inProgressRequestsNextAction {
+  margin-top: 8px;
+  padding: 12px;
+  background-color: #f0f8ff;
+  border-radius: 6px;
+}
+.inProgressRequestsTimeline {
+  margin-top: 8px;
+}
+.inProgressRequestsTimelineMeta {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+.inProgressRequestsTimelineDetails {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 4px;
+}
+.inProgressRequestsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.newClaimsTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.newClaimsDescription {
+  font-size: 12px;
+}
+.newClaimsTagRow {
+  margin-top: 8px;
+}
+.newClaimsUserRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.newClaimsUserName {
+  font-weight: 500;
+  font-size: 13px;
+}
+.newClaimsUserHandle {
+  font-size: 11px;
+}
+.newClaimsMessageIcon {
+  font-size: 16px;
+  color: #1890ff;
+}
+.newClaimsCreatedCell {
+  font-size: 12px;
+}
+.newClaimsHeader {
+  margin-bottom: 16px;
+}
+.newClaimsFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.newClaimsSearch {
+  width: 300px;
+}
+.newClaimsSelectCategory {
+  width: 150px;
+}
+.newClaimsSelectPriority {
+  width: 120px;
+}
+.newClaimsDateRange {
+  width: 250px;
+}
+.newClaimsModalHeader {
+  margin-bottom: 16px;
+}
+.newClaimsSectionBlock {
+  margin-bottom: 16px;
+}
+.newClaimsInfoRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.newClaimsParagraph {
+  margin-top: 8px;
+}
+.newClaimsAttachmentsRow {
+  margin-top: 8px;
+}
+.newClaimsMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.supportChatsChatsColHidden {
+  display: none;
+}
+.supportChatsCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.supportChatsCardTitleIcon {
+  font-size: 18px;
+  color: #1890ff;
+}
+.supportChatsSearchIcon {
+  color: #bfbfbf;
+}
+.supportChatsSearchInput {
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+.supportChatsFiltersRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.supportChatsFilterSelect {
+  flex: 1;
+  min-width: 120px;
+}
+.supportChatsStatsRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.supportChatsStatsUnread {
+  color: #ff4d4f;
+}
+.supportChatsListScroll {
+  max-height: 600px;
+  overflow-y: auto;
+}
+.supportChatsListScrollMobile {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.supportChatsListItem {
+  cursor: pointer;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+.supportChatsListItem:hover {
+  background-color: #fafafa;
+}
+.supportChatsListItemSelected {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+.supportChatsListItemSelected:hover {
+  background-color: #e6f7ff;
+}
+.supportChatsAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1890ff;
+}
+.supportChatsListTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.supportChatsListTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+.supportChatsListTags {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.supportChatsListTag {
+  margin: 0;
+  font-size: 10px;
+  padding: 0 6px;
+  line-height: 18px;
+}
+.supportChatsListSubject {
+  font-size: 13px;
+  color: #595959;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.supportChatsListLastMessage {
+  font-size: 12px;
+  color: #8c8c8c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.supportChatsListMeta {
+  font-size: 11px;
+  color: #bfbfbf;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.supportChatsListMetaIcon {
+  font-size: 10px;
+}
+.supportChatsChatHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.supportChatsChatHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.supportChatsChatName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+.supportChatsChatNameMobile {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+.supportChatsChatMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.supportChatsChatTag {
+  font-size: 12px;
+  margin: 0;
+}
+.supportChatsChatTagMobile {
+  font-size: 11px;
+  margin: 0;
+}
+.supportChatsChatSubject {
+  font-size: 14px;
+  color: #595959;
+}
+.supportChatsChatSubjectMobile {
+  font-size: 13px;
+  color: #595959;
+}
+.supportChatsChatTime {
+  font-size: 12px;
+  margin-left: auto;
+}
+.supportChatsChatTimeMobile {
+  font-size: 11px;
+  margin-left: auto;
+}
+.supportChatsMessages {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+}
+.supportChatsMessagesMobile {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+.supportChatsMessageRow {
+  display: flex;
+  animation: fadeInUp 0.3s ease;
+}
+.supportChatsMessageRowAdmin {
+  flex-direction: row-reverse;
+}
+.supportChatsMessageRowUser {
+  flex-direction: row;
+}
+.supportChatsMessageRowMobile {
+  margin-bottom: 12px;
+}
+.supportChatsMessageRowDesktop {
+  margin-bottom: 16px;
+}
+.supportChatsMessageBubble {
+  word-break: break-word;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.supportChatsMessageBubbleAdmin {
+  background: #1890ff;
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+.supportChatsMessageBubbleUser {
+  background: #fff;
+  color: #333;
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+.supportChatsMessageBubbleAdmin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+.supportChatsMessageBubbleUser:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.supportChatsMessageBubbleMobile {
+  max-width: 85%;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.supportChatsMessageBubbleDesktop {
+  max-width: 70%;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+.supportChatsMessageText {
+  line-height: 1.5;
+}
+.supportChatsMessageTime {
+  opacity: 0.8;
+  margin-top: 6px;
+  font-weight: 500;
+}
+.supportChatsMessageTimeAdmin {
+  text-align: left;
+}
+.supportChatsMessageTimeUser {
+  text-align: right;
+}
+.supportChatsMessageTimeMobile {
+  font-size: 10px;
+}
+.supportChatsMessageTimeDesktop {
+  font-size: 11px;
+}
+.supportChatsComposer {
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+.supportChatsComposerMobile {
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+.supportChatsAttachmentsRow {
+  margin-bottom: 12px;
+}
+.supportChatsAttachmentTag {
+  border-radius: 8px;
+  padding: 4px 12px;
+  margin-bottom: 4px;
+}
+.supportChatsComposerRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.supportChatsComposerRowMobile {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+.supportChatsMessageInput {
+  flex: 1;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+  padding: 10px 14px;
+}
+.supportChatsMessageInputMobile {
+  flex: 1;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+  padding: 10px 14px;
+}
+.supportChatsMessageInput:focus,
+.supportChatsMessageInputMobile:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+.supportChatsComposerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.supportChatsUploadButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+.supportChatsUploadButton:hover {
+  border-color: #1890ff;
+  transform: scale(1.03);
+}
+.supportChatsSendButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+.supportChatsSendButton:not([disabled]):not(.ant-btn-loading):hover {
+  transform: scale(1.05);
+}
+.supportChatsComposerHint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+.directorCommSubjectRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.directorCommFlagIcon {
+  color: #ff4d4f;
+}
+.directorCommUrgentIcon {
+  color: #faad14;
+}
+.directorCommSubjectText {
+  font-weight: normal;
+}
+.directorCommSubjectTextSent {
+  font-weight: bold;
+}
+.directorCommTagsRow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.directorCommSenderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.directorCommSenderName {
+  font-weight: bold;
+}
+.directorCommSenderMeta {
+  font-size: 11px;
+}
+.directorCommStatusWarning {
+  font-size: 11px;
+  color: #faad14;
+  margin-top: 2px;
+}
+.directorCommStatusWarningTime {
+  margin-top: 2px;
+}
+.directorCommDateTime {
+  font-size: 11px;
+}
+.directorCommRepliesMeta {
+  font-size: 11px;
+  color: #52c41a;
+  margin-top: 2px;
+}
+.directorCommAlert {
+  margin-bottom: 16px;
+}
+.directorCommStatsRow {
+  margin-bottom: 16px;
+}
+.directorCommStatIconInfo {
+  color: #1890ff;
+}
+.directorCommStatIconAlert {
+  color: #ff4d4f;
+}
+.directorCommStatIconWarn {
+  color: #faad14;
+}
+.directorCommStatIconSuccess {
+  color: #52c41a;
+}
+.directorCommActionsCard {
+  text-align: center;
+}
+.directorCommActionPrimary {
+  margin-bottom: 8px;
+}
+.directorCommMessagesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.directorCommMessagesFilter {
+  width: 200px;
+}
+.directorCommDeadlinePicker {
+  width: 100%;
+}
+.directorCommMeetingRange {
+  width: 100%;
+}
+.directorCommViewHeader {
+  margin-bottom: 16px;
+}
+.directorCommViewTagsRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.directorCommViewSection {
+  margin-bottom: 16px;
+}
+.directorCommViewContent {
+  white-space: pre-wrap;
+}
+.directorCommAttachmentItem {
+  margin-bottom: 8px;
+}
+.directorCommReplyTime {
+  margin-left: 8px;
+}
+.directorCommReplyBlock {
+  margin-top: 8px;
+}
+.directorCommReplyContent {
+  white-space: pre-wrap;
+}
+.directorCommReplyAlert {
+  margin-bottom: 16px;
+}
+.claimsProcessingNumber {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.claimsProcessingTitle {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.claimsProcessingTagRow {
+  margin-top: 8px;
+}
+.claimsProcessingParticipantBlock {
+  margin-bottom: 8px;
+}
+.claimsProcessingParticipantLabel {
+  font-size: 11px;
+}
+.claimsProcessingParticipantRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.claimsProcessingParticipantName {
+  font-size: 12px;
+}
+.claimsProcessingStatusCell {
+  text-align: center;
+}
+.claimsProcessingStatusMeta {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+.claimsProcessingAdminName {
+  font-weight: 500;
+  font-size: 12px;
+}
+.claimsProcessingAdminHandle {
+  font-size: 10px;
+}
+.claimsProcessingDeadlineCell {
+  text-align: center;
+}
+.claimsProcessingDeadlineDate {
+  font-size: 12px;
+  color: #666;
+}
+.claimsProcessingDeadlineDateOverdue {
+  color: #ff4d4f;
+}
+.claimsProcessingDeadlineTime {
+  font-size: 10px;
+  color: #999;
+}
+.claimsProcessingMessagesCell {
+  text-align: center;
+}
+.claimsProcessingMessageIcon {
+  font-size: 16px;
+  color: #1890ff;
+}
+.claimsProcessingHeader {
+  margin-bottom: 16px;
+}
+.claimsProcessingStatsRow {
+  margin-bottom: 16px;
+}
+.claimsProcessingStatNew .ant-statistic-content-value {
+  color: #1890ff;
+}
+.claimsProcessingStatInvestigating .ant-statistic-content-value {
+  color: #faad14;
+}
+.claimsProcessingStatOverdue .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+.claimsProcessingStatOverdueOk .ant-statistic-content-value {
+  color: #52c41a;
+}
+.claimsProcessingOverdueAlert {
+  margin-bottom: 16px;
+}
+.claimsProcessingFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.claimsProcessingSearch {
+  width: 300px;
+}
+.claimsProcessingSelectType {
+  width: 150px;
+}
+.claimsProcessingSelectStatus {
+  width: 150px;
+}
+.claimsProcessingSelectPriority {
+  width: 120px;
+}
+.claimsProcessingSelectAdmin {
+  width: 150px;
+}
+.claimsProcessingDateRange {
+  width: 250px;
+}
+.claimsProcessingModalHeader {
+  margin-bottom: 16px;
+}
+.claimsProcessingSectionBlock {
+  margin-bottom: 16px;
+}
+.claimsProcessingParagraph {
+  margin-top: 8px;
+}
+.claimsProcessingInfoRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.claimsProcessingOrderBox {
+  margin-top: 8px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+.claimsProcessingMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.claimsProcessingActionMeta {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+.claimsProcessingActionNote {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 4px;
+}
+.claimsProcessingEvidenceMeta {
+  font-size: 12px;
+  color: #666;
+}
+.claimsProcessingEvidenceVerified {
+  margin-left: 8px;
+}
+.claimsProcessingCallDatePicker {
+  width: 100%;
+}
+.blockedUsersUserMeta {
+  font-size: 12px;
+}
+.blockedUsersReasonText {
+  max-width: 180px;
+}
+.blockedUsersHeader {
+  margin-bottom: 16px;
+}
+.blockedUsersFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.blockedUsersSearch {
+  width: 300px;
+}
+.blockedUsersSelectRole {
+  width: 150px;
+}
+.blockedUsersSelectBlockType {
+  width: 150px;
+}
+.blockedUsersSummaryRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+.blockedUsersModalInfo {
+  margin-bottom: 16px;
+}
+.blockedUsersModalInfoBox {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+.overdue-row {
+  background-color: #fff2f0 !important;
+}
+.hold-row {
+  background-color: #f5f5f5 !important;
+}
+.supportButtonFloatWrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+.supportButtonFloat {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.supportField {
+  margin-bottom: 16px;
+}
+.supportLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.supportSelect {
+  width: 100%;
+}
+.supportHint {
+  margin-top: 12px;
+  color: #666;
+  font-size: 12px;
+}
+.claimUserEmail {
+  font-size: 12px;
+  color: #666;
+}
+.claimMessageItem {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+.claimMessageMeta {
+  font-size: 12px;
+  color: #666;
+}
+.claimInternalTag {
+  margin-left: 8px;
+}
+.claimWarningSpacing {
+  margin-top: 16px;
+}
+.claimResolution {
+  background: #f0f9ff;
+  padding: 12px;
+  border-radius: 4px;
+}
+.fullWidthSelect {
+  width: 100%;
+}
+.adminLoginPage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%);
+  padding: 40px 20px;
+  overflow: hidden;
+}
+.adminLoginSession {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.adminLoginCard {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+.adminLoginLoadingCard {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+}
+.adminLoginDecorBubble {
+  position: absolute;
+  top: 100px;
+  left: 15%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+.adminLoginDecorBubbleAlt {
+  position: absolute;
+  bottom: 150px;
+  right: 20%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(155, 74, 255, 0.15);
+  z-index: 0;
+}
+.adminLoginHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.adminLoginIconWrapper {
+  display: inline-block;
+  padding: 16px;
+  background: var(--color-brand-blue-600);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.adminLoginIcon {
+  font-size: 32px;
+  color: #fff;
+}
+.adminLoginTitle {
+  margin-bottom: 8px;
+  color: #1a1a1a;
+  font-family: var(--font-family-display);
+}
+.adminLoginSubtitle {
+  color: #666;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+.adminLoginLabel {
+  font-weight: 500;
+  font-size: 14px;
+}
+.adminLoginInput {
+  border-radius: 8px;
+}
+.adminLoginSubmit {
+  margin-top: 8px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+.adminLoginDivider {
+  margin: 32px 0 20px 0;
+  border-color: #e8e8e8;
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
+.adminLoginQuickList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.adminLoginQuickGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.adminLoginQuickSingle {
+  display: flex;
+  justify-content: center;
+}
+.adminLoginQuickButton {
+  height: 56px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #333;
+  transition: all 0.3s ease;
+}
+.adminLoginQuickButton:hover {
+  border-color: var(--color-brand-blue-600);
+  color: var(--color-brand-blue-600);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.adminLoginQuickButtonWide {
+  min-width: 200px;
+}
+.adminLoginInputIcon {
+  color: #999;
+}
+.individualOfferTitleWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 24px;
+}
+.individualOfferTitle {
+  margin: 0;
+}
+.individualOfferBody {
+  padding: 0 0 20px;
+}
+.individualOfferText {
+  display: block;
+  margin-bottom: 16px;
+}
+.individualOfferTextCompact {
+  display: block;
+  margin-bottom: 4px;
+}
+.individualOfferSubmitItem {
+  margin-bottom: 0;
+  text-align: center;
+  margin-top: 24px;
+}
+.individualOfferSubmitButton {
+  background: #10B981;
+  border-color: #10B981;
+  height: 48px;
+  width: 200px;
+  font-size: 16px;
+  font-weight: 500;
+}
+.supportChatLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+.supportChatCard {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.supportChatHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.supportChatMessages {
+  height: 500px;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.supportChatMessageRow {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+.supportChatMessageRowMine {
+  justify-content: flex-end;
+}
+.supportChatBubble {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.supportChatBubbleMine {
+  background-color: #1890ff;
+  color: #fff;
+}
+.supportChatSender {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+.supportChatSenderTag {
+  margin-left: 8px;
+}
+.supportChatFile {
+  margin-top: 8px;
+}
+.supportChatTimestamp {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: left;
+}
+.supportChatTimestampMine {
+  text-align: right;
+}
+.supportChatInputRow {
+  display: flex;
+  gap: 8px;
+}
+.supportChatInput {
+  flex: 1;
+}
+
+.arbitratorClaimTitleText {
+  font-size: 16px;
+}
+
+.arbitratorTagLeftGap {
+  margin-left: 8px;
+}
+
+.arbitratorApprovalComment {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.arbitratorClaimStatus {
+  margin-left: 16px;
+}
+
+.arbitratorStatusTag {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+.arbitratorChatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.arbitratorChatTitle {
+  margin: 0;
+}
+
+.arbitratorStackSpace {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.arbitratorSearchInput {
+  width: 300px;
+}
+
+.arbitratorClaimSelect {
+  width: 250px;
+}
+
+.arbitratorMessagesContainer {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.arbitratorMessagesCount {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.arbitratorReplyBox {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.arbitratorReplyText {
+  margin-top: 8px;
+}
+
+.arbitratorReplyCancel {
+  padding: 0;
+  margin-top: 8px;
+}
+
+.arbitratorMessageFormField {
+  position: relative;
+}
+
+.arbitratorMessageActionButton {
+  position: absolute;
+  bottom: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.arbitratorMessageAttachButton {
+  right: 108px;
+}
+
+.arbitratorMessageEmojiButton {
+  right: 60px;
+}
+
+.arbitratorMessageItem {
+  padding: 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  border-left: 4px solid #1890ff;
+  background-color: transparent;
+}
+
+.arbitratorMessageItemUnread {
+  background-color: #f0f7ff;
+  border: 2px solid #1890ff;
+  border-left: 4px solid #1890ff;
+}
+
+.arbitratorMessageItemDirector {
+  background-color: #fafafa;
+}
+
+.arbitratorMessageAvatar {
+  background-color: #1890ff;
+}
+
+.arbitratorClaimLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.arbitratorClaimLinkDisabled {
+  cursor: default;
+  text-decoration: none;
+}
+
+.arbitratorParagraphSpacing {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.arbitratorAttachments {
+  margin-top: 8px;
+}
+
+.arbitratorAttachmentLabel {
+  margin-right: 8px;
+}
+
+.arbitratorActionsRow {
+  margin-top: 8px;
+}
+
+.arbitratorSectionSpacing {
+  margin-bottom: 24px;
+}
+
+.arbitratorParagraphReset {
+  margin: 0;
+}
+
+.arbitratorTimelineDate {
+  margin-left: 8px;
+}
+
+.arbitratorParagraphTop {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.arbitratorSpaceFullSpacing {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.arbitratorAlertSpacing {
+  margin-bottom: 24px;
+}
+
+.arbitratorParagraphBottom {
+  margin-bottom: 8px;
+}
+
+.arbitratorTabsContainer {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.arbitratorAmountText {
+  font-size: 12px;
+}
+
+.arbitratorAmountHighlight {
+  font-size: 12px;
+  color: #1890ff;
 }
 
 

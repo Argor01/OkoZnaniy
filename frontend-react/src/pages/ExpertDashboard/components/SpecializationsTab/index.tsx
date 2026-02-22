@@ -25,7 +25,7 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
 }) => {
   return (
     <div className={styles.sectionCard}>
-      <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className={`${styles.sectionCardHeader} ${styles.specializationsHeader}`}>
         <h2 className={styles.sectionTitle}>Мои специализации</h2>
         <Button 
           type="primary"
@@ -45,32 +45,32 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
           <Text>У вас пока нет специализаций. Добавьте первую специализацию, чтобы начать получать заказы.</Text>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 16 }}>
+        <div className={styles.specializationsGrid}>
           {specializations.map((spec) => (
             <div key={spec.id} className={styles.orderCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className={styles.specializationHeaderRow}>
                 <div>
-                  <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
+                  <Title level={4} className={styles.specializationTitle}>
                     {spec.custom_name || spec.subject?.name || 'Специализация'}
                     {spec.is_verified && (
-                      <CheckCircleOutlined style={{ color: '#10b981', marginLeft: 8 }} />
+                      <CheckCircleOutlined className={styles.specializationVerifiedIcon} />
                     )}
                   </Title>
-                  <Text type="secondary" style={{ fontSize: 14 }}>
+                  <Text type="secondary" className={styles.specializationMeta}>
                     Опыт: {spec.experience_years} лет | Ставка: {spec.hourly_rate} ₽/час
                   </Text>
                   {spec.description && (
-                    <Paragraph style={{ marginTop: 8, color: '#6b7280' }}>
+                    <Paragraph className={styles.specializationDescription}>
                       {spec.description}
                     </Paragraph>
                   )}
                   {spec.skills && (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <div className={styles.specializationSkills}>
+                      <div className={styles.specializationSkillsList}>
                         {spec.skills.split(',').map((skill: string, index: number) => {
                           const trimmedSkill = skill.trim();
                           return trimmedSkill ? (
-                            <Tag key={index} color="blue" style={{ padding: '4px 12px', fontSize: 13 }}>
+                            <Tag key={index} color="blue" className={styles.specializationSkillTag}>
                               {trimmedSkill}
                             </Tag>
                           ) : null;

@@ -33,7 +33,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="ФИО" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -47,7 +47,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Email" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -58,7 +58,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Телефон" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -69,7 +69,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Университет" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -80,7 +80,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Специализация" 
                   size="large"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__input"
                 />
               </Form.Item>
 
@@ -88,7 +88,7 @@ const ExpertForm: React.FC = () => {
                 <Input.TextArea 
                   rows={4} 
                   placeholder="Расскажите о вашем опыте написания студенческих работ"
-                  style={{ borderRadius: '8px' }}
+                  className="partner-form__textarea"
                 />
               </Form.Item>
 
@@ -98,12 +98,7 @@ const ExpertForm: React.FC = () => {
                   htmlType="submit" 
                   size="large"
                   block
-                  className="button"
-                  style={{ 
-                    height: '56px',
-                    fontSize: '17px',
-                    borderRadius: '12px'
-                  }}
+                  className="button partner-form__submit"
                 >
                   Отправить заявку
                 </Button>

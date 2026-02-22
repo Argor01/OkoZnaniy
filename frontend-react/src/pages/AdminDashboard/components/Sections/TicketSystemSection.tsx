@@ -247,17 +247,17 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
   };
 
   return (
-    <div style={{ padding: isMobile ? 12 : 24 }}>
+    <div className={`ticketSystemWrapper ${isMobile ? 'ticketSystemWrapperMobile' : ''}`}>
       <Row gutter={[16, 16]}>
         <Col 
           xs={24} 
           lg={10}
-          style={{ display: isMobile && selectedTicket ? 'none' : 'block' }}
+          className={isMobile && selectedTicket ? 'ticketSystemListColHidden' : 'ticketSystemListCol'}
         >
           <Card 
             title={
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FileTextOutlined style={{ fontSize: 18, color: '#1890ff' }} />
+              <div className="ticketSystemTitleRow">
+                <FileTextOutlined className="ticketSystemTitleIcon" />
                 <span>Тикеты поддержки</span>
               </div>
             }
@@ -270,30 +270,22 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               />
             }
           >
-            <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 8,
-              marginBottom: 16,
-              padding: 12,
-              background: '#f5f5f5',
-              borderRadius: 8
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 600, color: '#1890ff' }}>{ticketStats.total}</div>
-                <div style={{ fontSize: 11, color: '#8c8c8c' }}>Всего</div>
+            <div className="ticketSystemStatsGrid">
+              <div className="ticketSystemStatItem">
+                <div className="ticketSystemStatValue ticketSystemStatTotal">{ticketStats.total}</div>
+                <div className="ticketSystemStatLabel">Всего</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 600, color: '#fa8c16' }}>{ticketStats.open}</div>
-                <div style={{ fontSize: 11, color: '#8c8c8c' }}>Открыто</div>
+              <div className="ticketSystemStatItem">
+                <div className="ticketSystemStatValue ticketSystemStatOpen">{ticketStats.open}</div>
+                <div className="ticketSystemStatLabel">Открыто</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 600, color: '#1890ff' }}>{ticketStats.inProgress}</div>
-                <div style={{ fontSize: 11, color: '#8c8c8c' }}>В работе</div>
+              <div className="ticketSystemStatItem">
+                <div className="ticketSystemStatValue ticketSystemStatInProgress">{ticketStats.inProgress}</div>
+                <div className="ticketSystemStatLabel">В работе</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 600, color: '#52c41a' }}>{ticketStats.completed}</div>
-                <div style={{ fontSize: 11, color: '#8c8c8c' }}>Завершено</div>
+              <div className="ticketSystemStatItem">
+                <div className="ticketSystemStatValue ticketSystemStatCompleted">{ticketStats.completed}</div>
+                <div className="ticketSystemStatLabel">Завершено</div>
               </div>
             </div>
 
@@ -302,15 +294,15 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               placeholder="Поиск по номеру, теме, клиенту..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ marginBottom: 12 }}
+              className="ticketSystemSearch"
               allowClear
             />
             
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <div className="ticketSystemFiltersRow">
               <Select
                 value={statusFilter}
                 onChange={setStatusFilter}
-                style={{ flex: 1 }}
+                className="ticketSystemFilterSelect"
                 size="small"
               >
                 <Option value="all">Все статусы</Option>
@@ -323,7 +315,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               <Select
                 value={priorityFilter}
                 onChange={setPriorityFilter}
-                style={{ flex: 1 }}
+                className="ticketSystemFilterSelect"
                 size="small"
               >
                 <Option value="all">Все приоритеты</Option>
@@ -334,7 +326,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               </Select>
             </div>
             
-            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <div className="ticketSystemListBody">
               <List
                 loading={loading}
                 dataSource={filteredTickets}
@@ -343,56 +335,50 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                   <Card
                     size="small"
                     onClick={() => setSelectedTicket(ticket)}
-                    style={{
-                      marginBottom: 8,
-                      cursor: 'pointer',
-                      border: selectedTicket?.id === ticket.id ? '2px solid #1890ff' : '1px solid #d9d9d9',
-                      background: selectedTicket?.id === ticket.id ? '#e6f7ff' : 'white',
-                      transition: 'all 0.2s'
-                    }}
+                    className={`ticketSystemTicketCard ${selectedTicket?.id === ticket.id ? 'ticketSystemTicketCardSelected' : ''}`}
                     hoverable
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <Text strong style={{ fontSize: 13 }}>
+                    <div className="ticketSystemTicketHeader">
+                      <Text strong className="ticketSystemTicketNumber">
                         Тикет #{ticket.id}
                       </Text>
-                      <div style={{ display: 'flex', gap: 4 }}>
+                      <div className="ticketSystemTicketTags">
                         <Tag 
                           color={getStatusColor(ticket.status)} 
                           icon={getStatusIcon(ticket.status)}
-                          style={{ margin: 0, fontSize: 10 }}
+                          className="ticketSystemTag"
                         >
                           {getStatusText(ticket.status)}
                         </Tag>
                         <Tag 
                           color={getPriorityColor(ticket.priority)}
                           icon={ticket.priority === 'urgent' || ticket.priority === 'high' ? <FlagOutlined /> : undefined}
-                          style={{ margin: 0, fontSize: 10 }}
+                          className="ticketSystemTag"
                         >
                           {getPriorityText(ticket.priority)}
                         </Tag>
                       </div>
                     </div>
                     
-                    <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                    <Text strong className="ticketSystemTicketSubject">
                       {ticket.subject}
                     </Text>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div className="ticketSystemTicketUser">
                       <Avatar size={20} icon={<UserOutlined />} />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
+                      <Text type="secondary" className="ticketSystemTicketUserName">
                         {ticket.user.first_name} {ticket.user.last_name}
                       </Text>
                     </div>
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
+                    <div className="ticketSystemTicketFooter">
+                      <Text type="secondary" className="ticketSystemTicketTime">
                         {formatTimestamp(ticket.created_at)}
                       </Text>
                       {ticket.messages && ticket.messages.length > 0 && (
                         <Badge 
                           count={ticket.messages.length} 
-                          style={{ backgroundColor: '#1890ff' }}
+                          className="ticketSystemMessageBadge"
                           overflowCount={99}
                         />
                       )}
@@ -413,12 +399,12 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                     <Button 
                       size="small" 
                       onClick={() => setSelectedTicket(null)}
-                      style={{ marginRight: 8 }}
+                      className="ticketSystemBackButton"
                     >
                       ← Назад
                     </Button>
                   )}
-                  <Text strong style={{ fontSize: 16 }}>
+                  <Text strong className="ticketSystemDetailTitle">
                     Тикет #{selectedTicket.id}: {selectedTicket.subject}
                   </Text>
                 </div>
@@ -428,7 +414,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                   <Select
                     value={selectedTicket.status}
                     onChange={(value) => onUpdateStatus?.(selectedTicket.id, value)}
-                    style={{ width: 140 }}
+                    className="ticketSystemStatusSelect"
                     size="small"
                   >
                     <Option value="open">Открыт</Option>
@@ -438,7 +424,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                   <Select
                     value={selectedTicket.priority}
                     onChange={(value) => onUpdatePriority?.(selectedTicket.id, value)}
-                    style={{ width: 120 }}
+                    className="ticketSystemPrioritySelect"
                     size="small"
                   >
                     <Option value="low">Низкий</Option>
@@ -449,7 +435,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                 </Space>
               }
             >
-              <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+              <Descriptions bordered size="small" column={2} className="ticketSystemDetails">
                 <Descriptions.Item label="Клиент">
                   <Space>
                     <Avatar size={24} icon={<UserOutlined />} />
@@ -483,7 +469,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               <Card 
                 size="small" 
                 title="Описание проблемы" 
-                style={{ marginBottom: 16, background: '#fafafa' }}
+                className="ticketSystemDescriptionCard"
               >
                 <Text>{selectedTicket.description}</Text>
               </Card>
@@ -491,16 +477,7 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               <Divider>Переписка</Divider>
 
               
-              <div 
-                style={{ 
-                  height: '400px', 
-                  overflowY: 'auto', 
-                  padding: 16,
-                  background: '#fafafa',
-                  borderRadius: 8,
-                  marginBottom: 16
-                }}
-              >
+              <div className="ticketSystemMessages">
                 {selectedTicket.messages && selectedTicket.messages.length > 0 ? (
                   <Timeline>
                     {selectedTicket.messages.map((msg) => (
@@ -509,19 +486,14 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                         color={msg.is_admin ? '#1890ff' : '#52c41a'}
                         dot={msg.is_admin ? <MessageOutlined /> : <UserOutlined />}
                       >
-                        <div style={{
-                          background: 'white',
-                          padding: 12,
-                          borderRadius: 8,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-                        }}>
-                          <div style={{ marginBottom: 8 }}>
+                        <div className="ticketSystemMessageBubble">
+                          <div className="ticketSystemMessageHeader">
                             <Text strong>{msg.sender.first_name} {msg.sender.last_name}</Text>
-                            <Text type="secondary" style={{ fontSize: 11, marginLeft: 8 }}>
+                            <Text type="secondary" className="ticketSystemMessageTime">
                               {formatMessageTime(msg.created_at)}
                             </Text>
                             {msg.is_admin && (
-                              <Tag color="blue" style={{ marginLeft: 8, fontSize: 10 }}>Поддержка</Tag>
+                              <Tag color="blue" className="ticketSystemSupportTag">Поддержка</Tag>
                             )}
                           </div>
                           <Text>{msg.message}</Text>
@@ -536,13 +508,13 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
               </div>
 
               
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="ticketSystemReplyRow">
                 <TextArea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите ответ..."
                   rows={3}
-                  style={{ flex: 1 }}
+                  className="ticketSystemReplyInput"
                   onPressEnter={(e) => {
                     if (e.ctrlKey) {
                       sendMessage();
@@ -555,12 +527,12 @@ export const TicketSystemSection: React.FC<TicketSystemSectionProps> = ({
                   onClick={sendMessage}
                   loading={sending}
                   disabled={!messageText.trim()}
-                  style={{ height: 'auto' }}
+                  className="ticketSystemSendButton"
                 >
                   Отправить
                 </Button>
               </div>
-              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 8 }}>
+              <Text type="secondary" className="ticketSystemHint">
                 💡 Ctrl+Enter для отправки
               </Text>
             </Card>

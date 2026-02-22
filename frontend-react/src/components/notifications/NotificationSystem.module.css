@@ -1,4 +1,4 @@
-﻿
+
 .notificationModal :global(.ant-modal-wrap) {
   z-index: 100001;
 }
@@ -132,6 +132,32 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+.settingsTitle {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 16px;
+}
+.settingsDescription {
+  font-size: 12px;
+}
+.iconOrder {
+  color: #3b82f6;
+}
+.iconClaim {
+  color: #f59e0b;
+}
+.iconMessage {
+  color: #8b5cf6;
+}
+.iconBalance {
+  color: #10b981;
+}
+.iconBid {
+  color: #06b6d4;
+}
+.iconDefault {
+  color: #6b7280;
 }
 
 

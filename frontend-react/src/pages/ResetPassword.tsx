@@ -38,14 +38,14 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="login-page" style={{ display: 'flex', justifyContent: 'center' }}>
-      <div className="auth-card" style={{ maxWidth: 520, width: '100%' }}>
-        <div className="auth-right" style={{ width: '100%' }}>
+    <div className="login-page loginPageCenter">
+      <div className="auth-card authCardNarrow">
+        <div className="auth-right authRightFull">
           <div className="auth-panel">
             <div className="panel-body">
-              <Title level={3} style={{ marginBottom: 8 }}>Восстановление пароля</Title>
+              <Title level={3} className="resetTitle">Восстановление пароля</Title>
               {!isLinkValid && (
-                <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+                <Paragraph type="secondary" className="resetDescription">
                   Ссылка недействительна или устарела. Пожалуйста, запросите новую ссылку на странице входа.
                 </Paragraph>
               )}

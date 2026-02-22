@@ -1,4 +1,4 @@
-﻿
+
 .sidebar {
   background: #ffffff;
   display: flex;
@@ -138,6 +138,60 @@
   min-width: 0;
   overflow-y: auto;
   background: #ffffff;
+}
+
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.layoutRoot {
+  min-height: 100vh;
+}
+
+.dashboardLayout {
+  background: #f5f5f5;
+  transition: all 0.2s;
+}
+
+.dashboardLayoutDesktop {
+  margin-left: 250px;
+}
+
+.dashboardLayoutMobile {
+  margin-left: 0;
+}
+
+.dashboardLayoutHeader {
+  margin-top: 64px;
+}
+
+.dashboardLayoutNoHeader {
+  margin-top: 0;
+}
+
+.contentBase {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.contentWithHeader {
+  min-height: calc(100vh - 64px);
+}
+
+.contentNoHeader {
+  min-height: 100vh;
+}
+
+.contentPaddingMobile {
+  padding: 16px;
+}
+
+.contentPaddingDesktop {
+  padding: 24px;
 }
 
 @media (max-width: 840px) {

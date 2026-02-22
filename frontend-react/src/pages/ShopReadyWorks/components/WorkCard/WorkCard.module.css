@@ -1,4 +1,4 @@
-﻿.card {
+.card {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s;
@@ -44,6 +44,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.favoriteIcon {
+  color: #ff4d4f;
+}
+
+.authorIcon {
+  color: #8c8c8c;
+}
+
+.authorLink {
+  padding: 0;
+  height: auto;
+  font-size: 13px;
+  color: #1890ff;
+}
+
+.rating {
+  font-size: 14px;
 }
 
 .title {

@@ -9,6 +9,7 @@ import {
   StarFilled 
 } from '@ant-design/icons';
 import type { User } from '../../../api/auth';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
@@ -20,7 +21,15 @@ interface FriendProfileModalProps {
 }
 
 const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+const avatarColorClasses = [
+  styles.friendProfileAvatarColor0,
+  styles.friendProfileAvatarColor1,
+  styles.friendProfileAvatarColor2,
+  styles.friendProfileAvatarColor3,
+  styles.friendProfileAvatarColor4,
+  styles.friendProfileAvatarColor5,
+  styles.friendProfileAvatarColor6,
+];
 
 const getInitials = (firstName?: string, lastName?: string, username?: string) => {
   if (firstName && lastName) return `${firstName[0]}${lastName[0]}`.toUpperCase();
@@ -53,157 +62,88 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={700}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: 24, 
-          padding: 0,
-          overflow: 'hidden',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
-        },
-        body: {
-          padding: 0
-        }
-      }}
+      wrapClassName={styles.friendProfileModalWrap}
     >
       <div>
-        <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '40px 32px',
-          position: 'relative'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 20 
-          }}>
+        <div className={styles.friendProfileHeader}>
+          <div className={styles.friendProfileHeaderRow}>
             <Avatar 
               size={100} 
               src={friend.avatar || undefined}
-              style={{ 
-                backgroundColor: getAvatarColor(friend.id),
-                fontSize: 36,
-                fontWeight: 600,
-                border: '4px solid rgba(255, 255, 255, 0.3)'
-              }}
+              className={`${styles.friendProfileAvatar} ${avatarColorClasses[friend.id % avatarColorClasses.length]}`}
             >
               {!friend.avatar && getInitials(friend.first_name, friend.last_name, friend.username)}
             </Avatar>
-            <div style={{ flex: 1 }}>
+            <div className={styles.friendProfileHeaderInfo}>
               <Text 
                 strong 
-                style={{ 
-                  fontSize: 28, 
-                  display: 'block',
-                  color: '#ffffff',
-                  marginBottom: 8
-                }}
+                className={styles.friendProfileName}
               >
                 {name}
               </Text>
               <Text 
-                style={{ 
-                  fontSize: 16, 
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  display: 'block',
-                  marginBottom: 12
-                }}
+                className={styles.friendProfileRole}
               >
                 {friend.role === 'expert' ? 'Эксперт' : friend.role === 'client' ? 'Клиент' : friend.role}
               </Text>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div>
-                  <Rate disabled defaultValue={0} style={{ fontSize: 16, color: '#fbbf24' }} />
-                </div>
+              <div className={styles.friendProfileRatingRow}>
+                <Rate disabled defaultValue={0} className={styles.friendProfileRating} />
               </div>
             </div>
           </div>
         </div>
 
         
-        <div style={{ padding: '32px' }}>
+        <div className={styles.friendProfileContent}>
           
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8,
-              marginBottom: 12
-            }}>
-              <UserOutlined style={{ fontSize: 20, color: '#667eea' }} />
-              <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+          <div className={styles.friendProfileSection}>
+            <div className={styles.friendProfileSectionHeader}>
+              <UserOutlined className={styles.friendProfileSectionIcon} />
+              <Text strong className={styles.friendProfileSectionTitle}>
                 О себе
               </Text>
             </div>
-            <Text style={{ fontSize: 15, color: '#4b5563', lineHeight: 1.6 }}>
+            <Text className={styles.friendProfileSectionText}>
               {friend.bio}
             </Text>
           </div>
 
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8,
-              marginBottom: 12
-            }}>
-              <TrophyOutlined style={{ fontSize: 20, color: '#667eea' }} />
-              <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+          <div className={styles.friendProfileSection}>
+            <div className={styles.friendProfileSectionHeader}>
+              <TrophyOutlined className={styles.friendProfileSectionIcon} />
+              <Text strong className={styles.friendProfileSectionTitle}>
                 Образование
               </Text>
             </div>
-            <Text style={{ fontSize: 15, color: '#4b5563' }}>
+            <Text className={styles.friendProfileSectionText}>
               {friend.education}
             </Text>
           </div>
 
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8,
-              marginBottom: 12
-            }}>
-              <ClockCircleOutlined style={{ fontSize: 20, color: '#667eea' }} />
-              <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+          <div className={styles.friendProfileSection}>
+            <div className={styles.friendProfileSectionHeader}>
+              <ClockCircleOutlined className={styles.friendProfileSectionIcon} />
+              <Text strong className={styles.friendProfileSectionTitle}>
                 Опыт работы
               </Text>
             </div>
-            <Text style={{ fontSize: 15, color: '#4b5563' }}>
+            <Text className={styles.friendProfileSectionText}>
               {typeof friend.experience_years === 'number' ? `${friend.experience_years} лет` : ''}
             </Text>
           </div>
 
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8,
-              marginBottom: 12
-            }}>
-              <StarFilled style={{ fontSize: 20, color: '#667eea' }} />
-              <Text strong style={{ fontSize: 18, color: '#1f2937' }}>
+          <div className={styles.friendProfileSection}>
+            <div className={styles.friendProfileSectionHeader}>
+              <StarFilled className={styles.friendProfileSectionIcon} />
+              <Text strong className={styles.friendProfileSectionTitle}>
                 Навыки
               </Text>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className={styles.friendProfileTags}>
               {skills.map((skill: string, index: number) => (
                 <Tag 
                   key={index}
-                  style={{ 
-                    padding: '6px 16px',
-                    fontSize: 14,
-                    borderRadius: 20,
-                    border: '1px solid #e0e7ff',
-                    background: '#f5f7ff',
-                    color: '#667eea'
-                  }}
+                  className={styles.friendProfileTag}
                 >
                   {skill}
                 </Tag>
@@ -212,22 +152,12 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
           </div>
 
           
-          <div style={{ 
-            display: 'flex', 
-            gap: 12,
-            paddingTop: 24,
-            borderTop: '1px solid #e5e7eb'
-          }}>
+          <div className={styles.friendProfileActions}>
             <Button 
               type="primary" 
               size="large"
               icon={<MessageOutlined />}
-              style={{ 
-                flex: 1,
-                height: 48,
-                borderRadius: 12,
-                fontSize: 16
-              }}
+              className={styles.friendProfilePrimaryButton}
               onClick={() => {
                 onClose();
                 onOpenChat();
@@ -238,11 +168,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             <Button 
               size="large"
               icon={<HeartOutlined />}
-              style={{ 
-                height: 48,
-                borderRadius: 12,
-                fontSize: 16
-              }}
+              className={styles.friendProfileSecondaryButton}
             >
               В избранное
             </Button>

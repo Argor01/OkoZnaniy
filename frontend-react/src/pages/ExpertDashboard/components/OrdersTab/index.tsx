@@ -132,7 +132,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   if (userProfileLoading || isLoading) {
     return (
       <div className={styles.sectionCard}>
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+        <div className={styles.ordersLoading}>
           <Spin size="large" />
         </div>
       </div>
@@ -142,38 +142,29 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   return (
     <div>
       <div className={styles.sectionCard}>
-        <div className={styles.sectionCardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div className={`${styles.sectionCardHeader} ${styles.ordersHeader}`}>
           <h2 className={styles.sectionTitle}>
             Заказы
           </h2>
           <Button 
             type="primary"
             onClick={() => navigate('/create-order')}
-            style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              border: 'none',
-              borderRadius: 8,
-            }}
+            className={styles.ordersCreateButton}
           >
             Создать заказ
           </Button>
         </div>
 
         {showAvailableTab && (
-          <div style={{ marginBottom: 24 }}>
+          <div className={styles.ordersFilterRow}>
             <Radio.Group 
               value={orderFilter} 
               onChange={(e) => setOrderFilter(e.target.value)}
-              style={{ width: '100%' }}
+              className={styles.ordersFilterGroup}
             >
               <Radio.Button 
                 value="my" 
-                style={{ 
-                  borderRadius: '8px 0 0 8px',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : 150,
-                  textAlign: 'center'
-                }}
+                className={`${styles.ordersFilterButton} ${styles.ordersFilterButtonLeft} ${isMobile ? styles.ordersFilterButtonMobile : styles.ordersFilterButtonDesktop}`}
               >
                 <Space>
                   <UserOutlined />
@@ -182,12 +173,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               </Radio.Button>
               <Radio.Button 
                 value="available" 
-                style={{ 
-                  borderRadius: '0 8px 8px 0',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 'auto' : 150,
-                  textAlign: 'center'
-                }}
+                className={`${styles.ordersFilterButton} ${styles.ordersFilterButtonRight} ${isMobile ? styles.ordersFilterButtonMobile : styles.ordersFilterButtonDesktop}`}
               >
                 <Space>
                   <FilterOutlined />
@@ -202,32 +188,27 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           <Empty
             description={
               <div>
-                <Text style={{ fontSize: 16, color: '#999' }}>
+                <Text className={styles.ordersEmptyText}>
                   {effectiveOrderFilter === 'my' 
                     ? 'У вас пока нет размещенных заказов'
                     : 'Нет доступных заказов для отклика'}
                 </Text>
               </div>
             }
-            style={{ padding: '60px 0' }}
+            className={styles.ordersEmpty}
           />
         ) : (
-          <div style={{ display: 'grid', gap: 16 }}>
+          <div className={styles.ordersGrid}>
             {displayOrders.map((order) => (
               <Card
                 key={order.id}
                 hoverable
-                style={{
-                  borderRadius: 12,
-                  border: '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                }}
-                styles={{ body: { padding: 20 } }}
+                className={styles.orderCard}
                 onClick={() => navigate(`/orders/${order.id}`)}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>
+                <div className={styles.orderCardHeader}>
+                  <div className={styles.orderCardHeaderInfo}>
+                    <Text strong className={styles.orderTitle}>
                       {order.title}
                     </Text>
                     <Space size={8} wrap>
@@ -242,8 +223,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       )}
                     </Space>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                  <div className={styles.orderCardActions}>
+                    <div className={styles.orderCardActionsRow}>
                       <Tooltip title="Скопировать ссылку на заказ">
                         <Button
                           type="text"
@@ -281,7 +262,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                         </Popconfirm>
                       )}
                     </div>
-                    <div style={{ fontSize: 20, fontWeight: 600, color: '#667eea' }}>
+                    <div className={styles.orderBudget}>
                       {order.budget ? `${order.budget} ₽` : 'Договорная'}
                     </div>
                   </div>
@@ -290,26 +271,26 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                 {order.description && (
                   <Paragraph 
                     ellipsis={{ rows: 2 }}
-                    style={{ color: '#666', marginBottom: 12 }}
+                    className={styles.orderDescription}
                   >
                     {order.description}
                   </Paragraph>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div className={styles.orderMetaRow}>
                   <Space size={16} wrap>
                     {order.deadline && (
                       <Space size={4}>
-                        <ClockCircleOutlined style={{ color: '#999' }} />
-                        <Text type="secondary" style={{ fontSize: 14 }}>
+                        <ClockCircleOutlined className={styles.orderMetaIcon} />
+                        <Text type="secondary" className={styles.orderMetaText}>
                           {dayjs(order.deadline).fromNow()}
                         </Text>
                       </Space>
                     )}
                     {order.responses_count !== undefined && (
                       <Space size={4}>
-                        <UserOutlined style={{ color: '#999' }} />
-                        <Text type="secondary" style={{ fontSize: 14 }}>
+                        <UserOutlined className={styles.orderMetaIcon} />
+                        <Text type="secondary" className={styles.orderMetaText}>
                           {order.responses_count} откликов
                         </Text>
                       </Space>
@@ -336,13 +317,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                         if (hasMyBid) return;
                         navigate(`/orders/${order.id}`);
                       }}
-                      style={{
-                        background: hasMyBid ? '#e5e7eb' : '#52c41a',
-                        color: hasMyBid ? '#6b7280' : undefined,
-                        border: 'none',
-                        borderRadius: 6,
-                        marginLeft: 8
-                      }}
+                      className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
                     >
                       {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
                     </Button>

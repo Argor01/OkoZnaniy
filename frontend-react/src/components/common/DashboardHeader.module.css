@@ -1,4 +1,4 @@
-﻿.dashboardHeader {
+.dashboardHeader {
   background: #fff;
   padding: 0 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -138,5 +138,87 @@
   font-weight: 600;
   font-size: 14px;
   color: #333;
+}
+
+.balanceIcon {
+  color: white;
+}
+
+.supportDropdown {
+  padding: 8px 4px;
+  min-width: 280px;
+}
+
+.supportSection {
+  margin-bottom: 12px;
+}
+
+.supportTitle {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.supportRow {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.supportRow:hover {
+  background: #f3f4f6;
+}
+
+.supportPhoneIcon {
+  font-size: 16px;
+  color: #10b981;
+  margin-right: 10px;
+}
+
+.supportMailIcon {
+  font-size: 16px;
+  color: #3b82f6;
+  margin-right: 10px;
+}
+
+.supportRowText {
+  font-size: 13px;
+  color: #374151;
+  flex: 1;
+}
+
+.supportCopyIcon {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.supportSchedule {
+  margin-bottom: 4px;
+  padding: 12px 12px 4px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+}
+
+.supportScheduleIcon {
+  font-size: 14px;
+  color: #f59e0b;
+  margin-right: 8px;
+}
+
+.supportScheduleTitle {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.supportScheduleText {
+  font-size: 12px;
+  color: #6b7280;
 }
 

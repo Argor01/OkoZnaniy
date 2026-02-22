@@ -253,16 +253,16 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="inProgressClaimsTitle">
             {record.title}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="inProgressClaimsDescription">
             {record.description.length > 80 
               ? `${record.description.substring(0, 80)}...` 
               : record.description
             }
           </Text>
-          <div style={{ marginTop: 8 }}>
+          <div className="inProgressClaimsTagRow">
             <Tag color={getCategoryColor(record.category)}>
               {getCategoryText(record.category)}
             </Tag>
@@ -278,17 +278,17 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       key: 'user',
       width: 150,
       render: (record: Claim) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="inProgressClaimsUserRow">
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div style={{ fontWeight: 500, fontSize: '12px' }}>
+            <div className="inProgressClaimsUserName">
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '10px' }}>
+            <Text type="secondary" className="inProgressClaimsUserHandle">
               @{record.user.username}
             </Text>
           </div>
@@ -301,10 +301,10 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       width: 150,
       render: (record: Claim) => (
         <div>
-          <div style={{ fontWeight: 500, fontSize: '12px' }}>
+          <div className="inProgressClaimsAdminName">
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" style={{ fontSize: '10px' }}>
+          <Text type="secondary" className="inProgressClaimsAdminHandle">
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -318,7 +318,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       width: 80,
       render: (count: number) => (
         <Badge count={count} showZero>
-          <MessageOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
+          <MessageOutlined className="inProgressClaimsMessageIcon" />
         </Badge>
       ),
     },
@@ -328,7 +328,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       key: 'last_activity',
       width: 100,
       render: (date: string) => (
-        <div style={{ fontSize: '11px' }}>
+        <div className="inProgressClaimsActivityCell">
           <div>{dayjs(date).format('DD.MM')}</div>
           <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
         </div>
@@ -377,7 +377,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="inProgressClaimsHeader">
           <Title level={4}>Обращения в работе</Title>
           <Text type="secondary">
             Обращения, которые находятся в процессе обработки
@@ -385,11 +385,11 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
         </div>
 
         
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="inProgressClaimsFiltersRow">
           <Search
             placeholder="Поиск по обращениям"
             allowClear
-            style={{ width: 300 }}
+            className="inProgressClaimsSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -397,7 +397,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
           
           <Select
             placeholder="Категория"
-            style={{ width: 150 }}
+            className="inProgressClaimsSelectCategory"
             value={selectedCategory}
             onChange={setSelectedCategory}
           >
@@ -411,7 +411,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="inProgressClaimsSelectPriority"
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -424,7 +424,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
 
           <Select
             placeholder="Администратор"
-            style={{ width: 150 }}
+            className="inProgressClaimsSelectAdmin"
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -480,7 +480,7 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
       >
         {selectedClaim && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressClaimsModalHeader">
               <Title level={5}>{selectedClaim.title}</Title>
               <Space>
                 <Tag color={getCategoryColor(selectedClaim.category)}>
@@ -493,21 +493,21 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
               </Space>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressClaimsSectionBlock">
               <Text strong>Прогресс выполнения:</Text>
               <Progress 
                 percent={selectedClaim.progress_percentage} 
                 strokeColor={getProgressColor(selectedClaim.progress_percentage)}
-                style={{ marginTop: 8 }}
+                className="inProgressClaimsProgress"
               />
             </div>
 
             <Divider />
 
-            <div style={{ display: 'flex', gap: 24, marginBottom: 16 }}>
-              <div style={{ flex: 1 }}>
+            <div className="inProgressClaimsDetailsRow">
+              <div className="inProgressClaimsDetailsColumn">
                 <Text strong>Пользователь:</Text>
-                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="inProgressClaimsInfoRow">
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -518,9 +518,9 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
                 </div>
               </div>
 
-              <div style={{ flex: 1 }}>
+              <div className="inProgressClaimsDetailsColumn">
                 <Text strong>Администратор:</Text>
-                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="inProgressClaimsInfoRow">
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
@@ -530,17 +530,17 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
               </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressClaimsSectionBlock">
               <Text strong>Описание:</Text>
-              <Paragraph style={{ marginTop: 8 }}>
+              <Paragraph className="inProgressClaimsParagraph">
                 {selectedClaim.description}
               </Paragraph>
             </div>
 
             {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="inProgressClaimsSectionBlock">
                 <Text strong>Вложения:</Text>
-                <div style={{ marginTop: 8 }}>
+                <div className="inProgressClaimsAttachmentsRow">
                   {selectedClaim.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file}</Tag>
                   ))}
@@ -548,14 +548,14 @@ export const InProgressClaimsSection: React.FC<InProgressClaimsSectionProps> = (
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+            <div className="inProgressClaimsMetaRow">
               <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Взято в работу: {dayjs(selectedClaim.taken_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Сообщений: {selectedClaim.messages_count}</span>
             </div>
 
             {selectedClaim.estimated_completion && (
-              <div style={{ marginTop: 8, fontSize: '12px', color: '#666' }}>
+              <div className="inProgressClaimsMetaSummary">
                 Планируемое завершение: {dayjs(selectedClaim.estimated_completion).format('DD.MM.YYYY HH:mm')}
               </div>
             )}

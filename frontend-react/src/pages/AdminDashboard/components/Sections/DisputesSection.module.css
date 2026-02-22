@@ -1,4 +1,4 @@
-﻿
+
 .disputesContainer {
   padding: 0;
 }
@@ -171,6 +171,18 @@
 
 .assignModal p {
   margin-bottom: 8px;
+}
+.assignSelect {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.disputesError {
+  margin: 16px;
+}
+
+.disputeModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(4px);
 }
 
 

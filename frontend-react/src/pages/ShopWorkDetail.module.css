@@ -1,0 +1,245 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 24px;
+}
+
+.pageInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: 16px;
+}
+
+.mainCard :global(.ant-card-body) {
+  padding: 24px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.headerRow {
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.workTitle {
+  margin: 0;
+}
+
+.typeTag {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+.preview {
+  text-align: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorCard {
+  background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
+  border: 2px solid #d3adf7;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
+  padding: 8px 16px;
+}
+
+.authorCard :global(.ant-card-body) {
+  padding: 16px 20px;
+}
+
+.authorLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #722ed1;
+}
+
+.authorAvatar {
+  border: 3px solid #722ed1;
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.2);
+}
+
+.authorLink {
+  padding: 0;
+  height: auto;
+  font-size: 18px;
+  font-weight: 700;
+  color: #722ed1;
+}
+
+.authorHint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 2px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.infoCard {
+  border-radius: 12px;
+}
+
+.infoCard :global(.ant-card-body) {
+  padding: 12px 16px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.centeredStat {
+  text-align: center;
+  width: 100%;
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.centeredRow {
+  justify-content: center;
+  width: 100%;
+}
+
+.mutedIcon {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.mutedValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #595959;
+}
+
+.subjectValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.priceIcon {
+  color: #52c41a;
+  font-size: 16px;
+}
+
+.priceValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #389e0d;
+}
+
+.ratingIcon {
+  color: #faad14;
+  font-size: 16px;
+}
+
+.ratingCount {
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.rateSmall {
+  font-size: 14px;
+}
+
+.createdIcon {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.createdValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #595959;
+}
+
+.contentCard {
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.contentCard :global(.ant-card-body) {
+  padding: 24px;
+}
+
+.description {
+  padding: 0;
+}
+
+.fileIcon {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.actionRow {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.actionButton {
+  min-width: 200px;
+  height: 48px;
+  font-size: 16px;
+}
+
+.downloadButton {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.notFound {
+  padding: 40px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .typeTag {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButton {
+    min-width: 100%;
+  }
+}

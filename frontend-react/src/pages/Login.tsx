@@ -589,12 +589,12 @@ const Login: React.FC = () => {
                 )}
               </div>
               
-              <div className="send-ellipsis" style={{ animationDelay: `${sendDelay}ms` }} aria-hidden="true">
+              <div className="send-ellipsis send-ellipsis-delay" aria-hidden="true">
                 <span className="dot"></span>
                 <span className="dot"></span>
                 <span className="dot"></span>
               </div>
-              <div className="bubble bubble-right" style={{ animationDelay: `${rightDelay}ms` }}>
+              <div className="bubble bubble-right bubble-right-delay">
                 <span className="bubble-text">{bubbleAnswer}</span>
                 {isAnswerLoading && (
                   <span className="typing" aria-live="polite">
@@ -604,7 +604,7 @@ const Login: React.FC = () => {
                   </span>
                 )}
               </div>
-              <div className="bubble bubble-left bubble-left-2" style={{ animationDelay: `${thumbDotsDelay}ms` }}>
+              <div className="bubble bubble-left bubble-left-2 bubble-left-2-delay">
                 {thumbStage !== 'emoji' && (
                   <span className="typing" aria-live="polite">
                     <span className="dot"></span>

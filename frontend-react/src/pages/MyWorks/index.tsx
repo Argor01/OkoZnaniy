@@ -237,7 +237,7 @@ const MyWorks: React.FC = () => {
         </Title>
         <div className={styles.pageHeaderRight}>
           <span className={styles.rating}>
-            <StarFilled style={{ color: '#fbbf24' }} /> {averageRatingText}
+            <StarFilled className={styles.ratingStar} /> {averageRatingText}
           </span>
         </div>
       </div>

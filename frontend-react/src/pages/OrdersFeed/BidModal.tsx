@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Form, InputNumber, Input, Button, message, Result } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '../../api/orders';
+import styles from './OrdersFeed.module.css';
 
 const { TextArea } = Input;
 
@@ -72,10 +73,10 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
         />
       ) : (
         <>
-          <div style={{ marginBottom: 16 }}>
+          <div className={styles.bidHeader}>
             <strong>{orderTitle}</strong>
             {orderBudget && (
-              <div style={{ color: '#666', marginTop: 4 }}>
+              <div className={styles.bidBudget}>
                 Бюджет заказчика: {orderBudget} ₽
               </div>
             )}
@@ -101,7 +102,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
               ]}
             >
               <InputNumber
-                style={{ width: '100%' }}
+                className={styles.fullWidth}
                 placeholder="Введите вашу цену"
                 addonAfter="₽"
                 min={1}
@@ -121,7 +122,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
               />
             </Form.Item>
 
-            <Form.Item style={{ marginBottom: 0 }}>
+            <Form.Item className={styles.formItemNoMargin}>
               <Button
                 type="primary"
                 htmlType="submit"

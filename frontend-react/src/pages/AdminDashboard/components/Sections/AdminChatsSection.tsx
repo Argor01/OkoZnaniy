@@ -126,7 +126,6 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   }, []);
 
   const isMobile = windowWidth < 768;
-  const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
   
   const chatRoomsData = chatRooms;
@@ -293,27 +292,16 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   return (
     <div 
       className={styles.chatContainer}
-      style={{ 
-        height: '80vh', 
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: isMobile ? 8 : 16
-      }}
     >
       <Card 
-        className={styles.chatListCard}
-        style={{ 
-          width: isMobile ? '100%' : isTablet ? 280 : 350,
-          marginRight: isMobile ? 0 : 0,
-          height: isMobile && selectedRoom ? '0' : isMobile ? '50vh' : '100%',
-          overflow: isMobile && selectedRoom ? 'hidden' : 'visible',
-          display: isMobile && selectedRoom ? 'none' : 'block'
-        }}
-        styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
+        className={[
+          styles.chatListCard,
+          isMobile && selectedRoom ? styles.chatListCardHidden : ''
+        ].filter(Boolean).join(' ')}
       >
-        <div style={{ padding: isMobile ? 12 : 16, borderBottom: '1px solid #f0f0f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-            <Title level={5} style={{ margin: 0, fontSize: isMobile ? 14 : 16 }}>
+        <div className={styles.chatListHeader}>
+          <div className={styles.chatListHeaderRow}>
+            <Title level={5} className={styles.chatListTitle}>
               {isMobile ? 'Чаты' : 'Внутренняя коммуникация'}
             </Title>
             <Button 
@@ -330,60 +318,53 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             placeholder="Поиск чатов"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: '100%' }}
+            className={styles.chatListSearch}
           />
         </div>
 
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div className={styles.chatListScroll}>
           <List
             dataSource={filteredRooms}
             renderItem={(room) => (
               <List.Item
-                style={{ 
-                  padding: isMobile ? '10px 12px' : '12px 16px',
-                  cursor: 'pointer',
-                  backgroundColor: selectedRoom?.id === room.id ? '#f0f8ff' : 'transparent',
-                  borderLeft: selectedRoom?.id === room.id ? '3px solid #1890ff' : '3px solid transparent',
-                  transition: 'all 0.2s ease'
-                }}
+                className={[
+                  styles.chatRoomItem,
+                  selectedRoom?.id === room.id ? styles.chatRoomItemActive : ''
+                ].filter(Boolean).join(' ')}
                 onClick={() => setSelectedRoom(room)}
               >
                 <List.Item.Meta
                   avatar={
                     <Badge count={room.unread_count}>
-                      <div style={{ 
-                        width: isMobile ? 36 : 40, 
-                        height: isMobile ? 36 : 40, 
-                        borderRadius: '50%', 
-                        backgroundColor: getRoomTypeColor(room.type),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontSize: isMobile ? 14 : 16
-                      }}>
+                      <div className={[
+                        styles.chatRoomAvatar,
+                        room.type === 'general' ? styles.roomTypeGeneral : '',
+                        room.type === 'department' ? styles.roomTypeDepartment : '',
+                        room.type === 'project' ? styles.roomTypeProject : '',
+                        room.type === 'private' ? styles.roomTypePrivate : ''
+                      ].filter(Boolean).join(' ')}>
                         <TeamOutlined />
                       </div>
                     </Badge>
                   }   
                title={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: room.unread_count > 0 ? 'bold' : 'normal' }}>
+                    <div className={styles.chatRoomTitleRow}>
+                      <span className={room.unread_count > 0 ? styles.chatRoomNameUnread : undefined}>
                         {room.name}
                       </span>
                       <div>
                         <Tag color={getRoomTypeColor(room.type)}>
                           {getRoomTypeText(room.type)}
                         </Tag>
-                        {room.is_muted && <BellOutlined style={{ color: '#ccc', marginLeft: 4 }} />}
+                        {room.is_muted && <BellOutlined className={styles.chatRoomMutedIcon} />}
                       </div>
                     </div>
                   }
                   description={
                     <div>
                       {room.last_message && (
-                        <div style={{ fontSize: '12px', color: '#666' }}>
-                          <span style={{ fontWeight: room.unread_count > 0 ? 'bold' : 'normal' }}>
+                        <div className={styles.chatRoomLastMessage}>
+                          <span className={room.unread_count > 0 ? styles.chatRoomLastMessageUnread : undefined}>
                             {room.last_message.sender.first_name}: {room.last_message.text.length > 30 
                               ? `${room.last_message.text.substring(0, 30)}...` 
                               : room.last_message.text
@@ -391,7 +372,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                           </span>
                         </div>
                       )}
-                      <div style={{ fontSize: '11px', color: '#999', marginTop: 2 }}>
+                      <div className={styles.chatRoomMeta}>
                         {room.participants.length} участников • 
                         {room.last_message && ` ${dayjs(room.last_message.sent_at).format('HH:mm')}`}
                       </div>
@@ -407,37 +388,25 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       
       {selectedRoom ? (
         <Card 
-          style={{ 
-            flex: 1, 
-            height: isMobile ? '85vh' : '100%',
-            width: isMobile ? '100%' : 'auto'
-          }}
-          styles={{ body: { padding: 0, height: '100%', display: 'flex', flexDirection: 'column' } }}
+          className={styles.chatMainCard}
         >
           
-          <div style={{ 
-            padding: isMobile ? 12 : 16, 
-            borderBottom: '1px solid #f0f0f0',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: 'white'
-          }}>
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className={styles.chatHeader}>
+            <div className={styles.chatHeaderInfo}>
               {isMobile && (
                 <Button 
                   size="small" 
                   onClick={() => setSelectedRoom(null)}
-                  style={{ flexShrink: 0 }}
+                  className={styles.chatBackButton}
                 >
                   ←
                 </Button>
               )}
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <Title level={5} style={{ margin: 0, fontSize: isMobile ? 14 : 16, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div className={styles.chatHeaderTitleWrap}>
+                <Title level={5} className={styles.chatHeaderTitle}>
                   {selectedRoom.name}
                 </Title>
-                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                <Text type="secondary" className={styles.chatHeaderSubtitle}>
                   {selectedRoom.participants.filter(p => p.online).length} онлайн из {selectedRoom.participants.length}
                 </Text>
               </div>
@@ -461,16 +430,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             </Space>
           </div>       
    
-          <div style={{ 
-            padding: isMobile ? '6px 12px' : '8px 16px', 
-            borderBottom: '1px solid #f0f0f0',
-            backgroundColor: 'white',
-            overflowX: 'auto',
-            whiteSpace: 'nowrap',
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
-            <div style={{ display: 'inline-flex', gap: isMobile ? 6 : 8 }}>
+          <div className={styles.chatParticipantsBar}>
+            <div className={styles.chatParticipantsRow}>
               {selectedRoom.participants.slice(0, isMobile ? 6 : 8).map(participant => (
                 <Tooltip 
                   key={participant.id}
@@ -481,115 +442,64 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     status={participant.online ? 'success' : 'default'}
                     offset={[-2, 2]}
                   >
-                    <div style={{ 
-                      width: isMobile ? 28 : 32, 
-                      height: isMobile ? 28 : 32, 
-                      borderRadius: '50%', 
-                      backgroundColor: participant.online ? '#52c41a' : '#d9d9d9',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: isMobile ? 10 : 12,
-                      cursor: 'pointer',
-                      flexShrink: 0
-                    }}>
+                    <div className={[
+                      styles.participantAvatar,
+                      participant.online ? styles.participantOnline : styles.participantOffline
+                    ].filter(Boolean).join(' ')}>
                       {participant.first_name[0]}{participant.last_name[0]}
                     </div>
                   </Badge>
                 </Tooltip>
               ))}
               {selectedRoom.participants.length > (isMobile ? 6 : 8) && (
-                <div style={{ 
-                  width: isMobile ? 28 : 32, 
-                  height: isMobile ? 28 : 32, 
-                  borderRadius: '50%', 
-                  backgroundColor: '#f0f0f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: isMobile ? 10 : 12,
-                  color: '#666',
-                  flexShrink: 0
-                }}>
+                <div className={styles.participantMore}>
                   +{selectedRoom.participants.length - (isMobile ? 6 : 8)}
                 </div>
               )}
             </div>
           </div>
 
-          <div style={{ 
-            flex: 1, 
-            overflow: 'auto', 
-            padding: isMobile ? 12 : 16,
-            backgroundColor: '#f5f5f5'
-          }}>
+          <div className={styles.chatMessagesArea}>
             {mockMessages.map((msg) => (
               <div 
                 key={msg.id} 
-                style={{ 
-                  marginBottom: isMobile ? 12 : 16,
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: isMobile ? 6 : 8
-                }}
+                className={styles.messageRow}
               >
-                <div style={{ 
-                  width: isMobile ? 28 : 32, 
-                  height: isMobile ? 28 : 32, 
-                  borderRadius: '50%', 
-                  backgroundColor: msg.is_system ? '#666' : '#1890ff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: isMobile ? 10 : 12,
-                  flexShrink: 0
-                }}>
+                <div className={[
+                  styles.messageAvatar,
+                  msg.is_system ? styles.messageAvatarSystem : styles.messageAvatarUser
+                ].filter(Boolean).join(' ')}>
                   {msg.is_system ? 'S' : `${msg.sender.first_name[0]}${msg.sender.last_name[0]}`}
                 </div>
                 
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className={styles.messageContent}>
                   
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: isMobile ? 4 : 8, 
-                    marginBottom: 4,
-                    flexWrap: 'wrap'
-                  }}>
-                    <Text strong style={{ fontSize: isMobile ? 12 : 13 }}>
+                  <div className={styles.messageHeaderRow}>
+                    <Text strong className={styles.messageSenderName}>
                       {msg.sender.first_name} {msg.sender.last_name}
                     </Text>
                     {!isMobile && (
-                      <Tag color="blue" style={{ fontSize: 11 }}>
+                      <Tag color="blue" className={styles.messageRoleTag}>
                         {msg.sender.role}
                       </Tag>
                     )}
-                    <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11 }}>
+                    <Text type="secondary" className={styles.messageTime}>
                       {dayjs(msg.sent_at).format('HH:mm')}
                     </Text>
                     {msg.is_pinned && (
-                      <PushpinOutlined style={{ color: '#faad14', fontSize: isMobile ? 11 : 12 }} />
+                      <PushpinOutlined className={styles.messagePin} />
                     )}
                   </div>  
                 
-                  <div style={{ 
-                    backgroundColor: msg.is_system ? '#f6f6f6' : 'white',
-                    padding: isMobile ? '8px 12px' : '10px 14px',
-                    borderRadius: isMobile ? 8 : 10,
-                    border: msg.is_pinned ? '1px solid #faad14' : '1px solid #e8e8e8',
-                    position: 'relative',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                    maxWidth: '100%',
-                    wordBreak: 'break-word'
-                  }}>
-                    <Text style={{ 
-                      fontSize: isMobile ? 13 : 14,
-                      fontStyle: msg.is_system ? 'italic' : 'normal',
-                      color: msg.is_system ? '#666' : 'inherit',
-                      lineHeight: 1.5
-                    }}>
+                  <div className={[
+                    styles.messageBubble,
+                    msg.is_system ? styles.messageBubbleSystem : '',
+                    msg.is_pinned ? styles.messageBubblePinned : ''
+                  ].filter(Boolean).join(' ')}>
+                    <Text className={[
+                      styles.messageText,
+                      msg.is_system ? styles.messageTextSystem : ''
+                    ].filter(Boolean).join(' ')}>
                       {msg.text}
                     </Text>
                   </div>
@@ -598,30 +508,15 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
             ))}
           </div>
 
-          <div style={{ 
-            padding: isMobile ? 12 : 16, 
-            borderTop: '1px solid #f0f0f0',
-            backgroundColor: 'white'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              gap: isMobile ? 6 : 10, 
-              alignItems: 'flex-end', 
-              width: '100%' 
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={styles.chatComposer}>
+            <div className={styles.chatComposerRow}>
+              <div className={styles.chatComposerInput}>
                 <TextArea
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   placeholder="Введите сообщение..."
                   autoSize={{ minRows: isMobile ? 1 : 2, maxRows: isMobile ? 4 : 6 }}
-                  style={{
-                    borderRadius: isMobile ? 8 : 12,
-                    border: '1px solid #e5e7eb',
-                    fontSize: isMobile ? 14 : 15,
-                    padding: isMobile ? '8px 12px' : '10px 14px',
-                    resize: 'none'
-                  }}
+                  className={styles.chatInput}
                   onPressEnter={(e) => {
                     if (!e.shiftKey) {
                       e.preventDefault();
@@ -631,7 +526,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                 />
               </div>
               
-              <div style={{ display: 'flex', gap: isMobile ? 4 : 8, alignItems: 'center', flexShrink: 0 }}>
+              <div className={styles.chatComposerActions}>
                 {!isMobile && (
                   <Upload
                     beforeUpload={handleFileUpload}
@@ -640,15 +535,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   >
                     <Button 
                       icon={<UploadOutlined />}
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        border: '1px solid #e5e7eb',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
+                      className={styles.chatUploadButton}
                     />
                   </Upload>
                 )}
@@ -658,44 +545,23 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   icon={<SendOutlined />}
                   onClick={handleSendMessage}
                   disabled={!messageText.trim()}
-                  style={{
-                    width: isMobile ? 40 : 44,
-                    height: isMobile ? 40 : 44,
-                    borderRadius: isMobile ? 8 : 12,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#1890ff',
-                    borderColor: '#1890ff'
-                  }}
+                  className={styles.chatSendButton}
                 >
                 </Button>
               </div>
             </div>
             
             {!isMobile && (
-              <div style={{ 
-                fontSize: '11px', 
-                color: '#999', 
-                marginTop: 8,
-                textAlign: 'center'
-              }}>
+              <div className={styles.chatComposerHint}>
                 Enter - отправить, Shift+Enter - новая строка
               </div>
             )}
           </div>
         </Card>
       ) : (
-        <Card style={{ flex: 1, height: '100%' }}>
-          <div style={{ 
-            height: '100%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            flexDirection: 'column',
-            color: '#999'
-          }}>
-            <MessageOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+        <Card className={styles.chatEmptyCard}>
+          <div className={styles.chatEmptyState}>
+            <MessageOutlined className={styles.chatEmptyIcon} />
             <Title level={4} type="secondary">
               Выберите чат для начала общения
             </Title>
@@ -805,7 +671,8 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
       >
         {selectedRoom && (
           <div>
-            {isEditingRoom ? (
+            {isEditingRoom ? (
+
               <Form form={editRoomForm} layout="vertical">
                 <Title level={5}>Редактирование чата</Title>
                 
@@ -838,7 +705,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                   </Select>
                 </Form.Item>
 
-                <div style={{ marginTop: 16, padding: 12, backgroundColor: '#f6f6f6', borderRadius: 6 }}>
+                <div className={styles.roomCreatedInfo}>
                   <Text strong>Создан:</Text> {dayjs(selectedRoom.created_at).format('DD.MM.YYYY HH:mm')} 
                   пользователем {selectedRoom.created_by.first_name} {selectedRoom.created_by.last_name}
                 </div>
@@ -855,10 +722,10 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     <Text strong>Тип:</Text> {getRoomTypeText(selectedRoom.type)}
                   </Col>
                 </Row>
-                <div style={{ marginTop: 8 }}>
+                <div className={styles.roomInfoBlock}>
                   <Text strong>Описание:</Text> {selectedRoom.description}
                 </div>
-                <div style={{ marginTop: 8 }}>
+                <div className={styles.roomInfoBlock}>
                   <Text strong>Создан:</Text> {dayjs(selectedRoom.created_at).format('DD.MM.YYYY HH:mm')} 
                   пользователем {selectedRoom.created_by.first_name} {selectedRoom.created_by.last_name}
                 </div>
@@ -887,7 +754,7 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     description={
                       <div>
                         <Tag>{participant.role}</Tag>
-                        <Text type="secondary" style={{ fontSize: '11px', marginLeft: 8 }}>
+                        <Text type="secondary" className={styles.participantStatusText}>
                           {participant.online ? 'Онлайн' : `Был(а) ${dayjs(participant.last_seen).fromNow()}`}
                         </Text>
                       </div>

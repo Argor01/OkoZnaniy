@@ -204,7 +204,7 @@ const PendingApproval: React.FC = () => {
       key: 'type',
       width: 110,
       render: (type: string) => (
-        <Tag color={getTypeColor(type)} style={{ margin: 0 }}>
+        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
           {getTypeText(type)}
         </Tag>
       ),
@@ -217,10 +217,10 @@ const PendingApproval: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -236,16 +236,16 @@ const PendingApproval: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
@@ -255,7 +255,7 @@ const PendingApproval: React.FC = () => {
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span style={{ fontSize: '12px' }}>
+          <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
         </Tooltip>
@@ -267,11 +267,11 @@ const PendingApproval: React.FC = () => {
       width: 130,
       render: (record: Claim) =>
         record.decision?.approval_status ? (
-          <Tag color={getApprovalStatusColor(record.decision.approval_status)} style={{ margin: 0 }}>
+          <Tag color={getApprovalStatusColor(record.decision.approval_status)} className="arbitratorTagNoMargin">
             {getApprovalStatusText(record.decision.approval_status)}
           </Tag>
         ) : (
-          <Tag color="orange" style={{ margin: 0 }}>Ожидает решения</Tag>
+          <Tag color="orange" className="arbitratorTagNoMargin">Ожидает решения</Tag>
         ),
     },
     {
@@ -281,7 +281,7 @@ const PendingApproval: React.FC = () => {
       ellipsis: true,
       render: (record: Claim) => (
         <Tooltip title={record.decision?.approval_comment || '-'}>
-          <Text style={{ fontSize: '12px' }}>
+          <Text className="arbitratorTextXs">
             {record.decision?.approval_comment || '-'}
           </Text>
         </Tooltip>
@@ -319,13 +319,13 @@ const PendingApproval: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <Title level={4} style={{ marginBottom: '8px' }}>Ожидают решения</Title>
-        <Text type="secondary" style={{ fontSize: '13px' }}>
+      <Card className="arbitratorCard">
+        <Title level={4} className="arbitratorSectionTitle">Ожидают решения</Title>
+        <Text type="secondary" className="arbitratorSectionSubtitle">
           Обращения, отправленные на согласование дирекции
         </Text>
 
-        <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -339,7 +339,7 @@ const PendingApproval: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип обращения"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={typeFilter}
               onChange={setTypeFilter}
               allowClear
@@ -352,7 +352,7 @@ const PendingApproval: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Статус согласования"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={approvalStatusFilter}
               onChange={setApprovalStatusFilter}
               allowClear
@@ -364,7 +364,7 @@ const PendingApproval: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               format="DD.MM.YYYY"
@@ -383,7 +383,7 @@ const PendingApproval: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

@@ -400,7 +400,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
       width: 280,
       render: (record: ProblemOrder) => (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <div className="problemOrdersHeaderRow">
             <strong>#{record.id}</strong>
             {record.days_overdue > 0 && (
               <Tag color="red">
@@ -408,10 +408,10 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
               </Tag>
             )}
           </div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="problemOrdersTitle">
             {record.title}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="problemOrdersMetaText">
             {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
           </Text>
         </div>
@@ -423,12 +423,12 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
       width: 250,
       render: (record: ProblemOrder) => (
         <div>
-          <div style={{ marginBottom: 4 }}>
+          <div className="problemOrdersProblemTagRow">
             <Tag color={getProblemTypeColor(record.problem_type)}>
               {getProblemTypeLabel(record.problem_type)}
             </Tag>
           </div>
-          <Text style={{ fontSize: '12px' }}>
+          <Text className="problemOrdersProblemText">
             {record.problem_description}
           </Text>
         </div>
@@ -451,15 +451,15 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
       width: 200,
       render: (record: ProblemOrder) => (
         <div>
-          <div style={{ marginBottom: 4, fontSize: '12px' }}>
+          <div className="problemOrdersParticipantRow">
             <UserOutlined /> {record.client.first_name} {record.client.last_name}
           </div>
           {record.expert ? (
-            <div style={{ fontSize: '12px' }}>
+            <div className="problemOrdersParticipantRow">
               <UserOutlined /> {record.expert.first_name} {record.expert.last_name}
             </div>
           ) : (
-            <Text type="secondary" style={{ fontSize: '12px' }}>
+            <Text type="secondary" className="problemOrdersParticipantEmpty">
               Эксперт не назначен
             </Text>
           )}
@@ -477,7 +477,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             size="small"
             status={record.completion_percentage === 0 ? 'exception' : 'active'}
           />
-          <Text style={{ fontSize: '11px' }}>
+          <Text className="problemOrdersProgressText">
             {record.completion_percentage}%
           </Text>
         </div>
@@ -502,9 +502,9 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
       render: (date: string) => {
         const daysSince = dayjs().diff(dayjs(date), 'days');
         return (
-          <div style={{ fontSize: '12px' }}>
+          <div className="problemOrdersActivity">
             <div>{dayjs(date).format('DD.MM.YYYY')}</div>
-            <Text type="secondary" style={{ fontSize: '11px' }}>
+            <Text type="secondary" className="problemOrdersActivityMeta">
               {daysSince === 0 ? 'Сегодня' : `${daysSince} дн. назад`}
             </Text>
           </div>
@@ -560,14 +560,14 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="problemOrdersSectionHeader">
           <Title level={4}>Проблемные заказы</Title>
           <Text type="secondary">
             Заказы, требующие внимания администратора
           </Text>
         </div>
 
-        <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Row gutter={16} className="problemOrdersStatsRow">
           <Col span={6}>
             <Statistic 
               title="Всего проблем" 
@@ -579,7 +579,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             <Statistic 
               title="Критические" 
               value={stats.critical} 
-              valueStyle={{ color: '#ff4d4f' }}
+              className="problemOrdersStatCritical"
               prefix={<FireOutlined />}
             />
           </Col>
@@ -587,7 +587,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             <Statistic 
               title="Просроченные" 
               value={stats.overdue} 
-              valueStyle={{ color: '#faad14' }}
+              className="problemOrdersStatOverdue"
               prefix={<ClockCircleOutlined />}
             />
           </Col>
@@ -606,15 +606,15 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             description={`У вас есть ${stats.critical} критических проблем, требующих немедленного решения.`}
             type="error"
             showIcon
-            style={{ marginBottom: 16 }}
+            className="problemOrdersCriticalAlert"
           />
         )}
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="problemOrdersFiltersRow">
           <Search
             placeholder="Поиск по названию или описанию проблемы"
             allowClear
-            style={{ width: 300 }}
+            className="problemOrdersSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -622,7 +622,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
           
           <Select
             placeholder="Тип проблемы"
-            style={{ width: 180 }}
+            className="problemOrdersSelectType"
             value={problemTypeFilter}
             onChange={setProblemTypeFilter}
           >
@@ -637,7 +637,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
 
           <Select
             placeholder="Критичность"
-            style={{ width: 150 }}
+            className="problemOrdersSelectSeverity"
             value={severityFilter}
             onChange={setSeverityFilter}
           >
@@ -702,7 +702,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
               description={selectedOrder.problem_description}
               type={selectedOrder.problem_severity === 'critical' ? 'error' : 'warning'}
               showIcon
-              style={{ marginBottom: 16 }}
+              className="problemOrdersModalAlert"
             />
 
             <Descriptions column={2} bordered size="small">
@@ -720,7 +720,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
               <Descriptions.Item label="Дедлайн">
                 {dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}
                 {selectedOrder.days_overdue > 0 && (
-                  <Tag color="red" style={{ marginLeft: 8 }}>
+                  <Tag color="red" className="problemOrdersOverdueTag">
                     Просрочен на {selectedOrder.days_overdue} дн.
                   </Tag>
                 )}
@@ -780,7 +780,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
       >
         <Form form={resolveForm} layout="vertical">
           {selectedOrder && (
-            <div style={{ marginBottom: 16 }}>
+            <div className="problemOrdersResolveAlertWrap">
               <Alert
                 message={getProblemTypeLabel(selectedOrder.problem_type)}
                 description={selectedOrder.problem_description}
@@ -823,7 +823,7 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
             description="Проблема будет передана руководству для принятия решения."
             type="warning"
             showIcon
-            style={{ marginBottom: 16 }}
+            className="problemOrdersEscalateAlert"
           />
           
           <Form.Item
@@ -839,14 +839,6 @@ export const ProblemOrdersSection: React.FC<ProblemOrdersSectionProps> = ({
         </Form>
       </Modal>
 
-      <style>{`
-        .critical-row {
-          background-color: #fff2f0 !important;
-        }
-        .high-priority-row {
-          background-color: #fff7e6 !important;
-        }
-      `}</style>
     </div>
   );
 };

@@ -54,9 +54,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
         </div>
       ),
       width: 600,
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-      },
+      wrapClassName: styles.disputeModalWrap,
     });
   };
 
@@ -78,7 +76,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
           <p>Выберите арбитра для спора #{dispute.id}:</p>
           <Select
             placeholder="Выберите арбитра"
-            style={{ width: '100%', marginTop: 8 }}
+            className={styles.assignSelect}
             onChange={(value) => {
               selectedArbitratorId = value;
             }}
@@ -93,9 +91,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
       ),
       okText: 'Назначить',
       cancelText: 'Отмена',
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-      },
+      wrapClassName: styles.disputeModalWrap,
       onOk: async () => {
         if (!selectedArbitratorId) {
           Modal.error({
@@ -285,7 +281,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
             description={error?.message || 'Не удалось загрузить данные о спорах'}
             type="error"
             showIcon
-            style={{ margin: 16 }}
+            className={styles.disputesError}
           />
         ) : (
           <Table

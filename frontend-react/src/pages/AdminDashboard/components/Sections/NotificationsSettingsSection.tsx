@@ -243,11 +243,11 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
       key: 'name',
       render: (record: NotificationTemplate) => (
         <div>
-          <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="notificationsTemplateTitleRow">
             {getTypeIcon(record.type)}
             {record.name}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="notificationsTemplateDescription">
             {record.description}
           </Text>
         </div>
@@ -336,14 +336,14 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         description="Управление шаблонами уведомлений, глобальными настройками и расписанием отправки. Изменения влияют на все уведомления системы."
         type="info"
         showIcon
-        style={{ marginBottom: 16 }}
+        className="notificationsAlertSpacing"
       />
 
       <Tabs defaultActiveKey="templates">
         <TabPane tab="Шаблоны уведомлений" key="templates">
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="notificationsCardTitleRow">
                 <span>Шаблоны уведомлений</span>
                 <Button 
                   type="primary" 
@@ -379,12 +379,12 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
           <Card title="Глобальные настройки уведомлений">
             <Row gutter={16}>
               {settingsData.map(setting => (
-                <Col span={12} key={setting.id} style={{ marginBottom: 16 }}>
+                <Col span={12} key={setting.id} className="notificationsSettingsCol">
                   <Card size="small">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="notificationsSettingRow">
                       <div>
-                        <div style={{ fontWeight: 'bold' }}>{setting.setting_name}</div>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                        <div className="notificationsSettingName">{setting.setting_name}</div>
+                        <Text type="secondary" className="notificationsSettingDescription">
                           {setting.description}
                         </Text>
                       </div>
@@ -399,7 +399,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                         ) : (
                           <Input 
                             value={setting.setting_value as string}
-                            style={{ width: 200 }}
+                            className="notificationsSettingInput"
                             onChange={(e) => {
                               
                               console.log('Update setting:', setting.setting_key, e.target.value);
@@ -418,7 +418,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         <TabPane tab="Расписание" key="schedules">
           <Card
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="notificationsCardTitleRow">
                 <span>Расписание отправки</span>
                 <Button 
                   type="primary" 
@@ -614,7 +614,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
               message={`Тестирование шаблона: ${testingTemplate.name}`}
               description={`Тип: ${getTypeText(testingTemplate.type)}`}
               type="info"
-              style={{ marginBottom: 16 }}
+              className="notificationsTestAlert"
             />
             
             <Form form={testForm} layout="vertical">

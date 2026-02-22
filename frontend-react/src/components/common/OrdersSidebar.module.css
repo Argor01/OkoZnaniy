@@ -64,6 +64,70 @@
   font-weight: 600;
 }
 
+.iconBlue {
+  color: #3b82f6;
+}
+
+.iconAmber {
+  color: #f59e0b;
+}
+
+.iconViolet {
+  color: #8b5cf6;
+}
+
+.iconGreen {
+  color: #10b981;
+}
+
+.iconCyan {
+  color: #06b6d4;
+}
+
+.iconRed {
+  color: #ef4444;
+}
+
+.iconIndigo {
+  color: #6366f1;
+}
+
+.iconGray {
+  color: #6b7280;
+}
+
+.badgeBlue :global(.ant-badge-count) {
+  background-color: #3b82f6;
+}
+
+.badgeAmber :global(.ant-badge-count) {
+  background-color: #f59e0b;
+}
+
+.badgeViolet :global(.ant-badge-count) {
+  background-color: #8b5cf6;
+}
+
+.badgeGreen :global(.ant-badge-count) {
+  background-color: #10b981;
+}
+
+.badgeCyan :global(.ant-badge-count) {
+  background-color: #06b6d4;
+}
+
+.badgeRed :global(.ant-badge-count) {
+  background-color: #ef4444;
+}
+
+.badgeIndigo :global(.ant-badge-count) {
+  background-color: #6366f1;
+}
+
+.badgeGray :global(.ant-badge-count) {
+  background-color: #6b7280;
+}
+
 .menu :global(.ant-menu-item-divider) {
   margin: 8px 0;
   background: #e5e7eb;

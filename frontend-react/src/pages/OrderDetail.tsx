@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, Descriptions, List, Divider, Empty, Badge, Rate, Modal } from 'antd';
+import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '../api/orders';
 import { authApi } from '../api/auth';
@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useDashboard } from '../contexts/DashboardContext';
 import { formatCurrency } from '../utils/formatters';
+import styles from './OrderDetail.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -113,7 +114,7 @@ const OrderDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centered}>
         <Spin size="large" />
       </div>
     );
@@ -121,7 +122,7 @@ const OrderDetail: React.FC = () => {
 
   if (!order) {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
+      <div className={styles.notFound}>
         <Title level={3}>Заказ не найден</Title>
         <Button type="primary" onClick={() => navigate('/orders')}>
           Вернуться к заказам
@@ -157,8 +158,8 @@ const OrderDetail: React.FC = () => {
   const isOrderOwner = order.client?.id === userProfile?.id;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: isMobile ? '16px' : '24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div className={styles.page}>
+      <div className={styles.pageInner}>
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => {
@@ -169,36 +170,29 @@ const OrderDetail: React.FC = () => {
             }
             navigate(-1);
           }}
-          style={{ marginBottom: 16 }}
+          className={styles.backButton}
           size={isMobile ? 'middle' : 'large'}
         >
           Назад
         </Button>
 
-        <Card>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Card className={styles.mainCard}>
+          <Space direction="vertical" size="large" className={styles.fullWidth}>
             <div>
-              <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{order.title}</Title>
-                <Tag color={getStatusColor(order.status)} style={{ fontSize: isMobile ? 12 : 14, padding: isMobile ? '2px 8px' : '4px 12px' }}>
+              <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
+                <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
+                <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
                   {getStatusText(order.status)}
                 </Tag>
               </Space>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className={styles.sectionStack}>
               <Card 
-                style={{ 
-                  background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
-                  border: '2px solid #d3adf7',
-                  borderRadius: 16,
-                  boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
-                  padding: '8px 16px'
-                }}
-                styles={{ body: { padding: '16px 20px' } }}
+                className={styles.clientCard}
               >
-                <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                <Space direction="vertical" size={12} className={styles.fullWidth}>
+                  <Text type="secondary" className={styles.clientLabel}>
                     ЗАКАЗЧИК
                   </Text>
                   <Space align="center" size={16}>
@@ -206,26 +200,17 @@ const OrderDetail: React.FC = () => {
                       size={48} 
                       src={order.client?.avatar} 
                       icon={<UserOutlined />}
-                      style={{ 
-                        border: '3px solid #722ed1',
-                        boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
-                      }}
+                      className={styles.clientAvatar}
                     />
                     <div>
                       <Button 
                         type="link" 
                         onClick={() => navigate(`/user/${order.client?.id}`)}
-                        style={{ 
-                          padding: 0, 
-                          height: 'auto',
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: '#722ed1'
-                        }}
+                        className={styles.clientLink}
                       >
                         {order.client?.username || order.client_name || 'Неизвестен'}
                       </Button>
-                      <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 2 }}>
+                      <div className={styles.clientHint}>
                         Нажмите, чтобы посмотреть профиль
                       </div>
                     </div>
@@ -233,25 +218,18 @@ const OrderDetail: React.FC = () => {
                 </Space>
               </Card>
 
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
-                gap: 16 
-              }}>
+              <div className={styles.infoGrid}>
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px 16px' } }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={2} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={2} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Дедлайн
                     </Text>
                     <Space align="center">
-                      <CalendarOutlined style={{ color: '#fa8c16', fontSize: 14 }} />
-                      <Text style={{ fontSize: 13, fontWeight: 600, color: '#d46b08' }}>
+                      <CalendarOutlined className={styles.deadlineIcon} />
+                      <Text className={styles.deadlineValue}>
                         {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
                       </Text>
                     </Space>
@@ -260,16 +238,13 @@ const OrderDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px 16px' } }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Предмет
                     </Text>
-                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                    <Text className={styles.subjectValue}>
                       {order.subject?.name || 'Не указан'}
                     </Text>
                   </Space>
@@ -277,18 +252,15 @@ const OrderDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px 16px' } }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Цена
                     </Text>
                     <Space align="center">
-                      <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                      <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
+                      <DollarOutlined className={styles.priceIcon} />
+                      <Text className={styles.priceValue}>
                         {formatCurrency(order.budget)}
                       </Text>
                     </Space>
@@ -297,16 +269,13 @@ const OrderDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px 16px' } }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Тип работы
                     </Text>
-                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                    <Text className={styles.subjectValue}>
                       {order.work_type?.name || 'Не указан'}
                     </Text>
                   </Space>
@@ -314,16 +283,13 @@ const OrderDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px 16px' } }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Размещен
                     </Text>
-                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#595959' }}>
+                    <Text className={styles.createdValue}>
                       {formatDistanceToNow(new Date(order.created_at), { addSuffix: true, locale: ru })}
                     </Text>
                   </Space>
@@ -333,7 +299,7 @@ const OrderDetail: React.FC = () => {
 
             <div>
               <Title level={4}>Описание заказа</Title>
-              <Paragraph style={{ whiteSpace: 'pre-wrap' }}>
+              <Paragraph className={styles.description}>
                 {order.description || 'Описание отсутствует'}
               </Paragraph>
             </div>
@@ -364,12 +330,12 @@ const OrderDetail: React.FC = () => {
              !order.expert && 
              !userHasBid && 
              order.client?.id !== userProfile?.id && (
-                <div style={{ marginTop: 24 }}>
+                <div className={styles.bidAction}>
                     <Button 
                         type="primary" 
                         size="large" 
                         onClick={() => setBidModalVisible(true)}
-                        style={{ width: isMobile ? '100%' : 'auto' }}
+                        className={styles.bidButton}
                     >
                         Откликнуться на заказ
                     </Button>
@@ -378,16 +344,16 @@ const OrderDetail: React.FC = () => {
             
             
             {order.client?.id === userProfile?.id && (
-                <div style={{ marginTop: 24 }}>
-                    <Tag color="blue" style={{ fontSize: 16, padding: '8px 16px' }}>
+                <div className={styles.statusTagWrap}>
+                    <Tag color="blue" className={styles.statusTagLarge}>
                         Это ваш заказ
                     </Tag>
                 </div>
             )}
             
             {userHasBid && (
-                 <div style={{ marginTop: 24 }}>
-                    <Tag color="success" style={{ fontSize: 16, padding: '8px 16px' }}>
+                 <div className={styles.statusTagWrap}>
+                    <Tag color="success" className={styles.statusTagLarge}>
                         Вы уже откликнулись на этот заказ
                     </Tag>
                 </div>
@@ -401,15 +367,9 @@ const OrderDetail: React.FC = () => {
                   <Badge
                     count={bids.length}
                     size="small"
-                    style={{
-                      backgroundColor: '#52c41a',
-                      fontSize: 10,
-                      height: 16,
-                      minWidth: 16,
-                      lineHeight: '16px'
-                    }}
+                    className={styles.bidsBadge}
                   >
-                    <span style={{ marginRight: 8 }}>Отклики экспертов</span>
+                    <span className={styles.bidsBadgeText}>Отклики экспертов</span>
                   </Badge>
                 </Title>
 
@@ -424,13 +384,7 @@ const OrderDetail: React.FC = () => {
                       renderItem={(bid: Bid) => (
                         <List.Item
                           key={bid.id}
-                          style={{
-                            background: order.expert?.id === bid.expert.id ? '#f6ffed' : '#fff',
-                            border: order.expert?.id === bid.expert.id ? '2px solid #52c41a' : '1px solid #f0f0f0',
-                            borderRadius: 8,
-                            padding: isMobile ? 12 : 16,
-                            marginBottom: 12
-                          }}
+                          className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
                           actions={
                             order.expert?.id === bid.expert.id
                               ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
@@ -455,7 +409,7 @@ const OrderDetail: React.FC = () => {
                                 size={isMobile ? 48 : 64} 
                                 src={bid.expert.avatar} 
                                 icon={<UserOutlined />}
-                                style={{ cursor: 'pointer' }}
+                                className={styles.bidAvatar}
                                 onClick={() => navigate(`/user/${bid.expert.id}`)}
                               />
                             }
@@ -465,39 +419,35 @@ const OrderDetail: React.FC = () => {
                                   <Button 
                                     type="link" 
                                     onClick={() => navigate(`/user/${bid.expert.id}`)}
-                                    style={{ padding: 0, height: 'auto', fontSize: isMobile ? 14 : 16 }}
+                                    className={styles.bidUserLink}
                                   >
                                     <Text strong>{bid.expert.username}</Text>
                                   </Button>
                                   <Space size={4}>
-                                      <StarOutlined style={{ color: '#faad14' }} />
+                                      <StarOutlined className={styles.ratingStar} />
                                       <Text>{bid.expert_rating || 0}</Text>
                                   </Space>
                                 </Space>
                                 {bid.expert.bio && (
-                                  <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13 }}>
+                                  <Text type="secondary" className={styles.bidBio}>
                                     {bid.expert.bio}
                                   </Text>
                                 )}
                               </Space>
                             }
                             description={
-                              <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                              <Space direction="vertical" size={8} className={styles.bidMeta}>
                                 <Space wrap>
-                                  <Tag color="blue" style={{ fontSize: isMobile ? 11 : 13 }}>
+                                  <Tag color="blue" className={styles.bidAmountTag}>
                                     <DollarOutlined /> {formatCurrency(bid.amount)}
                                   </Tag>
-                                  <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                                  <Text type="secondary" className={styles.bidMetaText}>
                                     {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
                                   </Text>
                                 </Space>
                                 {bid.comment && (
                                   <Paragraph 
-                                    style={{ 
-                                      margin: 0, 
-                                      fontSize: isMobile ? 12 : 14,
-                                      whiteSpace: 'pre-wrap' 
-                                    }}
+                                    className={styles.bidComment}
                                   >
                                     {bid.comment}
                                   </Paragraph>
@@ -527,12 +477,12 @@ const OrderDetail: React.FC = () => {
                     <Button 
                       type="link" 
                       onClick={() => navigate(`/user/${order.expert.id}`)}
-                      style={{ padding: 0, height: 'auto' }}
+                      className={styles.expertLink}
                     >
-                      <Text strong style={{ fontSize: isMobile ? 14 : 16 }}>{order.expert.username}</Text>
+                      <Text strong className={styles.expertName}>{order.expert.username}</Text>
                     </Button>
                     <br />
-                    <Text type="secondary" style={{ fontSize: isMobile ? 12 : 14 }}>Эксперт</Text>
+                    <Text type="secondary" className={styles.expertRole}>Эксперт</Text>
                   </div>
                   {isOrderOwner && (
                     <Button

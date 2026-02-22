@@ -5,22 +5,16 @@ import {
   Button, 
   Tag, 
   Space, 
-  Avatar, 
   Typography, 
   Input,
   Select,
   Modal,
   message,
   Tooltip,
-  DatePicker,
   Form
 } from 'antd';
 import { 
-  UserOutlined, 
-  CheckCircleOutlined, 
-  ExclamationCircleOutlined,
   SearchOutlined,
-  FilterOutlined,
   EyeOutlined,
   UnlockOutlined,
   ClockCircleOutlined
@@ -30,7 +24,6 @@ import dayjs from 'dayjs';
 const { Text, Title } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 interface BlockedUser {
   id: number;
@@ -141,11 +134,11 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
         <Space>
           <div>
             <div><strong>{record.username}</strong></div>
-            <Text type="secondary" style={{ fontSize: '12px' }}>
+            <Text type="secondary" className="blockedUsersUserMeta">
               {record.first_name} {record.last_name}
             </Text>
             <br />
-            <Text type="secondary" style={{ fontSize: '12px' }}>
+            <Text type="secondary" className="blockedUsersUserMeta">
               {record.email}
             </Text>
           </div>
@@ -181,7 +174,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
       width: 200,
       render: (reason: string) => (
         <Tooltip title={reason}>
-          <Text ellipsis style={{ maxWidth: 180 }}>
+          <Text ellipsis className="blockedUsersReasonText">
             {reason}
           </Text>
         </Tooltip>
@@ -246,7 +239,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="blockedUsersHeader">
           <Title level={4}>Заблокированные пользователи</Title>
           <Text type="secondary">
             Управление заблокированными пользователями системы
@@ -254,11 +247,11 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
         </div>
 
         
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="blockedUsersFiltersRow">
           <Search
             placeholder="Поиск по имени, email или username"
             allowClear
-            style={{ width: 300 }}
+            className="blockedUsersSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -266,7 +259,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
           
           <Select
             placeholder="Роль"
-            style={{ width: 150 }}
+            className="blockedUsersSelectRole"
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -278,7 +271,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
 
           <Select
             placeholder="Тип блокировки"
-            style={{ width: 150 }}
+            className="blockedUsersSelectBlockType"
             value={blockTypeFilter}
             onChange={setBlockTypeFilter}
           >
@@ -288,7 +281,7 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
           </Select>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+        <div className="blockedUsersSummaryRow">
           <Tag color="red">
             Всего заблокированных: {filteredData.length}
           </Tag>
@@ -332,9 +325,9 @@ export const BlockedUsersSection: React.FC<BlockedUsersSectionProps> = ({
         okButtonProps={{ danger: false, type: 'primary' }}
       >
         <Form form={unblockForm} layout="vertical">
-          <div style={{ marginBottom: 16 }}>
+          <div className="blockedUsersModalInfo">
             <Text strong>Информация о пользователе:</Text>
-            <div style={{ marginTop: 8, padding: 12, background: '#f5f5f5', borderRadius: 6 }}>
+            <div className="blockedUsersModalInfoBox">
               <div><strong>Имя:</strong> {selectedUser?.first_name} {selectedUser?.last_name}</div>
               <div><strong>Email:</strong> {selectedUser?.email}</div>
               <div><strong>Причина блокировки:</strong> {selectedUser?.block_reason}</div>

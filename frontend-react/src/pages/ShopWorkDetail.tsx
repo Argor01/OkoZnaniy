@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { WorkFile } from './ShopReadyWorks/types';
 import { useDashboard } from '../contexts/DashboardContext';
+import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
 
@@ -68,7 +69,7 @@ const ShopWorkDetail: React.FC = () => {
 
   if (!works) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div className={styles.centered}>
         <Spin size="large" />
       </div>
     );
@@ -76,7 +77,7 @@ const ShopWorkDetail: React.FC = () => {
 
   if (!work) {
     return (
-      <div style={{ padding: 40, textAlign: 'center' }}>
+      <div className={styles.notFound}>
         <Title level={3}>Работа не найдена</Title>
         <Button type="primary" onClick={() => navigate('/shop/ready-works')}>
           Вернуться к магазину
@@ -115,56 +116,44 @@ const ShopWorkDetail: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: isMobile ? '16px' : '24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div className={styles.page}>
+      <div className={styles.pageInner}>
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(-1)}
-          style={{ marginBottom: 16 }}
+          className={styles.backButton}
           size={isMobile ? 'middle' : 'large'}
         >
           Назад
         </Button>
 
-        <Card>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Card className={styles.mainCard}>
+          <Space direction="vertical" size="large" className={styles.fullWidth}>
             <div>
-              <Space align="start" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                <Title level={isMobile ? 3 : 2} style={{ margin: 0 }}>{work.title}</Title>
-                <Tag color="blue" style={{ fontSize: isMobile ? 12 : 14, padding: isMobile ? '2px 8px' : '4px 12px' }}>
+              <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
+                <Title level={isMobile ? 3 : 2} className={styles.workTitle}>{work.title}</Title>
+                <Tag color="blue" className={styles.typeTag}>
                   {work.work_type_name || work.workType || work.category || 'Тип работы'}
                 </Tag>
               </Space>
             </div>
 
             {work.preview && (
-              <div style={{ textAlign: 'center' }}>
+              <div className={styles.preview}>
                 <img 
                   src={work.preview} 
                   alt={work.title}
-                  style={{ 
-                    maxWidth: '100%', 
-                    maxHeight: 300, 
-                    borderRadius: 8,
-                    objectFit: 'cover'
-                  }}
+                  className={styles.previewImage}
                 />
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className={styles.sectionStack}>
               <Card 
-                style={{ 
-                  background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
-                  border: '2px solid #d3adf7',
-                  borderRadius: 16,
-                  boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
-                  padding: '8px 16px'
-                }}
-                styles={{ body: { padding: '16px 20px' } }}
+                className={styles.authorCard}
               >
-                <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                  <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                <Space direction="vertical" size={12} className={styles.fullWidth}>
+                  <Text type="secondary" className={styles.authorLabel}>
                     АВТОР
                   </Text>
                   <Space align="center" size={16}>
@@ -172,26 +161,17 @@ const ShopWorkDetail: React.FC = () => {
                       size={48} 
                       src={work.author?.avatar} 
                       icon={<UserOutlined />}
-                      style={{ 
-                        border: '3px solid #722ed1',
-                        boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
-                      }}
+                      className={styles.authorAvatar}
                     />
                     <div>
                       <Button 
                         type="link" 
                         onClick={() => navigate(`/user/${work.author?.id}`)}
-                        style={{ 
-                          padding: 0, 
-                          height: 'auto',
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: '#722ed1'
-                        }}
+                        className={styles.authorLink}
                       >
                         {work.author_name || work.author?.name || work.author?.username || 'Автор'}
                       </Button>
-                      <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 2 }}>
+                      <div className={styles.authorHint}>
                         Нажмите, чтобы посмотреть профиль
                       </div>
                     </div>
@@ -199,26 +179,19 @@ const ShopWorkDetail: React.FC = () => {
                 </Space>
               </Card>
 
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
-                gap: 16 
-              }}>
+              <div className={styles.infoGrid}>
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
-                  styles={{ body: { padding: '12px' } }}
+                  className={styles.infoCard}
                 >
-                  <div style={{ textAlign: 'center', width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500, display: 'block', marginBottom: 4 }}>
+                  <div className={styles.centeredStat}>
+                    <Text type="secondary" className={styles.statLabel}>
                       Просмотры
                     </Text>
-                    <Space align="center" style={{ justifyContent: 'center', width: '100%' }}>
-                      <EyeOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
-                      <Text style={{ fontSize: 13, fontWeight: 600, color: '#595959' }}>
+                    <Space align="center" className={styles.centeredRow}>
+                      <EyeOutlined className={styles.mutedIcon} />
+                      <Text className={styles.mutedValue}>
                         {work.viewsCount || 0}
                       </Text>
                     </Space>
@@ -227,15 +200,13 @@ const ShopWorkDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Предмет
                     </Text>
-                    <Text style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
+                    <Text className={styles.subjectValue}>
                       {work.subject_name || work.subject || 'Не указан'}
                     </Text>
                   </Space>
@@ -243,17 +214,15 @@ const ShopWorkDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Цена
                     </Text>
                     <Space align="center">
-                      <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                      <Text style={{ fontSize: 16, fontWeight: 700, color: '#389e0d' }}>
+                      <DollarOutlined className={styles.priceIcon} />
+                      <Text className={styles.priceValue}>
                         {formatCurrency(work.price)}
                       </Text>
                     </Space>
@@ -263,18 +232,16 @@ const ShopWorkDetail: React.FC = () => {
                 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Рейтинг
                     </Text>
                     <Space align="center">
-                      <StarOutlined style={{ color: '#faad14', fontSize: 16 }} />
-                      <Rate disabled value={work.rating} style={{ fontSize: 14 }} />
-                      <Text style={{ fontSize: 13, color: '#8c8c8c' }}>
+                      <StarOutlined className={styles.ratingIcon} />
+                      <Rate disabled value={work.rating} className={styles.rateSmall} />
+                      <Text className={styles.ratingCount}>
                         ({work.reviewsCount || 0})
                       </Text>
                     </Space>
@@ -283,17 +250,15 @@ const ShopWorkDetail: React.FC = () => {
 
                 <Card 
                   size="small" 
-                  style={{ 
-                    borderRadius: 12
-                  }}
+                  className={styles.infoCard}
                 >
-                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>
                       Создана
                     </Text>
                     <Space align="center">
-                      <CalendarOutlined style={{ color: '#8c8c8c', fontSize: 14 }} />
-                      <Text style={{ fontSize: 13, fontWeight: 600, color: '#595959' }}>
+                      <CalendarOutlined className={styles.createdIcon} />
+                      <Text className={styles.createdValue}>
                         {work.created_at || work.createdAt ? format(new Date(work.created_at || work.createdAt), 'dd.MM.yyyy', { locale: ru }) : 'Недавно'}
                       </Text>
                     </Space>
@@ -304,15 +269,10 @@ const ShopWorkDetail: React.FC = () => {
 
             <Card 
               title="Описание работы"
-              style={{ 
-                borderRadius: 12,
-                marginBottom: 24
-              }}
+              className={styles.contentCard}
             >
               <div 
-                style={{ 
-                  padding: 0
-                }}
+                className={styles.description}
                 dangerouslySetInnerHTML={{ __html: work.description || 'Описание отсутствует' }}
               />
             </Card>
@@ -321,10 +281,7 @@ const ShopWorkDetail: React.FC = () => {
             {work.files && work.files.length > 0 && (
               <Card 
                 title="Прикрепленные файлы"
-                style={{ 
-                  borderRadius: 12,
-                  marginBottom: 24
-                }}
+                className={styles.contentCard}
               >
                 <List
                   dataSource={work.files}
@@ -347,7 +304,7 @@ const ShopWorkDetail: React.FC = () => {
                       ]}
                     >
                       <List.Item.Meta
-                        avatar={<FileOutlined style={{ fontSize: 20, color: '#1890ff' }} />}
+                        avatar={<FileOutlined className={styles.fileIcon} />}
                         title={file.name}
                         description={`${file.file_type || 'Неизвестный тип'} • ${formatFileSize(file.file_size || 0)}`}
                       />
@@ -358,7 +315,7 @@ const ShopWorkDetail: React.FC = () => {
             )}
 
             
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <div className={styles.actionRow}>
               {userProfile?.id === work.author?.id ? (
 
                 <Popconfirm
@@ -373,11 +330,7 @@ const ShopWorkDetail: React.FC = () => {
                     size="large" 
                     icon={<DeleteOutlined />}
                     loading={deleteMutation.isPending}
-                    style={{ 
-                      minWidth: isMobile ? '100%' : 200,
-                      height: 48,
-                      fontSize: 16
-                    }}
+                    className={styles.actionButton}
                   >
                     Удалить работу
                   </Button>
@@ -409,13 +362,7 @@ const ShopWorkDetail: React.FC = () => {
                       }
                     }
                   }}
-                  style={{
-                    minWidth: isMobile ? '100%' : 200,
-                    height: 48,
-                    fontSize: 16,
-                    background: '#10b981',
-                    borderColor: '#10b981',
-                  }}
+                  className={`${styles.actionButton} ${styles.downloadButton}`}
                 >
                   Скачать
                 </Button>
@@ -426,11 +373,7 @@ const ShopWorkDetail: React.FC = () => {
                   size="large" 
                   icon={<ShoppingCartOutlined />}
                   onClick={handlePurchase}
-                  style={{ 
-                    minWidth: isMobile ? '100%' : 200,
-                    height: 48,
-                    fontSize: 16
-                  }}
+                  className={styles.actionButton}
                 >
                   Купить за {formatCurrency(work.price)}
                 </Button>

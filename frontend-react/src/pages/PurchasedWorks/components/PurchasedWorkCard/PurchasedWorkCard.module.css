@@ -1,4 +1,4 @@
-﻿.card {
+.card {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s;
@@ -46,6 +46,25 @@
   margin-bottom: 12px;
 }
 
+.headerRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.downloadedBadge :global(.ant-badge-count) {
+  background-color: #52c41a;
+}
+
+.badgeIcon {
+  font-size: 10px;
+  color: #fff;
+}
+
+.favoriteIcon {
+  color: #ff4d4f;
+}
+
 .title {
   margin: 12px 0 8px 0;
   color: #1f2937;
@@ -55,6 +74,21 @@
   display: block;
   margin-bottom: 12px;
   min-height: 40px;
+}
+
+.purchaseInfo {
+  padding: 8px 0;
+  margin: 12px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.calendarIcon {
+  color: #8b5cf6;
 }
 
 .meta {
@@ -80,6 +114,10 @@
   gap: 4px;
 }
 
+.priceLabel {
+  font-size: 12px;
+}
+
 .originalPrice {
   font-size: 12px;
 }
@@ -87,6 +125,18 @@
 .currentPrice {
   font-size: 20px;
   color: #3b82f6;
+}
+
+.rating {
+  font-size: 14px;
+}
+
+.downloadButton {
+  background: #3b82f6;
+}
+
+.downloadedButton {
+  background: #10b981;
 }
 
 .discount {

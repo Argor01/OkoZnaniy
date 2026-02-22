@@ -96,16 +96,16 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   
   return (
     <div className="panel-footer">
-      <div style={{ textAlign: 'center', marginBottom: '15px' }}>или войти через</div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
+      <div className="socialLoginTitle">или войти через</div>
+      <div className="socialLoginRow">
         <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
-          <img src="/assets/telegram.png" alt="telegram-login" style={{ width: '32px', height: '32px' }} />
+          <img src="/assets/telegram.png" alt="telegram-login" className="socialLoginIcon" />
         </a>
         <a href={googleHref} aria-label="Google">
-          <img src="/assets/google.png" alt="google-login" style={{ width: '32px', height: '32px' }} />
+          <img src="/assets/google.png" alt="google-login" className="socialLoginIcon" />
         </a>
         <a href={vkHref} aria-label="VK">
-          <img src="/assets/vk.png" alt="vk-login" style={{ width: '32px', height: '32px' }} />
+          <img src="/assets/vk.png" alt="vk-login" className="socialLoginIcon" />
         </a>
       </div>
     </div>

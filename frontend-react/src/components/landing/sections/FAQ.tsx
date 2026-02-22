@@ -78,7 +78,6 @@ const FAQ: React.FC = () => {
                 <div 
                   className="faq__item-toggler"
                   onClick={() => toggleItem(item.id)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <div className="faq__item-toggler-question">{item.question}</div>
                 </div>

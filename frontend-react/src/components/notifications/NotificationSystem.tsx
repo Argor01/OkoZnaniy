@@ -60,17 +60,17 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'order':
-        return <FileDoneOutlined style={{ color: '#3b82f6' }} />;
+        return <FileDoneOutlined className={styles.iconOrder} />;
       case 'claim':
-        return <TrophyOutlined style={{ color: '#f59e0b' }} />;
+        return <TrophyOutlined className={styles.iconClaim} />;
       case 'message':
-        return <CommentOutlined style={{ color: '#8b5cf6' }} />;
+        return <CommentOutlined className={styles.iconMessage} />;
       case 'balance':
-        return <DollarOutlined style={{ color: '#10b981' }} />;
+        return <DollarOutlined className={styles.iconBalance} />;
       case 'bid':
-        return <CheckCircleOutlined style={{ color: '#06b6d4' }} />;
+        return <CheckCircleOutlined className={styles.iconBid} />;
       default:
-        return <BellOutlined style={{ color: '#6b7280' }} />;
+        return <BellOutlined className={styles.iconDefault} />;
     }
   };
 
@@ -193,7 +193,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
           key="settings"
         >
           <div className={styles.settingsPanel}>
-            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16 }}>
+            <Text strong className={styles.settingsTitle}>
               Настройки уведомлений
             </Text>
             
@@ -201,7 +201,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Подтверждение заказов</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления о новых заказах и их подтверждении
                 </Text>
               </div>
@@ -219,7 +219,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Претензии</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления о новых претензиях и их статусе
                 </Text>
               </div>
@@ -237,7 +237,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Сообщения</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления о новых сообщениях в чате
                 </Text>
               </div>
@@ -255,7 +255,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Пополнение баланса</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления о пополнении и списании средств
                 </Text>
               </div>
@@ -273,7 +273,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Ставки на заказы</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления о новых ставках на ваши заказы
                 </Text>
               </div>
@@ -291,7 +291,7 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
               <div>
                 <Text strong>Системные обновления</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type="secondary" className={styles.settingsDescription}>
                   Уведомления об обновлениях платформы
                 </Text>
               </div>

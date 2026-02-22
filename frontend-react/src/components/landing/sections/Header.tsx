@@ -104,7 +104,7 @@ const Header: React.FC = () => {
                 {localStorage.getItem('access_token') ? (
                   <>
                     <button className="header__cabinet-button button" onClick={goToCabinet}>Личный кабинет</button>
-                    <button className="header__cabinet-button button" onClick={handleLogout} style={{ marginLeft: '8px' }}>Выйти</button>
+                    <button className="header__cabinet-button header__cabinet-button--spaced button" onClick={handleLogout}>Выйти</button>
                   </>
                 ) : (
                   <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>
@@ -117,7 +117,7 @@ const Header: React.FC = () => {
             {localStorage.getItem('access_token') ? (
               <>
                 <button className="header__cabinet-button button" onClick={goToCabinet}>Создать заказ</button>
-                <button className="header__cabinet-button button" onClick={handleLogout} style={{ marginLeft: '8px' }}>Выйти</button>
+                <button className="header__cabinet-button header__cabinet-button--spaced button" onClick={handleLogout}>Выйти</button>
               </>
             ) : (
               <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>

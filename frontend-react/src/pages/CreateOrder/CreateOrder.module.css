@@ -1,4 +1,4 @@
-﻿
+
 
 .container {
   width: 100%;
@@ -540,6 +540,20 @@
 
 .selectField .ant-select-arrow {
   color: #6b7280;
+}
+
+.selectDropdownFooter {
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.selectDropdownButton {
+  width: 100%;
+  text-align: left;
+}
+
+.fullWidth {
+  width: 100%;
 }
 
 .buttonSecondary {

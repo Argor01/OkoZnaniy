@@ -57,13 +57,8 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
 
   return (
     <Modal
-      style={isMobile ? { padding: 0 } : { top: 20 }}
       title={
-        <div style={{ 
-          fontSize: 24, 
-          fontWeight: 600, 
-          color: '#1890ff',
-        }}>
+        <div className={styles.applicationModalTitle}>
           Заполнение анкеты эксперта
         </div>
       }
@@ -74,65 +69,15 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       okText="Отправить"
       cancelText="Отмена"
       okButtonProps={{
-        className: styles.buttonPrimary,
+        className: `${styles.buttonPrimary} ${styles.applicationModalButton}`,
         size: 'large',
-        style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
-          fontWeight: 500
-        }
       }}
       cancelButtonProps={{
-        className: styles.buttonSecondary,
+        className: `${styles.buttonSecondary} ${styles.applicationModalButton}`,
         size: 'large',
-        style: { 
-          borderRadius: 12,
-          height: 44,
-          fontSize: 16,
-          fontWeight: 500
-        }
       }}
-      styles={{
-        mask: {
-          backdropFilter: isMobile ? 'none' : 'blur(8px)',
-          WebkitBackdropFilter: isMobile ? 'none' : 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: 0,
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: isMobile ? 'none' : 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          
-          display: 'flex',
-          flexDirection: 'column'
-        },
-        header: {
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: isMobile ? 'none' : 'blur(10px)',
-          padding: isMobile ? '16px' : '24px 32px',
-          borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? 0 : '24px 24px 0 0'
-        },
-        body: {
-          padding: isMobile ? '20px 24px' : '32px',
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          flex: 1,
-          overflowY: 'auto'
-        },
-        footer: {
-          padding: window.innerWidth <= 480 ? '16px' : '24px 32px',
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: window.innerWidth <= 480 ? 0 : '0 0 24px 24px'
-        }
-      }}
+      wrapClassName={`${styles.applicationModalWrap} ${isMobile ? styles.applicationModalWrapMobile : styles.applicationModalWrapDesktop}`}
     >
-      <div style={{
-        padding: 0
-      }}>
       <Form
         form={applicationForm}
         layout="vertical"
@@ -266,7 +211,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                           {...restField}
                           name={[name, 'university']}
                           rules={[{ required: true, message: 'Введите ВУЗ' }]}
-                          style={{ marginBottom: 12 }}
+                          className={styles.applicationModalItemSpacing}
                         >
                           <Input 
                             placeholder="Название ВУЗа" 
@@ -275,13 +220,13 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                           />
                         </Form.Item>
                       </Col>
-                      <Col span={2} style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Col span={2} className={styles.applicationModalDeleteCol}>
                         <Button
                           type="text"
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() => remove(name)}
-                          style={{ marginTop: 0 }}
+                          className={styles.applicationModalDeleteButton}
                         />
                       </Col>
                     </Row>
@@ -292,7 +237,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                           {...restField}
                           name={[name, 'start_year']}
                           rules={[{ required: true, message: 'Год начала' }]}
-                          style={{ marginBottom: 12 }}
+                          className={styles.applicationModalItemSpacing}
                         >
                           <Input 
                             type="number"
@@ -319,7 +264,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                         <Form.Item
                           {...restField}
                           name={[name, 'end_year']}
-                          style={{ marginBottom: 12 }}
+                          className={styles.applicationModalItemSpacing}
                         >
                           <Input 
                             type="number"
@@ -350,7 +295,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                         <Form.Item
                           {...restField}
                           name={[name, 'degree']}
-                          style={{ marginBottom: 0 }}
+                          className={styles.applicationModalItemTight}
                         >
                           <Input 
                             placeholder="Степень" 
@@ -362,21 +307,14 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                     </Row>
                   </div>
                 ))}
-                <Form.Item style={{ marginBottom: 0 }}>
+                <Form.Item className={styles.applicationModalItemTight}>
                   <Button
                     type="dashed"
                     onClick={() => add()}
                     block
                     icon={<PlusOutlined />}
                     size="large"
-                    style={{
-                      borderRadius: 12,
-                      height: 48,
-                      fontSize: 15,
-                      fontWeight: 500,
-                      borderColor: 'rgba(102, 126, 234, 0.3)',
-                      color: '#667eea'
-                    }}
+                    className={styles.applicationModalAddButton}
                   >
                     Добавить образование
                   </Button>
@@ -386,7 +324,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           </Form.List>
         </Form.Item>
       </Form>
-      </div>
     </Modal>
   );
 };

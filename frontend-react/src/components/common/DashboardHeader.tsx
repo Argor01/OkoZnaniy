@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Button, Dropdown, Layout, Menu, Space, Tooltip, Typography, message } from 'antd';
+import { Badge, Button, Dropdown, Layout, Menu, Space, Typography, message } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -164,13 +164,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <Space size={isMobile ? 8 : 16}>
           <Button
             type="text"
-            icon={<WalletOutlined style={{ color: 'white' }} />}
+            icon={<WalletOutlined className={styles.balanceIcon} />}
             onClick={onBalanceClick}
             className={`${styles.balanceButton} balanceButton`}
-            style={{ color: 'white' }}
           >
             {!isMobile && (
-              <Text className={`${styles.balanceText} balanceText`} style={{ color: 'white' }}>
+              <Text className={`${styles.balanceText} balanceText`}>
                 {formatCurrency(balance)}
               </Text>
             )}
@@ -202,90 +201,53 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {
                   key: 'support-info',
                   label: (
-                    <div style={{ padding: '8px 4px', minWidth: 280 }}>
-                      <div style={{ marginBottom: 12 }}>
-                        <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 12 }}>
+                    <div className={styles.supportDropdown}>
+                      <div className={styles.supportSection}>
+                        <Text strong className={styles.supportTitle}>
                           Служба поддержки
                         </Text>
                         
                         
                         <div 
-                          style={{ 
-                            marginBottom: 8, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            padding: '8px 12px',
-                            background: '#f9fafb',
-                            borderRadius: 8,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
+                          className={styles.supportRow}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigator.clipboard.writeText('88005007857');
                             message.success('Телефон скопирован!');
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#f3f4f6';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#f9fafb';
-                          }}
                         >
-                          <PhoneOutlined style={{ fontSize: 16, color: '#10b981', marginRight: 10 }} />
-                          <Text style={{ fontSize: 13, color: '#374151', flex: 1 }}>
+                          <PhoneOutlined className={styles.supportPhoneIcon} />
+                          <Text className={styles.supportRowText}>
                             8 (800) 500-78-57
                           </Text>
-                          <CopyOutlined style={{ fontSize: 12, color: '#9ca3af' }} />
+                          <CopyOutlined className={styles.supportCopyIcon} />
                         </div>
                         
                         
                         <div 
-                          style={{ 
-                            marginBottom: 8, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            padding: '8px 12px',
-                            background: '#f9fafb',
-                            borderRadius: 8,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
+                          className={styles.supportRow}
                           onClick={(e) => {
                             e.stopPropagation();
                             navigator.clipboard.writeText('b-oko.znaniy@mail.ru');
                             message.success('Email скопирован!');
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#f3f4f6';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#f9fafb';
-                          }}
                         >
-                          <MailOutlined style={{ fontSize: 16, color: '#3b82f6', marginRight: 10 }} />
-                          <Text style={{ fontSize: 13, color: '#374151', flex: 1 }}>
+                          <MailOutlined className={styles.supportMailIcon} />
+                          <Text className={styles.supportRowText}>
                             b-oko.znaniy@mail.ru
                           </Text>
-                          <CopyOutlined style={{ fontSize: 12, color: '#9ca3af' }} />
+                          <CopyOutlined className={styles.supportCopyIcon} />
                         </div>
                       </div>
                       
                       
-                      <div style={{ 
-                        marginBottom: 4, 
-                        paddingTop: 12, 
-                        borderTop: '1px solid #e5e7eb',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '12px 12px 4px 12px',
-                      }}>
-                        <ClockCircleOutlined style={{ fontSize: 14, color: '#f59e0b', marginRight: 8 }} />
+                      <div className={styles.supportSchedule}>
+                        <ClockCircleOutlined className={styles.supportScheduleIcon} />
                         <div>
-                          <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 2 }}>
+                          <Text strong className={styles.supportScheduleTitle}>
                             График работы
                           </Text>
-                          <Text style={{ fontSize: 12, color: '#6b7280' }}>
+                          <Text className={styles.supportScheduleText}>
                             Пн-Пт 07:00 - 16:00 (МСК)
                           </Text>
                         </div>

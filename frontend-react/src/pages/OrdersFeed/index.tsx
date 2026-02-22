@@ -262,7 +262,7 @@ const OrdersFeed: React.FC = () => {
       {!isMobile && (
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
-            <Title level={2} style={{ margin: 0, marginBottom: 8 }}>
+            <Title level={2} className={styles.pageTitle}>
               Лента работ
             </Title>
             <Text type="secondary">
@@ -298,7 +298,7 @@ const OrdersFeed: React.FC = () => {
             <Select
               size="large"
               placeholder="Предмет"
-              style={{ width: '100%' }}
+              className={styles.fullWidth}
               value={selectedSubject}
               onChange={setSelectedSubject}
               allowClear
@@ -315,7 +315,7 @@ const OrdersFeed: React.FC = () => {
             <Select
               size="large"
               placeholder="Тип работы"
-              style={{ width: '100%' }}
+              className={styles.fullWidth}
               value={selectedWorkType}
               onChange={setSelectedWorkType}
               allowClear
@@ -330,25 +330,25 @@ const OrdersFeed: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ marginTop: 16 }}>
+        <div className={styles.filtersRow}>
           <Button 
             type="link" 
             onClick={() => setShowFilters(!showFilters)}
-            style={{ padding: 0, marginBottom: showFilters ? 16 : 0 }}
+            className={showFilters ? styles.filterToggleExpanded : styles.filterToggle}
           >
             {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
           </Button>
         </div>
 
         {showFilters && (
-          <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
+          <Row gutter={[16, 16]} className={styles.filtersRow}>
             <Col xs={24} sm={12} md={8}>
-              <div style={{ marginBottom: 8 }}>
+              <div className={styles.filterLabel}>
                 <Text strong>Бюджет</Text>
               </div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ whiteSpace: 'nowrap' }}>От</Text>
+              <div className={styles.budgetRow}>
+                <div className={styles.budgetInputGroup}>
+                  <Text className={styles.nowrap}>От</Text>
                   <InputNumber
                     size="large"
                     min={0}
@@ -357,7 +357,7 @@ const OrdersFeed: React.FC = () => {
                     onChange={(value) => setBudgetRange([value || 0, budgetRange[1]])}
                     placeholder="0"
                     controls={false}
-                    style={{ width: 120 }}
+                    className={styles.budgetInput}
                     formatter={(value) => `${value} ₽`}
                     parser={(value) => {
                       const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
@@ -365,8 +365,8 @@ const OrdersFeed: React.FC = () => {
                     }}
                   />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Text style={{ whiteSpace: 'nowrap' }}>До</Text>
+                <div className={styles.budgetInputGroup}>
+                  <Text className={styles.nowrap}>До</Text>
                   <InputNumber
                     size="large"
                     min={budgetRange[0]}
@@ -375,7 +375,7 @@ const OrdersFeed: React.FC = () => {
                     onChange={(value) => setBudgetRange([budgetRange[0], value || 30000])}
                     placeholder="30000"
                     controls={false}
-                    style={{ width: 120 }}
+                    className={styles.budgetInput}
                     formatter={(value) => `${value} ₽`}
                     parser={(value) => {
                       const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
@@ -386,13 +386,13 @@ const OrdersFeed: React.FC = () => {
               </div>
             </Col>
             <Col xs={24} sm={12} md={8}>
-              <div style={{ marginBottom: 8 }}>
+              <div className={styles.filterLabel}>
                 <Text strong>Количество откликов</Text>
               </div>
               <Select
                 size="large"
                 placeholder="Все заказы"
-                style={{ width: '100%' }}
+                className={styles.fullWidth}
                 value={responsesFilter}
                 onChange={setResponsesFilter}
               >
@@ -403,15 +403,10 @@ const OrdersFeed: React.FC = () => {
               </Select>
             </Col>
             <Col xs={24} sm={12} md={8}>
-              <div style={{ marginBottom: 8 }}>
+              <div className={styles.filterLabel}>
                 <Text strong>Найдено заказов</Text>
               </div>
-              <div style={{ 
-                fontSize: 24, 
-                fontWeight: 600, 
-                color: '#667eea',
-                lineHeight: '40px'
-              }}>
+              <div className={styles.ordersCount}>
                 {filteredOrders.length}
               </div>
             </Col>
@@ -421,14 +416,14 @@ const OrdersFeed: React.FC = () => {
 
       
       {ordersLoading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+        <div className={styles.loadingBlock}>
           <Spin size="large" />
         </div>
       ) : filteredOrders.length === 0 ? (
         <Empty
           description={
             <div>
-              <Text style={{ fontSize: 16, color: '#999' }}>
+              <Text className={styles.emptyText}>
                 {searchText || selectedSubject || selectedWorkType 
                   ? 'Заказы не найдены. Попробуйте изменить фильтры.'
                   : userProfile?.role === 'client' 
@@ -437,7 +432,7 @@ const OrdersFeed: React.FC = () => {
               </Text>
             </div>
           }
-          style={{ padding: '60px 0' }}
+          className={styles.loadingBlock}
         >
           {userProfile?.role !== 'client' && (
             <Button 
@@ -450,7 +445,7 @@ const OrdersFeed: React.FC = () => {
           )}
         </Empty>
       ) : (
-        <div style={{ display: 'grid', gap: 16 }}>
+        <div className={styles.ordersGrid}>
           {filteredOrders.map((order: OrdersFeedOrder) => {
 
             if (order.files) {
@@ -477,18 +472,11 @@ const OrdersFeed: React.FC = () => {
               bodyPadding={24}
               onClick={() => navigate(`/orders/${order.id}`)}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ flex: 1 }}>
+              <div className={styles.orderHeader}>
+                <div className={styles.orderHeaderLeft}>
                   <Title 
                     level={4} 
-                    style={{ 
-                      margin: 0, 
-                      marginBottom: 12, 
-                      fontSize: 20, 
-                      fontWeight: 700,
-                      color: '#1890ff',
-                      cursor: 'pointer',
-                    }}
+                    className={styles.orderTitle}
                   >
                     {order.title}
                   </Title>
@@ -513,8 +501,8 @@ const OrdersFeed: React.FC = () => {
                     )}
                   </Space>
                 </div>
-                <div style={{ textAlign: 'right', marginLeft: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <div className={styles.orderHeaderRight}>
+                  <div className={styles.orderHeaderActions}>
                     <Tooltip title="Скопировать ссылку на заказ">
                       <Button
                         type="text"
@@ -541,15 +529,15 @@ const OrdersFeed: React.FC = () => {
 
               <Paragraph 
                 ellipsis={{ rows: 2 }}
-                style={{ color: '#666', marginBottom: 16 }}
+                className={styles.orderDescription}
               >
                 {order.description || 'Описание не указано'}
               </Paragraph>
 
               
               {order.files && order.files.length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                  <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
+                <div className={styles.filesBlock}>
+                  <Text type="secondary" className={styles.filesLabel}>
                     Прикрепленные файлы ({order.files.length}):
                   </Text>
                   <Space size={8} wrap>
@@ -557,11 +545,11 @@ const OrdersFeed: React.FC = () => {
 
                       const getFileIcon = (filename: string) => {
                         const ext = filename.split('.').pop()?.toLowerCase();
-                        if (ext === 'pdf') return <FilePdfOutlined style={{ color: '#ff4d4f' }} />;
-                        if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined style={{ color: '#1890ff' }} />;
-                        if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext || '')) return <FileImageOutlined style={{ color: '#52c41a' }} />;
-                        if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined style={{ color: '#fa8c16' }} />;
-                        return <FileOutlined style={{ color: '#666' }} />;
+                        if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
+                        if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
+                        if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
+                        if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
+                        return <FileOutlined className={styles.fileIconDefault} />;
                       };
                       const fileName = file.filename || 'file';
 
@@ -577,7 +565,7 @@ const OrdersFeed: React.FC = () => {
                               handleDownloadOrderFile(order.id, file);
                             }}
                           >
-                            {fileName} <DownloadOutlined style={{ marginLeft: 4 }} />
+                            {fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
                           </Tag>
                         </Tooltip>
                       );
@@ -586,51 +574,52 @@ const OrdersFeed: React.FC = () => {
                 </div>
               )}
 
-              <Space size={16} wrap style={{ marginBottom: 16 }}>
+              <Space size={16} wrap className={styles.orderMeta}>
                 <Space size={4}>
-                  <ClockCircleOutlined style={{ color: '#999' }} />
-                  <Text type="secondary" style={{ fontSize: 14 }}>
+                  <ClockCircleOutlined className={styles.metaIcon} />
+                  <Text type="secondary" className={styles.metaText}>
                     {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
                   </Text>
                 </Space>
                 {order.created_at && (
-                  <Text type="secondary" style={{ fontSize: 14 }}>
+                  <Text type="secondary" className={styles.metaText}>
                     Создан {dayjs(order.created_at).fromNow()}
                   </Text>
                 )}
                 <Space size={4}>
-                  <UserOutlined style={{ color: '#999' }} />
+                  <UserOutlined className={styles.metaIcon} />
                   <Text 
-                    style={{ 
-                      fontSize: 14, 
-                      fontWeight: 600,
-                      color: (order.bids?.length || order.responses_count || 0) === 0 ? '#999' : 
-                             (order.bids?.length || order.responses_count || 0) > 5 ? '#ff4d4f' : '#52c41a'
-                    }}
+                    className={`${styles.responsesCount} ${
+                      (order.bids?.length || order.responses_count || 0) === 0
+                        ? styles.responsesCountNone
+                        : (order.bids?.length || order.responses_count || 0) > 5
+                          ? styles.responsesCountMany
+                          : styles.responsesCountSome
+                    }`}
                   >
                     {order.bids?.length || order.responses_count || 0}
                   </Text>
                 </Space>
               </Space>
 
-              <Divider style={{ margin: '16px 0' }} />
+              <Divider className={styles.divider} />
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div className={styles.orderFooter}>
                 <Space size={10}>
                   <Avatar 
                     size={48}
                     src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
                     icon={<UserOutlined />}
-                    style={{ backgroundColor: '#1890ff' }}
+                    className={styles.clientAvatar}
                   />
                   <div>
-                    <Text strong style={{ display: 'block', fontSize: 14 }}>
+                    <Text strong className={styles.clientName}>
                       {order.client?.username || order.client_name || 
                         (order.client?.first_name && order.client?.last_name 
                           ? `${order.client.first_name} ${order.client.last_name}` 
                           : userProfile?.username || 'Заказчик')}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text type="secondary" className={styles.clientOrders}>
                       Заказов: {order.client_orders_count || 1}
                     </Text>
                   </div>
@@ -680,16 +669,7 @@ const OrdersFeed: React.FC = () => {
                 size="large"
                 block
                 onClick={() => navigate('/create-order')}
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  borderRadius: 12,
-                  height: 48,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  marginBottom: 16
-                }}
+                className={styles.mobileCreateButton}
               >
                 Создать заказ
               </Button>

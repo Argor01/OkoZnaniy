@@ -39,13 +39,13 @@ const TestProfileModal: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="testProfileModalContainer">
       <h2>Тест модального окна профиля эксперта</h2>
       <Button type="primary" onClick={() => setVisible(true)}>
         Открыть модальное окно профиля
       </Button>
       
-      <div style={{ marginTop: '20px' }}>
+      <div className="testProfileModalData">
         <h3>Данные пользователя:</h3>
         <pre>{JSON.stringify(mockUserProfile, null, 2)}</pre>
       </div>

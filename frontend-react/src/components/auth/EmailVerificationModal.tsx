@@ -31,7 +31,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       destroyOnClose
       wrapClassName="verification-modal"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="verificationModalBody">
         <Typography.Paragraph>
           На адрес <b>{email}</b> отправлен код подтверждения. Введите его ниже, чтобы завершить регистрацию.
         </Typography.Paragraph>
@@ -41,9 +41,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           onChange={(e) => onChangeCode(e.target.value)}
           maxLength={8}
         />
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+        <div className="verificationActions">
           <Button onClick={onCancel} disabled={loading}>Отмена</Button>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="verificationActionsRight">
             {onResend && (
               <Button onClick={onResend} disabled={loading} type="default">Отправить код снова</Button>
             )}

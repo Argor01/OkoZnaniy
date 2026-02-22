@@ -50,6 +50,16 @@
   margin-left: 4px;
 }
 
+.badgeActive :global(.ant-badge-count) {
+  background-color: #fff;
+  color: #1890ff;
+}
+
+.badgeInactive :global(.ant-badge-count) {
+  background-color: #1890ff;
+  color: #fff;
+}
+
 .requestsList {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

@@ -197,86 +197,26 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
   if (sessionLoading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px 20px',
-        }}
-      >
-        <Card style={{ width: '100%', maxWidth: '480px', borderRadius: '20px' }} loading />
+      <div className="adminLoginSession">
+        <Card className="adminLoginLoadingCard" loading />
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%)',
-        padding: '40px 20px',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="adminLoginPage">
+      <div className="adminLoginDecorBubble" />
+      <div className="adminLoginDecorBubbleAlt" />
       
-      <div
-        style={{
-          position: 'absolute',
-          top: 100,
-          left: '15%',
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.1)',
-          zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 150,
-          right: '20%',
-          width: 120,
-          height: 120,
-          borderRadius: '50%',
-          background: 'rgba(155, 74, 255, 0.15)',
-          zIndex: 0,
-        }}
-      />
-      
-      <Card
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          borderRadius: '20px',
-          boxShadow: 'var(--shadow-card)',
-          border: 'none',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              padding: '16px',
-              background: 'var(--color-brand-blue-600)',
-              borderRadius: '12px',
-              marginBottom: '16px',
-            }}
-          >
-            <CrownOutlined style={{ fontSize: '32px', color: '#fff' }} />
+      <Card className="adminLoginCard">
+        <div className="adminLoginHeader">
+          <div className="adminLoginIconWrapper">
+            <CrownOutlined className="adminLoginIcon" />
           </div>
-          <Title level={2} style={{ marginBottom: '8px', color: '#1a1a1a', fontFamily: 'var(--font-family-display)' }}>
+          <Title level={2} className="adminLoginTitle">
             Вход в админ-панель
           </Title>
-          <Paragraph style={{ color: '#666', marginBottom: 0, fontSize: '16px' }}>
+          <Paragraph className="adminLoginSubtitle">
             Введите email и пароль для доступа к админ-панели
           </Paragraph>
         </div>
@@ -289,7 +229,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         >
           <Form.Item
             name="username"
-            label={<span style={{ fontWeight: 500, fontSize: '14px' }}>Email</span>}
+            label={<span className="adminLoginLabel">Email</span>}
             rules={[
               { 
                 required: true, 
@@ -311,14 +251,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             validateTrigger="onBlur"
           >
             <Input
-              prefix={<MailOutlined style={{ color: '#999' }} />}
+              prefix={<MailOutlined className="adminLoginInputIcon" />}
               placeholder="Введите ваш email"
               size="large"
               disabled={loading}
               autoComplete="email"
-              style={{
-                borderRadius: '8px',
-              }}
+              className="adminLoginInput"
               onPressEnter={() => {
                 form.submit();
               }}
@@ -327,7 +265,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
           <Form.Item
             name="password"
-            label={<span style={{ fontWeight: 500, fontSize: '14px' }}>Пароль</span>}
+            label={<span className="adminLoginLabel">Пароль</span>}
             rules={[
               { 
                 required: true, 
@@ -349,14 +287,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             validateTrigger="onBlur"
           >
             <Input.Password
-              prefix={<LockOutlined style={{ color: '#999' }} />}
+              prefix={<LockOutlined className="adminLoginInputIcon" />}
               placeholder="Введите ваш пароль"
               size="large"
               disabled={loading}
               autoComplete="current-password"
-              style={{
-                borderRadius: '8px',
-              }}
+              className="adminLoginInput"
               onPressEnter={() => {
                 form.submit();
               }}
@@ -370,13 +306,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               loading={loading}
               block
               size="large"
-              style={{
-                marginTop: '8px',
-                height: '48px',
-                fontSize: '16px',
-                fontWeight: 600,
-                borderRadius: '8px',
-              }}
+              className="adminLoginSubmit"
             >
               Войти
             </Button>
@@ -384,26 +314,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         </Form>
 
         <>
-          <Divider 
-            style={{ 
-              margin: '32px 0 20px 0',
-              borderColor: '#e8e8e8',
-              fontSize: '13px',
-              color: '#999',
-              fontWeight: 500,
-            }}
-          >
+          <Divider className="adminLoginDivider">
             Быстрый вход
           </Divider>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+          <div className="adminLoginQuickList">
             
-            <div 
-              style={{ 
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '12px',
-              }}
-            >
+            <div className="adminLoginQuickGrid">
               {DEV_ACCOUNTS.filter(acc => acc.role !== 'director').map((account) => (
                 <Tooltip
                   key={account.email}
@@ -416,32 +332,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                     loading={loading}
                     disabled={loading}
                     size="large"
-                    style={{
-                      height: '56px',
-                      borderRadius: '12px',
-                      fontSize: '15px',
-                      fontWeight: 500,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      border: '1px solid #e0e0e0',
-                      background: '#fff',
-                      color: '#333',
-                      transition: 'all 0.3s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--color-brand-blue-600)';
-                      e.currentTarget.style.color = 'var(--color-brand-blue-600)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#e0e0e0';
-                      e.currentTarget.style.color = '#333';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
+                    className="adminLoginQuickButton"
                   >
                     {account.label}
                   </Button>
@@ -449,7 +340,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               ))}
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="adminLoginQuickSingle">
               {DEV_ACCOUNTS.filter(acc => acc.role === 'director').map((account) => (
                 <Tooltip
                   key={account.email}
@@ -462,33 +353,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                     loading={loading}
                     disabled={loading}
                     size="large"
-                    style={{
-                      height: '56px',
-                      borderRadius: '12px',
-                      fontSize: '15px',
-                      fontWeight: 500,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      border: '1px solid #e0e0e0',
-                      background: '#fff',
-                      color: '#333',
-                      transition: 'all 0.3s ease',
-                      minWidth: '200px',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--color-brand-blue-600)';
-                      e.currentTarget.style.color = 'var(--color-brand-blue-600)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#e0e0e0';
-                      e.currentTarget.style.color = '#333';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
+                    className="adminLoginQuickButton adminLoginQuickButtonWide"
                   >
                     {account.label}
                   </Button>

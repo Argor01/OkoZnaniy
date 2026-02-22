@@ -194,12 +194,12 @@ const CreateOrder: React.FC = () => {
                   dropdownRender={(menu) => (
                     <>
                       {menu}
-                      <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                      <div className={styles.selectDropdownFooter}>
                         <Button
                           type="text"
                           icon={<PlusOutlined />}
                           onClick={() => setNewWorkTypeModalVisible(true)}
-                          style={{ width: '100%', textAlign: 'left' }}
+                          className={styles.selectDropdownButton}
                         >
                           Добавить новый тип работы
                         </Button>
@@ -232,12 +232,12 @@ const CreateOrder: React.FC = () => {
                   dropdownRender={(menu) => (
                     <>
                       {menu}
-                      <div style={{ padding: '8px 0', borderTop: '1px solid #f0f0f0' }}>
+                      <div className={styles.selectDropdownFooter}>
                         <Button
                           type="text"
                           icon={<PlusOutlined />}
                           onClick={() => setNewSubjectModalVisible(true)}
-                          style={{ width: '100%', textAlign: 'left' }}
+                          className={styles.selectDropdownButton}
                         >
                           Добавить новый предмет
                         </Button>
@@ -300,8 +300,7 @@ const CreateOrder: React.FC = () => {
               <InputNumber
                 placeholder="Стоимость"
                 min={1}
-                style={{ width: '100%' }}
-                className={styles.priceInput}
+                className={`${styles.priceInput} ${styles.fullWidth}`}
               />
             </Form.Item>
 

@@ -214,7 +214,7 @@ const NewClaims: React.FC = () => {
       key: 'type',
       width: 110,
       render: (type: string) => (
-        <Tag color={getTypeColor(type)} style={{ margin: 0 }}>
+        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
           {getTypeText(type)}
         </Tag>
       ),
@@ -227,10 +227,10 @@ const NewClaims: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -246,16 +246,16 @@ const NewClaims: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
@@ -274,7 +274,7 @@ const NewClaims: React.FC = () => {
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span style={{ fontSize: '12px' }}>
+          <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
         </Tooltip>
@@ -287,7 +287,7 @@ const NewClaims: React.FC = () => {
       key: 'priority',
       width: 100,
       render: (priority: string) => (
-        <Tag color={getPriorityColor(priority)} style={{ margin: 0 }}>
+        <Tag color={getPriorityColor(priority)} className="arbitratorTagNoMargin">
           {getPriorityText(priority)}
         </Tag>
       ),
@@ -322,13 +322,13 @@ const NewClaims: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <Title level={4} style={{ marginBottom: '8px' }}>Новые обращения</Title>
-        <Text type="secondary" style={{ fontSize: '13px' }}>
+      <Card className="arbitratorCard">
+        <Title level={4} className="arbitratorSectionTitle">Новые обращения</Title>
+        <Text type="secondary" className="arbitratorSectionSubtitle">
           Список новых обращений, требующих обработки
         </Text>
 
-        <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -342,7 +342,7 @@ const NewClaims: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип обращения"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={typeFilter}
               onChange={setTypeFilter}
               allowClear
@@ -355,7 +355,7 @@ const NewClaims: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Приоритет"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={priorityFilter}
               onChange={setPriorityFilter}
               allowClear
@@ -367,7 +367,7 @@ const NewClaims: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               format="DD.MM.YYYY"
@@ -386,7 +386,7 @@ const NewClaims: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

@@ -157,7 +157,7 @@ const PurchasedWorks: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <Title level={2} style={{ margin: 0, marginBottom: 24 }}>
+      <Title level={2} className={styles.pageTitle}>
         Купленные работы
       </Title>
       

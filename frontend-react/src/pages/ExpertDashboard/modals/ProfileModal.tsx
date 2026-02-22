@@ -72,16 +72,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
   return (
     <Modal
-      style={isMobile ? { padding: 0 } : { top: 20 }}
       title={
-        <div style={{ 
-          fontSize: isMobile ? 18 : 24, 
-          fontWeight: 600, 
-          background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 50%, #40a9ff 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
+        <div className={`${styles.profileModalTitle} ${isMobile ? styles.profileModalTitleMobile : styles.profileModalTitleDesktop}`}>
           Редактировать профиль
         </div>
       }
@@ -92,67 +84,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       okText="Сохранить"
       cancelText="Отмена"
       okButtonProps={{
-        className: styles.buttonPrimary,
+        className: `${styles.buttonPrimary} ${styles.profileModalButton} ${isMobile ? styles.profileModalButtonMobile : styles.profileModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
-        style: { 
-          borderRadius: isMobile ? 8 : 12,
-          height: isMobile ? 40 : 44,
-          fontSize: isMobile ? 14 : 16,
-          fontWeight: 500
-        }
       }}
       cancelButtonProps={{
-        className: styles.buttonSecondary,
+        className: `${styles.buttonSecondary} ${styles.profileModalButton} ${isMobile ? styles.profileModalButtonMobile : styles.profileModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
-        style: { 
-          borderRadius: isMobile ? 8 : 12,
-          height: isMobile ? 40 : 44,
-          fontSize: isMobile ? 14 : 16,
-          fontWeight: 500
-        }
       }}
-      styles={{
-        mask: {
-          backdropFilter: isMobile ? 'none' : 'blur(8px)',
-          WebkitBackdropFilter: isMobile ? 'none' : 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: 0,
-          overflow: 'hidden',
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: isMobile ? 'none' : 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          margin: isMobile ? 0 : 'auto',
-          maxWidth: '100%',
-          
-          display: 'flex',
-          flexDirection: 'column'
-        },
-        header: {
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: isMobile ? 'none' : 'blur(10px)',
-          padding: isMobile ? '16px 20px' : '24px 32px',
-          borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? 0 : '24px 24px 0 0',
-          flexShrink: 0 
-        },
-        body: {
-          padding: isMobile ? '20px 24px' : '32px',
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          overflowY: 'auto',
-          flex: '1 1 auto', 
-          minHeight: 0 
-        },
-        footer: {
-          padding: isMobile ? '16px 20px' : '24px 32px',
-          background: isMobile ? '#ffffff' : 'rgba(255, 255, 255, 0.95)',
-          borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? 0 : '0 0 24px 24px',
-          flexShrink: 0 
-        }
-      }}
+      wrapClassName={`${styles.profileModalWrap} ${isMobile ? styles.profileModalWrapMobile : styles.profileModalWrapDesktop}`}
     >
       <Form
         form={form}
@@ -273,13 +212,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               <img 
                 src={imageUrl} 
                 alt="avatar" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className={styles.profileModalAvatarImage}
                 onError={() => setImageUrl(null)}
               />
             ) : (
               <div>
                 <UserOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить</div>
+                <div className={styles.profileModalUploadLabel}>Загрузить</div>
               </div>
             )}
           </Upload>
@@ -312,31 +251,24 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           <Input.TextArea 
             autoSize={{ minRows: 4, maxRows: 10 }}
             placeholder={isExpert ? "Расскажите о себе, своем опыте и специализации" : "Расскажите немного о себе"} 
-            className={styles.textareaField} 
-            style={{ fontSize: 15 }} 
+            className={`${styles.textareaField} ${styles.profileModalTextarea}`} 
           />
         </Form.Item>
         
         
         {isExpert && (
           <>
-            <div style={{ 
-              padding: '16px', 
-              backgroundColor: '#f0f9ff', 
-              borderRadius: '8px', 
-              marginBottom: '16px',
-              border: '1px solid #0ea5e9'
-            }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#0369a1' }}>Профессиональная информация</h4>
-              <p style={{ margin: 0, fontSize: '14px', color: '#0369a1' }}>
+            <div className={styles.profileModalExpertInfo}>
+              <h4 className={styles.profileModalExpertTitle}>Профессиональная информация</h4>
+              <p className={styles.profileModalExpertText}>
                 Заполните дополнительные поля для экспертов
               </p>
             </div>
-            <div style={{ display: 'flex', gap: 16, flexDirection: isMobile ? 'column' : 'row' }}>
+            <div className={`${styles.profileModalExpertGrid} ${isMobile ? styles.profileModalExpertGridMobile : ''}`}>
               <Form.Item 
                 label="Опыт работы (лет)" 
                 name="experience_years" 
-                style={{ flex: 1 }}
+                className={styles.profileModalFlexField}
                 rules={[
                   { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' }
                 ]}
@@ -352,8 +284,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   }}
                   formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
                   controls={false}
-                  style={{ width: '100%'}} 
-                  className={styles.inputNumberField} 
+                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`} 
                   size="large"
                   placeholder="0"
                   onKeyPress={(e) => {
@@ -366,7 +297,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               <Form.Item 
                 label="Почасовая ставка (₽)" 
                 name="hourly_rate" 
-                style={{ flex: 1 }}
+                className={styles.profileModalFlexField}
                 rules={[
                   { type: 'number', min: 0, max: 100000, message: 'Ставка должна быть от 0 до 100000 ₽' }
                 ]}
@@ -383,8 +314,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   }}
                   formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
                   controls={false}
-                  style={{ width: '100%' }} 
-                  className={styles.inputNumberField} 
+                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`} 
                   size="large"
                   placeholder="0"
                   onKeyPress={(e) => {
@@ -396,7 +326,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               </Form.Item>
             </div>
             <Form.Item label="Образование" name="education">
-              <Input.TextArea rows={3} placeholder="Укажите ваше образование и квалификации" className={styles.textareaField} style={{ fontSize: 15 }} />
+              <Input.TextArea
+                rows={3}
+                placeholder="Укажите ваше образование и квалификации"
+                className={`${styles.textareaField} ${styles.profileModalTextarea}`}
+              />
             </Form.Item>
             <Form.Item label="Навыки" name="skills">
               <SkillsSelect />

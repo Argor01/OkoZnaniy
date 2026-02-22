@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import { getMediaUrl } from '../config/api';
 import SectionHeader from '../components/common/SectionHeader';
 import SurfaceCard from '../components/common/SurfaceCard';
+import styles from './UserProfile.module.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -61,7 +62,7 @@ const UserProfile: FC = () => {
 
   if (userLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className={styles.loadingContainer}>
         <Spin size="large" />
         <p>Загрузка профиля...</p>
       </div>
@@ -70,7 +71,7 @@ const UserProfile: FC = () => {
 
   if (userError || !userData) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className={styles.errorContainer}>
         <Alert
           message="Пользователь не найден"
           description="Профиль пользователя не существует или был удален."
@@ -87,47 +88,33 @@ const UserProfile: FC = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: '24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+    <div className={styles.page}>
+      <div className={styles.pageInner}>
         
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(-1)}
-          style={{ marginBottom: 16 }}
+          className={styles.backButton}
           size="large"
         >
           Назад
         </Button>
 
         <Card>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space direction="vertical" size="large" className={styles.fullWidth}>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className={styles.profileStack}>
               
               <Card 
-                style={{ 
-                  background: 'linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%)', 
-                  border: '2px solid #d3adf7',
-                  borderRadius: 16,
-                  boxShadow: '0 4px 12px rgba(114, 46, 209, 0.15)',
-                  padding: '8px 16px'
-                }}
-                styles={{ body: { padding: '16px 20px' } }}
+                className={styles.headerCard}
               >
-                <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text type="secondary" style={{ fontSize: 14, fontWeight: 600, color: '#722ed1' }}>
+                <Space direction="vertical" size={12} className={styles.fullWidth}>
+                  <div className={styles.headerRow}>
+                    <Text type="secondary" className={styles.profileLabel}>
                       ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
                     </Text>
                     <Tag 
-                      style={{ 
-                        fontSize: 11, 
-                        padding: '2px 8px',
-                        backgroundColor: 'rgba(114, 46, 209, 0.1)',
-                        color: '#722ed1',
-                        border: '1px solid rgba(114, 46, 209, 0.2)',
-                        borderRadius: 12
-                      }}
+                      className={styles.roleTag}
                     >
                       {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
                     </Tag>
@@ -137,51 +124,32 @@ const UserProfile: FC = () => {
                       <img
                         src={getMediaUrl(userData.avatar)}
                         alt="Аватар"
-                        style={{
-                          width: 72,
-                          height: 72,
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: '3px solid #722ed1',
-                          boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
-                        }}
+                        className={styles.avatarImage}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const fallback = target.parentElement?.querySelector('.avatar-fallback') as HTMLElement;
-                          if (fallback) fallback.style.display = 'flex';
+                          target.classList.add(styles.avatarImageHidden);
+                          const fallback = target.parentElement?.querySelector('[data-role="avatar-fallback"]') as HTMLElement;
+                          if (fallback) fallback.classList.remove(styles.avatarFallbackHidden);
                         }}
                       />
                     ) : null}
                     <div 
-                      className="avatar-fallback"
-                      style={{ 
-                        width: 72, 
-                        height: 72, 
-                        borderRadius: '50%', 
-                        backgroundColor: 'white',
-                        display: userData.avatar ? 'none' : 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 28,
-                        color: '#722ed1',
-                        border: '3px solid #722ed1',
-                        boxShadow: '0 2px 8px rgba(114, 46, 209, 0.2)'
-                      }}
+                      data-role="avatar-fallback"
+                      className={`${styles.avatarFallback} ${userData.avatar ? styles.avatarFallbackHidden : ''}`}
                     >
                       <UserOutlined />
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <Text style={{ fontSize: 20, fontWeight: 700, color: '#722ed1', margin: 0 }}>
+                      <div className={styles.nameRow}>
+                        <Text className={styles.nameText}>
                           {userData.first_name && userData.last_name 
                             ? `${userData.first_name} ${userData.last_name}`
                             : userData.username
                           }
                         </Text>
-                        {userData.is_verified && <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />}
+                        {userData.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
                       </div>
-                      <Text style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 6 }}>@{userData.username}</Text>
+                      <Text className={styles.usernameText}>@{userData.username}</Text>
                     </div>
                   </Space>
                 </Space>
@@ -190,80 +158,72 @@ const UserProfile: FC = () => {
               
               <SurfaceCard title={<SectionHeader title="РЕЙТИНГ И СТАТИСТИКА" />}>
                 {(statsLoading || expertStatsLoading) ? (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <div className={styles.statsLoading}>
                     <Spin size="large" />
                   </div>
                 ) : userData.role === 'expert' && expertStats ? (
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                    gap: 24 
-                  }}>
+                  <div className={styles.statsGrid}>
                     
-                    <div style={{ textAlign: 'center', padding: '16px' }}>
-                      <div style={{ fontSize: 48, fontWeight: 600, color: '#faad14', marginBottom: 8 }}>
+                    <div className={styles.statCardCenter}>
+                      <div className={styles.statValueRating}>
                         {expertStats.average_rating ? Number(expertStats.average_rating).toFixed(1) : 'Н/Д'}
                       </div>
-                      <Rate disabled value={Number(expertStats.average_rating) || 0} style={{ fontSize: 20, marginBottom: 8 }} />
-                      <div style={{ fontSize: 14, color: '#666' }}>
+                      <Rate disabled value={Number(expertStats.average_rating) || 0} className={styles.rateLarge} />
+                      <div className={styles.statLabel}>
                         Средний рейтинг
                       </div>
-                      <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+                      <div className={styles.statSubLabel}>
                         на основе {expertStats.completed_orders} заказов
                       </div>
                     </div>
 
                     
-                    <div style={{ padding: '16px' }}>
-                      <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
+                    <div className={styles.statCardBlock}>
+                      <div className={styles.statBlockTitle}>
+                        <div className={styles.statNumberLarge}>
                           {expertStats.total_orders}
                         </div>
-                        <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
+                        <div className={styles.statLabel}>Всего заказов</div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div className={`${styles.statRow} ${styles.statRowSpacing}`}>
                         <Text>Завершено:</Text>
-                        <Text strong style={{ color: '#52c41a' }}>{expertStats.completed_orders}</Text>
+                        <Text strong className={styles.statSuccess}>{expertStats.completed_orders}</Text>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className={styles.statRow}>
                         <Text>Успешность:</Text>
-                        <Text strong style={{ color: '#52c41a' }}>{Number(expertStats.success_rate || 0).toFixed(1)}%</Text>
+                        <Text strong className={styles.statSuccess}>{Number(expertStats.success_rate || 0).toFixed(1)}%</Text>
                       </div>
                     </div>
                   </div>
                 ) : ordersStats ? (
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                    gap: 24 
-                  }}>
+                  <div className={styles.statsGrid}>
                     
-                    <div style={{ textAlign: 'center', padding: '16px' }}>
-                      <div style={{ fontSize: 48, fontWeight: 600, color: '#1890ff', marginBottom: 8 }}>
+                    <div className={styles.statCardCenter}>
+                      <div className={styles.statValuePrimary}>
                         {ordersStats.success_rate.toFixed(1)}%
                       </div>
-                      <div style={{ fontSize: 14, color: '#666' }}>
+                      <div className={styles.statLabel}>
                         Успешность заказов
                       </div>
                     </div>
 
                     
-                    <div style={{ padding: '16px' }}>
-                      <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontSize: 32, fontWeight: 600, color: '#1890ff' }}>
+                    <div className={styles.statCardBlock}>
+                      <div className={styles.statBlockTitle}>
+                        <div className={styles.statNumberLarge}>
                           {ordersStats.total}
                         </div>
-                        <div style={{ fontSize: 14, color: '#666' }}>Всего заказов</div>
+                        <div className={styles.statLabel}>Всего заказов</div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className={styles.statRow}>
                         <Text>Завершено:</Text>
-                        <Text strong style={{ color: '#52c41a' }}>{ordersStats.completed}</Text>
+                        <Text strong className={styles.statSuccess}>{ordersStats.completed}</Text>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <Text type="secondary" style={{ fontSize: 16 }}>Статистика недоступна</Text>
+                  <div className={styles.statsEmpty}>
+                    <Text type="secondary" className={styles.statsEmptyText}>Статистика недоступна</Text>
                   </div>
                 )}
               </SurfaceCard>
@@ -273,21 +233,21 @@ const UserProfile: FC = () => {
             <div>
               
               {userData.bio && (
-                <SurfaceCard title="О себе" style={{ marginBottom: 16 }}>
+                <SurfaceCard title="О себе" className={styles.sectionMargin}>
                   <Paragraph>{userData.bio}</Paragraph>
                 </SurfaceCard>
               )}
 
               
               {userData.role === 'expert' && userData.education && (
-                <SurfaceCard title="Образование" style={{ marginBottom: 16 }}>
+                <SurfaceCard title="Образование" className={styles.sectionMargin}>
                   <Paragraph>{userData.education}</Paragraph>
                 </SurfaceCard>
               )}
 
               {(userData.role === 'expert' && (userData.experience_years || userData.hourly_rate)) && (
-                <SurfaceCard title="Дополнительно" style={{ marginBottom: 16 }}>
-                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                <SurfaceCard title="Дополнительно" className={styles.sectionMargin}>
+                  <Space direction="vertical" size={8} className={styles.fullWidth}>
                     {!!userData.experience_years && (
                       <Space size={8}>
                         <Text>Опыт работы:</Text>
@@ -306,8 +266,8 @@ const UserProfile: FC = () => {
 
               
               {userData.role === 'expert' && userData.skills && (
-                <SurfaceCard title="Навыки" style={{ marginBottom: 16 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <SurfaceCard title="Навыки" className={styles.sectionMargin}>
+                  <div className={styles.tagList}>
                     {userData.skills.split(',').map((skill: string, index: number) => (
                       <Tag key={index} color="green">
                         {skill.trim()}
@@ -319,7 +279,7 @@ const UserProfile: FC = () => {
 
               
               {userData.role === 'expert' && userData.portfolio_url && (
-                <SurfaceCard title="Портфолио" style={{ marginBottom: 16 }}>
+                <SurfaceCard title="Портфолио" className={styles.sectionMargin}>
                   <Button 
                     type="link" 
                     href={userData.portfolio_url} 
@@ -335,7 +295,7 @@ const UserProfile: FC = () => {
             
             {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
               <SurfaceCard title="Специализации">
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div className={styles.tagList}>
                   {userData.specializations.map(
                     (
                       spec: {
@@ -364,31 +324,24 @@ const UserProfile: FC = () => {
             {userData.role === 'expert' && (
               <Card 
                 title={`Отзывы (${reviews.length})`} 
-                style={{ 
-                  borderRadius: 12
-                }}
+                className={styles.reviewsCard}
               >
                 {reviewsLoading ? (
-                  <div style={{ textAlign: 'center', padding: '20px' }}>
+                  <div className={styles.reviewsLoading}>
                     <Spin />
                   </div>
                 ) : reviews.length === 0 ? (
-                  <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                  <div className={styles.reviewsEmpty}>
                     Нет отзывов
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className={styles.reviewsList}>
                     {reviews.map((review: ExpertReview) => (
                       <div 
                         key={review.id}
-                        style={{
-                          padding: 16,
-                          background: '#fafafa',
-                          borderRadius: 8,
-                          border: '1px solid #f0f0f0'
-                        }}
+                        className={styles.reviewItem}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div className={styles.reviewHeader}>
                           <div
                             role="button"
                             tabIndex={0}
@@ -396,35 +349,35 @@ const UserProfile: FC = () => {
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
                             }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                            className={styles.reviewUser}
                           >
                             <Avatar
                               size={32}
                               src={getMediaUrl(review.client.avatar)}
-                              icon={<UserOutlined style={{ fontSize: 16 }} />}
+                              icon={<UserOutlined className={styles.reviewAvatarIcon} />}
                             />
                             <div>
-                              <Text strong style={{ fontSize: 15, lineHeight: 1.2 }}>
+                              <Text strong className={styles.reviewUserName}>
                                 @{review.client.username || `user${review.client.id}`}
                               </Text>
                               <br />
-                              <Text type="secondary" style={{ fontSize: 12 }}>
+                              <Text type="secondary" className={styles.reviewUserMeta}>
                                 {review.client.first_name} {review.client.last_name}
                               </Text>
                             </div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <Rate disabled value={review.rating} style={{ fontSize: 14 }} />
+                          <div className={styles.reviewDate}>
+                            <Rate disabled value={review.rating} className={styles.reviewRate} />
                             <br />
-                            <Text type="secondary" style={{ fontSize: 12 }}>
+                            <Text type="secondary" className={styles.reviewUserMeta}>
                               {dayjs(review.created_at).format('DD.MM.YYYY')}
                             </Text>
                           </div>
                         </div>
-                        <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
+                        <Text type="secondary" className={styles.reviewOrderTitle}>
                           {review.order?.title}
                         </Text>
-                        <Paragraph style={{ margin: 0, fontSize: 14 }}>
+                        <Paragraph className={styles.reviewText}>
                           {review.text || review.comment}
                         </Paragraph>
                       </div>

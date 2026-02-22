@@ -65,8 +65,8 @@ const AdminDashboard: React.FC = () => {
   
   if (loading) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Layout className="adminPageLayout">
+        <Content className="adminPageCenter">
           <Spin size="large" />
         </Content>
       </Layout>
@@ -87,8 +87,8 @@ const AdminDashboard: React.FC = () => {
   
   if (user.role !== 'admin') {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ padding: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Layout className="adminPageLayout">
+        <Content className="adminPageCenterPadded">
           <Result
             status="403"
             title="Доступ запрещен"

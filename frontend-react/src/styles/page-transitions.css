@@ -45,6 +45,33 @@
   }
 }
 
+.page-transition {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.page-transition--in {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.page-transition--out {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pageTransitionOut 0.3s ease-in-out;
+}
+
+@keyframes pageTransitionOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
 .page-wrapper {
   animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }

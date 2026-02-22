@@ -160,8 +160,8 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
   return (
     <div>
       <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Title level={4} style={{ margin: 0 }}>Чат с дирекцией</Title>
+        <div className="arbitratorChatHeader">
+          <Title level={4} className="arbitratorChatTitle">Чат с дирекцией</Title>
           <Button
             icon={<ReloadOutlined />}
             onClick={() => refetch()}
@@ -171,7 +171,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
           </Button>
         </div>
 
-        <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="middle">
+        <Space direction="vertical" className="arbitratorStackSpace" size="middle">
           <Space wrap>
             <Input
               placeholder="Поиск по тексту сообщений..."
@@ -180,11 +180,11 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
               onChange={(e) => setSearchText(e.target.value)}
               onPressEnter={handleSearch}
               allowClear
-              style={{ width: 300 }}
+              className="arbitratorSearchInput"
             />
             <Select
               placeholder="Фильтр по обращению"
-              style={{ width: 250 }}
+              className="arbitratorClaimSelect"
               value={selectedClaimId}
               onChange={setSelectedClaimId}
               allowClear
@@ -214,17 +214,10 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
         <Divider />
 
         <div
-          style={{
-            maxHeight: '500px',
-            overflowY: 'auto',
-            marginBottom: 16,
-            padding: '8px',
-            border: '1px solid #f0f0f0',
-            borderRadius: '8px',
-          }}
+          className="arbitratorMessagesContainer"
         >
           {isLoading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div className="arbitratorEmptyState">
               <Spin size="large" />
             </div>
           ) : (
@@ -237,7 +230,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
                 onClaimClick={handleClaimClick}
               />
               {messagesData && messagesData.count > pageSize && (
-                <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <div className="arbitratorMessagesCount">
                   <Text type="secondary">
                     Показано {filteredMessages.length} из {messagesData.count} сообщений
                   </Text>
@@ -253,19 +246,19 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
         <div ref={messageFormRef}>
           <Card size="small" title={replyToMessage ? 'Ответ на сообщение' : 'Новое сообщение'}>
             {replyToMessage && (
-              <div style={{ marginBottom: 16, padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              <div className="arbitratorReplyBox">
                 <Text type="secondary">
                   Ответ на сообщение от {replyToMessage.sender.username} от{' '}
                   {new Date(replyToMessage.created_at).toLocaleString('ru-RU')}
                 </Text>
-                <div style={{ marginTop: 8 }}>
+                <div className="arbitratorReplyText">
                   <Text>{replyToMessage.text}</Text>
                 </div>
                 <Button
                   size="small"
                   type="link"
                   onClick={() => setReplyToMessage(null)}
-                  style={{ padding: 0, marginTop: 8 }}
+                  className="arbitratorReplyCancel"
                 >
                   Отменить ответ
                 </Button>

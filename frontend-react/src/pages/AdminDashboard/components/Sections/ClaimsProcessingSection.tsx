@@ -375,13 +375,13 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="claimsProcessingNumber">
             {record.claim_number}
           </div>
-          <div style={{ fontSize: '13px', marginBottom: 4 }}>
+          <div className="claimsProcessingTitle">
             {record.title}
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div className="claimsProcessingTagRow">
             <Tag color={getTypeColor(record.claim_type)}>
               {getTypeText(record.claim_type)}
             </Tag>
@@ -403,21 +403,21 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       width: 200,
       render: (record: Claim) => (
         <div>
-          <div style={{ marginBottom: 8 }}>
-            <Text strong style={{ fontSize: '11px' }}>Клиент:</Text>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div className="claimsProcessingParticipantBlock">
+            <Text strong className="claimsProcessingParticipantLabel">Клиент:</Text>
+            <div className="claimsProcessingParticipantRow">
               <Avatar size={32} icon={<UserOutlined />} />
-              <span style={{ fontSize: '12px' }}>
+              <span className="claimsProcessingParticipantName">
                 {record.user.first_name} {record.user.last_name}
               </span>
             </div>
           </div>
           {record.expert && (
             <div>
-              <Text strong style={{ fontSize: '11px' }}>Эксперт:</Text>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Text strong className="claimsProcessingParticipantLabel">Эксперт:</Text>
+              <div className="claimsProcessingParticipantRow">
                 <Avatar size={32} icon={<UserOutlined />} />
-                <span style={{ fontSize: '12px' }}>
+                <span className="claimsProcessingParticipantName">
                   {record.expert.first_name} {record.expert.last_name}
                 </span>
               </div>
@@ -431,11 +431,11 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'status',
       width: 120,
       render: (record: Claim) => (
-        <div style={{ textAlign: 'center' }}>
+        <div className="claimsProcessingStatusCell">
           <Tag color={getStatusColor(record.status)}>
             {getStatusText(record.status)}
           </Tag>
-          <div style={{ fontSize: '11px', color: '#666', marginTop: 4 }}>
+          <div className="claimsProcessingStatusMeta">
             {record.days_open} дн.
           </div>
         </div>
@@ -447,10 +447,10 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       width: 120,
       render: (record: Claim) => (
         <div>
-          <div style={{ fontWeight: 500, fontSize: '12px' }}>
+          <div className="claimsProcessingAdminName">
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" style={{ fontSize: '10px' }}>
+          <Text type="secondary" className="claimsProcessingAdminHandle">
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -461,14 +461,11 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'deadline',
       width: 100,
       render: (record: Claim) => (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            fontSize: '12px',
-            color: dayjs().isAfter(dayjs(record.deadline)) ? '#ff4d4f' : '#666'
-          }}>
+        <div className="claimsProcessingDeadlineCell">
+          <div className={dayjs().isAfter(dayjs(record.deadline)) ? 'claimsProcessingDeadlineDate claimsProcessingDeadlineDateOverdue' : 'claimsProcessingDeadlineDate'}>
             {dayjs(record.deadline).format('DD.MM')}
           </div>
-          <div style={{ fontSize: '10px', color: '#999' }}>
+          <div className="claimsProcessingDeadlineTime">
             {dayjs(record.deadline).format('HH:mm')}
           </div>
         </div>
@@ -480,9 +477,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'messages_count',
       width: 80,
       render: (count: number) => (
-        <div style={{ textAlign: 'center' }}>
+        <div className="claimsProcessingMessagesCell">
           <Badge count={count} showZero>
-            <MessageOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
+            <MessageOutlined className="claimsProcessingMessageIcon" />
           </Badge>
         </div>
       ),
@@ -548,7 +545,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="claimsProcessingHeader">
           <Title level={4}>Обработка претензий</Title>
           <Text type="secondary">
             Комплексная система обработки претензий и споров между пользователями
@@ -556,21 +553,21 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </div>
 
         
-        <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Row gutter={16} className="claimsProcessingStatsRow">
           <Col span={6}>
             <Statistic title="Всего претензий" value={stats.total} />
           </Col>
           <Col span={6}>
-            <Statistic title="Новые" value={stats.new} valueStyle={{ color: '#1890ff' }} />
+            <Statistic title="Новые" value={stats.new} className="claimsProcessingStatNew" />
           </Col>
           <Col span={6}>
-            <Statistic title="В расследовании" value={stats.investigating} valueStyle={{ color: '#faad14' }} />
+            <Statistic title="В расследовании" value={stats.investigating} className="claimsProcessingStatInvestigating" />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Просроченные" 
               value={stats.overdue} 
-              valueStyle={{ color: stats.overdue > 0 ? '#ff4d4f' : '#52c41a' }} 
+              className={stats.overdue > 0 ? 'claimsProcessingStatOverdue' : 'claimsProcessingStatOverdueOk'}
             />
           </Col>
         </Row>
@@ -581,15 +578,15 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             description={`${stats.overdue} претензий просрочены и требуют немедленного внимания`}
             type="error"
             showIcon
-            style={{ marginBottom: 16 }}
+            className="claimsProcessingOverdueAlert"
           />
         )}
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="claimsProcessingFiltersRow">
           <Search
             placeholder="Поиск по претензиям"
             allowClear
-            style={{ width: 300 }}
+            className="claimsProcessingSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -597,7 +594,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           
           <Select
             placeholder="Тип претензии"
-            style={{ width: 150 }}
+            className="claimsProcessingSelectType"
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -613,7 +610,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Статус"
-            style={{ width: 150 }}
+            className="claimsProcessingSelectStatus"
             value={selectedStatus}
             onChange={setSelectedStatus}
           >
@@ -628,7 +625,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="claimsProcessingSelectPriority"
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -641,7 +638,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Администратор"
-            style={{ width: 150 }}
+            className="claimsProcessingSelectAdmin"
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -655,7 +652,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            style={{ width: 250 }}
+            className="claimsProcessingDateRange"
           />
         </div>
 
@@ -720,7 +717,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         {selectedClaim && (
           <Tabs activeKey={activeTab} onChange={setActiveTab}>
             <TabPane tab="Обзор" key="overview">
-              <div style={{ marginBottom: 16 }}>
+              <div className="claimsProcessingModalHeader">
                 <Title level={5}>{selectedClaim.title}</Title>
                 <Space>
                   <Tag color={getTypeColor(selectedClaim.claim_type)}>
@@ -735,18 +732,18 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                 </Space>
               </div>
 
-              <div style={{ marginBottom: 16 }}>
+              <div className="claimsProcessingSectionBlock">
                 <Text strong>Описание:</Text>
-                <Paragraph style={{ marginTop: 8 }}>
+                <Paragraph className="claimsProcessingParagraph">
                   {selectedClaim.description}
                 </Paragraph>
               </div>
 
               <Row gutter={24}>
                 <Col span={12}>
-                  <div style={{ marginBottom: 16 }}>
+                  <div className="claimsProcessingSectionBlock">
                     <Text strong>Клиент:</Text>
-                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="claimsProcessingInfoRow">
                       <Avatar size={32} icon={<UserOutlined />} />
                       <div>
                         <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -766,9 +763,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
                 <Col span={12}>
                   {selectedClaim.expert && (
-                    <div style={{ marginBottom: 16 }}>
+                    <div className="claimsProcessingSectionBlock">
                       <Text strong>Эксперт:</Text>
-                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className="claimsProcessingInfoRow">
                         <Avatar size={32} icon={<UserOutlined />} />
                         <div>
                           <div>{selectedClaim.expert.first_name} {selectedClaim.expert.last_name}</div>
@@ -789,9 +786,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
               </Row>
 
               {selectedClaim.order && (
-                <div style={{ marginBottom: 16 }}>
+                <div className="claimsProcessingSectionBlock">
                   <Text strong>Связанный заказ:</Text>
-                  <div style={{ marginTop: 8, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 6 }}>
+                  <div className="claimsProcessingOrderBox">
                     <div>ID: {selectedClaim.order.id}</div>
                     <div>Название: {selectedClaim.order.title}</div>
                     <div>Сумма: {selectedClaim.order.amount.toLocaleString()} ₽</div>
@@ -800,7 +797,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+              <div className="claimsProcessingMetaRow">
                 <span>Создана: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
                 <span>Дедлайн: {dayjs(selectedClaim.deadline).format('DD.MM.YYYY HH:mm')}</span>
                 <span>Дней открыта: {selectedClaim.days_open}</span>
@@ -816,12 +813,12 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                   >
                     <div>
                       <Text strong>{action.description}</Text>
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                      <div className="claimsProcessingActionMeta">
                         {action.performed_by.first_name} {action.performed_by.last_name} • 
                         {dayjs(action.performed_at).format('DD.MM.YYYY HH:mm')}
                       </div>
                       {action.notes && (
-                        <div style={{ fontSize: '12px', fontStyle: 'italic', marginTop: 4 }}>
+                        <div className="claimsProcessingActionNote">
                           Примечание: {action.notes}
                         </div>
                       )}
@@ -847,13 +844,13 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                       description={
                         <div>
                           <Tag color="blue">{evidence.type}</Tag>
-                          <span style={{ fontSize: '12px', color: '#666' }}>
+                          <span className="claimsProcessingEvidenceMeta">
                             Загружено {evidence.uploaded_by === 'admin' ? 'администратором' : 
                                      evidence.uploaded_by === 'user' ? 'клиентом' : 'экспертом'} • 
                             {dayjs(evidence.uploaded_at).format('DD.MM.YYYY HH:mm')}
                           </span>
                           {evidence.verified && (
-                            <Tag color="green" style={{ marginLeft: 8 }}>
+                            <Tag color="green" className="claimsProcessingEvidenceVerified">
                               Проверено
                             </Tag>
                           )}
@@ -1013,7 +1010,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             <DatePicker 
               showTime 
               placeholder="Выберите дату и время"
-              style={{ width: '100%' }}
+              className="claimsProcessingCallDatePicker"
             />
           </Form.Item>
 
@@ -1034,11 +1031,6 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </Form>
       </Modal>
 
-      <style>{`
-        .overdue-row {
-          background-color: #fff2f0 !important;
-        }
-      `}</style>
     </div>
   );
 };

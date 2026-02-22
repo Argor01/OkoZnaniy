@@ -143,23 +143,16 @@ const MessageList: React.FC<MessageListProps> = ({
         return (
           <List.Item
             key={message.id}
-            style={{
-              backgroundColor: isUnread ? '#f0f7ff' : message.sender.role === 'director' ? '#fafafa' : 'transparent',
-              padding: '16px',
-              marginBottom: '8px',
-              borderRadius: '8px',
-              border: isUnread ? '2px solid #1890ff' : '1px solid #f0f0f0',
-              borderLeft: message.sender.role === 'director' ? '4px solid #1890ff' : '4px solid #1890ff',
-            }}
+            className={`arbitratorMessageItem${isUnread ? ' arbitratorMessageItemUnread' : ''}${
+              !isUnread && message.sender.role === 'director' ? ' arbitratorMessageItemDirector' : ''
+            }`}
             onMouseEnter={() => handleMarkAsRead(message)}
           >
             <List.Item.Meta
               avatar={
                 <Avatar
                   icon={<UserOutlined />}
-                  style={{
-                    backgroundColor: isCurrentUser ? '#1890ff' : '#1890ff',
-                  }}
+                  className="arbitratorMessageAvatar"
                 />
               }
               title={
@@ -179,17 +172,14 @@ const MessageList: React.FC<MessageListProps> = ({
                 </Space>
               }
               description={
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                <Space direction="vertical" size="small" className="arbitratorSpaceFull">
                   <Text type="secondary">
                     {dayjs(message.created_at).format('DD.MM.YYYY HH:mm')}
                   </Text>
                   {message.claim_id && (
                     <Text
                       type="secondary"
-                      style={{
-                        cursor: onClaimClick ? 'pointer' : 'default',
-                        textDecoration: onClaimClick ? 'underline' : 'none',
-                      }}
+                      className={onClaimClick ? 'arbitratorClaimLink' : 'arbitratorClaimLinkDisabled'}
                       onClick={() => onClaimClick && onClaimClick(message.claim_id!)}
                     >
                       Связано с обращением #{message.claim_id}
@@ -198,12 +188,12 @@ const MessageList: React.FC<MessageListProps> = ({
                 </Space>
               }
             />
-            <Paragraph style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <Paragraph className="arbitratorParagraphSpacing">
               {message.text}
             </Paragraph>
             {message.attachments && message.attachments.length > 0 && (
-              <div style={{ marginTop: '8px' }}>
-                <Text type="secondary" style={{ marginRight: '8px' }}>
+              <div className="arbitratorAttachments">
+                <Text type="secondary" className="arbitratorAttachmentLabel">
                   <PaperClipOutlined /> Прикрепленные файлы:
                 </Text>
                 <Space>
@@ -220,7 +210,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 </Space>
               </div>
             )}
-            <div style={{ marginTop: '8px' }}>
+            <div className="arbitratorActionsRow">
               <Space>
                 {!isCurrentUser && (
                   <Button

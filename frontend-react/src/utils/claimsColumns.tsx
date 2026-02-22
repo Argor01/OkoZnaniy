@@ -50,7 +50,7 @@ export const getCommonClaimColumns = () => {
       render: (user: ClaimUser) => (
         <div>
           <div><strong>{user.username}</strong></div>
-          <div style={{ fontSize: '12px', color: '#666' }}>{user.email}</div>
+          <div className="claimUserEmail">{user.email}</div>
         </div>
       ),
     },
@@ -119,10 +119,10 @@ export const renderClaimDetailModal = (record: ClaimRecord) => {
           <>
             <p><strong>Сообщения:</strong></p>
             {record.messages.map((msg) => (
-              <div key={msg.id} style={{ marginBottom: 8, padding: 8, background: '#f5f5f5', borderRadius: 4 }}>
-                <div style={{ fontSize: '12px', color: '#666' }}>
+              <div key={msg.id} className="claimMessageItem">
+                <div className="claimMessageMeta">
                   {msg.author.username} - {dayjs(msg.createdAt).format('DD.MM.YYYY HH:mm')}
-                  {msg.isInternal && <Tag color="orange" style={{ marginLeft: 8 }}>Внутренняя</Tag>}
+                  {msg.isInternal && <Tag color="orange" className="claimInternalTag">Внутренняя</Tag>}
                 </div>
                 <div>{msg.message}</div>
               </div>
@@ -135,20 +135,17 @@ export const renderClaimDetailModal = (record: ClaimRecord) => {
             description="Ожидается решение от дирекции. Проверьте раздел 'Коммуникация с дирекцией' для получения обновлений."
             type="warning"
             showIcon
-            style={{ marginTop: 16 }}
+            className="claimWarningSpacing"
           />
         )}
         {record.resolution && (
           <>
             <p><strong>Решение:</strong></p>
-            <p style={{ background: '#f0f9ff', padding: 12, borderRadius: 4 }}>{record.resolution}</p>
+            <p className="claimResolution">{record.resolution}</p>
           </>
         )}
       </div>
     ),
     width: 700,
-    maskStyle: {
-      backdropFilter: 'blur(4px)',
-    },
   });
 };

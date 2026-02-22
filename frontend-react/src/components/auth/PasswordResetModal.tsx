@@ -64,7 +64,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
     >
       {step === 'email' ? (
         <div>
-          <p className="text-muted" style={{ marginBottom: '5px' }}>
+          <p className="text-muted passwordResetHint">
             Введите email для получения кода восстановления
           </p>
           <Input
@@ -82,7 +82,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             onClick={onRequestCode}
             size="large"
             block
-            style={{ marginTop: '16px' }}
+            className="passwordResetPrimaryAction"
           >
             Отправить код
           </Button>
@@ -94,7 +94,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           </p>
           
           
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
+          <div className="resetCodeRow">
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -106,24 +106,13 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 onChange={(e) => onCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={loading}
-                style={{
-                  width: '45px',
-                  height: '50px',
-                  fontSize: '24px',
-                  fontWeight: '500',
-                  border: '2px solid #d9d9d9',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  lineHeight: '46px',
-                  padding: '0',
-                  outline: 'none',
-                }}
+                className="resetCodeInput"
               />
             ))}
           </div>
 
           
-          <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+          <div className="resetActionsRow">
             <Button onClick={onBackToEmail} disabled={loading}>
               ← Назад
             </Button>
@@ -131,7 +120,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               type="primary"
               loading={loading}
               onClick={onVerifyCode}
-              style={{ flex: 1 }}
+              className="resetActionGrow"
               size="large"
             >
               Подтвердить код
@@ -140,7 +129,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
         </div>
       ) : (
         <div>
-          <p className="text-muted" style={{ marginBottom: '5px' }}>
+          <p className="text-muted passwordResetHint">
             Введите новый пароль
           </p>
 
@@ -151,7 +140,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             onChange={(e) => onNewPasswordChange(e.target.value)}
             size="large"
             disabled={loading}
-            style={{ marginBottom: '12px' }}
+            className="passwordResetInput"
           />
           <Input.Password
             prefix={<LockOutlined />}
@@ -163,7 +152,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             disabled={loading}
           />
 
-          <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+          <div className="resetActionsRow">
             <Button onClick={onBackToCode} disabled={loading}>
               ← Назад
             </Button>
@@ -171,7 +160,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               type="primary"
               loading={loading}
               onClick={onResetPassword}
-              style={{ flex: 1 }}
+              className="resetActionGrow"
               size="large"
             >
               Сбросить пароль

@@ -99,11 +99,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   return (
     <Modal
       title={
-        <div style={{ 
-          fontSize: isMobile ? 18 : 24, 
-          fontWeight: 600,
-          color: '#1f2937'
-        }}>
+        <div className={`${styles.specializationModalTitle} ${isMobile ? styles.specializationModalTitleMobile : styles.specializationModalTitleDesktop}`}>
           {editingSpecialization ? 'Редактировать специализацию' : 'Добавить специализацию'}
         </div>
       }
@@ -114,61 +110,14 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       okText={editingSpecialization ? 'Сохранить' : 'Добавить'}
       cancelText="Отмена"
       okButtonProps={{
-        className: styles.buttonPrimary,
+        className: `${styles.buttonPrimary} ${styles.specializationModalButton} ${isMobile ? styles.specializationModalButtonMobile : styles.specializationModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
-        style: { 
-          borderRadius: isMobile ? 8 : 12,
-          height: isMobile ? 40 : 44,
-          fontSize: isMobile ? 14 : 16,
-          fontWeight: 500
-        }
       }}
       cancelButtonProps={{
-        className: styles.buttonSecondary,
+        className: `${styles.buttonSecondary} ${styles.specializationModalButton} ${isMobile ? styles.specializationModalButtonMobile : styles.specializationModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
-        style: { 
-          borderRadius: isMobile ? 8 : 12,
-          height: isMobile ? 40 : 44,
-          fontSize: isMobile ? 14 : 16,
-          fontWeight: 500
-        }
       }}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 16 : 24, 
-          padding: 0,
-          overflow: 'hidden',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-          margin: isMobile ? '16px' : 'auto',
-          maxWidth: isMobile ? 'calc(100% - 32px)' : '600px'
-        },
-        header: {
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          padding: isMobile ? '16px 20px' : '24px 32px',
-          borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? '16px 16px 0 0' : '24px 24px 0 0'
-        },
-        body: {
-          padding: isMobile ? '20px' : '32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          maxHeight: isMobile ? 'calc(100vh - 200px)' : 'auto',
-          overflowY: isMobile ? 'auto' : 'visible'
-        },
-        footer: {
-          padding: isMobile ? '16px 20px' : '24px 32px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderTop: '1px solid rgba(102, 126, 234, 0.1)',
-          borderRadius: isMobile ? '0 0 16px 16px' : '0 0 24px 24px'
-        }
-      }}
+      wrapClassName={`${styles.specializationModalWrap} ${isMobile ? styles.specializationModalWrapMobile : styles.specializationModalWrapDesktop}`}
     >
       <Form
         form={form}
@@ -207,11 +156,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           />
         </Form.Item>
         
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
-          gap: isMobile ? 12 : 16 
-        }}>
+        <div className={`${styles.specializationModalGrid} ${isMobile ? styles.specializationModalGridMobile : styles.specializationModalGridDesktop}`}>
           <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
@@ -231,8 +176,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               }}
               formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
               controls={false}
-              style={{ width: '100%' }}
-              className={styles.inputField}
+              className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
               size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
@@ -262,8 +206,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
               controls={false}
               step={100}
-              style={{ width: '100%' }}
-              className={styles.inputField}
+              className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
               size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
@@ -291,8 +234,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           <Input.TextArea 
             rows={isMobile ? 3 : 4} 
             placeholder="Опишите ваш опыт в этой области"
-            className={styles.textareaField}
-            style={{ fontSize: isMobile ? 14 : 15 }}
+            className={`${styles.textareaField} ${isMobile ? styles.specializationModalTextareaMobile : styles.specializationModalTextareaDesktop}`}
           />
         </Form.Item>
       </Form>

@@ -129,7 +129,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
         label="Текст сообщения"
         rules={[{ required: true, message: 'Введите текст сообщения' }]}
       >
-        <div style={{ position: 'relative' }}>
+        <div className="arbitratorMessageFormField">
           <TextArea
             ref={textAreaRef}
             rows={4}
@@ -143,15 +143,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               shape="circle"
               icon={<PaperClipOutlined />}
               onClick={handleAttachClick}
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 108,
-                width: 40,
-                height: 40,
-                border: '1px solid #d1d5db',
-                background: '#fff',
-              }}
+              className="arbitratorMessageActionButton arbitratorMessageAttachButton"
             />
           </Upload>
           <Popover
@@ -171,15 +163,7 @@ const MessageForm: React.FC<MessageFormProps> = ({
               type="default"
               shape="circle"
               icon={<SmileOutlined />}
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 60,
-                width: 40,
-                height: 40,
-                border: '1px solid #d1d5db',
-                background: '#fff',
-              }}
+              className="arbitratorMessageActionButton arbitratorMessageEmojiButton"
             />
           </Popover>
         </div>

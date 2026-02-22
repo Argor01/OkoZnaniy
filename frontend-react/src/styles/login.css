@@ -20,6 +20,85 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
   max-height: calc(100vh - 48px);
 }
+.loginPageCenter {
+  display: flex;
+  justify-content: center;
+}
+.authCardNarrow {
+  max-width: 520px;
+  width: 100%;
+}
+.authRightFull {
+  width: 100%;
+}
+.resetTitle {
+  margin-bottom: 8px;
+}
+.resetDescription {
+  margin-bottom: 16px;
+}
+.socialLoginTitle {
+  text-align: center;
+  margin-bottom: 15px;
+}
+.socialLoginRow {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+.socialLoginIcon {
+  width: 32px;
+  height: 32px;
+}
+.verificationModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.verificationActions {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.verificationActionsRight {
+  display: flex;
+  gap: 8px;
+}
+.passwordResetHint {
+  margin-bottom: 5px;
+}
+.passwordResetPrimaryAction {
+  margin-top: 16px;
+}
+.resetCodeRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.resetCodeInput {
+  width: 45px;
+  height: 50px;
+  font-size: 24px;
+  font-weight: 500;
+  border: 2px solid #d9d9d9;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 46px;
+  padding: 0;
+  outline: none;
+}
+.resetActionsRow {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+.resetActionGrow {
+  flex: 1;
+}
+.passwordResetInput {
+  margin-bottom: 12px;
+}
 
 
 .auth-left {
@@ -125,12 +204,18 @@
   animation: bubbleInRight 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform, opacity;
 }
+.bubble-right-delay {
+  animation-delay: 4065ms;
+}
 
 .bubble-left-2 {
   grid-column: 1;
   grid-row: 3;
   justify-self: start;
   animation: bubbleInLeft 900ms cubic-bezier(0.22, 1, 0.36, 1) both, bubbleGlow 1800ms ease-in-out 1 both;
+}
+.bubble-left-2-delay {
+  animation-delay: 6195ms;
 }
 .bubble-left::after {
   content: '';
@@ -185,6 +270,9 @@
   opacity: 0;
   transform: translateX(-40px);
   animation: sendFly 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.send-ellipsis-delay {
+  animation-delay: 2765ms;
 }
 .send-ellipsis .dot {
   width: 6px;

@@ -1,4 +1,4 @@
-﻿
+
 
 
 .container {
@@ -29,6 +29,12 @@
   color: #1f2937;
   font-weight: 600;
   margin: 0;
+}
+
+.pageTitle {
+  margin: 0 0 24px 0;
+  color: #1f2937;
+  font-weight: 600;
 }
 
 

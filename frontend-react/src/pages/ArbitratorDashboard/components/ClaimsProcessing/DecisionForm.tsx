@@ -103,7 +103,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           ]}
         >
           <InputNumber
-            style={{ width: '100%' }}
+            className="arbitratorSelectFull"
             placeholder="Введите сумму возврата"
             min={1}
             max={orderAmount}

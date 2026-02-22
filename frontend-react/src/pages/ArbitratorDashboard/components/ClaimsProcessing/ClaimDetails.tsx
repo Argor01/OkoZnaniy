@@ -159,7 +159,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             bordered
             column={2}
             size="small"
-            style={{ marginBottom: 24 }}
+            className="arbitratorSectionSpacing"
           >
             <Descriptions.Item label="Номер обращения">
               <Text strong>#{claim.id}</Text>
@@ -201,7 +201,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
           <Title level={5}>
             <FileTextOutlined /> Информация о заказе
           </Title>
-          <Descriptions bordered column={2} size="small" style={{ marginBottom: 24 }}>
+          <Descriptions bordered column={2} size="small" className="arbitratorSectionSpacing">
             <Descriptions.Item label="Номер заказа">
               <Text strong>#{claim.order.id}</Text>
             </Descriptions.Item>
@@ -209,7 +209,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
               {claim.order.title}
             </Descriptions.Item>
             <Descriptions.Item label="Описание" span={2}>
-              <Paragraph style={{ margin: 0 }}>{claim.order.description}</Paragraph>
+              <Paragraph className="arbitratorParagraphReset">{claim.order.description}</Paragraph>
             </Descriptions.Item>
             <Descriptions.Item label="Сумма">
               <Text strong>{claim.order.amount.toLocaleString()} ₽</Text>
@@ -228,7 +228,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
           <Title level={5}>
             <UserOutlined /> Информация о клиенте
           </Title>
-          <Descriptions bordered column={2} size="small" style={{ marginBottom: 24 }}>
+          <Descriptions bordered column={2} size="small" className="arbitratorSectionSpacing">
             <Descriptions.Item label="Имя пользователя">
               {claim.client.username}
             </Descriptions.Item>
@@ -247,7 +247,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
               <Title level={5}>
                 <UserOutlined /> Информация об эксперте
               </Title>
-              <Descriptions bordered column={2} size="small" style={{ marginBottom: 24 }}>
+              <Descriptions bordered column={2} size="small" className="arbitratorSectionSpacing">
                 <Descriptions.Item label="Имя пользователя">
                   {claim.expert.username}
                 </Descriptions.Item>
@@ -265,15 +265,15 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
 
           <Title level={5}>История коммуникации</Title>
           {claim.messages && claim.messages.length > 0 ? (
-            <Timeline style={{ marginBottom: 24 }}>
+            <Timeline className="arbitratorSectionSpacing">
               {claim.messages.map((message) => (
                 <Timeline.Item key={message.id} color="blue">
                   <div>
                     <Text strong>{message.sender.username}</Text>
-                    <Text type="secondary" style={{ marginLeft: 8 }}>
+                    <Text type="secondary" className="arbitratorTimelineDate">
                       ({dayjs(message.created_at).format('DD.MM.YYYY HH:mm')})
                     </Text>
-                    <Paragraph style={{ marginTop: 8, marginBottom: 0 }}>
+                    <Paragraph className="arbitratorParagraphTop">
                       {message.text}
                     </Paragraph>
                   </div>
@@ -284,14 +284,14 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             <Empty
               description="Сообщений нет"
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              style={{ marginBottom: 24 }}
+              className="arbitratorSectionSpacing"
             />
           )}
 
           {claim.attachments && claim.attachments.length > 0 && (
             <>
               <Title level={5}>Прикрепленные файлы</Title>
-              <Space direction="vertical" style={{ width: '100%', marginBottom: 24 }}>
+              <Space direction="vertical" className="arbitratorSpaceFullSpacing">
                 {claim.attachments.map((attachment) => (
                   <Alert
                     key={attachment.id}
@@ -318,7 +318,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                 description={(claim as any).reason || (claim as any).client_comments}
                 type="warning"
                 showIcon
-                style={{ marginBottom: 24 }}
+                className="arbitratorAlertSpacing"
               />
             </>
           )}
@@ -331,14 +331,14 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                 message={`Тип конфликта: ${(claim as any).conflict_type}`}
                 description={
                   <div>
-                    <Paragraph style={{ marginBottom: 8 }}>
+                    <Paragraph className="arbitratorParagraphBottom">
                       <Text strong>Причина отмены:</Text> {(claim as any).cancellation_reason}
                     </Paragraph>
-                    <Paragraph style={{ marginBottom: 8 }}>
+                    <Paragraph className="arbitratorParagraphBottom">
                       <Text strong>Жалоба клиента:</Text> {(claim as any).client_complaint}
                     </Paragraph>
                     {(claim as any).expert_complaint && (
-                      <Paragraph style={{ marginBottom: 0 }}>
+                      <Paragraph className="arbitratorParagraphReset">
                         <Text strong>Жалоба эксперта:</Text> {(claim as any).expert_complaint}
                       </Paragraph>
                     )}
@@ -346,7 +346,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                 }
                 type="error"
                 showIcon
-                style={{ marginBottom: 24 }}
+                className="arbitratorAlertSpacing"
               />
             </>
           )}
@@ -356,7 +356,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
             <>
               <Divider />
               <Title level={5}>Решение арбитра</Title>
-              <Descriptions bordered column={1} size="small" style={{ marginBottom: 24 }}>
+              <Descriptions bordered column={1} size="small" className="arbitratorSectionSpacing">
                 <Descriptions.Item label="Тип решения">
                   <Tag color={
                     claim.decision.decision_type === 'full_refund' ? 'green' :
@@ -377,16 +377,16 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                   </Descriptions.Item>
                 )}
                 <Descriptions.Item label="Обоснование">
-                  <Paragraph style={{ margin: 0 }}>{claim.decision.reasoning}</Paragraph>
+                  <Paragraph className="arbitratorParagraphReset">{claim.decision.reasoning}</Paragraph>
                 </Descriptions.Item>
                 {claim.decision.client_comment && (
                   <Descriptions.Item label="Комментарий для клиента">
-                    <Paragraph style={{ margin: 0 }}>{claim.decision.client_comment}</Paragraph>
+                    <Paragraph className="arbitratorParagraphReset">{claim.decision.client_comment}</Paragraph>
                   </Descriptions.Item>
                 )}
                 {claim.decision.expert_comment && (
                   <Descriptions.Item label="Комментарий для эксперта">
-                    <Paragraph style={{ margin: 0 }}>{claim.decision.expert_comment}</Paragraph>
+                    <Paragraph className="arbitratorParagraphReset">{claim.decision.expert_comment}</Paragraph>
                   </Descriptions.Item>
                 )}
                 <Descriptions.Item label="Требуется согласование">
@@ -407,7 +407,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                 )}
                 {claim.decision.approval_comment && (
                   <Descriptions.Item label="Комментарий дирекции">
-                    <Paragraph style={{ margin: 0 }}>{claim.decision.approval_comment}</Paragraph>
+                    <Paragraph className="arbitratorParagraphReset">{claim.decision.approval_comment}</Paragraph>
                   </Descriptions.Item>
                 )}
                 <Descriptions.Item label="Дата решения">
@@ -419,7 +419,8 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
         </div>
       ),
     },
-  ];
+  ];
+
   if (showDecisionForm && claim.status !== 'completed') {
     tabItems.push({
       key: 'decision',
@@ -438,7 +439,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
       label: 'Действия',
       children: (
         <div>
-          <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Space direction="vertical" className="arbitratorSpaceFull" size="large">
             <div>
               <Title level={5}>
                 <QuestionCircleOutlined /> Запросить дополнительную информацию
@@ -524,10 +525,6 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
       open={visible}
       onCancel={onClose}
       width={1000}
-      maskStyle={{
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-      }}
       footer={[
         <Button key="close" onClick={onClose}>
           Закрыть
@@ -544,7 +541,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
         ),
       ].filter(Boolean)}
     >
-      <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+      <div className="arbitratorTabsContainer">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}

@@ -14,9 +14,7 @@ interface FriendsTabProps {
 }
 
 
-const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-
-const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
+const getAvatarColorClass = (id: number) => styles[`friendAvatarColor${id % 7}`];
 
 const getInitials = (firstName?: string, lastName?: string, username?: string) => {
   if (firstName && lastName) {
@@ -39,9 +37,9 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
 
   if (isLoading) {
     return (
-      <div className={styles.sectionCard} style={{ textAlign: 'center', padding: 40 }}>
+      <div className={`${styles.sectionCard} ${styles.friendsLoadingCard}`}>
         <Spin size="large" />
-        <Text style={{ display: 'block', marginTop: 16 }}>Загрузка пользователей...</Text>
+        <Text className={styles.friendsLoadingText}>Загрузка пользователей...</Text>
       </div>
     );
   }
@@ -61,82 +59,44 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
     <div className={styles.sectionCard}>
       <div className={styles.sectionCardHeader}>
         <h2 className={styles.sectionTitle}>Последние пользователи</h2>
-        <Text type="secondary" style={{ fontSize: 14 }}>
+        <Text type="secondary" className={styles.friendsSubtitle}>
           Пользователи, которые недавно заходили на сайт
         </Text>
       </div>
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: isMobile ? 12 : 16 
-      }}>
+      <div className={`${styles.friendsGrid} ${isMobile ? styles.friendsGridMobile : styles.friendsGridDesktop}`}>
         {recentUsers.map((user: User) => (
           <div 
             key={user.id} 
-            style={{ 
-              background: '#ffffff',
-              border: '1px solid #e5e7eb',
-              borderRadius: 16,
-              padding: isMobile ? 16 : 20,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
-            }}
-            onMouseEnter={(e) => {
-              if (!isMobile) {
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(102, 126, 234, 0.15)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#667eea';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isMobile) {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = '#e5e7eb';
-              }
-            }}
+            className={`${styles.friendCard} ${isMobile ? styles.friendCardMobile : styles.friendCardDesktop}`}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 16 }}>
+            <div className={styles.friendCardHeader}>
               <Avatar 
                 size={isMobile ? 72 : 80} 
                 src={user.avatar}
-                style={{ 
-                  backgroundColor: getAvatarColor(user.id),
-                  fontSize: isMobile ? 28 : 32,
-                  fontWeight: 600,
-                  marginBottom: 12,
-                  border: '3px solid #fff',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                }}
+                className={`${styles.friendAvatar} ${getAvatarColorClass(user.id)} ${isMobile ? styles.friendAvatarMobile : styles.friendAvatarDesktop}`}
               >
                 {!user.avatar && getInitials(user.first_name, user.last_name, user.username)}
               </Avatar>
-              <Text strong style={{ fontSize: isMobile ? 16 : 18, display: 'block', marginBottom: 4, color: '#1f2937' }}>
+              <Text strong className={`${styles.friendName} ${isMobile ? styles.friendNameMobile : styles.friendNameDesktop}`}>
                 {user.first_name && user.last_name 
                   ? `${user.first_name} ${user.last_name}`
                   : user.username || 'Пользователь'}
               </Text>
-              <Text type="secondary" style={{ fontSize: isMobile ? 12 : 13, display: 'block', marginBottom: 8 }}>
+              <Text type="secondary" className={`${styles.friendRole} ${isMobile ? styles.friendRoleMobile : styles.friendRoleDesktop}`}>
                 {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
               </Text>
               {user.bio && (
-                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                <Text type="secondary" className={styles.friendBio}>
                   {user.bio.length > 50 ? `${user.bio.slice(0, 50)}...` : user.bio}
                 </Text>
               )}
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className={styles.friendActions}>
               <Button 
                 type="primary" 
                 size={isMobile ? 'middle' : 'large'}
                 icon={<MessageOutlined />} 
-                style={{ 
-                  flex: 1,
-                  borderRadius: 10,
-                  fontWeight: 500,
-                  height: isMobile ? 36 : 40
-                }}
+                className={`${styles.friendMessageButton} ${isMobile ? styles.friendMessageButtonMobile : styles.friendMessageButtonDesktop}`}
                 onClick={() => onOpenChat(user)}
               >
                 Написать
@@ -144,12 +104,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
               <Button 
                 size={isMobile ? 'middle' : 'large'}
                 icon={<UserOutlined />}
-                style={{
-                  borderRadius: 10,
-                  fontWeight: 500,
-                  height: isMobile ? 36 : 40,
-                  minWidth: isMobile ? 44 : 48
-                }}
+                className={`${styles.friendProfileButton} ${isMobile ? styles.friendProfileButtonMobile : styles.friendProfileButtonDesktop}`}
                 onClick={() => onOpenProfile(user)}
               />
             </div>

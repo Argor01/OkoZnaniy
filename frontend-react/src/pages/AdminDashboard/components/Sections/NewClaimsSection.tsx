@@ -195,16 +195,16 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="newClaimsTitle">
             {record.title}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="newClaimsDescription">
             {record.description.length > 100 
               ? `${record.description.substring(0, 100)}...` 
               : record.description
             }
           </Text>
-          <div style={{ marginTop: 8 }}>
+          <div className="newClaimsTagRow">
             <Tag color={getCategoryColor(record.category)}>
               {getCategoryText(record.category)}
             </Tag>
@@ -223,17 +223,17 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
       key: 'user',
       width: 200,
       render: (record: Claim) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="newClaimsUserRow">
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div style={{ fontWeight: 500, fontSize: '13px' }}>
+            <div className="newClaimsUserName">
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px' }}>
+            <Text type="secondary" className="newClaimsUserHandle">
               @{record.user.username}
             </Text>
           </div>
@@ -247,7 +247,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
       width: 100,
       render: (count: number) => (
         <Badge count={count} showZero>
-          <MessageOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
+          <MessageOutlined className="newClaimsMessageIcon" />
         </Badge>
       ),
     },
@@ -257,7 +257,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
       key: 'created_at',
       width: 120,
       render: (date: string) => (
-        <div style={{ fontSize: '12px' }}>
+        <div className="newClaimsCreatedCell">
           <div>{dayjs(date).format('DD.MM.YYYY')}</div>
           <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
         </div>
@@ -307,18 +307,18 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="newClaimsHeader">
           <Title level={4}>Новые обращения</Title>
           <Text type="secondary">
             Обращения пользователей, ожидающие обработки
           </Text>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="newClaimsFiltersRow">
           <Search
             placeholder="Поиск по обращениям"
             allowClear
-            style={{ width: 300 }}
+            className="newClaimsSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -326,7 +326,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
           
           <Select
             placeholder="Категория"
-            style={{ width: 150 }}
+            className="newClaimsSelectCategory"
             value={selectedCategory}
             onChange={setSelectedCategory}
           >
@@ -340,7 +340,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="newClaimsSelectPriority"
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -355,7 +355,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            style={{ width: 250 }}
+            className="newClaimsDateRange"
           />
         </div>
 
@@ -403,7 +403,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
       >
         {selectedClaim && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className="newClaimsModalHeader">
               <Title level={5}>{selectedClaim.title}</Title>
               <Space>
                 <Tag color={getCategoryColor(selectedClaim.category)}>
@@ -417,9 +417,9 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
 
             <Divider />
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="newClaimsSectionBlock">
               <Text strong>Пользователь:</Text>
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="newClaimsInfoRow">
                 <Avatar size={32} icon={<UserOutlined />} />
                 <div>
                   <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -430,17 +430,17 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
               </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="newClaimsSectionBlock">
               <Text strong>Описание:</Text>
-              <Paragraph style={{ marginTop: 8 }}>
+              <Paragraph className="newClaimsParagraph">
                 {selectedClaim.description}
               </Paragraph>
             </div>
 
             {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="newClaimsSectionBlock">
                 <Text strong>Вложения:</Text>
-                <div style={{ marginTop: 8 }}>
+                <div className="newClaimsAttachmentsRow">
                   {selectedClaim.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file}</Tag>
                   ))}
@@ -448,7 +448,7 @@ export const NewClaimsSection: React.FC<NewClaimsSectionProps> = ({
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+            <div className="newClaimsMetaRow">
               <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Сообщений: {selectedClaim.messages_count}</span>
             </div>

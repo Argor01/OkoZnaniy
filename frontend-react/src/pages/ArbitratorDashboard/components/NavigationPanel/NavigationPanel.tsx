@@ -28,7 +28,7 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({
         <span>
           Новые обращения
           {newClaimsCount > 0 && (
-            <span style={{ marginLeft: 8, color: '#1890ff' }}>
+            <span className="arbitratorNavCount">
               ({newClaimsCount})
             </span>
           )}
@@ -57,10 +57,7 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({
       mode="inline"
       selectedKeys={[selectedTab]}
       onClick={({ key }) => onTabChange(key as NavigationTab)}
-      style={{
-        borderRight: 0,
-        height: '100%',
-      }}
+      className="arbitratorNavMenu"
       items={menuItems}
     />
   );

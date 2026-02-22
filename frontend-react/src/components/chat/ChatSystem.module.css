@@ -3,6 +3,13 @@
   display: flex;
   flex-direction: column;
 }
+.chatModal :global(.ant-modal-body) {
+  padding: 0;
+  height: 600px;
+}
+.chatModalMobile :global(.ant-modal-body) {
+  height: 100vh;
+}
 
 .chatContainer {
   display: flex;
@@ -21,6 +28,9 @@
 .chatListHeader {
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
+}
+.chatListHeaderTitle {
+  font-size: 18px;
 }
 
 .searchBox {
@@ -82,6 +92,9 @@
   font-weight: 600;
   color: #1f2937;
 }
+.unreadDot :global(.ant-badge-dot) {
+  background-color: #3b82f6;
+}
 
 .chatWindow {
   flex: 1;
@@ -102,6 +115,9 @@
 .chatWindowHeaderInfo {
   display: flex;
   flex-direction: column;
+}
+.chatWindowStatus {
+  font-size: 12px;
 }
 
 .chatWindowMessages {

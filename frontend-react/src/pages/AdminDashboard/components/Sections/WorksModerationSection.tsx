@@ -152,13 +152,13 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
       width: 300,
       render: (record: Work) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="worksModerationTitle">
             {record.title}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="worksModerationMetaText">
             {record.subject} • {record.work_type}
           </Text>
-          <div style={{ fontSize: '11px', color: '#666' }}>
+          <div className="worksModerationMetaSubtext">
             📄 {record.pages_count} стр. • 📝 {record.words_count.toLocaleString()} слов
           </div>
         </div>
@@ -171,10 +171,10 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
       render: (record: Work) => (
         <Space>
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>
+            <div className="worksModerationAuthorName">
               {record.author.first_name} {record.author.last_name}
             </div>
-            <div style={{ fontSize: '11px', color: '#666' }}>
+            <div className="worksModerationAuthorMeta">
               <StarOutlined /> {record.author.rating} • {record.author.works_count} работ
             </div>
           </div>
@@ -207,9 +207,9 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
       key: 'created_at',
       width: 120,
       render: (date: string) => (
-        <div style={{ fontSize: '12px' }}>
+        <div className="worksModerationDate">
           <div>{dayjs(date).format('DD.MM.YYYY')}</div>
-          <div style={{ color: '#666' }}>{dayjs(date).format('HH:mm')}</div>
+          <div className="worksModerationDateTime">{dayjs(date).format('HH:mm')}</div>
         </div>
       ),
     },
@@ -261,14 +261,14 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="worksModerationSectionHeader">
           <Title level={4}>Модерация работ</Title>
           <Text type="secondary">
             Проверка и одобрение работ для публикации в магазине
           </Text>
         </div>
 
-        <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Row gutter={16} className="worksModerationStatsRow">
           <Col span={6}>
             <Statistic title="Всего работ" value={stats.total} />
           </Col>
@@ -276,21 +276,21 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
             <Statistic 
               title="На модерации" 
               value={stats.pending} 
-              valueStyle={{ color: '#faad14' }}
+              className="worksModerationStatPending"
             />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Одобрено" 
               value={stats.approved} 
-              valueStyle={{ color: '#52c41a' }}
+              className="worksModerationStatApproved"
             />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Отклонено" 
               value={stats.rejected} 
-              valueStyle={{ color: '#ff4d4f' }}
+              className="worksModerationStatRejected"
             />
           </Col>
         </Row>
@@ -301,15 +301,15 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
             description={`У вас есть ${stats.pending} работ, ожидающих модерации.`}
             type="warning"
             showIcon
-            style={{ marginBottom: 16 }}
+            className="worksModerationAlert"
           />
         )}
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="worksModerationFiltersRow">
           <Search
             placeholder="Поиск по названию или автору"
             allowClear
-            style={{ width: 300 }}
+            className="worksModerationSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -317,7 +317,7 @@ export const WorksModerationSection: React.FC<WorksModerationSectionProps> = ({
           
           <Select
             placeholder="Статус модерации"
-            style={{ width: 150 }}
+            className="worksModerationStatusSelect"
             value={statusFilter}
             onChange={setStatusFilter}
           >

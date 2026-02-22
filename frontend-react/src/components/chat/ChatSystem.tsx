@@ -79,15 +79,12 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : 900}
-      className={styles.chatModal}
-      styles={{
-        body: { padding: 0, height: isMobile ? '100vh' : '600px' },
-      }}
+      className={`${styles.chatModal} ${isMobile ? styles.chatModalMobile : ''}`}
     >
       <div className={styles.chatContainer}>
         <div className={`${styles.chatList} ${selectedChat && isMobile ? styles.hidden : ''}`}>
           <div className={styles.chatListHeader}>
-            <Text strong style={{ fontSize: 18 }}>Сообщения</Text>
+            <Text strong className={styles.chatListHeaderTitle}>Сообщения</Text>
           </div>
           <div className={styles.searchBox}>
             <Input
@@ -133,7 +130,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                         {chat.lastMessage}
                       </Text>
                       {chat.unreadCount > 0 && (
-                        <Badge dot style={{ backgroundColor: '#3b82f6' }} />
+                        <Badge dot className={styles.unreadDot} />
                       )}
                     </div>
                   </div>
@@ -162,7 +159,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                 />
                 <div className={styles.chatWindowHeaderInfo}>
                   <Text strong>{selectedChat.userName}</Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                  <Text type="secondary" className={styles.chatWindowStatus}>
                     {selectedChat.isOnline ? 'Онлайн' : 'Не в сети'}
                   </Text>
                 </div>

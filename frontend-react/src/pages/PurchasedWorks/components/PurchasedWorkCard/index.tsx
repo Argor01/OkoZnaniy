@@ -49,19 +49,19 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
       }
     >
       <div className={styles.header}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className={styles.headerRow}>
           <Tag color="blue">{work.category}</Tag>
           {work.isDownloaded && (
             <Badge 
-              count={<CheckOutlined style={{ fontSize: 10, color: '#fff' }} />} 
-              style={{ backgroundColor: '#52c41a' }}
+              count={<CheckOutlined className={styles.badgeIcon} />} 
+              className={styles.downloadedBadge}
               size="small"
             />
           )}
         </div>
         <Button
           type="text"
-          icon={work.isFavorite ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+          icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
           onClick={(e) => {
             e.stopPropagation();
             onFavorite(work.id);
@@ -77,15 +77,10 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
         {work.description}
       </Text>
 
-      <div style={{ 
-        padding: '8px 0', 
-        margin: '12px 0', 
-        borderTop: '1px solid #f0f0f0',
-        borderBottom: '1px solid #f0f0f0' 
-      }}>
-        <Space direction="vertical" size={2} style={{ width: '100%' }}>
+      <div className={styles.purchaseInfo}>
+        <Space direction="vertical" size={2} className={styles.fullWidth}>
           <Space size={8}>
-            <CalendarOutlined style={{ color: '#8b5cf6' }} />
+            <CalendarOutlined className={styles.calendarIcon} />
             <Text type="secondary">Куплено: {formatDate(work.purchaseDate)}</Text>
           </Space>
           
@@ -94,7 +89,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
 
       <div className={styles.meta}>
         <Space size={4}>
-          <Rate disabled value={work.rating} style={{ fontSize: 14 }} />
+          <Rate disabled value={work.rating} className={styles.rating} />
           <Text type="secondary">({work.reviewsCount})</Text>
         </Space>
         <Space size={8}>
@@ -105,7 +100,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
 
       <div className={styles.footer}>
         <div className={styles.price}>
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" className={styles.priceLabel}>
             Вы заплатили:
           </Text>
           <Text strong className={styles.currentPrice}>
@@ -121,9 +116,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
             e.stopPropagation();
             onDownload(work.id);
           }}
-          style={{
-            background: work.isDownloaded ? '#10b981' : '#3b82f6'
-          }}
+          className={work.isDownloaded ? styles.downloadedButton : styles.downloadButton}
         >
           {work.isDownloaded ? 'Скачать снова' : 'Скачать'}
         </Button>

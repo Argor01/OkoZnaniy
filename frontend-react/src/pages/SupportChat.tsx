@@ -75,7 +75,7 @@ const SupportChat: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+        <div className="supportChatLoading">
           <Spin size="large" />
         </div>
       </DashboardLayout>
@@ -86,7 +86,7 @@ const SupportChat: React.FC = () => {
     <DashboardLayout>
       <Card
         title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="supportChatHeader">
             <Button
               type="text"
               icon={<ArrowLeftOutlined />}
@@ -95,17 +95,10 @@ const SupportChat: React.FC = () => {
             <span>Чат с технической поддержкой</span>
           </div>
         }
-        style={{ maxWidth: '900px', margin: '0 auto' }}
+        className="supportChatCard"
       >
         <div
-          style={{
-            height: '500px',
-            overflowY: 'auto',
-            padding: '16px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '8px',
-            marginBottom: '16px',
-          }}
+          className="supportChatMessages"
         >
           {messages.length === 0 ? (
             <Empty description="Нет сообщений" />
@@ -113,27 +106,16 @@ const SupportChat: React.FC = () => {
             messages.map((msg) => (
               <div
                 key={msg.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: msg.is_mine ? 'flex-end' : 'flex-start',
-                  marginBottom: '16px',
-                }}
+                className={`supportChatMessageRow ${msg.is_mine ? 'supportChatMessageRowMine' : ''}`}
               >
                 <div
-                  style={{
-                    maxWidth: '70%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    backgroundColor: msg.is_mine ? '#1890ff' : '#fff',
-                    color: msg.is_mine ? '#fff' : '#000',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  }}
+                  className={`supportChatBubble ${msg.is_mine ? 'supportChatBubbleMine' : ''}`}
                 >
                   {!msg.is_mine && (
-                    <div style={{ fontSize: '12px', opacity: 0.8, marginBottom: '4px' }}>
+                    <div className="supportChatSender">
                       {msg.sender.first_name} {msg.sender.last_name}
                       {msg.sender.is_admin && (
-                        <Tag color="blue" style={{ marginLeft: '8px' }}>
+                        <Tag color="blue" className="supportChatSenderTag">
                           Поддержка
                         </Tag>
                       )}
@@ -141,19 +123,14 @@ const SupportChat: React.FC = () => {
                   )}
                   <div>{msg.text}</div>
                   {msg.file && (
-                    <div style={{ marginTop: '8px' }}>
+                    <div className="supportChatFile">
                       <a href={msg.file} target="_blank" rel="noopener noreferrer">
                         <PaperClipOutlined /> Файл
                       </a>
                     </div>
                   )}
                   <div
-                    style={{
-                      fontSize: '11px',
-                      opacity: 0.7,
-                      marginTop: '4px',
-                      textAlign: msg.is_mine ? 'right' : 'left',
-                    }}
+                    className={`supportChatTimestamp ${msg.is_mine ? 'supportChatTimestampMine' : ''}`}
                   >
                     {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
                       hour: '2-digit',
@@ -167,14 +144,14 @@ const SupportChat: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="supportChatInputRow">
           <TextArea
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Введите сообщение... (Ctrl+Enter для отправки)"
             rows={3}
-            style={{ flex: 1 }}
+            className="supportChatInput"
           />
           <Button
             type="primary"

@@ -18,12 +18,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
 
   return (
     <div
-      style={{
-        animation: `${transitionStage} 0.3s ease-in-out`,
-        opacity: transitionStage === 'fadeOut' ? 0 : 1,
-        transform: transitionStage === 'fadeOut' ? 'translateY(20px)' : 'translateY(0)',
-        transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
-      }}
+      className={`page-transition ${transitionStage === 'fadeOut' ? 'page-transition--out' : 'page-transition--in'}`}
       onAnimationEnd={() => {
         if (transitionStage === 'fadeOut') {
           setTransitionStage('fadeIn');

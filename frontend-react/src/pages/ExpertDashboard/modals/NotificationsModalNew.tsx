@@ -13,6 +13,7 @@ import {
 import { notificationsApi, Notification } from '../../../api/notifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import styles from '../ExpertDashboard.module.css';
 
 const { Text } = Typography;
 
@@ -24,26 +25,46 @@ interface NotificationsModalProps {
 
 
 const getNotificationIcon = (type: string) => {
-  const iconMap: Record<string, React.ReactNode> = {
-    'new_order': <FileDoneOutlined style={{ color: '#3b82f6' }} />,
-    'order_taken': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'order_assigned': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'file_uploaded': <FileDoneOutlined style={{ color: '#8b5cf6' }} />,
-    'new_comment': <CommentOutlined style={{ color: '#f59e0b' }} />,
-    'status_changed': <BellOutlined style={{ color: '#3b82f6' }} />,
-    'deadline_soon': <ClockCircleOutlined style={{ color: '#ef4444' }} />,
-    'document_verified': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'specialization_verified': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'review_received': <TrophyOutlined style={{ color: '#f59e0b' }} />,
-    'new_rating': <TrophyOutlined style={{ color: '#f59e0b' }} />,
-    'rating_milestone': <TrophyOutlined style={{ color: '#fbbf24' }} />,
-    'payment_received': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'order_completed': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'new_contact': <QuestionCircleOutlined style={{ color: '#3b82f6' }} />,
-    'application_approved': <CheckCircleOutlined style={{ color: '#10b981' }} />,
-    'application_rejected': <ClockCircleOutlined style={{ color: '#ef4444' }} />,
+  const iconClassMap: Record<string, string> = {
+    'new_order': styles.notificationsIconPrimary,
+    'order_taken': styles.notificationsIconSuccess,
+    'order_assigned': styles.notificationsIconSuccess,
+    'file_uploaded': styles.notificationsIconInfo,
+    'new_comment': styles.notificationsIconWarning,
+    'status_changed': styles.notificationsIconPrimary,
+    'deadline_soon': styles.notificationsIconDanger,
+    'document_verified': styles.notificationsIconSuccess,
+    'specialization_verified': styles.notificationsIconSuccess,
+    'review_received': styles.notificationsIconWarning,
+    'new_rating': styles.notificationsIconWarning,
+    'rating_milestone': styles.notificationsIconHighlight,
+    'payment_received': styles.notificationsIconSuccess,
+    'order_completed': styles.notificationsIconSuccess,
+    'new_contact': styles.notificationsIconPrimary,
+    'application_approved': styles.notificationsIconSuccess,
+    'application_rejected': styles.notificationsIconDanger,
   };
-  return iconMap[type] || <BellOutlined style={{ color: '#6b7280' }} />;
+  const iconClassName = iconClassMap[type] || styles.notificationsIconMuted;
+  const iconMap: Record<string, React.ReactNode> = {
+    'new_order': <FileDoneOutlined className={iconClassName} />,
+    'order_taken': <CheckCircleOutlined className={iconClassName} />,
+    'order_assigned': <CheckCircleOutlined className={iconClassName} />,
+    'file_uploaded': <FileDoneOutlined className={iconClassName} />,
+    'new_comment': <CommentOutlined className={iconClassName} />,
+    'status_changed': <BellOutlined className={iconClassName} />,
+    'deadline_soon': <ClockCircleOutlined className={iconClassName} />,
+    'document_verified': <CheckCircleOutlined className={iconClassName} />,
+    'specialization_verified': <CheckCircleOutlined className={iconClassName} />,
+    'review_received': <TrophyOutlined className={iconClassName} />,
+    'new_rating': <TrophyOutlined className={iconClassName} />,
+    'rating_milestone': <TrophyOutlined className={iconClassName} />,
+    'payment_received': <CheckCircleOutlined className={iconClassName} />,
+    'order_completed': <CheckCircleOutlined className={iconClassName} />,
+    'new_contact': <QuestionCircleOutlined className={iconClassName} />,
+    'application_approved': <CheckCircleOutlined className={iconClassName} />,
+    'application_rejected': <ClockCircleOutlined className={iconClassName} />,
+  };
+  return iconMap[type] || <BellOutlined className={iconClassName} />;
 };
 
 
@@ -133,76 +154,25 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={isMobile ? '100%' : 'calc(100vw - 300px)'}
-      styles={{
-        mask: {
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)'
-        },
-        content: { 
-          borderRadius: isMobile ? 0 : 24, 
-          padding: 0,
-          margin: isMobile ? 0 : 'auto',
-          overflow: 'hidden',
-          background: '#ffffff',
-          boxShadow: isMobile ? 'none' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-          width: isMobile ? '100vw' : undefined,
-          height: isMobile ? '100vh' : 'calc(100vh - 80px)'
-        },
-        header: {
-          display: 'none'
-        },
-        body: {
-          padding: 0,
-          margin: 0,
-          background: '#ffffff',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }
-      }}
+      wrapClassName={`${styles.notificationsModalWrap} ${isMobile ? styles.notificationsModalWrapMobile : styles.notificationsModalWrapDesktop}`}
     >
       <ErrorBoundary>
-      <div style={{ 
-        padding: isMobile ? '16px' : '32px',
-        height: '100%',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 16 : 24 }}>
-          <Text strong style={{ 
-            fontSize: isMobile ? 20 : 24, 
-            color: '#1f2937'
-          }}>
+      <div className={`${styles.notificationsModalContent} ${isMobile ? styles.notificationsModalContentMobile : styles.notificationsModalContentDesktop}`}>
+        <div className={`${styles.notificationsModalHeader} ${isMobile ? styles.notificationsModalHeaderMobile : styles.notificationsModalHeaderDesktop}`}>
+          <Text strong className={`${styles.notificationsModalTitle} ${isMobile ? styles.notificationsModalTitleMobile : styles.notificationsModalTitleDesktop}`}>
             Уведомления
           </Text>
           {notifications.some(n => !n.is_read) && (
             <Text 
               onClick={handleMarkAllAsRead}
-              style={{ 
-                fontSize: isMobile ? 12 : 14, 
-                color: '#3b82f6',
-                cursor: 'pointer'
-              }}
+              className={`${styles.notificationsModalMarkAll} ${isMobile ? styles.notificationsModalMarkAllMobile : styles.notificationsModalMarkAllDesktop}`}
             >
               Отметить все
             </Text>
           )}
         </div>
 
-        <div style={{ 
-          display: 'flex', 
-          gap: 0,
-          marginBottom: isMobile ? 16 : 24,
-          background: '#f9fafb',
-          borderRadius: isMobile ? 8 : 12,
-          padding: '4px',
-          border: '1px solid #e5e7eb',
-          overflowX: isMobile ? 'auto' : 'visible',
-          flexWrap: isMobile ? 'nowrap' : 'wrap'
-        }}>
+        <div className={`${styles.notificationsModalTabs} ${isMobile ? styles.notificationsModalTabsMobile : styles.notificationsModalTabsDesktop}`}>
           {[
             { key: 'all', label: 'Все', icon: <BellOutlined /> },
             { key: 'orders', label: 'Заказы', icon: <FileDoneOutlined /> },
@@ -212,64 +182,29 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <div
               key={tab.key}
               onClick={() => setNotificationTab(tab.key)}
-              style={{
-                flex: isMobile ? '0 0 auto' : 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: isMobile ? 6 : 8,
-                padding: isMobile ? '10px 12px' : '12px 16px',
-                cursor: 'pointer',
-                borderRadius: 8,
-                background: notificationTab === tab.key ? '#ffffff' : 'transparent',
-                borderBottom: notificationTab === tab.key ? '2px solid #3b82f6' : '2px solid transparent',
-                transition: 'all 0.2s ease',
-                minWidth: isMobile ? 'auto' : 0
-              }}
+              className={`${styles.notificationsModalTab} ${notificationTab === tab.key ? styles.notificationsModalTabActive : styles.notificationsModalTabInactive} ${isMobile ? styles.notificationsModalTabMobile : styles.notificationsModalTabDesktop}`}
             >
               {React.isValidElement(tab.icon)
-                ? React.cloneElement(tab.icon as React.ReactElement<{ style?: React.CSSProperties }>, {
-                    style: {
-                      fontSize: isMobile ? 16 : 18,
-                      color: notificationTab === tab.key ? '#3b82f6' : '#6b7280',
-                      flexShrink: 0
-                    }
+                ? React.cloneElement(tab.icon as React.ReactElement<{ className?: string }>, {
+                    className: `${styles.notificationsModalTabIcon} ${notificationTab === tab.key ? styles.notificationsModalTabIconActive : styles.notificationsModalTabIconInactive} ${isMobile ? styles.notificationsModalTabIconMobile : styles.notificationsModalTabIconDesktop}`
                   })
                 : tab.icon}
-              <Text style={{ 
-                fontSize: isMobile ? 13 : 14, 
-                color: notificationTab === tab.key ? '#1f2937' : '#6b7280',
-                fontWeight: notificationTab === tab.key ? 500 : 400,
-                whiteSpace: 'nowrap'
-              }}>
+              <Text className={`${styles.notificationsModalTabLabel} ${notificationTab === tab.key ? styles.notificationsModalTabLabelActive : styles.notificationsModalTabLabelInactive} ${isMobile ? styles.notificationsModalTabLabelMobile : styles.notificationsModalTabLabelDesktop}`}>
                 {tab.label}
               </Text>
             </div>
           ))}
         </div>
 
-        <div style={{ 
-          minHeight: isMobile ? '300px' : '500px',
-          background: '#ffffff',
-          borderRadius: isMobile ? 8 : 12,
-          border: '1px solid #e5e7eb',
-          padding: isMobile ? '12px' : '16px'
-        }}>
+        <div className={`${styles.notificationsModalList} ${isMobile ? styles.notificationsModalListMobile : styles.notificationsModalListDesktop}`}>
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+            <div className={styles.notificationsModalLoading}>
               <Spin size="large" />
             </div>
           ) : filteredNotifications.length === 0 ? (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '48px 24px',
-              minHeight: '400px'
-            }}>
-              <BellOutlined style={{ fontSize: 48, color: '#d1d5db', marginBottom: 16 }} />
-              <Text type="secondary" style={{ fontSize: 14 }}>
+            <div className={styles.notificationsModalEmpty}>
+              <BellOutlined className={styles.notificationsModalEmptyIcon} />
+              <Text type="secondary" className={styles.notificationsModalEmptyText}>
                 Нет уведомлений в этой категории
               </Text>
             </div>
@@ -278,85 +213,28 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
               <div
                 key={notification.id}
                 onClick={() => handleMarkAsRead(notification)}
-                style={{
-                  padding: isMobile ? '12px' : '16px',
-                  marginBottom: isMobile ? '8px' : '12px',
-                  background: notification.is_read ? '#ffffff' : '#eff6ff',
-                  borderRadius: isMobile ? 8 : 12,
-                  border: `1px solid ${notification.is_read ? '#e5e7eb' : '#bfdbfe'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  gap: isMobile ? 12 : 16,
-                  alignItems: 'flex-start'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isMobile) {
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isMobile) {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }
-                }}
+                className={`${styles.notificationsModalItem} ${notification.is_read ? styles.notificationsModalItemRead : styles.notificationsModalItemUnread} ${isMobile ? styles.notificationsModalItemMobile : styles.notificationsModalItemDesktop}`}
               >
                 
-                <div style={{
-                  width: isMobile ? 36 : 40,
-                  height: isMobile ? 36 : 40,
-                  borderRadius: isMobile ? 8 : 10,
-                  background: notification.is_read ? '#f3f4f6' : '#dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: isMobile ? 18 : 20,
-                  flexShrink: 0
-                }}>
+                <div className={`${styles.notificationsModalItemIcon} ${notification.is_read ? styles.notificationsModalItemIconRead : styles.notificationsModalItemIconUnread} ${isMobile ? styles.notificationsModalItemIconMobile : styles.notificationsModalItemIconDesktop}`}>
                   {getNotificationIcon(notification.type)}
                 </div>
 
                 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'flex-start',
-                    marginBottom: 4
-                  }}>
-                    <Text strong style={{ 
-                      fontSize: isMobile ? 14 : 15, 
-                      color: '#1f2937',
-                      fontWeight: notification.is_read ? 500 : 600,
-                      lineHeight: 1.4
-                    }}>
+                <div className={styles.notificationsModalItemBody}>
+                  <div className={styles.notificationsModalItemHeader}>
+                    <Text strong className={`${styles.notificationsModalItemTitle} ${notification.is_read ? styles.notificationsModalItemTitleRead : styles.notificationsModalItemTitleUnread} ${isMobile ? styles.notificationsModalItemTitleMobile : styles.notificationsModalItemTitleDesktop}`}>
                       {notification.title}
                     </Text>
                     {!notification.is_read && (
-                      <div style={{
-                        width: isMobile ? 6 : 8,
-                        height: isMobile ? 6 : 8,
-                        borderRadius: '50%',
-                        background: '#3b82f6',
-                        flexShrink: 0,
-                        marginLeft: 8,
-                        marginTop: isMobile ? 4 : 6
-                      }} />
+                      <div className={`${styles.notificationsModalUnreadDot} ${isMobile ? styles.notificationsModalUnreadDotMobile : styles.notificationsModalUnreadDotDesktop}`} />
                     )}
                   </div>
-                  <Text style={{ 
-                    fontSize: isMobile ? 13 : 14, 
-                    color: '#6b7280',
-                    display: 'block',
-                    marginBottom: isMobile ? 6 : 8,
-                    lineHeight: 1.5
-                  }}>
+                  <Text className={`${styles.notificationsModalItemText} ${isMobile ? styles.notificationsModalItemTextMobile : styles.notificationsModalItemTextDesktop}`}>
                     {notification.message}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, color: '#9ca3af' }}>
-                    <ClockCircleOutlined style={{ marginRight: 4 }} />
+                  <Text type="secondary" className={`${styles.notificationsModalItemTime} ${isMobile ? styles.notificationsModalItemTimeMobile : styles.notificationsModalItemTimeDesktop}`}>
+                    <ClockCircleOutlined className={styles.notificationsModalItemTimeIcon} />
                     {formatTimestamp(notification.created_at)}
                   </Text>
                 </div>

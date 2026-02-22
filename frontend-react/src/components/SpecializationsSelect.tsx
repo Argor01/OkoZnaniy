@@ -7,7 +7,6 @@ interface SpecializationsSelectProps {
   onChange?: (value: string[]) => void;
   placeholder?: string;
   size?: 'small' | 'middle' | 'large';
-  style?: React.CSSProperties;
   className?: string;
 }
 
@@ -16,16 +15,16 @@ const SpecializationsSelect: React.FC<SpecializationsSelectProps> = ({
   onChange,
   placeholder = 'Выберите или введите специализации',
   size = 'large',
-  style,
   className
 }) => {
+  const selectClassName = [className, 'fullWidthSelect'].filter(Boolean).join(' ');
+
   return (
     <Select
       mode="tags"
       size={size}
       placeholder={placeholder}
-      style={{ width: '100%', ...style }}
-      className={className}
+      className={selectClassName}
       value={value}
       onChange={onChange}
       options={POPULAR_SPECIALIZATIONS.map(spec => ({ label: spec, value: spec }))}

@@ -345,13 +345,13 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'request',
       render: (record: CustomerRequest) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="openRequestsRequestNumber">
             {record.request_number}
           </div>
-          <div style={{ fontSize: '13px', marginBottom: 4 }}>
+          <div className="openRequestsTitle">
             {record.title}
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div className="openRequestsTagRow">
             <Tag color={getTypeColor(record.request_type)}>
               {getTypeText(record.request_type)}
             </Tag>
@@ -375,20 +375,20 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'user',
       width: 200,
       render: (record: CustomerRequest) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="openRequestsUserRow">
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div style={{ fontWeight: 500, fontSize: '12px' }}>
+            <div className="openRequestsUserName">
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '10px' }}>
+            <Text type="secondary" className="openRequestsUserHandle">
               @{record.user.username}
             </Text>
-            <div style={{ marginTop: 2 }}>
+            <div className="openRequestsUserTypeRow">
               <Tag color={getUserTypeColor(record.user.user_type)}>
                 {record.user.user_type === 'student' ? 'Студент' : 
                  record.user.user_type === 'expert' ? 'Эксперт' : 'Партнер'}
@@ -403,9 +403,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'source',
       width: 80,
       render: (record: CustomerRequest) => (
-        <div style={{ textAlign: 'center' }}>
+        <div className="openRequestsCenterCell">
           <Tooltip title={record.source}>
-            <span style={{ fontSize: '16px' }}>
+            <span className="openRequestsSourceIcon">
               {getSourceIcon(record.source)}
             </span>
           </Tooltip>
@@ -417,15 +417,19 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'waiting_time',
       width: 120,
       render: (record: CustomerRequest) => (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            fontWeight: 500, 
-            fontSize: '13px',
-            color: record.is_overdue ? '#ff4d4f' : record.waiting_time_hours > 4 ? '#faad14' : '#52c41a'
-          }}>
+        <div className="openRequestsCenterCell">
+          <div
+            className={`openRequestsWaitingTime ${
+              record.is_overdue
+                ? 'openRequestsWaitingOverdue'
+                : record.waiting_time_hours > 4
+                ? 'openRequestsWaitingWarning'
+                : 'openRequestsWaitingOk'
+            }`}
+          >
             {formatWaitingTime(record.waiting_time_hours)}
           </div>
-          <div style={{ fontSize: '10px', color: '#999' }}>
+          <div className="openRequestsSlaMeta">
             SLA: {dayjs(record.sla_deadline).format('HH:mm')}
           </div>
           {record.escalation_level > 0 && (
@@ -443,7 +447,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       render: (record: CustomerRequest) => (
         <div>
           {record.tags.slice(0, 2).map(tag => (
-            <Tag key={tag} style={{ marginBottom: 2 }}>
+            <Tag key={tag} className="openRequestsTagItem">
               {tag}
             </Tag>
           ))}
@@ -461,7 +465,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'created_at',
       width: 100,
       render: (date: string) => (
-        <div style={{ fontSize: '11px', textAlign: 'center' }}>
+        <div className="openRequestsCreatedCell">
           <div>{dayjs(date).format('DD.MM')}</div>
           <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
         </div>
@@ -526,7 +530,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="openRequestsSectionHeader">
           <Title level={4}>Открытые запросы клиентов</Title>
           <Text type="secondary">
             Новые запросы от пользователей, ожидающие обработки
@@ -534,7 +538,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </div>
 
         
-        <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Row gutter={16} className="openRequestsStatsRow">
           <Col span={6}>
             <Statistic title="Всего запросов" value={stats.total} />
           </Col>
@@ -542,11 +546,11 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             <Statistic 
               title="Просроченные" 
               value={stats.overdue} 
-              valueStyle={{ color: stats.overdue > 0 ? '#ff4d4f' : '#52c41a' }} 
+              className={stats.overdue > 0 ? 'openRequestsStatOverdue' : 'openRequestsStatOk'}
             />
           </Col>
           <Col span={6}>
-            <Statistic title="Срочные" value={stats.urgent} valueStyle={{ color: '#faad14' }} />
+            <Statistic title="Срочные" value={stats.urgent} className="openRequestsStatUrgent" />
           </Col>
           <Col span={6}>
             <Statistic 
@@ -562,15 +566,15 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             description={`${stats.overdue} запросов просрочены и требуют немедленного внимания`}
             type="error"
             showIcon
-            style={{ marginBottom: 16 }}
+            className="openRequestsAlert"
           />
         )}
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="openRequestsFiltersRow">
           <Search
             placeholder="Поиск по запросам"
             allowClear
-            style={{ width: 300 }}
+            className="openRequestsSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -578,7 +582,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           
           <Select
             placeholder="Тип запроса"
-            style={{ width: 150 }}
+            className="openRequestsSelectType"
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -594,7 +598,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="openRequestsSelectPriority"
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -607,7 +611,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Источник"
-            style={{ width: 120 }}
+            className="openRequestsSelectSource"
             value={selectedSource}
             onChange={setSelectedSource}
           >
@@ -621,7 +625,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Тип пользователя"
-            style={{ width: 130 }}
+            className="openRequestsSelectUserType"
             value={selectedUserType}
             onChange={setSelectedUserType}
           >
@@ -643,7 +647,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            style={{ width: 250 }}
+            className="openRequestsRangePicker"
           />
         </div>
 
@@ -697,7 +701,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       >
         {selectedRequest && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className="openRequestsModalHeader">
               <Title level={5}>{selectedRequest.title}</Title>
               <Space>
                 <Tag color={getTypeColor(selectedRequest.request_type)}>
@@ -717,18 +721,18 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </Space>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="openRequestsSectionBlock">
               <Text strong>Описание:</Text>
-              <Paragraph style={{ marginTop: 8 }}>
+              <Paragraph className="openRequestsParagraphSpacing">
                 {selectedRequest.description}
               </Paragraph>
             </div>
 
             <Row gutter={24}>
               <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
+                <div className="openRequestsSectionBlock">
                   <Text strong>Пользователь:</Text>
-                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="openRequestsUserInfo">
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</div>
@@ -747,15 +751,15 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </Col>
 
               <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
+                <div className="openRequestsSectionBlock">
                   <Text strong>Информация о пользователе:</Text>
-                  <div style={{ marginTop: 8 }}>
+                  <div className="openRequestsInfoList">
                     <div>Тип: {selectedRequest.user.user_type === 'student' ? 'Студент' : 
                                 selectedRequest.user.user_type === 'expert' ? 'Эксперт' : 'Партнер'}</div>
                     <div>Регистрация: {dayjs(selectedRequest.user.registration_date).format('DD.MM.YYYY')}</div>
                     <div>Всего заказов: {selectedRequest.user.total_orders}</div>
                     {selectedRequest.user.is_vip && (
-                      <div style={{ color: '#faad14' }}>VIP статус</div>
+                      <div className="openRequestsVipText">VIP статус</div>
                     )}
                   </div>
                 </div>
@@ -763,9 +767,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             </Row>
 
             {selectedRequest.related_order && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="openRequestsSectionBlock">
                 <Text strong>Связанный заказ:</Text>
-                <div style={{ marginTop: 8, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 6 }}>
+                <div className="openRequestsRelatedOrderBox">
                   <div>ID: {selectedRequest.related_order.id}</div>
                   <div>Название: {selectedRequest.related_order.title}</div>
                   <div>Сумма: {selectedRequest.related_order.amount.toLocaleString()} ₽</div>
@@ -775,9 +779,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             )}
 
             {selectedRequest.attachments && selectedRequest.attachments.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="openRequestsSectionBlock">
                 <Text strong>Вложения:</Text>
-                <div style={{ marginTop: 8 }}>
+                <div className="openRequestsAttachmentsRow">
                   {selectedRequest.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file.name}</Tag>
                   ))}
@@ -785,22 +789,22 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </div>
             )}
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="openRequestsSectionBlock">
               <Text strong>Теги:</Text>
-              <div style={{ marginTop: 8 }}>
+              <div className="openRequestsTagsRow">
                 {selectedRequest.tags.map(tag => (
                   <Tag key={tag}>{tag}</Tag>
                 ))}
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+            <div className="openRequestsMetaRow">
               <span>Создан: {dayjs(selectedRequest.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Источник: {getSourceIcon(selectedRequest.source)} {selectedRequest.source}</span>
               <span>Время ожидания: {formatWaitingTime(selectedRequest.waiting_time_hours)}</span>
             </div>
 
-            <div style={{ marginTop: 8, fontSize: '12px', color: '#666', textAlign: 'center' }}>
+            <div className="openRequestsMetaSummary">
               SLA дедлайн: {dayjs(selectedRequest.sla_deadline).format('DD.MM.YYYY HH:mm')} | 
               Автоответов отправлено: {selectedRequest.auto_responses_sent} |
               Уровень эскалации: {selectedRequest.escalation_level}
@@ -905,20 +909,11 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             <DatePicker 
               showTime 
               placeholder="Выберите дату и время"
-              style={{ width: '100%' }}
+              className="openRequestsDatePicker"
             />
           </Form.Item>
         </Form>
       </Modal>
-
-      <style>{`
-        .overdue-row {
-          background-color: #fff2f0 !important;
-        }
-        .urgent-row {
-          background-color: #fff7e6 !important;
-        }
-      `}</style>
     </div>
   );
 };

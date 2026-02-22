@@ -192,7 +192,7 @@ const InProgress: React.FC = () => {
       key: 'type',
       width: 110,
       render: (type: string) => (
-        <Tag color={getTypeColor(type)} style={{ margin: 0 }}>
+        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
           {getTypeText(type)}
         </Tag>
       ),
@@ -205,10 +205,10 @@ const InProgress: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -224,23 +224,23 @@ const InProgress: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
       title: 'Время в работе',
       key: 'time_in_work',
       width: 110,
-      render: (record: Claim) => <Text style={{ fontSize: '12px' }}>{getTimeInWork(record)}</Text>,
+      render: (record: Claim) => <Text className="arbitratorTextXs">{getTimeInWork(record)}</Text>,
     },
     {
       title: 'Последнее действие',
@@ -249,7 +249,7 @@ const InProgress: React.FC = () => {
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span style={{ fontSize: '12px' }}>
+          <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
         </Tooltip>
@@ -284,13 +284,13 @@ const InProgress: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <Title level={4} style={{ marginBottom: '8px' }}>В работе</Title>
-        <Text type="secondary" style={{ fontSize: '13px' }}>
+      <Card className="arbitratorCard">
+        <Title level={4} className="arbitratorSectionTitle">В работе</Title>
+        <Text type="secondary" className="arbitratorSectionSubtitle">
           Список обращений, находящихся в обработке
         </Text>
 
-        <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
           <Col xs={24} sm={12} md={8} lg={8}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -304,7 +304,7 @@ const InProgress: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип обращения"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={typeFilter}
               onChange={setTypeFilter}
               allowClear
@@ -326,7 +326,7 @@ const InProgress: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

@@ -166,7 +166,7 @@ const RefundRequests: React.FC = () => {
       key: 'status',
       width: 130,
       render: (status: string) => (
-        <Tag color={getStatusColor(status)} style={{ margin: 0 }}>
+        <Tag color={getStatusColor(status)} className="arbitratorTagNoMargin">
           {getStatusText(status)}
         </Tag>
       ),
@@ -179,10 +179,10 @@ const RefundRequests: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -198,16 +198,16 @@ const RefundRequests: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
@@ -216,7 +216,7 @@ const RefundRequests: React.FC = () => {
       width: 100,
       align: 'right' as const,
       render: (record: Claim) => (
-        <Text style={{ fontSize: '12px' }}>{record.order.amount.toLocaleString()} ₽</Text>
+        <Text className="arbitratorAmountText">{record.order.amount.toLocaleString()} ₽</Text>
       ),
     },
     {
@@ -225,7 +225,7 @@ const RefundRequests: React.FC = () => {
       width: 100,
       align: 'right' as const,
       render: (record: Claim) => (
-        <Text strong style={{ color: '#1890ff', fontSize: '12px' }}>
+        <Text strong className="arbitratorAmountHighlight">
           {getRequestedAmount(record).toLocaleString()} ₽
         </Text>
       ),
@@ -237,7 +237,7 @@ const RefundRequests: React.FC = () => {
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span style={{ fontSize: '12px' }}>
+          <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
         </Tooltip>
@@ -263,15 +263,15 @@ const RefundRequests: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <Title level={4} style={{ marginBottom: '8px' }}>
+      <Card className="arbitratorCard">
+        <Title level={4} className="arbitratorSectionTitle">
           <DollarOutlined /> Заявки на возврат средств
         </Title>
-        <Text type="secondary" style={{ fontSize: '13px' }}>
+        <Text type="secondary" className="arbitratorSectionSubtitle">
           Список заявок на возврат средств от клиентов
         </Text>
 
-        <Row gutter={[12, 12]} style={{ marginTop: 16, marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -285,7 +285,7 @@ const RefundRequests: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Статус"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={statusFilter}
               onChange={setStatusFilter}
               allowClear
@@ -299,7 +299,7 @@ const RefundRequests: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={3}>
             <InputNumber
               placeholder="Сумма от"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={minAmount}
               onChange={(value) => setMinAmount(value || undefined)}
               min={0}
@@ -310,7 +310,7 @@ const RefundRequests: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={3}>
             <InputNumber
               placeholder="Сумма до"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={maxAmount}
               onChange={(value) => setMaxAmount(value || undefined)}
               min={0}
@@ -320,7 +320,7 @@ const RefundRequests: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               format="DD.MM.YYYY"
@@ -339,7 +339,7 @@ const RefundRequests: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

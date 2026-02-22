@@ -1,7 +1,8 @@
-import type { CSSProperties, FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { Card } from 'antd';
 import type { CardProps } from 'antd';
 import { BORDER_RADIUS, BOX_SHADOW, SPACING } from '../../config/ui';
+import styles from './SurfaceCard.module.css';
 
 type ShadowKey = keyof typeof BOX_SHADOW;
 type RadiusKey = keyof typeof BORDER_RADIUS;
@@ -17,28 +18,57 @@ const SurfaceCard: FC<SurfaceCardProps> = ({
   bodyPadding = SPACING.lg,
   radius = 'md',
   shadow = 'sm',
-  style,
-  styles,
+  className,
   ...props
 }) => {
-  const borderRadius = typeof radius === 'number' ? radius : BORDER_RADIUS[radius];
-  const boxShadow = shadow ? BOX_SHADOW[shadow] : undefined;
+  const radiusClass =
+    typeof radius === 'number'
+      ? styles.radiusMd
+      : radius === 'sm'
+        ? styles.radiusSm
+        : radius === 'lg'
+          ? styles.radiusLg
+          : radius === 'xl'
+            ? styles.radiusXl
+            : radius === 'round'
+              ? styles.radiusRound
+              : styles.radiusMd;
 
-  const mergedStyle: CSSProperties = {
-    borderRadius,
-    boxShadow,
-    ...style,
-  };
+  const shadowClass =
+    shadow === false
+      ? styles.shadowNone
+      : shadow === 'md'
+        ? styles.shadowMd
+        : shadow === 'lg'
+          ? styles.shadowLg
+          : shadow === 'xl'
+            ? styles.shadowXl
+            : styles.shadowSm;
 
-  const mergedStyles: CardProps['styles'] = {
-    ...styles,
-    body: {
-      padding: bodyPadding,
-      ...(styles?.body as CSSProperties | undefined),
-    },
-  };
+  const bodyPaddingClass =
+    bodyPadding === SPACING.xs
+      ? styles.bodyPaddingXs
+      : bodyPadding === SPACING.sm
+        ? styles.bodyPaddingSm
+        : bodyPadding === SPACING.md
+          ? styles.bodyPaddingMd
+          : bodyPadding === SPACING.xl
+            ? styles.bodyPaddingXl
+            : bodyPadding === SPACING.xxl
+              ? styles.bodyPaddingXxl
+              : styles.bodyPaddingLg;
 
-  return <Card style={mergedStyle} styles={mergedStyles} {...props} />;
+  const mergedClassName = [
+    styles.surfaceCard,
+    radiusClass,
+    shadowClass,
+    bodyPaddingClass,
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return <Card className={mergedClassName} {...props} />;
 };
 
 export default SurfaceCard;

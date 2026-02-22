@@ -12,7 +12,7 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile }) => {
       <div className={styles.sectionCardHeader}>
         <h2 className={styles.sectionTitle}>Мои работы</h2>
       </div>
-      <div style={{ padding: '24px' }}>
+      <div className={styles.worksEmptyContainer}>
         <Empty description="Нет работ для отображения" />
       </div>
     </div>

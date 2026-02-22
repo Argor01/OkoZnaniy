@@ -70,26 +70,26 @@ const InternalCommunication: React.FC = () => {
               Список обращений, отправленных на согласование дирекции
             </Text>
             {claims.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
+              <div className="arbitratorEmptyState">
                 <Empty
                   description="Нет обращений на согласовании"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               </div>
             ) : (
-              <div style={{ marginTop: 16 }}>
+              <div className="arbitratorClaimsList">
                 {claims.map((claim) => (
                   <Card
                     key={claim.id}
-                    style={{ marginBottom: 16, cursor: 'pointer' }}
+                    className="arbitratorClaimCard"
                     onClick={() => handleViewClaim(claim)}
                     hoverable
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ flex: 1 }}>
-                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    <div className="arbitratorClaimRow">
+                      <div className="arbitratorClaimContent">
+                        <Space direction="vertical" size="small" className="arbitratorSpaceFull">
                           <div>
-                            <Text strong style={{ fontSize: '16px' }}>
+                            <Text strong className="arbitratorClaimTitleText">
                               Обращение #{claim.id}
                             </Text>
                             <Tag
@@ -100,7 +100,7 @@ const InternalCommunication: React.FC = () => {
                                   ? 'orange'
                                   : 'red'
                               }
-                              style={{ marginLeft: 8 }}
+                              className="arbitratorTagLeftGap"
                             >
                               {claim.type === 'refund'
                                 ? 'Возврат средств'
@@ -113,32 +113,32 @@ const InternalCommunication: React.FC = () => {
                             {claim.order.title || 'Без названия'}
                           </Text>
                           <Space>
-                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                            <Text type="secondary" className="arbitratorTextXs">
                               <ClockCircleOutlined /> Отправлено:{' '}
                               {dayjs(claim.created_at).format('DD.MM.YYYY HH:mm')}
                             </Text>
                             {claim.decision?.created_at && (
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                              <Text type="secondary" className="arbitratorTextXs">
                                 Решение принято:{' '}
                                 {dayjs(claim.decision.created_at).format('DD.MM.YYYY HH:mm')}
                               </Text>
                             )}
                           </Space>
                           {claim.decision?.approval_comment && (
-                            <div style={{ marginTop: 8, padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                            <div className="arbitratorApprovalComment">
+                              <Text type="secondary" className="arbitratorTextXs">
                                 Комментарий дирекции: {claim.decision.approval_comment}
                               </Text>
                             </div>
                           )}
                         </Space>
                       </div>
-                      <div style={{ marginLeft: 16 }}>
+                      <div className="arbitratorClaimStatus">
                         {claim.decision?.approval_status === 'pending' && (
                           <Tag
                             color="orange"
                             icon={<ClockCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            className="arbitratorStatusTag"
                           >
                             Ожидает решения
                           </Tag>
@@ -147,7 +147,7 @@ const InternalCommunication: React.FC = () => {
                           <Tag
                             color="green"
                             icon={<CheckCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            className="arbitratorStatusTag"
                           >
                             Согласовано
                           </Tag>
@@ -156,7 +156,7 @@ const InternalCommunication: React.FC = () => {
                           <Tag
                             color="red"
                             icon={<CloseCircleOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
+                            className="arbitratorStatusTag"
                           >
                             Отклонено
                           </Tag>

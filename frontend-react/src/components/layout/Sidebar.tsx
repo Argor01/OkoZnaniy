@@ -25,30 +25,9 @@ const { Text, Title } = Typography;
 export const MobileMenuButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <button
     onClick={onClick}
-    style={{
-      width: '44px',
-      height: '44px',
-      borderRadius: '50%',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      border: 'none',
-      boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
-      color: 'white',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'scale(1.05)';
-      e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'scale(1)';
-      e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
-    }}
+    className={styles.mobileMenuButton}
   >
-    <MenuOutlined style={{ fontSize: '20px' }} />
+    <MenuOutlined className={styles.mobileMenuIcon} />
   </button>
 );
 
@@ -192,7 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       key: 'notifications',
       icon: unreadNotifications > 0 ? (
         <Badge dot>
-          <BellOutlined style={{ color: '#ff4d4f' }} />
+          <BellOutlined className={styles.notificationDotIcon} />
         </Badge>
       ) : (
         <BellOutlined />
@@ -273,44 +252,31 @@ const Sidebar: React.FC<SidebarProps> = ({
   ].filter(Boolean);
 
   const profileSection = (
-    <div className={styles.sidebarProfile} style={{ position: 'relative' }}>
-      <Avatar
-        size={48}
-        src={userProfile?.avatar || undefined}
-        icon={<UserOutlined />}
-        style={{ backgroundColor: '#1890ff' }}
-      />
-      <div style={{ marginLeft: 12, flex: 1 }}>
-        <Title level={5} style={{ margin: 0, fontSize: 14, color: 'white' }}>
-          {userProfile?.username || 'Пользователь'}
-        </Title>
-        <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>
-          {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-        </Text>
+    <div className={styles.sidebarProfile}>
+      <div className={styles.sidebarProfileInner}>
+        <Avatar
+          size={48}
+          src={userProfile?.avatar || undefined}
+          icon={<UserOutlined />}
+          className={styles.sidebarAvatar}
+        />
+        <div className={styles.sidebarProfileInfo}>
+          <Title level={5} className={styles.sidebarProfileName}>
+            {userProfile?.username || 'Пользователь'}
+          </Title>
+          <Text className={styles.sidebarProfileRole}>
+            {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+          </Text>
+        </div>
+        {isMobile && (
+          <button
+            onClick={() => onMobileDrawerChange?.(false)}
+            className={styles.mobileProfileClose}
+          >
+            ✕
+          </button>
+        )}
       </div>
-      {isMobile && (
-        <button
-          onClick={() => onMobileDrawerChange?.(false)}
-          style={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            background: 'none',
-            border: 'none',
-            color: 'white',
-            fontSize: '24px',
-            cursor: 'pointer',
-            padding: '4px',
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.9,
-          }}
-        >
-          ✕
-        </button>
-      )}
     </div>
   );
 
@@ -335,35 +301,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         <>
           <div
             onClick={() => onMobileDrawerChange?.(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 9998,
-              opacity: mobileDrawerOpen ? 1 : 0,
-              visibility: mobileDrawerOpen ? 'visible' : 'hidden',
-              transition: 'opacity 0.3s ease, visibility 0.3s ease',
-            }}
+            className={`${styles.mobileOverlay} ${mobileDrawerOpen ? styles.mobileOverlayVisible : ''}`}
           />
           <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: '100vw',
-              maxWidth: '100vw',
-              background: '#fff',
-              zIndex: 9999,
-              overflowY: 'auto',
-              boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
-              transform: mobileDrawerOpen ? 'translateX(0)' : 'translateX(-100%)',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
+            className={`${styles.mobileMenu} ${mobileDrawerOpen ? styles.mobileMenuOpen : ''}`}
           >
             {sidebarContent}
           </div>
@@ -374,16 +315,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Sider
           width={250}
           className={styles.sidebar}
-          style={{
-            background: '#fff',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-            position: 'fixed',
-            top: 64, 
-            left: 0,
-            height: 'calc(100vh - 64px)', 
-            borderRight: '1px solid #f0f0f0',
-            zIndex: 999,
-          }}
         >
           {sidebarContent}
         </Sider>

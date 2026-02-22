@@ -204,14 +204,14 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       width: 300,
       render: (record: Order) => (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <div className="allOrdersHeaderRow">
             <strong>#{record.id}</strong>
             {record.is_urgent && <Tag color="red">Срочно</Tag>}
           </div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="allOrdersTitle">
             {record.title}
           </div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className="allOrdersMetaText">
             {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
           </Text>
         </div>
@@ -223,10 +223,10 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       width: 180,
       render: (record: Order) => (
         <div>
-          <div style={{ fontSize: '13px', fontWeight: 500 }}>
+          <div className="allOrdersPersonName">
             {record.client.first_name} {record.client.last_name}
           </div>
-          <Text type="secondary" style={{ fontSize: '11px' }}>
+          <Text type="secondary" className="allOrdersPersonHandle">
             @{record.client.username}
           </Text>
         </div>
@@ -239,10 +239,10 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
       render: (record: Order) => (
         record.expert ? (
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>
+            <div className="allOrdersPersonName">
               {record.expert.first_name} {record.expert.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px' }}>
+            <Text type="secondary" className="allOrdersPersonHandle">
               @{record.expert.username}
             </Text>
           </div>
@@ -283,13 +283,11 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
         const isNearDeadline = deadlineDate.diff(dayjs(), 'days') <= 3;
         
         return (
-          <div style={{ 
-            color: isOverdue ? '#ff4d4f' : isNearDeadline ? '#faad14' : undefined 
-          }}>
-            <div style={{ fontSize: '12px' }}>
+          <div className={isOverdue ? 'allOrdersDeadlineOverdue' : isNearDeadline ? 'allOrdersDeadlineNear' : 'allOrdersDeadline'}>
+            <div className="allOrdersDeadlineDate">
               {deadlineDate.format('DD.MM.YYYY')}
             </div>
-            <div style={{ fontSize: '11px' }}>
+            <div className="allOrdersDeadlineTime">
               {deadlineDate.format('HH:mm')}
             </div>
           </div>
@@ -333,28 +331,28 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="allOrdersSectionHeader">
           <Title level={4}>Все заказы</Title>
           <Text type="secondary">
             Управление всеми заказами в системе
           </Text>
         </div>
 
-        <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Row gutter={16} className="allOrdersStatsRow">
           <Col span={4}>
             <Statistic title="Всего заказов" value={stats.total} />
           </Col>
           <Col span={4}>
-            <Statistic title="Новые" value={stats.new} valueStyle={{ color: '#1890ff' }} />
+            <Statistic title="Новые" value={stats.new} className="allOrdersStatNew" />
           </Col>
           <Col span={4}>
-            <Statistic title="В работе" value={stats.inProgress} valueStyle={{ color: '#faad14' }} />
+            <Statistic title="В работе" value={stats.inProgress} className="allOrdersStatInProgress" />
           </Col>
           <Col span={4}>
-            <Statistic title="Завершены" value={stats.completed} valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="Завершены" value={stats.completed} className="allOrdersStatCompleted" />
           </Col>
           <Col span={4}>
-            <Statistic title="Отменены" value={stats.cancelled} valueStyle={{ color: '#ff4d4f' }} />
+            <Statistic title="Отменены" value={stats.cancelled} className="allOrdersStatCancelled" />
           </Col>
           <Col span={4}>
             <Statistic 
@@ -366,11 +364,11 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
           </Col>
         </Row>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="allOrdersFiltersRow">
           <Search
             placeholder="Поиск по названию, описанию или клиенту"
             allowClear
-            style={{ width: 300 }}
+            className="allOrdersSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -378,7 +376,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
           
           <Select
             placeholder="Статус"
-            style={{ width: 150 }}
+            className="allOrdersSelectStatus"
             value={statusFilter}
             onChange={setStatusFilter}
           >
@@ -393,7 +391,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
 
           <Select
             placeholder="Предмет"
-            style={{ width: 150 }}
+            className="allOrdersSelectSubject"
             value={subjectFilter}
             onChange={setSubjectFilter}
           >
@@ -407,7 +405,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="allOrdersSelectPriority"
             value={priorityFilter}
             onChange={setPriorityFilter}
           >
@@ -420,7 +418,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
 
           <RangePicker
             placeholder={['Дата от', 'Дата до']}
-            style={{ width: 240 }}
+            className="allOrdersRangePicker"
             value={dateRange}
             onChange={setDateRange}
           />
@@ -538,7 +536,7 @@ export const AllOrdersSection: React.FC<AllOrdersSectionProps> = ({
 
             <Divider />
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="allOrdersModalActions">
               <Button 
                 type="primary" 
                 onClick={() => handleChangeStatus(selectedOrder, 'in_progress')}

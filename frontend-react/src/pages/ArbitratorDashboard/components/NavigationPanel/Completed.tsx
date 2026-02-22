@@ -181,7 +181,7 @@ const Completed: React.FC = () => {
       key: 'type',
       width: 110,
       render: (type: string) => (
-        <Tag color={getTypeColor(type)} style={{ margin: 0 }}>
+        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
           {getTypeText(type)}
         </Tag>
       ),
@@ -194,10 +194,10 @@ const Completed: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="arbitratorTextEllipsis">
               {record.client.username}
             </div>
-            <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
             </Text>
           </div>
@@ -213,16 +213,16 @@ const Completed: React.FC = () => {
         record.expert ? (
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="arbitratorTextEllipsis">
                 {record.expert.username}
               </div>
-              <Text type="secondary" style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+              <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}
               </Text>
             </div>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не назначен</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не назначен</Text>
         ),
     },
     {
@@ -231,11 +231,11 @@ const Completed: React.FC = () => {
       width: 130,
       render: (record: Claim) =>
         record.decision ? (
-          <Tag color={getDecisionColor(record.decision.decision_type)} style={{ margin: 0 }}>
+          <Tag color={getDecisionColor(record.decision.decision_type)} className="arbitratorTagNoMargin">
             {getDecisionText(record.decision.decision_type)}
           </Tag>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не указано</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не указано</Text>
         ),
     },
     {
@@ -246,7 +246,7 @@ const Completed: React.FC = () => {
       render: (date: string) =>
         date ? (
           <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-            <span style={{ fontSize: '12px' }}>
+            <span className="arbitratorTextXs">
               {dayjs(date).format('DD.MM.YYYY')}
             </span>
           </Tooltip>
@@ -263,12 +263,12 @@ const Completed: React.FC = () => {
       render: (record: Claim) =>
         record.arbitrator ? (
           <Tooltip title={record.arbitrator.username}>
-            <Text style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+            <Text className="arbitratorTextEllipsisXs">
               {record.arbitrator.username}
             </Text>
           </Tooltip>
         ) : (
-          <Text type="secondary" style={{ fontSize: '12px' }}>Не указан</Text>
+          <Text type="secondary" className="arbitratorTextXs">Не указан</Text>
         ),
     },
     {
@@ -290,11 +290,11 @@ const Completed: React.FC = () => {
 
   return (
     <div>
-      <Card bodyStyle={{ padding: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+      <Card className="arbitratorCard">
+        <div className="arbitratorHeaderRow">
           <div>
-            <Title level={4} style={{ margin: 0, marginBottom: '4px' }}>Завершённые</Title>
-            <Text type="secondary" style={{ fontSize: '13px' }}>
+            <Title level={4} className="arbitratorSectionTitleCompact">Завершённые</Title>
+            <Text type="secondary" className="arbitratorSectionSubtitle">
               Архив завершённых обращений
             </Text>
           </div>
@@ -307,7 +307,7 @@ const Completed: React.FC = () => {
           </Tooltip>
         </div>
 
-        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+        <Row gutter={[12, 12]} className="arbitratorFiltersRowCompact">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -321,7 +321,7 @@ const Completed: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип обращения"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={typeFilter}
               onChange={setTypeFilter}
               allowClear
@@ -334,7 +334,7 @@ const Completed: React.FC = () => {
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
               placeholder="Тип решения"
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={decisionTypeFilter}
               onChange={setDecisionTypeFilter}
               allowClear
@@ -348,7 +348,7 @@ const Completed: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
-              style={{ width: '100%' }}
+              className="arbitratorSelectFull"
               value={dateRange}
               onChange={(dates) => setDateRange(dates)}
               format="DD.MM.YYYY"
@@ -367,7 +367,7 @@ const Completed: React.FC = () => {
           </Col>
         </Row>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="arbitratorTableScroll">
           <Table
             columns={columns}
             dataSource={claims}

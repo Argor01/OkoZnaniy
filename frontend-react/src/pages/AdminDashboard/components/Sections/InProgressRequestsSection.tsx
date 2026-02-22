@@ -372,13 +372,13 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       key: 'request',
       render: (record: CustomerRequest) => (
         <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <div className="inProgressRequestsNumber">
             {record.request_number}
           </div>
-          <div style={{ fontSize: '13px', marginBottom: 4 }}>
+          <div className="inProgressRequestsTitle">
             {record.title}
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div className="inProgressRequestsTagRow">
             <Tag color={getTypeColor(record.request_type)}>
               {getTypeText(record.request_type)}
             </Tag>
@@ -397,17 +397,17 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       key: 'user',
       width: 150,
       render: (record: CustomerRequest) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="inProgressRequestsUserRow">
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div style={{ fontWeight: 500, fontSize: '12px' }}>
+            <div className="inProgressRequestsUserName">
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" style={{ fontSize: '10px' }}>
+            <Text type="secondary" className="inProgressRequestsUserHandle">
               @{record.user.username}
             </Text>
           </div>
@@ -420,10 +420,10 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       width: 150,
       render: (record: CustomerRequest) => (
         <div>
-          <div style={{ fontWeight: 500, fontSize: '12px' }}>
+          <div className="inProgressRequestsAdminName">
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" style={{ fontSize: '10px' }}>
+          <Text type="secondary" className="inProgressRequestsAdminRole">
             {record.assigned_admin.role}
           </Text>
         </div>
@@ -434,12 +434,12 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       key: 'status',
       width: 120,
       render: (record: CustomerRequest) => (
-        <div style={{ textAlign: 'center' }}>
+        <div className="inProgressRequestsStatusCell">
           <Tag color={getStatusColor(record.status)}>
             {getStatusText(record.status)}
           </Tag>
           {record.is_overdue && (
-            <div style={{ fontSize: '10px', color: '#ff4d4f', marginTop: 2 }}>
+            <div className="inProgressRequestsOverdueLabel">
               Просрочен
             </div>
           )}
@@ -457,7 +457,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
             size="small"
             strokeColor={getProgressColor(record.progress_percentage)}
           />
-          <Text style={{ fontSize: '11px', color: '#666' }}>
+          <Text className="inProgressRequestsProgressMeta">
             {record.progress_percentage}%
           </Text>
         </div>
@@ -469,12 +469,12 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       key: 'response_count',
       width: 80,
       render: (count: number, record: CustomerRequest) => (
-        <div style={{ textAlign: 'center' }}>
+        <div className="inProgressRequestsResponsesCell">
           <Badge count={count} showZero>
-            <MessageOutlined style={{ fontSize: '16px', color: '#1890ff' }} />
+            <MessageOutlined className="inProgressRequestsResponseIcon" />
           </Badge>
           {record.last_response_at && (
-            <div style={{ fontSize: '10px', color: '#999', marginTop: 2 }}>
+            <div className="inProgressRequestsResponseTime">
               {dayjs(record.last_response_at).format('HH:mm')}
             </div>
           )}
@@ -486,18 +486,15 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       key: 'deadline',
       width: 100,
       render: (record: CustomerRequest) => (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            fontSize: '12px',
-            color: record.is_overdue ? '#ff4d4f' : '#666'
-          }}>
+        <div className="inProgressRequestsDeadlineCell">
+          <div className={record.is_overdue ? 'inProgressRequestsDeadlineDate inProgressRequestsDeadlineOverdue' : 'inProgressRequestsDeadlineDate'}>
             {dayjs(record.sla_deadline).format('DD.MM')}
           </div>
-          <div style={{ fontSize: '10px', color: '#999' }}>
+          <div className="inProgressRequestsDeadlineTime">
             {dayjs(record.sla_deadline).format('HH:mm')}
           </div>
           {record.estimated_completion && (
-            <div style={{ fontSize: '10px', color: '#52c41a', marginTop: 2 }}>
+            <div className="inProgressRequestsDeadlineEstimate">
               ~{dayjs(record.estimated_completion).format('HH:mm')}
             </div>
           )}
@@ -564,7 +561,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className="inProgressRequestsHeader">
           <Title level={4}>Запросы в процессе решения</Title>
           <Text type="secondary">
             Запросы, которые находятся в активной работе
@@ -572,7 +569,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </div>
 
         
-        <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Row gutter={16} className="inProgressRequestsStatsRow">
           <Col span={6}>
             <Statistic title="Всего в работе" value={stats.total} />
           </Col>
@@ -580,26 +577,32 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
             <Statistic 
               title="Просроченные" 
               value={stats.overdue} 
-              valueStyle={{ color: stats.overdue > 0 ? '#ff4d4f' : '#52c41a' }} 
+              className={stats.overdue > 0 ? 'inProgressRequestsStatOverdue' : 'inProgressRequestsStatOk'}
             />
           </Col>
           <Col span={6}>
-            <Statistic title="Ожидают ответа" value={stats.waitingResponse} valueStyle={{ color: '#faad14' }} />
+            <Statistic title="Ожидают ответа" value={stats.waitingResponse} className="inProgressRequestsStatWaiting" />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Средний прогресс" 
               value={`${Math.round(stats.avgProgress)}%`}
-              valueStyle={{ color: getProgressColor(stats.avgProgress) }}
+              className={
+                stats.avgProgress >= 80 
+                  ? 'inProgressRequestsStatProgressHigh' 
+                  : stats.avgProgress >= 50 
+                    ? 'inProgressRequestsStatProgressMedium' 
+                    : 'inProgressRequestsStatProgressLow'
+              }
             />
           </Col>
         </Row>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="inProgressRequestsFiltersRow">
           <Search
             placeholder="Поиск по запросам"
             allowClear
-            style={{ width: 300 }}
+            className="inProgressRequestsSearch"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -607,7 +610,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
           
           <Select
             placeholder="Тип запроса"
-            style={{ width: 150 }}
+            className="inProgressRequestsSelectType"
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -623,7 +626,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
 
           <Select
             placeholder="Статус"
-            style={{ width: 150 }}
+            className="inProgressRequestsSelectStatus"
             value={selectedStatus}
             onChange={setSelectedStatus}
           >
@@ -636,7 +639,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
 
           <Select
             placeholder="Администратор"
-            style={{ width: 150 }}
+            className="inProgressRequestsSelectAdmin"
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -648,7 +651,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
 
           <Select
             placeholder="Приоритет"
-            style={{ width: 120 }}
+            className="inProgressRequestsSelectPriority"
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -709,7 +712,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
       >
         {selectedRequest && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressRequestsModalHeader">
               <Title level={5}>{selectedRequest.title}</Title>
               <Space>
                 <Tag color={getTypeColor(selectedRequest.request_type)}>
@@ -727,27 +730,27 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
               </Space>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressRequestsSectionBlock">
               <Text strong>Прогресс выполнения:</Text>
               <Progress 
                 percent={selectedRequest.progress_percentage} 
                 strokeColor={getProgressColor(selectedRequest.progress_percentage)}
-                style={{ marginTop: 8 }}
+                className="inProgressRequestsProgress"
               />
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressRequestsSectionBlock">
               <Text strong>Описание:</Text>
-              <Paragraph style={{ marginTop: 8 }}>
+              <Paragraph className="inProgressRequestsParagraph">
                 {selectedRequest.description}
               </Paragraph>
             </div>
 
             <Row gutter={24}>
               <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
+                <div className="inProgressRequestsSectionBlock">
                   <Text strong>Пользователь:</Text>
-                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="inProgressRequestsInfoRow">
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</div>
@@ -760,9 +763,9 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
               </Col>
 
               <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
+                <div className="inProgressRequestsSectionBlock">
                   <Text strong>Администратор:</Text>
-                  <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="inProgressRequestsInfoRow">
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.assigned_admin.first_name} {selectedRequest.assigned_admin.last_name}</div>
@@ -774,9 +777,9 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
             </Row>
 
             {selectedRequest.related_order && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="inProgressRequestsSectionBlock">
                 <Text strong>Связанный заказ:</Text>
-                <div style={{ marginTop: 8, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 6 }}>
+                <div className="inProgressRequestsRelatedOrder">
                   <div>ID: {selectedRequest.related_order.id}</div>
                   <div>Название: {selectedRequest.related_order.title}</div>
                   <div>Сумма: {selectedRequest.related_order.amount.toLocaleString()} ₽</div>
@@ -786,26 +789,26 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
             )}
 
             {selectedRequest.notes && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="inProgressRequestsSectionBlock">
                 <Text strong>Заметки:</Text>
-                <div style={{ marginTop: 8, padding: 12, backgroundColor: '#fff7e6', borderRadius: 6 }}>
+                <div className="inProgressRequestsNotesBox">
                   {selectedRequest.notes}
                 </div>
               </div>
             )}
 
             {selectedRequest.next_action && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="inProgressRequestsSectionBlock">
                 <Text strong>Следующее действие:</Text>
-                <div style={{ marginTop: 8, padding: 12, backgroundColor: '#f0f8ff', borderRadius: 6 }}>
+                <div className="inProgressRequestsNextAction">
                   {selectedRequest.next_action}
                 </div>
               </div>
             )}
 
-            <div style={{ marginBottom: 16 }}>
+            <div className="inProgressRequestsSectionBlock">
               <Text strong>История действий:</Text>
-              <Timeline style={{ marginTop: 8 }}>
+              <Timeline className="inProgressRequestsTimeline">
                 {selectedRequest.actions.map((action, index) => (
                   <Timeline.Item 
                     key={action.id}
@@ -813,12 +816,12 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
                   >
                     <div>
                       <Text strong>{action.description}</Text>
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                      <div className="inProgressRequestsTimelineMeta">
                         {action.performed_by.first_name} {action.performed_by.last_name} • 
                         {dayjs(action.performed_at).format('DD.MM.YYYY HH:mm')}
                       </div>
                       {action.details && (
-                        <div style={{ fontSize: '12px', fontStyle: 'italic', marginTop: 4 }}>
+                        <div className="inProgressRequestsTimelineDetails">
                           {action.details}
                         </div>
                       )}
@@ -828,7 +831,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
               </Timeline>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#666' }}>
+            <div className="inProgressRequestsMetaRow">
               <span>Создан: {dayjs(selectedRequest.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Взят в работу: {dayjs(selectedRequest.taken_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Ответов: {selectedRequest.response_count}</span>
@@ -948,14 +951,6 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         </Form>
       </Modal>
 
-      <style>{`
-        .overdue-row {
-          background-color: #fff2f0 !important;
-        }
-        .hold-row {
-          background-color: #f5f5f5 !important;
-        }
-      `}</style>
     </div>
   );
 };

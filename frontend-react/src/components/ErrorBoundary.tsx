@@ -31,7 +31,7 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div className="errorBoundaryContainer">
           <Result
             status="error"
             title="Что-то пошло не так"
@@ -43,7 +43,7 @@ class ErrorBoundary extends Component<Props, State> {
             ]}
           />
           {process.env.NODE_ENV === 'development' && (
-            <div style={{ marginTop: '20px', textAlign: 'left', background: '#f5f5f5', padding: '10px', borderRadius: '4px', overflow: 'auto' }}>
+            <div className="errorBoundaryDebug">
               <Typography.Text type="secondary">
                 <pre>{this.state.error?.stack}</pre>
               </Typography.Text>

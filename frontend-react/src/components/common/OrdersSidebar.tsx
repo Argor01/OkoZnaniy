@@ -55,91 +55,91 @@ const OrdersSidebar: React.FC<OrdersSidebarProps> = ({
     },
     {
       key: 'new',
-      icon: <ClockCircleOutlined style={{ color: '#3b82f6' }} />,
+      icon: <ClockCircleOutlined className={styles.iconBlue} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>Открыт</span>
-          <Badge count={ordersCount.new} className={styles.badge} style={{ backgroundColor: '#3b82f6' }} />
+          <Badge count={ordersCount.new} className={`${styles.badge} ${styles.badgeBlue}`} />
         </div>
       ),
     },
     {
       key: 'confirming',
-      icon: <SyncOutlined style={{ color: '#f59e0b' }} />,
+      icon: <SyncOutlined className={styles.iconAmber} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>На подтверждении</span>
-          <Badge count={ordersCount.confirming} className={styles.badge} style={{ backgroundColor: '#f59e0b' }} />
+          <Badge count={ordersCount.confirming} className={`${styles.badge} ${styles.badgeAmber}`} />
         </div>
       ),
     },
     {
       key: 'in_progress',
-      icon: <SyncOutlined style={{ color: '#8b5cf6' }} />,
+      icon: <SyncOutlined className={styles.iconViolet} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>На выполнении</span>
-          <Badge count={ordersCount.in_progress} className={styles.badge} style={{ backgroundColor: '#8b5cf6' }} />
+          <Badge count={ordersCount.in_progress} className={`${styles.badge} ${styles.badgeViolet}`} />
         </div>
       ),
     },
     {
       key: 'payment',
-      icon: <DollarOutlined style={{ color: '#10b981' }} />,
+      icon: <DollarOutlined className={styles.iconGreen} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>Ожидает оплаты</span>
-          <Badge count={ordersCount.payment} className={styles.badge} style={{ backgroundColor: '#10b981' }} />
+          <Badge count={ordersCount.payment} className={`${styles.badge} ${styles.badgeGreen}`} />
         </div>
       ),
     },
     {
       key: 'review',
-      icon: <FileSearchOutlined style={{ color: '#06b6d4' }} />,
+      icon: <FileSearchOutlined className={styles.iconCyan} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>На проверке</span>
-          <Badge count={ordersCount.review} className={styles.badge} style={{ backgroundColor: '#06b6d4' }} />
+          <Badge count={ordersCount.review} className={`${styles.badge} ${styles.badgeCyan}`} />
         </div>
       ),
     },
     {
       key: 'completed',
-      icon: <CheckCircleOutlined style={{ color: '#10b981' }} />,
+      icon: <CheckCircleOutlined className={styles.iconGreen} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>Выполнен</span>
-          <Badge count={ordersCount.completed} className={styles.badge} style={{ backgroundColor: '#10b981' }} />
+          <Badge count={ordersCount.completed} className={`${styles.badge} ${styles.badgeGreen}`} />
         </div>
       ),
     },
     {
       key: 'revision',
-      icon: <EditOutlined style={{ color: '#ef4444' }} />,
+      icon: <EditOutlined className={styles.iconRed} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>На доработке</span>
-          <Badge count={ordersCount.revision} className={styles.badge} style={{ backgroundColor: '#ef4444' }} />
+          <Badge count={ordersCount.revision} className={`${styles.badge} ${styles.badgeRed}`} />
         </div>
       ),
     },
     {
       key: 'download',
-      icon: <DownloadOutlined style={{ color: '#6366f1' }} />,
+      icon: <DownloadOutlined className={styles.iconIndigo} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>Ожидает скачивания</span>
-          <Badge count={ordersCount.download} className={styles.badge} style={{ backgroundColor: '#6366f1' }} />
+          <Badge count={ordersCount.download} className={`${styles.badge} ${styles.badgeIndigo}`} />
         </div>
       ),
     },
     {
       key: 'closed',
-      icon: <CloseCircleOutlined style={{ color: '#6b7280' }} />,
+      icon: <CloseCircleOutlined className={styles.iconGray} />,
       label: (
         <div className={styles.menuItemContent}>
           <span>Закрыт</span>
-          <Badge count={ordersCount.closed} className={styles.badge} style={{ backgroundColor: '#6b7280' }} />
+          <Badge count={ordersCount.closed} className={`${styles.badge} ${styles.badgeGray}`} />
         </div>
       ),
     },
