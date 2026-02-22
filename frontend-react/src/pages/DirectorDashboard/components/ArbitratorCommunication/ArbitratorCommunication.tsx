@@ -49,7 +49,7 @@ const ArbitratorCommunication: React.FC = () => {
       label: (
         <span style={{ whiteSpace: 'nowrap' }}>
           <MessageOutlined style={{ marginRight: isMobile ? 4 : 8 }} /> 
-          {isMobile ? 'Чат' : 'Чат с арбитрами'}
+          {isMobile ? 'Чат' : 'Внутренний чат'}
         </span>
       ),
       children: <ArbitratorChat />,
@@ -88,7 +88,7 @@ const ArbitratorCommunication: React.FC = () => {
                 marginBottom: isMobile ? 16 : 24,
               }}
             >
-              Список обращений, отправленных арбитрами на согласование дирекции
+              Список обращений, отправленных на согласование дирекции
             </Text>
             {claims.length === 0 ? (
               <div style={{ textAlign: 'center', padding: isMobile ? '24px' : '40px' }}>

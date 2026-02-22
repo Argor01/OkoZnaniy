@@ -153,7 +153,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
                 marginBottom: isMobile ? 8 : 16,
               }}
             >
-              Коммуникация с арбитрами
+              Внутренняя коммуникация
             </Title>
             <Text 
               type="secondary"
@@ -161,7 +161,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
                 fontSize: isMobile ? 13 : 14,
               }}
             >
-              Общение с арбитрами по вопросам согласования решений и других вопросов
+              Общение с сотрудниками по вопросам согласования решений и других вопросов
             </Text>
           </div>
 

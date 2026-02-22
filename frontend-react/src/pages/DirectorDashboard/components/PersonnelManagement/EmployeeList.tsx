@@ -164,7 +164,7 @@ const EmployeeList: React.FC = () => {
   const getRoleLabel = (role: string) => {
     const roleLabels: Record<string, string> = {
       admin: 'Администратор',
-      arbitrator: 'Арбитр',
+      director: 'Директор',
       partner: 'Партнёр',
       expert: 'Эксперт',
       client: 'Клиент',
@@ -175,7 +175,7 @@ const EmployeeList: React.FC = () => {
   const getRoleColor = (role: string) => {
     const roleColors: Record<string, string> = {
       admin: 'red',
-      arbitrator: 'orange',
+      director: 'purple',
       partner: 'blue',
       expert: 'green',
       client: 'default',
@@ -241,7 +241,8 @@ const EmployeeList: React.FC = () => {
       title: 'Статус',
       dataIndex: 'is_active',
       key: 'is_active',
-      render: (isActive: boolean | undefined, record: Employee) => {
+      render: (isActive: boolean | undefined, record: Employee) => {
+
         const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
         const active = isActive !== false; 
         
@@ -250,7 +251,8 @@ const EmployeeList: React.FC = () => {
           return <Tag color="red">Неактивен</Tag>;
         }
         
-        if (isDeactivatedExpert) {
+        if (isDeactivatedExpert) {
+
           return <Tag color="orange">Неактивен (эксперт)</Tag>;
         }
         
@@ -275,7 +277,8 @@ const EmployeeList: React.FC = () => {
                 onClick={() => handleViewDetails(record)}
               />
             </Tooltip>
-            {!isActive ? (
+            {!isActive ? (
+
               <Tooltip title="Активировать">
                 <Button
                   type="text"
@@ -284,7 +287,8 @@ const EmployeeList: React.FC = () => {
                   style={{ color: '#52c41a' }}
                 />
               </Tooltip>
-            ) : isDeactivatedExpert ? (
+            ) : isDeactivatedExpert ? (
+
               <Tooltip title="Активировать как эксперта">
                 <Button
                   type="text"
@@ -293,7 +297,8 @@ const EmployeeList: React.FC = () => {
                   style={{ color: '#52c41a' }}
                 />
               </Tooltip>
-            ) : (
+            ) : (
+
               <>
                 <Tooltip title="Деактивировать">
                   <Button
@@ -403,7 +408,7 @@ const EmployeeList: React.FC = () => {
           >
             <Option value="all">Все роли</Option>
             <Option value="admin">Администратор</Option>
-            <Option value="arbitrator">Арбитр</Option>
+            <Option value="director">Директор</Option>
             <Option value="partner">Партнёр</Option>
             <Option value="expert">Эксперт</Option>
           </Select>

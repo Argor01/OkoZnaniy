@@ -840,9 +840,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def contact_banned_users(self, request):
         """Получить список пользователей, забаненных за обмен контактами"""
-        if request.user.role not in ['admin', 'arbitrator']:
+        if request.user.role not in ['admin', 'director']:
             return Response(
-                {'error': 'Доступно только для администраторов и арбитров'},
+                {'error': 'Доступно только для администраторов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -870,9 +870,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def ban_for_contacts(self, request, pk=None):
         """Забанить пользователя за обмен контактами"""
-        if request.user.role not in ['admin', 'arbitrator']:
+        if request.user.role not in ['admin', 'director']:
             return Response(
-                {'error': 'Доступно только для администраторов и арбитров'},
+                {'error': 'Доступно только для администраторов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -902,9 +902,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def unban_for_contacts(self, request, pk=None):
         """Разбанить пользователя за обмен контактами"""
-        if request.user.role not in ['admin', 'arbitrator']:
+        if request.user.role not in ['admin', 'director']:
             return Response(
-                {'error': 'Доступно только для администраторов и арбитров'},
+                {'error': 'Доступно только для администраторов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
 

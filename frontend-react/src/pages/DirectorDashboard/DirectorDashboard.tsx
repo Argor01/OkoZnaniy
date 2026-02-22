@@ -17,7 +17,7 @@ import PersonnelManagement from './components/PersonnelManagement/PersonnelManag
 import FinancialStatistics from './components/FinancialStatistics/FinancialStatistics';
 import PartnerPanel from './components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from './components/GeneralStatistics/GeneralStatistics';
-import ArbitratorCommunication from './components/ArbitratorCommunication/ArbitratorCommunication';
+import { AdminChatsSection } from '../AdminDashboard/components/Sections/AdminChatsSection';
 import ContactBannedUsers from './components/ContactBannedUsers';
 
 const { Header, Sider, Content, Footer } = Layout;
@@ -29,6 +29,117 @@ type MenuItem = {
   label: string;
   component: React.ReactNode;
 };
+
+// Mock данные для чатов директора
+const mockChatRooms = [
+  {
+    id: 1,
+    name: 'Общий чат администраторов',
+    description: 'Общение всех администраторов платформы',
+    type: 'general' as const,
+    participants: [
+      {
+        id: 1,
+        username: 'admin_chief',
+        first_name: 'Анна',
+        last_name: 'Главная',
+        role: 'Главный администратор',
+        online: true,
+      },
+      {
+        id: 2,
+        username: 'admin_support',
+        first_name: 'Петр',
+        last_name: 'Поддержкин',
+        role: 'Администратор поддержки',
+        online: true,
+      },
+      {
+        id: 3,
+        username: 'admin_content',
+        first_name: 'Мария',
+        last_name: 'Контентова',
+        role: 'Контент-администратор',
+        online: false,
+        last_seen: '2024-02-04T07:30:00Z',
+      },
+    ],
+    created_by: {
+      id: 100,
+      username: 'director',
+      first_name: 'Владимир',
+      last_name: 'Директоров',
+    },
+    created_at: '2024-01-01T10:00:00Z',
+    last_message: {
+      id: 1,
+      text: 'Доброе утро, команда! Сегодня у нас много новых обращений',
+      sender: {
+        id: 1,
+        username: 'admin_chief',
+        first_name: 'Анна',
+        last_name: 'Главная',
+        role: 'Главный администратор',
+        online: true,
+      },
+      sent_at: '2024-02-04T08:00:00Z',
+      is_pinned: false,
+      is_system: false,
+    },
+    unread_count: 3,
+    is_muted: false,
+    is_archived: false,
+  },
+  {
+    id: 2,
+    name: 'Чат с директором',
+    description: 'Прямая связь с руководством',
+    type: 'private' as const,
+    participants: [
+      {
+        id: 100,
+        username: 'director',
+        first_name: 'Владимир',
+        last_name: 'Директоров',
+        role: 'Директор',
+        online: true,
+      },
+      {
+        id: 1,
+        username: 'admin_chief',
+        first_name: 'Анна',
+        last_name: 'Главная',
+        role: 'Главный администратор',
+        online: true,
+      },
+    ],
+    created_by: {
+      id: 100,
+      username: 'director',
+      first_name: 'Владимир',
+      last_name: 'Директоров',
+    },
+    created_at: '2024-01-01T10:00:00Z',
+    last_message: {
+      id: 3,
+      text: 'Подготовьте отчет по итогам недели к завтрашнему совещанию',
+      sender: {
+        id: 100,
+        username: 'director',
+        first_name: 'Владимир',
+        last_name: 'Директоров',
+        role: 'Директор',
+        online: true,
+      },
+      sent_at: '2024-02-04T09:15:00Z',
+      is_pinned: true,
+      is_system: false,
+    },
+    unread_count: 0,
+    is_muted: false,
+    is_archived: false,
+  },
+];
 
 const DirectorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -147,10 +258,10 @@ const DirectorDashboard: React.FC = () => {
       component: <GeneralStatistics />,
     },
     {
-      key: 'arbitrators',
+      key: 'internal-communication',
       icon: <MessageOutlined />,
-      label: 'Коммуникация с арбитрами',
-      component: <ArbitratorCommunication />,
+      label: 'Внутренняя коммуникация',
+      component: <AdminChatsSection chatRooms={mockChatRooms} currentUserId={1} />,
     },
     {
       key: 'contact-bans',

@@ -5,7 +5,6 @@ from django.db import models
 class Roles(models.TextChoices):
     CLIENT = 'client'
     EXPERT = 'expert'
-    ARBITRATOR = 'arbitrator'
     ADMIN = 'admin'
     DIRECTOR = 'director'
     PARTNER = 'partner'

@@ -107,7 +107,7 @@ const ContactBannedUsers: React.FC = () => {
       expert: 'Эксперт',
       client: 'Клиент',
       partner: 'Партнер',
-      arbitrator: 'Арбитр',
+      director: 'Директор',
     };
     return roleLabels[role] || role;
   };
