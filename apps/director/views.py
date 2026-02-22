@@ -323,6 +323,22 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         
         serializer = UserSerializer(archived, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def destroy(self, request, pk=None):
+        """Полное удаление сотрудника из системы (только для архивированных)"""
+        user = self.get_object()
+        
+        # Проверяем, что пользователь архивирован
+        if user.is_active:
+            return Response(
+                {'detail': 'Можно удалять только архивированных сотрудников'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Удаляем пользователя
+        user.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['post'])
     def register(self, request):
