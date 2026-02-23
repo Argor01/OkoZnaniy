@@ -123,6 +123,11 @@ export const menuItems: MenuItem[] = [
     icon: CommentOutlined,
     label: 'Внутренняя коммуникация',
   },
+  {
+    key: 'user_conversations',
+    icon: MessageOutlined,
+    label: 'Переписки пользователей',
+  },
   
   {
     key: 'request_processing' as MenuKey,
@@ -176,6 +181,7 @@ export const titleMap: Record<MenuKey, string> = {
   tickets: 'Тикеты поддержки',
   admin_chats: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
+  user_conversations: 'Переписки пользователей',
   
   request_processing: 'Обработка запросов',
   request_processing_open: 'Открытые запросы клиентов',

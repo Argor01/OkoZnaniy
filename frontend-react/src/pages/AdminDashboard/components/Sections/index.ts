@@ -23,3 +23,4 @@ export { AdminChatsSection } from './AdminChatsSection';
 export { OpenRequestsSection } from './OpenRequestsSection';
 export { InProgressRequestsSection } from './InProgressRequestsSection';
 export { CompletedRequestsSection } from './CompletedRequestsSection';
+export { UserConversationsSection } from './UserConversationsSection';

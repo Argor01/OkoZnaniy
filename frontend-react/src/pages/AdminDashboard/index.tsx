@@ -39,6 +39,7 @@ import {
   CompletedClaimsSection,
   PendingApprovalSection,
   AdminChatsSection,
+  UserConversationsSection,
 } from './components/Sections';
 import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
@@ -371,6 +372,19 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             onRejectApproval={(claimId, reason) => { void claimId; void reason; }}
             onEscalateToDirector={(claimId) => { void claimId; }}
             onRequestMoreInfo={(claimId, questions) => { void claimId; void questions; }}
+          />
+        );
+
+      case 'user_conversations':
+        return (
+          <UserConversationsSection
+            conversations={[]}
+            loading={false}
+            onViewConversation={(conversationId) => { void conversationId; }}
+            onLoadMessages={async (conversationId) => {
+              void conversationId;
+              return [];
+            }}
           />
         );
     }

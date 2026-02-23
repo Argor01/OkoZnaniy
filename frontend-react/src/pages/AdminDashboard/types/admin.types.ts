@@ -92,7 +92,8 @@ export type MenuKey =
   | 'user_roles'
   | 'orders_management'           
   | 'all_orders'
-  | 'problem_orders';
+  | 'problem_orders'
+  | 'user_conversations';
 
 
 export interface TableColumn {
