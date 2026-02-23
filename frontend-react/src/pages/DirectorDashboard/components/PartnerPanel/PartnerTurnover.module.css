@@ -1,4 +1,4 @@
-﻿
+
 .datePickerContainer {
   width: 100%;
 }
@@ -30,6 +30,438 @@
   font-size: 13px;
   border-radius: 6px;
   font-weight: 500;
+}
+
+.filterCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.filterCardMobile {
+  border-radius: 8px;
+}
+
+.datePickerWrapper {
+  position: relative;
+}
+
+.quickSelectDesktop {
+  margin-top: 12px;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.statCardMobile {
+  border-radius: 8px;
+}
+
+.statCardHighlightMobile {
+  background: #f6ffed;
+  border: 2px solid #52c41a;
+}
+
+.statisticTurnover {
+  padding: 12px 0;
+}
+
+.statisticTurnover :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticTurnoverMobile {
+  padding: 8px 0;
+}
+
+.statisticTurnoverMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticCommission {
+  padding: 12px 0;
+}
+
+.statisticCommission :global(.ant-statistic-content-value) {
+  color: #3f8600;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticCommissionMobile {
+  padding: 8px 0;
+}
+
+.statisticCommissionMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticActive {
+  padding: 12px 0;
+}
+
+.statisticActive :global(.ant-statistic-content-value) {
+  color: #722ed1;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.statisticActiveMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
+}
+
+.topPartnersRow {
+  margin-bottom: 16px;
+}
+
+.chartCard {
+  border-radius: 12px;
+}
+
+.chartCardMobile {
+  border-radius: 8px;
+}
+
+.chartCardHead :global(.ant-card-head-title) {
+  font-size: 16px;
+}
+
+.chartCardHeadMobile :global(.ant-card-head-title) {
+  font-size: 14px;
+}
+
+.chartContainer {
+  width: 100%;
+  height: 300px;
+}
+
+.chartContainerMobile {
+  height: 250px;
+}
+
+.chartContainerScrollableMobile {
+  overflow-x: auto;
+}
+
+.chartContainer :global(.recharts-cartesian-axis-tick-value) {
+  font-size: 12px;
+}
+
+.chartContainerMobile :global(.recharts-cartesian-axis-tick-value) {
+  font-size: 10px;
+}
+
+.chartContainer :global(.recharts-default-tooltip) {
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.chartContainerMobile :global(.recharts-default-tooltip) {
+  font-size: 12px;
+}
+
+.chartContainer :global(.recharts-legend-item-text) {
+  font-size: 14px;
+}
+
+.chartContainerMobile :global(.recharts-legend-item-text) {
+  font-size: 12px;
+}
+
+.chartContainerPie {
+  width: 100%;
+  height: 300px;
+}
+
+.chartContainerPieMobile {
+  height: 250px;
+}
+
+.chartContainerPie :global(.recharts-default-tooltip) {
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.chartContainerPieMobile :global(.recharts-default-tooltip) {
+  font-size: 12px;
+}
+
+.chartContainerPie :global(.recharts-legend-item-text) {
+  font-size: 14px;
+}
+
+.chartContainerPieMobile :global(.recharts-legend-item-text) {
+  font-size: 11px;
+}
+
+.topPartnersDetailsCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.topPartnersDetailsCardMobile {
+  border-radius: 8px;
+}
+
+.topPartnersDetailsHead :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.topPartnersDetailsHeadMobile :global(.ant-card-head-title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fullWidthSpace {
+  width: 100%;
+}
+
+.topPartnerCard {
+  border-radius: 8px;
+}
+
+.topPartnerCardMobile {
+  border-radius: 6px;
+}
+
+.topPartnerCardTop1 {
+  border: 2px solid #ffd700;
+  background: #fff7e6;
+}
+
+.topPartnerCardTop2 {
+  border: 2px solid #ffd700;
+  background: #f6ffed;
+}
+
+.topPartnerCardTop3 {
+  border: 2px solid #ffd700;
+  background: #fff2e8;
+}
+
+.topPartnerCardDefault {
+  border: 1px solid #d9d9d9;
+  background: #fafafa;
+}
+
+.topPartnerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.topPartnerHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topPartnerRankTag {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.topPartnerName {
+  font-size: 16px;
+}
+
+.topPartnerPercentTag {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.topPartnerEmail {
+  margin-bottom: 8px;
+}
+
+.topPartnerEmailText {
+  font-size: 13px;
+}
+
+.topPartnerStatBox {
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.topPartnerTurnoverBox {
+  background: #e6f7ff;
+}
+
+.topPartnerCommissionBox {
+  background: #f6ffed;
+}
+
+.topPartnerStatLabel {
+  font-size: 11px;
+  color: #666;
+}
+
+.topPartnerTurnoverValue {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.topPartnerCommissionValue {
+  font-size: 14px;
+  color: #52c41a;
+}
+
+.topPartnerReferralBox {
+  margin-top: 8px;
+  text-align: center;
+  background: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.topPartnerReferralLabel {
+  font-size: 12px;
+  color: #666;
+}
+
+.topPartnerReferralValue {
+  font-size: 13px;
+  color: #722ed1;
+}
+
+.allPartnersCard {
+  border-radius: 12px;
+}
+
+.allPartnersCardMobile {
+  border-radius: 8px;
+}
+
+.allPartnersHead :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.allPartnersHeadMobile :global(.ant-card-head-title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.allPartnerCard {
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  background: #fafafa;
+}
+
+.allPartnerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.allPartnerHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.allPartnerRankTag {
+  font-size: 12px;
+}
+
+.allPartnerName {
+  font-size: 15px;
+}
+
+.allPartnerPercentTag {
+  font-size: 11px;
+}
+
+.allPartnerEmail {
+  margin-bottom: 10px;
+}
+
+.allPartnerEmailText {
+  font-size: 12px;
+}
+
+.allPartnerStatBox {
+  padding: 6px 8px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.allPartnerTurnoverBox {
+  background: #e6f7ff;
+}
+
+.allPartnerCommissionBox {
+  background: #f6ffed;
+}
+
+.allPartnerReferralsBox {
+  background: #f0f0f0;
+}
+
+.allPartnerStatLabel {
+  font-size: 10px;
+  color: #666;
+}
+
+.allPartnerTurnoverValue {
+  font-size: 12px;
+  color: #1890ff;
+}
+
+.allPartnerCommissionValue {
+  font-size: 12px;
+  color: #52c41a;
+}
+
+.allPartnerReferralsValue {
+  font-size: 12px;
+  color: #722ed1;
+}
+
+.allPartnersSummaryCard {
+  margin-top: 16px;
+  border-radius: 8px;
+  border: 2px solid #1890ff;
+  background: #f0f9ff;
+}
+
+.allPartnersSummaryTitle {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.allPartnersSummaryRow {
+  margin-top: 8px;
+}
+
+.allPartnersSummaryCell {
+  text-align: center;
+}
+
+.allPartnersSummaryLabel {
+  font-size: 11px;
+  color: #666;
+}
+
+.allPartnersSummaryValueBlue {
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.allPartnersSummaryValueGreen {
+  font-size: 14px;
+  color: #52c41a;
 }
 
 

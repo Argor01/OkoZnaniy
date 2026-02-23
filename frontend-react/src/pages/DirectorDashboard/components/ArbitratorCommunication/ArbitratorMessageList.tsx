@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { directorApi } from '../../api/directorApi';
 import type { InternalMessage } from '../../api/types';
+import styles from './ArbitratorMessageList.module.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -126,7 +127,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
 
   if (messages.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
+      <div className={styles.emptyState}>
         <Text type="secondary">Сообщений нет</Text>
       </div>
     );
@@ -143,14 +144,15 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
         return (
           <List.Item
             key={message.id}
-            style={{
-              backgroundColor: isUnread ? '#f0f7ff' : message.sender.role === 'arbitrator' ? '#fafafa' : 'transparent',
-              padding: isMobile ? '12px' : '16px',
-              marginBottom: isMobile ? '6px' : '8px',
-              borderRadius: isMobile ? 6 : 8,
-              border: isUnread ? '2px solid #1890ff' : '1px solid #f0f0f0',
-              borderLeft: message.sender.role === 'arbitrator' ? '4px solid #1890ff' : '4px solid #1890ff',
-            }}
+            className={[
+              styles.messageItem,
+              isMobile ? styles.messageItemMobile : '',
+              isUnread
+                ? styles.messageItemUnread
+                : message.sender.role === 'arbitrator'
+                ? styles.messageItemArbitrator
+                : styles.messageItemDefault,
+            ].filter(Boolean).join(' ')}
             onMouseEnter={() => handleMarkAsRead(message)}
           >
             <List.Item.Meta
@@ -158,61 +160,55 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 <Avatar
                   size={isMobile ? 80 : 96}
                   icon={<UserOutlined />}
-                  style={{
-                    backgroundColor: isCurrentUser ? '#1890ff' : '#1890ff',
-                    flexShrink: 0,
-                  }}
+                  className={styles.avatar}
                 />
               }
               title={
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: '8px', 
-                  alignItems: 'center',
-                  minWidth: 0,
-                }}>
-                  <Text strong style={{ whiteSpace: 'nowrap', minWidth: 0 }}>
+                <div className={styles.titleRow}>
+                  <Text strong className={styles.senderName}>
                     {message.sender.username}
                   </Text>
-                  <Tag 
+                  <Tag
                     color={message.sender.role === 'arbitrator' ? 'blue' : 'purple'}
-                    style={{ margin: 0, flexShrink: 0 }}
+                    className={styles.metaTag}
                   >
                     {message.sender.role === 'arbitrator' ? 'Арбитр' : 'Дирекция'}
                   </Tag>
                   {message.priority && (
-                    <Tag 
+                    <Tag
                       color={getPriorityColor(message.priority)}
-                      style={{ margin: 0, flexShrink: 0 }}
+                      className={styles.metaTag}
                     >
                       {getPriorityText(message.priority)}
                     </Tag>
                   )}
-                  <Tag 
+                  <Tag
                     color={getStatusColor(message.status, message.read_at)}
-                    style={{ margin: 0, flexShrink: 0 }}
+                    className={styles.metaTag}
                   >
                     {getStatusText(message.status, message.read_at)}
                   </Tag>
                 </div>
               }
               description={
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                  <Text 
+                <Space direction="vertical" size="small" className={styles.fullWidth}>
+                  <Text
                     type="secondary"
-                    style={{ fontSize: isMobile ? 11 : 12 }}
+                    className={[
+                      styles.metaText,
+                      isMobile ? styles.metaTextMobile : '',
+                    ].filter(Boolean).join(' ')}
                   >
                     {dayjs(message.created_at).format(isMobile ? 'DD.MM.YY HH:mm' : 'DD.MM.YYYY HH:mm')}
                   </Text>
                   {message.claim_id && (
                     <Text
                       type="secondary"
-                      style={{
-                        cursor: onClaimClick ? 'pointer' : 'default',
-                        textDecoration: onClaimClick ? 'underline' : 'none',
-                        fontSize: isMobile ? 11 : 12,
-                      }}
+                      className={[
+                        styles.claimLink,
+                        isMobile ? styles.claimLinkMobile : '',
+                        onClaimClick ? styles.claimLinkActive : styles.claimLinkInactive,
+                      ].filter(Boolean).join(' ')}
                       onClick={() => onClaimClick && onClaimClick(message.claim_id!)}
                     >
                       Связано с обращением #{message.claim_id}
@@ -221,31 +217,37 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 </Space>
               }
             />
-            <Paragraph 
-              style={{ 
-                marginTop: isMobile ? '6px' : '8px', 
-                marginBottom: isMobile ? '6px' : '8px',
-                fontSize: isMobile ? 13 : 14,
-                lineHeight: 1.6,
-              }}
+            <Paragraph
+              className={[
+                styles.messageText,
+                isMobile ? styles.messageTextMobile : '',
+              ].filter(Boolean).join(' ')}
             >
               {message.text}
             </Paragraph>
             {message.attachments && message.attachments.length > 0 && (
-              <div style={{ marginTop: isMobile ? '6px' : '8px' }}>
-                <Text 
-                  type="secondary" 
-                  style={{ 
-                    marginRight: isMobile ? '4px' : '8px',
-                    fontSize: isMobile ? 11 : 12,
-                  }}
+              <div
+                className={[
+                  styles.attachmentsBlock,
+                  isMobile ? styles.attachmentsBlockMobile : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <Text
+                  type="secondary"
+                  className={[
+                    styles.attachmentsLabel,
+                    isMobile ? styles.attachmentsLabelMobile : '',
+                  ].filter(Boolean).join(' ')}
                 >
                   <PaperClipOutlined /> {isMobile ? 'Файлы:' : 'Прикрепленные файлы:'}
                 </Text>
-                <Space 
+                <Space
                   direction={isMobile ? 'vertical' : 'horizontal'}
                   size="small"
-                  style={{ width: isMobile ? '100%' : 'auto' }}
+                  className={[
+                    styles.attachmentsList,
+                    isMobile ? styles.attachmentsListMobile : '',
+                  ].filter(Boolean).join(' ')}
                 >
                   {message.attachments.map((attachment) => (
                     <a
@@ -253,10 +255,10 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                       href={attachment.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ 
-                        fontSize: isMobile ? 12 : 14,
-                        wordBreak: 'break-all',
-                      }}
+                      className={[
+                        styles.attachmentLink,
+                        isMobile ? styles.attachmentLinkMobile : '',
+                      ].filter(Boolean).join(' ')}
                     >
                       {attachment.name}
                     </a>
@@ -264,14 +266,22 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                 </Space>
               </div>
             )}
-            <div style={{ marginTop: isMobile ? '6px' : '8px' }}>
+            <div
+              className={[
+                styles.actionsRow,
+                isMobile ? styles.actionsRowMobile : '',
+              ].filter(Boolean).join(' ')}
+            >
               <Space size={isMobile ? 'small' : 'middle'}>
                 {!isCurrentUser && (
                   <Button
                     size="small"
                     icon={<ArrowLeftOutlined />}
                     onClick={() => onReply && onReply(message)}
-                    style={{ fontSize: isMobile ? 12 : 14 }}
+                    className={[
+                      styles.actionButton,
+                      isMobile ? styles.actionButtonMobile : '',
+                    ].filter(Boolean).join(' ')}
                   >
                     {isMobile ? 'Ответ' : 'Ответить'}
                   </Button>
@@ -283,7 +293,10 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                     icon={<DeleteOutlined />}
                     onClick={() => handleDelete(message.id)}
                     loading={deleteMessageMutation.isPending}
-                    style={{ fontSize: isMobile ? 12 : 14 }}
+                    className={[
+                      styles.actionButton,
+                      isMobile ? styles.actionButtonMobile : '',
+                    ].filter(Boolean).join(' ')}
                   >
                     {isMobile ? '' : 'Удалить'}
                   </Button>

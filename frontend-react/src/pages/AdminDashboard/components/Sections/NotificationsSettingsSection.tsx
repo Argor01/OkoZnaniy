@@ -392,7 +392,8 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                         {typeof setting.setting_value === 'boolean' ? (
                           <Switch 
                             checked={setting.setting_value}
-                            onChange={(checked) => {
+                            onChange={(checked) => {
+
                               console.log('Update setting:', setting.setting_key, checked);
                             }}
                           />

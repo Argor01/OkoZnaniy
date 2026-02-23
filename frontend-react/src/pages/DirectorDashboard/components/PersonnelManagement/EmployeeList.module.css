@@ -1,4 +1,4 @@
-﻿
+
 .customSearchContainer {
   display: flex;
   height: 40px;
@@ -92,4 +92,118 @@
 
 .mobileFiltersContainer .ant-select {
   margin-bottom: 0;
+}
+
+.activateButton {
+  color: #52c41a;
+}
+
+.employeeCard {
+  border-radius: 12px;
+  border: none;
+  background: #fafafa;
+}
+
+.employeeCardMobile {
+  border-radius: 8px;
+}
+
+.pageTitle {
+  margin-bottom: 24px;
+  font-size: 20px;
+  color: #1f2937;
+}
+
+.pageTitleMobile {
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.filtersContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.filtersContainerMobile {
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.customSearchContainerFull {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.searchDesktop {
+  width: 300px;
+}
+
+.roleSelect {
+  width: 200px;
+}
+
+.statusSelect {
+  width: 200px;
+}
+
+.roleSelectMobile {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.statusSelectMobile {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.employeeTable {
+  border-radius: 12px;
+}
+
+.tablePagination {
+  padding: 16px;
+}
+
+.tablePaginationMobile {
+  padding: 12px;
+}
+
+.employeeDetailModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.employeeDetailModalMobile :global(.ant-modal) {
+  top: 0;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.employeeDetailModalMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  height: 100vh;
+}
+
+.employeeDetailModalMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 55px);
+  overflow-y: auto;
 }

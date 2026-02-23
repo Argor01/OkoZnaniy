@@ -69,7 +69,7 @@ const IncomeExpenseDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="incomeExpenseLoading">
         <Spin size="large" />
       </div>
     );
@@ -104,10 +104,12 @@ const IncomeExpenseDetail: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          'incomeExpenseFiltersCard',
+          isMobile ? 'incomeExpenseFiltersCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+      >
         {isMobile ? (
           <div className={mobileStyles.datePickerContainer}>
             <RangePicker
@@ -176,69 +178,63 @@ const IncomeExpenseDetail: React.FC = () => {
         )}
       </Card>
 
-      <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[16, isMobile ? 12 : 16]} className="incomeExpenseStatsRow">
         <Col xs={24} sm={12} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              'incomeExpenseStatCard',
+              isMobile ? 'incomeExpenseStatCardMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Общий доход"
               value={totalIncome}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#52c41a',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                'incomeExpenseIncomeStatistic',
+                isMobile ? 'incomeExpenseIncomeStatisticMobile' : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              'incomeExpenseStatCard',
+              isMobile ? 'incomeExpenseStatCardMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Общие расходы"
               value={totalExpense}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#ff4d4f',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                'incomeExpenseExpenseStatistic',
+                isMobile ? 'incomeExpenseExpenseStatisticMobile' : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={24} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? '#f0f9ff' : '#fff',
-            border: isMobile ? '2px solid #1890ff' : '1px solid #d9d9d9'
-          }}>
+          <Card
+            className={[
+              'incomeExpenseStatCard',
+              'incomeExpenseHighlightCard',
+              isMobile ? 'incomeExpenseStatCardMobile' : '',
+              isMobile ? 'incomeExpenseHighlightCardMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Чистая прибыль"
               value={netProfit}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#1890ff',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
+              className={[
+                'incomeExpenseNetStatistic',
+                isMobile ? 'incomeExpenseNetStatisticMobile' : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
@@ -246,19 +242,17 @@ const IncomeExpenseDetail: React.FC = () => {
 
       <Card 
         title="Доходы и расходы"
-        style={{ 
-          borderRadius: isMobile ? 8 : 12
-        }}
-        headStyle={{
-          fontSize: isMobile ? 16 : 18,
-          fontWeight: 600
-        }}
+        className={[
+          'incomeExpenseChartCard',
+          isMobile ? 'incomeExpenseChartCardMobile' : '',
+        ].filter(Boolean).join(' ')}
       >
-        <div style={{ 
-          width: '100%', 
-          height: isMobile ? 300 : 400,
-          overflowX: isMobile ? 'auto' : 'visible'
-        }}>
+        <div
+          className={[
+            'incomeExpenseChartContainer',
+            isMobile ? 'incomeExpenseChartContainerMobile' : '',
+          ].filter(Boolean).join(' ')}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
               data={chartData}
@@ -281,16 +275,8 @@ const IncomeExpenseDetail: React.FC = () => {
               />
               <Tooltip 
                 formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-                contentStyle={{
-                  fontSize: isMobile ? 12 : 14,
-                  borderRadius: 8
-                }}
               />
-              <Legend 
-                wrapperStyle={{
-                  fontSize: isMobile ? 12 : 14
-                }}
-              />
+              <Legend />
               <Bar dataKey="income" fill="#52c41a" name="Доход" />
               <Bar dataKey="expense" fill="#ff4d4f" name="Расход" />
             </BarChart>

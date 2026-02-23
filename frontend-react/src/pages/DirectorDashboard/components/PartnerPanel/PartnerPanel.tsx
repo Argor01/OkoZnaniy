@@ -12,7 +12,7 @@ const PartnerPanel: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <UserAddOutlined style={{ marginRight: 8 }} />
+          <UserAddOutlined className="partnerPanelTabIcon" />
           Список партнёров
         </span>
       ),
@@ -22,7 +22,7 @@ const PartnerPanel: React.FC = () => {
       key: 'turnover',
       label: (
         <span>
-          <DollarOutlined style={{ marginRight: 8 }} />
+          <DollarOutlined className="partnerPanelTabIcon" />
           Оборот по партнёрам
         </span>
       ),
@@ -32,17 +32,20 @@ const PartnerPanel: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ 
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          'partnerPanelCard',
+          isMobile ? 'partnerPanelCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+      >
         <Tabs 
           defaultActiveKey="list" 
           items={items}
           size={isMobile ? 'middle' : 'large'}
-          tabBarStyle={{
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: 500
-          }}
+          className={[
+            'partnerPanelTabs',
+            isMobile ? 'partnerPanelTabsMobile' : '',
+          ].filter(Boolean).join(' ')}
         />
       </Card>
     </div>

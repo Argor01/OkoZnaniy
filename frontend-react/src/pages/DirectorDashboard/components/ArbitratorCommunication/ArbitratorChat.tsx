@@ -21,6 +21,7 @@ import type { GetMessagesParams, InternalMessage, Claim } from '../../api/types'
 import ArbitratorMessageList from './ArbitratorMessageList';
 import ArbitratorMessageForm from './ArbitratorMessageForm';
 import { authApi } from '../../../../api/auth';
+import styles from './ArbitratorChat.module.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -138,58 +139,57 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
   return (
     <div>
       <Card
-        style={{
-          borderRadius: isMobile ? 8 : 12,
-          border: 'none',
-          background: '#fafafa',
-        }}
+        className={[
+          styles.rootCard,
+          isMobile ? styles.rootCardMobile : '',
+        ].filter(Boolean).join(' ')}
       >
-        <Space direction="vertical" size={isMobile ? 'middle' : 'large'} style={{ width: '100%' }}>
+        <Space
+          direction="vertical"
+          size={isMobile ? 'middle' : 'large'}
+          className={styles.contentStack}
+        >
           <div>
             <Title 
               level={4}
-              style={{
-                fontSize: isMobile ? 18 : 20,
-                marginBottom: isMobile ? 8 : 16,
-              }}
+              className={[
+                styles.headerTitle,
+                isMobile ? styles.headerTitleMobile : '',
+              ].filter(Boolean).join(' ')}
             >
               Внутренняя коммуникация
             </Title>
             <Text 
               type="secondary"
-              style={{
-                fontSize: isMobile ? 13 : 14,
-              }}
+              className={[
+                styles.headerSubtitle,
+                isMobile ? styles.headerSubtitleMobile : '',
+              ].filter(Boolean).join(' ')}
             >
               Общение с сотрудниками по вопросам согласования решений и других вопросов
             </Text>
           </div>
 
-          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
+          <Divider className={isMobile ? styles.dividerMobile : styles.divider} />
 
           <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? 12 : 16,
-              padding: isMobile ? 12 : 16,
-              background: '#fff',
-              borderRadius: isMobile ? 8 : 12,
-              border: '1px solid #e5e7eb',
-            }}
+            className={[
+              styles.filtersCard,
+              isMobile ? styles.filtersCardMobile : '',
+            ].filter(Boolean).join(' ')}
           >
             <Input
               placeholder={isMobile ? "Поиск..." : "Поиск по сообщениям..."}
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: '100%' }}
+              className={styles.searchInput}
               size={isMobile ? 'middle' : 'large'}
               allowClear
             />
             <Select
               placeholder="Фильтр по обращению"
-              style={{ width: '100%' }}
+              className={styles.claimSelect}
               size={isMobile ? 'middle' : 'large'}
               value={selectedClaimId}
               onChange={(value) => setSelectedClaimId(value)}
@@ -206,27 +206,25 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
               onClick={() => refetch()}
               loading={isLoading}
               size={isMobile ? 'middle' : 'large'}
-              style={{ width: isMobile ? '100%' : 'auto' }}
+              className={isMobile ? styles.refreshButtonMobile : styles.refreshButton}
             >
               Обновить
             </Button>
           </div>
 
-          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
+          <Divider className={isMobile ? styles.dividerMobile : styles.divider} />
 
           <div 
-            style={{ 
-              minHeight: isMobile ? '300px' : '400px', 
-              maxHeight: isMobile ? '400px' : '600px', 
-              overflowY: 'auto',
-              background: '#fff',
-              borderRadius: isMobile ? 8 : 12,
-              border: '1px solid #e5e7eb',
-              padding: isMobile ? 12 : 16,
-            }}
+            className={[
+              styles.messagesArea,
+              isMobile ? styles.messagesAreaMobile : '',
+            ].filter(Boolean).join(' ')}
           >
             {isLoading ? (
-              <div style={{ textAlign: 'center', padding: isMobile ? '24px' : '40px' }}>
+              <div className={[
+                styles.loadingState,
+                isMobile ? styles.loadingStateMobile : '',
+              ].filter(Boolean).join(' ')}>
                 <Spin size="large" />
               </div>
             ) : filteredMessages.length === 0 ? (
@@ -244,7 +242,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
             )}
           </div>
 
-          <Divider style={{ margin: isMobile ? '12px 0' : '16px 0' }} />
+          <Divider className={isMobile ? styles.dividerMobile : styles.divider} />
 
           <div ref={messageFormRef}>
             <ArbitratorMessageForm

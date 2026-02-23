@@ -176,7 +176,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
                   ]}
                 >
                   <InputNumber
-                    style={{ width: '100%' }}
+                    className={styles.fullWidthInput}
                     min={0}
                     max={100}
                     step={0.1}

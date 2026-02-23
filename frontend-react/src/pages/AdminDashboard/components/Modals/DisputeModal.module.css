@@ -1,4 +1,4 @@
-﻿
+
 .disputeModal :global(.ant-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
@@ -34,6 +34,10 @@
   font-size: 14px;
   padding: 6px 12px;
   border-radius: 6px;
+}
+
+.statusAlert {
+  margin-top: 12px;
 }
 
 .section {

@@ -136,7 +136,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
               description="Для рассмотрения спора необходимо назначить арбитра"
               type="warning"
               showIcon
-              style={{ marginTop: 12 }}
+              className={styles.statusAlert}
             />
           )}
         </div>

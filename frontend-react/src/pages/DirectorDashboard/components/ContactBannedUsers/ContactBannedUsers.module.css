@@ -1,0 +1,59 @@
+.userSecondaryText {
+  font-size: 12px;
+}
+
+.reasonText {
+  max-width: 230px;
+  display: block;
+}
+
+.headerBlock {
+  margin-bottom: 16px;
+}
+
+.filtersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  width: 300px;
+}
+
+.roleSelect {
+  width: 150px;
+}
+
+.statsRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.detailsBody {
+  padding: 12px 0;
+}
+
+.detailsSpace {
+  width: 100%;
+}
+
+.infoBlock {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.banInfoBlock {
+  margin-top: 8px;
+  padding: 12px;
+  background: #fff2e8;
+  border-radius: 6px;
+}
+
+.unbanSection {
+  margin-bottom: 16px;
+}

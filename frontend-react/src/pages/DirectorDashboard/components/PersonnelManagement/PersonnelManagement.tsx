@@ -32,7 +32,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'registration',
       label: (
         <span>
-          <UserAddOutlined style={{ marginRight: 8 }} />
+          <UserAddOutlined className="personnelManagementTabIcon" />
           Регистрация сотрудника
         </span>
       ),
@@ -42,7 +42,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'applications',
       label: (
         <span>
-          <FileTextOutlined style={{ marginRight: 8 }} />
+          <FileTextOutlined className="personnelManagementTabIcon" />
           Анкеты экспертов
         </span>
       ),
@@ -52,7 +52,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <TeamOutlined style={{ marginRight: 8 }} />
+          <TeamOutlined className="personnelManagementTabIcon" />
           Список сотрудников
         </span>
       ),
@@ -62,7 +62,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'archive',
       label: (
         <span>
-          <InboxOutlined style={{ marginRight: 8 }} />
+          <InboxOutlined className="personnelManagementTabIcon" />
           Архив
         </span>
       ),
@@ -75,11 +75,10 @@ const PersonnelManagement: React.FC = () => {
   return (
     <div>
       <Card
-        style={{
-          borderRadius: isMobile ? 8 : 16,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-          border: '1px solid #f0f0f0',
-        }}
+        className={[
+          'personnelManagementCard',
+          isMobile ? 'personnelManagementCardMobile' : '',
+        ].filter(Boolean).join(' ')}
       >
         <Tabs 
           activeKey={activeTab}
@@ -87,14 +86,10 @@ const PersonnelManagement: React.FC = () => {
           defaultActiveKey="list" 
           items={items}
           size={isMobile ? 'middle' : 'large'}
-          style={{ 
-            fontSize: isMobile ? '14px' : '16px'
-          }}
-          tabBarStyle={{
-            fontSize: isMobile ? '14px' : '16px',
-            fontWeight: 500,
-            marginBottom: isMobile ? 16 : 24,
-          }}
+          className={[
+            'personnelManagementTabs',
+            isMobile ? 'personnelManagementTabsMobile' : '',
+          ].filter(Boolean).join(' ')}
         />
       </Card>
     </div>

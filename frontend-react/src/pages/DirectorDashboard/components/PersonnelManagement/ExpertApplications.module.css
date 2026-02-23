@@ -1,4 +1,4 @@
-﻿
+
 .mobileCard {
   margin-bottom: 12px;
 }
@@ -52,6 +52,41 @@
 .mobileDate {
   font-size: 11px;
   color: #8c8c8c;
+}
+
+.approveButton {
+  color: #52c41a;
+}
+
+.filterControls {
+  margin-bottom: 16px;
+}
+
+.totalCount {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.detailActions {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.detailActionsMobile {
+  text-align: center;
+}
+
+.detailModalMask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.detailModalMobile {
+  top: 20px;
+}
+
+.detailModalMobile :global(.ant-modal-body) {
+  padding: 12px;
 }
 
 

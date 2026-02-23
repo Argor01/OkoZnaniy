@@ -246,7 +246,7 @@ const ExpertApplications: React.FC = () => {
                     type="text"
                     icon={<CheckOutlined />}
                     onClick={() => handleApprove(record.id)}
-                    style={{ color: '#52c41a' }}
+                    className={styles.approveButton}
                   />
                 </Tooltip>
                 <Tooltip title="Отклонить">
@@ -354,7 +354,7 @@ const ExpertApplications: React.FC = () => {
       <Card>
         <Title level={4}>Анкеты экспертов</Title>
         
-        <Space style={{ marginBottom: 16 }} wrap>
+        <Space className={styles.filterControls} wrap>
           <Button
             type={statusFilter === 'pending' ? 'primary' : 'default'}
             onClick={() => setStatusFilter('pending')}
@@ -386,7 +386,7 @@ const ExpertApplications: React.FC = () => {
             <div>
               {(applications || []).map(renderMobileCard)}
               {applications && applications.length > 0 && (
-                <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <div className={styles.totalCount}>
                   <Text type="secondary">Всего: {applications.length}</Text>
                 </div>
               )}
@@ -415,14 +415,7 @@ const ExpertApplications: React.FC = () => {
         }}
         footer={null}
         width={isMobile ? '95%' : 800}
-        style={isMobile ? { top: 20 } : {}}
-        styles={{
-          mask: {
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-          },
-          body: isMobile ? { padding: '12px' } : {},
-        }}
+        className={isMobile ? styles.detailModalMobile : undefined}
       >
         {selectedApplication && (
           <div>
@@ -491,7 +484,12 @@ const ExpertApplications: React.FC = () => {
                       : getStatusTag('new', selectedApplication.user)}
               </Descriptions.Item>
             </Descriptions>
-            <div style={{ marginTop: 16, textAlign: isMobile ? 'center' : 'right' }}>
+            <div
+              className={[
+                styles.detailActions,
+                isMobile ? styles.detailActionsMobile : '',
+              ].filter(Boolean).join(' ')}
+            >
               {isMobile ? (
                 <Row gutter={[8, 8]}>
                   <Col span={24}>
@@ -571,8 +569,7 @@ const ExpertApplications: React.FC = () => {
         onOk={() => rejectForm.submit()}
         confirmLoading={rejectMutation.isPending}
         width={isMobile ? '95%' : 520}
-        style={isMobile ? { top: 20 } : {}}
-        styles={isMobile ? { body: { padding: '12px' } } : {}}
+        className={isMobile ? styles.detailModalMobile : undefined}
       >
         <Form
           form={rejectForm}
@@ -603,8 +600,7 @@ const ExpertApplications: React.FC = () => {
         onOk={() => reworkForm.submit()}
         confirmLoading={reworkMutation.isPending}
         width={isMobile ? '95%' : 520}
-        style={isMobile ? { top: 20 } : {}}
-        styles={isMobile ? { body: { padding: '12px' } } : {}}
+        className={isMobile ? styles.detailModalMobile : undefined}
       >
         <Form
           form={reworkForm}

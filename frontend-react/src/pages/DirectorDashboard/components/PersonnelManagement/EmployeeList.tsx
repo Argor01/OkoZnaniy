@@ -284,7 +284,7 @@ const EmployeeList: React.FC = () => {
                   type="text"
                   icon={<CheckCircleOutlined />}
                   onClick={() => handleActivate(record)}
-                  style={{ color: '#52c41a' }}
+                  className={styles.activateButton}
                 />
               </Tooltip>
             ) : isDeactivatedExpert ? (
@@ -294,7 +294,7 @@ const EmployeeList: React.FC = () => {
                   type="text"
                   icon={<CheckCircleOutlined />}
                   onClick={() => handleActivate(record)}
-                  style={{ color: '#52c41a' }}
+                  className={styles.activateButton}
                 />
               </Tooltip>
             ) : (
@@ -328,42 +328,32 @@ const EmployeeList: React.FC = () => {
   return (
     <div>
       <Card
-        style={{
-          borderRadius: isMobile ? 8 : 12,
-          border: 'none',
-          background: '#fafafa',
-        }}
+        className={[
+          styles.employeeCard,
+          isMobile ? styles.employeeCardMobile : '',
+        ].filter(Boolean).join(' ')}
       >
         <Title 
           level={4} 
-          style={{
-            marginBottom: isMobile ? 16 : 24,
-            fontSize: isMobile ? 18 : 20,
-            color: '#1f2937',
-          }}
+          className={[
+            styles.pageTitle,
+            isMobile ? styles.pageTitleMobile : '',
+          ].filter(Boolean).join(' ')}
         >
           Сотрудники
         </Title>
         <div
-          className={isMobile ? styles.mobileFiltersContainer : ''}
-          style={{
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 0 : 16,
-            marginBottom: isMobile ? 16 : 24,
-            padding: isMobile ? 12 : 16,
-            background: '#fff',
-            borderRadius: isMobile ? 8 : 12,
-            border: '1px solid #e5e7eb',
-          }}
+          className={[
+            styles.filtersContainer,
+            isMobile ? styles.filtersContainerMobile : '',
+          ].filter(Boolean).join(' ')}
         >
           {isMobile ? (
             <div 
-              className={styles.customSearchContainer}
-              style={{ 
-                width: '100%',
-                marginBottom: 12,
-              }}
+              className={[
+                styles.customSearchContainer,
+                styles.customSearchContainerFull,
+              ].filter(Boolean).join(' ')}
             >
               <input
                 className={styles.customSearchInput}
@@ -389,9 +379,7 @@ const EmployeeList: React.FC = () => {
               placeholder="Поиск по имени, фамилии или email"
               allowClear
               size="large"
-              style={{ 
-                width: 300,
-              }}
+              className={styles.searchDesktop}
               onSearch={setSearchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
@@ -399,10 +387,7 @@ const EmployeeList: React.FC = () => {
           <Select
             placeholder="Фильтр по роли"
             size={isMobile ? 'middle' : 'large'}
-            style={{ 
-              width: isMobile ? '100%' : 200,
-              marginBottom: isMobile ? 12 : 0,
-            }}
+            className={isMobile ? styles.roleSelectMobile : styles.roleSelect}
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -415,10 +400,7 @@ const EmployeeList: React.FC = () => {
           <Select
             placeholder="Фильтр по статусу"
             size={isMobile ? 'middle' : 'large'}
-            style={{ 
-              width: isMobile ? '100%' : 200,
-              marginBottom: isMobile ? 8 : 0,
-            }}
+            className={isMobile ? styles.statusSelectMobile : styles.statusSelect}
             value={statusFilter}
             onChange={setStatusFilter}
           >
@@ -428,15 +410,7 @@ const EmployeeList: React.FC = () => {
           </Select>
         </div>
         <Spin spinning={isLoading}>
-          <div 
-            style={{ 
-              overflowX: 'auto', 
-              width: '100%',
-              background: '#fff',
-              borderRadius: isMobile ? 8 : 12,
-              border: '1px solid #e5e7eb',
-            }}
-          >
+          <div className={styles.tableWrapper}>
             <Table
               columns={columns}
               dataSource={filteredEmployees}
@@ -447,13 +421,9 @@ const EmployeeList: React.FC = () => {
                 showSizeChanger: !isMobile,
                 showTotal: (total) => `Всего: ${total}`,
                 simple: isMobile,
-                style: {
-                  padding: isMobile ? '12px' : '16px',
-                }
+                className: isMobile ? styles.tablePaginationMobile : styles.tablePagination,
               }}
-              style={{
-                borderRadius: isMobile ? 8 : 12,
-              }}
+              className={styles.employeeTable}
             />
           </div>
         </Spin>
@@ -469,26 +439,10 @@ const EmployeeList: React.FC = () => {
         }}
         footer={null}
         width={isMobile ? '100%' : 600}
-        style={isMobile ? {
-          top: 0,
-          padding: 0,
-          maxWidth: '100%',
-          margin: 0
-        } : {}}
-        styles={{
-          mask: {
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-          },
-          content: isMobile ? {
-            borderRadius: 0,
-            height: '100vh'
-          } : {},
-          body: isMobile ? {
-            maxHeight: 'calc(100vh - 55px)',
-            overflowY: 'auto'
-          } : {}
-        }}
+        wrapClassName={[
+          styles.employeeDetailModalWrap,
+          isMobile ? styles.employeeDetailModalMobile : '',
+        ].filter(Boolean).join(' ')}
       >
         {selectedEmployee && (
           <Descriptions column={1} bordered>

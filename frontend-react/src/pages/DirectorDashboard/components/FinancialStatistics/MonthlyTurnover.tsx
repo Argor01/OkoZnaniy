@@ -47,7 +47,7 @@ const MonthlyTurnover: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="monthlyTurnoverLoading">
         <Spin size="large" />
       </div>
     );
@@ -82,10 +82,12 @@ const MonthlyTurnover: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          'monthlyTurnoverFiltersCard',
+          isMobile ? 'monthlyTurnoverFiltersCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+      >
         {isMobile ? (
           <div className={mobileStyles.datePickerContainer}>
             <RangePicker
@@ -154,48 +156,46 @@ const MonthlyTurnover: React.FC = () => {
         )}
       </Card>
 
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className="monthlyTurnoverStatsRow">
         <Col xs={24} sm={12}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              'monthlyTurnoverStatCard',
+              isMobile ? 'monthlyTurnoverStatCardMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Оборот за период"
               value={totalTurnover}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#1890ff',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                'monthlyTurnoverStatistic',
+                isMobile ? 'monthlyTurnoverStatisticMobile' : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? (changePercent >= 0 ? '#f0f9ff' : '#fff1f0') : '#fff',
-            border: isMobile ? `2px solid ${changePercent >= 0 ? '#1890ff' : '#ff4d4f'}` : '1px solid #d9d9d9'
-          }}>
+          <Card
+            className={[
+              'monthlyTurnoverStatCard',
+              'monthlyTurnoverChangeCard',
+              isMobile ? 'monthlyTurnoverStatCardMobile' : '',
+              isMobile && changePercent >= 0 ? 'monthlyTurnoverChangeCardPositive' : '',
+              isMobile && changePercent < 0 ? 'monthlyTurnoverChangeCardNegative' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Изменение к предыдущему периоду"
               value={Math.abs(changePercent)}
               prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
-              valueStyle={{ 
-                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
+              className={[
+                'monthlyTurnoverChangeStatistic',
+                isMobile ? 'monthlyTurnoverChangeStatisticMobile' : '',
+                changePercent >= 0 ? 'monthlyTurnoverChangePositive' : 'monthlyTurnoverChangeNegative',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
@@ -203,19 +203,17 @@ const MonthlyTurnover: React.FC = () => {
 
       <Card 
         title="Динамика оборота"
-        style={{ 
-          borderRadius: isMobile ? 8 : 12
-        }}
-        headStyle={{
-          fontSize: isMobile ? 16 : 18,
-          fontWeight: 600
-        }}
+        className={[
+          'monthlyTurnoverChartCard',
+          isMobile ? 'monthlyTurnoverChartCardMobile' : '',
+        ].filter(Boolean).join(' ')}
       >
-        <div style={{ 
-          width: '100%', 
-          height: isMobile ? 300 : 400,
-          overflowX: isMobile ? 'auto' : 'visible'
-        }}>
+        <div
+          className={[
+            'monthlyTurnoverChartContainer',
+            isMobile ? 'monthlyTurnoverChartContainerMobile' : '',
+          ].filter(Boolean).join(' ')}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
               data={chartData}
@@ -238,16 +236,8 @@ const MonthlyTurnover: React.FC = () => {
               />
               <Tooltip 
                 formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-                contentStyle={{
-                  fontSize: isMobile ? 12 : 14,
-                  borderRadius: 8
-                }}
               />
-              <Legend 
-                wrapperStyle={{
-                  fontSize: isMobile ? 12 : 14
-                }}
-              />
+              <Legend />
               <Line type="monotone" dataKey="amount" stroke="#1890ff" name="Оборот" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>

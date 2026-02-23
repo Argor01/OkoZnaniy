@@ -1,0 +1,149 @@
+.emptyState {
+  text-align: center;
+  padding: 40px;
+}
+
+.messageItem {
+  padding: 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  border-left: 4px solid #1890ff;
+}
+
+.messageItemMobile {
+  padding: 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+}
+
+.messageItemUnread {
+  background-color: #f0f7ff;
+  border: 2px solid #1890ff;
+  border-left: 4px solid #1890ff;
+}
+
+.messageItemArbitrator {
+  background-color: #fafafa;
+}
+
+.messageItemDefault {
+  background-color: transparent;
+}
+
+.avatar {
+  background-color: #1890ff;
+  flex-shrink: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.senderName {
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.metaTag {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.metaText {
+  font-size: 12px;
+}
+
+.metaTextMobile {
+  font-size: 11px;
+}
+
+.claimLink {
+  font-size: 12px;
+}
+
+.claimLinkMobile {
+  font-size: 11px;
+}
+
+.claimLinkActive {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.claimLinkInactive {
+  cursor: default;
+  text-decoration: none;
+}
+
+.messageText {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.messageTextMobile {
+  margin-top: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.attachmentsBlock {
+  margin-top: 8px;
+}
+
+.attachmentsBlockMobile {
+  margin-top: 6px;
+}
+
+.attachmentsLabel {
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.attachmentsLabelMobile {
+  margin-right: 4px;
+  font-size: 11px;
+}
+
+.attachmentsList {
+  width: auto;
+}
+
+.attachmentsListMobile {
+  width: 100%;
+}
+
+.attachmentLink {
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.attachmentLinkMobile {
+  font-size: 12px;
+}
+
+.actionsRow {
+  margin-top: 8px;
+}
+
+.actionsRowMobile {
+  margin-top: 6px;
+}
+
+.actionButton {
+  font-size: 14px;
+}
+
+.actionButtonMobile {
+  font-size: 12px;
+}

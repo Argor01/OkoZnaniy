@@ -173,7 +173,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               if (!isLt2M) {
                 message.error('Размер файла должен быть меньше 2MB!');
                 return false;
-              }
+              }
+
               const reader = new FileReader();
               reader.onload = (e) => {
                 setImageUrl(e.target?.result as string);
@@ -195,7 +196,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 if (result) {
                   form.setFieldsValue({ avatar: result.avatar });
                   onSuccess?.(result);
-                  message.success('Аватар обновлен!');
+                  message.success('Аватар обновлен!');
+
                   queryClient.setQueryData(['user-profile'], result);
                   await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
                   await queryClient.refetchQueries({ queryKey: ['user-profile'] });
@@ -241,7 +243,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             className={styles.inputField} 
             size="large" 
             placeholder="Ваш_никнейм"
-            onChange={(e) => {
+            onChange={(e) => {
+
               const value = e.target.value.replace(/\s+/g, '_');
               form.setFieldValue('username', value);
             }}

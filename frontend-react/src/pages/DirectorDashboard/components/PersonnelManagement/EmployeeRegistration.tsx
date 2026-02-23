@@ -77,20 +77,24 @@ const EmployeeRegistration: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: isMobile ? '0 12px' : 0 }}>
-      <Card style={{ 
-        width: '100%', 
-        maxWidth: 700,
-        borderRadius: isMobile ? 8 : 12,
-        padding: isMobile ? '12px' : '24px'
-      }}>
+    <div
+      className={[
+        'employeeRegistrationWrapper',
+        isMobile ? 'employeeRegistrationWrapperMobile' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <Card
+        className={[
+          'employeeRegistrationCard',
+          isMobile ? 'employeeRegistrationCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+      >
         <Title 
           level={isMobile ? 5 : 4} 
-          style={{ 
-            textAlign: 'center', 
-            marginBottom: isMobile ? 16 : 24,
-            fontSize: isMobile ? 18 : 20
-          }}
+          className={[
+            'employeeRegistrationTitle',
+            isMobile ? 'employeeRegistrationTitleMobile' : '',
+          ].filter(Boolean).join(' ')}
         >
           Регистрация нового сотрудника
         </Title>
@@ -200,20 +204,20 @@ const EmployeeRegistration: React.FC = () => {
           <Form.Item>
             <Space 
               direction={isMobile ? 'vertical' : 'horizontal'}
-              style={{ 
-                width: '100%',
-                justifyContent: isMobile ? 'stretch' : 'flex-start'
-              }}
+              className={[
+                'employeeRegistrationActions',
+                isMobile ? 'employeeRegistrationActionsMobile' : '',
+              ].filter(Boolean).join(' ')}
               size={isMobile ? 'middle' : 'small'}
             >
               <Button
                 type="default"
                 onClick={handleGeneratePassword}
                 icon={<PlusOutlined />}
-                style={{
-                  width: isMobile ? '100%' : 'auto',
-                  height: isMobile ? 40 : 'auto'
-                }}
+                className={[
+                  'employeeRegistrationActionButton',
+                  isMobile ? 'employeeRegistrationActionButtonMobile' : '',
+                ].filter(Boolean).join(' ')}
                 size={isMobile ? 'large' : 'middle'}
               >
                 Сгенерировать пароль
@@ -226,12 +230,10 @@ const EmployeeRegistration: React.FC = () => {
                     form.setFieldsValue({ password: '' });
                   }
                 }}
-                style={{
-                  width: isMobile ? '100%' : 'auto',
-                  height: isMobile ? 40 : 'auto',
-                  textAlign: isMobile ? 'center' : 'left',
-                  padding: isMobile ? '8px 15px' : '4px 15px'
-                }}
+                className={[
+                  'employeeRegistrationToggleButton',
+                  isMobile ? 'employeeRegistrationToggleButtonMobile' : '',
+                ].filter(Boolean).join(' ')}
                 size={isMobile ? 'large' : 'middle'}
               >
                 {autoGeneratePassword ? 'Ввести пароль вручную' : 'Автогенерация пароля'}
@@ -246,11 +248,10 @@ const EmployeeRegistration: React.FC = () => {
               loading={registerMutation.isPending}
               size="large"
               block
-              style={{
-                height: isMobile ? 48 : 40,
-                fontSize: isMobile ? 16 : 14,
-                fontWeight: 500
-              }}
+              className={[
+                'employeeRegistrationSubmit',
+                isMobile ? 'employeeRegistrationSubmitMobile' : '',
+              ].filter(Boolean).join(' ')}
             >
               Зарегистрировать сотрудника
             </Button>

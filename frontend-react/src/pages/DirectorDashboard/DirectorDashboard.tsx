@@ -189,14 +189,7 @@ const DirectorDashboard: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
+      <div className="directorDashboardLoading">
         <Spin size="large" />
       </div>
     );
@@ -277,9 +270,6 @@ const DirectorDashboard: React.FC = () => {
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-      },
       onOk: async () => {
         try {
           authApi.logout();
@@ -308,10 +298,10 @@ const DirectorDashboard: React.FC = () => {
       mode="inline"
       selectedKeys={[selectedMenu]}
       onClick={({ key }) => handleMenuClick(key)}
-      style={{
-        borderRight: 0,
-        height: isMobile ? 'auto' : 'calc(100vh - 120px)',
-      }}
+      className={[
+        'directorDashboardMenu',
+        isMobile ? 'directorDashboardMenuMobile' : 'directorDashboardMenuDesktop',
+      ].join(' ')}
       items={menuItems.map((item) => ({
         key: item.key,
         icon: item.icon,
@@ -321,26 +311,33 @@ const DirectorDashboard: React.FC = () => {
   );
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className="directorDashboardLayout">
       {!isMobile && (
         <Sider
           width={isTablet ? 200 : 250}
-          style={{
-            background: '#fff',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-          }}
+          className="directorDashboardSider"
           breakpoint="lg"
           collapsedWidth="0"
         >
           <div
-            style={{
-              padding: isTablet ? '16px' : '24px',
-              textAlign: 'center',
-              borderBottom: '1px solid #f0f0f0',
-            }}
+            className={[
+              'directorDashboardSiderHeader',
+              isTablet ? 'directorDashboardSiderHeaderTablet' : '',
+            ].filter(Boolean).join(' ')}
           >
-            <BankOutlined style={{ fontSize: isTablet ? '28px' : '32px', color: '#1890ff', marginBottom: '8px' }} />
-            <Title level={4} style={{ margin: 0, fontSize: isTablet ? '14px' : '16px' }}>
+            <BankOutlined
+              className={[
+                'directorDashboardSiderIcon',
+                isTablet ? 'directorDashboardSiderIconTablet' : '',
+              ].filter(Boolean).join(' ')}
+            />
+            <Title
+              level={4}
+              className={[
+                'directorDashboardSiderTitle',
+                isTablet ? 'directorDashboardSiderTitleTablet' : '',
+              ].filter(Boolean).join(' ')}
+            >
               ЛК директора
             </Title>
           </div>
@@ -353,58 +350,28 @@ const DirectorDashboard: React.FC = () => {
           {drawerVisible && (
             <div
               onClick={() => setDrawerVisible(false)}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 9998,
-                opacity: drawerVisible ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }}
+              className="directorDashboardMobileOverlay"
             />
           )}
           <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: '100vw',
-              background: '#fff',
-              zIndex: 9999,
-              overflowY: 'auto',
-              boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
-              transform: drawerVisible ? 'translateX(0)' : 'translateX(-100%)',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
+            className={[
+              'directorDashboardMobileDrawer',
+              drawerVisible ? 'directorDashboardMobileDrawerOpen' : '',
+            ].filter(Boolean).join(' ')}
           >
-            <div style={{ padding: '16px', textAlign: 'right', borderBottom: '1px solid #f0f0f0' }}>
+            <div className="directorDashboardMobileCloseRow">
               <button
                 onClick={() => setDrawerVisible(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  color: '#666',
-                }}
+                className="directorDashboardMobileCloseButton"
               >
                 ✕
               </button>
             </div>
             <div
-              style={{
-                padding: '16px',
-                textAlign: 'center',
-                borderBottom: '1px solid #f0f0f0',
-              }}
+              className="directorDashboardMobileHeader"
             >
-              <BankOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
-              <Title level={5} style={{ margin: 0 }}>
+              <BankOutlined className="directorDashboardMobileHeaderIcon" />
+              <Title level={5} className="directorDashboardMobileHeaderTitle">
                 ЛК директора
               </Title>
             </div>
@@ -415,43 +382,25 @@ const DirectorDashboard: React.FC = () => {
 
       <Layout>
         <Header
-          style={{
-            background: '#fff',
-            padding: isMobile ? '0 16px' : '0 24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'relative',
-          }}
+          className={[
+            'directorDashboardHeader',
+            isMobile ? 'directorDashboardHeaderMobile' : '',
+          ].filter(Boolean).join(' ')}
         >
           {isMobile && (
             <Button
               type="primary"
               icon={<MenuOutlined />}
               onClick={() => setDrawerVisible(true)}
-              style={{
-                borderRadius: '8px',
-                height: '40px',
-                width: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'absolute',
-                left: '16px',
-                zIndex: 1,
-              }}
+              className="directorDashboardMenuButton"
             />
           )}
           <Title 
             level={isMobile ? 5 : 3} 
-            style={{ 
-              margin: 0,
-              flex: 1,
-              textAlign: isMobile ? 'center' : 'left',
-              paddingLeft: isMobile ? '52px' : 0,
-              paddingRight: isMobile ? '52px' : 0,
-            }}
+            className={[
+              'directorDashboardHeaderTitle',
+              isMobile ? 'directorDashboardHeaderTitleMobile' : '',
+            ].filter(Boolean).join(' ')}
           >
             {isMobile 
               ? currentMenuItem?.label?.split(' ')[0] || 'Директор'
@@ -463,28 +412,27 @@ const DirectorDashboard: React.FC = () => {
             icon={<LogoutOutlined />}
             onClick={handleLogout}
             size={isMobile ? 'small' : 'middle'}
-            style={isMobile ? {
-              position: 'absolute',
-              right: '16px',
-              zIndex: 1,
-            } : {}}
+            className={isMobile ? 'directorDashboardLogoutButtonMobile' : undefined}
           >
             {!isMobile && 'Выйти'}
           </Button>
         </Header>
         <Content
-          style={{
-            margin: isMobile ? '12px' : isTablet ? '16px' : '24px',
-            padding: isMobile ? '12px' : isTablet ? '16px' : '24px',
-            background: '#fff',
-            borderRadius: '8px',
-            minHeight: 'calc(100vh - 112px)',
-          }}
+          className={[
+            'directorDashboardContent',
+            isMobile ? 'directorDashboardContentMobile' : '',
+            isTablet ? 'directorDashboardContentTablet' : '',
+          ].filter(Boolean).join(' ')}
         >
           {currentMenuItem?.component}
         </Content>
         {!isMobile && (
-          <Footer style={{ textAlign: 'center', background: '#fff', padding: isTablet ? '12px' : '24px' }}>
+          <Footer
+            className={[
+              'directorDashboardFooter',
+              isTablet ? 'directorDashboardFooterTablet' : '',
+            ].filter(Boolean).join(' ')}
+          >
             Личный кабинет директора © {new Date().getFullYear()}
           </Footer>
         )}

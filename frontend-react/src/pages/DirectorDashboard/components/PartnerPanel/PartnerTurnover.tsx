@@ -167,11 +167,18 @@ const PartnerTurnover: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
-        <div className={isMobile ? styles.datePickerContainer : ''} style={{ position: 'relative' }}>
+      <Card
+        className={[
+          styles.filterCard,
+          isMobile ? styles.filterCardMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
+        <div
+          className={[
+            styles.datePickerWrapper,
+            isMobile ? styles.datePickerContainer : '',
+          ].filter(Boolean).join(' ')}
+        >
           <RangePicker
             value={dateRange}
             onChange={(dates) => {
@@ -239,7 +246,7 @@ const PartnerTurnover: React.FC = () => {
               </Col>
             </Row>
           ) : (
-            <Space wrap size="middle" style={{ marginTop: 12 }}>
+            <Space wrap size="middle" className={styles.quickSelectDesktop}>
               <Button onClick={() => handleQuickSelect('thisWeek')}>Эта неделя</Button>
               <Button onClick={() => handleQuickSelect('thisMonth')}>Этот месяц</Button>
               <Button onClick={() => handleQuickSelect('lastMonth')}>Прошлый месяц</Button>
@@ -254,67 +261,60 @@ const PartnerTurnover: React.FC = () => {
         {turnoverData && (
           <>
             
-            <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+            <Row gutter={[16, isMobile ? 12 : 16]} className={styles.statsRow}>
               <Col xs={24} sm={12} md={8}>
-                <Card style={{ 
-                  borderRadius: isMobile ? 8 : 12,
-                  textAlign: 'center'
-                }}>
+                <Card
+                  className={[
+                    styles.statCard,
+                    isMobile ? styles.statCardMobile : '',
+                  ].filter(Boolean).join(' ')}
+                >
                   <Statistic
                     title="Общий оборот партнёров"
                     value={totalTurnover}
                     prefix="₽"
                     precision={2}
-                    valueStyle={{ 
-                      color: '#1890ff',
-                      fontSize: isMobile ? 20 : 24,
-                      fontWeight: 600
-                    }}
-                    style={{
-                      padding: isMobile ? '8px 0' : '12px 0'
-                    }}
+                    className={[
+                      styles.statisticTurnover,
+                      isMobile ? styles.statisticTurnoverMobile : '',
+                    ].filter(Boolean).join(' ')}
                   />
                 </Card>
               </Col>
               <Col xs={24} sm={12} md={8}>
-                <Card style={{ 
-                  borderRadius: isMobile ? 8 : 12,
-                  textAlign: 'center'
-                }}>
+                <Card
+                  className={[
+                    styles.statCard,
+                    isMobile ? styles.statCardMobile : '',
+                  ].filter(Boolean).join(' ')}
+                >
                   <Statistic
                     title="Общая комиссия"
                     value={turnoverData.partners?.reduce((sum: number, p: any) => sum + (p.commission || 0), 0) || 0}
                     prefix="₽"
                     precision={2}
-                    valueStyle={{ 
-                      color: '#3f8600',
-                      fontSize: isMobile ? 20 : 24,
-                      fontWeight: 600
-                    }}
-                    style={{
-                      padding: isMobile ? '8px 0' : '12px 0'
-                    }}
+                    className={[
+                      styles.statisticCommission,
+                      isMobile ? styles.statisticCommissionMobile : '',
+                    ].filter(Boolean).join(' ')}
                   />
                 </Card>
               </Col>
               <Col xs={24} sm={24} md={8}>
-                <Card style={{ 
-                  borderRadius: isMobile ? 8 : 12,
-                  textAlign: 'center',
-                  background: isMobile ? '#f6ffed' : '#fff',
-                  border: isMobile ? '2px solid #52c41a' : '1px solid #d9d9d9'
-                }}>
+                <Card
+                  className={[
+                    styles.statCard,
+                    isMobile ? styles.statCardMobile : '',
+                    isMobile ? styles.statCardHighlightMobile : '',
+                  ].filter(Boolean).join(' ')}
+                >
                   <Statistic
                     title="Активных партнёров"
                     value={turnoverData.partners?.length || 0}
-                    valueStyle={{ 
-                      color: '#722ed1',
-                      fontSize: isMobile ? 22 : 24,
-                      fontWeight: 700
-                    }}
-                    style={{
-                      padding: isMobile ? '12px 0' : '12px 0'
-                    }}
+                    className={[
+                      styles.statisticActive,
+                      isMobile ? styles.statisticActiveMobile : '',
+                    ].filter(Boolean).join(' ')}
                   />
                 </Card>
               </Col>
@@ -322,22 +322,23 @@ const PartnerTurnover: React.FC = () => {
 
             
             {topPartners.length > 0 && (
-              <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 16 }}>
+              <Row gutter={[16, isMobile ? 12 : 16]} className={styles.topPartnersRow}>
                 <Col xs={24} lg={12}>
                   <Card 
                     title="Топ-5 партнёров по обороту"
-                    style={{ 
-                      borderRadius: isMobile ? 8 : 12
-                    }}
-                    headStyle={{
-                      fontSize: isMobile ? 14 : 16
-                    }}
+                    className={[
+                      styles.chartCard,
+                      isMobile ? styles.chartCardMobile : '',
+                      isMobile ? styles.chartCardHeadMobile : styles.chartCardHead,
+                    ].filter(Boolean).join(' ')}
                   >
-                    <div style={{ 
-                      width: '100%', 
-                      height: isMobile ? 250 : 300,
-                      overflowX: isMobile ? 'auto' : 'visible'
-                    }}>
+                    <div
+                      className={[
+                        styles.chartContainer,
+                        isMobile ? styles.chartContainerMobile : '',
+                        isMobile ? styles.chartContainerScrollableMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    >
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart 
                           data={topPartners.map((p) => ({
@@ -353,29 +354,17 @@ const PartnerTurnover: React.FC = () => {
                           }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis 
-                            dataKey="name" 
-                            fontSize={isMobile ? 10 : 12}
+                          <XAxis
+                            dataKey="name"
                             interval={0}
                             angle={isMobile ? -45 : 0}
                             textAnchor={isMobile ? 'end' : 'middle'}
                           />
-                          <YAxis 
-                            fontSize={isMobile ? 10 : 12}
-                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                          />
+                          <YAxis tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />
                           <Tooltip 
                             formatter={(value: number) => formatCurrency(value)}
-                            contentStyle={{
-                              fontSize: isMobile ? 12 : 14,
-                              borderRadius: 8
-                            }}
                           />
-                          <Legend 
-                            wrapperStyle={{
-                              fontSize: isMobile ? 12 : 14
-                            }}
-                          />
+                          <Legend />
                           <Bar dataKey="turnover" fill="#1890ff" name="Оборот" />
                           <Bar dataKey="commission" fill="#52c41a" name="Комиссия" />
                         </BarChart>
@@ -386,17 +375,18 @@ const PartnerTurnover: React.FC = () => {
                 <Col xs={24} lg={12}>
                   <Card 
                     title="Распределение оборота"
-                    style={{ 
-                      borderRadius: isMobile ? 8 : 12
-                    }}
-                    headStyle={{
-                      fontSize: isMobile ? 14 : 16
-                    }}
+                    className={[
+                      styles.chartCard,
+                      isMobile ? styles.chartCardMobile : '',
+                      isMobile ? styles.chartCardHeadMobile : styles.chartCardHead,
+                    ].filter(Boolean).join(' ')}
                   >
-                    <div style={{ 
-                      width: '100%', 
-                      height: isMobile ? 250 : 300
-                    }}>
+                    <div
+                      className={[
+                        styles.chartContainerPie,
+                        isMobile ? styles.chartContainerPieMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    >
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -418,16 +408,8 @@ const PartnerTurnover: React.FC = () => {
                           </Pie>
                           <Tooltip 
                             formatter={(value: number) => formatCurrency(value)}
-                            contentStyle={{
-                              fontSize: isMobile ? 12 : 14,
-                              borderRadius: 8
-                            }}
                           />
-                          <Legend 
-                            wrapperStyle={{
-                              fontSize: isMobile ? 11 : 14
-                            }}
-                          />
+                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -439,99 +421,81 @@ const PartnerTurnover: React.FC = () => {
             {topPartners.length > 0 && (
               <Card 
                 title="Детали топ-5 партнёров" 
-                style={{ 
-                  marginBottom: 16,
-                  borderRadius: isMobile ? 8 : 12
-                }}
-                headStyle={{
-                  fontSize: isMobile ? 16 : 18,
-                  fontWeight: 600
-                }}
+                className={[
+                  styles.topPartnersDetailsCard,
+                  isMobile ? styles.topPartnersDetailsCardMobile : '',
+                  isMobile ? styles.topPartnersDetailsHeadMobile : styles.topPartnersDetailsHead,
+                ].filter(Boolean).join(' ')}
               >
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <Space direction="vertical" className={styles.fullWidthSpace}>
                   {topPartners.map((partner, index) => {
                     const percentage = totalTurnover > 0 ? ((partner.turnover || 0) / totalTurnover) * 100 : 0;
                     return (
                       <Card 
                         key={partner.id} 
                         size="small"
-                        style={{
-                          borderRadius: isMobile ? 6 : 8,
-                          border: index < 3 ? '2px solid #ffd700' : '1px solid #d9d9d9',
-                          background: index === 0 ? '#fff7e6' : index === 1 ? '#f6ffed' : index === 2 ? '#fff2e8' : '#fafafa'
-                        }}
+                        className={[
+                          styles.topPartnerCard,
+                          isMobile ? styles.topPartnerCardMobile : '',
+                          index === 0
+                            ? styles.topPartnerCardTop1
+                            : index === 1
+                            ? styles.topPartnerCardTop2
+                            : index === 2
+                            ? styles.topPartnerCardTop3
+                            : styles.topPartnerCardDefault,
+                        ].filter(Boolean).join(' ')}
                       >
                         {isMobile ? (
                           
                           <div>
-                            <div style={{ 
-                              display: 'flex', 
-                              justifyContent: 'space-between', 
-                              alignItems: 'center',
-                              marginBottom: 12
-                            }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className={styles.topPartnerHeader}>
+                              <div className={styles.topPartnerHeaderLeft}>
                                 <Tag 
                                   color={index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? '#cd7f32' : 'default'}
-                                  style={{ fontSize: 14, fontWeight: 'bold' }}
+                                  className={styles.topPartnerRankTag}
                                 >
                                   {index + 1}
                                 </Tag>
-                                <Text strong style={{ fontSize: 16 }}>
+                                <Text strong className={styles.topPartnerName}>
                                   {partner.firstName || partner.first_name} {partner.lastName || partner.last_name}
                                 </Text>
                               </div>
-                              <Tag color="blue" style={{ fontSize: 12, fontWeight: 'bold' }}>
+                              <Tag color="blue" className={styles.topPartnerPercentTag}>
                                 {percentage.toFixed(1)}%
                               </Tag>
                             </div>
                             
-                            <div style={{ marginBottom: 8 }}>
-                              <Text type="secondary" style={{ fontSize: 13 }}>
+                            <div className={styles.topPartnerEmail}>
+                              <Text type="secondary" className={styles.topPartnerEmailText}>
                                 {partner.email || partner.partnerEmail || ''}
                               </Text>
                             </div>
                             
                             <Row gutter={[8, 8]}>
                               <Col span={12}>
-                                <div style={{ 
-                                  background: '#e6f7ff', 
-                                  padding: '8px 12px', 
-                                  borderRadius: 6,
-                                  textAlign: 'center'
-                                }}>
-                                  <Text style={{ fontSize: 11, color: '#666' }}>Оборот</Text>
+                                <div className={[styles.topPartnerStatBox, styles.topPartnerTurnoverBox].join(' ')}>
+                                  <Text className={styles.topPartnerStatLabel}>Оборот</Text>
                                   <br />
-                                  <Text strong style={{ fontSize: 14, color: '#1890ff' }}>
+                                  <Text strong className={styles.topPartnerTurnoverValue}>
                                     {formatCurrency(partner.turnover || 0)}
                                   </Text>
                                 </div>
                               </Col>
                               <Col span={12}>
-                                <div style={{ 
-                                  background: '#f6ffed', 
-                                  padding: '8px 12px', 
-                                  borderRadius: 6,
-                                  textAlign: 'center'
-                                }}>
-                                  <Text style={{ fontSize: 11, color: '#666' }}>Комиссия</Text>
+                                <div className={[styles.topPartnerStatBox, styles.topPartnerCommissionBox].join(' ')}>
+                                  <Text className={styles.topPartnerStatLabel}>Комиссия</Text>
                                   <br />
-                                  <Text strong style={{ fontSize: 14, color: '#52c41a' }}>
+                                  <Text strong className={styles.topPartnerCommissionValue}>
                                     {formatCurrency(partner.commission || 0)}
                                   </Text>
                                 </div>
                               </Col>
                             </Row>
                             
-                            <div style={{ 
-                              marginTop: 8, 
-                              textAlign: 'center',
-                              background: '#f0f0f0',
-                              padding: '6px 12px',
-                              borderRadius: 6
-                            }}>
-                              <Text style={{ fontSize: 12, color: '#666' }}>Рефералов: </Text>
-                              <Text strong style={{ fontSize: 13, color: '#722ed1' }}>
+                            <div className={styles.topPartnerReferralBox}>
+                              <Text className={styles.topPartnerReferralLabel}>Рефералов: </Text>
+                              <Text strong className={styles.topPartnerReferralValue}>
                                 {partner.referralsCount || partner.referrals_count || 0}
                               </Text>
                             </div>
@@ -574,95 +538,69 @@ const PartnerTurnover: React.FC = () => {
 
             <Card 
               title="Оборот по всем партнёрам"
-              style={{ 
-                borderRadius: isMobile ? 8 : 12
-              }}
-              headStyle={{
-                fontSize: isMobile ? 16 : 18,
-                fontWeight: 600
-              }}
+              className={[
+                styles.allPartnersCard,
+                isMobile ? styles.allPartnersCardMobile : '',
+                isMobile ? styles.allPartnersHeadMobile : styles.allPartnersHead,
+              ].filter(Boolean).join(' ')}
             >
               {isMobile ? (
                 
                 <div>
-                  <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                  <Space direction="vertical" className={styles.fullWidthSpace} size="middle">
                     {(turnoverData.partners || []).map((partner: any, index: number) => {
                       const percentage = totalTurnover > 0 ? ((partner.turnover || 0) / totalTurnover) * 100 : 0;
                       return (
                         <Card 
                           key={partner.id} 
                           size="small"
-                          style={{
-                            borderRadius: 8,
-                            border: '1px solid #e8e8e8',
-                            background: '#fafafa'
-                          }}
+                          className={styles.allPartnerCard}
                         >
                           <div>
-                            <div style={{ 
-                              display: 'flex', 
-                              justifyContent: 'space-between', 
-                              alignItems: 'center',
-                              marginBottom: 12
-                            }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Tag color={index < 3 ? 'gold' : 'default'} style={{ fontSize: 12 }}>
+                            <div className={styles.allPartnerHeader}>
+                              <div className={styles.allPartnerHeaderLeft}>
+                                <Tag color={index < 3 ? 'gold' : 'default'} className={styles.allPartnerRankTag}>
                                   #{index + 1}
                                 </Tag>
-                                <Text strong style={{ fontSize: 15 }}>
+                                <Text strong className={styles.allPartnerName}>
                                   {partner.firstName || partner.first_name || ''} {partner.lastName || partner.last_name || ''}
                                 </Text>
                               </div>
-                              <Tag color="blue" style={{ fontSize: 11 }}>
+                              <Tag color="blue" className={styles.allPartnerPercentTag}>
                                 {percentage.toFixed(1)}%
                               </Tag>
                             </div>
                             
-                            <div style={{ marginBottom: 10 }}>
-                              <Text type="secondary" style={{ fontSize: 12 }}>
+                            <div className={styles.allPartnerEmail}>
+                              <Text type="secondary" className={styles.allPartnerEmailText}>
                                 📧 {partner.email || partner.partnerEmail || 'Не указан'}
                               </Text>
                             </div>
                             
                             <Row gutter={[6, 6]}>
                               <Col span={8}>
-                                <div style={{ 
-                                  background: '#e6f7ff', 
-                                  padding: '6px 8px', 
-                                  borderRadius: 4,
-                                  textAlign: 'center'
-                                }}>
-                                  <Text style={{ fontSize: 10, color: '#666' }}>Оборот</Text>
+                                <div className={[styles.allPartnerStatBox, styles.allPartnerTurnoverBox].join(' ')}>
+                                  <Text className={styles.allPartnerStatLabel}>Оборот</Text>
                                   <br />
-                                  <Text strong style={{ fontSize: 12, color: '#1890ff' }}>
+                                  <Text strong className={styles.allPartnerTurnoverValue}>
                                     {formatCurrency(partner.turnover || 0)}
                                   </Text>
                                 </div>
                               </Col>
                               <Col span={8}>
-                                <div style={{ 
-                                  background: '#f6ffed', 
-                                  padding: '6px 8px', 
-                                  borderRadius: 4,
-                                  textAlign: 'center'
-                                }}>
-                                  <Text style={{ fontSize: 10, color: '#666' }}>Комиссия</Text>
+                                <div className={[styles.allPartnerStatBox, styles.allPartnerCommissionBox].join(' ')}>
+                                  <Text className={styles.allPartnerStatLabel}>Комиссия</Text>
                                   <br />
-                                  <Text strong style={{ fontSize: 12, color: '#52c41a' }}>
+                                  <Text strong className={styles.allPartnerCommissionValue}>
                                     {formatCurrency(partner.commission || 0)}
                                   </Text>
                                 </div>
                               </Col>
                               <Col span={8}>
-                                <div style={{ 
-                                  background: '#f0f0f0', 
-                                  padding: '6px 8px', 
-                                  borderRadius: 4,
-                                  textAlign: 'center'
-                                }}>
-                                  <Text style={{ fontSize: 10, color: '#666' }}>Рефералов</Text>
+                                <div className={[styles.allPartnerStatBox, styles.allPartnerReferralsBox].join(' ')}>
+                                  <Text className={styles.allPartnerStatLabel}>Рефералов</Text>
                                   <br />
-                                  <Text strong style={{ fontSize: 12, color: '#722ed1' }}>
+                                  <Text strong className={styles.allPartnerReferralsValue}>
                                     {partner.referralsCount || partner.referrals_count || 0}
                                   </Text>
                                 </div>
@@ -677,31 +615,26 @@ const PartnerTurnover: React.FC = () => {
                   
                   {(turnoverData.partners || []).length > 0 && (
                     <Card 
-                      style={{
-                        marginTop: 16,
-                        borderRadius: 8,
-                        border: '2px solid #1890ff',
-                        background: '#f0f9ff'
-                      }}
+                      className={styles.allPartnersSummaryCard}
                     >
-                      <Text strong style={{ fontSize: 14, color: '#1890ff' }}>
+                      <Text strong className={styles.allPartnersSummaryTitle}>
                         📊 Общие итоги:
                       </Text>
-                      <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
+                      <Row gutter={[8, 8]} className={styles.allPartnersSummaryRow}>
                         <Col span={12}>
-                          <div style={{ textAlign: 'center' }}>
-                            <Text style={{ fontSize: 11, color: '#666' }}>Общий оборот</Text>
+                          <div className={styles.allPartnersSummaryCell}>
+                            <Text className={styles.allPartnersSummaryLabel}>Общий оборот</Text>
                             <br />
-                            <Text strong style={{ fontSize: 14, color: '#1890ff' }}>
+                            <Text strong className={styles.allPartnersSummaryValueBlue}>
                               {formatCurrency(totalTurnover)}
                             </Text>
                           </div>
                         </Col>
                         <Col span={12}>
-                          <div style={{ textAlign: 'center' }}>
-                            <Text style={{ fontSize: 11, color: '#666' }}>Общая комиссия</Text>
+                          <div className={styles.allPartnersSummaryCell}>
+                            <Text className={styles.allPartnersSummaryLabel}>Общая комиссия</Text>
                             <br />
-                            <Text strong style={{ fontSize: 14, color: '#52c41a' }}>
+                            <Text strong className={styles.allPartnersSummaryValueGreen}>
                               {formatCurrency((turnoverData.partners || []).reduce((sum: number, p: any) => sum + (p.commission || 0), 0))}
                             </Text>
                           </div>

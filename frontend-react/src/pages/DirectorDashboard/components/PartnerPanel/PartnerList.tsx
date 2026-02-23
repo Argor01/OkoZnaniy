@@ -210,7 +210,7 @@ const PartnerList: React.FC = () => {
         const code = record.referralCode || record.referral_code || '-';
         return (
           <Tooltip title={code}>
-            <Text copyable style={{ maxWidth: '120px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Text copyable className={styles.referralCodeText}>
               {code}
             </Text>
           </Tooltip>
@@ -234,7 +234,7 @@ const PartnerList: React.FC = () => {
         const active = record.activeReferrals || record.active_referrals || 0;
         return (
           <Tooltip title={`Всего: ${total}, Активных: ${active}`}>
-            <span style={{ cursor: 'help' }}>{total} / {active}</span>
+            <span className={styles.referralsHelp}>{total} / {active}</span>
           </Tooltip>
         );
       },
@@ -247,17 +247,18 @@ const PartnerList: React.FC = () => {
       width: 120,
       render: (_, record) => {
         const amount = record.totalEarnings || record.total_earnings || 0;
-        const formatted = formatCurrency(amount);
+        const formatted = formatCurrency(amount);
+
         if (amount >= 1000000) {
           return (
             <Tooltip title={formatted}>
-              <span style={{ cursor: 'help' }}>{(amount / 1000000).toFixed(1)}М ₽</span>
+              <span className={styles.earningsHelp}>{(amount / 1000000).toFixed(1)}М ₽</span>
             </Tooltip>
           );
         } else if (amount >= 1000) {
           return (
             <Tooltip title={formatted}>
-              <span style={{ cursor: 'help' }}>{(amount / 1000).toFixed(0)}К ₽</span>
+              <span className={styles.earningsHelp}>{(amount / 1000).toFixed(0)}К ₽</span>
             </Tooltip>
           );
         }
@@ -351,89 +352,85 @@ const PartnerList: React.FC = () => {
   return (
     <div>
       
-      <Row gutter={[16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[16, isMobile ? 12 : 16]} className={styles.statsRow}>
         <Col xs={24} sm={12} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Активных партнёров"
               value={activePartnersCount}
               suffix={`/ ${totalPartnersCount}`}
-              valueStyle={{ 
-                color: '#3f8600',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticActive,
+                isMobile ? styles.statisticActiveMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Общий доход партнёров"
               value={partners?.reduce((sum, p) => sum + (p.totalEarnings || p.total_earnings || 0), 0) || 0}
               prefix="₽"
               precision={2}
-              valueStyle={{ 
-                color: '#1890ff',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticEarnings,
+                isMobile ? styles.statisticEarningsMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={24} md={8}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? '#f9f0ff' : '#fff',
-            border: isMobile ? '2px solid #722ed1' : '1px solid #d9d9d9'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+              isMobile ? styles.statCardHighlightMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Всего рефералов"
               value={partners?.reduce((sum, p) => sum + (p.totalReferrals || p.total_referrals || 0), 0) || 0}
-              valueStyle={{ 
-                color: '#722ed1',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticReferrals,
+                isMobile ? styles.statisticReferralsMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
       </Row>
 
       
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          styles.filtersCard,
+          isMobile ? styles.filtersCardMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
         <Space 
           direction="vertical" 
-          style={{ width: '100%' }} 
+          className={styles.filtersSpace}
           size={isMobile ? "middle" : "large"}
         >
-          {isMobile ? (
+          {isMobile ? (
+
             <>
               <Input
                 placeholder="Поиск по имени или email"
                 prefix={<SearchOutlined />}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: '100%' }}
+                className={styles.fullWidthControl}
                 size="large"
                 allowClear
               />
@@ -442,7 +439,7 @@ const PartnerList: React.FC = () => {
                   <Select
                     value={statusFilter}
                     onChange={setStatusFilter}
-                    style={{ width: '100%' }}
+                    className={styles.fullWidthControl}
                     size="large"
                     placeholder="Статус"
                   >
@@ -458,7 +455,7 @@ const PartnerList: React.FC = () => {
                       setStatusFilter('all');
                       setDateRange(null);
                     }}
-                    style={{ width: '100%', height: 40 }}
+                    className={styles.resetButton}
                     size="large"
                   >
                     Сбросить
@@ -477,20 +474,21 @@ const PartnerList: React.FC = () => {
                 />
               </div>
             </>
-          ) : (
+          ) : (
+
             <Space wrap>
               <Input
                 placeholder="Поиск по имени или email"
                 prefix={<SearchOutlined />}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 300 }}
+                className={styles.desktopSearch}
                 allowClear
               />
               <Select
                 value={statusFilter}
                 onChange={setStatusFilter}
-                style={{ width: 150 }}
+                className={styles.desktopStatus}
               >
                 <Option value="all">Все</Option>
                 <Option value="active">Активные</Option>
@@ -515,10 +513,12 @@ const PartnerList: React.FC = () => {
       </Card>
 
       
-      <Card style={{ 
-        borderRadius: isMobile ? 8 : 12,
-        overflow: 'auto'
-      }}>
+      <Card
+        className={[
+          styles.tableCard,
+          isMobile ? styles.tableCardMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
         <Spin spinning={isLoading}>
           <Table
             columns={columns}
@@ -530,11 +530,8 @@ const PartnerList: React.FC = () => {
               showSizeChanger: !isMobile,
               showTotal: (total) => `Всего: ${total}`,
               simple: isMobile,
-              style: {
-                padding: isMobile ? '12px' : '16px',
-                marginRight: 8
-              }
             }}
+            className={isMobile ? styles.tableMobile : styles.tableDesktop}
             size={isMobile ? "middle" : "small"}
           />
         </Spin>
@@ -550,32 +547,13 @@ const PartnerList: React.FC = () => {
             key="close" 
             onClick={() => setDetailModalVisible(false)}
             size={isMobile ? 'large' : 'middle'}
-            style={{ width: isMobile ? '100%' : 'auto' }}
+            className={isMobile ? styles.modalButtonFull : undefined}
           >
             Закрыть
           </Button>,
         ]}
         width={isMobile ? '100%' : 800}
-        style={isMobile ? {
-          top: 0,
-          padding: 0,
-          maxWidth: '100%',
-          margin: 0
-        } : {}}
-        styles={{
-          mask: {
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-          },
-          content: isMobile ? {
-            borderRadius: 0,
-            height: '100vh'
-          } : {},
-          body: isMobile ? {
-            maxHeight: 'calc(100vh - 55px)',
-            overflowY: 'auto'
-          } : {}
-        }}
+        className={isMobile ? styles.detailModalMobile : undefined}
       >
         {selectedPartner && (
           <Descriptions 
@@ -622,7 +600,10 @@ const PartnerList: React.FC = () => {
       <Modal
         title="Изменить процент комиссии"
         open={commissionModalVisible}
-        className={styles.compactModal}
+        className={[
+          styles.compactModal,
+          isMobile ? styles.compactModalMobile : '',
+        ].filter(Boolean).join(' ')}
         onCancel={() => {
           setCommissionModalVisible(false);
           commissionForm.resetFields();
@@ -631,28 +612,6 @@ const PartnerList: React.FC = () => {
         confirmLoading={updateCommissionMutation.isPending}
         width={isMobile ? (window.innerWidth <= 380 ? '95%' : '90%') : 400}
         centered
-        style={isMobile ? {
-          maxWidth: window.innerWidth <= 380 ? '95%' : '90%',
-          margin: '0 auto'
-        } : {}}
-
-        styles={{
-          body: isMobile ? {
-            padding: '4px 16px 2px 16px',
-            minHeight: 'auto',
-            height: 'auto'
-          } : {
-            padding: '16px 20px 8px 20px',
-            minHeight: 'auto'
-          },
-          footer: isMobile ? {
-            padding: '4px 16px 8px 16px',
-            marginTop: 0
-          } : {
-            padding: '8px 20px 16px 20px',
-            marginTop: 0
-          }
-        }}
         okButtonProps={{
           size: isMobile ? 'large' : 'middle'
         }}
@@ -674,7 +633,7 @@ const PartnerList: React.FC = () => {
             ]}
           >
             <InputNumber
-              style={{ width: '100%' }}
+              className={styles.fullWidthControl}
               min={0}
               max={100}
               precision={2}
@@ -696,32 +655,13 @@ const PartnerList: React.FC = () => {
             key="close" 
             onClick={() => setReferralsModalVisible(false)}
             size={isMobile ? 'large' : 'middle'}
-            style={{ width: isMobile ? '100%' : 'auto' }}
+            className={isMobile ? styles.modalButtonFull : undefined}
           >
             Закрыть
           </Button>,
         ]}
         width={isMobile ? '100%' : 800}
-        style={isMobile ? {
-          top: 0,
-          padding: 0,
-          maxWidth: '100%',
-          margin: 0
-        } : {}}
-        styles={{
-          mask: {
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-          },
-          content: isMobile ? {
-            borderRadius: 0,
-            height: '100vh'
-          } : {},
-          body: isMobile ? {
-            maxHeight: 'calc(100vh - 55px)',
-            overflowY: 'auto'
-          } : {}
-        }}
+        className={isMobile ? styles.detailModalMobile : undefined}
       >
         {selectedPartner && (
           <Table

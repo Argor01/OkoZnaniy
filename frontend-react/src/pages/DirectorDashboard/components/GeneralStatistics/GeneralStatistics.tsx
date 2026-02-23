@@ -51,7 +51,7 @@ const GeneralStatistics: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className={styles.loading}>
         <Spin size="large" />
       </div>
     );
@@ -305,13 +305,15 @@ const GeneralStatistics: React.FC = () => {
     <div>
 
       
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          styles.filtersCard,
+          isMobile ? styles.filtersCardMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
         <Space 
           direction="vertical" 
-          style={{ width: '100%' }} 
+          className={styles.filtersSpace}
           size={isMobile ? 'middle' : 'small'}
         >
           {isMobile ? (
@@ -328,7 +330,7 @@ const GeneralStatistics: React.FC = () => {
                 size="large"
                 getPopupContainer={(trigger) => trigger.parentElement || document.body}
               />
-              <Row gutter={[8, 8]} style={{ marginTop: 12 }}>
+              <Row gutter={[8, 8]} className={styles.exportRow}>
                 <Col span={12}>
                   <Button
                     type="primary"
@@ -351,7 +353,7 @@ const GeneralStatistics: React.FC = () => {
               </Row>
             </div>
           ) : (
-            <Space>
+            <Space className={styles.exportRow}>
               <RangePicker
                 value={dateRange}
                 onChange={(dates) => {
@@ -457,144 +459,207 @@ const GeneralStatistics: React.FC = () => {
       </Card>
 
       
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className={styles.statsRow}>
         <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Общий оборот"
               value={totalTurnover}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#1890ff',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
               suffix={
-                <Space>
+                <Space className={styles.statSuffix}>
                   {turnoverChange >= 0 ? (
-                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                    <ArrowUpOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconPositive,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   ) : (
-                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                    <ArrowDownOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconNegative,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   )}
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: turnoverChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                  <Text
+                    className={[
+                      styles.changeText,
+                      turnoverChange >= 0 ? styles.changeTextPositive : styles.changeTextNegative,
+                      isMobile ? styles.changeTextMobile : '',
+                    ].filter(Boolean).join(' ')}
+                  >
                     {Math.abs(turnoverChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticTurnover,
+                isMobile ? styles.statisticTurnoverMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Чистая прибыль"
               value={netProfit}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#3f8600',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
               suffix={
-                <Space>
+                <Space className={styles.statSuffix}>
                   {profitChange >= 0 ? (
-                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                    <ArrowUpOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconPositive,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   ) : (
-                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                    <ArrowDownOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconNegative,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   )}
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: profitChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                  <Text
+                    className={[
+                      styles.changeText,
+                      profitChange >= 0 ? styles.changeTextPositive : styles.changeTextNegative,
+                      isMobile ? styles.changeTextMobile : '',
+                    ].filter(Boolean).join(' ')}
+                  >
                     {Math.abs(profitChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticProfit,
+                isMobile ? styles.statisticProfitMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Активные заказы"
               value={activeOrders}
               prefix={<ShoppingOutlined />}
-              valueStyle={{ 
-                color: '#722ed1',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
               suffix={
-                <Space>
+                <Space className={styles.statSuffix}>
                   {ordersChange >= 0 ? (
-                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                    <ArrowUpOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconPositive,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   ) : (
-                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                    <ArrowDownOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconNegative,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   )}
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: ordersChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                  <Text
+                    className={[
+                      styles.changeText,
+                      ordersChange >= 0 ? styles.changeTextPositive : styles.changeTextNegative,
+                      isMobile ? styles.changeTextMobile : '',
+                    ].filter(Boolean).join(' ')}
+                  >
                     {Math.abs(ordersChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticOrders,
+                isMobile ? styles.statisticOrdersMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? '#f0f9ff' : '#fff',
-            border: isMobile ? '2px solid #1890ff' : '1px solid #d9d9d9'
-          }}>
+          <Card
+            className={[
+              styles.statCard,
+              isMobile ? styles.statCardMobile : '',
+              isMobile ? styles.statCardHighlightMobile : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Средний чек"
               value={averageCheck}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#13c2c2',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
               suffix={
-                <Space>
+                <Space className={styles.statSuffix}>
                   {averageCheckChange >= 0 ? (
-                    <ArrowUpOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#3f8600' }} />
+                    <ArrowUpOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconPositive,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   ) : (
-                    <ArrowDownOutlined style={{ fontSize: isMobile ? 12 : 14, color: '#cf1322' }} />
+                    <ArrowDownOutlined
+                      className={[
+                        styles.changeIcon,
+                        styles.changeIconNegative,
+                        isMobile ? styles.changeIconMobile : '',
+                      ].filter(Boolean).join(' ')}
+                    />
                   )}
-                  <Text style={{ fontSize: isMobile ? 12 : 14, color: averageCheckChange >= 0 ? '#3f8600' : '#cf1322' }}>
+                  <Text
+                    className={[
+                      styles.changeText,
+                      averageCheckChange >= 0 ? styles.changeTextPositive : styles.changeTextNegative,
+                      isMobile ? styles.changeTextMobile : '',
+                    ].filter(Boolean).join(' ')}
+                  >
                     {Math.abs(averageCheckChange).toFixed(2)}%
                   </Text>
                 </Space>
               }
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
+              className={[
+                styles.statisticAverage,
+                isMobile ? styles.statisticAverageMobile : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
       </Row>
 
       
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginTop: 24 }}>
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className={styles.secondaryRow}>
       </Row>
     </div>
   );

@@ -89,7 +89,7 @@ const EmployeeArchive: React.FC = () => {
       content: (
         <div>
           <p>Вы уверены, что хотите удалить {employee.first_name} {employee.last_name} навсегда?</p>
-          <p style={{ color: 'red', fontWeight: 'bold' }}>
+          <p className="employeeArchiveDeleteWarning">
             Это действие нельзя отменить!
           </p>
         </div>
@@ -181,7 +181,7 @@ const EmployeeArchive: React.FC = () => {
               type="text"
               icon={<UndoOutlined />}
               onClick={() => handleRestore(record)}
-              style={{ color: '#52c41a' }}
+              className="employeeArchiveRestoreButton"
             />
           </Tooltip>
           <Tooltip title="Удалить навсегда">
@@ -201,11 +201,11 @@ const EmployeeArchive: React.FC = () => {
     <div>
       <Card>
         <Title level={4}>Архив сотрудников</Title>
-        <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="large">
+        <Space direction="vertical" className="employeeArchiveFilters" size="large">
           <Search
             placeholder="Поиск по имени, фамилии или email"
             allowClear
-            style={{ width: 300 }}
+            className="employeeArchiveSearch"
             onSearch={setSearchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -233,12 +233,6 @@ const EmployeeArchive: React.FC = () => {
         }}
         footer={null}
         width={600}
-        styles={{
-          mask: {
-            backdropFilter: 'blur(4px)',
-            WebkitBackdropFilter: 'blur(4px)',
-          },
-        }}
       >
         {selectedEmployee && (
           <Descriptions column={1} bordered>

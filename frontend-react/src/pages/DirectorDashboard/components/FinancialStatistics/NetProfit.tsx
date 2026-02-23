@@ -49,7 +49,7 @@ const NetProfit: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
+      <div className="netProfitLoading">
         <Spin size="large" />
       </div>
     );
@@ -84,10 +84,12 @@ const NetProfit: React.FC = () => {
 
   return (
     <div>
-      <Card style={{ 
-        marginBottom: 16,
-        borderRadius: isMobile ? 8 : 12
-      }}>
+      <Card
+        className={[
+          'netProfitFiltersCard',
+          isMobile ? 'netProfitFiltersCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+      >
         {isMobile ? (
           <div className={mobileStyles.datePickerContainer}>
             <RangePicker
@@ -156,48 +158,46 @@ const NetProfit: React.FC = () => {
         )}
       </Card>
 
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} style={{ marginBottom: 24 }}>
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className="netProfitStatsRow">
         <Col xs={24} sm={12}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center'
-          }}>
+          <Card
+            className={[
+              'netProfitStatCard',
+              isMobile ? 'netProfitStatCardMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Чистая прибыль за период"
               value={totalProfitValue}
               prefix="₽"
               precision={0}
-              valueStyle={{ 
-                color: '#52c41a',
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: 600
-              }}
-              style={{
-                padding: isMobile ? '8px 0' : '12px 0'
-              }}
+              className={[
+                'netProfitStatistic',
+                isMobile ? 'netProfitStatisticMobile' : '',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12}>
-          <Card style={{ 
-            borderRadius: isMobile ? 8 : 12,
-            textAlign: 'center',
-            background: isMobile ? (changePercent >= 0 ? '#f6ffed' : '#fff1f0') : '#fff',
-            border: isMobile ? `2px solid ${changePercent >= 0 ? '#52c41a' : '#ff4d4f'}` : '1px solid #d9d9d9'
-          }}>
+          <Card
+            className={[
+              'netProfitStatCard',
+              'netProfitChangeCard',
+              isMobile ? 'netProfitStatCardMobile' : '',
+              isMobile && changePercent >= 0 ? 'netProfitChangeCardPositive' : '',
+              isMobile && changePercent < 0 ? 'netProfitChangeCardNegative' : '',
+            ].filter(Boolean).join(' ')}
+          >
             <Statistic
               title="Изменение к предыдущему периоду"
               value={Math.abs(changePercent)}
               prefix={changePercent >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               suffix="%"
-              valueStyle={{ 
-                color: changePercent >= 0 ? '#3f8600' : '#cf1322',
-                fontSize: isMobile ? 22 : 24,
-                fontWeight: 700
-              }}
-              style={{
-                padding: isMobile ? '12px 0' : '12px 0'
-              }}
+              className={[
+                'netProfitChangeStatistic',
+                isMobile ? 'netProfitChangeStatisticMobile' : '',
+                changePercent >= 0 ? 'netProfitChangePositive' : 'netProfitChangeNegative',
+              ].filter(Boolean).join(' ')}
             />
           </Card>
         </Col>
@@ -205,19 +205,17 @@ const NetProfit: React.FC = () => {
 
       <Card 
         title="Динамика прибыли и расходов"
-        style={{ 
-          borderRadius: isMobile ? 8 : 12
-        }}
-        headStyle={{
-          fontSize: isMobile ? 16 : 18,
-          fontWeight: 600
-        }}
+        className={[
+          'netProfitChartCard',
+          isMobile ? 'netProfitChartCardMobile' : '',
+        ].filter(Boolean).join(' ')}
       >
-        <div style={{ 
-          width: '100%', 
-          height: isMobile ? 300 : 400,
-          overflowX: isMobile ? 'auto' : 'visible'
-        }}>
+        <div
+          className={[
+            'netProfitChartContainer',
+            isMobile ? 'netProfitChartContainerMobile' : '',
+          ].filter(Boolean).join(' ')}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
               data={chartData}
@@ -240,16 +238,8 @@ const NetProfit: React.FC = () => {
               />
               <Tooltip 
                 formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-                contentStyle={{
-                  fontSize: isMobile ? 12 : 14,
-                  borderRadius: 8
-                }}
               />
-              <Legend 
-                wrapperStyle={{
-                  fontSize: isMobile ? 12 : 14
-                }}
-              />
+              <Legend />
               <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Прибыль" />
               <Area type="monotone" dataKey="expenses" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
             </AreaChart>

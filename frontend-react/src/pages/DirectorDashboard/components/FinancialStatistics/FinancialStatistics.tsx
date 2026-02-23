@@ -11,7 +11,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'turnover',
       label: (
         <span>
-          <DollarOutlined style={{ marginRight: 8 }} />
+          <DollarOutlined className="financialStatisticsTabIcon" />
           Общий оборот
         </span>
       ),
@@ -21,7 +21,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'profit',
       label: (
         <span>
-          <LineChartOutlined style={{ marginRight: 8 }} />
+          <LineChartOutlined className="financialStatisticsTabIcon" />
           Чистая прибыль
         </span>
       ),
@@ -31,7 +31,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'detail',
       label: (
         <span>
-          <FileTextOutlined style={{ marginRight: 8 }} />
+          <FileTextOutlined className="financialStatisticsTabIcon" />
           Доходы и расходы
         </span>
       ),

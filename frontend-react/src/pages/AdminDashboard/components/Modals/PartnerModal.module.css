@@ -1,4 +1,4 @@
-﻿
+
 .partnerModal :global(.ant-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
@@ -100,6 +100,10 @@
 .form :global(.ant-form-item-label > label) {
   font-weight: 500;
   color: #262626;
+}
+
+.fullWidthInput {
+  width: 100%;
 }
 
 

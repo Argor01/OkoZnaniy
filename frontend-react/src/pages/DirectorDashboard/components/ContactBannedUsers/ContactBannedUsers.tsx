@@ -24,6 +24,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import apiClient from '../../../../api/client';
+import styles from './ContactBannedUsers.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -142,11 +143,11 @@ const ContactBannedUsers: React.FC = () => {
       render: (record: ContactBannedUser) => (
         <Space direction="vertical" size={0}>
           <Text strong>{record.username}</Text>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" className={styles.userSecondaryText}>
             {record.first_name} {record.last_name}
           </Text>
           {record.email && (
-            <Text type="secondary" style={{ fontSize: '12px' }}>
+            <Text type="secondary" className={styles.userSecondaryText}>
               <MailOutlined /> {record.email}
             </Text>
           )}
@@ -171,7 +172,7 @@ const ContactBannedUsers: React.FC = () => {
       width: 250,
       render: (reason: string) => (
         <Tooltip title={reason}>
-          <Text ellipsis style={{ maxWidth: 230, display: 'block' }}>
+          <Text ellipsis className={styles.reasonText}>
             {reason}
           </Text>
         </Tooltip>
@@ -233,18 +234,18 @@ const ContactBannedUsers: React.FC = () => {
   return (
     <div>
       <Card>
-        <div style={{ marginBottom: 16 }}>
+        <div className={styles.headerBlock}>
           <Title level={4}>Баны за обмен контактами</Title>
           <Text type="secondary">
             Пользователи, забаненные за попытку обмена контактными данными в переписках
           </Text>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className={styles.filtersRow}>
           <Search
             placeholder="Поиск по имени, email или username"
             allowClear
-            style={{ width: 300 }}
+            className={styles.searchInput}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -252,7 +253,7 @@ const ContactBannedUsers: React.FC = () => {
           
           <Select
             placeholder="Роль"
-            style={{ width: 150 }}
+            className={styles.roleSelect}
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -263,7 +264,7 @@ const ContactBannedUsers: React.FC = () => {
           </Select>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+        <div className={styles.statsRow}>
           <Tag color="red">
             Всего забанено: {filteredData.length}
           </Tag>
@@ -318,11 +319,11 @@ const ContactBannedUsers: React.FC = () => {
         width={600}
       >
         {selectedUser && (
-          <div style={{ padding: '12px 0' }}>
-            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <div className={styles.detailsBody}>
+            <Space direction="vertical" size={16} className={styles.detailsSpace}>
               <div>
                 <Text strong>Основная информация:</Text>
-                <div style={{ marginTop: 8, padding: 12, background: '#f5f5f5', borderRadius: 6 }}>
+                <div className={styles.infoBlock}>
                   <div><strong>Username:</strong> {selectedUser.username}</div>
                   <div><strong>Имя:</strong> {selectedUser.first_name} {selectedUser.last_name}</div>
                   <div><strong>Email:</strong> {selectedUser.email || 'Не указан'}</div>
@@ -334,7 +335,7 @@ const ContactBannedUsers: React.FC = () => {
 
               <div>
                 <Text strong>Информация о бане:</Text>
-                <div style={{ marginTop: 8, padding: 12, background: '#fff2e8', borderRadius: 6 }}>
+                <div className={styles.banInfoBlock}>
                   <div><strong>Дата бана:</strong> {selectedUser.contact_ban_date ? dayjs(selectedUser.contact_ban_date).format('DD.MM.YYYY HH:mm') : '-'}</div>
                   <div><strong>Причина:</strong> {selectedUser.contact_ban_reason}</div>
                   <div><strong>Количество нарушений:</strong> <Tag color={selectedUser.contact_violations_count > 3 ? 'red' : 'orange'}>{selectedUser.contact_violations_count}</Tag></div>
@@ -361,9 +362,9 @@ const ContactBannedUsers: React.FC = () => {
       >
         {selectedUser && (
           <div>
-            <div style={{ marginBottom: 16 }}>
+            <div className={styles.unbanSection}>
               <Text strong>Информация о пользователе:</Text>
-              <div style={{ marginTop: 8, padding: 12, background: '#f5f5f5', borderRadius: 6 }}>
+              <div className={styles.infoBlock}>
                 <div><strong>Имя:</strong> {selectedUser.first_name} {selectedUser.last_name}</div>
                 <div><strong>Email:</strong> {selectedUser.email || 'Не указан'}</div>
                 <div><strong>Причина бана:</strong> {selectedUser.contact_ban_reason}</div>

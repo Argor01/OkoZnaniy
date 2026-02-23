@@ -1,6 +1,169 @@
-﻿
+
 .compactModal {
   
+}
+
+.compactModalMobile {
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.referralCodeText {
+  max-width: 120px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referralsHelp {
+  cursor: help;
+}
+
+.earningsHelp {
+  cursor: help;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.statCardMobile {
+  border-radius: 8px;
+}
+
+.statCardHighlightMobile {
+  background: #f9f0ff;
+  border: 2px solid #722ed1;
+}
+
+.statisticActive {
+  padding: 12px 0;
+}
+
+.statisticActive :global(.ant-statistic-content-value) {
+  color: #3f8600;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticActiveMobile {
+  padding: 8px 0;
+}
+
+.statisticActiveMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticEarnings {
+  padding: 12px 0;
+}
+
+.statisticEarnings :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticEarningsMobile {
+  padding: 8px 0;
+}
+
+.statisticEarningsMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticReferrals {
+  padding: 12px 0;
+}
+
+.statisticReferrals :global(.ant-statistic-content-value) {
+  color: #722ed1;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.statisticReferralsMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
+}
+
+.filtersCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.filtersCardMobile {
+  border-radius: 8px;
+}
+
+.filtersSpace {
+  width: 100%;
+}
+
+.fullWidthControl {
+  width: 100%;
+}
+
+.resetButton {
+  width: 100%;
+  height: 40px;
+}
+
+.desktopSearch {
+  width: 300px;
+}
+
+.desktopStatus {
+  width: 150px;
+}
+
+.tableCard {
+  border-radius: 12px;
+  overflow: auto;
+}
+
+.tableCardMobile {
+  border-radius: 8px;
+}
+
+.tableMobile :global(.ant-pagination) {
+  padding: 12px;
+  margin-right: 8px;
+}
+
+.tableDesktop :global(.ant-pagination) {
+  padding: 16px;
+  margin-right: 8px;
+}
+
+.modalButtonFull {
+  width: 100%;
+}
+
+.detailModalMask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.detailModalMobile {
+  top: 0;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
+.detailModalMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  height: 100vh;
+}
+
+.detailModalMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 55px);
+  overflow-y: auto;
 }
 
 .compactModal .ant-modal-body {

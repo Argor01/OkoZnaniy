@@ -1,4 +1,4 @@
-﻿
+
 .datePickerContainer {
   width: 100%;
   position: relative;
@@ -31,6 +31,154 @@
   font-size: 13px;
   border-radius: 6px;
   font-weight: 500;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+}
+
+.filtersCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.filtersCardMobile {
+  border-radius: 8px;
+}
+
+.filtersSpace {
+  width: 100%;
+}
+
+.exportRow {
+  margin-top: 12px;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.secondaryRow {
+  margin-top: 24px;
+}
+
+.statCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.statCardMobile {
+  border-radius: 8px;
+}
+
+.statCardHighlightMobile {
+  background: #f0f9ff;
+  border: 2px solid #1890ff;
+}
+
+.statSuffix {
+  align-items: center;
+}
+
+.changeIcon {
+  font-size: 14px;
+}
+
+.changeIconMobile {
+  font-size: 12px;
+}
+
+.changeIconPositive {
+  color: #3f8600;
+}
+
+.changeIconNegative {
+  color: #cf1322;
+}
+
+.changeText {
+  font-size: 14px;
+}
+
+.changeTextMobile {
+  font-size: 12px;
+}
+
+.changeTextPositive {
+  color: #3f8600;
+}
+
+.changeTextNegative {
+  color: #cf1322;
+}
+
+.statisticTurnover {
+  padding: 12px 0;
+}
+
+.statisticTurnover :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticTurnoverMobile {
+  padding: 8px 0;
+}
+
+.statisticTurnoverMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticProfit {
+  padding: 12px 0;
+}
+
+.statisticProfit :global(.ant-statistic-content-value) {
+  color: #3f8600;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticProfitMobile {
+  padding: 8px 0;
+}
+
+.statisticProfitMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticOrders {
+  padding: 12px 0;
+}
+
+.statisticOrders :global(.ant-statistic-content-value) {
+  color: #722ed1;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticOrdersMobile {
+  padding: 8px 0;
+}
+
+.statisticOrdersMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.statisticAverage {
+  padding: 12px 0;
+}
+
+.statisticAverage :global(.ant-statistic-content-value) {
+  color: #13c2c2;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.statisticAverageMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
 }
 
 

@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import ArbitratorChat from './ArbitratorChat';
 import { directorApi } from '../../api/directorApi';
 import type { Claim } from '../../api/types';
+import styles from './ArbitratorCommunication.module.css';
 
 type ArbitratorCommunicationTab = 'chat' | 'approvals';
 
@@ -47,8 +48,8 @@ const ArbitratorCommunication: React.FC = () => {
     {
       key: 'chat',
       label: (
-        <span style={{ whiteSpace: 'nowrap' }}>
-          <MessageOutlined style={{ marginRight: isMobile ? 4 : 8 }} /> 
+        <span className={styles.tabLabel}>
+          <MessageOutlined className={isMobile ? styles.tabIconMobile : styles.tabIcon} /> 
           {isMobile ? 'Чат' : 'Внутренний чат'}
         </span>
       ),
@@ -57,76 +58,76 @@ const ArbitratorCommunication: React.FC = () => {
     {
       key: 'approvals',
       label: (
-        <span style={{ whiteSpace: 'nowrap' }}>
-          <FileTextOutlined style={{ marginRight: isMobile ? 4 : 8 }} /> 
+        <span className={styles.tabLabel}>
+          <FileTextOutlined className={isMobile ? styles.tabIconMobile : styles.tabIcon} /> 
           {isMobile ? `Согласование (${claims.length})` : `Обращения на согласовании (${claims.length})`}
         </span>
       ),
       children: (
         <div>
           <Card
-            style={{
-              borderRadius: isMobile ? 8 : 12,
-              border: 'none',
-              background: '#fafafa',
-            }}
+            className={[
+              styles.approvalsCard,
+              isMobile ? styles.approvalsCardMobile : '',
+            ].filter(Boolean).join(' ')}
           >
             <Title 
               level={4}
-              style={{
-                fontSize: isMobile ? 18 : 20,
-                marginBottom: isMobile ? 8 : 16,
-              }}
+              className={[
+                styles.approvalsTitle,
+                isMobile ? styles.approvalsTitleMobile : '',
+              ].filter(Boolean).join(' ')}
             >
               Обращения, отправленные на согласование
             </Title>
             <Text 
               type="secondary"
-              style={{
-                fontSize: isMobile ? 13 : 14,
-                display: 'block',
-                marginBottom: isMobile ? 16 : 24,
-              }}
+              className={[
+                styles.approvalsSubtitle,
+                isMobile ? styles.approvalsSubtitleMobile : '',
+              ].filter(Boolean).join(' ')}
             >
               Список обращений, отправленных на согласование дирекции
             </Text>
             {claims.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: isMobile ? '24px' : '40px' }}>
+              <div className={[
+                styles.emptyState,
+                isMobile ? styles.emptyStateMobile : '',
+              ].filter(Boolean).join(' ')}>
                 <Empty
                   description="Нет обращений на согласовании"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               </div>
             ) : (
-              <div style={{ marginTop: isMobile ? 12 : 16 }}>
+              <div className={[
+                styles.claimsList,
+                isMobile ? styles.claimsListMobile : '',
+              ].filter(Boolean).join(' ')}>
                 {claims.map((claim) => (
                   <Card
                     key={claim.id}
-                    style={{ 
-                      marginBottom: isMobile ? 12 : 16, 
-                      cursor: 'pointer',
-                      borderRadius: isMobile ? 8 : 12,
-                      border: '1px solid #e5e7eb',
-                    }}
+                    className={[
+                      styles.claimCard,
+                      isMobile ? styles.claimCardMobile : '',
+                    ].filter(Boolean).join(' ')}
                     onClick={() => handleViewClaim(claim)}
                     hoverable
                   >
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'flex-start',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: isMobile ? 12 : 0,
-                    }}>
-                      <div style={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
-                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                          <div style={{ 
-                            display: 'flex', 
-                            flexWrap: 'wrap', 
-                            alignItems: 'center', 
-                            gap: 8 
-                          }}>
-                            <Text strong style={{ fontSize: isMobile ? 15 : 16 }}>
+                    <div className={[
+                      styles.claimHeader,
+                      isMobile ? styles.claimHeaderMobile : '',
+                    ].filter(Boolean).join(' ')}>
+                      <div className={[
+                        styles.claimMain,
+                        isMobile ? styles.claimMainMobile : '',
+                      ].filter(Boolean).join(' ')}>
+                        <Space direction="vertical" size="small" className={styles.claimMetaSpace}>
+                          <div className={styles.claimTitleRow}>
+                            <Text strong className={[
+                              styles.claimTitle,
+                              isMobile ? styles.claimTitleMobile : '',
+                            ].filter(Boolean).join(' ')}>
                               Обращение #{claim.id}
                             </Text>
                             <Tag
@@ -147,65 +148,78 @@ const ArbitratorCommunication: React.FC = () => {
                           </div>
                           <Text 
                             type="secondary"
-                            style={{
-                              fontSize: isMobile ? 13 : 14,
-                            }}
+                            className={[
+                              styles.claimOrderTitle,
+                              isMobile ? styles.claimOrderTitleMobile : '',
+                            ].filter(Boolean).join(' ')}
                           >
                             {claim.order.title || 'Без названия'}
                           </Text>
                           <Space 
                             direction={isMobile ? 'vertical' : 'horizontal'}
                             size="small"
-                            style={{ width: isMobile ? '100%' : 'auto' }}
+                            className={[
+                              styles.claimInfoSpace,
+                              isMobile ? styles.claimInfoSpaceMobile : '',
+                            ].filter(Boolean).join(' ')}
                           >
-                            <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <Text type="secondary" className={[
+                              styles.claimInfoText,
+                              isMobile ? styles.claimInfoTextMobile : '',
+                            ].filter(Boolean).join(' ')}>
                               <ClockCircleOutlined /> Отправлено:{' '}
                               {dayjs(claim.created_at).format('DD.MM.YYYY HH:mm')}
                             </Text>
                             {claim.decision?.created_at && (
-                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                              <Text type="secondary" className={[
+                                styles.claimInfoText,
+                                isMobile ? styles.claimInfoTextMobile : '',
+                              ].filter(Boolean).join(' ')}>
                                 Решение принято:{' '}
                                 {dayjs(claim.decision.created_at).format('DD.MM.YYYY HH:mm')}
                               </Text>
                             )}
                           </Space>
                           {claim.decision?.reasoning && (
-                            <div style={{ 
-                              marginTop: 8, 
-                              padding: isMobile ? '6px' : '8px', 
-                              backgroundColor: '#f5f5f5', 
-                              borderRadius: isMobile ? 6 : 8,
-                            }}>
-                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <div className={[
+                              styles.claimDecisionBox,
+                              isMobile ? styles.claimDecisionBoxMobile : '',
+                            ].filter(Boolean).join(' ')}>
+                              <Text type="secondary" className={[
+                                styles.claimDecisionText,
+                                isMobile ? styles.claimDecisionTextMobile : '',
+                              ].filter(Boolean).join(' ')}>
                                 <strong>Обоснование:</strong> {claim.decision.reasoning}
                               </Text>
                             </div>
                           )}
                           {claim.decision?.approval_comment && (
-                            <div style={{ 
-                              marginTop: 8, 
-                              padding: isMobile ? '6px' : '8px', 
-                              backgroundColor: '#f5f5f5', 
-                              borderRadius: isMobile ? 6 : 8,
-                            }}>
-                              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <div className={[
+                              styles.claimDecisionBox,
+                              isMobile ? styles.claimDecisionBoxMobile : '',
+                            ].filter(Boolean).join(' ')}>
+                              <Text type="secondary" className={[
+                                styles.claimDecisionText,
+                                isMobile ? styles.claimDecisionTextMobile : '',
+                              ].filter(Boolean).join(' ')}>
                                 Комментарий: {claim.decision.approval_comment}
                               </Text>
                             </div>
                           )}
                         </Space>
                       </div>
-                      <div style={{ marginLeft: isMobile ? 0 : 16, width: isMobile ? '100%' : 'auto' }}>
+                      <div className={[
+                        styles.claimStatusWrap,
+                        isMobile ? styles.claimStatusWrapMobile : '',
+                      ].filter(Boolean).join(' ')}>
                         {claim.decision?.approval_status === 'pending' && (
                           <Tag
                             color="orange"
                             icon={<ClockCircleOutlined />}
-                            style={{ 
-                              fontSize: isMobile ? 12 : 14, 
-                              padding: isMobile ? '2px 8px' : '4px 12px',
-                              width: isMobile ? '100%' : 'auto',
-                              textAlign: 'center',
-                            }}
+                            className={[
+                              styles.claimStatusTag,
+                              isMobile ? styles.claimStatusTagMobile : '',
+                            ].filter(Boolean).join(' ')}
                           >
                             Ожидает решения
                           </Tag>
@@ -214,12 +228,10 @@ const ArbitratorCommunication: React.FC = () => {
                           <Tag
                             color="green"
                             icon={<CheckCircleOutlined />}
-                            style={{ 
-                              fontSize: isMobile ? 12 : 14, 
-                              padding: isMobile ? '2px 8px' : '4px 12px',
-                              width: isMobile ? '100%' : 'auto',
-                              textAlign: 'center',
-                            }}
+                            className={[
+                              styles.claimStatusTag,
+                              isMobile ? styles.claimStatusTagMobile : '',
+                            ].filter(Boolean).join(' ')}
                           >
                             Согласовано
                           </Tag>
@@ -228,12 +240,10 @@ const ArbitratorCommunication: React.FC = () => {
                           <Tag
                             color="red"
                             icon={<CloseCircleOutlined />}
-                            style={{ 
-                              fontSize: isMobile ? 12 : 14, 
-                              padding: isMobile ? '2px 8px' : '4px 12px',
-                              width: isMobile ? '100%' : 'auto',
-                              textAlign: 'center',
-                            }}
+                            className={[
+                              styles.claimStatusTag,
+                              isMobile ? styles.claimStatusTagMobile : '',
+                            ].filter(Boolean).join(' ')}
                           >
                             Отклонено
                           </Tag>
@@ -253,20 +263,17 @@ const ArbitratorCommunication: React.FC = () => {
   return (
     <div>
       <Card
-        style={{
-          borderRadius: isMobile ? 8 : 16,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-          border: '1px solid #f0f0f0',
-        }}
+        className={[
+          styles.rootCard,
+          isMobile ? styles.rootCardMobile : '',
+        ].filter(Boolean).join(' ')}
       >
         <Tabs
           activeKey={activeTab}
           onChange={(key) => setActiveTab(key as ArbitratorCommunicationTab)}
           items={tabItems}
           size={isMobile ? 'middle' : 'large'}
-          tabBarStyle={{
-            marginBottom: isMobile ? 16 : 24,
-          }}
+          className={styles.tabs}
         />
       </Card>
     </div>

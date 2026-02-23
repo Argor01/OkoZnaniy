@@ -52,11 +52,11 @@ const StatisticsPanel: React.FC<{
   ];
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      <Card style={{ marginBottom: 20 }}>
-        <Space direction="vertical" style={{ width: '100%' }} size="middle">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <Title level={4} style={{ margin: 0 }}>
+    <div className="partnerDashboardSection">
+      <Card className="partnerDashboardCardSpacing">
+        <Space direction="vertical" className="partnerDashboardSpaceFull" size="middle">
+          <div className="partnerDashboardPanelHeader">
+            <Title level={4} className="partnerDashboardTitleReset">
               <CalendarOutlined /> Выберите период
             </Title>
             {dateRange && (
@@ -70,7 +70,7 @@ const StatisticsPanel: React.FC<{
             onChange={(dates) => onDateRangeChange(dates as [Dayjs, Dayjs] | null)}
             format="DD.MM.YYYY"
             placeholder={['Начало периода', 'Конец периода']}
-            style={{ width: '100%', maxWidth: 400 }}
+            className="partnerDashboardRangePicker"
             presets={rangePresets}
           />
           {dateRange && (
@@ -81,7 +81,7 @@ const StatisticsPanel: React.FC<{
         </Space>
       </Card>
 
-      <Row gutter={[16, 16]} style={{ marginBottom: 0 }}>
+      <Row gutter={[16, 16]} className="partnerDashboardStatsRow">
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
@@ -153,12 +153,12 @@ const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   const partnerInfo = data.partner_info;
 
   return (
-    <div style={{ marginTop: 20 }}>
-      <Card title="Реферальная программа" style={{ marginBottom: 0 }}>
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
+    <div className="partnerDashboardReferralSection">
+      <Card title="Реферальная программа" className="partnerDashboardCardReset">
+        <Space direction="vertical" className="partnerDashboardSpaceFull" size="large">
           <div>
             <Text strong>Ваш реферальный код: </Text>
-            <Tag color="blue" style={{ fontSize: '14px', padding: '4px 12px' }}>
+            <Tag color="blue" className="partnerDashboardReferralCodeTag">
               {partnerInfo.referral_code}
             </Tag>
           </div>
@@ -195,17 +195,14 @@ const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
             Скопировать
           </Button>,
         ]}
-        maskStyle={{
-          backdropFilter: 'blur(4px)',
-        }}
       >
-        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <Space direction="vertical" className="partnerDashboardSpaceFull" size="middle">
           <Text>Поделитесь этой ссылкой для привлечения новых пользователей:</Text>
           <Input.TextArea
             value={generatedLink}
             readOnly
             rows={3}
-            style={{ fontFamily: 'monospace' }}
+            className="partnerDashboardMonospaceInput"
           />
           <Text type="secondary">
             Когда пользователь зарегистрируется по этой ссылке, он автоматически станет вашим рефералом
@@ -228,7 +225,7 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
       render: (username: string, record: Referral) => (
         <div>
           <div><strong>{username}</strong></div>
-          <div style={{ fontSize: '14px', color: '#666' }}>{record.email}</div>
+          <div className="partnerDashboardReferralEmail">{record.email}</div>
         </div>
       ),
     },
@@ -264,24 +261,8 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет рефералов' }}
-        style={{ fontSize: '16px' }}
-        className="large-table"
+        className="partnerDashboardLargeTable"
       />
-      <style>{`
-        .large-table .ant-table {
-          font-size: 16px;
-        }
-        .large-table .ant-table-thead > tr > th {
-          font-size: 16px;
-          font-weight: 600;
-        }
-        .large-table .ant-table-tbody > tr > td {
-          font-size: 16px;
-        }
-        .large-table .ant-tag {
-          font-size: 14px;
-        }
-      `}</style>
     </Card>
   );
 };
@@ -345,24 +326,8 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет начислений' }}
-        style={{ fontSize: '16px' }}
-        className="large-table"
+        className="partnerDashboardLargeTable"
       />
-      <style>{`
-        .large-table .ant-table {
-          font-size: 16px;
-        }
-        .large-table .ant-table-thead > tr > th {
-          font-size: 16px;
-          font-weight: 600;
-        }
-        .large-table .ant-table-tbody > tr > td {
-          font-size: 16px;
-        }
-        .large-table .ant-tag {
-          font-size: 14px;
-        }
-      `}</style>
     </Card>
   );
 };
@@ -433,9 +398,6 @@ const PartnerDashboard: React.FC = () => {
       content: 'Вы уверены, что хотите выйти?',
       okText: 'Выйти',
       cancelText: 'Отмена',
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-      },
       onOk: async () => {
         try {
           authApi.logout();
@@ -464,10 +426,7 @@ const PartnerDashboard: React.FC = () => {
       mode="inline"
       selectedKeys={[selectedMenu]}
       onClick={({ key }) => handleMenuClick(key)}
-      style={{
-        borderRight: 0,
-        height: isMobile ? 'auto' : 'calc(100vh - 120px)',
-      }}
+      className={`partnerDashboardMenu ${isMobile ? 'partnerDashboardMenuMobile' : 'partnerDashboardMenuDesktop'}`}
       items={menuItems.map((item) => ({
         key: item.key,
         icon: item.icon,
@@ -478,8 +437,8 @@ const PartnerDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Layout className="partnerDashboardLayout">
+        <Content className="partnerDashboardCenteredContent">
           <Spin size="large" />
         </Content>
       </Layout>
@@ -488,8 +447,8 @@ const PartnerDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ padding: '50px', textAlign: 'center' }}>
+      <Layout className="partnerDashboardLayout">
+        <Content className="partnerDashboardErrorContent">
           <Title level={3}>Ошибка загрузки</Title>
           <Button onClick={() => navigate('/login')}>Войти в систему</Button>
         </Content>
@@ -502,26 +461,19 @@ const PartnerDashboard: React.FC = () => {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className="partnerDashboardLayout">
       {!isMobile && (
         <Sider
           width={isTablet ? 200 : 250}
-          style={{
-            background: '#fff',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-          }}
+          className="partnerDashboardSider"
           breakpoint="lg"
           collapsedWidth="0"
         >
           <div
-            style={{
-              padding: isTablet ? '16px' : '24px',
-              textAlign: 'center',
-              borderBottom: '1px solid #f0f0f0',
-            }}
+            className={`partnerDashboardSiderHeader ${isTablet ? 'partnerDashboardSiderHeaderTablet' : ''}`}
           >
-            <UserAddOutlined style={{ fontSize: isTablet ? '28px' : '32px', color: '#1890ff', marginBottom: '8px' }} />
-            <Title level={4} style={{ margin: 0, fontSize: isTablet ? '14px' : '16px' }}>
+            <UserAddOutlined className={`partnerDashboardSiderIcon ${isTablet ? 'partnerDashboardSiderIconTablet' : ''}`} />
+            <Title level={4} className={`partnerDashboardSiderTitle ${isTablet ? 'partnerDashboardSiderTitleTablet' : ''}`}>
               {isTablet ? 'ЛК партнера' : 'Партнерский кабинет'}
             </Title>
           </div>
@@ -536,38 +488,24 @@ const PartnerDashboard: React.FC = () => {
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         width={280}
-        styles={{ body: { padding: 0 } }}
+        className="partnerDashboardDrawer"
       >
         <div
-          style={{
-            padding: '16px',
-            textAlign: 'center',
-            borderBottom: '1px solid #f0f0f0',
-          }}
+          className="partnerDashboardDrawerHeader"
         >
-          <UserAddOutlined style={{ fontSize: '28px', color: '#1890ff', marginBottom: '8px' }} />
-          <Title level={5} style={{ margin: 0 }}>
+          <UserAddOutlined className="partnerDashboardDrawerIcon" />
+          <Title level={5} className="partnerDashboardDrawerTitle">
             ЛК партнера
           </Title>
         </div>
         {renderMenu()}
       </Drawer>
 
-      <Layout style={{ background: '#f0f2f5' }}>
+      <Layout className="partnerDashboardMainLayout">
         <Header
-          style={{
-            background: '#fff',
-            padding: '0 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-          }}
+          className="partnerDashboardHeader"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="partnerDashboardHeaderLeft">
             {isMobile && (
               <Button
                 type="text"
@@ -575,7 +513,7 @@ const PartnerDashboard: React.FC = () => {
                 onClick={() => setDrawerVisible(true)}
               />
             )}
-            <Title level={4} style={{ margin: 0 }}>
+            <Title level={4} className="partnerDashboardHeaderTitle">
               Партнерский кабинет
             </Title>
           </div>
@@ -588,19 +526,12 @@ const PartnerDashboard: React.FC = () => {
           </Button>
         </Header>
         <Content
-          style={{
-            margin: isMobile ? '12px' : '16px',
-            padding: isMobile ? '16px' : '20px',
-            background: '#fff',
-            borderRadius: '8px',
-            minHeight: 'calc(100vh - 64px)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-          }}
+          className={`partnerDashboardContent ${isMobile ? 'partnerDashboardContentMobile' : ''}`}
         >
           {currentMenuItem?.component}
         </Content>
         {!isMobile && (
-          <Footer style={{ textAlign: 'center', background: '#fff', padding: isTablet ? '12px' : '24px' }}>
+          <Footer className={`partnerDashboardFooter ${isTablet ? 'partnerDashboardFooterTablet' : ''}`}>
             Партнерский кабинет © {new Date().getFullYear()}
           </Footer>
         )}

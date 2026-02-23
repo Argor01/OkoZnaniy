@@ -5,6 +5,732 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
+.directorDashboardLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.directorDashboardConfirmMask {
+  backdrop-filter: blur(4px);
+}
+
+.directorDashboardMenu {
+  border-right: 0;
+}
+
+.directorDashboardMenuDesktop {
+  height: calc(100vh - 120px);
+}
+
+.directorDashboardMenuMobile {
+  height: auto;
+}
+
+.directorDashboardLayout {
+  min-height: 100vh;
+}
+
+.directorDashboardSider {
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.directorDashboardSiderHeader {
+  padding: 24px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.directorDashboardSiderHeaderTablet {
+  padding: 16px;
+}
+
+.directorDashboardSiderIcon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.directorDashboardSiderIconTablet {
+  font-size: 28px;
+}
+
+.directorDashboardSiderTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.directorDashboardSiderTitleTablet {
+  font-size: 14px;
+}
+
+.directorDashboardMobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  transition: opacity 0.3s ease;
+}
+
+.directorDashboardMobileDrawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  background: #fff;
+  z-index: 9999;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.directorDashboardMobileDrawerOpen {
+  transform: translateX(0);
+}
+
+.directorDashboardMobileCloseRow {
+  padding: 16px;
+  text-align: right;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.directorDashboardMobileCloseButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  color: #666;
+}
+
+.directorDashboardMobileHeader {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.directorDashboardMobileHeaderIcon {
+  font-size: 28px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.directorDashboardMobileHeaderTitle {
+  margin: 0;
+}
+
+.directorDashboardHeader {
+  background: #fff;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.directorDashboardHeaderMobile {
+  padding: 0 16px;
+}
+
+.directorDashboardMenuButton {
+  border-radius: 8px;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 16px;
+  z-index: 1;
+}
+
+.directorDashboardHeaderTitle {
+  margin: 0;
+  flex: 1;
+  text-align: left;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.directorDashboardHeaderTitleMobile {
+  text-align: center;
+  padding-left: 52px;
+  padding-right: 52px;
+}
+
+.directorDashboardLogoutButtonMobile {
+  position: absolute;
+  right: 16px;
+  z-index: 1;
+}
+
+.directorDashboardContent {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  min-height: calc(100vh - 112px);
+}
+
+.directorDashboardContentTablet {
+  margin: 16px;
+  padding: 16px;
+}
+
+.directorDashboardContentMobile {
+  margin: 12px;
+  padding: 12px;
+}
+
+.directorDashboardFooter {
+  text-align: center;
+  background: #fff;
+  padding: 24px;
+}
+
+.directorDashboardFooterTablet {
+  padding: 12px;
+}
+
+.employeeArchiveDeleteWarning {
+  color: red;
+  font-weight: bold;
+}
+
+.employeeArchiveRestoreButton {
+  color: #52c41a;
+}
+
+.employeeArchiveFilters {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.employeeArchiveSearch {
+  width: 300px;
+}
+
+.employeeArchiveModalMask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.personnelManagementTabIcon {
+  margin-right: 8px;
+}
+
+.personnelManagementCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.personnelManagementCardMobile {
+  border-radius: 8px;
+}
+
+.personnelManagementTabs {
+  font-size: 16px;
+}
+
+.personnelManagementTabs :global(.ant-tabs-nav) {
+  margin-bottom: 24px;
+}
+
+.personnelManagementTabs :global(.ant-tabs-tab) {
+  font-weight: 500;
+}
+
+.personnelManagementTabsMobile {
+  font-size: 14px;
+}
+
+.personnelManagementTabsMobile :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.employeeRegistrationWrapper {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.employeeRegistrationWrapperMobile {
+  padding: 0 12px;
+}
+
+.employeeRegistrationCard {
+  width: 100%;
+  max-width: 700px;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.employeeRegistrationCardMobile {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.employeeRegistrationTitle {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 20px;
+}
+
+.employeeRegistrationTitleMobile {
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.employeeRegistrationActions {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.employeeRegistrationActionsMobile {
+  justify-content: stretch;
+}
+
+.employeeRegistrationActionButton {
+  width: auto;
+  height: auto;
+}
+
+.employeeRegistrationActionButtonMobile {
+  width: 100%;
+  height: 40px;
+}
+
+.employeeRegistrationToggleButton {
+  width: auto;
+  height: auto;
+  text-align: left;
+  padding: 4px 15px;
+}
+
+.employeeRegistrationToggleButtonMobile {
+  width: 100%;
+  height: 40px;
+  text-align: center;
+  padding: 8px 15px;
+}
+
+.employeeRegistrationSubmit {
+  height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.employeeRegistrationSubmitMobile {
+  height: 48px;
+  font-size: 16px;
+}
+
+.financialStatisticsTabIcon {
+  margin-right: 8px;
+}
+
+.monthlyTurnoverLoading {
+  text-align: center;
+  padding: 50px;
+}
+
+.monthlyTurnoverFiltersCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.monthlyTurnoverFiltersCardMobile {
+  border-radius: 8px;
+}
+
+.monthlyTurnoverStatsRow {
+  margin-bottom: 24px;
+}
+
+.monthlyTurnoverStatCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.monthlyTurnoverStatCardMobile {
+  border-radius: 8px;
+}
+
+.monthlyTurnoverChangeCardPositive {
+  background: #f0f9ff;
+  border: 2px solid #1890ff;
+}
+
+.monthlyTurnoverChangeCardNegative {
+  background: #fff1f0;
+  border: 2px solid #ff4d4f;
+}
+
+.monthlyTurnoverStatistic {
+  padding: 12px 0;
+}
+
+.monthlyTurnoverStatistic :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.monthlyTurnoverStatisticMobile {
+  padding: 8px 0;
+}
+
+.monthlyTurnoverStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.monthlyTurnoverChangeStatistic {
+  padding: 12px 0;
+}
+
+.monthlyTurnoverChangeStatistic :global(.ant-statistic-content-value) {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.monthlyTurnoverChangeStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
+}
+
+.monthlyTurnoverChangePositive :global(.ant-statistic-content-value) {
+  color: #3f8600;
+}
+
+.monthlyTurnoverChangeNegative :global(.ant-statistic-content-value) {
+  color: #cf1322;
+}
+
+.monthlyTurnoverChartCard {
+  border-radius: 12px;
+}
+
+.monthlyTurnoverChartCard :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.monthlyTurnoverChartCardMobile {
+  border-radius: 8px;
+}
+
+.monthlyTurnoverChartCardMobile :global(.ant-card-head-title) {
+  font-size: 16px;
+}
+
+.monthlyTurnoverChartContainer {
+  width: 100%;
+  height: 400px;
+  overflow-x: visible;
+}
+
+.monthlyTurnoverChartContainerMobile {
+  height: 300px;
+  overflow-x: auto;
+}
+
+.monthlyTurnoverChartContainer :global(.recharts-default-tooltip) {
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.monthlyTurnoverChartContainerMobile :global(.recharts-default-tooltip) {
+  font-size: 12px;
+}
+
+.monthlyTurnoverChartContainer :global(.recharts-legend-wrapper) {
+  font-size: 14px;
+}
+
+.monthlyTurnoverChartContainerMobile :global(.recharts-legend-wrapper) {
+  font-size: 12px;
+}
+
+.netProfitLoading {
+  text-align: center;
+  padding: 50px;
+}
+
+.netProfitFiltersCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.netProfitFiltersCardMobile {
+  border-radius: 8px;
+}
+
+.netProfitStatsRow {
+  margin-bottom: 24px;
+}
+
+.netProfitStatCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.netProfitStatCardMobile {
+  border-radius: 8px;
+}
+
+.netProfitChangeCardPositive {
+  background: #f6ffed;
+  border: 2px solid #52c41a;
+}
+
+.netProfitChangeCardNegative {
+  background: #fff1f0;
+  border: 2px solid #ff4d4f;
+}
+
+.netProfitStatistic {
+  padding: 12px 0;
+}
+
+.netProfitStatistic :global(.ant-statistic-content-value) {
+  color: #52c41a;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.netProfitStatisticMobile {
+  padding: 8px 0;
+}
+
+.netProfitStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.netProfitChangeStatistic {
+  padding: 12px 0;
+}
+
+.netProfitChangeStatistic :global(.ant-statistic-content-value) {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.netProfitChangeStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
+}
+
+.netProfitChangePositive :global(.ant-statistic-content-value) {
+  color: #3f8600;
+}
+
+.netProfitChangeNegative :global(.ant-statistic-content-value) {
+  color: #cf1322;
+}
+
+.netProfitChartCard {
+  border-radius: 12px;
+}
+
+.netProfitChartCard :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.netProfitChartCardMobile {
+  border-radius: 8px;
+}
+
+.netProfitChartCardMobile :global(.ant-card-head-title) {
+  font-size: 16px;
+}
+
+.netProfitChartContainer {
+  width: 100%;
+  height: 400px;
+  overflow-x: visible;
+}
+
+.netProfitChartContainerMobile {
+  height: 300px;
+  overflow-x: auto;
+}
+
+.netProfitChartContainer :global(.recharts-default-tooltip) {
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.netProfitChartContainerMobile :global(.recharts-default-tooltip) {
+  font-size: 12px;
+}
+
+.netProfitChartContainer :global(.recharts-legend-wrapper) {
+  font-size: 14px;
+}
+
+.netProfitChartContainerMobile :global(.recharts-legend-wrapper) {
+  font-size: 12px;
+}
+
+.incomeExpenseLoading {
+  text-align: center;
+  padding: 50px;
+}
+
+.incomeExpenseFiltersCard {
+  margin-bottom: 16px;
+  border-radius: 12px;
+}
+
+.incomeExpenseFiltersCardMobile {
+  border-radius: 8px;
+}
+
+.incomeExpenseStatsRow {
+  margin-bottom: 24px;
+}
+
+.incomeExpenseStatCard {
+  border-radius: 12px;
+  text-align: center;
+}
+
+.incomeExpenseStatCardMobile {
+  border-radius: 8px;
+}
+
+.incomeExpenseHighlightCardMobile {
+  background: #f0f9ff;
+  border: 2px solid #1890ff;
+}
+
+.incomeExpenseIncomeStatistic {
+  padding: 12px 0;
+}
+
+.incomeExpenseIncomeStatistic :global(.ant-statistic-content-value) {
+  color: #52c41a;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.incomeExpenseIncomeStatisticMobile {
+  padding: 8px 0;
+}
+
+.incomeExpenseIncomeStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.incomeExpenseExpenseStatistic {
+  padding: 12px 0;
+}
+
+.incomeExpenseExpenseStatistic :global(.ant-statistic-content-value) {
+  color: #ff4d4f;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.incomeExpenseExpenseStatisticMobile {
+  padding: 8px 0;
+}
+
+.incomeExpenseExpenseStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 20px;
+}
+
+.incomeExpenseNetStatistic {
+  padding: 12px 0;
+}
+
+.incomeExpenseNetStatistic :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.incomeExpenseNetStatisticMobile :global(.ant-statistic-content-value) {
+  font-size: 22px;
+}
+
+.incomeExpenseChartCard {
+  border-radius: 12px;
+}
+
+.incomeExpenseChartCard :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.incomeExpenseChartCardMobile {
+  border-radius: 8px;
+}
+
+.incomeExpenseChartCardMobile :global(.ant-card-head-title) {
+  font-size: 16px;
+}
+
+.incomeExpenseChartContainer {
+  width: 100%;
+  height: 400px;
+  overflow-x: visible;
+}
+
+.incomeExpenseChartContainerMobile {
+  height: 300px;
+  overflow-x: auto;
+}
+
+.incomeExpenseChartContainer :global(.recharts-default-tooltip) {
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.incomeExpenseChartContainerMobile :global(.recharts-default-tooltip) {
+  font-size: 12px;
+}
+
+.incomeExpenseChartContainer :global(.recharts-legend-wrapper) {
+  font-size: 14px;
+}
+
+.incomeExpenseChartContainerMobile :global(.recharts-legend-wrapper) {
+  font-size: 12px;
+}
+
+.partnerPanelTabIcon {
+  margin-right: 8px;
+}
+
+.partnerPanelCard {
+  border-radius: 12px;
+}
+
+.partnerPanelCardMobile {
+  border-radius: 8px;
+}
+
+.partnerPanelTabs {
+  font-size: 16px;
+}
+
+.partnerPanelTabs :global(.ant-tabs-tab) {
+  font-weight: 500;
+}
+
+.partnerPanelTabsMobile {
+  font-size: 14px;
+}
+
 
 .ant-modal-wrap {
   backdrop-filter: blur(4px);
@@ -2848,6 +3574,209 @@
 .arbitratorAmountHighlight {
   font-size: 12px;
   color: #1890ff;
+}
+
+.partnerDashboardSection {
+  margin-bottom: 24px;
+}
+
+.partnerDashboardCardSpacing {
+  margin-bottom: 20px;
+}
+
+.partnerDashboardCardReset {
+  margin-bottom: 0;
+}
+
+.partnerDashboardSpaceFull {
+  width: 100%;
+}
+
+.partnerDashboardPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.partnerDashboardTitleReset {
+  margin: 0;
+}
+
+.partnerDashboardRangePicker {
+  width: 100%;
+  max-width: 400px;
+}
+
+.partnerDashboardStatsRow {
+  margin-bottom: 0;
+}
+
+.partnerDashboardReferralSection {
+  margin-top: 20px;
+}
+
+.partnerDashboardReferralCodeTag {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+.partnerDashboardMonospaceInput {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.partnerDashboardReferralEmail {
+  font-size: 14px;
+  color: #666;
+}
+
+.partnerDashboardLargeTable .ant-table {
+  font-size: 16px;
+}
+
+.partnerDashboardLargeTable .ant-table-thead > tr > th {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.partnerDashboardLargeTable .ant-table-tbody > tr > td {
+  font-size: 16px;
+}
+
+.partnerDashboardLargeTable .ant-tag {
+  font-size: 14px;
+}
+
+.partnerDashboardMenu {
+  border-right: 0;
+}
+
+.partnerDashboardMenuDesktop {
+  height: calc(100vh - 120px);
+}
+
+.partnerDashboardMenuMobile {
+  height: auto;
+}
+
+.partnerDashboardLayout {
+  min-height: 100vh;
+}
+
+.partnerDashboardSider {
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.partnerDashboardSiderHeader {
+  padding: 24px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.partnerDashboardSiderHeaderTablet {
+  padding: 16px;
+}
+
+.partnerDashboardSiderIcon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.partnerDashboardSiderIconTablet {
+  font-size: 28px;
+}
+
+.partnerDashboardSiderTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.partnerDashboardSiderTitleTablet {
+  font-size: 14px;
+}
+
+.partnerDashboardDrawer .ant-drawer-body {
+  padding: 0;
+}
+
+.partnerDashboardDrawerHeader {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.partnerDashboardDrawerIcon {
+  font-size: 28px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.partnerDashboardDrawerTitle {
+  margin: 0;
+}
+
+.partnerDashboardMainLayout {
+  background: #f0f2f5;
+}
+
+.partnerDashboardHeader {
+  background: #fff;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.partnerDashboardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.partnerDashboardHeaderTitle {
+  margin: 0;
+}
+
+.partnerDashboardContent {
+  margin: 16px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  min-height: calc(100vh - 64px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.partnerDashboardContentMobile {
+  margin: 12px;
+  padding: 16px;
+}
+
+.partnerDashboardFooter {
+  text-align: center;
+  background: #fff;
+  padding: 24px;
+}
+
+.partnerDashboardFooterTablet {
+  padding: 12px;
+}
+
+.partnerDashboardCenteredContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.partnerDashboardErrorContent {
+  padding: 50px;
+  text-align: center;
 }
 
 
