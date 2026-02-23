@@ -378,12 +378,271 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'user_conversations':
         return (
           <UserConversationsSection
-            conversations={[]}
+            conversations={[
+              {
+                id: 1,
+                participants: [
+                  {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                    role: 'client',
+                  },
+                  {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                    role: 'expert',
+                  },
+                ],
+                last_message: {
+                  text: 'Спасибо за выполненную работу! Все отлично.',
+                  created_at: '2024-02-23T14:30:00Z',
+                },
+                messages_count: 15,
+                order_id: 1234,
+                order_title: 'Решение задач по математике',
+              },
+              {
+                id: 2,
+                participants: [
+                  {
+                    id: 102,
+                    username: 'anna_client',
+                    first_name: 'Анна',
+                    last_name: 'Иванова',
+                    role: 'client',
+                  },
+                  {
+                    id: 202,
+                    username: 'dmitry_expert',
+                    first_name: 'Дмитрий',
+                    last_name: 'Козлов',
+                    role: 'expert',
+                  },
+                ],
+                last_message: {
+                  text: 'Когда будет готова работа?',
+                  created_at: '2024-02-23T13:15:00Z',
+                },
+                messages_count: 8,
+                order_id: 1235,
+                order_title: 'Курсовая работа по экономике',
+              },
+              {
+                id: 3,
+                participants: [
+                  {
+                    id: 103,
+                    username: 'sergey_client',
+                    first_name: 'Сергей',
+                    last_name: 'Волков',
+                    role: 'client',
+                  },
+                  {
+                    id: 203,
+                    username: 'elena_expert',
+                    first_name: 'Елена',
+                    last_name: 'Новикова',
+                    role: 'expert',
+                  },
+                ],
+                last_message: {
+                  text: 'Добрый день! Приступаю к выполнению вашего заказа.',
+                  created_at: '2024-02-23T12:00:00Z',
+                },
+                messages_count: 3,
+                order_id: 1236,
+                order_title: 'Реферат по истории России',
+              },
+              {
+                id: 4,
+                participants: [
+                  {
+                    id: 104,
+                    username: 'olga_client',
+                    first_name: 'Ольга',
+                    last_name: 'Соколова',
+                    role: 'client',
+                  },
+                  {
+                    id: 204,
+                    username: 'alex_expert',
+                    first_name: 'Александр',
+                    last_name: 'Морозов',
+                    role: 'expert',
+                  },
+                ],
+                last_message: {
+                  text: 'Нужно внести небольшие правки в работу',
+                  created_at: '2024-02-23T10:45:00Z',
+                },
+                messages_count: 22,
+                order_id: 1237,
+                order_title: 'Дипломная работа по программированию',
+              },
+              {
+                id: 5,
+                participants: [
+                  {
+                    id: 105,
+                    username: 'pavel_client',
+                    first_name: 'Павел',
+                    last_name: 'Лебедев',
+                    role: 'client',
+                  },
+                  {
+                    id: 205,
+                    username: 'natalia_expert',
+                    first_name: 'Наталья',
+                    last_name: 'Федорова',
+                    role: 'expert',
+                  },
+                ],
+                last_message: {
+                  text: 'Отправила вам первую часть работы на проверку',
+                  created_at: '2024-02-23T09:20:00Z',
+                },
+                messages_count: 12,
+                order_id: 1238,
+                order_title: 'Эссе по английскому языку',
+              },
+            ]}
             loading={false}
             onViewConversation={(conversationId) => { void conversationId; }}
             onLoadMessages={async (conversationId) => {
               void conversationId;
-              return [];
+              // Моковые сообщения для просмотра
+              return [
+                {
+                  id: 1,
+                  sender: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  receiver: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  text: 'Здравствуйте! Мне нужна помощь с решением задач по математике.',
+                  created_at: '2024-02-23T10:00:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 2,
+                  sender: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  receiver: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  text: 'Добрый день! Конечно, помогу. Пришлите, пожалуйста, условия задач.',
+                  created_at: '2024-02-23T10:15:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 3,
+                  sender: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  receiver: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  text: 'Отправил файл с заданиями. Когда сможете выполнить?',
+                  created_at: '2024-02-23T10:30:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 4,
+                  sender: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  receiver: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  text: 'Посмотрела задания. Смогу выполнить к завтрашнему вечеру.',
+                  created_at: '2024-02-23T11:00:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 5,
+                  sender: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  receiver: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  text: 'Отлично, жду!',
+                  created_at: '2024-02-23T11:15:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 6,
+                  sender: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  receiver: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  text: 'Работа выполнена! Отправила вам файл с решениями.',
+                  created_at: '2024-02-23T14:00:00Z',
+                  is_read: true,
+                },
+                {
+                  id: 7,
+                  sender: {
+                    id: 101,
+                    username: 'ivan_client',
+                    first_name: 'Иван',
+                    last_name: 'Петров',
+                  },
+                  receiver: {
+                    id: 201,
+                    username: 'maria_expert',
+                    first_name: 'Мария',
+                    last_name: 'Смирнова',
+                  },
+                  text: 'Спасибо за выполненную работу! Все отлично.',
+                  created_at: '2024-02-23T14:30:00Z',
+                  is_read: false,
+                },
+              ];
             }}
           />
         );
