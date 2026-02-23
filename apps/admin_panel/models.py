@@ -21,6 +21,7 @@ class SupportRequest(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_requests')
     admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_requests')
+    support_chat = models.ForeignKey('chat.SupportChat', on_delete=models.SET_NULL, null=True, blank=True, related_name='support_request', verbose_name='Чат поддержки')
     subject = models.CharField(max_length=255, verbose_name='Тема')
     description = models.TextField(verbose_name='Описание')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')

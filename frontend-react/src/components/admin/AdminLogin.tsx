@@ -320,7 +320,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           <div className="adminLoginQuickList">
             
             <div className="adminLoginQuickGrid">
-              {DEV_ACCOUNTS.filter(acc => acc.role !== 'director').map((account) => (
+              {DEV_ACCOUNTS.filter(acc => ['admin', 'expert', 'director'].includes(acc.role)).map((account) => (
                 <Tooltip
                   key={account.email}
                   title={`${account.email}`}
@@ -333,27 +333,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                     disabled={loading}
                     size="large"
                     className="adminLoginQuickButton"
-                  >
-                    {account.label}
-                  </Button>
-                </Tooltip>
-              ))}
-            </div>
-            
-            <div className="adminLoginQuickSingle">
-              {DEV_ACCOUNTS.filter(acc => acc.role === 'director').map((account) => (
-                <Tooltip
-                  key={account.email}
-                  title={`${account.email}`}
-                  placement="top"
-                >
-                  <Button
-                    icon={getRoleIcon(account.role)}
-                    onClick={() => handleQuickLogin(account)}
-                    loading={loading}
-                    disabled={loading}
-                    size="large"
-                    className="adminLoginQuickButton adminLoginQuickButtonWide"
                   >
                     {account.label}
                   </Button>
