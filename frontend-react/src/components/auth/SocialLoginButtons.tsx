@@ -30,7 +30,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     e.preventDefault();
     const authId = generateAuthId();
 
-    window.open(`https://t.me/oko_expert_bot?start=${authId}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://t.me/okoznaniybot?start=${authId}`, '_blank', 'noopener,noreferrer');
     checkAuthStatus(authId);
   };
 
