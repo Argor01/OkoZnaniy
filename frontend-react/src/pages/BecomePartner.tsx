@@ -6,6 +6,9 @@ import PartnerBenefits from '../components/landing/sections/PartnerBenefits';
 import PartnerSteps from '../components/landing/sections/PartnerSteps';
 import FeedbackForm from '../components/landing/sections/FeedbackForm';
 import Footer from '../components/landing/sections/Footer';
+import '../styles/expert-partner-pages.css';
+import '../styles/partner-pages.css';
+import '../styles/page-transitions.css';
 
 const BecomePartner: React.FC = () => {
   return (

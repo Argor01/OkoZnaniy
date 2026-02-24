@@ -13,6 +13,8 @@ import About from '../components/landing/sections/About';
 import FAQ from '../components/landing/sections/FAQ';
 import PlaceTaskInfo from '../components/landing/sections/PlaceTaskInfo';
 import Footer from '../components/landing/sections/Footer';
+import '../styles/landing.css';
+import '../styles/page-transitions.css';
 
 const Home: React.FC = () => {
   const [searchParams] = useSearchParams();

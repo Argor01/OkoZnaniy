@@ -8,23 +8,7 @@ import 'dayjs/locale/ru';
 import './utils/clearAuth'; 
 
 
-import './styles/page-transitions.css';
-import './styles/landing.css';
-import './styles/logo.css';
-import './styles/expert-partner-pages.css';
-import './styles/expert-advantages.css';
-import './styles/expert-form.css';
-import './styles/feedback-form.css';
-import './styles/partner-pages.css';
 import './styles/globals.css';
-import './styles/typography.css';
-import './styles/spacing.css';
-import './styles/tokens.css';
-import './styles/components.css';
-import './styles/messages.css';
-import './styles/modals.css';
-import './styles/modals-centered.css';
-import './styles/avatar.css';
 
 
 import OrderDetail from './pages/OrderDetail';

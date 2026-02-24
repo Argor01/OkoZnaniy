@@ -5,6 +5,8 @@ import ExpertFirstScreen from '../components/landing/sections/ExpertFirstScreen'
 import ExpertAdvantages from '../components/landing/sections/ExpertAdvantages';
 import FeedbackForm from '../components/landing/sections/FeedbackForm';
 import Footer from '../components/landing/sections/Footer';
+import '../styles/expert-partner-pages.css';
+import '../styles/page-transitions.css';
 
 const BecomeExpert: React.FC = () => {
   return (

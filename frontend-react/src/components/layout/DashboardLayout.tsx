@@ -9,6 +9,7 @@ import Sidebar from './Sidebar';
 import { useNotifications } from '../../hooks/useNotifications';
 import { DashboardContext } from '../../contexts/DashboardContext';
 import styles from './DashboardLayout.module.css';
+import '../../styles/modals.css';
 
 
 import ProfileModal from '../../pages/ExpertDashboard/modals/ProfileModal';

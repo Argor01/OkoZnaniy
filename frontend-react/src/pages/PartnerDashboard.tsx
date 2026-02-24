@@ -17,6 +17,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '../api/partners';
+import '../styles/modals.css';
+import '../styles/components.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;

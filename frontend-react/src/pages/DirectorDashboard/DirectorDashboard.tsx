@@ -19,6 +19,8 @@ import PartnerPanel from './components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from './components/GeneralStatistics/GeneralStatistics';
 import ArbitratorCommunication from './components/ArbitratorCommunication/ArbitratorCommunication';
 import ContactBannedUsers from './components/ContactBannedUsers';
+import '../../styles/modals.css';
+import '../../styles/components.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;

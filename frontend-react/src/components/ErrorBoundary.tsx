@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button, Result, Typography } from 'antd';
+import '../styles/components.css';
 
 interface Props {
   children: ReactNode;

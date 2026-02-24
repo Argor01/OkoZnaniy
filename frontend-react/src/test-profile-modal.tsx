@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from 'antd';
 import ProfileModal from './pages/ExpertDashboard/modals/ProfileModal';
+import './styles/components.css';
 
 const TestProfileModal: React.FC = () => {
   const [visible, setVisible] = useState(false);

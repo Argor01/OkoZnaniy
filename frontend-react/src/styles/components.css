@@ -1,10 +1,5 @@
 
 
-.ant-modal-mask {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
 .directorDashboardLoading {
   display: flex;
   justify-content: center;

@@ -27,6 +27,8 @@ import IndividualOfferModal from '../../../components/modals/IndividualOfferModa
 import { ordersApi } from '../../../api/orders';
 import { expertsApi } from '../../../api/experts';
 import styles from '../ExpertDashboard.module.css';
+import '../../../styles/messages.css';
+import '../../../styles/avatar.css';
 
 const { Text } = Typography;
 

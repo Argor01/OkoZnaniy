@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingOutlined, DollarOutlined, ClockCircleOutlined, LaptopOutlined, SafetyOutlined, UserOutlined, CustomerServiceOutlined } from '@ant-design/icons';
+import '../../../styles/expert-advantages.css';
 
 const ExpertAdvantages: React.FC = () => {
   return (

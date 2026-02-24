@@ -155,7 +155,8 @@ const GeneralStatistics: React.FC = () => {
             'Значение': totalPartners,
             'Изменение': '',
           },
-        ];
+        ];
+
         const wb = XLSX.utils.book_new();
         
         
@@ -172,15 +173,18 @@ const GeneralStatistics: React.FC = () => {
         XLSX.utils.book_append_sheet(wb, ws, 'Статистика');
 
         
-        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
+        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
+
         XLSX.writeFile(wb, fileName);
 
         message.success({ content: 'Данные успешно экспортированы!', key: 'export', duration: 2 });
-      } else if (format === 'pdf') {
+      } else if (format === 'pdf') {
+
         const pdfMakeModule = await import('pdfmake/build/pdfmake');
         const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
         
-        const pdfMake = pdfMakeModule.default || pdfMakeModule;
+        const pdfMake = pdfMakeModule.default || pdfMakeModule;
+
         if (pdfFontsModule.default && pdfFontsModule.default.pdfMake) {
           pdfMake.vfs = pdfFontsModule.default.pdfMake.vfs;
         } else if (pdfFontsModule.pdfMake) {
@@ -189,7 +193,8 @@ const GeneralStatistics: React.FC = () => {
           pdfMake.vfs = pdfFontsModule.default;
         } else {
           pdfMake.vfs = pdfFontsModule;
-        }
+        }
+
         const tableBody = [
           [
             { text: 'Показатель', style: 'tableHeader' },
@@ -226,7 +231,8 @@ const GeneralStatistics: React.FC = () => {
           ['Всего клиентов', totalClients.toString()],
           ['Всего экспертов', totalExperts.toString()],
           ['Всего партнеров', totalPartners.toString()]
-        ];
+        ];
+
         const docDefinition: any = {
           content: [
             { text: 'Общая статистика', style: 'header' },
@@ -288,7 +294,8 @@ const GeneralStatistics: React.FC = () => {
               ]
             };
           }
-        };
+        };
+
         pdfMake.createPdf(docDefinition).download(
           `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.pdf`
         );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form, Input, Button } from 'antd';
+import '../../../styles/expert-form.css';
 
 const ExpertForm: React.FC = () => {
   const [form] = Form.useForm();

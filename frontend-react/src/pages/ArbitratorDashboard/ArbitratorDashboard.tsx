@@ -21,6 +21,8 @@ import Completed from './components/NavigationPanel/Completed';
 import PendingApproval from './components/NavigationPanel/PendingApproval';
 import ClaimsProcessing from './components/ClaimsProcessing/ClaimsProcessing';
 import InternalCommunication from './components/InternalCommunication/InternalCommunication';
+import '../../styles/modals.css';
+import '../../styles/components.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;

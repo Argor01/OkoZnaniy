@@ -1,5 +1,7 @@
-﻿
-
+.ant-modal-mask {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
 
 .ant-modal {
   max-width: 90%;

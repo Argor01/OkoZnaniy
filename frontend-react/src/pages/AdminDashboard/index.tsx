@@ -44,6 +44,8 @@ import {
 import { PartnerModal, DisputeModal, SupportRequestModal } from './components/Modals';
 import AdminLogin from '../../components/admin/AdminLogin';
 import type { MenuKey } from './types';
+import '../../styles/modals.css';
+import '../../styles/components.css';
 
 const { Content } = Layout;
 

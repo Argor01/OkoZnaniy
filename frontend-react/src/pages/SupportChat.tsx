@@ -4,6 +4,7 @@ import { Card, Input, Button, message, Spin, Empty, Avatar, Tag } from 'antd';
 import { SendOutlined, ArrowLeftOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { supportApi, SupportMessage } from '../api/support';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import '../styles/components.css';
 
 const { TextArea } = Input;
 const isDebugEnabled = () =>
