@@ -54,8 +54,11 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
     },
-    onError: () => {
-      message.error('Ошибка при добавлении типа работы');
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.name?.[0] || 
+                          error?.response?.data?.detail || 
+                          'Ошибка при добавлении типа работы';
+      message.error(errorMessage);
     },
   });
 
@@ -67,8 +70,11 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       setNewSubjectName('');
       message.success('Новый предмет добавлен');
     },
-    onError: () => {
-      message.error('Ошибка при добавлении предмета');
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.name?.[0] || 
+                          error?.response?.data?.detail || 
+                          'Ошибка при добавлении предмета';
+      message.error(errorMessage);
     },
   });
 
@@ -355,7 +361,26 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         open={newWorkTypeModalVisible}
         onOk={() => {
           if (newWorkTypeName.trim()) {
-            createWorkTypeMutation.mutate(newWorkTypeName.trim());
+            // Нормализуем имя
+            const normalizedName = newWorkTypeName.trim().split(/\s+/).join(' ').toLowerCase();
+            
+            // Проверяем, нет ли уже такого типа работы
+            const existingWorkType = workTypes.find((wt: any) => 
+              wt.name.toLowerCase() === normalizedName
+            );
+            
+            if (existingWorkType) {
+              message.warning(`Тип работы "${existingWorkType.name}" уже существует`);
+              return;
+            }
+            
+            // Делаем первую букву заглавной
+            const capitalizedName = newWorkTypeName.trim().split(/\s+/).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+            
+            createWorkTypeMutation.mutate(capitalizedName);
           } else {
             message.error('Введите название типа работы');
           }
@@ -372,7 +397,19 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           onChange={(e) => setNewWorkTypeName(e.target.value)}
           onPressEnter={() => {
             if (newWorkTypeName.trim()) {
-              createWorkTypeMutation.mutate(newWorkTypeName.trim());
+              const normalizedName = newWorkTypeName.trim().split(/\s+/).join(' ').toLowerCase();
+              const existingWorkType = workTypes.find((wt: any) => 
+                wt.name.toLowerCase() === normalizedName
+              );
+              if (existingWorkType) {
+                message.warning(`Тип работы "${existingWorkType.name}" уже существует`);
+                return;
+              }
+              const capitalizedName = newWorkTypeName.trim().split(/\s+/).join(' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+              createWorkTypeMutation.mutate(capitalizedName);
             }
           }}
         />
@@ -384,7 +421,26 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         open={newSubjectModalVisible}
         onOk={() => {
           if (newSubjectName.trim()) {
-            createSubjectMutation.mutate(newSubjectName.trim());
+            // Нормализуем имя
+            const normalizedName = newSubjectName.trim().split(/\s+/).join(' ').toLowerCase();
+            
+            // Проверяем, нет ли уже такого предмета
+            const existingSubject = subjects.find((s: any) => 
+              s.name.toLowerCase() === normalizedName
+            );
+            
+            if (existingSubject) {
+              message.warning(`Предмет "${existingSubject.name}" уже существует`);
+              return;
+            }
+            
+            // Делаем первую букву заглавной
+            const capitalizedName = newSubjectName.trim().split(/\s+/).join(' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+            
+            createSubjectMutation.mutate(capitalizedName);
           } else {
             message.error('Введите название предмета');
           }
@@ -401,7 +457,19 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           onChange={(e) => setNewSubjectName(e.target.value)}
           onPressEnter={() => {
             if (newSubjectName.trim()) {
-              createSubjectMutation.mutate(newSubjectName.trim());
+              const normalizedName = newSubjectName.trim().split(/\s+/).join(' ').toLowerCase();
+              const existingSubject = subjects.find((s: any) => 
+                s.name.toLowerCase() === normalizedName
+              );
+              if (existingSubject) {
+                message.warning(`Предмет "${existingSubject.name}" уже существует`);
+                return;
+              }
+              const capitalizedName = newSubjectName.trim().split(/\s+/).join(' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+              createSubjectMutation.mutate(capitalizedName);
             }
           }}
         />

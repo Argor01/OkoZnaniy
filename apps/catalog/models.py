@@ -41,7 +41,7 @@ class SubjectCategory(models.Model):
 
 class Subject(models.Model):
     """Модель предмета (например, Математика, Физика и т.д.)"""
-    name = models.CharField("Название предмета", max_length=100)
+    name = models.CharField("Название предмета", max_length=100, unique=True)
     slug = models.SlugField("URL", max_length=100, unique=True, blank=True)
     description = models.TextField("Описание", blank=True)
     category = models.ForeignKey(
@@ -72,11 +72,17 @@ class Subject(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
+        # Нормализация имени: убираем лишние пробелы и приводим к единому регистру
+        if self.name:
+            self.name = ' '.join(self.name.strip().split())
+            # Делаем первую букву заглавной, остальные строчными
+            self.name = self.name.capitalize()
+        
         if not self.slug:
             base_slug = slugify(self.name, allow_unicode=True) or "subject"
             slug = base_slug
             n = 1
-            while Subject.objects.filter(slug=slug).exists():
+            while Subject.objects.filter(slug=slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{n}"
                 n += 1
             self.slug = slug
@@ -203,11 +209,17 @@ class WorkType(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
+        # Нормализация имени: убираем лишние пробелы и приводим к единому регистру
+        if self.name:
+            self.name = ' '.join(self.name.strip().split())
+            # Делаем первую букву заглавной, остальные строчными
+            self.name = self.name.capitalize()
+        
         if not self.slug:
             base_slug = slugify(self.name, allow_unicode=True) or "work-type"
             slug = base_slug
             n = 1
-            while WorkType.objects.filter(slug=slug).exists():
+            while WorkType.objects.filter(slug=slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{n}"
                 n += 1
             self.slug = slug
