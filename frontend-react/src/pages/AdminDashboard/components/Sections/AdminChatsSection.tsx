@@ -28,7 +28,8 @@ import {
   BellOutlined,
   PushpinOutlined,
   UploadOutlined,
-  EditOutlined
+  EditOutlined,
+  WarningOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './AdminChatsSection.module.css';
@@ -267,6 +268,20 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
   const handleCancelEdit = () => {
     setIsEditingRoom(false);
     editRoomForm.resetFields();
+  };
+
+  const handleReportMessage = (messageId: number, messageSender: string) => {
+    Modal.confirm({
+      title: 'Пожаловаться на сообщение',
+      icon: <WarningOutlined />,
+      content: `Вы уверены, что хотите пожаловаться на сообщение от ${messageSender}?`,
+      okText: 'Да, пожаловаться',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk() {
+        message.warning(`Жалоба на сообщение #${messageId} отправлена на рассмотрение`);
+      },
+    });
   }; 
  
   const getRoomTypeColor = (type: string) => {
@@ -491,17 +506,32 @@ export const AdminChatsSection: React.FC<AdminChatsSectionProps> = ({
                     )}
                   </div>  
                 
-                  <div className={[
-                    styles.messageBubble,
-                    msg.is_system ? styles.messageBubbleSystem : '',
-                    msg.is_pinned ? styles.messageBubblePinned : ''
-                  ].filter(Boolean).join(' ')}>
-                    <Text className={[
-                      styles.messageText,
-                      msg.is_system ? styles.messageTextSystem : ''
+                  <div className={styles.messageBubbleWrapper}>
+                    <div className={[
+                      styles.messageBubble,
+                      msg.is_system ? styles.messageBubbleSystem : '',
+                      msg.is_pinned ? styles.messageBubblePinned : ''
                     ].filter(Boolean).join(' ')}>
-                      {msg.text}
-                    </Text>
+                      <Text className={[
+                        styles.messageText,
+                        msg.is_system ? styles.messageTextSystem : ''
+                      ].filter(Boolean).join(' ')}>
+                        {msg.text}
+                      </Text>
+                    </div>
+                    
+                    {!msg.is_system && (
+                      <Tooltip title="Пожаловаться на сообщение">
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<WarningOutlined />}
+                          className={styles.messageReportButton}
+                          onClick={() => handleReportMessage(msg.id, `${msg.sender.first_name} ${msg.sender.last_name}`)}
+                          danger
+                        />
+                      </Tooltip>
+                    )}
                   </div>
                 </div>
               </div>

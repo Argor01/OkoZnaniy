@@ -27,6 +27,10 @@ urlpatterns = [
     path('support-chats/', views.get_support_chats, name='get-support-chats'),
     path('support-chats/<int:chat_id>/send-message/', views.send_support_chat_message, name='send-support-chat-message'),
     
+    # Переписки пользователей
+    path('user-chats/', views.get_user_chats, name='get-user-chats'),
+    path('messages/<int:message_id>/report/', views.report_message, name='report-message'),
+    
     # Статистика
     path('stats/', views.get_admin_stats, name='admin-stats'),
 ]

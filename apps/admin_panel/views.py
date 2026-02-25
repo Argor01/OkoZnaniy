@@ -433,3 +433,139 @@ def send_support_chat_message(request, chat_id):
         'created_at': message.created_at.isoformat(),
         'is_mine': True,
     })
+
+
+# ============= ПРОСМОТР ПЕРЕПИСОК ПОЛЬЗОВАТЕЛЕЙ =============
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_user_chats(request):
+    """Получить все переписки пользователей на платформе"""
+    from apps.chat.models import Chat, Message
+    from django.db.models import Max, Count, Q
+    
+    # Получаем все чаты с аннотациями
+    chats = Chat.objects.annotate(
+        last_message_time=Max('messages__created_at'),
+        message_count=Count('messages')
+    ).filter(
+        message_count__gt=0  # Только чаты с сообщениями
+    ).select_related(
+        'order', 'client', 'expert'
+    ).prefetch_related(
+        'participants', 'messages', 'messages__sender'
+    ).order_by('-last_message_time')
+    
+    # Формируем ответ
+    result = []
+    for chat in chats:
+        participants_list = []
+        for participant in chat.participants.all():
+            participants_list.append({
+                'id': participant.id,
+                'username': participant.username,
+                'first_name': participant.first_name,
+                'last_name': participant.last_name,
+                'email': participant.email,
+                'role': participant.role,
+                'avatar': None,
+                'online': False,  # Можно добавить логику определения онлайн-статуса
+            })
+        
+        last_message = chat.messages.last()
+        
+        # Получаем все сообщения чата
+        messages = []
+        for msg in chat.messages.all():
+            messages.append({
+                'id': msg.id,
+                'text': msg.text,
+                'file': msg.file.url if msg.file else None,
+                'file_name': msg.file_name,
+                'message_type': msg.message_type,
+                'offer_data': msg.offer_data,
+                'sender': {
+                    'id': msg.sender.id,
+                    'username': msg.sender.username,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'role': msg.sender.role,
+                },
+                'is_read': msg.is_read,
+                'created_at': msg.created_at.isoformat(),
+            })
+        
+        chat_data = {
+            'id': chat.id,
+            'order_id': chat.order.id if chat.order else None,
+            'order_title': chat.order.title if chat.order else None,
+            'context_title': chat.context_title,
+            'participants': participants_list,
+            'client': {
+                'id': chat.client.id,
+                'username': chat.client.username,
+                'first_name': chat.client.first_name,
+                'last_name': chat.client.last_name,
+                'email': chat.client.email,
+            } if chat.client else None,
+            'expert': {
+                'id': chat.expert.id,
+                'username': chat.expert.username,
+                'first_name': chat.expert.first_name,
+                'last_name': chat.expert.last_name,
+                'email': chat.expert.email,
+            } if chat.expert else None,
+            'messages': messages,
+            'last_message': {
+                'text': last_message.text if last_message else '',
+                'sender': {
+                    'first_name': last_message.sender.first_name,
+                    'last_name': last_message.sender.last_name,
+                } if last_message else None,
+                'created_at': last_message.created_at.isoformat() if last_message else '',
+            } if last_message else None,
+            'message_count': chat.message_count,
+            'created_at': chat.messages.first().created_at.isoformat() if chat.messages.exists() else '',
+            'updated_at': last_message.created_at.isoformat() if last_message else '',
+        }
+        
+        result.append(chat_data)
+    
+    return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def report_message(request, message_id):
+    """Создать жалобу на сообщение"""
+    from apps.chat.models import Message, ContactViolationLog
+    
+    try:
+        message = Message.objects.select_related('chat', 'sender').get(id=message_id)
+    except Message.DoesNotExist:
+        return Response({'error': 'Сообщение не найдено'}, status=404)
+    
+    reason = request.data.get('reason', 'Жалоба от администратора')
+    action = request.data.get('action', 'warning')  # warning, ban, message_blocked
+    notes = request.data.get('notes', '')
+    
+    # Создаем лог нарушения
+    violation = ContactViolationLog.objects.create(
+        user=message.sender,
+        chat=message.chat,
+        message=message,
+        violation_text=message.text,
+        action_taken=action,
+        notes=f"{reason}. {notes}".strip()
+    )
+    
+    # Если действие - бан, блокируем пользователя
+    if action == 'ban':
+        message.sender.is_active = False
+        message.sender.save()
+    
+    return Response({
+        'status': 'success',
+        'violation_id': violation.id,
+        'message': f'Жалоба зарегистрирована. Действие: {violation.get_action_taken_display()}'
+    })
