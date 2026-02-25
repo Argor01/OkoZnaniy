@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { store } from '../store';
-import { logout } from '../store/slices/authSlice';
+import { store } from '@/store';
+import { logout } from '@/store/slices/authSlice';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

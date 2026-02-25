@@ -1,0 +1,366 @@
+.arbitratorNavCount {
+  margin-left: 8px;
+  color: #1890ff;
+}
+
+.arbitratorNavMenu {
+  border-right: 0;
+  height: 100%;
+}
+
+.arbitratorCard .ant-card-body {
+  padding: 16px;
+}
+
+.arbitratorSectionTitle {
+  margin-bottom: 8px;
+}
+
+.arbitratorSectionTitleCompact {
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.arbitratorSectionSubtitle {
+  font-size: 13px;
+}
+
+.arbitratorFiltersRow {
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.arbitratorFiltersRowCompact {
+  margin-bottom: 12px;
+}
+
+.arbitratorTableScroll {
+  overflow-x: auto;
+}
+
+.arbitratorSelectFull {
+  width: 100%;
+}
+
+.arbitratorTagNoMargin {
+  margin: 0;
+}
+
+.arbitratorTextEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arbitratorTextEllipsisSmall {
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.arbitratorTextXs {
+  font-size: 12px;
+}
+
+.arbitratorTextEllipsisXs {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.arbitratorHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.arbitratorTableContainer {
+  overflow-x: auto;
+}
+
+.arbitratorLayout {
+  min-height: 100vh;
+}
+
+.arbitratorSider {
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.arbitratorSiderHeader {
+  padding: 24px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.arbitratorSiderIcon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 8px;
+}
+
+.arbitratorSiderTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.arbitratorSiderUser {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.arbitratorMenu {
+  border-right: 0;
+}
+
+.arbitratorHeader {
+  background: #fff;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arbitratorSectionHeaderTitle {
+  margin: 0;
+}
+
+.arbitratorContent {
+  margin: 16px;
+  padding: 0;
+  background: transparent;
+  min-height: calc(100vh - 112px);
+}
+
+.arbitratorFooter {
+  text-align: center;
+  background: #fff;
+}
+
+.arbitratorEmptyState {
+  text-align: center;
+  padding: 40px;
+}
+
+.arbitratorClaimsList {
+  margin-top: 16px;
+}
+
+.arbitratorClaimCard {
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.arbitratorClaimRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.arbitratorClaimContent {
+  flex: 1;
+}
+
+.arbitratorSpaceFull {
+  width: 100%;
+}
+
+.arbitratorClaimTitleText {
+  font-size: 16px;
+}
+
+.arbitratorTagLeftGap {
+  margin-left: 8px;
+}
+
+.arbitratorApprovalComment {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.arbitratorClaimStatus {
+  margin-left: 16px;
+}
+
+.arbitratorStatusTag {
+  font-size: 14px;
+  padding: 4px 12px;
+}
+
+.arbitratorChatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.arbitratorChatTitle {
+  margin: 0;
+}
+
+.arbitratorStackSpace {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.arbitratorSearchInput {
+  width: 300px;
+}
+
+.arbitratorClaimSelect {
+  width: 250px;
+}
+
+.arbitratorMessagesContainer {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.arbitratorMessagesCount {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.arbitratorReplyBox {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.arbitratorReplyText {
+  margin-top: 8px;
+}
+
+.arbitratorReplyCancel {
+  padding: 0;
+  margin-top: 8px;
+}
+
+.arbitratorMessageFormField {
+  position: relative;
+}
+
+.arbitratorMessageActionButton {
+  position: absolute;
+  bottom: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.arbitratorMessageAttachButton {
+  right: 108px;
+}
+
+.arbitratorMessageEmojiButton {
+  right: 60px;
+}
+
+.arbitratorMessageItem {
+  padding: 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  border-left: 4px solid #1890ff;
+  background-color: transparent;
+}
+
+.arbitratorMessageItemUnread {
+  background-color: #f0f7ff;
+  border: 2px solid #1890ff;
+  border-left: 4px solid #1890ff;
+}
+
+.arbitratorMessageItemDirector {
+  background-color: #fafafa;
+}
+
+.arbitratorMessageAvatar {
+  background-color: #1890ff;
+}
+
+.arbitratorClaimLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.arbitratorClaimLinkDisabled {
+  cursor: default;
+  text-decoration: none;
+}
+
+.arbitratorParagraphSpacing {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.arbitratorAttachments {
+  margin-top: 8px;
+}
+
+.arbitratorAttachmentLabel {
+  margin-right: 8px;
+}
+
+.arbitratorActionsRow {
+  margin-top: 8px;
+}
+
+.arbitratorSectionSpacing {
+  margin-bottom: 24px;
+}
+
+.arbitratorParagraphReset {
+  margin: 0;
+}
+
+.arbitratorTimelineDate {
+  margin-left: 8px;
+}
+
+.arbitratorParagraphTop {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.arbitratorSpaceFullSpacing {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.arbitratorAlertSpacing {
+  margin-bottom: 24px;
+}
+
+.arbitratorParagraphBottom {
+  margin-bottom: 8px;
+}
+
+.arbitratorTabsContainer {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.arbitratorAmountText {
+  font-size: 12px;
+}
+
+.arbitratorAmountHighlight {
+  font-size: 12px;
+  color: #1890ff;
+}

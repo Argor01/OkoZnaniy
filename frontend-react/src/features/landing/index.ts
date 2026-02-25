@@ -1,0 +1,21 @@
+// Home page imported directly from pages/Home
+export { default as About } from './components/sections/About';
+export { default as Advantages } from './components/sections/Advantages';
+export { default as ExpertAdvantages } from './components/sections/ExpertAdvantages';
+export { default as ExpertFirstScreen } from './components/sections/ExpertFirstScreen';
+export { default as ExpertForm } from './components/sections/ExpertForm';
+export { default as FAQ } from './components/sections/FAQ';
+export { default as FeedbackForm } from './components/sections/FeedbackForm';
+export { default as FirstScreen } from './components/sections/FirstScreen';
+export { default as Footer } from './components/sections/Footer';
+export { default as Header } from './components/sections/Header';
+export { default as LeaveOrder } from './components/sections/LeaveOrder';
+export { default as OnlyPro } from './components/sections/OnlyPro';
+export { default as PartnerBenefits } from './components/sections/PartnerBenefits';
+export { default as PartnerFirstScreen } from './components/sections/PartnerFirstScreen';
+export { default as PartnerForm } from './components/sections/PartnerForm';
+export { default as PartnerSteps } from './components/sections/PartnerSteps';
+export { default as PlaceTask } from './components/sections/PlaceTask';
+export { default as PlaceTaskInfo } from './components/sections/PlaceTaskInfo';
+export { default as Prices } from './components/sections/Prices';
+export { default as Reviews } from './components/sections/Reviews';

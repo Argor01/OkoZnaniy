@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Button, Typography } from 'antd';
 import { useDispatch } from 'react-redux';
-import { FormField } from '../shared/Form/FormField';
+import { FormField } from '@/components/shared/Form/FormField';
 import { useApi } from '@/hooks/useApi';
 import { setCredentials } from '@/store/slices/authSlice';
 import { useRouter } from 'next/router';

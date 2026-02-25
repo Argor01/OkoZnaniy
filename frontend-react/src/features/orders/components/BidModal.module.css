@@ -1,0 +1,16 @@
+.bidHeader {
+  margin-bottom: 16px;
+}
+
+.bidBudget {
+  color: #666;
+  margin-top: 4px;
+}
+
+.formItemNoMargin {
+  margin-bottom: 0;
+}
+
+.fullWidth {
+  width: 100%;
+}

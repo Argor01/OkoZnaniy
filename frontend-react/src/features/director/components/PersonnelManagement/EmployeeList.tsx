@@ -1,0 +1,486 @@
+import React, { useState } from 'react';
+import {
+  Table,
+  Card,
+  Button,
+  Modal,
+  Space,
+  Tag,
+  Input,
+  Select,
+  message,
+  Typography,
+  Descriptions,
+  Spin,
+  Tooltip,
+} from 'antd';
+import {
+  StopOutlined,
+  CheckCircleOutlined,
+  InboxOutlined,
+  EyeOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import {
+  getPersonnel,
+  deactivateEmployee,
+  activateEmployee,
+  archiveEmployee,
+} from '@/features/director/api/directorApi';
+import { type Employee } from '@/features/director/api/types';
+import styles from './EmployeeList.module.css';
+
+const { Title } = Typography;
+const { Search } = Input;
+const { Option } = Select;
+
+const EmployeeList: React.FC = () => {
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const queryClient = useQueryClient();
+
+  const { data: employees, isLoading } = useQuery({
+    queryKey: ['director-personnel'],
+    queryFn: getPersonnel,
+  });
+
+  const deactivateMutation = useMutation({
+    mutationFn: (id: number) => deactivateEmployee(id),
+    onSuccess: (updated: Employee) => {
+      message.success('Сотрудник деактивирован');
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: false, role: updated.role, application_approved: updated.application_approved } : e));
+      });
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при деактивации сотрудника';
+      message.error(errorMessage);
+    },
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: (id: number) => activateEmployee(id),
+    onSuccess: (updated: Employee) => {
+      message.success('Сотрудник активирован');
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: true } : e));
+      });
+      try {
+        const raw = localStorage.getItem('director_deactivated_employees');
+        const arr = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(arr)) {
+          const next = arr.filter((x: number) => x !== updated.id);
+          localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
+        }
+      } catch (e: unknown) {
+        void e;
+      }
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+    },
+    onError: (error: any, id: number) => {
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при активации сотрудника';
+      message.error(errorMessage);
+      try {
+        const raw = localStorage.getItem('director_deactivated_employees');
+        const arr = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(arr)) {
+          const next = arr.filter((x: number) => x !== id);
+          localStorage.setItem('director_deactivated_employees', JSON.stringify(next));
+        }
+      } catch (e: unknown) {
+        void e;
+      }
+      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
+        if (!prev) return prev;
+        return prev.map((e) => (e.id === id ? { ...e, is_active: true } : e));
+      });
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+    },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: number) => archiveEmployee(id),
+    onSuccess: () => {
+      message.success('Сотрудник заархивирован');
+      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-personnel-archive'] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при архивации сотрудника';
+      message.error(errorMessage);
+    },
+  });
+
+  const handleViewDetails = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setDetailModalVisible(true);
+  };
+
+  const handleDeactivate = (employee: Employee) => {
+    Modal.confirm({
+      title: 'Деактивировать сотрудника',
+      content: `Вы уверены, что хотите деактивировать ${employee.first_name} ${employee.last_name}?`,
+      okText: 'Деактивировать',
+      cancelText: 'Отмена',
+      onOk: () => {
+        deactivateMutation.mutate(employee.id);
+      },
+    });
+  };
+
+  const handleActivate = (employee: Employee) => {
+    Modal.confirm({
+      title: 'Активировать сотрудника',
+      content: `Вы уверены, что хотите активировать ${employee.first_name} ${employee.last_name}?`,
+      okText: 'Активировать',
+      cancelText: 'Отмена',
+      onOk: () => {
+        activateMutation.mutate(employee.id);
+      },
+    });
+  };
+
+  const handleArchive = (employee: Employee) => {
+    Modal.confirm({
+      title: 'Архивировать сотрудника',
+      content: `Вы уверены, что хотите заархивировать ${employee.first_name} ${employee.last_name}?`,
+      okText: 'Архивировать',
+      cancelText: 'Отмена',
+      onOk: () => {
+        archiveMutation.mutate(employee.id);
+      },
+    });
+  };
+
+  const getRoleLabel = (role: string) => {
+    const roleLabels: Record<string, string> = {
+      admin: 'Администратор',
+      director: 'Директор',
+      partner: 'Партнёр',
+      expert: 'Эксперт',
+      client: 'Клиент',
+    };
+    return roleLabels[role] || role;
+  };
+
+  const getRoleColor = (role: string) => {
+    const roleColors: Record<string, string> = {
+      admin: 'red',
+      director: 'purple',
+      partner: 'blue',
+      expert: 'green',
+      client: 'default',
+    };
+    return roleColors[role] || 'default';
+  };
+
+  const filteredEmployees = employees?.filter((employee) => {
+    const matchesSearch =
+      employee.first_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      employee.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchText.toLowerCase());
+    
+    const isDeactivatedExpert = employee.role === 'client' && employee.application_approved === false;
+    
+    
+    const matchesRole = 
+      roleFilter === 'all' || 
+      employee.role === roleFilter ||
+      (roleFilter === 'expert' && isDeactivatedExpert);
+    
+    const isActive = employee.is_active !== false; 
+    
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && isActive && !isDeactivatedExpert) ||
+      (statusFilter === 'inactive' && (!isActive || isDeactivatedExpert));
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  }) || [];
+
+  const columns = [
+    {
+      title: 'Имя',
+      dataIndex: 'first_name',
+      key: 'first_name',
+    },
+    {
+      title: 'Фамилия',
+      dataIndex: 'last_name',
+      key: 'last_name',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Роль',
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: string) => (
+        <Tag color={getRoleColor(role)}>{getRoleLabel(role)}</Tag>
+      ),
+    },
+    {
+      title: 'Дата регистрации',
+      dataIndex: 'date_joined',
+      key: 'date_joined',
+      render: (date: string) => dayjs(date).format('DD.MM.YYYY'),
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'is_active',
+      key: 'is_active',
+      render: (isActive: boolean | undefined, record: Employee) => {
+
+        const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
+        const active = isActive !== false; 
+        
+        if (!active) {
+          
+          return <Tag color="red">Неактивен</Tag>;
+        }
+        
+        if (isDeactivatedExpert) {
+
+          return <Tag color="orange">Неактивен (эксперт)</Tag>;
+        }
+        
+        return <Tag color="green">Активен</Tag>;
+      },
+    },
+    {
+      title: 'Действия',
+      key: 'actions',
+      width: 120,
+      render: (_: any, record: Employee) => {
+        const isActive = record.is_active !== false;
+        
+        const isDeactivatedExpert = record.role === 'client' && record.application_approved === false;
+        
+        return (
+          <Space>
+            <Tooltip title="Просмотр">
+              <Button
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={() => handleViewDetails(record)}
+              />
+            </Tooltip>
+            {!isActive ? (
+
+              <Tooltip title="Активировать">
+                <Button
+                  type="text"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleActivate(record)}
+                  className={styles.activateButton}
+                />
+              </Tooltip>
+            ) : isDeactivatedExpert ? (
+
+              <Tooltip title="Активировать как эксперта">
+                <Button
+                  type="text"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleActivate(record)}
+                  className={styles.activateButton}
+                />
+              </Tooltip>
+            ) : (
+
+              <>
+                <Tooltip title="Деактивировать">
+                  <Button
+                    type="text"
+                    icon={<StopOutlined />}
+                    onClick={() => handleDeactivate(record)}
+                    danger
+                  />
+                </Tooltip>
+                <Tooltip title="Архивировать">
+                  <Button
+                    type="text"
+                    icon={<InboxOutlined />}
+                    onClick={() => handleArchive(record)}
+                  />
+                </Tooltip>
+              </>
+            )}
+          </Space>
+        );
+      },
+    },
+  ];
+
+  const isMobile = window.innerWidth <= 840;
+
+  return (
+    <div>
+      <Card
+        className={[
+          styles.employeeCard,
+          isMobile ? styles.employeeCardMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
+        <Title 
+          level={4} 
+          className={[
+            styles.pageTitle,
+            isMobile ? styles.pageTitleMobile : '',
+          ].filter(Boolean).join(' ')}
+        >
+          Сотрудники
+        </Title>
+        <div
+          className={[
+            styles.filtersContainer,
+            isMobile ? styles.filtersContainerMobile : '',
+          ].filter(Boolean).join(' ')}
+        >
+          {isMobile ? (
+            <div 
+              className={[
+                styles.customSearchContainer,
+                styles.customSearchContainerFull,
+              ].filter(Boolean).join(' ')}
+            >
+              <input
+                className={styles.customSearchInput}
+                placeholder="Поиск..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    setSearchText(e.currentTarget.value);
+                  }
+                }}
+              />
+              <button
+                className={styles.customSearchButton}
+                onClick={() => setSearchText(searchText)}
+                type="button"
+              >
+                <SearchOutlined />
+              </button>
+            </div>
+          ) : (
+            <Search
+              placeholder="Поиск по имени, фамилии или email"
+              allowClear
+              size="large"
+              className={styles.searchDesktop}
+              onSearch={setSearchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          )}
+          <Select
+            placeholder="Фильтр по роли"
+            size={isMobile ? 'middle' : 'large'}
+            className={isMobile ? styles.roleSelectMobile : styles.roleSelect}
+            value={roleFilter}
+            onChange={setRoleFilter}
+          >
+            <Option value="all">Все роли</Option>
+            <Option value="admin">Администратор</Option>
+            <Option value="director">Директор</Option>
+            <Option value="partner">Партнёр</Option>
+            <Option value="expert">Эксперт</Option>
+          </Select>
+          <Select
+            placeholder="Фильтр по статусу"
+            size={isMobile ? 'middle' : 'large'}
+            className={isMobile ? styles.statusSelectMobile : styles.statusSelect}
+            value={statusFilter}
+            onChange={setStatusFilter}
+          >
+            <Option value="all">Все статусы</Option>
+            <Option value="active">Активные</Option>
+            <Option value="inactive">Неактивные</Option>
+          </Select>
+        </div>
+        <Spin spinning={isLoading}>
+          <div className={styles.tableWrapper}>
+            <Table
+              columns={columns}
+              dataSource={filteredEmployees}
+              rowKey="id"
+              scroll={{ x: isMobile ? 800 : undefined }}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: !isMobile,
+                showTotal: (total) => `Всего: ${total}`,
+                simple: isMobile,
+                className: isMobile ? styles.tablePaginationMobile : styles.tablePagination,
+              }}
+              className={styles.employeeTable}
+            />
+          </div>
+        </Spin>
+      </Card>
+
+      
+      <Modal
+        title="Детали сотрудника"
+        open={detailModalVisible}
+        onCancel={() => {
+          setDetailModalVisible(false);
+          setSelectedEmployee(null);
+        }}
+        footer={null}
+        width={isMobile ? '100%' : 600}
+        wrapClassName={[
+          styles.employeeDetailModalWrap,
+          isMobile ? styles.employeeDetailModalMobile : '',
+        ].filter(Boolean).join(' ')}
+      >
+        {selectedEmployee && (
+          <Descriptions column={1} bordered>
+            <Descriptions.Item label="Имя">
+              {selectedEmployee.first_name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Фамилия">
+              {selectedEmployee.last_name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {selectedEmployee.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Телефон">
+              {selectedEmployee.phone || 'Не указан'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Роль">
+              <Tag color={getRoleColor(selectedEmployee.role)}>
+                {getRoleLabel(selectedEmployee.role)}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Статус">
+              <Tag color={selectedEmployee.is_active !== false ? 'green' : 'red'}>
+                {selectedEmployee.is_active !== false ? 'Активен' : 'Неактивен'}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Дата регистрации">
+              {dayjs(selectedEmployee.date_joined).format('DD.MM.YYYY HH:mm')}
+            </Descriptions.Item>
+            <Descriptions.Item label="Последний вход">
+              {selectedEmployee.last_login
+                ? dayjs(selectedEmployee.last_login).format('DD.MM.YYYY HH:mm')
+                : 'Никогда'}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+export default EmployeeList;

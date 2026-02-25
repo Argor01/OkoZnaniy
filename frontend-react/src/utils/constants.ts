@@ -1,5 +1,4 @@
 
-
 export const BREAKPOINTS = {
   MOBILE: 840,
   TABLET: 1024,
@@ -11,39 +10,63 @@ export const ORDER_STATUSES = {
   NEW: 'new',
   CONFIRMING: 'confirming',
   IN_PROGRESS: 'in_progress',
-  PAYMENT: 'payment',
+  WAITING_PAYMENT: 'waiting_payment',
   REVIEW: 'review',
   COMPLETED: 'completed',
   REVISION: 'revision',
   DOWNLOAD: 'download',
   CLOSED: 'closed',
   CANCELLED: 'cancelled',
+  DISPUTE: 'dispute',
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   new: 'Создан',
   confirming: 'На подтверждении',
   in_progress: 'В работе',
-  payment: 'Ожидает оплаты',
+  waiting_payment: 'Ожидает оплаты',
   review: 'На проверке',
   completed: 'Завершен',
   revision: 'На доработке',
   download: 'Ожидает скачивания',
   closed: 'Закрыт',
   cancelled: 'Отменен',
+  dispute: 'Спор',
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
   new: 'blue',
   confirming: 'orange',
   in_progress: 'purple',
-  payment: 'green',
+  waiting_payment: 'gold',
   review: 'cyan',
   completed: 'green',
   revision: 'magenta',
   download: 'geekblue',
   closed: 'default',
   cancelled: 'red',
+  dispute: 'volcano',
+};
+
+export const ORDER_PRIORITIES = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  URGENT: 'urgent',
+} as const;
+
+export const ORDER_PRIORITY_LABELS: Record<string, string> = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
+  urgent: 'Срочный',
+};
+
+export const ORDER_PRIORITY_COLORS: Record<string, string> = {
+  low: 'green',
+  medium: 'blue',
+  high: 'orange',
+  urgent: 'red',
 };
 
 export const USER_ROLES = {
@@ -64,6 +87,8 @@ export const ROUTES = {
     googleCallbackLegacy: '/google-callback',
   },
   createOrder: '/create-order',
+  becomeExpert: '/become-expert',
+  becomePartner: '/become-partner',
   expert: {
     root: '/expert',
     application: '/expert-application',
@@ -102,15 +127,4 @@ export const ROUTES = {
   supportChat: {
     detail: '/support-chat/:chatId',
   },
-  becomeExpert: '/become-expert',
-  becomePartner: '/become-partner',
-} as const;
-
-export const NOTIFICATION_TYPES = {
-  ORDER: 'order',
-  CLAIM: 'claim',
-  MESSAGE: 'message',
-  BALANCE: 'balance',
-  BID: 'bid',
-  SYSTEM: 'system',
-} as const;
+};

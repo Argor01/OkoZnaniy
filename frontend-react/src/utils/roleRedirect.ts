@@ -1,5 +1,5 @@
-import { ordersApi } from '../api/orders';
-import { ROUTES } from './constants';
+import { ordersApi } from '@/features/orders/api/orders';
+import { ROUTES } from '@/utils/constants';
 
 
 export const redirectByRole = async (

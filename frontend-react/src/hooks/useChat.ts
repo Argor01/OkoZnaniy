@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { chatApi, ChatListItem, Message } from '../api/chat';
+import { chatApi, ChatListItem, Message } from '@/features/support/api/chat';
 
 export const useChat = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);

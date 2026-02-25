@@ -193,10 +193,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         # Логируем входящие данные для отладки
         logger.info(f"[Login] Attempting login with username: {username}")
-        print(f"[Login] ========== LOGIN ATTEMPT ==========")
-        print(f"[Login] Username/Email: {username}")
-        print(f"[Login] Password provided: {'Yes' if password else 'No'}")
-        print(f"[Login] All attrs: {list(attrs.keys())}")
         
         # Проверяем, что username и password не пустые
         if not username or not password:
@@ -204,10 +200,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             print(f"[Login] Missing username or password")
             raise serializers.ValidationError('Укажите имя пользователя и пароль')
         
+        username = username.strip()
+        
         # Пытаемся найти пользователя по username, email или телефону
         user = None
         
-        # Сначала пробуем по username
+        # Сначала пробуем по username (точное совпадение)
         try:
             user = User.objects.get(username=username)
             logger.info(f"[Login] User found by username: {username}")
@@ -217,17 +215,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Если не найден по username, пробуем по email
         if not user and username and '@' in username:
             try:
-                user = User.objects.get(email=username)
-                logger.info(f"[Login] User found by email: {username}, user_id: {user.id}")
-                print(f"[Login] User found by email: {username}, user_id: {user.id}")
-            except User.DoesNotExist:
-                logger.warning(f"[Login] User not found by email: {username}")
-                print(f"[Login] User not found by email: {username}")
-            except User.MultipleObjectsReturned:
                 user = User.objects.filter(email=username).first()
-                logger.warning(f"[Login] Multiple users found by email: {username}, using first: {user.id}")
-                print(f"[Login] Multiple users found by email: {username}, using first: {user.id}")
-        
+                if user:
+                    logger.info(f"[Login] User found by email: {username}, user_id: {user.id}")
+                    print(f"[Login] User found by email: {username}, user_id: {user.id}")
+                else:
+                    logger.warning(f"[Login] User not found by email: {username}")
+            except Exception as e:
+                 logger.error(f"[Login] Error searching by email: {str(e)}")
+
         # Если не найден по email, пробуем по телефону
         if not user and username:
             # Нормализуем телефон для поиска

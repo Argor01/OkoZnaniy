@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { API_URL } from '../config/api';
-import { ROUTES } from '../utils/constants';
+import { API_URL } from '@/config/api';
+import { ROUTES } from '@/utils/constants';
+import { API_ENDPOINTS } from '@/config/endpoints';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -31,11 +32,11 @@ apiClient.interceptors.request.use((config) => {
   
   const normalizedUrl = url.toString();
   const isAuthEndpoint =
-    normalizedUrl.includes('/users/token') || 
-    normalizedUrl.includes('/users/telegram_auth') ||
-    normalizedUrl.includes('/users/verify_email_code') ||
-    normalizedUrl.includes('/users/resend_verification_code') ||
-    (normalizedUrl.endsWith('/users/') && method === 'post'); 
+    normalizedUrl.includes(API_ENDPOINTS.auth.login) || 
+    normalizedUrl.includes(API_ENDPOINTS.auth.telegramAuth) ||
+    normalizedUrl.includes(API_ENDPOINTS.auth.verifyEmailCode) ||
+    normalizedUrl.includes(API_ENDPOINTS.auth.resendVerificationCode) ||
+    (normalizedUrl.endsWith(API_ENDPOINTS.auth.register) && method === 'post'); 
 
   if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -70,7 +71,7 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token');
         
         if (refreshToken) {
-          const response = await axios.post(`${API_URL}/users/token/refresh/`, {
+          const response = await axios.post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {
             refresh: refreshToken,
           });
 

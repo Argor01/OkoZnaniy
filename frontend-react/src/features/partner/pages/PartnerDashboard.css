@@ -1,0 +1,280 @@
+.partnerDashboardSection {
+  margin-bottom: 24px;
+}
+
+.partnerDashboardHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.partnerDashboardWalletCard {
+  text-align: center;
+  padding: 24px;
+}
+
+.partnerDashboardReferralBox {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.partnerDashboardReferralLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.partnerDashboardReferralCode {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1890ff;
+  letter-spacing: 2px;
+}
+
+.partnerDashboardCopyButton {
+  margin-top: 12px;
+}
+
+.partnerDashboardReferralCount {
+  font-size: 36px;
+  font-weight: bold;
+  color: #52c41a;
+}
+
+.partnerDashboardIncomeChart {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.partnerDashboardIncomeBar {
+  flex: 1;
+  background: linear-gradient(180deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 4px 4px 0 0;
+  position: relative;
+}
+
+.partnerDashboardIncomeLabel {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.partnerDashboardIncomeValue {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #666;
+}
+
+.partnerDashboardTableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.partnerDashboardFilters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.partnerDashboardSummaryItem {
+  text-align: center;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.partnerDashboardSummaryValue {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.partnerDashboardSummaryLabel {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.partnerDashboardBonusCard {
+  text-align: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+}
+
+.partnerDashboardBonusAmount {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.partnerDashboardBonusLabel {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.partnerDashboardQuickActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.partnerDashboardQuickAction {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Layout Styles */
+.partnerDashboardLayout {
+  min-height: 100vh;
+}
+
+.partnerDashboardSider {
+  background: #fff !important;
+  border-right: 1px solid #f0f0f0;
+  overflow: auto;
+  height: 100vh;
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.partnerDashboardSiderHeader {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.partnerDashboardSiderHeaderTablet {
+  padding: 0 16px;
+  justify-content: center;
+}
+
+.partnerDashboardSiderIcon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-right: 12px;
+}
+
+.partnerDashboardSiderIconTablet {
+  margin-right: 0;
+}
+
+.partnerDashboardSiderTitle {
+  margin: 0 !important;
+  color: #333;
+  font-size: 18px !important;
+  white-space: nowrap;
+}
+
+.partnerDashboardSiderTitleTablet {
+  display: none;
+}
+
+.partnerDashboardMainLayout {
+  margin-left: 250px;
+  min-height: 100vh;
+  background: #f0f2f5;
+  transition: all 0.2s;
+}
+
+@media (max-width: 992px) {
+  .partnerDashboardMainLayout {
+    margin-left: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .partnerDashboardMainLayout {
+    margin-left: 0;
+  }
+}
+
+.partnerDashboardHeader {
+  background: #fff !important;
+  padding: 0 24px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  width: 100%;
+}
+
+.partnerDashboardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.partnerDashboardHeaderTitle {
+  margin: 0 !important;
+  font-size: 18px !important;
+}
+
+.partnerDashboardContent {
+  margin: 24px 16px 0;
+  overflow: initial;
+  min-height: auto;
+}
+
+.partnerDashboardContentMobile {
+  margin: 16px 8px 0;
+}
+
+.partnerDashboardFooter {
+  text-align: center;
+  color: #888;
+}
+
+.partnerDashboardMenu {
+  border-right: none !important;
+}
+
+.partnerDashboardDrawer .ant-drawer-body {
+  padding: 0;
+}
+
+.partnerDashboardDrawerHeader {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.partnerDashboardDrawerIcon {
+  font-size: 20px;
+  color: #1890ff;
+  margin-right: 12px;
+}
+
+.partnerDashboardDrawerTitle {
+  margin: 0 !important;
+}

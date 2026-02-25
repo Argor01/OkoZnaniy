@@ -1,0 +1,335 @@
+import React, { useState } from 'react';
+import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography } from 'antd';
+import { StopOutlined, CheckCircleOutlined, InfoCircleOutlined, ClockCircleOutlined, EyeOutlined, UnlockOutlined, SearchOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { useBlockedUsers, useUserActions } from '@/features/admin/hooks/useAdminPanelData';
+import { BlockedUser } from '@/features/admin/types/admin';
+
+const { Text, Title } = Typography;
+const { Option } = Select;
+const { Search } = Input;
+
+interface BlockedUsersTableProps {
+  users?: BlockedUser[];
+  loading?: boolean;
+  onUnblockUser?: (userId: number) => Promise<void>;
+  onViewUserDetails?: (user: BlockedUser) => void;
+}
+
+export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
+  users = [],
+  loading = false,
+  onUnblockUser,
+  onViewUserDetails,
+}) => {
+  const [searchText, setSearchText] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [blockTypeFilter, setBlockTypeFilter] = useState<string>('all');
+  const [selectedUser, setSelectedUser] = useState<BlockedUser | null>(null);
+  const [unblockModalVisible, setUnblockModalVisible] = useState(false);
+  const [unblockForm] = Form.useForm();
+
+  const dataSource = users;
+
+  const filteredData = dataSource.filter(user => {
+    const searchLower = searchText.toLowerCase();
+    const matchesSearch = 
+      (user.username || '').toLowerCase().includes(searchLower) ||
+      (user.email || '').toLowerCase().includes(searchLower) ||
+      `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase().includes(searchLower);
+    
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesBlockType = blockTypeFilter === 'all' || user.block_duration === blockTypeFilter;
+    
+    return matchesSearch && matchesRole && matchesBlockType;
+  });
+
+  const handleUnblockUser = (user: BlockedUser) => {
+    setSelectedUser(user);
+    setUnblockModalVisible(true);
+  };
+
+  const handleUnblockConfirm = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      await unblockForm.validateFields();
+      if (onUnblockUser) {
+        await onUnblockUser(selectedUser.id);
+      }
+      message.success(`Пользователь ${selectedUser.username} разблокирован`);
+      setUnblockModalVisible(false);
+      setSelectedUser(null);
+      unblockForm.resetFields();
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    const roleLabels: Record<string, string> = {
+      admin: 'Администратор',
+      expert: 'Эксперт',
+      client: 'Клиент',
+      partner: 'Партнер',
+    };
+    return roleLabels[role] || role;
+  };
+
+  const getRoleColor = (role: string) => {
+    const roleColors: Record<string, string> = {
+      admin: 'red',
+      expert: 'blue',
+      client: 'green',
+      partner: 'orange',
+    };
+    return roleColors[role] || 'default';
+  };
+
+  const getBlockTypeColor = (blockType: string) => {
+    return blockType === 'permanent' ? 'red' : 'orange';
+  };
+
+  const getBlockTypeLabel = (blockType: string) => {
+    return blockType === 'permanent' ? 'Постоянная' : 'Временная';
+  };
+
+  const columns = [
+    {
+      title: 'Пользователь',
+      key: 'user',
+      width: 250,
+      render: (record: BlockedUser) => (
+        <Space>
+          <div>
+            <div><strong>{record.username}</strong></div>
+            <Text type="secondary" className="blockedUsersUserMeta">
+              {record.first_name} {record.last_name}
+            </Text>
+            <br />
+            <Text type="secondary" className="blockedUsersUserMeta">
+              {record.email}
+            </Text>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: 'Роль',
+      dataIndex: 'role',
+      key: 'role',
+      width: 100,
+      render: (role: string) => (
+        <Tag color={getRoleColor(role)}>
+          {getRoleLabel(role)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Тип блокировки',
+      dataIndex: 'block_duration',
+      key: 'block_duration',
+      width: 120,
+      render: (blockType: string) => (
+        <Tag color={getBlockTypeColor(blockType)} icon={<ClockCircleOutlined />}>
+          {getBlockTypeLabel(blockType)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Причина блокировки',
+      dataIndex: 'block_reason',
+      key: 'block_reason',
+      width: 200,
+      render: (reason: string) => (
+        <Tooltip title={reason}>
+          <Text ellipsis className="blockedUsersReasonText">
+            {reason}
+          </Text>
+        </Tooltip>
+      ),
+    },
+    {
+      title: 'Дата блокировки',
+      dataIndex: 'blocked_at',
+      key: 'blocked_at',
+      width: 120,
+      render: (date: string) => dayjs(date).format('DD.MM.YYYY'),
+    },
+    {
+      title: 'Разблокировка',
+      dataIndex: 'unblock_date',
+      key: 'unblock_date',
+      width: 120,
+      render: (date: string | undefined, record: BlockedUser) => {
+        if (record.block_duration === 'permanent') {
+          return <Text type="secondary">Постоянно</Text>;
+        }
+        return date ? dayjs(date).format('DD.MM.YYYY') : '-';
+      },
+    },
+    {
+      title: 'Нарушения',
+      dataIndex: 'violation_count',
+      key: 'violation_count',
+      width: 100,
+      render: (count: number) => (
+        <Tag color={count > 3 ? 'red' : count > 1 ? 'orange' : 'green'}>
+          {count}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Действия',
+      key: 'actions',
+      width: 150,
+      render: (record: BlockedUser) => (
+        <Space>
+          <Tooltip title="Подробно">
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => onViewUserDetails?.(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Разблокировать">
+            <Button 
+              size="small" 
+              type="primary"
+              icon={<UnlockOutlined />}
+              onClick={() => handleUnblockUser(record)}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <Card>
+        <div className="blockedUsersHeader">
+          <Title level={4}>Заблокированные пользователи</Title>
+          <Text type="secondary">
+            Управление заблокированными пользователями системы
+          </Text>
+        </div>
+
+        
+        <div className="blockedUsersFiltersRow">
+          <Search
+            placeholder="Поиск по имени, email или username"
+            allowClear
+            className="blockedUsersSearch"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            prefix={<SearchOutlined />}
+          />
+          
+          <Select
+            placeholder="Роль"
+            className="blockedUsersSelectRole"
+            value={roleFilter}
+            onChange={setRoleFilter}
+          >
+            <Option value="all">Все роли</Option>
+            <Option value="client">Клиенты</Option>
+            <Option value="expert">Эксперты</Option>
+            <Option value="partner">Партнеры</Option>
+          </Select>
+
+          <Select
+            placeholder="Тип блокировки"
+            className="blockedUsersSelectBlockType"
+            value={blockTypeFilter}
+            onChange={setBlockTypeFilter}
+          >
+            <Option value="all">Все типы</Option>
+            <Option value="temporary">Временная</Option>
+            <Option value="permanent">Постоянная</Option>
+          </Select>
+        </div>
+
+        <div className="blockedUsersSummaryRow">
+          <Tag color="red">
+            Всего заблокированных: {filteredData.length}
+          </Tag>
+          <Tag color="orange">
+            Временно: {filteredData.filter(u => u.block_duration === 'temporary').length}
+          </Tag>
+          <Tag color="red">
+            Постоянно: {filteredData.filter(u => u.block_duration === 'permanent').length}
+          </Tag>
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={filteredData}
+          rowKey="id"
+          loading={loading}
+          pagination={{ 
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => 
+              `${range[0]}-${range[1]} из ${total} пользователей`
+          }}
+          locale={{ emptyText: 'Заблокированные пользователи не найдены' }}
+          scroll={{ x: 1200 }}
+        />
+      </Card>
+
+      
+      <Modal
+        title={`Разблокировать пользователя ${selectedUser?.username}`}
+        open={unblockModalVisible}
+        onOk={handleUnblockConfirm}
+        onCancel={() => {
+          setUnblockModalVisible(false);
+          setSelectedUser(null);
+          unblockForm.resetFields();
+        }}
+        okText="Разблокировать"
+        cancelText="Отмена"
+        okButtonProps={{ danger: false, type: 'primary' }}
+      >
+        <Form form={unblockForm} layout="vertical">
+          <div className="blockedUsersModalInfo">
+            <Text strong>Информация о пользователе:</Text>
+            <div className="blockedUsersModalInfoBox">
+              <div><strong>Имя:</strong> {selectedUser?.first_name} {selectedUser?.last_name}</div>
+              <div><strong>Email:</strong> {selectedUser?.email}</div>
+              <div><strong>Причина блокировки:</strong> {selectedUser?.block_reason}</div>
+              <div><strong>Дата блокировки:</strong> {selectedUser?.blocked_at ? dayjs(selectedUser.blocked_at).format('DD.MM.YYYY HH:mm') : '-'}</div>
+            </div>
+          </div>
+          
+          <Form.Item
+            name="reason"
+            label="Причина разблокировки"
+            rules={[{ required: true, message: 'Укажите причину разблокировки' }]}
+          >
+            <Input.TextArea
+              rows={3}
+              placeholder="Укажите причину разблокировки пользователя..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export const BlockedUsersSection: React.FC = () => {
+  const { users, loading } = useBlockedUsers(true);
+  const { unblockUser } = useUserActions();
+
+  return (
+    <BlockedUsersTable
+      users={users}
+      loading={loading}
+      onUnblockUser={unblockUser}
+      onViewUserDetails={() => {}}
+    />
+  );
+};

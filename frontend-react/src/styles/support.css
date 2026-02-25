@@ -1,0 +1,441 @@
+.supportChatsChatsColHidden {
+  display: none;
+}
+.supportChatsCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.supportChatsCardTitleIcon {
+  font-size: 18px;
+  color: #1890ff;
+}
+.supportChatsSearchIcon {
+  color: #bfbfbf;
+}
+.supportChatsSearchInput {
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+.supportChatsFiltersRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.supportChatsFilterSelect {
+  flex: 1;
+  min-width: 120px;
+}
+.supportChatsStatsRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.supportChatsStatsUnread {
+  color: #ff4d4f;
+}
+.supportChatsListScroll {
+  max-height: 600px;
+  overflow-y: auto;
+}
+.supportChatsListScrollMobile {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.supportChatsListItem {
+  cursor: pointer;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+.supportChatsListItem:hover {
+  background-color: #fafafa;
+}
+.supportChatsListItemSelected {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+.supportChatsListItemSelected:hover {
+  background-color: #e6f7ff;
+}
+.supportChatsAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1890ff;
+}
+.supportChatsListTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.supportChatsListTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+.supportChatsListTags {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.supportChatsListTag {
+  margin: 0;
+  font-size: 10px;
+  padding: 0 6px;
+  line-height: 18px;
+}
+.supportChatsListSubject {
+  font-size: 13px;
+  color: #595959;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.supportChatsListLastMessage {
+  font-size: 12px;
+  color: #8c8c8c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.supportChatsListMeta {
+  font-size: 11px;
+  color: #bfbfbf;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.supportChatsListMetaIcon {
+  font-size: 10px;
+}
+.supportChatsChatHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.supportChatsChatHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.supportChatsChatName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+.supportChatsChatNameMobile {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+.supportChatsChatMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.supportChatsChatTag {
+  font-size: 12px;
+  margin: 0;
+}
+.supportChatsChatTagMobile {
+  font-size: 11px;
+  margin: 0;
+}
+.supportChatsChatSubject {
+  font-size: 14px;
+  color: #595959;
+}
+.supportChatsChatSubjectMobile {
+  font-size: 13px;
+  color: #595959;
+}
+.supportChatsChatTime {
+  font-size: 12px;
+  margin-left: auto;
+}
+.supportChatsChatTimeMobile {
+  font-size: 11px;
+  margin-left: auto;
+}
+.supportChatsMessages {
+  height: 400px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+}
+.supportChatsMessagesMobile {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fafafa;
+}
+.supportChatsMessageRow {
+  display: flex;
+  animation: fadeInUp 0.3s ease;
+}
+.supportChatsMessageRowAdmin {
+  flex-direction: row-reverse;
+}
+.supportChatsMessageRowUser {
+  flex-direction: row;
+}
+.supportChatsMessageRowMobile {
+  margin-bottom: 12px;
+}
+.supportChatsMessageRowDesktop {
+  margin-bottom: 16px;
+}
+.supportChatsMessageBubble {
+  word-break: break-word;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.supportChatsMessageBubbleAdmin {
+  background: #1890ff;
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+.supportChatsMessageBubbleUser {
+  background: #fff;
+  color: #333;
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+.supportChatsMessageBubbleAdmin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+.supportChatsMessageBubbleUser:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.supportChatsMessageBubbleMobile {
+  max-width: 85%;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.supportChatsMessageBubbleDesktop {
+  max-width: 70%;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+.supportChatsMessageText {
+  line-height: 1.5;
+}
+.supportChatsMessageTime {
+  opacity: 0.8;
+  margin-top: 6px;
+  font-weight: 500;
+}
+.supportChatsMessageTimeAdmin {
+  text-align: left;
+}
+.supportChatsMessageTimeUser {
+  text-align: right;
+}
+.supportChatsMessageTimeMobile {
+  font-size: 10px;
+}
+.supportChatsMessageTimeDesktop {
+  font-size: 11px;
+}
+.supportChatsComposer {
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+.supportChatsComposerMobile {
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
+}
+.supportChatsAttachmentsRow {
+  margin-bottom: 12px;
+}
+.supportChatsAttachmentTag {
+  border-radius: 8px;
+  padding: 4px 12px;
+  margin-bottom: 4px;
+}
+.supportChatsComposerRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.supportChatsComposerRowMobile {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+.supportChatsMessageInput {
+  flex: 1;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+  padding: 10px 14px;
+}
+.supportChatsMessageInputMobile {
+  flex: 1;
+  font-size: 14px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+  padding: 10px 14px;
+}
+.supportChatsMessageInput:focus,
+.supportChatsMessageInputMobile:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+.supportChatsComposerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.supportChatsUploadButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+.supportChatsUploadButton:hover {
+  border-color: #1890ff;
+  transform: scale(1.03);
+}
+.supportChatsSendButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+.supportChatsSendButton:not([disabled]):not(.ant-btn-loading):hover {
+  transform: scale(1.05);
+}
+.supportChatsComposerHint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+.supportButtonFloatWrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+.supportButtonFloat {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.supportField {
+  margin-bottom: 16px;
+}
+.supportLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.supportSelect {
+  width: 100%;
+}
+.supportHint {
+  margin-top: 12px;
+  color: #666;
+  font-size: 12px;
+}
+.supportChatLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+.supportChatCard {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.supportChatHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.supportChatMessages {
+  height: 500px;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.supportChatMessageRow {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+.supportChatMessageRowMine {
+  justify-content: flex-end;
+}
+.supportChatBubble {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.supportChatBubbleMine {
+  background-color: #1890ff;
+  color: #fff;
+}
+.supportChatSender {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+.supportChatSenderTag {
+  margin-left: 8px;
+}
+.supportChatFile {
+  margin-top: 8px;
+}
+.supportChatTimestamp {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: left;
+}
+.supportChatTimestampMine {
+  text-align: right;
+}
+.supportChatInputRow {
+  display: flex;
+  gap: 8px;
+}
+.supportChatInput {
+  flex: 1;
+}

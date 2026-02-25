@@ -1,11 +1,13 @@
 
-
-
 export const BREAKPOINTS = {
   mobile: 840,
   tablet: 1024,
   desktop: 1280,
   wide: 1920,
+  // Alias for backward compatibility or different naming conventions
+  MOBILE: 768,
+  TABLET: 1024,
+  DESKTOP: 1200,
 } as const;
 
 
@@ -15,6 +17,17 @@ export const SIDEBAR_COLLAPSED_WIDTH = 80;
 
 export const HEADER_HEIGHT = 64;
 export const MOBILE_HEADER_HEIGHT = 56;
+
+export const LAYOUT_CONSTANTS = {
+  SIDER_WIDTH: SIDEBAR_WIDTH,
+  SIDER_WIDTH_TABLET: 200,
+  SIDER_COLLAPSED_WIDTH: 0,
+  HEADER_HEIGHT: HEADER_HEIGHT,
+  FOOTER_HEIGHT: 48,
+  CONTENT_PADDING: 24,
+  CONTENT_PADDING_TABLET: 16,
+  CONTENT_PADDING_MOBILE: 12,
+} as const;
 
 
 export const SPACING = {
@@ -68,6 +81,15 @@ export const COLORS = {
   },
 } as const;
 
+export const STATUS_COLORS = {
+  SUCCESS: COLORS.success,
+  WARNING: '#faad14', // Slightly different from COLORS.warning (#f59e0b)
+  ERROR: COLORS.error,
+  INFO: COLORS.info,
+  PROCESSING: '#1890ff',
+  DEFAULT: '#d9d9d9',
+} as const;
+
 
 export const GRADIENTS = {
   primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -92,4 +114,40 @@ export const TRANSITIONS = {
   fast: '0.15s ease',
   normal: '0.3s ease',
   slow: '0.5s ease',
+} as const;
+
+export const TABLE_CONSTANTS = {
+  DEFAULT_PAGE_SIZE: 10,
+  PAGE_SIZE_OPTIONS: ['10', '20', '50', '100'],
+  SCROLL_Y: 400,
+} as const;
+
+export const MODAL_CONSTANTS = {
+  DEFAULT_WIDTH: 600,
+  LARGE_WIDTH: 800,
+  EXTRA_LARGE_WIDTH: 1000,
+  MASK_STYLE: {
+    backdropFilter: 'blur(4px)',
+  },
+} as const;
+
+export const NOTIFICATION_CONSTANTS = {
+  SUCCESS_DURATION: 3,
+  ERROR_DURATION: 5,
+  WARNING_DURATION: 4,
+  INFO_DURATION: 3,
+} as const;
+
+export const DATE_FORMATS = {
+  DATE: 'DD.MM.YYYY',
+  DATETIME: 'DD.MM.YYYY HH:mm',
+  TIME: 'HH:mm',
+  MONTH_YEAR: 'MM.YYYY',
+} as const;
+
+export const LIMITS = {
+  MAX_FILE_SIZE: 10 * 1024 * 1024, 
+  MAX_MESSAGE_LENGTH: 1000,
+  MAX_SUBJECT_LENGTH: 200,
+  MAX_DESCRIPTION_LENGTH: 2000,
 } as const;
