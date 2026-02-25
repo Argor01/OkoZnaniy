@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message, Tabs } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import type { FC } from 'react';
 import { authApi } from '../../api/auth';
 import type { User } from '../../api/auth';
@@ -33,6 +34,7 @@ import FriendProfileModal from './modals/FriendProfileModal';
 
 const ExpertDashboard: FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   
   useNotifications();
@@ -306,8 +308,7 @@ const ExpertDashboard: FC = () => {
         }}
         onOpenProfile={(friend) => {
           closeAllModals();
-          setSelectedFriend(friend);
-          setFriendProfileModalVisible(true);
+          navigate(`/profile/${friend.id}`);
         }}
         isMobile={isMobile}
       />

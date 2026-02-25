@@ -108,15 +108,348 @@ export const UserConversationsSection: React.FC = () => {
 
   const isMobile = windowWidth < 768;
 
+  // Мок-данные для тестирования
+  const mockChats: UserChat[] = [
+    {
+      id: 1,
+      order_id: 101,
+      order_title: 'Решение задач по математике',
+      context_title: 'Консультация по математике',
+      participants: [
+        {
+          id: 1,
+          username: 'client1',
+          first_name: 'Иван',
+          last_name: 'Петров',
+          email: 'client1@test.com',
+          role: 'client',
+          avatar: null,
+          online: true,
+        },
+        {
+          id: 2,
+          username: 'expert1',
+          first_name: 'Мария',
+          last_name: 'Смирнова',
+          email: 'expert1@test.com',
+          role: 'expert',
+          avatar: null,
+          online: false,
+        },
+      ],
+      client: {
+        id: 1,
+        username: 'client1',
+        first_name: 'Иван',
+        last_name: 'Петров',
+        email: 'client1@test.com',
+      },
+      expert: {
+        id: 2,
+        username: 'expert1',
+        first_name: 'Мария',
+        last_name: 'Смирнова',
+        email: 'expert1@test.com',
+      },
+      messages: [
+        {
+          id: 1,
+          text: 'Здравствуйте! Мне нужна помощь с решением задач по математике.',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 1,
+            username: 'client1',
+            first_name: 'Иван',
+            last_name: 'Петров',
+            role: 'client',
+          },
+          is_read: true,
+          created_at: '2024-02-20T10:00:00Z',
+        },
+        {
+          id: 2,
+          text: 'Добрый день! Конечно, помогу. Какие именно задачи вас интересуют?',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 2,
+            username: 'expert1',
+            first_name: 'Мария',
+            last_name: 'Смирнова',
+            role: 'expert',
+          },
+          is_read: true,
+          created_at: '2024-02-20T10:15:00Z',
+        },
+        {
+          id: 3,
+          text: 'Нужно решить систему уравнений и построить график функции.',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 1,
+            username: 'client1',
+            first_name: 'Иван',
+            last_name: 'Петров',
+            role: 'client',
+          },
+          is_read: true,
+          created_at: '2024-02-20T10:30:00Z',
+        },
+      ],
+      last_message: {
+        text: 'Нужно решить систему уравнений и построить график функции.',
+        sender: {
+          first_name: 'Иван',
+          last_name: 'Петров',
+        },
+        created_at: '2024-02-20T10:30:00Z',
+      },
+      message_count: 3,
+      created_at: '2024-02-20T10:00:00Z',
+      updated_at: '2024-02-20T10:30:00Z',
+    },
+    {
+      id: 2,
+      order_id: 102,
+      order_title: 'Курсовая работа по экономике',
+      context_title: 'Помощь с курсовой работой',
+      participants: [
+        {
+          id: 3,
+          username: 'client2',
+          first_name: 'Анна',
+          last_name: 'Иванова',
+          email: 'client2@test.com',
+          role: 'client',
+          avatar: null,
+          online: true,
+        },
+        {
+          id: 4,
+          username: 'expert2',
+          first_name: 'Дмитрий',
+          last_name: 'Козлов',
+          email: 'expert2@test.com',
+          role: 'expert',
+          avatar: null,
+          online: true,
+        },
+      ],
+      client: {
+        id: 3,
+        username: 'client2',
+        first_name: 'Анна',
+        last_name: 'Иванова',
+        email: 'client2@test.com',
+      },
+      expert: {
+        id: 4,
+        username: 'expert2',
+        first_name: 'Дмитрий',
+        last_name: 'Козлов',
+        email: 'expert2@test.com',
+      },
+      messages: [
+        {
+          id: 4,
+          text: 'Добрый день! Нужна помощь с курсовой по экономике.',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 3,
+            username: 'client2',
+            first_name: 'Анна',
+            last_name: 'Иванова',
+            role: 'client',
+          },
+          is_read: true,
+          created_at: '2024-02-21T09:00:00Z',
+        },
+        {
+          id: 5,
+          text: 'Здравствуйте! Расскажите подробнее о теме курсовой.',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 4,
+            username: 'expert2',
+            first_name: 'Дмитрий',
+            last_name: 'Козлов',
+            role: 'expert',
+          },
+          is_read: true,
+          created_at: '2024-02-21T09:10:00Z',
+        },
+        {
+          id: 6,
+          text: 'Тема: "Анализ финансовых показателей предприятия"',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 3,
+            username: 'client2',
+            first_name: 'Анна',
+            last_name: 'Иванова',
+            role: 'client',
+          },
+          is_read: true,
+          created_at: '2024-02-21T09:20:00Z',
+        },
+        {
+          id: 7,
+          text: 'Отлично! Я могу помочь с этой темой. Когда нужна работа?',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 4,
+            username: 'expert2',
+            first_name: 'Дмитрий',
+            last_name: 'Козлов',
+            role: 'expert',
+          },
+          is_read: false,
+          created_at: '2024-02-21T09:25:00Z',
+        },
+      ],
+      last_message: {
+        text: 'Отлично! Я могу помочь с этой темой. Когда нужна работа?',
+        sender: {
+          first_name: 'Дмитрий',
+          last_name: 'Козлов',
+        },
+        created_at: '2024-02-21T09:25:00Z',
+      },
+      message_count: 4,
+      created_at: '2024-02-21T09:00:00Z',
+      updated_at: '2024-02-21T09:25:00Z',
+    },
+    {
+      id: 3,
+      order_id: null,
+      order_title: null,
+      context_title: 'Консультация по программированию',
+      participants: [
+        {
+          id: 5,
+          username: 'client3',
+          first_name: 'Сергей',
+          last_name: 'Волков',
+          email: 'client3@test.com',
+          role: 'client',
+          avatar: null,
+          online: false,
+        },
+        {
+          id: 6,
+          username: 'expert3',
+          first_name: 'Елена',
+          last_name: 'Новикова',
+          email: 'expert3@test.com',
+          role: 'expert',
+          avatar: null,
+          online: true,
+        },
+      ],
+      client: {
+        id: 5,
+        username: 'client3',
+        first_name: 'Сергей',
+        last_name: 'Волков',
+        email: 'client3@test.com',
+      },
+      expert: {
+        id: 6,
+        username: 'expert3',
+        first_name: 'Елена',
+        last_name: 'Новикова',
+        email: 'expert3@test.com',
+      },
+      messages: [
+        {
+          id: 8,
+          text: 'Здравствуйте! Помогите разобраться с алгоритмами сортировки.',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 5,
+            username: 'client3',
+            first_name: 'Сергей',
+            last_name: 'Волков',
+            role: 'client',
+          },
+          is_read: true,
+          created_at: '2024-02-22T14:00:00Z',
+        },
+        {
+          id: 9,
+          text: 'Добрый день! Какие именно алгоритмы вас интересуют?',
+          file: null,
+          file_name: '',
+          message_type: 'text',
+          offer_data: null,
+          sender: {
+            id: 6,
+            username: 'expert3',
+            first_name: 'Елена',
+            last_name: 'Новикова',
+            role: 'expert',
+          },
+          is_read: true,
+          created_at: '2024-02-22T14:05:00Z',
+        },
+      ],
+      last_message: {
+        text: 'Добрый день! Какие именно алгоритмы вас интересуют?',
+        sender: {
+          first_name: 'Елена',
+          last_name: 'Новикова',
+        },
+        created_at: '2024-02-22T14:05:00Z',
+      },
+      message_count: 2,
+      created_at: '2024-02-22T14:00:00Z',
+      updated_at: '2024-02-22T14:05:00Z',
+    },
+  ];
+
+  const USE_MOCK_DATA = true; // Переключатель для использования мок-данных
+
   const fetchChats = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('admin-panel/user-chats/');
-      setChats(response.data);
+      if (USE_MOCK_DATA) {
+        // Используем мок-данные
+        setTimeout(() => {
+          setChats(mockChats);
+          setLoading(false);
+        }, 500);
+      } else {
+        // Загружаем реальные данные
+        const response = await apiClient.get('admin-panel/user-chats/');
+        setChats(response.data);
+        setLoading(false);
+      }
     } catch (error) {
       console.error('Ошибка загрузки чатов:', error);
       antMessage.error('Не удалось загрузить переписки');
-    } finally {
       setLoading(false);
     }
   };

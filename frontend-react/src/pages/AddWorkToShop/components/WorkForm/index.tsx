@@ -102,13 +102,24 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             <Text strong className={styles.label}>
               Стоимость работы
             </Text>
-            <InputNumber
+            <Input
               placeholder="Введите стоимость работы"
-              value={formData.price}
-              onChange={(value) => setFormData({ ...formData, price: value || 0 })}
+              value={formData.price || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Разрешаем только цифры
+                if (value === '' || /^\d+$/.test(value)) {
+                  setFormData({ ...formData, price: value === '' ? 0 : parseInt(value, 10) });
+                }
+              }}
+              onKeyPress={(e) => {
+                // Блокируем ввод нецифровых символов
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
               className={styles.priceInput}
-              min={0}
-              addonAfter="₽"
+              suffix="₽"
             />
           </Col>
         </Row>
@@ -199,15 +210,25 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           <Text strong className={styles.label}>
             Превью работы (изображение)
           </Text>
+          <Text type="secondary" className={styles.hint}>
+            Рекомендуемый размер: 800x600 пикселей. Форматы: JPG, PNG, WEBP. Максимальный размер: 5 МБ
+          </Text>
           <Upload
             name="preview"
             listType="picture-card"
             className={styles.previewUpload}
             showUploadList={false}
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/');
               if (!isImage) {
                 message.error('Можно загружать только изображения!');
+                return Upload.LIST_IGNORE as any;
+              }
+              
+              const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+              if (!allowedTypes.includes(file.type)) {
+                message.error('Допустимые форматы: JPG, PNG, WEBP');
                 return Upload.LIST_IGNORE as any;
               }
               
@@ -218,30 +239,44 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               }
               
               setFormData({ ...formData, preview: file });
+              message.success('Изображение загружено');
               return false;
             }}
           >
             {formData.preview ? (
-              <img
-                src={URL.createObjectURL(formData.preview)} 
-                alt="preview" 
-                className={styles.previewImage}
-              />
+              <div className={styles.previewImageContainer}>
+                <img
+                  src={URL.createObjectURL(formData.preview)} 
+                  alt="preview" 
+                  className={styles.previewImage}
+                />
+                <div className={styles.previewOverlay}>
+                  <PlusOutlined />
+                  <div className={styles.previewHint}>Изменить</div>
+                </div>
+              </div>
             ) : (
-              <div>
-                <PlusOutlined />
-                <div className={styles.previewHint}>Загрузить</div>
+              <div className={styles.previewPlaceholder}>
+                <PlusOutlined className={styles.previewIcon} />
+                <div className={styles.previewHint}>Нажмите для загрузки</div>
+                <div className={styles.previewSubHint}>или перетащите файл сюда</div>
               </div>
             )}
           </Upload>
           {formData.preview && (
-            <Button 
-              type="link" 
-              onClick={() => setFormData({ ...formData, preview: null })}
-              className={styles.removePreviewButton}
-            >
-              Удалить изображение
-            </Button>
+            <div className={styles.previewActions}>
+              <Text type="secondary" className={styles.previewFileName}>
+                {formData.preview.name}
+              </Text>
+              <Button 
+                type="link" 
+                danger
+                onClick={() => setFormData({ ...formData, preview: null })}
+                className={styles.removePreviewButton}
+              >
+                Удалить изображение
+              </Button>
+            </div>
           )}
         </div>
 
