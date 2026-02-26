@@ -73,7 +73,7 @@ export const AdminChatsSection: React.FC = () => {
   const isMobile = windowWidth < 768;
 
   
-  const chatRoomsData = (chatRooms as any[]) || [];
+  const chatRoomsData = Array.isArray(chatRooms) ? chatRooms : [];
 
   
   const filteredRooms = chatRoomsData.filter(room =>

@@ -6,12 +6,12 @@ export const communicationApi = {
   // Chat Rooms
   getChatRooms: async () => {
     const response = await apiClient.get(API_ENDPOINTS.admin.communication.chatRooms.list);
-    return response.data;
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   getChatRoomMessages: async (roomId: number) => {
     const response = await apiClient.get(API_ENDPOINTS.admin.communication.chatRooms.messages(roomId));
-    return response.data;
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   sendChatRoomMessage: async (roomId: number, message: string) => {
