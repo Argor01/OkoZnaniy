@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button, Typography, Tag } from 'antd';
+import React, { useMemo } from 'react';
+import { Button, Typography, Tag, Skeleton } from 'antd';
 import { EditOutlined, ClockCircleOutlined, DollarOutlined, LinkOutlined } from '@ant-design/icons';
 import { UserProfile } from '../../types';
 import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
@@ -8,11 +8,23 @@ const { Title, Paragraph } = Typography;
 
 interface AboutTabProps {
   profile: UserProfile | null;
+  loading?: boolean;
   isMobile: boolean;
   onEdit: () => void;
 }
 
-const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
+const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobile, onEdit }) => {
+  if (loading) {
+    return (
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionCardHeader}>
+          <h2 className={styles.sectionTitle}>О себе</h2>
+        </div>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </div>
+    );
+  }
+
   const isExpert = profile?.role === 'expert';
   
   const defaultBio = isExpert 
@@ -22,7 +34,10 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
   const defaultEducation = 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.';
   const defaultSkills = ['Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения', 'Теория вероятностей', 'Python', 'C++', 'JavaScript', 'Физика', 'Механика', 'Электродинамика'];
 
-  const skills = profile?.skills ? profile.skills.split(',').map(s => s.trim()).filter(s => s) : (isExpert ? defaultSkills : []);
+  const skills = useMemo(() => 
+    profile?.skills ? profile.skills.split(',').map(s => s.trim()).filter(s => s) : (isExpert ? defaultSkills : []),
+    [profile?.skills, isExpert]
+  );
 
   return (
     <div className={styles.sectionCard}>
@@ -93,6 +108,6 @@ const AboutTab: React.FC<AboutTabProps> = ({ profile, isMobile, onEdit }) => {
       )}
     </div>
   );
-};
+});
 
 export default AboutTab;

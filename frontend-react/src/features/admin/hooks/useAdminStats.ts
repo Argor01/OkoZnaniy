@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
-import { QUERY_KEYS } from '../constants/adminConstants';
+import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 
 export const useAdminStats = () => {
   const { data: stats, isLoading: loading, refetch } = useQuery({

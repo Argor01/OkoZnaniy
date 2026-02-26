@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
-import { QUERY_KEYS } from '../constants/adminConstants';
+import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 import { message } from 'antd';
 
 export const useWorks = (status?: string, enabled: boolean = true) => {

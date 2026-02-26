@@ -26,7 +26,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import { ServiceTariff, CommissionSettings } from '@/features/admin/types/admin';
-import { useTariffs, useTariffActions, useCommissions, useCommissionActions } from '../../hooks';
+import { useTariffs, useTariffActions, useCommissions, useCommissionActions } from '@/features/admin/hooks';
 
 const { Text } = Typography;
 const { Option } = Select;

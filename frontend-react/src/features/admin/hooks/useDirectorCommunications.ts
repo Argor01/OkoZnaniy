@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
-import { QUERY_KEYS, QUERY_CONFIG } from '../constants/adminConstants';
+import { QUERY_KEYS, QUERY_CONFIG } from '@/features/admin/constants/adminConstants';
 import { message } from 'antd';
 
 export const useDirectorCommunications = (enabled: boolean = true) => {

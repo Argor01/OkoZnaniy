@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SupportRequest, SupportMessage, SupportStats, SupportStatus } from '@/features/admin/types/support.types';
 import { supportApi, SupportChat, SupportMessage as ApiSupportMessage } from '@/features/support/api/support';
-import { QUERY_KEYS } from '../constants/adminConstants';
+import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 
 export const useSupportRequests = () => {
   const queryClient = useQueryClient();

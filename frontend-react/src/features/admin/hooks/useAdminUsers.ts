@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
 import { AdminUser, AdminRole, AdminPermission } from '@/features/admin/types/admin';
-import { QUERY_KEYS } from '../constants/adminConstants';
+import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 import { message } from 'antd';
 
 export const useUsers = () => {

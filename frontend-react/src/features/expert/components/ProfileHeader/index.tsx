@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Typography, Rate, Space, Button, Tooltip } from 'antd';
+import { Avatar, Typography, Rate, Space, Button, Tooltip, Skeleton } from 'antd';
 import { UserOutlined, EditOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { UserProfile } from '../../types';
@@ -12,19 +12,31 @@ const { Title, Text } = Typography;
 
 export interface ProfileHeaderProps {
   profile: UserProfile | null;
+  loading?: boolean;
   expertStats: ExpertStatistics | undefined;
   userProfile: UserProfile | null | undefined;
   isMobile: boolean;
   onEditProfile?: () => void;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
   profile,
+  loading,
   expertStats,
   userProfile,
   isMobile,
   onEditProfile,
 }) => {
+  if (loading) {
+    return (
+      <div className={styles.profileBlock}>
+        <div className={styles.profileBlockContent}>
+          <Skeleton avatar active paragraph={{ rows: 2 }} />
+        </div>
+      </div>
+    );
+  }
+
   const displayName =
     (profile?.first_name || profile?.last_name)
       ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
@@ -169,7 +181,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ProfileHeader;
 export { ProfileHeader };

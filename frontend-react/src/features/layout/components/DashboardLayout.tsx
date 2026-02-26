@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Layout, Modal, message, Spin } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -31,6 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(false);
   
   
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -79,7 +80,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   }, [supportUserId]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     Modal.confirm({
       title: 'Выход из системы',
       content: 'Вы уверены, что хотите выйти?',
@@ -99,7 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         }
       },
     });
-  };
+  }, [navigate]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
 
@@ -111,7 +112,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const closeAllModals = () => {
+  const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
     setMessageModalVisible(false);
     setNotificationsModalVisible(false);
@@ -123,9 +124,72 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setSelectedUserIdForChat(undefined);
     setSelectedOrderIdForChat(undefined);
     setSelectedChatContextTitle(undefined);
-  };
+  }, []);
 
-  const contextValue = {
+  const handleMessagesClick = useCallback(() => {
+    closeAllModals();
+    setMessageModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleNotificationsClick = useCallback(() => {
+    closeAllModals();
+    setNotificationsModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleArbitrationClick = useCallback(() => {
+    closeAllModals();
+    setArbitrationModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleFinanceClick = useCallback(() => {
+    closeAllModals();
+    setFinanceModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleFriendsClick = useCallback(() => {
+    closeAllModals();
+    setFriendsModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleFaqClick = useCallback(() => {
+    closeAllModals();
+    setFaqModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleProfileClick = useCallback(() => {
+    closeAllModals();
+    setProfileModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleSupportClick = useCallback(() => {
+    void (async () => {
+      const id = await ensureSupportUserId();
+      if (!id) {
+        message.error('Поддержка не настроена');
+        return;
+      }
+      closeAllModals();
+      setSelectedUserIdForChat(id);
+      setSelectedChatContextTitle(undefined);
+      setMessageModalVisible(true);
+    })();
+  }, [closeAllModals, ensureSupportUserId]);
+
+  const handleHeaderMenuClick = useCallback(() => {
+    if (isMobile) {
+      setMobileMenuVisible(true);
+    } else {
+      setDesktopSidebarOpen((prev) => !prev);
+    }
+  }, [isMobile]);
+
+  const sidebarUserProfile = useMemo(() => userProfile ? {
+    username: userProfile.username,
+    avatar: userProfile.avatar,
+    role: userProfile.role
+  } : undefined, [userProfile?.username, userProfile?.avatar, userProfile?.role]);
+
+  const contextValue = useMemo(() => ({
     openProfileModal: () => { closeAllModals(); setProfileModalVisible(true); },
     openMessageModal: (userId?: number) => { 
         closeAllModals(); 
@@ -162,15 +226,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         setFriendProfileModalVisible(true);
     },
     closeAllModals,
-  };
+  }), [closeAllModals]);
 
-  const handleMenuSelect = (key: string) => {
+  const handleMenuSelect = useCallback((key: string) => {
     if (key.startsWith('orders-') || key === 'orders') {
       navigate('/expert?tab=orders');
       return;
     }
-    
-  };
+  }, [navigate]);
 
   const getSelectedKey = () => {
     const path = location.pathname;
@@ -212,7 +275,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const dashboardLayoutClassName = [
     styles.dashboardLayout,
-    isMobile ? styles.dashboardLayoutMobile : styles.dashboardLayoutDesktop,
+    isMobile ? styles.dashboardLayoutMobile : (desktopSidebarOpen ? styles.dashboardLayoutDesktop : ''),
     shouldShowHeader ? styles.dashboardLayoutHeader : styles.dashboardLayoutNoHeader,
   ].join(' ');
 
@@ -229,33 +292,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         {shouldShowHeader && (
           <DashboardHeader
-            userProfile={userProfile ? {
-              username: userProfile.username,
-              avatar: userProfile.avatar,
-              role: userProfile.role,
-              balance: balance
-            } : undefined}
+            userProfile={sidebarUserProfile}
             unreadMessages={unreadMessages}
             unreadNotifications={unreadNotifications}
-            onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
-            onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
-            onSupportClick={() => {
-              void (async () => {
-                const id = await ensureSupportUserId();
-                if (!id) {
-                  message.error('Поддержка не настроена');
-                  return;
-                }
-                closeAllModals();
-                setSelectedUserIdForChat(id);
-                setSelectedChatContextTitle(undefined);
-                setMessageModalVisible(true);
-              })();
-            }}
-            onBalanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
-            onProfileClick={() => { closeAllModals(); setProfileModalVisible(true); }}
+            onMessagesClick={handleMessagesClick}
+            onNotificationsClick={handleNotificationsClick}
+            onSupportClick={handleSupportClick}
+            onBalanceClick={handleFinanceClick}
+            onProfileClick={handleProfileClick}
             onLogout={handleLogout}
-            onMenuClick={() => setMobileMenuVisible(true)}
+            onMenuClick={handleHeaderMenuClick}
             isMobile={isMobile}
           />
         )}
@@ -264,20 +310,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           selectedKey={getSelectedKey()}
           onMenuSelect={handleMenuSelect}
           onLogout={handleLogout}
-          onMessagesClick={() => { closeAllModals(); setMessageModalVisible(true); }}
-          onNotificationsClick={() => { closeAllModals(); setNotificationsModalVisible(true); }}
-          onArbitrationClick={() => { closeAllModals(); setArbitrationModalVisible(true); }}
-          onFinanceClick={() => { closeAllModals(); setFinanceModalVisible(true); }}
-          onFriendsClick={() => { closeAllModals(); setFriendsModalVisible(true); }}
-          onFaqClick={() => { closeAllModals(); setFaqModalVisible(true); }}
+          onMessagesClick={handleMessagesClick}
+          onNotificationsClick={handleNotificationsClick}
+          onArbitrationClick={handleArbitrationClick}
+          onFinanceClick={handleFinanceClick}
+          onFriendsClick={handleFriendsClick}
+          onFaqClick={handleFaqClick}
           mobileDrawerOpen={mobileMenuVisible}
           onMobileDrawerChange={setMobileMenuVisible}
+          collapsed={!isMobile && !desktopSidebarOpen}
           unreadNotifications={unreadNotifications}
-          userProfile={userProfile ? {
-            username: userProfile.username,
-            avatar: userProfile.avatar,
-            role: userProfile.role
-          } : undefined}
+          userProfile={sidebarUserProfile}
         />
         
         <Layout className={dashboardLayoutClassName}>

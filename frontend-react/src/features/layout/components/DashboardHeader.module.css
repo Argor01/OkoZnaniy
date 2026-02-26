@@ -35,6 +35,41 @@
   margin-left: 24px;
   line-height: 64px;
   min-width: 0;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.navMenu :global(.ant-menu-item), 
+.navMenu :global(.ant-menu-submenu-title) {
+  font-family: 'Syncopate', sans-serif !important;
+}
+
+.headerLogo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+}
+
+.logoImage {
+  height: 32px;
+  width: auto;
+}
+
+.logoText {
+  font-family: 'Syncopate', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #333;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .logoText {
+    display: none;
+  }
 }
 
 .headerRight {
@@ -222,3 +257,14 @@
   color: #6b7280;
 }
 
+/* Apply Syncopate font to all header elements */
+.dashboardHeader,
+.dashboardHeader :global(*) {
+  font-family: 'Syncopate', sans-serif !important;
+}
+
+/* Ensure icons keep their font family if needed, though Ant Design icons are usually SVGs */
+.dashboardHeader :global(.anticon),
+.dashboardHeader :global(.anticon *) {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+}

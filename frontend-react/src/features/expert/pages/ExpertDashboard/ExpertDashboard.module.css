@@ -5674,15 +5674,23 @@
 .applicationEmptyCard {
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 32px;
 }
 
 .applicationEmptyStack {
   width: 100%;
+  align-items: center !important;
+  justify-content: center;
 }
 
 .applicationEmptyText {
   font-size: 16px;
   color: #6b7280;
+  text-align: center;
 }
 
 .applicationEmptyButton {
@@ -6004,5 +6012,60 @@
 .orderBidButtonDisabled {
   background: #e5e7eb;
   color: #6b7280;
+}
+
+/* Expert Dashboard Headers & Labels - Syncopate Font */
+
+/* Headers in the main content area - 18px */
+.expertContentContainer h1,
+.expertContentContainer h2,
+.expertContentContainer h3,
+.expertContentContainer h4,
+.expertContentContainer h5,
+.expertContentContainer h6,
+.expertContentContainer :global(.ant-typography-title),
+.expertContentContainer :global(.ant-card-head-title),
+.sectionTitle,
+.applicationTitle,
+.applicationSubtitle
+{
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 18px !important;
+}
+
+/* Headers & Labels in Modals - 12px */
+.applicationModalTitle,
+.profileModalTitle,
+.profileModalExpertTitle,
+.welcomeModalTitle,
+/* Generic Modal Titles */
+.applicationModalWrap :global(.ant-modal-title),
+.profileModalWrap :global(.ant-modal-title),
+.welcomeModalWrap :global(.ant-modal-title),
+/* Labels in Application Form (Anketa) */
+.applicationModalWrap :global(.ant-form-item-label > label),
+/* Labels in Profile Form */
+.profileModalWrap :global(.ant-form-item-label > label),
+/* Ensure any other labels inside the application modal form are covered */
+.applicationModalWrap label
+{
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* Labels in main dashboard forms - 18px (keeping consistent with "dashboard 18px" rule) */
+.expertContentContainer :global(.ant-form-item-label > label)
+{
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 18px !important;
+}
+
+/* Tabs (Switchers) - Syncopate */
+.expertContentContainer :global(.ant-tabs-tab),
+.expertContentContainer :global(.ant-tabs-tab-btn),
+.profileModalWrap :global(.ant-tabs-tab),
+.profileModalWrap :global(.ant-tabs-tab-btn)
+{
+  font-family: 'Syncopate', sans-serif !important;
 }
 

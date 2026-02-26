@@ -84,7 +84,7 @@ interface Claim {
   messages?: ClaimMessage[];
 }
 
-import { useClaims, useClaimActions, useTicketActions } from '../../hooks';
+import { useClaims, useClaimActions, useTicketActions } from '@/features/admin/hooks';
 
 export const InProgressClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('in_progress', true);

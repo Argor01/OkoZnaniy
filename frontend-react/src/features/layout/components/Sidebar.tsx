@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
 import {
   UserOutlined,
@@ -50,9 +50,10 @@ interface SidebarProps {
   onFaqClick?: () => void;
   mobileDrawerOpen?: boolean;
   onMobileDrawerChange?: (open: boolean) => void;
+  collapsed?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
+const Sidebar: React.FC<SidebarProps> = React.memo(({
   selectedKey,
   onMenuSelect,
   userProfile,
@@ -67,6 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onFaqClick,
   mobileDrawerOpen = false,
   onMobileDrawerChange,
+  collapsed = false,
 }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
@@ -81,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleMenuClick = ({ key }: { key: string }) => {
+  const handleMenuClick = useCallback(({ key }: { key: string }) => {
     
     if (isMobile && onMobileDrawerChange) {
       onMobileDrawerChange(false);
@@ -147,12 +149,24 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
 
     onMenuSelect(key);
-  };
+  }, [
+    isMobile,
+    onMobileDrawerChange,
+    navigate,
+    onMessagesClick,
+    onNotificationsClick,
+    onArbitrationClick,
+    onFinanceClick,
+    onFriendsClick,
+    onFaqClick,
+    onLogout,
+    onMenuSelect
+  ]);
 
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     {
       key: 'dashboard',
       icon: <UserOutlined />,
@@ -209,29 +223,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <ShoppingOutlined />,
       label: 'Заказы',
     } : null,
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     {
       key: 'friends',
       icon: <TeamOutlined />,
@@ -249,9 +240,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       danger: true,
       className: styles.logoutMenuItem,
     },
-  ].filter(Boolean);
+  ].filter(Boolean), [isExpert, isClient, isMobile, unreadMessages, unreadNotifications]);
 
-  const profileSection = (
+  const profileSection = useMemo(() => (
     <div className={styles.sidebarProfile}>
       <div className={styles.sidebarProfileInner}>
         <Avatar
@@ -278,9 +269,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
     </div>
-  );
+  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange]);
 
-  const sidebarContent = (
+  const sidebarContent = useMemo(() => (
     <>
       {profileSection}
       <Menu
@@ -293,7 +284,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         items={menuItems}
       />
     </>
-  );
+  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
 
   return (
     <>
@@ -315,12 +306,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Sider
           width={250}
           className={styles.sidebar}
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          collapsedWidth={0}
         >
           {sidebarContent}
         </Sider>
       )}
     </>
   );
-};
+});
 
 export default Sidebar;

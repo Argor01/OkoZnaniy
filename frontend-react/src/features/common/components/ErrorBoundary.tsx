@@ -43,7 +43,7 @@ class ErrorBoundary extends Component<Props, State> {
               </Button>
             ]}
           />
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <div className="errorBoundaryDebug">
               <Typography.Text type="secondary">
                 <pre>{this.state.error?.stack}</pre>

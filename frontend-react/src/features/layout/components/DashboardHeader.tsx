@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { Badge, Button, Dropdown, Layout, Menu, Space, Typography, message } from 'antd';
 import {
   UserOutlined,
@@ -44,7 +44,7 @@ interface DashboardHeaderProps {
   isMobile?: boolean;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   userProfile,
   unreadMessages = 0,
   unreadNotifications = 0,
@@ -64,58 +64,61 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
 
-  const navItems: MenuProps['items'] = [
-    {
-      key: '/orders-feed',
-      label: 'Лента заказов',
-      icon: <UnorderedListOutlined />,
-    },
-  ];
+  const navItems = useMemo<MenuProps['items']>(() => {
+    const items: MenuProps['items'] = [
+      {
+        key: '/orders-feed',
+        label: 'Лента заказов',
+        icon: <UnorderedListOutlined />,
+      },
+    ];
 
-  if (isExpert) {
-    navItems.push({
-      key: '/works',
-      label: 'Мои заказы',
-      icon: <FileDoneOutlined />,
-    });
-    navItems.push({
-      key: 'shop-menu',
-      label: 'Магазин',
-      icon: <ShopOutlined />,
-      children: [
-        {
-          key: '/shop/ready-works',
-          label: 'Магазин готовых работ',
-        },
-        {
-          key: '/shop/add-work',
-          label: 'Добавить работу',
-        },
-        {
-          key: '/shop/purchased',
-          label: 'Купленные работы',
-        },
-      ],
-    });
-  } else if (isClient) {
-    navItems.push({
-      key: '/create-order',
-      label: 'Создать заказ',
-      icon: <PlusOutlined />,
-    });
-    navItems.push({
-      key: '/shop/ready-works',
-      label: 'Магазин работ',
-      icon: <ShopOutlined />,
-    });
-    navItems.push({
-      key: '/shop/purchased',
-      label: 'Купленные работы',
-      icon: <FileDoneOutlined />,
-    });
-  }
+    if (isExpert) {
+      items.push({
+        key: '/works',
+        label: 'Мои заказы',
+        icon: <FileDoneOutlined />,
+      });
+      items.push({
+        key: 'shop-menu',
+        label: 'Магазин',
+        icon: <ShopOutlined />,
+        children: [
+          {
+            key: '/shop/ready-works',
+            label: 'Магазин готовых работ',
+          },
+          {
+            key: '/shop/add-work',
+            label: 'Добавить работу',
+          },
+          {
+            key: '/shop/purchased',
+            label: 'Купленные работы',
+          },
+        ],
+      });
+    } else if (isClient) {
+      items.push({
+        key: '/create-order',
+        label: 'Создать заказ',
+        icon: <PlusOutlined />,
+      });
+      items.push({
+        key: '/shop/ready-works',
+        label: 'Магазин работ',
+        icon: <ShopOutlined />,
+      });
+      items.push({
+        key: '/shop/purchased',
+        label: 'Купленные работы',
+        icon: <FileDoneOutlined />,
+      });
+    }
+    return items;
+  }, [isExpert, isClient]);
 
-  const profileMenuItems: MenuProps['items'] = [
+  const profileMenuItems = useMemo<MenuProps['items']>(() => [
     {
       key: 'profile',
       label: 'Редактировать профиль',
@@ -132,32 +135,104 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       danger: true,
       onClick: onLogout,
     },
-  ];
+  ], [onProfileClick, onLogout]);
+
+  const handleNavClick: MenuProps['onClick'] = useCallback(({ key }) => {
+    if (key !== 'shop-menu') {
+      navigate(key);
+    }
+  }, [navigate]);
+
+  const supportMenuItems = useMemo<MenuProps['items']>(() => [
+    {
+      key: 'support-info',
+      label: (
+        <div className={styles.supportDropdown}>
+          <div className={styles.supportSection}>
+            <Text strong className={styles.supportTitle}>
+              Служба поддержки
+            </Text>
+            
+            <div 
+              className={styles.supportRow}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText('88005007857');
+                message.success('Телефон скопирован!');
+              }}
+            >
+              <PhoneOutlined className={styles.supportPhoneIcon} />
+              <Text className={styles.supportRowText}>
+                8 (800) 500-78-57
+              </Text>
+              <CopyOutlined className={styles.supportCopyIcon} />
+            </div>
+            
+            <div 
+              className={styles.supportRow}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText('b-oko.znaniy@mail.ru');
+                message.success('Email скопирован!');
+              }}
+            >
+              <MailOutlined className={styles.supportMailIcon} />
+              <Text className={styles.supportRowText}>
+                b-oko.znaniy@mail.ru
+              </Text>
+              <CopyOutlined className={styles.supportCopyIcon} />
+            </div>
+          </div>
+          
+          <div className={styles.supportSchedule}>
+            <ClockCircleOutlined className={styles.supportScheduleIcon} />
+            <div>
+              <Text strong className={styles.supportScheduleTitle}>
+                График работы
+              </Text>
+              <Text className={styles.supportScheduleText}>
+                Пн-Пт 07:00 - 16:00 (МСК)
+              </Text>
+            </div>
+          </div>
+        </div>
+      ),
+      disabled: true,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'write-to-support',
+      label: 'Написать нам',
+      icon: <MessageOutlined />,
+      onClick: onSupportClick,
+    },
+  ], [onSupportClick]);
 
   return (
     <Header className={styles.dashboardHeader}>
       <div className={styles.headerLeft}>
-        {isMobile && (
-          <Button
-            type="text"
-            icon={<MenuOutlined />}
-            onClick={onMenuClick}
-            className={styles.menuButton}
-          />
-        )}
+        <Button
+          type="text"
+          icon={<MenuOutlined />}
+          onClick={onMenuClick}
+          className={styles.menuButton}
+        />
         {!isMobile && (
           <Menu
             mode="horizontal"
             selectedKeys={[location.pathname]}
             items={navItems}
             className={styles.navMenu}
-            onClick={({ key }) => {
-              if (key !== 'shop-menu') {
-                navigate(key);
-              }
-            }}
+            onClick={handleNavClick}
           />
         )}
+      </div>
+
+      <div className={styles.headerLogo}>
+        <img src="/assets/logo.png" alt="Око Знаний" className={styles.logoImage} />
+        <span className={styles.logoText}>Око Знаний</span>
       </div>
 
       <div className={styles.headerRight}>
@@ -197,75 +272,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           
           <Dropdown
             menu={{
-              items: [
-                {
-                  key: 'support-info',
-                  label: (
-                    <div className={styles.supportDropdown}>
-                      <div className={styles.supportSection}>
-                        <Text strong className={styles.supportTitle}>
-                          Служба поддержки
-                        </Text>
-                        
-                        
-                        <div 
-                          className={styles.supportRow}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigator.clipboard.writeText('88005007857');
-                            message.success('Телефон скопирован!');
-                          }}
-                        >
-                          <PhoneOutlined className={styles.supportPhoneIcon} />
-                          <Text className={styles.supportRowText}>
-                            8 (800) 500-78-57
-                          </Text>
-                          <CopyOutlined className={styles.supportCopyIcon} />
-                        </div>
-                        
-                        
-                        <div 
-                          className={styles.supportRow}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigator.clipboard.writeText('b-oko.znaniy@mail.ru');
-                            message.success('Email скопирован!');
-                          }}
-                        >
-                          <MailOutlined className={styles.supportMailIcon} />
-                          <Text className={styles.supportRowText}>
-                            b-oko.znaniy@mail.ru
-                          </Text>
-                          <CopyOutlined className={styles.supportCopyIcon} />
-                        </div>
-                      </div>
-                      
-                      
-                      <div className={styles.supportSchedule}>
-                        <ClockCircleOutlined className={styles.supportScheduleIcon} />
-                        <div>
-                          <Text strong className={styles.supportScheduleTitle}>
-                            График работы
-                          </Text>
-                          <Text className={styles.supportScheduleText}>
-                            Пн-Пт 07:00 - 16:00 (МСК)
-                          </Text>
-                        </div>
-                      </div>
-                    </div>
-                  ),
-                  disabled: true,
-                },
-                {
-                  type: 'divider',
-                },
-                {
-                  key: 'write-to-support',
-                  label: 'Написать нам',
-                  icon: <MessageOutlined />,
-                  onClick: onSupportClick,
-                },
-              ],
+              items: supportMenuItems,
             }}
             placement="bottomRight"
             trigger={['click']}
@@ -291,6 +298,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
     </Header>
   );
-};
+});
 
 export default DashboardHeader;

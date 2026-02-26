@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button, Typography, Spin, Space } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import type { ExpertApplication } from '@/features/expert/api/experts';
@@ -23,7 +23,7 @@ const getApplicationStatusIcon = (status: ExpertApplication['status']) => {
   }
 };
 
-const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
+const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   application,
   applicationLoading,
   userProfile,
@@ -37,23 +37,22 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
     );
   }
 
-  
   const hasValidApplication = application && 
     typeof application === 'object' && 
     !Array.isArray(application) &&
     'status' in application;
 
-  if (hasValidApplication) {
-    const isDeactivated = (() => {
-      try {
-        const raw = localStorage.getItem('director_deactivated_employees');
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
-      } catch {
-        return false;
-      }
-    })();
+  const isDeactivated = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('director_deactivated_employees');
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
+    } catch {
+      return false;
+    }
+  }, [userProfile?.id]);
 
+  if (hasValidApplication) {
     const statusClass = isDeactivated ? styles.statusRejected :
       application.status === 'pending' ? styles.statusPending :
       application.status === 'approved' ? styles.statusApproved :
@@ -97,10 +96,8 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
     );
   }
 
-
-  
   return (
-    <div className={`${styles.emptyApplicationCard} ${styles.applicationEmptyCard}`}>
+    <div className={`${styles.card} ${styles.applicationEmptyCard}`}>
       <Space direction="vertical" className={styles.applicationEmptyStack} size="large">
         <Text className={styles.applicationEmptyText}>
           У вас ещё нет анкеты. Заполните анкету для работы на платформе.
@@ -109,13 +106,13 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
           type="primary" 
           size="large"
           onClick={onOpenApplicationModal}
-          className={`${styles.buttonPrimary} ${styles.applicationEmptyButton}`}
+          className={styles.buttonPrimary}
         >
           Заполнить анкету
         </Button>
       </Space>
     </div>
   );
-};
+});
 
 export default ApplicationStatus;

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { internalCommunicationApi, InternalMessage, MeetingRequest } from '@/features/admin/api/internalCommunication';
-import { QUERY_KEYS, QUERY_CONFIG } from '../constants/adminConstants';
+import { QUERY_KEYS, QUERY_CONFIG } from '@/features/admin/constants/adminConstants';
 
 export const useInternalCommunication = () => {
   const queryClient = useQueryClient();

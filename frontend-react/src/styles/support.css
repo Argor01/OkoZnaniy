@@ -348,10 +348,18 @@
   z-index: 1000;
 }
 .supportButtonFloat {
-  width: 60px;
-  height: 60px;
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  padding: 0 !important;
   font-size: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  aspect-ratio: 1 / 1;
 }
 .supportField {
   margin-bottom: 16px;

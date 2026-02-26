@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, Suspense, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { message, Tabs } from 'antd';
+import { message, Tabs, Skeleton, Spin } from 'antd';
 import type { FC } from 'react';
 import { authApi } from '@/features/auth/api/auth';
 import type { User } from '@/features/auth/api/auth';
@@ -8,28 +8,30 @@ import { expertsApi, type Specialization } from '@/features/expert/api/experts';
 import { useNotifications } from '@/hooks/useNotifications';
 import ProfileHeader from '../../components/ProfileHeader/index';
 import ApplicationStatus from '../../components/ApplicationStatus/index';
-import AboutTab from '../../components/AboutTab';
-import SpecializationsTab from '../../components/SpecializationsTab';
-import ReviewsTab from '../../components/ReviewsTab';
-import OrdersTab from '../../components/OrdersTab';
-import WorksTab from '../../components/WorksTab';
-import FriendsTab from '../../components/FriendsTab';
 import { UserProfile } from '../../types';
 import { useExpertDisputes } from '../../hooks/useExpertDisputes';
 import styles from './ExpertDashboard.module.css';
 
 
-import ProfileModal from '../../modals/ProfileModal';
-import ApplicationModal from '../../modals/ApplicationModal';
-import WelcomeModal from '../../modals/WelcomeModal';
-import SpecializationModal from '../../modals/SpecializationModal';
-import MessageModal from '../../modals/MessageModalNew';
-import NotificationsModal from '../../modals/NotificationsModalNew';
-import ArbitrationModal from '../../modals/ArbitrationModal';
-import FinanceModal from '../../modals/FinanceModal';
-import FriendsModal from '../../modals/FriendsModal';
-import FaqModal from '../../modals/FaqModal';
-import FriendProfileModal from '../../modals/FriendProfileModal';
+import AboutTab from '../../components/AboutTab';
+const SpecializationsTab = React.lazy(() => import('../../components/SpecializationsTab'));
+const ReviewsTab = React.lazy(() => import('../../components/ReviewsTab'));
+const OrdersTab = React.lazy(() => import('../../components/OrdersTab'));
+const WorksTab = React.lazy(() => import('../../components/WorksTab'));
+const FriendsTab = React.lazy(() => import('../../components/FriendsTab'));
+
+
+const ProfileModal = React.lazy(() => import('../../modals/ProfileModal'));
+const ApplicationModal = React.lazy(() => import('../../modals/ApplicationModal'));
+const WelcomeModal = React.lazy(() => import('../../modals/WelcomeModal'));
+const SpecializationModal = React.lazy(() => import('../../modals/SpecializationModal'));
+const MessageModal = React.lazy(() => import('../../modals/MessageModalNew'));
+const NotificationsModal = React.lazy(() => import('../../modals/NotificationsModalNew'));
+const ArbitrationModal = React.lazy(() => import('../../modals/ArbitrationModal'));
+const FinanceModal = React.lazy(() => import('../../modals/FinanceModal'));
+const FriendsModal = React.lazy(() => import('../../modals/FriendsModal'));
+const FaqModal = React.lazy(() => import('../../modals/FaqModal'));
+const FriendProfileModal = React.lazy(() => import('../../modals/FriendProfileModal'));
 
 const ExpertDashboard: FC = () => {
   const queryClient = useQueryClient();
@@ -53,14 +55,13 @@ const ExpertDashboard: FC = () => {
   
   
   const [activeTab, setActiveTab] = useState<string>('about');
-  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
 
-  const closeAllModals = () => {
+  const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
     setApplicationModalVisible(false);
     setWelcomeModalVisible(false);
@@ -73,12 +74,13 @@ const ExpertDashboard: FC = () => {
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
     setSelectedUserIdForChat(undefined);
-  };
+  }, []);
 
   
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const { data: application, isLoading: applicationLoading } = useQuery({
@@ -123,12 +125,6 @@ const ExpertDashboard: FC = () => {
   });
 
   React.useEffect(() => {
-    if (userProfile) {
-      setProfile(userProfile);
-    }
-  }, [userProfile]);
-
-  React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 840);
     };
@@ -136,200 +132,242 @@ const ExpertDashboard: FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const handleEditProfile = useCallback(() => {
+    closeAllModals();
+    setProfileModalVisible(true);
+  }, [closeAllModals]);
+
+  const handleOpenApplicationModal = useCallback(() => {
+    closeAllModals();
+    setApplicationModalVisible(true);
+  }, [closeAllModals]);
+
+  const items = useMemo(() => {
+    const list = [
+      {
+        key: 'about',
+        label: 'О себе',
+        children: (
+          <AboutTab
+            profile={userProfile || null}
+            loading={isProfileLoading}
+            isMobile={isMobile}
+            onEdit={handleEditProfile}
+          />
+        ),
+      }
+    ];
+
+    if (userProfile?.role === 'expert') {
+      list.push({
+        key: 'specializations',
+        label: `Специализации ${specializations.length || 0}`,
+        children: (
+          <SpecializationsTab
+            specializations={specializations}
+            specializationsLoading={specializationsLoading}
+            isMobile={isMobile}
+            onEdit={(spec) => {
+              closeAllModals();
+              setEditingSpecialization(spec);
+              setSpecializationModalVisible(true);
+            }}
+            onAdd={() => {
+              closeAllModals();
+              setEditingSpecialization(null);
+              setSpecializationModalVisible(true);
+            }}
+            onDelete={(spec) => {
+              if (!spec?.id) return;
+              deleteSpecializationMutation.mutate(spec.id);
+            }}
+          />
+        ),
+      });
+
+      list.push({
+        key: 'reviews',
+        label: 'Отзывы',
+        children: <ReviewsTab isMobile={isMobile} expertId={userProfile?.id} />,
+      });
+    }
+
+    list.push({
+      key: 'orders',
+      label: 'Заказы',
+      children: <OrdersTab isMobile={isMobile} />,
+    });
+
+    if (userProfile?.role === 'expert') {
+      list.push({
+        key: 'works',
+        label: 'Работы',
+        children: (
+          <WorksTab 
+            isMobile={isMobile}
+          />
+        ),
+      });
+    }
+
+    list.push({
+      key: 'friends',
+      label: 'Мои друзья',
+      children: (
+        <FriendsTab 
+          isMobile={isMobile}
+          onOpenChat={(friend) => {
+            closeAllModals();
+            setSelectedUserIdForChat(friend.id);
+            setMessageModalVisible(true);
+          }}
+          onOpenProfile={(friend) => {
+            closeAllModals();
+            setSelectedFriend(friend);
+            setFriendProfileModalVisible(true);
+          }}
+        />
+      ),
+    });
+
+    return list;
+  }, [userProfile, isMobile, specializations, specializationsLoading, closeAllModals, deleteSpecializationMutation, handleEditProfile]);
+
   return (
     <>
       <div className={styles.expertContentContainer}>
         <ProfileHeader
-          profile={profile}
+          profile={userProfile || null}
+          loading={isProfileLoading}
           expertStats={expertStats}
           userProfile={userProfile}
           isMobile={isMobile}
-          onEditProfile={() => { closeAllModals(); setProfileModalVisible(true); }}
+          onEditProfile={handleEditProfile}
         />
         
         <ApplicationStatus
           application={application || null}
           applicationLoading={applicationLoading}
           userProfile={userProfile}
-          onOpenApplicationModal={() => { closeAllModals(); setApplicationModalVisible(true); }}
+          onOpenApplicationModal={handleOpenApplicationModal}
         />
         
         <div ref={tabsRef}>
-          <Tabs
-            activeKey={activeTab}
-            onChange={setActiveTab}
-            items={[
-              {
-                key: 'about',
-                label: 'О себе',
-                children: (
-                  <AboutTab
-                    profile={profile}
-                    isMobile={isMobile}
-                    onEdit={() => { closeAllModals(); setProfileModalVisible(true); }}
-                  />
-                ),
-              },
-              
-              ...(userProfile?.role === 'expert' ? [{
-                key: 'specializations',
-                label: `Специализации ${specializations.length || 0}`,
-                children: (
-                  <SpecializationsTab
-                    specializations={specializations}
-                    specializationsLoading={specializationsLoading}
-                    isMobile={isMobile}
-                    onEdit={(spec) => {
-                      closeAllModals();
-                      setEditingSpecialization(spec);
-                      setSpecializationModalVisible(true);
-                    }}
-                    onAdd={() => {
-                      closeAllModals();
-                      setEditingSpecialization(null);
-                      setSpecializationModalVisible(true);
-                    }}
-                    onDelete={(spec) => {
-                      if (!spec?.id) return;
-                      deleteSpecializationMutation.mutate(spec.id);
-                    }}
-                  />
-                ),
-              }] : []),
-              
-              ...(userProfile?.role === 'expert' ? [{
-                key: 'reviews',
-                label: 'Отзывы',
-                children: <ReviewsTab isMobile={isMobile} expertId={userProfile?.id} />,
-              }] : []),
-              {
-                key: 'orders',
-                label: 'Заказы',
-                children: <OrdersTab isMobile={isMobile} />,
-              },
-              
-              ...(userProfile?.role === 'expert' ? [{
-                key: 'works',
-                label: 'Работы',
-                children: (
-                  <WorksTab 
-                    isMobile={isMobile}
-                  />
-                ),
-              }] : []),
-              {
-                key: 'friends',
-                label: 'Мои друзья',
-                children: (
-                  <FriendsTab 
-                    isMobile={isMobile}
-                    onOpenChat={(friend) => {
-                      closeAllModals();
-                      setSelectedUserIdForChat(friend.id);
-                      setMessageModalVisible(true);
-                    }}
-                    onOpenProfile={(friend) => {
-                      closeAllModals();
-                      setSelectedFriend(friend);
-                      setFriendProfileModalVisible(true);
-                    }}
-                  />
-                ),
-              },
-            ]}
-          />
+          <Suspense fallback={<div style={{ padding: '24px' }}><Skeleton active paragraph={{ rows: 6 }} /></div>}>
+            <Tabs
+              activeKey={activeTab}
+              onChange={setActiveTab}
+              items={items}
+            />
+          </Suspense>
         </div>
       </div>
 
-      <ProfileModal
-        visible={profileModalVisible}
-        onClose={() => setProfileModalVisible(false)}
-        profile={profile}
-        userProfile={userProfile}
-      />
-      
-      <ApplicationModal
-        visible={applicationModalVisible}
-        onClose={() => setApplicationModalVisible(false)}
-      />
-      
-      <WelcomeModal
-        visible={welcomeModalVisible}
-        onClose={() => setWelcomeModalVisible(false)}
-        userProfile={userProfile}
-      />
-      
-      <SpecializationModal
-        visible={specializationModalVisible}
-        onClose={() => setSpecializationModalVisible(false)}
-        editingSpecialization={editingSpecialization}
-      />
-      
-      <MessageModal
-        visible={messageModalVisible}
-        onClose={() => {
-          setMessageModalVisible(false);
-          setSelectedUserIdForChat(undefined);
-        }}
-        isMobile={isMobile}
-        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
-        isDesktop={window.innerWidth > 1024}
-        selectedUserId={selectedUserIdForChat}
-        userProfile={userProfile}
-      />
-      
-      <NotificationsModal
-        visible={notificationsModalVisible}
-        onClose={() => setNotificationsModalVisible(false)}
-        isMobile={isMobile}
-      />
-      
-      <ArbitrationModal
-          visible={arbitrationModalVisible}
-          onClose={() => setArbitrationModalVisible(false)}
-          cases={arbitrationCases}
-          isMobile={isMobile}
-        />
-      
-      <FinanceModal
-        visible={financeModalVisible}
-        onClose={() => setFinanceModalVisible(false)}
-        profile={profile}
-        isMobile={isMobile}
-      />
-      
-      <FriendsModal
-        visible={friendsModalVisible}
-        onClose={() => setFriendsModalVisible(false)}
-        onOpenChat={(friend) => {
-          closeAllModals();
-          setSelectedUserIdForChat(friend.id);
-          setMessageModalVisible(true);
-        }}
-        onOpenProfile={(friend) => {
-          closeAllModals();
-          setSelectedFriend(friend);
-          setFriendProfileModalVisible(true);
-        }}
-        isMobile={isMobile}
-      />
-      
-      <FaqModal
-        visible={faqModalVisible}
-        onClose={() => setFaqModalVisible(false)}
-        isMobile={isMobile}
-      />
-      
-      <FriendProfileModal
-        visible={friendProfileModalVisible}
-        onClose={() => setFriendProfileModalVisible(false)}
-        friend={selectedFriend}
-        onOpenChat={() => {
-          closeAllModals();
-          if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
-          setMessageModalVisible(true);
-        }}
-      />
+      <Suspense fallback={null}>
+        {profileModalVisible && (
+          <ProfileModal
+            visible={profileModalVisible}
+            onClose={() => setProfileModalVisible(false)}
+            profile={userProfile || null}
+            userProfile={userProfile}
+          />
+        )}
+        
+        {applicationModalVisible && (
+          <ApplicationModal
+            visible={applicationModalVisible}
+            onClose={() => setApplicationModalVisible(false)}
+            application={application || null}
+          />
+        )}
+        
+        {welcomeModalVisible && (
+          <WelcomeModal
+            visible={welcomeModalVisible}
+            onClose={() => setWelcomeModalVisible(false)}
+          />
+        )}
+        
+        {specializationModalVisible && (
+          <SpecializationModal
+            visible={specializationModalVisible}
+            onClose={() => {
+              setSpecializationModalVisible(false);
+              setEditingSpecialization(null);
+            }}
+            specialization={editingSpecialization}
+            profile={userProfile || null}
+          />
+        )}
+        
+        {messageModalVisible && selectedUserIdForChat && (
+          <MessageModal
+            visible={messageModalVisible}
+            onClose={() => {
+              setMessageModalVisible(false);
+              setSelectedUserIdForChat(undefined);
+            }}
+            isMobile={isMobile}
+            isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
+            isDesktop={window.innerWidth > 1024}
+            selectedUserId={selectedUserIdForChat}
+            userProfile={userProfile || undefined}
+          />
+        )}
+        
+        {notificationsModalVisible && (
+          <NotificationsModal
+            visible={notificationsModalVisible}
+            onClose={() => setNotificationsModalVisible(false)}
+          />
+        )}
+        
+        {arbitrationModalVisible && (
+          <ArbitrationModal
+            visible={arbitrationModalVisible}
+            onClose={() => setArbitrationModalVisible(false)}
+            cases={arbitrationCases}
+          />
+        )}
+        
+        {financeModalVisible && (
+          <FinanceModal
+            visible={financeModalVisible}
+            onClose={() => setFinanceModalVisible(false)}
+            balance={userProfile?.balance || 0}
+          />
+        )}
+        
+        {friendsModalVisible && (
+          <FriendsModal
+            visible={friendsModalVisible}
+            onClose={() => setFriendsModalVisible(false)}
+          />
+        )}
+        
+        {faqModalVisible && (
+          <FaqModal
+            visible={faqModalVisible}
+            onClose={() => setFaqModalVisible(false)}
+          />
+        )}
+        
+        {friendProfileModalVisible && selectedFriend && (
+          <FriendProfileModal
+            visible={friendProfileModalVisible}
+            onClose={() => {
+              setFriendProfileModalVisible(false);
+              setSelectedFriend(null);
+            }}
+            user={selectedFriend}
+            onOpenChat={(userId) => {
+              setFriendProfileModalVisible(false);
+              setSelectedUserIdForChat(userId);
+              setMessageModalVisible(true);
+            }}
+          />
+        )}
+      </Suspense>
     </>
   );
 };

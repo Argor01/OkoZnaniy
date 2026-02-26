@@ -54,6 +54,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #722ed1;
+
 }
 
 .roleTag {
@@ -104,7 +105,8 @@
 }
 
 .nameText {
-  font-size: 20px;
+  font-family: 'Syncopate', sans-serif;
+  font-size: 18px !important;
   font-weight: 700;
   color: #722ed1;
   margin: 0;
@@ -206,6 +208,10 @@
 
 .sectionMargin {
   margin-bottom: 16px;
+}
+
+.sectionMargin :global(.ant-card-head-title) {
+  font-size: 18px;
 }
 
 .tagList {

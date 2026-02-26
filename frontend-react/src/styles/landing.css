@@ -1,7 +1,6 @@
-﻿﻿@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
 html {
   font-size: 16px;
-  font-family: var(--font-family-sans);
   font-weight: 400;
   font-style: normal;
   scroll-behavior: smooth;
@@ -15,10 +14,14 @@ body {
   background-color: #ffffff;
 }
 
-a,
-button,
-input,
-textarea {
+.landing-page {
+  font-family: var(--font-family-sans);
+}
+
+.landing-page a,
+.landing-page button,
+.landing-page input,
+.landing-page textarea {
   font-family: var(--font-family-sans);
   text-decoration: none;
 }
@@ -369,7 +372,7 @@ img {
           flex: 0 0 auto;
 }
 .header__nav-menu-item-link {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 15px;
   color: #fff;
@@ -566,7 +569,7 @@ img {
 }
 .first-screen__content-descripton {
   margin: 0 0 60px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 32px;
   color: #fff;
@@ -733,7 +736,7 @@ img {
       -ms-flex: 0 1 420px;
           flex: 0 1 420px;
   margin: 0;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 20px;
   color: var(--color-grey-700);
@@ -811,7 +814,7 @@ img {
   }
 }
 .place-task__advantages-card-text {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 18px;
   color: #fff;
@@ -888,13 +891,13 @@ img {
 }
 .advantages__card-title {
   margin: 0;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 600;
   font-size: 16px;
   color: #000;
 }
 .advantages__card-text {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 14px;
   color: #000;
@@ -956,7 +959,7 @@ img {
   }
 }
 .prices__details-description {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 24px;
   color: var(--color-grey-700);
@@ -1072,7 +1075,7 @@ img {
 }
 .prices__main-card-details-title {
   margin: 0 0 12px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 32px;
   color: var(--color-grey-700);
@@ -1094,7 +1097,7 @@ img {
   gap: 4px 40px;
 }
 .prices__main-card-details-info-item {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
 }
 .prices__main-card-details-info-item-title {
   font-weight: 400;
@@ -1332,7 +1335,7 @@ img {
 }
 .only-pro__description {
   margin: 0 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 24px;
   color: #fff;
@@ -1404,7 +1407,7 @@ img {
   margin-top: 20px;
   margin-bottom: 0;
   padding: 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 20px;
   color: #fff;
@@ -1461,7 +1464,7 @@ img {
 }
 .reviews__description {
   margin: 0 0 30px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 24px;
   color: var(--color-grey-700);
@@ -1489,14 +1492,14 @@ img {
 }
 .reviews__slider-slide-name {
   margin: 0 0 5px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 20px;
   color: var(--color-grey-700);
 }
 .reviews__slider-slide-type {
   margin: 0 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 16px;
   color: var(--color-grey-700);
@@ -1504,7 +1507,7 @@ img {
 }
 .reviews__slider-slide-text {
   margin: 0 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 16px;
   color: var(--color-grey-700);
@@ -1733,7 +1736,7 @@ img {
 }
 .leave-order__steps-item-title {
   margin: 0 0 15px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 600;
   font-size: 24px;
   text-align: center;
@@ -1766,7 +1769,7 @@ img {
   height: auto;
 }
 .leave-order__steps-item-text {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 20px;
   text-align: center;
@@ -1972,7 +1975,7 @@ img {
           flex: 0 0 auto;
   width: 30px;
   aspect-ratio: 1;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 23px;
   line-height: 100%;
@@ -2000,7 +2003,7 @@ img {
   background-color: #bae0ff;
 }
 .faq__item-toggler-question {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 600;
   font-size: 20px;
   color: #464646;
@@ -2031,7 +2034,7 @@ img {
 }
 .faq__item-panel-answer {
   padding: 22px 40px 30px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 20px;
   color: #000;
@@ -2312,7 +2315,7 @@ img {
   }
 }
 .footer__contacts-link-text {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 20px;
   color: #fff;
@@ -2407,7 +2410,7 @@ img {
   }
 }
 .footer__documents-link {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 16px;
   text-decoration: underline;
@@ -2488,7 +2491,7 @@ img {
 }
 .about__mission-title {
   margin: 0 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 32px;
   color: var(--color-grey-700);
@@ -2500,7 +2503,7 @@ img {
 }
 .about__mission-text {
   margin: 0 0 20px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 18px;
   line-height: 1.6;
@@ -2573,7 +2576,7 @@ img {
   height: 100%;
 }
 .about__value-text {
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 600;
   font-size: 18px;
   text-align: center;
@@ -2661,7 +2664,7 @@ img {
 }
 .about__team-name {
   margin: 0 0 8px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 24px;
   color: var(--color-grey-700);
@@ -2673,7 +2676,7 @@ img {
 }
 .about__team-role {
   margin: 0 0 15px;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 500;
   font-size: 16px;
   color: var(--color-brand-blue-500);
@@ -2685,7 +2688,7 @@ img {
 }
 .about__team-description {
   margin: 0;
-  font-family: "Jost", sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 16px;
   line-height: 1.6;

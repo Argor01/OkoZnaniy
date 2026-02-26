@@ -26,6 +26,7 @@
   border-bottom: 1px solid #f0f0f0;
   background: #1890ff;
   color: white;
+
 }
 .sidebarProfileInner {
   position: relative;
@@ -43,7 +44,7 @@
 .sidebarProfileName {
   margin: 0;
   font-size: 14px;
-  color: white;
+  color: white !important; 
 }
 .sidebarProfileRole {
   font-size: 12px;

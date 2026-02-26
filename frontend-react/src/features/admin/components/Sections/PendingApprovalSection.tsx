@@ -44,7 +44,7 @@ const { TextArea } = Input;
 const { Step } = Steps;
 
 import { ApprovalRequest, Claim } from '@/features/support/types/support';
-import { useClaims, useClaimActions } from '../../hooks';
+import { useClaims, useClaimActions } from '@/features/admin/hooks';
 
 export const PendingApprovalSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('pending_approval', true);

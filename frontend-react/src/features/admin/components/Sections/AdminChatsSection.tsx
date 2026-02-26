@@ -27,7 +27,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './AdminChatsSection.module.css';
-import { useAdminAuth } from '../../hooks/useAdminAuth';
+import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import { useChatRooms, useChatMessages, useChatActions } from '@/features/admin/hooks/useAdminChats';
 import { ChatRoom, ChatMessage } from '@/features/admin/types/admin';
 

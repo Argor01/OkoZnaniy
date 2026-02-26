@@ -10,10 +10,10 @@ import {
   useClaimActions,
   useAdminChatRooms,
   useChatRoomActions
-} from '../hooks';
+} from '@/features/admin/hooks';
 import { User } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
-import { AdminLayout } from '../components/Layout';
+import { AdminLayout } from '@/features/admin/components/Layout';
 import { 
   OverviewSection, 
   PartnersSection, 
@@ -32,10 +32,10 @@ import {
   AdminChatsSection,
   UserConversationsSection,
   TariffsSettingsSection,
-} from '../components/Sections';
-import { PartnerModal, DisputeModal, SupportRequestModal } from '../components/Modals';
-import AdminLogin from './AdminLogin';
-import type { MenuKey } from '../types';
+} from '@/features/admin/components/Sections';
+import { PartnerModal, DisputeModal, SupportRequestModal } from '@/features/admin/components/Modals';
+import AdminLogin from '@/features/admin/pages/AdminLogin';
+import type { MenuKey } from '@/features/admin/types';
 import '@/styles/modals.css';
 import '@/styles/admin-dashboard.css';
 
