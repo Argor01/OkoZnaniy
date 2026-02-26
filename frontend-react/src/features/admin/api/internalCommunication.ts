@@ -9,7 +9,11 @@ export const internalCommunicationApi = {
     const response = await apiClient.get('/director/internal-communication/', {
       params: { is_archived: isArchived },
     });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   
@@ -46,7 +50,11 @@ export const internalCommunicationApi = {
     const response = await apiClient.get('/director/meeting-requests/', {
       params: status ? { status } : {},
     });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   

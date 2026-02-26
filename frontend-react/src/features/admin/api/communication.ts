@@ -6,12 +6,20 @@ export const communicationApi = {
   // Chat Rooms
   getChatRooms: async () => {
     const response = await apiClient.get(API_ENDPOINTS.admin.communication.chatRooms.list);
-    return Array.isArray(response.data) ? response.data : [];
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   getChatRoomMessages: async (roomId: number) => {
     const response = await apiClient.get(API_ENDPOINTS.admin.communication.chatRooms.messages(roomId));
-    return Array.isArray(response.data) ? response.data : [];
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   sendChatRoomMessage: async (roomId: number, message: string) => {

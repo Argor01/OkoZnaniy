@@ -112,10 +112,21 @@ export const UserConversationsSection: React.FC = () => {
     setLoading(true);
     try {
       const response = await apiClient.get('admin-panel/user-chats/');
-      setChats(response.data);
+      const data = response.data;
+      if (Array.isArray(data)) {
+        setChats(data);
+      } else if (data && typeof data === 'object' && Array.isArray(data.results)) {
+        setChats(data.results);
+      } else if (data && typeof data === 'object' && Array.isArray(data.data)) {
+        setChats(data.data);
+      } else {
+        setChats([]);
+        console.error('Unexpected data format for chats:', data);
+      }
     } catch (error) {
       console.error('Ошибка загрузки чатов:', error);
       antMessage.error('Не удалось загрузить переписки');
+      setChats([]);
     } finally {
       setLoading(false);
     }

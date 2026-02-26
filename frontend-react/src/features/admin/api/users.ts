@@ -6,12 +6,20 @@ export const usersApi = {
   // Users
   getUsers: async (): Promise<AdminUser[]> => {
     const response = await apiClient.get<AdminUser[]>(API_ENDPOINTS.admin.users.list);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).results)) return (data as any).results;
+    if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
+    return [];
   },
 
   getBlockedUsers: async (): Promise<BlockedUser[]> => {
     const response = await apiClient.get<BlockedUser[]>(API_ENDPOINTS.admin.users.blocked);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).results)) return (data as any).results;
+    if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
+    return [];
   },
 
   blockUser: async (userId: number): Promise<void> => {
@@ -30,7 +38,11 @@ export const usersApi = {
   // Roles & Permissions
   getRoles: async (): Promise<AdminRole[]> => {
     const response = await apiClient.get<AdminRole[]>(API_ENDPOINTS.admin.roles.list);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).results)) return (data as any).results;
+    if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
+    return [];
   },
 
   createRole: async (roleData: Partial<AdminRole>): Promise<AdminRole> => {
@@ -49,7 +61,11 @@ export const usersApi = {
 
   getPermissions: async (): Promise<AdminPermission[]> => {
     const response = await apiClient.get<AdminPermission[]>(API_ENDPOINTS.admin.roles.permissions);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).results)) return (data as any).results;
+    if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
+    return [];
   },
 
   updateRolePermissions: async (roleId: string, permissions: string[]): Promise<AdminRole> => {

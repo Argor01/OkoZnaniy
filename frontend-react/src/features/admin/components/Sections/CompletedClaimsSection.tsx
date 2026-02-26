@@ -84,7 +84,7 @@ interface Claim {
   resolution: ClaimResolution;
 }
 
-import { useClaims, useClaimActions } from '../../hooks/useAdminPanelData';
+import { useClaims, useClaimActions } from '../../hooks';
 
 export const CompletedClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('completed', true);

@@ -6,7 +6,11 @@ export const financeApi = {
   // Tariffs
   getTariffs: async () => {
     const response = await apiClient.get(API_ENDPOINTS.admin.finance.tariffs.list);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   createTariff: async (data: any) => {
@@ -26,7 +30,11 @@ export const financeApi = {
   // Commissions
   getCommissions: async () => {
     const response = await apiClient.get(API_ENDPOINTS.admin.finance.commissions.list);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   createCommission: async (data: any) => {
@@ -46,12 +54,20 @@ export const financeApi = {
   // Partners & Earnings
   getPartners: async (): Promise<Partner[]> => {
     const response = await apiClient.get(API_ENDPOINTS.admin.finance.partners);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   getEarnings: async (): Promise<PartnerEarning[]> => {
     const response = await apiClient.get(API_ENDPOINTS.admin.finance.earnings);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   updatePartner: async (partnerId: number, data: UpdatePartnerRequest): Promise<Partner> => {

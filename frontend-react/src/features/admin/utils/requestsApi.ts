@@ -186,7 +186,11 @@ export const requestsApi = {
   
   async getRequestHistory(requestId: number): Promise<any[]> {
     const response = await apiClient.get(`/admin/customer-requests/${requestId}/history/`);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   
@@ -214,7 +218,11 @@ export const requestsApi = {
   
   async getAvailableAdmins(): Promise<any[]> {
     const response = await apiClient.get('/admin/users/admins/');
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   
@@ -228,6 +236,10 @@ export const requestsApi = {
   async getResponseTemplates(category?: string): Promise<any[]> {
     const params = category ? { category } : {};
     const response = await apiClient.get('/admin/response-templates/', { params });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 };

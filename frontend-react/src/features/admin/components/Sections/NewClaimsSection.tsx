@@ -30,7 +30,7 @@ import {
   ExclamationCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useClaims, useClaimActions } from '@/features/admin/hooks/useAdminPanelData';
+import { useClaims, useClaimActions } from '@/features/admin/hooks';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;

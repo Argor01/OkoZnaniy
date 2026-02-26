@@ -10,6 +10,12 @@ export const useChatRooms = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getChatRooms,
     enabled,
     initialData: [],
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { chatRooms, loading, refetch };

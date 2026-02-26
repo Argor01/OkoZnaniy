@@ -26,7 +26,7 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useWorks, useWorkActions } from '../../hooks/useAdminPanelData';
+import { useWorks, useWorkActions } from '../../hooks';
 import { Work } from '@/features/admin/types/admin';
 
 const { Text, Title } = Typography;

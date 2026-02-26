@@ -23,6 +23,9 @@ export const QUERY_KEYS = {
     works: (status?: string) => ['admin-works', status],
     tariffs: ['admin-tariffs'],
     commissions: ['admin-commissions'],
+    internalMessages: (archived?: boolean) => ['admin-internal-messages', archived],
+    meetingRequests: (status?: string) => ['admin-meeting-requests', status],
+    internalUnreadCount: ['admin-internal-unread-count'],
   },
   
   // User

@@ -9,6 +9,12 @@ export const useUsers = () => {
   const { data: users = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_USERS,
     queryFn: adminPanelApi.getUsers,
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { users, loading, error };
@@ -20,6 +26,12 @@ export const useBlockedUsers = () => {
   const { data: users = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_BLOCKED_USERS,
     queryFn: adminPanelApi.getBlockedUsers,
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { users, loading, error };
@@ -29,6 +41,12 @@ export const useRoles = () => {
   const { data: roles = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_ROLES,
     queryFn: adminPanelApi.getRoles,
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { roles, loading, error };
@@ -38,6 +56,12 @@ export const usePermissions = () => {
   const { data: permissions = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_PERMISSIONS,
     queryFn: adminPanelApi.getPermissions,
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { permissions, loading, error };

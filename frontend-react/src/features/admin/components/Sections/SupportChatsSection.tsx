@@ -38,7 +38,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './SupportChatsSection.module.css';
-import { useSupportChats, useSupportActions } from '@/features/admin/hooks/useAdminPanelData';
+import { useSupportChats, useSupportActions } from '@/features/admin/hooks';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import '@/styles/support.css';
 

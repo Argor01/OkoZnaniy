@@ -34,7 +34,7 @@ import {
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useTickets, useTicketActions } from '@/features/admin/hooks/useAdminPanelData';
+import { useTickets, useTicketActions } from '@/features/admin/hooks';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;

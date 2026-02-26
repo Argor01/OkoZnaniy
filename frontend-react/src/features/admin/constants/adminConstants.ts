@@ -51,6 +51,9 @@ export const QUERY_KEYS = {
   ADMIN_WORKS: GLOBAL_QUERY_KEYS.admin.works,
   ADMIN_TARIFFS: GLOBAL_QUERY_KEYS.admin.tariffs,
   ADMIN_COMMISSIONS: GLOBAL_QUERY_KEYS.admin.commissions,
+  ADMIN_INTERNAL_MESSAGES: GLOBAL_QUERY_KEYS.admin.internalMessages,
+  ADMIN_MEETING_REQUESTS: GLOBAL_QUERY_KEYS.admin.meetingRequests,
+  ADMIN_INTERNAL_UNREAD_COUNT: GLOBAL_QUERY_KEYS.admin.internalUnreadCount,
 } as const;
 
 

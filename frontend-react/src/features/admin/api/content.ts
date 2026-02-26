@@ -12,7 +12,11 @@ export const contentApi = {
   getWorks: async (status?: string) => {
     const params = status ? { status } : {};
     const response = await apiClient.get(API_ENDPOINTS.admin.content.works.list, { params });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   approveWork: async (workId: number) => {

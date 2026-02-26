@@ -11,6 +11,12 @@ export const useTariffs = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getTariffs,
     enabled,
     initialData: [],
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { tariffs, loading, refetch };
@@ -60,6 +66,12 @@ export const useCommissions = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getCommissions,
     enabled,
     initialData: [],
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { commissions, loading, refetch };

@@ -37,7 +37,11 @@ export const supportApi = {
   getSupportRequests: async (status?: string): Promise<SupportRequest[]> => {
     const params = status ? { status } : {};
     const response = await apiClient.get(API_ENDPOINTS.admin.support.requests.list, { params });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   takeSupportRequest: async (requestId: number) => {
@@ -58,7 +62,11 @@ export const supportApi = {
   // Support Chats
   getSupportChats: async (): Promise<SupportChat[]> => {
     const response = await apiClient.get(API_ENDPOINTS.admin.support.chats.list);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   sendSupportChatMessage: async (chatId: number, message: string) => {
@@ -70,7 +78,11 @@ export const supportApi = {
   getClaims: async (status?: string): Promise<Claim[]> => {
     const params = status ? { status } : {};
     const response = await apiClient.get(API_ENDPOINTS.admin.support.claims.list, { params });
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+    return [];
   },
 
   takeClaimInWork: async (claimId: number) => {

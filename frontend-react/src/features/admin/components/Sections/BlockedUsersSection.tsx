@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography } from 'antd';
 import { StopOutlined, CheckCircleOutlined, InfoCircleOutlined, ClockCircleOutlined, EyeOutlined, UnlockOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useBlockedUsers, useUserActions } from '@/features/admin/hooks/useAdminPanelData';
+import { useBlockedUsers, useUserActions } from '@/features/admin/hooks';
 import { BlockedUser } from '@/features/admin/types/admin';
 
 const { Text, Title } = Typography;

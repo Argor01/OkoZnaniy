@@ -10,6 +10,12 @@ export const useOrders = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getOrders,
     enabled,
     initialData: [],
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { orders, loading, refetch };
@@ -24,6 +30,12 @@ export const useProblemOrders = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getProblemOrders,
     enabled,
     initialData: [],
+    select: (data: any) => {
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
+      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+      return [];
+    }
   });
 
   return { orders, loading, refetch };

@@ -32,7 +32,9 @@ export const useRequestProcessing = () => {
   });
 
   
-  const requests = requestsResponse?.results || [];
+  const requests = Array.isArray(requestsResponse) 
+    ? requestsResponse 
+    : (requestsResponse?.results || []);
 
   
   const {
@@ -48,7 +50,9 @@ export const useRequestProcessing = () => {
   });
 
   
-  const requestMessages = messagesResponse?.results || [];
+  const requestMessages = Array.isArray(messagesResponse)
+    ? messagesResponse
+    : (messagesResponse?.results || []);
 
   
   const {
