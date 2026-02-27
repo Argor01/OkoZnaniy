@@ -223,7 +223,7 @@
 }
 
 .chatListName {
-  font-size: 14px;
+  font-size: 10px;
   color: #1f2937;
   font-weight: 500;
   font-family: 'Syncopate', sans-serif;
@@ -442,6 +442,10 @@
 .orderTabs :global(.ant-tabs-nav) {
   margin: 0;
   flex: 1;
+}
+
+.orderTabs :global(.ant-tabs-tab) {
+  font-family: 'Syncopate', sans-serif;
 }
 
 .orderToggleButton {

@@ -1682,7 +1682,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                           {headerOrder.title || order?.title || `Заказ #${effectiveOrderId}`}
                         </Text>
                       ) : headerContextTitle ? (
-                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
+                        <Text className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
                           {headerContextTitle}
                         </Text>
                       ) : (

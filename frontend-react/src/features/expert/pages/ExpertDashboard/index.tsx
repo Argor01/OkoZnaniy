@@ -205,6 +205,7 @@ const ExpertDashboard: FC = () => {
         children: (
           <WorksTab 
             isMobile={isMobile}
+            userProfile={userProfile}
           />
         ),
       });

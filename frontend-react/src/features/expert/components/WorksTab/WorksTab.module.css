@@ -1,5 +1,66 @@
-.worksEmptyContainer {
-  padding: 24px;
+.worksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.workCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.workCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.workCardImage {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+}
+
+.workCardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.workCardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.workCardPrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 8px;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.workCardMeta {
+  display: flex;
+  justify-content: space-between;
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: auto;
+}
+
+.workCardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .sectionCard {
@@ -19,7 +80,7 @@
 }
 
 .sectionTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
   color: #1f2937;

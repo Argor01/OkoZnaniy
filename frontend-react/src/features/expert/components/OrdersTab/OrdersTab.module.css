@@ -27,6 +27,7 @@
 .ordersFilterButton {
   font-weight: 500;
   text-align: center;
+  font-family: 'Syncopate', sans-serif;
 }
 
 .ordersFilterButtonLeft {
@@ -82,7 +83,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 32px;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -94,7 +95,7 @@
 .orderTitle {
   font-size: 16px;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
   font-family: 'Syncopate', sans-serif;
 }
 
@@ -116,7 +117,7 @@
 
 .orderDescription {
   color: #666;
-  margin-bottom: 18px;
+  margin-bottom: 32px;
   font-size: 18px;
   font-family: 'BwSurco-Medium', sans-serif;
 }
@@ -141,6 +142,9 @@
   border: none;
   border-radius: 6px;
   margin-left: 8px;
+  font-weight: 600;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .orderBidButtonActive {
@@ -194,12 +198,12 @@
 }
 
 .filesBlock {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .filesLabel {
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   display: block;
 }
 
@@ -246,6 +250,23 @@
 .clientName { display: block; font-size: 14px; }
 .clientOrders { font-size: 12px; }
 
+.clientInfo {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.clientAvatar {
+  background-color: #87d068;
+}
+
+.clientName {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1f2937;
+  font-family: 'BwSurco-Medium', sans-serif;
+}
+
 /* Shared Styles from Dashboard */
 .sectionCard {
   background: rgba(255, 255, 255, 0.95);
@@ -264,7 +285,7 @@
 }
 
 .sectionTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
   color: #1f2937;

@@ -6,6 +6,14 @@
   box-sizing: border-box;
 }
 
+.expertContentContainer :global(.ant-tabs-tab) {
+  font-family: 'Syncopate', sans-serif;
+}
+
+.expertContentContainer :global(.ant-tabs-tab-btn) {
+  font-family: 'Syncopate', sans-serif;
+}
+
 @media (max-width: 768px) {
   .expertContentContainer {
     width: 100%;

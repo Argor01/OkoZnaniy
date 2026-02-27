@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm } from 'antd';
+import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm, Avatar } from 'antd';
 import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -35,8 +35,21 @@ type OrdersListItem = {
   custom_work_type?: string | null;
   work_type?: { name: string };
   topic?: { name: string };
+  client?: {
+    id: number;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    avatar?: string | null;
+  };
   is_active?: boolean;
   deleted?: boolean;
+  files?: Array<{
+    id: number;
+    filename: string;
+    file_size?: string;
+    file_url?: string;
+  }>;
 };
 
 const isOrdersListItem = (o: unknown): o is OrdersListItem => {
@@ -171,13 +184,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
           <h2 className={styles.sectionTitle}>
             Заказы
           </h2>
-          <Button 
-            type="primary"
-            onClick={() => navigate('/create-order')}
-            className={styles.ordersCreateButton}
-          >
-            Создать заказ
-          </Button>
         </div>
 
         {showAvailableTab && (
@@ -350,6 +356,22 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   </div>
                 )}
 
+                {order.client && (
+                  <div className={styles.clientInfo}>
+                    <Space size={12}>
+                      <Avatar 
+                        src={order.client.avatar} 
+                        icon={<UserOutlined />} 
+                        size={48}
+                        className={styles.clientAvatar}
+                      />
+                      <Text className={styles.clientName}>
+                        {order.client.first_name || order.client.username}
+                      </Text>
+                    </Space>
+                  </div>
+                )}
+
                 <div className={styles.orderMetaRow}>
                   <Space size={16} wrap>
                     {order.deadline && (
@@ -383,7 +405,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       return (
                     <Button 
                       type={hasMyBid ? 'default' : 'primary'}
-                      size="small"
+                      size={isMobile ? 'middle' : 'large'}
                       disabled={hasMyBid}
                       onClick={(e) => {
                         e.stopPropagation();
