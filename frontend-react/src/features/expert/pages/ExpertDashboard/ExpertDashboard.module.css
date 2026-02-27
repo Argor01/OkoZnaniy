@@ -902,6 +902,7 @@
   border-radius: 50%;
   background-color: #10b981;
   display: inline-block;
+  margin-bottom: 6px;
 }
 
 .profileOnlineText {
@@ -5534,9 +5535,9 @@
 }
 
 .aboutBio {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.8;
-  color: #4b5563;
+  color: black;
 }
 
 .aboutHighlights {
@@ -5571,15 +5572,16 @@
 }
 
 .aboutSectionText {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.8;
-  color: #4b5563;
+  color: black;
 }
 
 .aboutSkillsList {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 16px;
 }
 
 .aboutSkillTag {
@@ -5678,7 +5680,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 52px;
 }
 
 .applicationEmptyStack {
@@ -6068,4 +6070,58 @@
 {
   font-family: 'Syncopate', sans-serif !important;
 }
+
+/* Added for Orders Card Structure */
+.filesBlock {
+  margin-bottom: 16px;
+}
+
+.filesLabel {
+  font-size: 12px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.fileTag {
+  cursor: pointer;
+  padding: 4px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.fileTag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fileIconPdf { color: #ff4d4f; }
+.fileIconDoc { color: #1890ff; }
+.fileIconImage { color: #52c41a; }
+.fileIconArchive { color: #fa8c16; }
+.fileIconDefault { color: #666; }
+.fileDownloadIcon { margin-left: 4px; }
+
+.orderMeta { margin-bottom: 16px; }
+.metaIcon { color: #999; }
+.metaText { font-size: 14px; }
+
+.responsesCount { font-size: 14px; font-weight: 600; }
+.responsesCountNone { color: #999; }
+.responsesCountMany { color: #ff4d4f; }
+.responsesCountSome { color: #52c41a; }
+
+.divider { margin: 16px 0; }
+
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.clientAvatar { background-color: #1890ff; }
+.clientName { display: block; font-size: 14px; }
+.clientOrders { font-size: 12px; }
 

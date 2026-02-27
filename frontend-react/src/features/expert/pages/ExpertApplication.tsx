@@ -160,7 +160,7 @@ const ExpertApplication: React.FC = () => {
             <Title level={1} style={{ 
               margin: 0, 
               marginBottom: 12,
-              fontFamily: 'var(--font-family-display)',
+              fontFamily: "'Syncopate', sans-serif",
               fontWeight: 800,
               color: '#fff'
             }}>

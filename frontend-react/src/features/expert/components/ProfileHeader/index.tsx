@@ -106,13 +106,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
               <Title level={3} className={styles.profileNameTitle}>
                 {displayName}
               </Title>
-              {isMobile ? (
-                <span className={styles.profileOnlineDot} />
-              ) : (
-                <Text type="secondary" className={styles.profileOnlineText}>
-                  Онлайн
-                </Text>
-              )}
+              <span className={styles.profileOnlineDot} />
             </div>
             <div
               className={`${styles.profileStatsRow} ${isMobile ? styles.profileStatsRowMobile : ''}`}

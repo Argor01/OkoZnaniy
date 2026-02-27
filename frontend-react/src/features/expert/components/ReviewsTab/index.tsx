@@ -78,7 +78,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                 </div>
               </div>
 
-              <Paragraph className={styles.reviewText}>{review.text || review.comment || '—'}</Paragraph>
+              <Paragraph className={styles.reviewText}>{review.text || review.comment || ''}</Paragraph>
             </div>
           ))}
         </div>

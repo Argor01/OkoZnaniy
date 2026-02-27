@@ -112,6 +112,26 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_LABELS[status] || status;
 
+  const handleDownloadOrderFile = async (orderId: number, file: any) => {
+    try {
+      const blob = await ordersApi.downloadOrderFile(orderId, file.id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', file.filename || 'file');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('Ошибка при скачивании файла:', error);
+      message.error('Не удалось скачать файл');
+    }
+  };
+
+  const isOrderOwner = (order: OrdersListItem) => {
+    return order.client?.id === userProfile?.id;
+  };
+
   const handleDeleteOrder = async (orderId: number) => {
     try {
       await ordersApi.deleteOrder(orderId);
