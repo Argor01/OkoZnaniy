@@ -174,12 +174,14 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     },
     {
       key: 'messages',
-      icon: <MessageOutlined />,
-      label: (
-        <Badge count={unreadMessages} offset={[10, 0]}>
-          Сообщения
+      icon: unreadMessages > 0 ? (
+        <Badge dot>
+          <MessageOutlined className={styles.notificationDotIcon} />
         </Badge>
+      ) : (
+        <MessageOutlined />
       ),
+      label: 'Сообщения',
     },
     {
       key: 'notifications',

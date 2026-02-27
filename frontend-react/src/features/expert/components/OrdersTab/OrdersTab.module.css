@@ -1,3 +1,11 @@
+.sectionCard {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
 .ordersLoading {
   text-align: center;
   padding: 60px 0;
@@ -58,7 +66,7 @@
 .ordersGrid {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 992px) {
@@ -163,7 +171,7 @@
   border: none;
   color: #fff;
   text-transform: uppercase;
-  font-weight: 400;
+  font-weight: 300;
   font-size: 14px;
 }
 
@@ -171,7 +179,7 @@
   border-radius: 16px;
   padding: 4px 12px;
   border: none;
-  font-weight: 400;
+  font-weight: 300;
   color: #fff;
   background: #1890ff;
   font-size: 14px;
@@ -181,7 +189,7 @@
   border-radius: 16px;
   padding: 4px 12px;
   border: none;
-  font-weight: 400;
+  font-weight: 300;
   color: #fff;
   background: #722ed1;
   font-size: 14px;
@@ -191,7 +199,7 @@
   border-radius: 16px;
   padding: 4px 12px;
   border: none;
-  font-weight: 400;
+  font-weight: 300;
   color: #fff;
   background: #eb2f96;
   font-size: 14px;

@@ -121,11 +121,12 @@
   overflow: hidden;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   margin: auto;
   max-width: 100%;
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 40px);
 }
 
 .profileModalWrapMobile :global(.ant-modal-content) {
@@ -137,6 +138,15 @@
 
 .profileModalWrapDesktop :global(.ant-modal-content) {
   border-radius: 24px;
+}
+
+.profileModalWrap :global(.ant-modal-content) ::-webkit-scrollbar {
+  display: none;
+}
+
+.profileModalWrap :global(.ant-modal-content) * {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .profileModalWrap :global(.ant-modal-header) {
@@ -159,8 +169,7 @@
   padding: 32px;
   background: rgba(255, 255, 255, 0.95);
   overflow-y: auto;
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 1;
 }
 
 .profileModalWrapMobile :global(.ant-modal-body) {
@@ -169,10 +178,9 @@
 }
 
 .profileModalWrap :global(.ant-modal-footer) {
-  padding: 24px 32px;
-  background: rgba(255, 255, 255, 0.95);
+  margin-top: 0;
+  padding: 16px 32px 24px;
   border-top: 1px solid rgba(102, 126, 234, 0.1);
-  border-radius: 0 0 24px 24px;
   flex-shrink: 0;
 }
 

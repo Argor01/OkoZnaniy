@@ -72,6 +72,9 @@ a {
   width: 100%;
 }
 
+.ant-tag {
+  font-weight: 300;
+}
 
 .ant-btn.balanceButton,
 .ant-btn.balanceButton:hover,

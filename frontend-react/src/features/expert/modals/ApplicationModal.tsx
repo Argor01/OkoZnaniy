@@ -27,16 +27,31 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
 
   
   useEffect(() => {
-    if (visible && isMobile) {
+    if (visible) {
       document.body.style.overflow = 'hidden';
-      
+      // Hide scrollbar visually but keep functionality if needed
+      const style = document.createElement('style');
+      style.id = 'hide-scrollbar-style';
+      style.innerHTML = `
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+      `;
+      document.head.appendChild(style);
     } else {
       document.body.style.overflow = '';
+      const style = document.getElementById('hide-scrollbar-style');
+      if (style) {
+        style.remove();
+      }
     }
     return () => {
       document.body.style.overflow = '';
+      const style = document.getElementById('hide-scrollbar-style');
+      if (style) {
+        style.remove();
+      }
     };
-  }, [visible, isMobile]);
+  }, [visible]);
 
   const createApplicationMutation = useMutation({
     mutationFn: expertsApi.createApplication,
@@ -66,6 +81,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       onCancel={onClose}
       onOk={() => applicationForm.submit()}
       width={isMobile ? '100%' : 750}
+      style={{ top: 20 }}
       okText="Отправить"
       cancelText="Отмена"
       okButtonProps={{

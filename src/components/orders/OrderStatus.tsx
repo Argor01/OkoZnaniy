@@ -19,7 +19,7 @@ export const OrderStatus: React.FC<OrderStatusProps> = ({ status }) => {
   const config = statusConfig[status];
 
   return (
-    <Tag color={config.color} style={{ minWidth: 85, textAlign: 'center' }}>
+    <Tag color={config.color} style={{ minWidth: 85, textAlign: 'center', fontWeight: 100 }}>
       {config.text}
     </Tag>
   );

@@ -465,21 +465,17 @@ const OrdersFeed: React.FC = () => {
                       : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
                 : false;
             return (
-            <SurfaceCard
+            <Card
               key={order.id}
               hoverable
               className={styles.orderCard}
-              bodyPadding={24}
               onClick={() => navigate(`/orders/${order.id}`)}
             >
-              <div className={styles.orderHeader}>
-                <div className={styles.orderHeaderLeft}>
-                  <Title 
-                    level={4} 
-                    className={styles.orderTitle}
-                  >
+              <div className={styles.orderCardHeader}>
+                <div className={styles.orderCardHeaderInfo}>
+                  <Text strong className={styles.orderTitle}>
                     {order.title}
-                  </Title>
+                  </Text>
                   <Space size={8} wrap>
                     <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
                       {getStatusText(order.status)}
@@ -501,8 +497,8 @@ const OrdersFeed: React.FC = () => {
                     )}
                   </Space>
                 </div>
-                <div className={styles.orderHeaderRight}>
-                  <div className={styles.orderHeaderActions}>
+                <div className={styles.orderCardActions}>
+                  <div className={styles.orderCardActionsRow}>
                     <Tooltip title="Скопировать ссылку на заказ">
                       <Button
                         type="text"
@@ -521,7 +517,7 @@ const OrdersFeed: React.FC = () => {
                       />
                     </Tooltip>
                   </div>
-                  <div className={styles.budgetText}>
+                  <div className={styles.orderBudget}>
                     {Number.isFinite(Number(order.budget)) ? formatCurrency(Number(order.budget)) : 'Договорная'}
                   </div>
                 </div>
@@ -533,7 +529,6 @@ const OrdersFeed: React.FC = () => {
               >
                 {order.description || 'Описание не указано'}
               </Paragraph>
-
               
               {order.files && order.files.length > 0 && (
                 <div className={styles.filesBlock}>
@@ -542,7 +537,6 @@ const OrdersFeed: React.FC = () => {
                   </Text>
                   <Space size={8} wrap>
                     {order.files.map((file) => {
-
                       const getFileIcon = (filename: string) => {
                         const ext = filename.split('.').pop()?.toLowerCase();
                         if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
@@ -551,7 +545,7 @@ const OrdersFeed: React.FC = () => {
                         if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
                         return <FileOutlined className={styles.fileIconDefault} />;
                       };
-                      const fileName = file.filename || 'file';
+                      const fileName = file.filename || file.file_name || 'file';
 
                       return (
                         <Tooltip
@@ -561,7 +555,8 @@ const OrdersFeed: React.FC = () => {
                           <Tag 
                             icon={getFileIcon(fileName)}
                             className={styles.fileTag}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDownloadOrderFile(order.id, file);
                             }}
                           >
@@ -574,38 +569,8 @@ const OrdersFeed: React.FC = () => {
                 </div>
               )}
 
-              <Space size={16} wrap className={styles.orderMeta}>
-                <Space size={4}>
-                  <ClockCircleOutlined className={styles.metaIcon} />
-                  <Text type="secondary" className={styles.metaText}>
-                    {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
-                  </Text>
-                </Space>
-                {order.created_at && (
-                  <Text type="secondary" className={styles.metaText}>
-                    Создан {dayjs(order.created_at).fromNow()}
-                  </Text>
-                )}
-                <Space size={4}>
-                  <UserOutlined className={styles.metaIcon} />
-                  <Text 
-                    className={`${styles.responsesCount} ${
-                      (order.bids?.length || order.responses_count || 0) === 0
-                        ? styles.responsesCountNone
-                        : (order.bids?.length || order.responses_count || 0) > 5
-                          ? styles.responsesCountMany
-                          : styles.responsesCountSome
-                    }`}
-                  >
-                    {order.bids?.length || order.responses_count || 0}
-                  </Text>
-                </Space>
-              </Space>
-
-              <Divider className={styles.divider} />
-
-              <div className={styles.orderFooter}>
-                <Space size={10}>
+              <div className={styles.clientInfo}>
+                <Space size={12}>
                   <Avatar 
                     size={48}
                     src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
@@ -619,45 +584,70 @@ const OrdersFeed: React.FC = () => {
                           ? `${order.client.first_name} ${order.client.last_name}` 
                           : userProfile?.username || 'Заказчик')}
                     </Text>
-                    <Text type="secondary" className={styles.clientOrders}>
+                    <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
                       Заказов: {order.client_orders_count || 1}
                     </Text>
                   </div>
                 </Space>
-                <Space size={8}>
-                  {isOrderOwner(order) ? (
-                    <Button 
-                      danger
-                      icon={<DeleteOutlined />}
-                      className={`${styles.actionButton} ${styles.deleteButton}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
-                          handleDeleteOrder(order.id);
-                        }
-                      }}
-                    >
-                      Удалить
-                    </Button>
-                  ) : userProfile?.role === 'expert' ? (
-                    <Button 
-                      type={hasMyBid ? 'default' : 'primary'}
-                      disabled={hasMyBid || checkingMyBid}
-                      className={`${styles.actionButton} ${styles.bidButton}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (hasMyBid || checkingMyBid) return;
-                        setSelectedOrderForBid(order);
-                        setBidModalVisible(true);
-                      }}
-                    >
-                      {hasMyBid ? 'Вы уже откликнулись на этот заказ' : checkingMyBid ? 'Проверяем...' : 'Откликнуться'}
-                    </Button>
-                  ) : null}
-                </Space>
               </div>
-            </SurfaceCard>
-          );
+
+              <div className={styles.orderMetaRow}>
+                <Space size={16} wrap>
+                  <Space size={4}>
+                    <ClockCircleOutlined className={styles.orderMetaIcon} />
+                    <Text type="secondary" className={styles.orderMetaText}>
+                      {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
+                    </Text>
+                  </Space>
+                  <Space size={4}>
+                    <UserOutlined className={styles.orderMetaIcon} />
+                    <Text 
+                      className={`${styles.responsesCount} ${
+                        (order.bids?.length || order.responses_count || 0) === 0
+                          ? styles.responsesCountNone
+                          : (order.bids?.length || order.responses_count || 0) > 5
+                            ? styles.responsesCountMany
+                            : styles.responsesCountSome
+                      }`}
+                    >
+                      {order.bids?.length || order.responses_count || 0} откликов
+                    </Text>
+                  </Space>
+                </Space>
+                
+                {isOrderOwner(order) ? (
+                  <Button 
+                    danger
+                    icon={<DeleteOutlined />}
+                    className={`${styles.actionButton} ${styles.deleteButton}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                        handleDeleteOrder(order.id);
+                      }
+                    }}
+                  >
+                    Удалить
+                  </Button>
+                ) : userProfile?.role === 'expert' ? (
+                  <Button 
+                    type={hasMyBid ? 'default' : 'primary'}
+                    disabled={hasMyBid || checkingMyBid}
+                    size={isMobile ? 'middle' : 'large'}
+                    className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (hasMyBid || checkingMyBid) return;
+                      setSelectedOrderForBid(order);
+                      setBidModalVisible(true);
+                    }}
+                  >
+                    {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
+                  </Button>
+                ) : null}
+              </div>
+            </Card>
+            );
           })}
         </div>
       )}

@@ -46,6 +46,10 @@
   margin-bottom: 12px;
 }
 
+.header :global(.ant-tag) {
+  font-weight: 300;
+}
+
 .favoriteIcon {
   color: #ff4d4f;
 }

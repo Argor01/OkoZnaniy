@@ -16,6 +16,10 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+.workCard :global(.ant-tag) {
+  font-weight: 300;
+}
+
 .workCardImage {
   height: 200px;
   object-fit: cover;

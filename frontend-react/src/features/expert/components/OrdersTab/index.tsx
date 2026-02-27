@@ -402,19 +402,21 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                               )
                             : false;
 
+                      const isMyOrder = order.client?.id === userProfile.id;
+
                       return (
                     <Button 
-                      type={hasMyBid ? 'default' : 'primary'}
+                      type={hasMyBid || isMyOrder ? 'default' : 'primary'}
                       size={isMobile ? 'middle' : 'large'}
-                      disabled={hasMyBid}
+                      disabled={hasMyBid || isMyOrder}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (hasMyBid) return;
+                        if (hasMyBid || isMyOrder) return;
                         navigate(`/orders/${order.id}`);
                       }}
-                      className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
+                      className={`${styles.orderBidButton} ${(hasMyBid || isMyOrder) ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
                     >
-                      {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
+                      {isMyOrder ? 'Ваш заказ' : (hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться')}
                     </Button>
                       );
                     })()

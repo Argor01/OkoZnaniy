@@ -43,12 +43,14 @@
 }
 .sidebarProfileName {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px !important;
   color: white !important; 
+  font-family: 'Syncopate', sans-serif;
 }
 .sidebarProfileRole {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
+  font-family: 'BwSurco-Medium', sans-serif;
 }
 .mobileProfileClose {
   position: absolute;
@@ -69,6 +71,14 @@
 
 .sidebarMenu {
   border-right: none;
+}
+
+.sidebarMenu :global(.ant-menu-item),
+.sidebarMenu :global(.ant-menu-submenu-title),
+.sidebarMenu :global(.ant-menu-item) :global(.ant-menu-title-content),
+.sidebarMenu :global(.ant-menu-submenu-title) :global(.ant-menu-title-content),
+.sidebarMenu :global(.ant-badge) {
+  font-family: 'Syncopate', sans-serif !important;
 }
 
 .logoutMenuItem {

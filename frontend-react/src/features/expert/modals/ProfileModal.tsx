@@ -30,17 +30,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
   
   useEffect(() => {
-    if (visible && isMobile) {
+    if (visible) {
       document.body.style.overflow = 'hidden';
-      
-      
+      // Hide scrollbar visually but keep functionality if needed
+      const style = document.createElement('style');
+      style.id = 'hide-scrollbar-style-profile';
+      style.innerHTML = `
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+      `;
+      document.head.appendChild(style);
     } else {
       document.body.style.overflow = '';
+      const style = document.getElementById('hide-scrollbar-style-profile');
+      if (style) {
+        style.remove();
+      }
     }
     return () => {
       document.body.style.overflow = '';
+      const style = document.getElementById('hide-scrollbar-style-profile');
+      if (style) {
+        style.remove();
+      }
     };
-  }, [visible, isMobile]);
+  }, [visible]);
 
   useEffect(() => {
     if (visible && profile) {
@@ -81,6 +95,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       onCancel={onClose}
       onOk={() => form.submit()}
       width={isMobile ? '100%' : 750}
+      style={{ top: 20 }}
       okText="Сохранить"
       cancelText="Отмена"
       okButtonProps={{
