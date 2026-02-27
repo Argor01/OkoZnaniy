@@ -3,7 +3,7 @@ import { Modal, Typography, Select, DatePicker, Input, Button, Space } from 'ant
 import { DownOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { formatCurrency } from '../../../utils/formatters';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './FinanceModal.module.css';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;

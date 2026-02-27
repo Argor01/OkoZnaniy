@@ -9,7 +9,7 @@ import {
   StarFilled 
 } from '@ant-design/icons';
 import type { User } from '@/features/auth/api/auth';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './FriendProfileModal.module.css';
 
 const { Text } = Typography;
 

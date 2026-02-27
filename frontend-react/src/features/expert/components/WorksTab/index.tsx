@@ -1,6 +1,6 @@
 import React from 'react';
 import { Empty } from 'antd';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './WorksTab.module.css';
 
 interface WorksTabProps {
   isMobile: boolean;

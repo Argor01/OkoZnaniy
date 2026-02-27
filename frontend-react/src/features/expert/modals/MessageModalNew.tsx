@@ -26,7 +26,7 @@ import { getMediaUrl } from '../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
 

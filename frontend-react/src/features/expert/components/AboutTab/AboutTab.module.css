@@ -1,0 +1,89 @@
+.aboutBio {
+  font-size: 18px;
+  line-height: 1.8;
+  color: black;
+}
+
+.aboutHighlights {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.aboutHighlightItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aboutHighlightIcon {
+  font-size: 18px;
+  color: #667eea;
+}
+
+.aboutHighlightText {
+  font-size: 16px;
+  color: #4b5563;
+}
+
+.aboutSection {
+  margin-top: 24px;
+}
+
+.aboutSectionTitle {
+  margin-bottom: 20px;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.aboutSectionText {
+  font-size: 18px;
+  line-height: 1.8;
+  color: black;
+}
+
+.aboutSkillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.aboutSkillTag {
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.aboutPortfolioLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #667eea;
+  text-decoration: none;
+}
+
+.sectionCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sectionCardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}

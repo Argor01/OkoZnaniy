@@ -6,7 +6,7 @@ import { authApi } from '@/features/auth/api/auth';
 import apiClient from '@/api/client';
 import { UserProfile } from '../types';
 import SkillsSelect from '../components/inputs/SkillsSelect';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ProfileModal.module.css';
 
 interface ProfileModalProps {
   visible: boolean;

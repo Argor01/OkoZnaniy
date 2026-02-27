@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm } from 'antd';
-import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ordersApi } from '@/features/orders/api/orders';
@@ -9,7 +9,7 @@ import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './OrdersTab.module.css';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -30,6 +30,11 @@ type OrdersListItem = {
   responses_count?: number;
   subject_name?: string | null;
   work_type_name?: string | null;
+  custom_subject?: string | null;
+  subject?: { name: string };
+  custom_work_type?: string | null;
+  work_type?: { name: string };
+  topic?: { name: string };
   is_active?: boolean;
   deleted?: boolean;
 };
@@ -232,14 +237,23 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       {order.title}
                     </Text>
                     <Space size={8} wrap>
-                      <Tag color={getStatusColor(order.status)}>
+                      <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
                         {getStatusText(order.status)}
                       </Tag>
-                      {order.subject_name && (
-                        <Tag color="blue">{order.subject_name}</Tag>
+                      {(order.custom_subject || order.subject?.name || order.subject_name) && (
+                        <Tag className={styles.subjectTag}>
+                          {order.custom_subject || order.subject?.name || order.subject_name}
+                        </Tag>
                       )}
-                      {order.work_type_name && (
-                        <Tag>{order.work_type_name}</Tag>
+                      {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
+                        <Tag className={styles.workTypeTag}>
+                          {order.custom_work_type || order.work_type?.name || order.work_type_name}
+                        </Tag>
+                      )}
+                      {order.topic?.name && (
+                        <Tag className={styles.topicTag}>
+                          Тема: {order.topic.name}
+                        </Tag>
                       )}
                     </Space>
                   </div>
@@ -295,6 +309,45 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   >
                     {order.description}
                   </Paragraph>
+                )}
+
+                {order.files && order.files.length > 0 && (
+                  <div className={styles.filesBlock}>
+                    <Text type="secondary" className={styles.filesLabel}>
+                      Прикрепленные файлы ({order.files.length}):
+                    </Text>
+                    <Space size={8} wrap>
+                      {order.files.map((file) => {
+                        const getFileIcon = (filename: string) => {
+                          const ext = filename.split('.').pop()?.toLowerCase();
+                          if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
+                          if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
+                          if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
+                          if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
+                          return <FileOutlined className={styles.fileIconDefault} />;
+                        };
+                        const fileName = file.filename || 'file';
+
+                        return (
+                          <Tooltip
+                            key={String(file.id ?? fileName)}
+                            title={`Открыть ${fileName} (${file.file_size || 'размер неизвестен'})`}
+                          >
+                            <Tag 
+                              icon={getFileIcon(fileName)}
+                              className={styles.fileTag}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownloadOrderFile(order.id, file);
+                              }}
+                            >
+                              {fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
+                            </Tag>
+                          </Tooltip>
+                        );
+                      })}
+                    </Space>
+                  </div>
                 )}
 
                 <div className={styles.orderMetaRow}>

@@ -1,0 +1,558 @@
+.arbitrationModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.arbitrationModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 80px);
+}
+
+.arbitrationModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  box-shadow: none;
+}
+
+
+.arbitrationModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.arbitrationModalWrap :global(.ant-modal-header) {
+  display: none;
+}
+
+.arbitrationModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.arbitrationModalContent {
+  background: #f3f4f6;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.arbitrationModalContentMobile {
+  padding: 16px;
+}
+
+.arbitrationModalContentDesktop {
+  padding: 32px;
+}
+
+.arbitrationModalTitle {
+  color: #1f2937;
+  display: block;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.arbitrationModalTitleMobile {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalTitleDesktop {
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.arbitrationModalTabs {
+  display: flex;
+  gap: 0;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.arbitrationModalTabsMobile {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.arbitrationModalTabsDesktop {
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.arbitrationModalTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.arbitrationModalTabInactive {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+}
+
+.arbitrationModalTabActiveAll {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.arbitrationModalTabActivePending {
+  background: #ffffff;
+  border-bottom: 2px solid #f59e0b;
+}
+
+.arbitrationModalTabActiveInReview {
+  background: #ffffff;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.arbitrationModalTabActiveResolved {
+  background: #ffffff;
+  border-bottom: 2px solid #10b981;
+}
+
+.arbitrationModalTabActiveRejected {
+  background: #ffffff;
+  border-bottom: 2px solid #ef4444;
+}
+
+.arbitrationModalTabIcon {
+  font-size: 16px;
+}
+
+.arbitrationModalTabIconInactive {
+  color: #6b7280;
+}
+
+.arbitrationModalTabIconAll {
+  color: #3b82f6;
+}
+
+.arbitrationModalTabIconPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalTabIconInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalTabIconResolved {
+  color: #10b981;
+}
+
+.arbitrationModalTabIconRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalTabLabel {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.arbitrationModalTabLabelActive {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.arbitrationModalTabLabelInactive {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.arbitrationModalList {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  min-height: 350px;
+}
+
+.arbitrationModalListInner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.arbitrationModalCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arbitrationModalCardMobile {
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.arbitrationModalCardDesktop {
+  padding: 20px;
+  border-radius: 12px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .arbitrationModalCard:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.arbitrationModalCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalCardHeaderMobile {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arbitrationModalCardHeaderDesktop {
+  flex-direction: row;
+}
+
+.arbitrationModalCardHeaderInfo {
+  flex: 1;
+}
+
+.arbitrationModalCardHeaderInfoMobile {
+  width: 100%;
+}
+
+.arbitrationModalCardHeaderInfoDesktop {
+  width: auto;
+}
+
+.arbitrationModalCardTitle {
+  color: #1f2937;
+  display: block;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.arbitrationModalCardTitleMobile {
+  font-size: 14px;
+}
+
+.arbitrationModalCardTitleDesktop {
+  font-size: 16px;
+}
+
+.arbitrationModalCardMetaMobile {
+  font-size: 12px;
+}
+
+.arbitrationModalCardMetaDesktop {
+  font-size: 13px;
+}
+
+.arbitrationModalStatusBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+}
+
+.arbitrationModalStatusBadgeMobile {
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+
+.arbitrationModalStatusBadgeDesktop {
+  padding: 6px 12px;
+  margin-left: 16px;
+}
+
+.arbitrationModalStatusBadgePending {
+  background: #fef3c7;
+}
+
+.arbitrationModalStatusBadgeInReview {
+  background: #dbeafe;
+}
+
+.arbitrationModalStatusBadgeResolved {
+  background: #d1fae5;
+}
+
+.arbitrationModalStatusBadgeRejected {
+  background: #fee2e2;
+}
+
+.arbitrationModalStatusBadgeDefault {
+  background: #f3f4f6;
+}
+
+.arbitrationModalStatusIcon {
+  display: inline-flex;
+}
+
+.arbitrationModalStatusIconMobile {
+  font-size: 12px;
+}
+
+.arbitrationModalStatusIconDesktop {
+  font-size: 14px;
+}
+
+.arbitrationModalStatusIconPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalStatusIconInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalStatusIconResolved {
+  color: #10b981;
+}
+
+.arbitrationModalStatusIconRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalStatusIconDefault {
+  color: #6b7280;
+}
+
+.arbitrationModalStatusText {
+  font-weight: 500;
+}
+
+.arbitrationModalStatusTextMobile {
+  font-size: 11px;
+}
+
+.arbitrationModalStatusTextDesktop {
+  font-size: 13px;
+}
+
+.arbitrationModalStatusTextPending {
+  color: #f59e0b;
+}
+
+.arbitrationModalStatusTextInReview {
+  color: #3b82f6;
+}
+
+.arbitrationModalStatusTextResolved {
+  color: #10b981;
+}
+
+.arbitrationModalStatusTextRejected {
+  color: #ef4444;
+}
+
+.arbitrationModalStatusTextDefault {
+  color: #6b7280;
+}
+
+.arbitrationModalReason {
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 3px solid #f59e0b;
+}
+
+.arbitrationModalReasonTitle {
+  font-size: 13px;
+  color: #92400e;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arbitrationModalReasonText {
+  font-size: 13px;
+  color: #78350f;
+}
+
+.arbitrationModalDescription {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDecision {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDecisionResolved {
+  background: #d1fae5;
+  border-left: 3px solid #10b981;
+}
+
+.arbitrationModalDecisionRejected {
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+}
+
+.arbitrationModalDecisionTitle {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arbitrationModalDecisionTitleResolved {
+  color: #065f46;
+}
+
+.arbitrationModalDecisionTitleRejected {
+  color: #991b1b;
+}
+
+.arbitrationModalDecisionText {
+  font-size: 13px;
+}
+
+.arbitrationModalDecisionTextResolved {
+  color: #047857;
+}
+
+.arbitrationModalDecisionTextRejected {
+  color: #b91c1c;
+}
+
+.arbitrationModalDocuments {
+  margin-bottom: 12px;
+}
+
+.arbitrationModalDocumentsTitle {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.arbitrationModalDocumentsList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.arbitrationModalDocumentItem {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.arbitrationModalDocumentIcon {
+  font-size: 12px;
+}
+
+.arbitrationModalFooter {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.arbitrationModalFooterMobile {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arbitrationModalFooterDesktop {
+  align-items: center;
+  flex-direction: row;
+}
+
+.arbitrationModalFooterMeta {
+  display: flex;
+}
+
+.arbitrationModalFooterMetaMobile {
+  gap: 12px;
+  flex-direction: column;
+  width: 100%;
+}
+
+.arbitrationModalFooterMetaDesktop {
+  gap: 16px;
+  flex-direction: row;
+}
+
+.arbitrationModalFooterText {
+  white-space: nowrap;
+}
+
+.arbitrationModalFooterTextMobile {
+  font-size: 11px;
+}
+
+.arbitrationModalFooterTextDesktop {
+  font-size: 12px;
+}
+
+.arbitrationModalFooterIcon {
+  margin-right: 4px;
+}
+
+.arbitrationModalAmount {
+  color: #1f2937;
+  white-space: nowrap;
+}
+
+.arbitrationModalAmountMobile {
+  font-size: 16px;
+}
+
+.arbitrationModalAmountDesktop {
+  font-size: 15px;
+}
+
+.arbitrationModalAmountIcon {
+  margin-right: 4px;
+}
+
+.arbitrationModalEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  min-height: 350px;
+}
+
+.arbitrationModalEmptyIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalEmptyText {
+  font-size: 14px;
+  color: #6b7280;
+}

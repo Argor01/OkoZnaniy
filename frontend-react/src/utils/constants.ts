@@ -21,7 +21,7 @@ export const ORDER_STATUSES = {
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
-  new: 'Создан',
+  new: 'Новый',
   confirming: 'На подтверждении',
   in_progress: 'В работе',
   waiting_payment: 'Ожидает оплаты',
@@ -35,7 +35,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
-  new: 'blue',
+  new: 'green',
   confirming: 'orange',
   in_progress: 'purple',
   waiting_payment: 'gold',

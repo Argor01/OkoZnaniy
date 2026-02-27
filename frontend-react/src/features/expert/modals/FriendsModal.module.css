@@ -1,0 +1,253 @@
+.friendsModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.friendsModalWrapMobile :global(.ant-modal) {
+  top: 0;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.friendsModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.friendsModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  padding: 16px;
+  height: 100vh;
+}
+
+.friendsModalWrap :global(.ant-modal-body) {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.friendsModalWrapMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 80px);
+}
+
+.friendsModalTitle {
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.friendsModalTitleMobile {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.friendsModalTitleDesktop {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.friendsModalContent {
+  padding-top: 16px;
+}
+
+.friendsModalContentMobile {
+  padding-top: 12px;
+}
+
+.friendsModalSearchRow {
+  display: flex;
+  align-items: stretch;
+}
+
+.friendsModalSearch {
+  width: 100%;
+}
+
+.friendsModalSearchMobile {
+  margin-bottom: 16px;
+  height: 44px;
+}
+
+.friendsModalSearchDesktop {
+  margin-bottom: 24px;
+}
+
+.friendsModalSearchMobile :global(.ant-input) {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px 11px;
+  height: 100%;
+}
+
+.friendsModalSearchDesktop :global(.ant-input) {
+  font-size: 16px;
+}
+
+.friendsModalLoading {
+  text-align: center;
+  padding: 40px;
+}
+
+.friendsModalLoadingText {
+  display: block;
+  margin-top: 16px;
+}
+
+.friendsModalGrid {
+  display: grid;
+  align-items: stretch;
+}
+
+.friendsModalGridMobile {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.friendsModalGridDesktop {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.friendsModalCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.friendsModalCardMobile {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.friendsModalCardDesktop {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.friendsModalCardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.friendsModalCardHeaderMobile {
+  gap: 10px;
+}
+
+.friendsModalAvatar {
+  flex-shrink: 0;
+}
+
+.friendsModalAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendsModalAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendsModalAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendsModalAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendsModalAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendsModalAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendsModalAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendsModalCardInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendsModalName {
+  display: block;
+  line-height: 22px;
+}
+
+.friendsModalNameMobile {
+  font-size: 15px;
+}
+
+.friendsModalNameDesktop {
+  font-size: 16px;
+}
+
+.friendsModalRole {
+  display: block;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.friendsModalRoleMobile {
+  font-size: 11px;
+}
+
+.friendsModalRoleDesktop {
+  font-size: 12px;
+}
+
+.friendsModalBio {
+  display: block;
+  margin-top: 4px;
+}
+
+.friendsModalBioMobile {
+  font-size: 11px;
+}
+
+.friendsModalBioDesktop {
+  font-size: 12px;
+}
+
+.friendsModalActions {
+  display: flex;
+}
+
+.friendsModalActionsMobile {
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.friendsModalActionsDesktop {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.friendsModalActionButton {
+  font-size: 14px;
+}
+
+.friendsModalActionButtonMobile {
+  font-size: 12px;
+  flex: 1;
+}
+
+.friendsModalActionButtonDesktop {
+  font-size: 14px;
+  flex: 1;
+}

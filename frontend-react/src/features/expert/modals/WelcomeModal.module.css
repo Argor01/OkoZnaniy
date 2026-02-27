@@ -1,0 +1,119 @@
+.welcomeModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.welcomeModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.welcomeModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+}
+
+.welcomeModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.welcomeModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+}
+
+.welcomeModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: 'Syncopate', sans-serif !important;
+}
+
+.welcomeModalWrap :global(.ant-modal-title) {
+  font-family: 'Syncopate', sans-serif !important;
+}
+
+.welcomeModalButton {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.welcomeModalButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.welcomeModalIntro {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.welcomeModalName {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcomeModalText {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #475569;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.welcomeModalList {
+  background: rgba(241, 245, 249, 0.5);
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.welcomeModalListItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 15px;
+  color: #334155;
+}
+
+.welcomeModalListItem:last-child {
+  margin-bottom: 0;
+}
+
+.welcomeModalListIcon {
+  color: #10b981;
+  font-size: 18px;
+  margin-right: 12px;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 8px;
+  border-radius: 50%;
+}

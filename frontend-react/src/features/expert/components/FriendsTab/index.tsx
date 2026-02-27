@@ -3,7 +3,7 @@ import { Button, Typography, Avatar, Rate, Spin, Empty } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './FriendsTab.module.css';
 
 const { Text } = Typography;
 

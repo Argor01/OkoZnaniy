@@ -12,7 +12,7 @@ import {
   PaperClipOutlined
 } from '@ant-design/icons';
 import { ArbitrationCase } from '../types';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ArbitrationModal.module.css';
 
 const { Text, Paragraph } = Typography;
 

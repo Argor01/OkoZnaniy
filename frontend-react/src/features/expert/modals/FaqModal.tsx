@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Typography, Collapse } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './FaqModal.module.css';
 
 const { Text } = Typography;
 

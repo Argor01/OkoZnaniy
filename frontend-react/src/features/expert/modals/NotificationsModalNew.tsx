@@ -13,7 +13,7 @@ import {
 import { notificationsApi, Notification } from '@/features/common/api/notifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './NotificationsModalNew.module.css';
 
 const { Text } = Typography;
 

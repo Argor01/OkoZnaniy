@@ -1,0 +1,323 @@
+.financeModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.financeModalWrap :global(.ant-modal-content) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  height: calc(100vh - 80px);
+}
+
+.financeModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  padding: 16px;
+  margin: 0;
+  max-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+}
+
+.financeModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.financeModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.financeModalWrapMobile :global(.ant-modal-body) {
+  max-height: calc(100vh - 100px);
+}
+
+.financeModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.financeModalLayout {
+  display: flex;
+  gap: 24px;
+  min-height: 600px;
+}
+
+.financeModalLayoutMobile {
+  flex-direction: column;
+  gap: 16px;
+  min-height: auto;
+}
+
+.financeModalLayoutDesktop {
+  flex-direction: row;
+}
+
+.financeModalMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.financeModalMainMobile {
+  order: 2;
+}
+
+.financeModalMainDesktop {
+  order: 1;
+}
+
+.financeModalHeading {
+  display: block;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.financeModalHeadingMobile {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.financeModalHeadingDesktop {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.financeModalFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.financeModalFiltersMobile {
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.financeModalSelectMobile {
+  width: 100%;
+}
+
+.financeModalSelectDesktop {
+  width: 180px;
+}
+
+.financeModalRangeMobile {
+  width: 100%;
+}
+
+.financeModalRangeDesktop {
+  width: 280px;
+}
+
+.financeModalSearch {
+  flex: 1;
+}
+
+.financeModalSearchMobile {
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.financeModalSearchDesktop {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.financeModalSearchIcon {
+  color: #9ca3af;
+}
+
+.financeModalSummary {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.financeModalSummaryTitle {
+  font-size: 14px;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.financeModalSummaryRow {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.financeModalSummaryText {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.financeModalSummaryValue {
+  color: #1f2937;
+}
+
+.financeModalSummarySuccess {
+  color: #10b981;
+}
+
+.financeModalSummaryDanger {
+  color: #ef4444;
+}
+
+.financeModalEmptyState {
+  min-height: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.financeModalEmptyText {
+  font-size: 14px;
+}
+
+.financeModalSidebar {
+  flex-shrink: 0;
+}
+
+.financeModalSidebarMobile {
+  width: 100%;
+  order: 1;
+}
+
+.financeModalSidebarDesktop {
+  width: 300px;
+  order: 2;
+}
+
+.financeModalSidebarCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.financeModalSidebarCardMobile {
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.financeModalSidebarCardDesktop {
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.financeModalBalanceBlockMobile {
+  margin-bottom: 16px;
+}
+
+.financeModalBalanceBlockDesktop {
+  margin-bottom: 24px;
+}
+
+.financeModalBalanceLabel {
+  color: #6b7280;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.financeModalBalanceLabelMobile {
+  font-size: 13px;
+}
+
+.financeModalBalanceLabelDesktop {
+  font-size: 14px;
+}
+
+.financeModalBalanceValue {
+  color: #1f2937;
+  display: block;
+}
+
+.financeModalBalanceValueMobile {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.financeModalBalanceValueDesktop {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.financeModalBalanceButton {
+  border-radius: 8px;
+  height: 40px;
+}
+
+.financeModalBreakdown {
+  margin-bottom: 24px;
+}
+
+.financeModalBreakdownRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.financeModalLegend {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.financeModalLegendSuccess {
+  background: #10b981;
+}
+
+.financeModalLegendDanger {
+  background: #ef4444;
+}
+
+.financeModalLegendMuted {
+  background: #6b7280;
+}
+
+.financeModalBreakdownLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.financeModalBreakdownValue {
+  font-size: 16px;
+  color: #1f2937;
+  margin-left: 20px;
+  display: block;
+}
+
+.financeModalQuickLinks {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.financeModalQuickLinksTitle {
+  font-size: 14px;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.financeModalQuickLinksList {
+  width: 100%;
+}
+
+.financeModalQuickLinkButton {
+  text-align: left;
+  height: 36px;
+}

@@ -1,0 +1,299 @@
+.ordersLoading {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.ordersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ordersCreateButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+}
+
+.ordersFilterRow {
+  margin-bottom: 24px;
+}
+
+.ordersFilterGroup {
+  width: 100%;
+}
+
+.ordersFilterButton {
+  font-weight: 500;
+  text-align: center;
+}
+
+.ordersFilterButtonLeft {
+  border-radius: 8px 0 0 8px;
+}
+
+.ordersFilterButtonRight {
+  border-radius: 0 8px 8px 0;
+}
+
+.ordersFilterButtonMobile {
+  min-width: auto;
+}
+
+.ordersFilterButtonDesktop {
+  min-width: 150px;
+}
+
+.ordersEmptyText {
+  font-size: 16px;
+  color: #999;
+}
+
+.ordersEmpty {
+  padding: 60px 0;
+}
+
+.ordersGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 992px) {
+  .ordersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.orderCard {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.orderCard :global(.ant-card-body) {
+  padding: 20px;
+}
+
+.orderCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orderCardHeaderInfo {
+  flex: 1;
+}
+
+.orderTitle {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 8px;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.orderCardActions {
+  text-align: right;
+}
+
+.orderCardActionsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.orderBudget {
+  font-size: 18px;
+  font-family: 'Syncopate';
+  color: #3b82f6;
+}
+
+.orderDescription {
+  color: #666;
+  margin-bottom: 18px;
+  font-size: 18px;
+  font-family: 'BwSurco-Medium', sans-serif;
+}
+
+.orderMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orderMetaIcon {
+  color: #999;
+}
+
+.orderMetaText {
+  font-size: 14px;
+}
+
+.orderBidButton {
+  border: none;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.orderBidButtonActive {
+  background: #52c41a;
+  color: #ffffff;
+}
+
+.orderBidButtonDisabled {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.statusTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.subjectTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 400;
+  color: #fff;
+  background: #1890ff;
+  font-size: 14px;
+}
+
+.workTypeTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 400;
+  color: #fff;
+  background: #722ed1;
+  font-size: 14px;
+}
+
+.topicTag {
+  border-radius: 16px;
+  padding: 4px 12px;
+  border: none;
+  font-weight: 400;
+  color: #fff;
+  background: #eb2f96;
+  font-size: 14px;
+}
+
+.filesBlock {
+  margin-bottom: 16px;
+}
+
+.filesLabel {
+  font-size: 12px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.fileTag {
+  cursor: pointer;
+  padding: 4px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.fileTag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fileIconPdf { color: #ff4d4f; }
+.fileIconDoc { color: #1890ff; }
+.fileIconImage { color: #52c41a; }
+.fileIconArchive { color: #fa8c16; }
+.fileIconDefault { color: #666; }
+.fileDownloadIcon { margin-left: 4px; }
+
+.orderMeta { margin-bottom: 16px; }
+.metaIcon { color: #999; }
+.metaText { font-size: 14px; }
+
+.responsesCount { font-size: 14px; font-weight: 600; }
+.responsesCountNone { color: #999; }
+.responsesCountMany { color: #ff4d4f; }
+.responsesCountSome { color: #52c41a; }
+
+.divider { margin: 16px 0; }
+
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.clientAvatar { background-color: #1890ff; }
+.clientName { display: block; font-size: 14px; }
+.clientOrders { font-size: 12px; }
+
+/* Shared Styles from Dashboard */
+.sectionCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sectionCardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+@media (max-width: 1024px) {
+  .sectionCard {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}

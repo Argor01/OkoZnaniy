@@ -6,7 +6,7 @@ import { UserProfile } from '../../types';
 import type { ExpertStatistics } from '@/features/expert/api/experts';
 import { ordersApi, type Order } from '@/features/orders/api/orders';
 import { formatCurrency } from '../../../../utils/formatters';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ProfileHeader.module.css';
 
 const { Title, Text } = Typography;
 

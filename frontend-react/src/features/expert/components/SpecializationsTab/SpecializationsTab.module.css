@@ -1,0 +1,111 @@
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px;
+  color: #6b7280;
+}
+
+.specializationsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.specializationsGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.specializationHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.specializationTitle {
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.specializationVerifiedIcon {
+  color: #10b981;
+  margin-left: 8px;
+}
+
+.specializationMeta {
+  font-size: 14px;
+}
+
+.specializationDescription {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.specializationSkills {
+  margin-top: 12px;
+}
+
+.specializationSkillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.specializationSkillTag {
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.sectionCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sectionCardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.buttonPrimary {
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.buttonPrimary:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+}

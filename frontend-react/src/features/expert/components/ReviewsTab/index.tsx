@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Rate, Empty, Spin, Avatar } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ReviewsTab.module.css';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';

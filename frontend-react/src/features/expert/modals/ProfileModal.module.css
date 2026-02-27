@@ -1,0 +1,283 @@
+
+/* Shared Form Styles */
+.inputField {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.inputField:focus,
+.inputField:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.inputField.ant-input-number {
+  padding: 0;
+  height: auto;
+  min-height: 40px;
+}
+
+.inputField :global(.ant-input-number-input) {
+  height: auto;
+  line-height: 1.5715;
+  padding: 8px 11px 12px 11px;
+  display: block;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.inputNumberField {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+  width: 100%;
+  padding: 8px 11px; 
+}
+
+.inputNumberField:hover, .inputNumberField:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.textareaField {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.textareaField:focus,
+.textareaField:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+@media (max-width: 480px) {
+  .textareaField :global(.ant-input) {
+    min-height: 80px;
+    height: auto;
+    resize: vertical;
+  }
+}
+
+/* Shared Button Styles */
+.buttonPrimary {
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.buttonPrimary:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+}
+
+.buttonSecondary {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  height: 44px;
+  color: #667eea;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.buttonSecondary:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+/* Profile Modal Specific Styles */
+.profileModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.profileModalWrapMobile :global(.ant-modal) {
+  padding: 0;
+  top: 0;
+}
+
+.profileModalWrapDesktop :global(.ant-modal) {
+  top: 20px;
+}
+
+.profileModalWrap :global(.ant-modal-content) {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin: auto;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  background: #ffffff;
+  backdrop-filter: none;
+  margin: 0;
+}
+
+.profileModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.profileModalWrap :global(.ant-modal-header) {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 24px 24px 0 0;
+  flex-shrink: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-header) {
+  background: #ffffff;
+  backdrop-filter: none;
+  padding: 16px 20px;
+  border-radius: 0;
+}
+
+.profileModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-body) {
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+.profileModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 0 0 24px 24px;
+  flex-shrink: 0;
+}
+
+.profileModalWrapMobile :global(.ant-modal-footer) {
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 0;
+}
+
+.profileModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.profileModalExpertTitle {
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 12px !important;
+  margin: 0 0 8px 0;
+  color: #0369a1;
+}
+
+.profileModalButton {
+  font-weight: 500;
+}
+
+.profileModalButtonMobile {
+  border-radius: 8px;
+  height: 40px;
+  font-size: 14px;
+}
+
+.profileModalButtonDesktop {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.profileModalAvatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileModalUploadLabel {
+  margin-top: 8px;
+}
+
+.profileModalTextarea {
+  font-size: 15px;
+}
+
+.profileModalExpertInfo {
+  padding: 16px;
+  background-color: #f0f9ff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #0ea5e9;
+}
+
+.profileModalExpertText {
+  margin: 0;
+  font-size: 14px;
+  color: #0369a1;
+}
+
+.profileModalExpertGrid {
+  display: flex;
+  gap: 16px;
+  flex-direction: row;
+}
+
+.profileModalExpertGridMobile {
+  flex-direction: column;
+}
+
+.profileModalFlexField {
+  flex: 1;
+}
+
+.profileModalFullWidth {
+  width: 100%;
+}
+
+.profileModalTitleMobile {
+  font-size: 18px;
+}
+
+.profileModalTitleDesktop {
+  font-size: 24px;
+}
+
+.profileModalWrap :global(.ant-modal-title) {
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 12px !important;
+}
+
+.profileModalWrap :global(.ant-form-item-label > label) {
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* Tabs */
+.profileModalWrap :global(.ant-tabs-tab),
+.profileModalWrap :global(.ant-tabs-tab-btn) {
+  font-family: 'Syncopate', sans-serif !important;
+}

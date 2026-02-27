@@ -3,7 +3,7 @@ import { Modal, Form, Input, InputNumber as AntInputNumber, message } from 'antd
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
 import SkillsSelect from '../components/inputs/SkillsSelect';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './SpecializationModal.module.css';
 
 type SpecializationFormValues = {
   subject_id?: number;

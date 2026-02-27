@@ -1,0 +1,223 @@
+.friendsLoadingCard {
+  text-align: center;
+  padding: 40px;
+}
+
+.friendsLoadingText {
+  display: block;
+  margin-top: 16px;
+}
+
+.friendsSubtitle {
+  font-size: 14px;
+}
+
+.friendsGrid {
+  display: grid;
+}
+
+.friendsGridMobile {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.friendsGridDesktop {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.friendCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.friendCardMobile {
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.friendCardDesktop {
+  border-radius: 16px;
+  padding: 20px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .friendCard:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-4px);
+    border-color: #667eea;
+  }
+}
+
+.friendCardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.friendAvatar {
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.friendAvatarMobile {
+  font-size: 28px;
+}
+
+.friendAvatarDesktop {
+  font-size: 32px;
+}
+
+.friendAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendName {
+  display: block;
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.friendNameMobile {
+  font-size: 16px;
+}
+
+.friendNameDesktop {
+  font-size: 18px;
+}
+
+.friendRole {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.friendRoleMobile {
+  font-size: 12px;
+}
+
+.friendRoleDesktop {
+  font-size: 13px;
+}
+
+.friendBio {
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+
+.friendActions {
+  display: flex;
+  gap: 8px;
+}
+
+.friendMessageButton {
+  flex: 1;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.friendMessageButtonMobile {
+  height: 36px;
+  font-size: 14px;
+}
+
+.friendMessageButtonDesktop {
+  height: 40px;
+  font-size: 15px;
+}
+
+.friendProfileButton {
+  border-radius: 10px;
+}
+
+.friendProfileButtonMobile {
+  width: 36px;
+  height: 36px;
+}
+
+.friendProfileButtonDesktop {
+  width: 40px;
+  height: 40px;
+}
+
+.sectionCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sectionCardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+@media (max-width: 1024px) {
+  .sectionCard {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}

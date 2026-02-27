@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Typography, Spin, Space, Tag } from 'antd';
 import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import type { Specialization } from '@/features/expert/api/experts';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './SpecializationsTab.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -47,7 +47,7 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
       ) : (
         <div className={styles.specializationsGrid}>
           {specializations.map((spec) => (
-            <div key={spec.id} className={styles.orderCard}>
+            <div key={spec.id} className={styles.card}>
               <div className={styles.specializationHeaderRow}>
                 <div>
                   <Title level={4} className={styles.specializationTitle}>

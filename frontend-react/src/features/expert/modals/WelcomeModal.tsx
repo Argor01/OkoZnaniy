@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Button, Typography } from 'antd';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './WelcomeModal.module.css';
 
 const { Paragraph } = Typography;
 

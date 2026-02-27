@@ -4,7 +4,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type Education } from '@/features/expert/api/experts';
 import SpecializationsSelect from '../components/inputs/SpecializationsSelect';
-import styles from '../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ApplicationModal.module.css';
 
 interface ApplicationModalProps {
   visible: boolean;

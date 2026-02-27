@@ -1,0 +1,161 @@
+.friendProfileModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.friendProfileModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.friendProfileModalWrap :global(.ant-modal-body) {
+  padding: 0;
+}
+
+.friendProfileHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 32px;
+  position: relative;
+}
+
+.friendProfileHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.friendProfileAvatar {
+  font-size: 36px;
+  font-weight: 600;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.friendProfileAvatarColor0 {
+  background-color: #3b82f6;
+}
+
+.friendProfileAvatarColor1 {
+  background-color: #10b981;
+}
+
+.friendProfileAvatarColor2 {
+  background-color: #f59e0b;
+}
+
+.friendProfileAvatarColor3 {
+  background-color: #8b5cf6;
+}
+
+.friendProfileAvatarColor4 {
+  background-color: #ec4899;
+}
+
+.friendProfileAvatarColor5 {
+  background-color: #06b6d4;
+}
+
+.friendProfileAvatarColor6 {
+  background-color: #84cc16;
+}
+
+.friendProfileHeaderInfo {
+  flex: 1;
+}
+
+.friendProfileName {
+  font-size: 28px;
+  display: block;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.friendProfileRole {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.friendProfileRatingRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.friendProfileRating {
+  font-size: 16px;
+  color: #fbbf24;
+}
+
+.friendProfileContent {
+  padding: 32px;
+}
+
+.friendProfileSection {
+  margin-bottom: 32px;
+}
+
+.friendProfileSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.friendProfileSectionIcon {
+  font-size: 20px;
+  color: #667eea;
+}
+
+.friendProfileSectionTitle {
+  font-size: 18px;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.friendProfileSectionText {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.friendProfileTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.friendProfileTag {
+  padding: 6px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+  border: 1px solid #e0e7ff;
+  background: #f5f7ff;
+  color: #667eea;
+}
+
+.friendProfileActions {
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.friendProfilePrimaryButton {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.friendProfileSecondaryButton {
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+}

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Typography, Tag, Skeleton } from 'antd';
 import { ClockCircleOutlined, DollarOutlined, LinkOutlined } from '@ant-design/icons';
 import { UserProfile } from '../../types';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './AboutTab.module.css';
 
 const { Title, Paragraph } = Typography;
 

@@ -3,7 +3,7 @@ import { Button, Typography, Spin, Space } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import type { ExpertApplication } from '@/features/expert/api/experts';
 import type { UserProfile } from '../../types';
-import styles from '../../pages/ExpertDashboard/ExpertDashboard.module.css';
+import styles from './ApplicationStatus.module.css';
 
 const { Text } = Typography;
 
@@ -31,7 +31,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
 }) => {
   if (applicationLoading) {
     return (
-      <div className={`${styles.card} ${styles.applicationLoadingCard}`}>
+      <div className={`${styles.applicationCard} ${styles.applicationLoadingCard}`}>
         <Spin size="large" />
       </div>
     );
@@ -97,7 +97,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   }
 
   return (
-    <div className={`${styles.card} ${styles.applicationEmptyCard}`}>
+    <div className={`${styles.applicationCard} ${styles.applicationEmptyCard}`}>
       <Space direction="vertical" className={styles.applicationEmptyStack} size="large">
         <Text className={styles.applicationEmptyText}>
           У вас ещё нет анкеты. Заполните анкету для работы на платформе.

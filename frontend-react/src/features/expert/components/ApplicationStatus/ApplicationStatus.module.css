@@ -1,0 +1,121 @@
+.applicationCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-top: 24px; 
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.applicationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.applicationTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.applicationSubtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 4px 0 0 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.statusPending {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.statusApproved {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.statusRejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.applicationLoadingCard {
+  text-align: center;
+  padding: 48px;
+}
+
+.applicationRejectBox {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+}
+
+.applicationRejectText {
+  font-size: 14px;
+}
+
+.applicationActionRow {
+  margin-top: 16px;
+}
+
+.applicationEmptyCard {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 52px;
+}
+
+.applicationEmptyStack {
+  width: 100%;
+  align-items: center !important;
+  justify-content: center;
+}
+
+.applicationEmptyText {
+  font-size: 16px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.applicationEmptyButton {
+  margin-top: 8px;
+  position: relative;
+  z-index: 10;
+}
+
+.buttonPrimary {
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.buttonPrimary:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+}

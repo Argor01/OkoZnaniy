@@ -1,0 +1,54 @@
+.worksEmptyContainer {
+  padding: 24px;
+}
+
+.sectionCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sectionCardHeader {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+@media (max-width: 1024px) {
+  .sectionCard {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+  }
+  .sectionTitle {
+    font-size: 20px;
+  }
+}

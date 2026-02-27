@@ -1,0 +1,258 @@
+/* Shared Form Styles */
+.inputField {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.inputField:focus,
+.inputField:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.inputField.ant-input-number {
+  padding: 0;
+  height: auto;
+  min-height: 40px;
+}
+
+.inputField :global(.ant-input-number-input) {
+  height: auto;
+  line-height: 1.5715;
+  padding: 8px 11px 12px 11px;
+  display: block;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.textareaField {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.textareaField:focus,
+.textareaField:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+@media (max-width: 480px) {
+  .textareaField :global(.ant-input) {
+    min-height: 80px;
+    height: auto;
+    resize: vertical;
+  }
+}
+
+/* Shared Button Styles */
+.buttonPrimary {
+  background: #1890ff;
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.buttonPrimary:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+}
+
+.buttonSecondary {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  height: 44px;
+  color: #667eea;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.buttonSecondary:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.applicationModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.applicationModalWrap :global(.ant-modal-header) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 24px 32px;
+}
+
+.applicationModalWrap :global(.ant-modal-body) {
+  padding: 32px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.applicationModalWrap :global(.ant-modal-footer) {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 20px 32px;
+}
+
+.applicationModalWrap :global(.ant-modal-close) {
+  top: 24px;
+  right: 32px;
+}
+
+.applicationModalTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.applicationModalWrap :global(.ant-modal-title),
+.applicationModalWrap :global(.ant-form-item-label > label),
+.applicationModalWrap label {
+  font-family: 'Syncopate', sans-serif !important;
+  font-size: 12px !important;
+}
+
+/* Mobile specific overrides */
+@media (max-width: 576px) {
+  .applicationModalWrapMobile {
+    max-width: 100% !important;
+    margin: 0 !important;
+    top: 0 !important;
+    padding-bottom: 0 !important;
+    height: 100vh !important;
+  }
+
+  .applicationModalWrapMobile :global(.ant-modal-content) {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .applicationModalWrapMobile :global(.ant-modal-body) {
+    flex: 1 !important;
+    padding: 20px !important;
+    max-height: none !important; 
+    overflow-y: auto !important;
+  }
+
+  .applicationModalWrapMobile :global(.ant-modal-header) {
+    padding: 20px !important;
+  }
+
+  .applicationModalWrapMobile :global(.ant-modal-footer) {
+    padding: 16px 20px !important;
+  }
+}
+
+.modalEducationRow {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.modalEducationRow:hover {
+  border-color: rgba(102, 126, 234, 0.3);
+  background: #ffffff;
+}
+
+.modalEducationRow .ant-form-item {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.modalEducationRow .ant-col {
+  display: flex;
+  align-items: center;
+}
+
+.modalEducationRow .ant-form-item-control-input {
+  min-height: auto;
+}
+
+.modalEducationRow :global(.ant-row) {
+  margin: 0 0 8px 0;
+}
+
+.modalEducationRow :global(.ant-row:last-child) {
+  margin-bottom: 0;
+}
+
+.modalEducationRow :global(.ant-col) {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.modalEducationRow :global(.ant-col:first-child) {
+  padding-left: 0;
+}
+
+.modalEducationRow :global(.ant-col:last-child) {
+  padding-right: 0;
+}
+
+.modalEducationRow :global(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .modalEducationRow {
+    padding: 20px 16px;
+  }
+  
+  .modalEducationRow :global(.ant-row) {
+    margin: 0 0 12px 0;
+  }
+}
+
+.applicationModalButton {
+  border-radius: 12px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.applicationModalItemSpacing {
+  margin-bottom: 12px;
+}
+
+.applicationModalItemTight {
+  margin-bottom: 0;
+}
+
+.applicationModalDeleteCol {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.applicationModalDeleteButton {
+  margin-top: 0;
+}
+
+.applicationModalAddButton {
+  border-radius: 12px;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 500;
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #667eea;
+}
