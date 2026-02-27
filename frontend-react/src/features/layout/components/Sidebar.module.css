@@ -79,6 +79,7 @@
 .sidebarMenu :global(.ant-menu-submenu-title) :global(.ant-menu-title-content),
 .sidebarMenu :global(.ant-badge) {
   font-family: 'Syncopate', sans-serif !important;
+  cursor: pointer;
 }
 
 .logoutMenuItem {

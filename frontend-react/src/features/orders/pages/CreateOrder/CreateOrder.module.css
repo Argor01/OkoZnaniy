@@ -1,29 +1,27 @@
 
 
 .container {
+  max-width: 1200px;
+  margin: 0 auto;
   width: 100%;
-  min-height: 100vh;
-  background: #f3f4f6;
   padding: 24px;
   box-sizing: border-box;
-  display: block;
-  visibility: visible;
-  opacity: 1;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+}
+
+.card :global(.ant-card-body) {
   padding: 32px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: block;
-  visibility: visible;
-  opacity: 1;
+}
+
+.card :global(.ant-form-item-label) > label {
+  font-family: 'Syncopate', sans-serif !important;
 }
 
 .header {
@@ -36,25 +34,17 @@
 }
 
 .title {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
+  color: #1f2937;
   margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: 'Syncopate', sans-serif !important;
 }
 
 
 .priceSection {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 24px;
   margin-top: 32px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .priceRow {
@@ -149,6 +139,7 @@
 .checkboxField .ant-checkbox-wrapper {
   color: #1f2937;
   font-weight: 500;
+  font-family: 'Syncopate', sans-serif;
 }
 
 .checkboxField .ant-checkbox-inner {
@@ -168,6 +159,7 @@
   color: #6b7280;
   font-size: 14px;
   margin-left: 8px;
+  font-family: 'Syncopate', sans-serif;
 }
 
 .promoSection {
@@ -202,30 +194,26 @@
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.1);
-}
-
-.sectionTitle {
-  font-size: 24px;
+  /* Remavew speripxcca tylsttmtch2unif;ecadlook*/
   font-weight: 600;
   margin-bottom: 24px;
   color: #1f2937;
+  font-family: 'Syncopate', sans-serif;
 }
 
 .titleInput {
-  border-radius: 12px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  transition: all 0.3s ease;
-  height: 48px;
-  font-size: 16px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  height: 44px;
   margin-bottom: 16px;
 }
 
 .titleInput:hover,
 .titleInput:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .titleInput::placeholder {
@@ -343,9 +331,9 @@
 
 
 .descriptionTextarea {
-  border-radius: 12px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: #1f2937;
   font-size: 15px;
   line-height: 1.6;
@@ -354,8 +342,8 @@
 
 .descriptionTextarea:hover,
 .descriptionTextarea:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .descriptionTextarea::placeholder {
@@ -375,8 +363,8 @@
 
 .privateNotesTextarea:hover,
 .privateNotesTextarea:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #a67eea;
+  box-shadow: 0 0 0 3px rgba(1022, 266, 324, 0.1);
 }
 
 .privateNotesTextarea::placeholder {
@@ -389,58 +377,32 @@
 
 .uploadArea {
   border-radius: 12px;
-  border: 2px dashed rgba(102, 126, 234, 0.3);
-  transition: all 0.3s ease;
-  background: rgba(102, 126, 234, 0.02);
-}
-
-.uploadArea .ant-upload {
-  border: none;
-  background: transparent;
-}
-
-.uploadArea .ant-upload-btn {
-  border: none;
-  background: transparent;
-  padding: 24px;
+  border: 2px dashed #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafbfc;
 }
 
 .uploadArea:hover {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  border-color: #3b82f6;
+  background: #f8fafc;
 }
 
-.uploadArea .ant-upload-drag-icon {
-  color: #667eea;
+.uploadArea :global(.ant-upload-drag-icon) {
+  color: #6b7280;
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.uploadArea .ant-upload-text {
-  color: #1f2937;
+.uploadArea :global(.ant-upload-text) {
+  color: #374151;
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 8px;
 }
 
-.uploadArea .ant-upload-hint {
+.uploadArea :global(.ant-upload-hint) {
   color: #6b7280;
   font-size: 14px;
-}
-
-
-.uploadArea .ant-upload-drag {
-  border: none;
-  background: transparent;
-}
-
-.uploadArea .ant-upload-drag-container {
-  border: none;
-}
-
-.uploadArea::before,
-.uploadArea::after {
-  display: none;
 }
 
 .fileUploadSection {
@@ -487,47 +449,67 @@
 }
 
 .submitSection {
-  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
   margin-top: 32px;
-  text-align: center;
+  padding-top: 24px;
+  border-top: 2px solid #f1f5f9;
 }
 
 .submitButton {
-  background: #1890ff;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border: none;
-  border-radius: 12px;
-  height: 56px;
-  font-size: 18px;
+  border-radius: 10px;
+  height: 48px;
+  font-size: 16px;
   font-weight: 600;
-  padding: 0 48px;
-  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
-  transition: all 0.3s ease;
+  padding: 0 32px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.submitButton:hover::before {
+  left: 100%;
 }
 
 .submitButton:hover {
-  background: #40a9ff;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
 }
 
 
 .selectField {
-  border-radius: 12px;
-  height: 48px;
+  border-radius: 10px;
+  height: 44px;
 }
 
 .selectField .ant-select-selector {
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  height: 48px;
-  padding: 0 16px;
-  transition: all 0.3s ease;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  height: 44px;
+  padding: 4px 11px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .selectField .ant-select-selector:hover,
 .selectField.ant-select-focused .ant-select-selector {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .selectField .ant-select-selection-placeholder {
@@ -557,19 +539,22 @@
 }
 
 .buttonSecondary {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-radius: 12px;
-  height: 44px;
-  font-size: 16px;
+  border-radius: 10px;
+  height: 48px;
+  padding: 0 32px;
+  border: 2px solid #e5e7eb;
+  color: #6b7280;
   font-weight: 500;
-  color: #667eea;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
 }
 
 .buttonSecondary:hover {
-  background: rgba(102, 126, 234, 0.1);
-  border-color: rgba(102, 126, 234, 0.4);
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 
