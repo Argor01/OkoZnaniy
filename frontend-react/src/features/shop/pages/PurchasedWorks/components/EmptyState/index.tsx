@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Typography } from 'antd';
+import { Typography } from 'antd';
 import { ShoppingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { AppButton } from '@/components/ui/AppButton';
 import styles from './EmptyState.module.css';
 
 const { Title, Text } = Typography;
@@ -20,14 +21,14 @@ const EmptyState: React.FC = () => {
       <Text className={styles.description}>
         Перейдите в магазин готовых работ, чтобы найти и купить нужную работу
       </Text>
-      <Button
-        type="primary"
+      <AppButton
+        variant="primary"
         size="large"
         onClick={() => navigate('/shop/ready-works')}
         className={styles.button}
       >
         Перейти в магазин
-      </Button>
+      </AppButton>
     </div>
   );
 };

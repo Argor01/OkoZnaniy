@@ -1,12 +1,15 @@
 
 import React from 'react';
-import { Input, Select, Space, Button } from 'antd';
+import { Space } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { FiltersState } from '@/features/shop/types';
 import type { Subject, WorkType } from '@/features/common/api/catalog';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppInput } from '@/components/ui/AppInput';
+import { AppSelect } from '@/components/ui/AppSelect';
 import styles from './Filters.module.css';
 
-const { Option } = Select;
+const { Option } = AppSelect;
 
 interface FiltersProps {
   filters: FiltersState;
@@ -19,7 +22,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
   return (
     <div className={styles.container}>
       <Space size="middle" wrap className={styles.filters}>
-        <Input
+        <AppInput
           placeholder="Поиск работ..."
           prefix={<SearchOutlined />}
           value={filters.search}
@@ -28,7 +31,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
           allowClear
         />
 
-        <Select
+        <AppSelect
           placeholder="Предмет"
           value={filters.subjectId}
           onChange={(value) => onFilterChange({ ...filters, subjectId: value as number })}
@@ -42,9 +45,9 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
                 {subj.name}
               </Option>
             ))}
-        </Select>
+        </AppSelect>
 
-        <Select
+        <AppSelect
           placeholder="Тип работы"
           value={filters.workTypeId}
           onChange={(value) => onFilterChange({ ...filters, workTypeId: value as number })}
@@ -58,9 +61,9 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
                 {wt.name}
               </Option>
             ))}
-        </Select>
+        </AppSelect>
 
-        <Select
+        <AppSelect
           placeholder="Сортировка"
           value={filters.sortBy}
           onChange={(value) => onFilterChange({ ...filters, sortBy: value })}
@@ -71,14 +74,15 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
           <Option value="price-asc">Цена: по возрастанию</Option>
           <Option value="price-desc">Цена: по убыванию</Option>
           <Option value="rating">Рейтинг</Option>
-        </Select>
+        </AppSelect>
 
-        <Button
+        <AppButton
           icon={<FilterOutlined />}
           onClick={() => onFilterChange({})}
+          variant="secondary"
         >
           Сбросить
-        </Button>
+        </AppButton>
       </Space>
     </div>
   );

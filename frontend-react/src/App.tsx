@@ -10,6 +10,7 @@ import './styles/globals.css';
 
 import { SupportButton } from '@/features/support';
 import { AppRoutes } from '@/routes/AppRoutes';
+import { CookieConsent } from '@/components/ui';
 
 dayjs.locale('ru');
 
@@ -48,6 +49,7 @@ const App: React.FC = () => {
             <div className="App">
               <AppRoutes />
               <SupportButton />
+              <CookieConsent />
             </div>
           </Suspense>
         </Router>

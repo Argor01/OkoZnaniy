@@ -53,7 +53,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             purchase_count=Count('purchase', distinct=True),
         )
         
-        return queryset.select_related('subject', 'work_type', 'author')
+        return queryset.select_related('subject', 'work_type', 'author').prefetch_related('files')
     
     def get_serializer_class(self):
         if self.action == 'create':

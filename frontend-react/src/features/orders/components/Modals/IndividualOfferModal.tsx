@@ -1,13 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Modal, Input, Button, DatePicker, InputNumber, Typography, Form, Select } from 'antd';
+import { Modal, Typography, Form } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { catalogApi } from '@/features/common/api/catalog';
-import '@/styles/individual-offer.css';
+import { AppButton, AppInput, AppSelect, AppDatePicker } from '@/components/ui';
+import styles from './IndividualOfferModal.module.css';
 
 const { Text, Title } = Typography;
-const { TextArea } = Input;
 
 interface IndividualOfferModalProps {
   open: boolean;
@@ -86,31 +86,31 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
       footer={null}
       width={600}
       title={
-        <div className="individualOfferTitleWrapper">
-          <Title level={4} className="individualOfferTitle">
+        <div className={styles.titleWrapper}>
+          <Title level={4} className={styles.title}>
             {isIndividual ? 'Индивидуальное предложение' : 'Предложение готовой работы'}
           </Title>
         </div>
       }
       closeIcon={<CloseOutlined />}
     >
-      <div className="individualOfferBody">
-        <Text type="secondary" className="individualOfferText">
+      <div className={styles.body}>
+        <Text type="secondary" className={styles.text}>
           {isIndividual
             ? 'Вы можете отправить покупателю индивидуальное предложение своих услуг.'
             : 'Заполните информацию, после чего в чат отправится карточка предложения.'}
         </Text>
         {isIndividual ? (
           <>
-            <Text type="secondary" className="individualOfferTextCompact">
+            <Text type="secondary" className={styles.textCompact}>
               1. Укажите, какие услуги и в каком объеме будут предоставлены покупателю.
             </Text>
-            <Text type="secondary" className="individualOfferText">
+            <Text type="secondary" className={styles.text}>
               2. Опишите свой релевантный опыт. Продемонстрируйте 1-3 примера выполнения похожей работы.
             </Text>
           </>
         ) : workTitle ? (
-          <Text type="secondary" className="individualOfferText">
+          <Text type="secondary" className={styles.text}>
             {workTitle}
           </Text>
         ) : null}
@@ -126,7 +126,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
             label={<Text strong>Описание</Text>}
             rules={[{ required: true, message: 'Пожалуйста, введите описание' }]}
           >
-            <TextArea 
+            <AppInput.TextArea 
               rows={6} 
               placeholder={isIndividual ? 'Напишите, как вы будете решать задачу клиента' : 'Опишите, что входит в работу'} 
               maxLength={2000}
@@ -141,7 +141,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                 label={<Text strong>Тип работы</Text>}
                 rules={[{ required: true, message: 'Укажите тип работы' }]}
               >
-                <Select
+                <AppSelect
                   placeholder="Выберите тип работы"
                   loading={workTypesLoading}
                   showSearch
@@ -157,7 +157,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                 label={<Text strong>Предмет</Text>}
                 rules={[{ required: true, message: 'Укажите предмет' }]}
               >
-                <Select
+                <AppSelect
                   placeholder="Выберите предмет"
                   loading={subjectsLoading}
                   showSearch
@@ -175,8 +175,8 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
             label={<Text strong>Стоимость</Text>}
             rules={[{ required: true, message: 'Укажите стоимость' }]}
           >
-            <InputNumber<number>
-              className="fullWidthSelect"
+            <AppInput.Number
+              className={styles.fullWidth}
               formatter={value => `₽ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
               parser={value => Number((value ?? '').replace(/₽\s?|(,*)/g, ''))}
               min={500}
@@ -191,27 +191,25 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
               label={<Text strong>Срок выполнения</Text>}
               rules={[{ required: true, message: 'Укажите срок выполнения' }]}
             >
-              <DatePicker 
-                className="fullWidthSelect" 
+              <AppDatePicker 
+                className={styles.fullWidth}
                 placeholder="Выберите дату"
                 disabledDate={(current) => current && current < dayjs().endOf('day')}
               />
             </Form.Item>
           ) : (
-            <Form.Item name="deadline" hidden>
-              <Input />
-            </Form.Item>
+            null
           )}
 
-          <Form.Item className="individualOfferSubmitItem">
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+          <Form.Item className={styles.submitItem}>
+            <AppButton
+              variant="success"
+              htmlType="submit"
               loading={loading}
-              className="individualOfferSubmitButton"
+              className={styles.submitButton}
             >
-              {isIndividual ? 'Предложить' : 'Отправить предложение'}
-            </Button>
+              Отправить предложение
+            </AppButton>
           </Form.Item>
         </Form>
       </div>

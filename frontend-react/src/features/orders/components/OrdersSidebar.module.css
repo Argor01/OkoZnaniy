@@ -1,16 +1,17 @@
 .ordersSidebar {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .sidebarHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #764ba2 100%);
   color: white;
 }
 
@@ -23,33 +24,38 @@
   font-size: 18px;
   font-weight: 600;
   color: white;
+  font-family: var(--font-display);
 }
 
 .menu {
-  border: none;
-  padding: 8px;
+  list-style: none;
+  padding: var(--spacing-sm);
+  margin: 0;
 }
 
-.menu :global(.ant-menu-item) {
-  border-radius: 8px;
-  margin: 4px 0;
-  height: auto;
-  line-height: 1.5;
-  padding: 12px 16px;
-  transition: all 0.3s ease;
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
 }
 
-.menu :global(.ant-menu-item:hover) {
-  background: rgba(102, 126, 234, 0.1);
+.menuItem:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--primary-purple);
 }
 
-.menu :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+.menuItem.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: var(--primary-purple);
   font-weight: 600;
-}
-
-.menu :global(.ant-menu-item-selected::after) {
-  border-right: 3px solid #667eea;
+  border-right: 3px solid var(--primary-purple);
 }
 
 .menuItemContent {
@@ -57,47 +63,42 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  font-size: 14px;
 }
 
 .badge {
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 600;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
-.iconBlue {
-  color: #3b82f6;
+.badgeActive {
+  background-color: var(--primary-purple);
+  color: white;
 }
 
-.iconAmber {
-  color: #f59e0b;
-}
+/* Status specific colors for icons */
+.iconBlue { color: #3b82f6; }
+.iconAmber { color: #f59e0b; }
+.iconViolet { color: #8b5cf6; }
+.iconGreen { color: #10b981; }
+.iconCyan { color: #06b6d4; }
+.iconRed { color: #ef4444; }
+.iconIndigo { color: #6366f1; }
+.iconGray { color: #6b7280; }
 
-.iconViolet {
-  color: #8b5cf6;
-}
-
-.iconGreen {
-  color: #10b981;
-}
-
-.iconCyan {
-  color: #06b6d4;
-}
-
-.iconRed {
-  color: #ef4444;
-}
-
-.iconIndigo {
-  color: #6366f1;
-}
-
-.iconGray {
-  color: #6b7280;
-}
-
-.badgeBlue :global(.ant-badge-count) {
-  background-color: #3b82f6;
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: var(--spacing-sm) 0;
 }
 
 .badgeAmber :global(.ant-badge-count) {

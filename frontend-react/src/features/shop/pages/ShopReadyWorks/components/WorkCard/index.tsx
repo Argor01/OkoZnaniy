@@ -1,8 +1,10 @@
 import React from 'react';
-import { Card, Tag, Button, Space, Typography, Rate, Popconfirm } from 'antd';
+import { Tag, Space, Typography, Rate, Popconfirm } from 'antd';
 import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Work } from '@/features/shop/types';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppButton } from '@/components/ui/AppButton';
 import styles from './WorkCard.module.css';
 
 const { Text, Title } = Typography;
@@ -24,7 +26,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
   const navigate = useNavigate();
 
   return (
-    <Card
+    <AppCard
       hoverable
       className={styles.card}
       onClick={() => onView(work.id)}
@@ -45,8 +47,8 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
       <div className={styles.header}>
         <Tag color="blue">{work.category}</Tag>
         <Space size={4}>
-          <Button
-            type="text"
+          <AppButton
+            variant="text"
             icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
             onClick={(e) => {
               e.stopPropagation();
@@ -61,8 +63,8 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
               onConfirm={() => onDelete(work.id)}
               onCancel={(e) => e?.stopPropagation()}
             >
-              <Button
-                type="text"
+              <AppButton
+                variant="text"
                 danger
                 icon={<DeleteOutlined />}
                 onClick={(e) => e.stopPropagation()}
@@ -85,8 +87,8 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         <div className={styles.author}>
           <Space size={8}>
             <UserOutlined className={styles.authorIcon} />
-            <Button 
-              type="link" 
+            <AppButton 
+              variant="link" 
               className={styles.authorLink}
               onClick={(e) => {
                 e.stopPropagation();
@@ -94,7 +96,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
               }}
             >
               {work.author.name || work.author.username || work.author_name || 'Неизвестен'}
-            </Button>
+            </AppButton>
           </Space>
         </div>
       )}
@@ -116,8 +118,8 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
             {work.price} ₽
           </Text>
         </div>
-        <Button
-          type="primary"
+        <AppButton
+          variant="primary"
           icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
           disabled={isPurchased ? !canDownload : false}
           onClick={(e) => {
@@ -130,9 +132,9 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
           }}
         >
           {isPurchased ? 'Скачать' : 'Купить'}
-        </Button>
+        </AppButton>
       </div>
-    </Card>
+    </AppCard>
   );
 };
 

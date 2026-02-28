@@ -1,0 +1,41 @@
+.upload {
+  /* Base styles if needed */
+}
+
+.card :global(.ant-upload) {
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-secondary);
+}
+
+.card :global(.ant-upload:hover) {
+  border-color: var(--primary-blue);
+  background: var(--bg-secondary);
+}
+
+/* Override Ant Design styles for Dragger to match our theme */
+.upload :global(.ant-upload.ant-upload-drag) {
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.upload :global(.ant-upload.ant-upload-drag:hover) {
+  border-color: var(--primary-blue);
+  background: var(--bg-tertiary);
+}
+
+.upload :global(.ant-upload-drag-icon .anticon) {
+  color: var(--primary-purple);
+}
+
+.upload :global(.ant-upload-text) {
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.upload :global(.ant-upload-hint) {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}

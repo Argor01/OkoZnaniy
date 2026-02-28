@@ -1,8 +1,9 @@
 import React from 'react';
-import { Row, Col, Empty, Spin } from 'antd';
+import { Row, Col } from 'antd';
 import WorkCard from '../WorkCard';
 import { Work } from '@/features/shop/types';
 import type { Purchase } from '@/features/shop/api/shop';
+import { AppEmpty, AppSpinner } from '@/components/ui';
 import styles from './WorksList.module.css';
 
 interface WorksListProps {
@@ -31,14 +32,14 @@ const WorksList: React.FC<WorksListProps> = ({
   if (loading) {
     return (
       <div className={styles.loading}>
-        <Spin size="large" />
+        <AppSpinner size="large" />
       </div>
     );
   }
 
   if (works.length === 0) {
     return (
-      <Empty
+      <AppEmpty
         description="Работы не найдены"
         className={styles.empty}
       />

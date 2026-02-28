@@ -1,8 +1,10 @@
 
 import React from 'react';
-import { Card, Tag, Button, Space, Typography, Rate, Badge } from 'antd';
+import { Tag, Space, Typography, Rate, Badge } from 'antd';
 import { EyeOutlined, DownloadOutlined, HeartOutlined, HeartFilled, CheckOutlined, CalendarOutlined } from '@ant-design/icons';
 import { PurchasedWork } from '@/features/shop/types';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppButton } from '@/components/ui/AppButton';
 import styles from './PurchasedWorkCard.module.css'; 
 
 const { Text, Title } = Typography;
@@ -27,7 +29,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
   };
 
   return (
-    <Card
+    <AppCard
       hoverable
       className={styles.card}
       onClick={() => onView && onView(work.workId)}
@@ -59,12 +61,12 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
             />
           )}
         </div>
-        <Button
-          type="text"
+        <AppButton
+          variant="text"
           icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
           onClick={(e) => {
             e.stopPropagation();
-            onFavorite(work.id);
+            onFavorite && onFavorite(work.id);
           }}
         />
       </div>
@@ -108,8 +110,8 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
           </Text>
           
         </div>
-        <Button
-          type="primary"
+        <AppButton
+          variant="primary"
           icon={<DownloadOutlined />}
           disabled={!work.deliveredFileAvailable}
           onClick={(e) => {
@@ -119,9 +121,9 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
           className={work.isDownloaded ? styles.downloadedButton : styles.downloadButton}
         >
           {work.isDownloaded ? 'Скачать снова' : 'Скачать'}
-        </Button>
+        </AppButton>
       </div>
-    </Card>
+    </AppCard>
   );
 };
 

@@ -1,0 +1,8 @@
+.empty {
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+}
+
+.empty :global(.ant-empty-description) {
+  color: var(--text-secondary);
+}

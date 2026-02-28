@@ -1,5 +1,5 @@
 .grid {
-  margin-top: 24px;
+  margin-top: var(--spacing-lg, 24px);
   justify-content: start;
 }
 

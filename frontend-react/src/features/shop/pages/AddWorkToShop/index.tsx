@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Typography, message } from 'antd';
 import WorkForm from './components/WorkForm';
-import { WorkFormData } from '@/features/shop/types';
+import { WorkFormData, CreateWorkPayload } from '@/features/shop/types';
 import { shopApi } from '@/features/shop/api/shop';
 import styles from './AddWorkToShop.module.css';
 
@@ -15,7 +15,7 @@ const AddWorkToShop: React.FC = () => {
 
   
   const createWorkMutation = useMutation({
-    mutationFn: (data: any) => shopApi.createWork(data),
+    mutationFn: (data: CreateWorkPayload) => shopApi.createWork(data),
     onSuccess: () => {
       message.success('Работа успешно добавлена!');
       queryClient.invalidateQueries({ queryKey: ['shop-works'] });
@@ -28,7 +28,7 @@ const AddWorkToShop: React.FC = () => {
 
   const handleSubmit = (formData: WorkFormData) => {
     
-    const apiData = {
+    const apiData: CreateWorkPayload = {
       title: formData.title,
       description: formData.description,
       price: formData.price,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Typography, Tag, Button, Space, Empty, Spin, Input, Select, Row, Col, InputNumber, message, Avatar, Divider, Tooltip } from 'antd';
+import { Typography, Tag, Space, Empty, Spin, Select, Row, Col, InputNumber, message, Avatar, Tooltip } from 'antd';
 import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,8 @@ import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
 import { formatCurrency } from '@/utils/formatters';
 import BidModal from '../../components/BidModal';
-import { SurfaceCard } from '@/features/common';
+import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty, OrderCard } from '@/components/ui';
+import { AppSelect } from '@/components/ui/AppSelect';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -269,23 +270,23 @@ const OrdersFeed: React.FC = () => {
               Найдите подходящий заказ или создайте свой
             </Text>
           </div>
-          <Button 
-            type="primary" 
+          <AppButton 
+            variant="primary" 
             size="large"
             onClick={() => navigate('/create-order')}
             className={styles.primaryButton}
           >
             Создать заказ
-          </Button>
+          </AppButton>
         </div>
       )}
 
-      <Card 
+      <AppCard 
         className={styles.filterCard}
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={12} lg={8}>
-            <Input
+            <AppInput
               size="large"
               placeholder="Поиск по названию или описанию..."
               prefix={<SearchOutlined />}
@@ -295,7 +296,7 @@ const OrdersFeed: React.FC = () => {
             />
           </Col>
           <Col xs={24} sm={12} md={6} lg={8}>
-            <Select
+            <AppSelect
               size="large"
               placeholder="Предмет"
               className={styles.fullWidth}
@@ -305,14 +306,14 @@ const OrdersFeed: React.FC = () => {
               suffixIcon={<FilterOutlined />}
             >
               {(fetchedSubjects || []).map((subject: Subject) => (
-                <Select.Option key={subject.id} value={subject.id}>
+                <AppSelect.Option key={subject.id} value={subject.id}>
                   {subject.name}
-                </Select.Option>
+                </AppSelect.Option>
               ))}
-            </Select>
+            </AppSelect>
           </Col>
           <Col xs={24} sm={12} md={6} lg={8}>
-            <Select
+            <AppSelect
               size="large"
               placeholder="Тип работы"
               className={styles.fullWidth}
@@ -322,22 +323,22 @@ const OrdersFeed: React.FC = () => {
               suffixIcon={<FilterOutlined />}
             >
               {(workTypes || []).map((workType: WorkType) => (
-                <Select.Option key={workType.id} value={workType.id}>
+                <AppSelect.Option key={workType.id} value={workType.id}>
                   {workType.name}
-                </Select.Option>
+                </AppSelect.Option>
               ))}
-            </Select>
+            </AppSelect>
           </Col>
         </Row>
 
         <div className={styles.filtersRow}>
-          <Button 
-            type="link" 
+          <AppButton 
+            variant="link" 
             onClick={() => setShowFilters(!showFilters)}
             className={showFilters ? styles.filterToggleExpanded : styles.filterToggle}
           >
             {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
-          </Button>
+          </AppButton>
         </div>
 
         {showFilters && (
@@ -349,12 +350,12 @@ const OrdersFeed: React.FC = () => {
               <div className={styles.budgetRow}>
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>От</Text>
-                  <InputNumber
+                  <AppInput.Number
                     size="large"
                     min={0}
                     max={budgetRange[1]}
                     value={budgetRange[0]}
-                    onChange={(value) => setBudgetRange([value || 0, budgetRange[1]])}
+                    onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
                     placeholder="0"
                     controls={false}
                     className={styles.budgetInput}
@@ -367,12 +368,12 @@ const OrdersFeed: React.FC = () => {
                 </div>
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>До</Text>
-                  <InputNumber
+                  <AppInput.Number
                     size="large"
                     min={budgetRange[0]}
                     max={100000}
                     value={budgetRange[1]}
-                    onChange={(value) => setBudgetRange([budgetRange[0], value || 30000])}
+                    onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 30000])}
                     placeholder="30000"
                     controls={false}
                     className={styles.budgetInput}
@@ -389,18 +390,18 @@ const OrdersFeed: React.FC = () => {
               <div className={styles.filterLabel}>
                 <Text strong>Количество откликов</Text>
               </div>
-              <Select
+              <AppSelect
                 size="large"
                 placeholder="Все заказы"
                 className={styles.fullWidth}
                 value={responsesFilter}
                 onChange={setResponsesFilter}
               >
-                <Select.Option value="all">Все заказы</Select.Option>
-                <Select.Option value="none">Без откликов</Select.Option>
-                <Select.Option value="few">1-5 откликов</Select.Option>
-                <Select.Option value="many">Более 5 откликов</Select.Option>
-              </Select>
+                <AppSelect.Option value="all">Все заказы</AppSelect.Option>
+                <AppSelect.Option value="none">Без откликов</AppSelect.Option>
+                <AppSelect.Option value="few">1-5 откликов</AppSelect.Option>
+                <AppSelect.Option value="many">Более 5 откликов</AppSelect.Option>
+              </AppSelect>
             </Col>
             <Col xs={24} sm={12} md={8}>
               <div className={styles.filterLabel}>
@@ -412,15 +413,15 @@ const OrdersFeed: React.FC = () => {
             </Col>
           </Row>
         )}
-      </Card>
+      </AppCard>
 
       
       {ordersLoading ? (
         <div className={styles.loadingBlock}>
-          <Spin size="large" />
+          <AppSpinner size="large" />
         </div>
       ) : filteredOrders.length === 0 ? (
-        <Empty
+        <AppEmpty
           description={
             <div>
               <Text className={styles.emptyText}>
@@ -435,15 +436,15 @@ const OrdersFeed: React.FC = () => {
           className={styles.loadingBlock}
         >
           {userProfile?.role !== 'client' && (
-            <Button 
-              type="primary" 
+            <AppButton 
+              variant="primary" 
               size="large"
               onClick={() => navigate('/create-order')}
             >
               Создать первый заказ
-            </Button>
+            </AppButton>
           )}
-        </Empty>
+        </AppEmpty>
       ) : (
         <div className={styles.ordersGrid}>
           {filteredOrders.map((order: OrdersFeedOrder) => {
@@ -465,188 +466,25 @@ const OrdersFeed: React.FC = () => {
                       : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
                 : false;
             return (
-            <Card
-              key={order.id}
-              hoverable
-              className={styles.orderCard}
-              onClick={() => navigate(`/orders/${order.id}`)}
-            >
-              <div className={styles.orderCardHeader}>
-                <div className={styles.orderCardHeaderInfo}>
-                  <Text strong className={styles.orderTitle}>
-                    {order.title}
-                  </Text>
-                  <Space size={8} wrap>
-                    <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
-                      {getStatusText(order.status)}
-                    </Tag>
-                    {(order.custom_subject || order.subject?.name || order.subject_name) && (
-                      <Tag className={styles.subjectTag}>
-                        {order.custom_subject || order.subject?.name || order.subject_name}
-                      </Tag>
-                    )}
-                    {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
-                      <Tag className={styles.workTypeTag}>
-                        {order.custom_work_type || order.work_type?.name || order.work_type_name}
-                      </Tag>
-                    )}
-                    {order.topic?.name && (
-                      <Tag className={styles.topicTag}>
-                        Тема: {order.topic.name}
-                      </Tag>
-                    )}
-                  </Space>
-                </div>
-                <div className={styles.orderCardActions}>
-                  <div className={styles.orderCardActionsRow}>
-                    <Tooltip title="Скопировать ссылку на заказ">
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<ShareAltOutlined />}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const url = `${window.location.origin}/orders/${order.id}`;
-                          try {
-                            await navigator.clipboard.writeText(url);
-                            message.success('Ссылка скопирована');
-                          } catch {
-                            message.error('Не удалось скопировать ссылку');
-                          }
-                        }}
-                      />
-                    </Tooltip>
-                  </div>
-                  <div className={styles.orderBudget}>
-                    {Number.isFinite(Number(order.budget)) ? formatCurrency(Number(order.budget)) : 'Договорная'}
-                  </div>
-                </div>
-              </div>
-
-              <Paragraph 
-                ellipsis={{ rows: 2 }}
-                className={styles.orderDescription}
-              >
-                {order.description || 'Описание не указано'}
-              </Paragraph>
-              
-              {order.files && order.files.length > 0 && (
-                <div className={styles.filesBlock}>
-                  <Text type="secondary" className={styles.filesLabel}>
-                    Прикрепленные файлы ({order.files.length}):
-                  </Text>
-                  <Space size={8} wrap>
-                    {order.files.map((file) => {
-                      const getFileIcon = (filename: string) => {
-                        const ext = filename.split('.').pop()?.toLowerCase();
-                        if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
-                        if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
-                        if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
-                        if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
-                        return <FileOutlined className={styles.fileIconDefault} />;
-                      };
-                      const fileName = file.filename || file.file_name || 'file';
-
-                      return (
-                        <Tooltip
-                          key={String(file.id ?? fileName)}
-                          title={`Открыть ${fileName} (${file.file_size || 'размер неизвестен'})`}
-                        >
-                          <Tag 
-                            icon={getFileIcon(fileName)}
-                            className={styles.fileTag}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownloadOrderFile(order.id, file);
-                            }}
-                          >
-                            {fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
-                          </Tag>
-                        </Tooltip>
-                      );
-                    })}
-                  </Space>
-                </div>
-              )}
-
-              <div className={styles.clientInfo}>
-                <Space size={12}>
-                  <Avatar 
-                    size={48}
-                    src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
-                    icon={<UserOutlined />}
-                    className={styles.clientAvatar}
-                  />
-                  <div>
-                    <Text strong className={styles.clientName}>
-                      {order.client?.username || order.client_name || 
-                        (order.client?.first_name && order.client?.last_name 
-                          ? `${order.client.first_name} ${order.client.last_name}` 
-                          : userProfile?.username || 'Заказчик')}
-                    </Text>
-                    <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
-                      Заказов: {order.client_orders_count || 1}
-                    </Text>
-                  </div>
-                </Space>
-              </div>
-
-              <div className={styles.orderMetaRow}>
-                <Space size={16} wrap>
-                  <Space size={4}>
-                    <ClockCircleOutlined className={styles.orderMetaIcon} />
-                    <Text type="secondary" className={styles.orderMetaText}>
-                      {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
-                    </Text>
-                  </Space>
-                  <Space size={4}>
-                    <UserOutlined className={styles.orderMetaIcon} />
-                    <Text 
-                      className={`${styles.responsesCount} ${
-                        (order.bids?.length || order.responses_count || 0) === 0
-                          ? styles.responsesCountNone
-                          : (order.bids?.length || order.responses_count || 0) > 5
-                            ? styles.responsesCountMany
-                            : styles.responsesCountSome
-                      }`}
-                    >
-                      {order.bids?.length || order.responses_count || 0} откликов
-                    </Text>
-                  </Space>
-                </Space>
-                
-                {isOrderOwner(order) ? (
-                  <Button 
-                    danger
-                    icon={<DeleteOutlined />}
-                    className={`${styles.actionButton} ${styles.deleteButton}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
-                        handleDeleteOrder(order.id);
-                      }
-                    }}
-                  >
-                    Удалить
-                  </Button>
-                ) : userProfile?.role === 'expert' ? (
-                  <Button 
-                    type={hasMyBid ? 'default' : 'primary'}
-                    disabled={hasMyBid || checkingMyBid}
-                    size={isMobile ? 'middle' : 'large'}
-                    className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (hasMyBid || checkingMyBid) return;
-                      setSelectedOrderForBid(order);
-                      setBidModalVisible(true);
-                    }}
-                  >
-                    {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
-                  </Button>
-                ) : null}
-              </div>
-            </Card>
+              <OrderCard
+                key={order.id}
+                order={order}
+                userProfile={userProfile}
+                onDelete={(id) => {
+                  if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                    handleDeleteOrder(id);
+                  }
+                }}
+                onBid={(order) => {
+                  setSelectedOrderForBid(order);
+                  setBidModalVisible(true);
+                }}
+                onClick={(id) => navigate(`/orders/${id}`)}
+                onDownloadFile={handleDownloadOrderFile}
+                hasMyBid={hasMyBid}
+                checkingMyBid={checkingMyBid}
+                isMobile={isMobile}
+              />
             );
           })}
         </div>
@@ -654,15 +492,15 @@ const OrdersFeed: React.FC = () => {
 
             
             {isMobile && (
-              <Button 
-                type="primary" 
+              <AppButton 
+                variant="primary" 
                 size="large"
                 block
                 onClick={() => navigate('/create-order')}
                 className={styles.mobileCreateButton}
               >
                 Создать заказ
-              </Button>
+              </AppButton>
             )}
 
       {selectedOrderForBid && (

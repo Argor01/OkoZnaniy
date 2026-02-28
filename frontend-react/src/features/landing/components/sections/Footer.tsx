@@ -16,8 +16,10 @@ const Footer: React.FC = () => (
         </div>
 
         <div className="footer__documents">
-          <a className="footer__documents-link" href="#">Политика конфиденциальности</a>
-          <a className="footer__documents-link" href="#">Пользовательское соглашение</a>
+          <a className="footer__documents-link" href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Политика конфиденциальности</a>
+          <a className="footer__documents-link" href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer">Согласие на обработку ПД</a>
+          <a className="footer__documents-link" href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Клиент)</a>
+          <a className="footer__documents-link" href="/docs/user_agreement_expert.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Эксперт)</a>
         </div>
       </div>
     </div>

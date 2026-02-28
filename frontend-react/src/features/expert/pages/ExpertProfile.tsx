@@ -1,12 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Tag, Spin, Alert, Button, Rate, Divider, Avatar } from 'antd';
+import { Typography, Tag, Spin, Alert, Rate, Divider, Avatar } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertStatistics, type ExpertReview } from '@/features/expert/api/experts';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import styles from './ExpertProfile.module.css';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppButton } from '@/components/ui/AppButton';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -79,9 +81,9 @@ const ExpertProfile: React.FC = () => {
           type="error"
           showIcon
           action={
-            <Button type="primary" onClick={() => navigate(-1)}>
+            <AppButton variant="primary" onClick={() => navigate(-1)}>
               Назад
-            </Button>
+            </AppButton>
           }
         />
       </div>
@@ -92,9 +94,9 @@ const ExpertProfile: React.FC = () => {
     <div className={styles.pageContainer}>
       
       <div className={styles.headerRow}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+        <AppButton icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} variant="secondary">
           Назад
-        </Button>
+        </AppButton>
         <div>
           <div className={styles.headerMeta}>
             {expert.avatar ? (
@@ -122,19 +124,19 @@ const ExpertProfile: React.FC = () => {
       <div className={styles.contentGrid}>
         <div>
           {expert.bio && (
-            <Card title="О себе" className={styles.cardSpacing}>
+            <AppCard title="О себе" className={styles.cardSpacing}>
               <Paragraph>{expert.bio}</Paragraph>
-            </Card>
+            </AppCard>
           )}
 
           {expert.education && (
-            <Card title="Образование" className={styles.cardSpacing}>
+            <AppCard title="Образование" className={styles.cardSpacing}>
               <Paragraph>{expert.education}</Paragraph>
-            </Card>
+            </AppCard>
           )}
 
           {expert.skills && (
-            <Card title="Навыки" className={styles.cardSpacing}>
+            <AppCard title="Навыки" className={styles.cardSpacing}>
               <div className={styles.skillsWrap}>
                 {expert.skills.split(',').map((skill: string, index: number) => (
                   <Tag key={index} color="blue">
@@ -142,25 +144,25 @@ const ExpertProfile: React.FC = () => {
                   </Tag>
                 ))}
               </div>
-            </Card>
+            </AppCard>
           )}
 
           {expert.portfolio_url && (
-            <Card title="Портфолио" className={styles.cardSpacing}>
-              <Button 
-                type="link" 
+            <AppCard title="Портфолио" className={styles.cardSpacing}>
+              <AppButton 
+                variant="link" 
                 href={expert.portfolio_url} 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
                 Посмотреть портфолио
-              </Button>
-            </Card>
+              </AppButton>
+            </AppCard>
           )}
         </div>
 
         <div>
-          <Card title="Рейтинг и статистика" className={styles.cardSpacing}>
+          <AppCard title="Рейтинг и статистика" className={styles.cardSpacing}>
             {statsLoading ? (
               <Spin />
             ) : expertStats ? (
@@ -204,9 +206,9 @@ const ExpertProfile: React.FC = () => {
             ) : (
               <Text type="secondary">Статистика недоступна</Text>
             )}
-          </Card>
+          </AppCard>
 
-          <Card title="Контактная информация">
+          <AppCard title="Контактная информация">
             <div className={styles.infoList}>
               <div>
                 <Text strong>Email:</Text>
@@ -228,9 +230,9 @@ const ExpertProfile: React.FC = () => {
                 </div>
               )}
             </div>
-          </Card>
+          </AppCard>
 
-          <Card title="Дополнительно" className={styles.cardTopSpacing}>
+          <AppCard title="Дополнительно" className={styles.cardTopSpacing}>
             <div className={styles.infoList}>
               {expert.experience_years && (
                 <div>
@@ -252,11 +254,11 @@ const ExpertProfile: React.FC = () => {
                 <Text>{dayjs(expert.date_joined).format('DD.MM.YYYY')}</Text>
               </div>
             </div>
-          </Card>
+          </AppCard>
         </div>
       </div>
 
-      <Card title={`Отзывы (${reviews.length})`} className={styles.reviewsCard}>
+      <AppCard title={`Отзывы (${reviews.length})`} className={styles.reviewsCard}>
         {reviewsLoading ? (
           <div className={styles.reviewsLoading}>
             <Spin />
@@ -315,7 +317,7 @@ const ExpertProfile: React.FC = () => {
             ))}
           </div>
         )}
-      </Card>
+      </AppCard>
     </div>
   );
 };

@@ -8,6 +8,7 @@ import DashboardHeader from './DashboardHeader';
 import Sidebar from './Sidebar';
 import { useNotifications } from '@/hooks/useNotifications';
 import { DashboardContext } from '@/contexts/DashboardContext';
+import { AppFooter } from '@/components/layout/AppFooter';
 import styles from './DashboardLayout.module.css';
 import '@/styles/modals.css';
 
@@ -327,6 +328,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Content className={contentClassName}>
             {children}
           </Content>
+          <AppFooter userRole={userProfile?.role} />
         </Layout>
       </Layout>
 

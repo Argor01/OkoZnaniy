@@ -18,6 +18,9 @@ const RegisterWithEmailVerification: React.FC = () => {
     password2: '',
     role: 'client',
   });
+  const [agreement, setAgreement] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
+  const [userAgreement, setUserAgreement] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fromGoogle, setFromGoogle] = useState(false);
@@ -52,11 +55,25 @@ const RegisterWithEmailVerification: React.FC = () => {
       return;
     }
 
+    if (!agreement) {
+      setError('Необходимо принять согласие на обработку персональных данных');
+      return;
+    }
+
+    if (!userAgreement) {
+      setError('Необходимо принять пользовательское соглашение');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const response = await apiClient.post('/users/', formData);
+      const payload = {
+        ...formData,
+        newsletter_subscription: newsletter
+      };
+      const response = await apiClient.post('/users/', payload);
       
       
       if (response.data.email_verification_required) {
@@ -199,6 +216,64 @@ const RegisterWithEmailVerification: React.FC = () => {
                 <option value="expert">Выполнять работы</option>
                 <option value="partner">Стать партнером</option>
               </select>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="agreement"
+                  name="agreement"
+                  type="checkbox"
+                  required
+                  checked={agreement}
+                  onChange={(e) => setAgreement(e.target.checked)}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="agreement" className="font-medium text-gray-700">
+                  Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">Политикой обработки персональных данных</a>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="userAgreement"
+                  name="userAgreement"
+                  type="checkbox"
+                  required
+                  checked={userAgreement}
+                  onChange={(e) => setUserAgreement(e.target.checked)}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="userAgreement" className="font-medium text-gray-700">
+                  Я принимаю <a href={formData.role === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">пользовательское соглашение</a>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="newsletter"
+                  name="newsletter"
+                  type="checkbox"
+                  checked={newsletter}
+                  onChange={(e) => setNewsletter(e.target.checked)}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="newsletter" className="font-medium text-gray-700">
+                  Я предоставляю своё согласие на получение новостной и рекламной рассылки
+                </label>
+              </div>
             </div>
           </div>
 

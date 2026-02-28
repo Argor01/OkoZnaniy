@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tag, Button, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm, Avatar } from 'antd';
+import { Typography, Tag, Space, Empty, Spin, Radio, Tooltip, message, Popconfirm, Avatar } from 'antd';
 import { ClockCircleOutlined, UserOutlined, FilterOutlined, ShareAltOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,8 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './OrdersTab.module.css';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppButton } from '@/components/ui/AppButton';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -169,17 +171,17 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
 
   if (userProfileLoading || isLoading) {
     return (
-      <div className={styles.sectionCard}>
+      <AppCard className={styles.sectionCard}>
         <div className={styles.ordersLoading}>
           <Spin size="large" />
         </div>
-      </div>
+      </AppCard>
     );
   }
 
   return (
     <div>
-      <div className={styles.sectionCard}>
+      <AppCard className={styles.sectionCard}>
         <div className={`${styles.sectionCardHeader} ${styles.ordersHeader}`}>
           <h2 className={styles.sectionTitle}>
             Заказы
@@ -231,7 +233,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
         ) : (
           <div className={styles.ordersGrid}>
             {displayOrders.map((order) => (
-              <Card
+              <AppCard
                 key={order.id}
                 hoverable
                 className={styles.orderCard}
@@ -266,8 +268,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   <div className={styles.orderCardActions}>
                     <div className={styles.orderCardActionsRow}>
                       <Tooltip title="Скопировать ссылку на заказ">
-                        <Button
-                          type="text"
+                        <AppButton
+                          variant="text"
                           size="small"
                           icon={<ShareAltOutlined />}
                           onClick={async (e) => {
@@ -292,8 +294,8 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                             handleDeleteOrder(order.id);
                           }}
                         >
-                          <Button
-                            type="text"
+                          <AppButton
+                            variant="text"
                             size="small"
                             danger
                             icon={<DeleteOutlined />}
@@ -405,28 +407,26 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                       const isMyOrder = order.client?.id === userProfile.id;
 
                       return (
-                    <Button 
-                      type={hasMyBid || isMyOrder ? 'default' : 'primary'}
-                      size={isMobile ? 'middle' : 'large'}
-                      disabled={hasMyBid || isMyOrder}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (hasMyBid || isMyOrder) return;
-                        navigate(`/orders/${order.id}`);
-                      }}
-                      className={`${styles.orderBidButton} ${(hasMyBid || isMyOrder) ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
-                    >
-                      {isMyOrder ? 'Ваш заказ' : (hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться')}
-                    </Button>
+                        <AppButton 
+                          variant={hasMyBid || isMyOrder ? 'secondary' : 'success'}
+                          size={isMobile ? 'middle' : 'large'}
+                          disabled={hasMyBid || isMyOrder}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/orders/${order.id}`);
+                          }}
+                        >
+                          {isMyOrder ? 'Ваш заказ' : (hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться')}
+                        </AppButton>
                       );
                     })()
                   )}
                 </div>
-              </Card>
+              </AppCard>
             ))}
           </div>
         )}
-      </div>
+      </AppCard>
     </div>
   );
 };

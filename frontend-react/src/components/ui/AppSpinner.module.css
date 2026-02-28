@@ -1,0 +1,8 @@
+.spinner {
+  /* Default spinner styles if needed */
+  color: var(--primary-blue);
+}
+
+.spinner :global(.ant-spin-dot-item) {
+  background-color: var(--primary-blue);
+}

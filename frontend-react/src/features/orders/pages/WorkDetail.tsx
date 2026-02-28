@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, Divider } from 'antd';
+import { Typography, Space, Tag, Avatar, Spin } from 'antd';
+import { AppCard, AppButton } from '@/components/ui';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined } from '@ant-design/icons';
-import { ordersApi } from '@/features/orders/api/orders';
+import { ordersApi, Order, OrderFile } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -27,7 +28,7 @@ const WorkDetail: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: work, isLoading } = useQuery({
+  const { data: work, isLoading } = useQuery<Order>({
     queryKey: ['work', workId],
     queryFn: () => ordersApi.getById(Number(workId)),
     enabled: !!workId,
@@ -45,9 +46,9 @@ const WorkDetail: React.FC = () => {
     return (
       <div className={styles.notFound}>
         <Title level={3}>Работа не найдена</Title>
-        <Button type="primary" onClick={() => navigate('/works')}>
+        <AppButton variant="primary" onClick={() => navigate('/works')}>
           Вернуться к работам
-        </Button>
+        </AppButton>
       </div>
     );
   }
@@ -79,16 +80,17 @@ const WorkDetail: React.FC = () => {
   return (
     <div className={styles.page}>
       <div className={styles.pageInner}>
-        <Button 
+        <AppButton 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(-1)}
           className={styles.backButton}
           size={isMobile ? 'middle' : 'large'}
+          variant="secondary"
         >
           Назад
-        </Button>
+        </AppButton>
 
-        <Card className={styles.mainCard}>
+        <AppCard className={styles.mainCard}>
           <Space direction="vertical" size="large" className={styles.fullWidth}>
             <div>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
@@ -100,7 +102,7 @@ const WorkDetail: React.FC = () => {
             </div>
 
             <div className={styles.sectionStack}>
-              <Card 
+              <AppCard 
                 className={styles.clientCard}
               >
                 <Space direction="vertical" size={12} className={styles.fullWidth}>
@@ -115,8 +117,8 @@ const WorkDetail: React.FC = () => {
                       className={styles.clientAvatar}
                     />
                     <div>
-                      <Button 
-                        type="link" 
+                      <AppButton 
+                        variant="link" 
                         onClick={() => {
                           console.log('Navigating to user profile:', work.client?.id);
                           if (work.client?.id) {
@@ -128,17 +130,17 @@ const WorkDetail: React.FC = () => {
                         className={styles.clientLink}
                       >
                         {work.client?.username || work.client_name || 'Неизвестен'}
-                      </Button>
+                      </AppButton>
                       <div className={styles.clientHint}>
                         Нажмите, чтобы посмотреть профиль
                       </div>
                     </div>
                   </Space>
                 </Space>
-              </Card>
+              </AppCard>
 
               <div className={styles.infoGrid}>
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -153,9 +155,9 @@ const WorkDetail: React.FC = () => {
                       </Text>
                     </Space>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -167,9 +169,9 @@ const WorkDetail: React.FC = () => {
                       {work.subject?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -184,9 +186,9 @@ const WorkDetail: React.FC = () => {
                       </Text>
                     </Space>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -198,9 +200,9 @@ const WorkDetail: React.FC = () => {
                       {work.work_type?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -212,42 +214,42 @@ const WorkDetail: React.FC = () => {
                       {formatDistanceToNow(new Date(work.updated_at || work.created_at), { addSuffix: true, locale: ru })}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
               </div>
             </div>
 
-            <Card 
+            <AppCard 
               title="Описание работы"
               className={styles.contentCard}
             >
               <Paragraph className={styles.description}>
                 {work.description || 'Описание отсутствует'}
               </Paragraph>
-            </Card>
+            </AppCard>
 
             {work.files && work.files.length > 0 && (
-              <Card 
+              <AppCard 
                 title="Прикрепленные файлы"
                 className={styles.contentCard}
               >
                 <Space direction="vertical">
-                  {work.files.map((file: any, index: number) => (
+                  {work.files.map((file: OrderFile, index: number) => (
                     <a 
                       key={index} 
-                      href={file.view_url || file.file_url || file.file || file} 
+                      href={file.view_url || file.file_url || '#'} 
                       target="_blank" 
                       rel="noopener noreferrer"
                     >
-                      Файл {index + 1}
+                      {file.filename || `Файл ${index + 1}`}
                     </a>
                   ))}
                 </Space>
-              </Card>
+              </AppCard>
             )}
 
             
             {work.expert_rating && (
-              <Card 
+              <AppCard 
                 title="Оценка работы"
                 className={styles.infoCard}
               >
@@ -267,10 +269,10 @@ const WorkDetail: React.FC = () => {
                     Оценка от {formatDistanceToNow(new Date(work.expert_rating.created_at), { addSuffix: true, locale: ru })}
                   </Text>
                 </Space>
-              </Card>
+              </AppCard>
             )}
           </Space>
-        </Card>
+        </AppCard>
       </div>
     </div>
   );

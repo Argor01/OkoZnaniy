@@ -1,10 +1,11 @@
 .bidHeader {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md, 16px);
 }
 
 .bidBudget {
-  color: #666;
-  margin-top: 4px;
+  color: var(--text-secondary, #666);
+  margin-top: var(--spacing-xs, 4px);
+  font-size: var(--font-size-sm, 14px);
 }
 
 .formItemNoMargin {
@@ -13,4 +14,11 @@
 
 .fullWidth {
   width: 100%;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm, 8px);
+  margin-top: var(--spacing-lg, 24px);
 }

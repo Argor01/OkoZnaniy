@@ -1,6 +1,4 @@
 
-
-
 .contentContainer {
   max-width: 1200px;
   margin: 0 auto;
@@ -18,10 +16,10 @@
 }
 
 .filterCard {
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 24px;
 }
 
@@ -40,7 +38,7 @@
 .pageTitle {
   margin: 0;
   margin-bottom: 8px;
-  font-family: 'Syncopate', sans-serif;
+  font-family: var(--font-display);
   font-size: 20px !important;
 }
 
@@ -52,7 +50,7 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  color: #1890ff;
+  color: var(--primary-blue);
   font-weight: 500;
   margin-bottom: 16px;
   user-select: none;
@@ -69,7 +67,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .budgetRow {
@@ -93,403 +91,70 @@
 .ordersCount {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .loadingBlock {
   text-align: center;
-  padding: 40px;
+  padding: 40px 0;
 }
 
 .emptyText {
-  text-align: center;
-  color: #999;
-  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 16px;
 }
 
 .ordersGrid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .orderCard {
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  cursor: pointer;
-  margin-bottom: 0;
   height: 100%;
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .orderCard:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-blue);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
-}
-
-.orderCard :global(.ant-card-body) {
-  padding: 20px;
 }
 
 .orderCardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .orderCardHeaderInfo {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .orderTitle {
-  font-size: 16px;
-  display: block;
-  margin-bottom: 24px;
-  font-family: 'Syncopate', sans-serif;
-  color: #1890ff;
-  font-weight: 700;
-}
-
-.orderCardActions {
-  text-align: right;
-}
-
-.orderCardActionsRow {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-
-.orderBudget {
   font-size: 18px;
-  font-family: 'Syncopate';
-  color: #3b82f6;
-}
-
-.orderDescription {
-  color: #666;
-  margin-bottom: 32px;
-  font-size: 18px;
-  font-family: 'BwSurco-Medium', sans-serif;
-}
-
-.orderMetaRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.orderMetaIcon {
-  color: #999;
-}
-
-.orderMetaText {
-  font-size: 14px;
-}
-
-.orderBidButton {
-  border: none;
-  border-radius: 6px;
-  margin-left: 8px;
   font-weight: 600;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.orderBidButtonActive {
-  background: #52c41a;
-  color: #ffffff;
-}
-
-.orderBidButtonDisabled {
-  background: #e5e7eb;
-  color: #6b7280;
-}
-
-.actionButton {
-  border: none;
-  border-radius: 6px;
-  margin-left: 8px;
-  font-weight: 600;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.deleteButton {
-  background: #ff4d4f;
-  color: white;
-}
-
-.deleteButton:hover {
-  background: #ff7875;
-  color: white;
+  color: var(--text-primary);
 }
 
 .statusTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  color: #fff;
-  text-transform: uppercase;
-  font-weight: 300;
-  font-size: 14px;
+  margin-right: 0;
 }
 
-.subjectTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 300;
-  color: #fff;
-  background: #1890ff;
-  font-size: 14px;
-}
-
-.workTypeTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 300;
-  color: #fff;
-  background: #722ed1;
-  font-size: 14px;
-}
-
-.topicTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 300;
-  color: #fff;
-  background: #eb2f96;
-  font-size: 14px;
-}
-
-.filesBlock {
-  margin-bottom: 24px;
-}
-
-.filesLabel {
-  font-size: 12px;
-  margin-bottom: 12px;
-  display: block;
-}
-
-.fileTag {
-  cursor: pointer;
-  padding: 4px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.fileTag:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.fileIconPdf { color: #ff4d4f; }
-.fileIconDoc { color: #1890ff; }
-.fileIconImage { color: #52c41a; }
-.fileIconArchive { color: #fa8c16; }
-.fileIconDefault { color: #666; }
-.fileDownloadIcon { margin-left: 4px; }
-
-.responsesCount { font-size: 14px; font-weight: 600; }
-.responsesCountNone { color: #999; }
-.responsesCountMany { color: #ff4d4f; }
-.responsesCountSome { color: #52c41a; }
-
-.clientInfo {
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-}
-
-.clientAvatar {
-  background-color: #87d068;
-}
-
-.clientName {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1f2937;
-  font-family: 'BwSurco-Medium', sans-serif;
-}
-
-.mobileCreateButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  border-radius: 12px;
-  height: 48px;
-  font-size: 16px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  margin-bottom: 16px;
-}
-
-.bidHeader {
-  margin-bottom: 16px;
-}
-
-.bidBudget {
-  color: #666;
-  margin-top: 4px;
-}
-
-.formItemNoMargin {
-  margin-bottom: 0;
+.subjectTag, .workTypeTag, .topicTag {
+  margin-right: 0;
 }
 
 .primaryButton {
-  background: #1E90FF;
-  border: none;
-  border-radius: 12px;
-  height: 48px;
-  padding: 0 32px;
-  font-size: 16px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
 }
 
 .primaryButton:hover {
-  background: #1c7ed6;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-@media (max-width: 768px) {
-  .pageHeader {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-  
-  .filterCard {
-    border-radius: 12px;
-    margin-bottom: 20px;
-  }
-  
-  .orderCard {
-    border-radius: 12px;
-    margin-bottom: 12px;
-  }
-}
-
-.emptyState {
-  text-align: center;
-  padding: 60px 20px;
-  color: #6b7280;
-}
-
-.loadingContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 20px;
-}
-
-.infoCard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  border-radius: 16px;
-  margin-bottom: 24px;
-}
-
-.infoCard :global(.ant-card-body) {
-  padding: 20px;
-}
-
-
-.statusTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 600;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-.subjectTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 600;
-  color: #fff;
-  background: #1890ff;
-}
-
-.workTypeTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 600;
-  color: #fff;
-  background: #722ed1;
-}
-
-.topicTag {
-  border-radius: 16px;
-  padding: 4px 12px;
-  border: none;
-  font-weight: 600;
-  color: #fff;
-  background: #eb2f96;
-}
-
-
-.fileTag {
-  cursor: pointer;
-  padding: 4px 12px;
-  font-size: 13px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.fileTag:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-.budgetText {
-  font-size: 24px;
-  font-weight: 600;
-  color: #667eea;
-}
-
-
-.actionButton {
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.actionButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.bidButton {
-  background: #52c41a;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.bidButton:hover {
-  background: #389e0d;
-}
-
-.deleteButton {
-  border-radius: 8px;
-  font-weight: 500;
+  background-color: var(--primary-blue-hover);
+  border-color: var(--primary-blue-hover);
 }

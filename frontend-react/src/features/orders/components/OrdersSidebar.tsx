@@ -1,5 +1,4 @@
 import React from 'react';
-import { Menu, Badge } from 'antd';
 import {
   ShoppingOutlined,
   ClockCircleOutlined,
@@ -11,8 +10,8 @@ import {
   EditOutlined,
   DownloadOutlined,
   CloseCircleOutlined,
+  FilterOutlined,
 } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
 import { ORDER_STATUSES } from '@/utils/constants';
 import styles from './OrdersSidebar.module.css';
 
@@ -40,136 +39,118 @@ const OrdersSidebar: React.FC<OrdersSidebarProps> = ({
   onStatusChange,
   isMobile = false,
 }) => {
-  const menuItems: MenuProps['items'] = [
+  const menuItems = [
     {
       key: 'all',
       icon: <ShoppingOutlined />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Все заказы</span>
-          <Badge count={ordersCount.all} className={styles.badge} />
-        </div>
-      ),
+      label: 'Все заказы',
+      count: ordersCount.all,
+      iconClass: '',
     },
     {
       type: 'divider',
     },
     {
       key: ORDER_STATUSES.NEW,
-      icon: <ClockCircleOutlined className={styles.iconBlue} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Открыт</span>
-          <Badge count={ordersCount[ORDER_STATUSES.NEW]} className={`${styles.badge} ${styles.badgeBlue}`} />
-        </div>
-      ),
+      icon: <ClockCircleOutlined />,
+      label: 'Открыт',
+      count: ordersCount[ORDER_STATUSES.NEW],
+      iconClass: styles.iconBlue,
     },
     {
       key: ORDER_STATUSES.CONFIRMING,
-      icon: <SyncOutlined className={styles.iconAmber} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>На подтверждении</span>
-          <Badge count={ordersCount[ORDER_STATUSES.CONFIRMING]} className={`${styles.badge} ${styles.badgeAmber}`} />
-        </div>
-      ),
+      icon: <SyncOutlined />,
+      label: 'На подтверждении',
+      count: ordersCount[ORDER_STATUSES.CONFIRMING],
+      iconClass: styles.iconAmber,
     },
     {
       key: ORDER_STATUSES.IN_PROGRESS,
-      icon: <SyncOutlined className={styles.iconViolet} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>На выполнении</span>
-          <Badge count={ordersCount[ORDER_STATUSES.IN_PROGRESS]} className={`${styles.badge} ${styles.badgeViolet}`} />
-        </div>
-      ),
+      icon: <SyncOutlined />,
+      label: 'На выполнении',
+      count: ordersCount[ORDER_STATUSES.IN_PROGRESS],
+      iconClass: styles.iconViolet,
     },
     {
       key: ORDER_STATUSES.WAITING_PAYMENT,
-      icon: <DollarOutlined className={styles.iconGreen} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Ожидает оплаты</span>
-          <Badge count={ordersCount[ORDER_STATUSES.WAITING_PAYMENT]} className={`${styles.badge} ${styles.badgeGreen}`} />
-        </div>
-      ),
+      icon: <DollarOutlined />,
+      label: 'Ожидает оплаты',
+      count: ordersCount[ORDER_STATUSES.WAITING_PAYMENT],
+      iconClass: styles.iconGreen,
     },
     {
       key: ORDER_STATUSES.REVIEW,
-      icon: <FileSearchOutlined className={styles.iconCyan} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>На проверке</span>
-          <Badge count={ordersCount[ORDER_STATUSES.REVIEW]} className={`${styles.badge} ${styles.badgeCyan}`} />
-        </div>
-      ),
+      icon: <FileSearchOutlined />,
+      label: 'На проверке',
+      count: ordersCount[ORDER_STATUSES.REVIEW],
+      iconClass: styles.iconCyan,
     },
     {
       key: ORDER_STATUSES.COMPLETED,
-      icon: <CheckCircleOutlined className={styles.iconGreen} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Выполнен</span>
-          <Badge count={ordersCount[ORDER_STATUSES.COMPLETED]} className={`${styles.badge} ${styles.badgeGreen}`} />
-        </div>
-      ),
+      icon: <CheckCircleOutlined />,
+      label: 'Завершен',
+      count: ordersCount[ORDER_STATUSES.COMPLETED],
+      iconClass: styles.iconGreen,
     },
     {
       key: ORDER_STATUSES.REVISION,
-      icon: <EditOutlined className={styles.iconRed} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>На доработке</span>
-          <Badge count={ordersCount[ORDER_STATUSES.REVISION]} className={`${styles.badge} ${styles.badgeRed}`} />
-        </div>
-      ),
+      icon: <EditOutlined />,
+      label: 'В доработке',
+      count: ordersCount[ORDER_STATUSES.REVISION],
+      iconClass: styles.iconRed,
     },
     {
       key: ORDER_STATUSES.DOWNLOAD,
-      icon: <DownloadOutlined className={styles.iconLime} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Ожидает скачивания</span>
-          <Badge count={ordersCount[ORDER_STATUSES.DOWNLOAD]} className={`${styles.badge} ${styles.badgeLime}`} />
-        </div>
-      ),
+      icon: <DownloadOutlined />,
+      label: 'Можно скачать',
+      count: ordersCount[ORDER_STATUSES.DOWNLOAD],
+      iconClass: styles.iconIndigo,
     },
     {
       key: ORDER_STATUSES.CLOSED,
-      icon: <FileDoneOutlined className={styles.iconGray} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Закрыт</span>
-          <Badge count={ordersCount[ORDER_STATUSES.CLOSED]} className={`${styles.badge} ${styles.badgeGray}`} />
-        </div>
-      ),
-    },
-    {
-      key: ORDER_STATUSES.CANCELLED,
-      icon: <CloseCircleOutlined className={styles.iconRed} />,
-      label: (
-        <div className={styles.menuItemContent}>
-          <span>Отменен</span>
-          {/* Badge is not usually shown for cancelled or is 0 */}
-        </div>
-      ),
+      icon: <CloseCircleOutlined />,
+      label: 'Отменен',
+      count: ordersCount[ORDER_STATUSES.CLOSED],
+      iconClass: styles.iconGray,
     },
   ];
 
+  if (isMobile) return null; // Or handle mobile differently
 
   return (
     <div className={styles.ordersSidebar}>
       <div className={styles.sidebarHeader}>
-        <ShoppingOutlined className={styles.headerIcon} />
-        <h3 className={styles.headerTitle}>Мои заказы</h3>
+        <FilterOutlined className={styles.headerIcon} />
+        <h2 className={styles.headerTitle}>Фильтры</h2>
       </div>
-      <Menu
-        mode="inline"
-        selectedKeys={[selectedStatus]}
-        items={menuItems}
-        onClick={({ key }) => onStatusChange?.(key)}
-        className={styles.menu}
-      />
+      
+      <ul className={styles.menu}>
+        {menuItems.map((item, index) => {
+          if (item.type === 'divider') {
+            return <li key={`divider-${index}`} className={styles.divider} />;
+          }
+
+          const isActive = selectedStatus === item.key;
+          
+          return (
+            <li 
+              key={item.key} 
+              className={`${styles.menuItem} ${isActive ? styles.active : ''}`}
+              onClick={() => onStatusChange?.(item.key as string)}
+            >
+              <span className={`${styles.icon} ${item.iconClass}`}>{item.icon}</span>
+              <div className={styles.menuItemContent}>
+                <span>{item.label}</span>
+                {item.count > 0 && (
+                  <span className={`${styles.badge} ${isActive ? styles.badgeActive : ''}`}>
+                    {item.count}
+                  </span>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };

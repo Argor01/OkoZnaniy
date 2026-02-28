@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Modal, Form, InputNumber, Input, Button, message, Result } from 'antd';
+import { Modal, Form, message, Result } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '@/features/orders/api/orders';
+import { AppButton, AppInput } from '@/components/ui';
 import styles from './BidModal.module.css';
-
-const { TextArea } = Input;
 
 interface BidModalProps {
   visible: boolean;
@@ -66,9 +65,9 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
           title="Ваш отклик успешно отправлен!"
           subTitle="Заказчик получит уведомление и сможет связаться с вами"
           extra={[
-            <Button type="primary" key="close" onClick={handleClose}>
+            <AppButton variant="primary" key="close" onClick={handleClose}>
               Закрыть
-            </Button>,
+            </AppButton>,
           ]}
         />
       ) : (
@@ -98,41 +97,38 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
                   min: 1, 
                   message: 'Цена должна быть больше 0',
                   transform: (value) => Number(value)
-                }
+                },
               ]}
             >
-              <InputNumber
-                className={styles.fullWidth}
-                placeholder="Введите вашу цену"
-                addonAfter="₽"
-                min={1}
+              <AppInput.Number
+                style={{ width: '100%' }}
+                placeholder="Введите сумму"
                 size="large"
               />
             </Form.Item>
 
             <Form.Item
               name="comment"
-              label="Комментарий (необязательно)"
+              label="Комментарий (опционально)"
             >
-              <TextArea
+              <AppInput.TextArea
                 rows={4}
-                placeholder="Расскажите почему вы подходите для этого заказа..."
-                maxLength={500}
-                showCount
+                placeholder="Напишите, почему вы подходите для этого заказа..."
               />
             </Form.Item>
 
-            <Form.Item className={styles.formItemNoMargin}>
-              <Button
-                type="primary"
+            <div className={styles.formActions}>
+              <AppButton variant="default" onClick={handleClose}>
+                Отмена
+              </AppButton>
+              <AppButton
+                variant="primary"
                 htmlType="submit"
                 loading={placeBidMutation.isPending}
-                block
-                size="large"
               >
                 Отправить отклик
-              </Button>
-            </Form.Item>
+              </AppButton>
+            </div>
           </Form>
         </>
       )}

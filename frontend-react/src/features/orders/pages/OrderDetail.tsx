@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button, Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge } from 'antd';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
@@ -12,6 +12,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { formatCurrency } from '@/utils/formatters';
 import styles from './OrderDetail.module.css';
 import { ROUTES } from '@/utils/constants';
+import { AppButton, AppCard } from '@/components/ui';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -27,7 +28,7 @@ const OrderDetail: React.FC = () => {
   const removeOrderFromCaches = React.useCallback((id: number) => {
     const filterOut = (data: any) => {
       if (!data) return data;
-      if (Array.isArray(data)) return data.filter((o) => o?.id !== id);
+      if (Array.isArray(data)) return data.filter((o: any) => o?.id !== id);
       if (Array.isArray(data.results)) return { ...data, results: data.results.filter((o: any) => o?.id !== id) };
       return data;
     };
@@ -48,7 +49,7 @@ const OrderDetail: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: order, isLoading, error: orderError } = useQuery<Order, any>({
+  const { data: order, isLoading, error: orderError } = useQuery<Order, Error>({
     queryKey: ['order', orderId],
     queryFn: () => ordersApi.getById(Number(orderId)),
     enabled: !!orderId,
@@ -60,7 +61,7 @@ const OrderDetail: React.FC = () => {
   });
 
   React.useEffect(() => {
-    const status = orderError?.response?.status;
+    const status = (orderError as any)?.response?.status;
     if (status === 404 && orderId) {
       const idNum = Number(orderId);
       if (!Number.isNaN(idNum)) {
@@ -92,7 +93,7 @@ const OrderDetail: React.FC = () => {
         return;
       }
 
-      const blob = await (ordersApi as any).downloadOrderFile(orderIdNum, fileIdNum);
+      const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -125,9 +126,9 @@ const OrderDetail: React.FC = () => {
     return (
       <div className={styles.notFound}>
         <Title level={3}>Заказ не найден</Title>
-        <Button type="primary" onClick={() => navigate('/orders')}>
+        <AppButton variant="primary" onClick={() => navigate('/orders')}>
           Вернуться к заказам
-        </Button>
+        </AppButton>
       </div>
     );
   }
@@ -161,7 +162,7 @@ const OrderDetail: React.FC = () => {
   return (
     <div className={styles.page}>
       <div className={styles.pageInner}>
-        <Button 
+        <AppButton 
           icon={<ArrowLeftOutlined />} 
           onClick={() => {
             const from = (location.state as any)?.from;
@@ -175,9 +176,9 @@ const OrderDetail: React.FC = () => {
           size={isMobile ? 'middle' : 'large'}
         >
           Назад
-        </Button>
+        </AppButton>
 
-        <Card className={styles.mainCard}>
+        <AppCard className={styles.mainCard}>
           <Space direction="vertical" size="large" className={styles.fullWidth}>
             <div>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
@@ -189,7 +190,7 @@ const OrderDetail: React.FC = () => {
             </div>
 
             <div className={styles.sectionStack}>
-              <Card 
+              <AppCard 
                 className={styles.clientCard}
               >
                 <Space direction="vertical" size={12} className={styles.fullWidth}>
@@ -204,23 +205,23 @@ const OrderDetail: React.FC = () => {
                       className={styles.clientAvatar}
                     />
                     <div>
-                      <Button 
-                        type="link" 
+                      <AppButton 
+                        variant="link" 
                         onClick={() => navigate(`/user/${order.client?.id}`)}
                         className={styles.clientLink}
                       >
                         {order.client?.username || order.client_name || 'Неизвестен'}
-                      </Button>
+                      </AppButton>
                       <div className={styles.clientHint}>
                         Нажмите, чтобы посмотреть профиль
                       </div>
                     </div>
                   </Space>
                 </Space>
-              </Card>
+              </AppCard>
 
               <div className={styles.infoGrid}>
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -235,9 +236,9 @@ const OrderDetail: React.FC = () => {
                       </Text>
                     </Space>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -249,9 +250,9 @@ const OrderDetail: React.FC = () => {
                       {order.subject?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -266,9 +267,9 @@ const OrderDetail: React.FC = () => {
                       </Text>
                     </Space>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -280,9 +281,9 @@ const OrderDetail: React.FC = () => {
                       {order.work_type?.name || 'Не указан'}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
 
-                <Card 
+                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -294,7 +295,7 @@ const OrderDetail: React.FC = () => {
                       {formatDistanceToNow(new Date(order.created_at), { addSuffix: true, locale: ru })}
                     </Text>
                   </Space>
-                </Card>
+                </AppCard>
               </div>
             </div>
 
@@ -332,14 +333,14 @@ const OrderDetail: React.FC = () => {
              !userHasBid && 
              order.client?.id !== userProfile?.id && (
                 <div className={styles.bidAction}>
-                    <Button 
-                        type="primary" 
+                    <AppButton 
+                        variant="primary" 
                         size="large" 
                         onClick={() => setBidModalVisible(true)}
                         className={styles.bidButton}
                     >
                         Откликнуться на заказ
-                    </Button>
+                    </AppButton>
                 </div>
             )}
             
@@ -391,7 +392,7 @@ const OrderDetail: React.FC = () => {
                               ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
                               : isOrderOwner
                                 ? [
-                                    <Button
+                                    <AppButton
                                       size={isMobile ? 'small' : 'middle'}
                                       icon={<MessageOutlined />}
                                       onClick={async () => {
@@ -399,7 +400,7 @@ const OrderDetail: React.FC = () => {
                                       }}
                                     >
                                       Написать
-                                    </Button>
+                                    </AppButton>
                                   ]
                                 : []
                           }
@@ -417,13 +418,13 @@ const OrderDetail: React.FC = () => {
                             title={
                               <Space direction="vertical" size={4}>
                                 <Space>
-                                  <Button 
-                                    type="link" 
+                                  <AppButton 
+                                    variant="link" 
                                     onClick={() => navigate(`/user/${bid.expert.id}`)}
                                     className={styles.bidUserLink}
                                   >
                                     <Text strong>{bid.expert.username}</Text>
-                                  </Button>
+                                  </AppButton>
                                   <Space size={4}>
                                       <StarOutlined className={styles.ratingStar} />
                                       <Text>{bid.expert_rating || 0}</Text>
@@ -475,30 +476,30 @@ const OrderDetail: React.FC = () => {
                     icon={<UserOutlined />}
                   />
                   <div>
-                    <Button 
-                      type="link" 
+                    <AppButton 
+                      variant="link" 
                       onClick={() => navigate(`/user/${order.expert.id}`)}
                       className={styles.expertLink}
                     >
                       <Text strong className={styles.expertName}>{order.expert.username}</Text>
-                    </Button>
+                    </AppButton>
                     <br />
                     <Text type="secondary" className={styles.expertRole}>Эксперт</Text>
                   </div>
                   {isOrderOwner && (
-                    <Button
+                    <AppButton
                       size={isMobile ? 'small' : 'middle'}
                       icon={<MessageOutlined />}
                       onClick={() => dashboard.openOrderChat(order.id, order.expert.id)}
                     >
                       Написать
-                    </Button>
+                    </AppButton>
                   )}
                 </Space>
               </div>
             )}
           </Space>
-        </Card>
+        </AppCard>
       </div>
 
       <BidModal

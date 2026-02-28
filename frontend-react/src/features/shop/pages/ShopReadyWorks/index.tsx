@@ -148,10 +148,18 @@ const ShopReadyWorks: React.FC = () => {
     }
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : [];
     
-    
+    interface RawWork extends Work {
+      subjectId?: number;
+      subject_id?: number;
+      workTypeId?: number;
+      work_type_id?: number;
+      createdAt?: string;
+      updatedAt?: string;
+      category?: string;
+    }
+
     const transformedBase = base.map((work: Work) => {
-      // @ts-ignore - backward compatibility for old API fields
-      const extended = work as any;
+      const extended = work as RawWork;
       const subject = Number(work.subject ?? extended.subjectId ?? extended.subject_id ?? 0);
       const work_type = Number(work.work_type ?? extended.workTypeId ?? extended.work_type_id ?? 0);
 
@@ -160,7 +168,6 @@ const ShopReadyWorks: React.FC = () => {
         created_at: work.created_at || extended.createdAt,
         updated_at: work.updated_at || extended.updatedAt,
         category: work.work_type_name || extended.category || 'Другое',
-        // workType and createdAt removed from target object as they are not in Work interface
         subject,
         work_type,
         rating: work.rating || 0,

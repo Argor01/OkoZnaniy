@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Typography, Input, Table, Tag, Avatar, Space } from 'antd';
+import { Typography, Table, Tag, Avatar, Space } from 'antd';
 import { SearchOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ordersApi } from '@/features/orders/api/orders';
+import { AppInput } from '@/components/ui';
+import { ordersApi, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { expertsApi } from '@/features/expert/api/experts';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
@@ -14,17 +15,17 @@ import styles from './MyWorks.module.css';
 
 const { Title } = Typography;
 
-const isInProgressGroup = (order: any) => {
+const isInProgressGroup = (order: Order) => {
   const status = String(order?.status ?? '');
   return status === 'in_progress' || status === 'revision';
 };
 
-const isReviewGroup = (order: any) => {
+const isReviewGroup = (order: Order) => {
   const status = String(order?.status ?? '');
   return status === 'review' || status === 'under_review';
 };
 
-const isAllTabGroup = (order: any) => {
+const isAllTabGroup = (order: Order) => {
   const status = String(order?.status ?? '');
   if (isInProgressGroup(order)) return true;
   if (isReviewGroup(order)) return true;
@@ -54,15 +55,15 @@ const MyWorks: React.FC = () => {
     queryFn: () => ordersApi.getMyOrders({ ordering: '-created_at' }),
   });
 
-  const orders: any[] = useMemo(() => {
+  const orders: Order[] = useMemo(() => {
     const raw =
       myOrdersData && typeof myOrdersData === 'object' && 'results' in myOrdersData
         ? (myOrdersData as { results?: unknown }).results
         : myOrdersData;
-    return Array.isArray(raw) ? (raw as any[]) : [];
+    return Array.isArray(raw) ? (raw as Order[]) : [];
   }, [myOrdersData]);
 
-  const isOverdueOrder = (order: any) => {
+  const isOverdueOrder = (order: Order) => {
     if (order?.is_overdue === true) return true;
     const status = String(order?.status ?? '');
     if (!(status === 'in_progress' || status === 'revision')) return false;
@@ -144,12 +145,12 @@ const MyWorks: React.FC = () => {
     return `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(num)} ₽`;
   };
 
-  const columns: ColumnsType<any> = [
+  const columns: ColumnsType<Order> = [
     {
       title: 'Название',
       dataIndex: 'title',
       key: 'title',
-      render: (title: unknown, record: any) => (
+      render: (title: unknown, record: Order) => (
         <div className={styles.titleCell}>
           <div className={styles.titleText}>{String(title ?? 'Без названия')}</div>
           {record?.work_type?.name || record?.subject?.name ? (
@@ -159,12 +160,12 @@ const MyWorks: React.FC = () => {
           ) : null}
         </div>
       ),
-      sorter: (a: any, b: any) => String(a?.title ?? '').localeCompare(String(b?.title ?? '')),
+      sorter: (a: Order, b: Order) => String(a?.title ?? '').localeCompare(String(b?.title ?? '')),
     },
     {
       title: 'Покупатель',
       key: 'buyer',
-      render: (_: unknown, record: any) => {
+      render: (_: unknown, record: Order) => {
         const username = record?.client?.username ?? record?.client_name ?? '—';
         const avatarSrc = record?.client?.avatar;
         return (
@@ -180,7 +181,7 @@ const MyWorks: React.FC = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       render: (value: unknown) => formatOrderDate(value),
-      sorter: (a: any, b: any) => {
+      sorter: (a: Order, b: Order) => {
         const ta = typeof a?.created_at === 'string' ? dayjs(a.created_at).valueOf() : 0;
         const tb = typeof b?.created_at === 'string' ? dayjs(b.created_at).valueOf() : 0;
         return ta - tb;
@@ -190,8 +191,8 @@ const MyWorks: React.FC = () => {
       title: 'Осталось',
       dataIndex: 'deadline',
       key: 'deadline',
-      render: (value: unknown, record: any) => (isOverdueOrder(record) ? 'Просрочено' : formatRemaining(value, record?.status)),
-      sorter: (a: any, b: any) => {
+      render: (value: unknown, record: Order) => (isOverdueOrder(record) ? 'Просрочено' : formatRemaining(value, record?.status)),
+      sorter: (a: Order, b: Order) => {
         const ta =
           typeof a?.deadline === 'string'
             ? (String(a?.status ?? '') === 'review' ? dayjs(a.deadline).add(5, 'day').valueOf() : dayjs(a.deadline).valueOf())
@@ -208,7 +209,7 @@ const MyWorks: React.FC = () => {
       dataIndex: 'budget',
       key: 'budget',
       render: (value: unknown) => formatBudget(value),
-      sorter: (a: any, b: any) => Number(a?.budget ?? 0) - Number(b?.budget ?? 0),
+      sorter: (a: Order, b: Order) => Number(a?.budget ?? 0) - Number(b?.budget ?? 0),
     },
     {
       title: 'Заметка',
@@ -220,7 +221,7 @@ const MyWorks: React.FC = () => {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      render: (status: unknown, record: any) => (
+      render: (status: unknown, record: Order) => (
         <Tag className={styles.statusTag} color={isOverdueOrder(record) ? 'red' : undefined}>
           {isOverdueOrder(record) ? 'Просрочен' : getStatusLabel(String(status ?? ''))}
         </Tag>
@@ -274,7 +275,7 @@ const MyWorks: React.FC = () => {
           </button>
         </div>
 
-        <Input
+        <AppInput
           placeholder="Поиск..."
           prefix={<SearchOutlined />}
           value={searchText}
