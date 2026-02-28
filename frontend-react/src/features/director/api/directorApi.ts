@@ -88,7 +88,7 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
       const statusMap = app.status === 'pending' ? 'under_review' : app.status;
       return {
         id: app.id,
-        user: app.expert || app.user,
+        expert: app.expert || app.user,
         experience_years: app.work_experience_years ?? app.experience_years,
         education: educationStr,
         skills: app.skills,

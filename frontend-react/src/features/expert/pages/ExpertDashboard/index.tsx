@@ -264,7 +264,7 @@ const ExpertDashboard: FC = () => {
         </div>
       </div>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<Spin size="large" fullscreen />}>
         {profileModalVisible && (
           <ProfileModal
             visible={profileModalVisible}

@@ -4,9 +4,14 @@ import { CreateWorkPayload, Purchase, Work } from '@/features/shop/types/shop';
 export type { CreateWorkPayload, Purchase, Work };
 
 export const shopApi = {
-  getWorks: async (): Promise<Work[]> => {
-    const response = await apiClient.get('/shop/works/');
+  getWorks: async (params?: { author?: number }): Promise<Work[]> => {
+    const response = await apiClient.get('/shop/works/', { params });
     return response.data.results || response.data;
+  },
+
+  getWork: async (id: number): Promise<Work> => {
+    const response = await apiClient.get(`/shop/works/${id}/`);
+    return response.data;
   },
 
   purchaseWork: async (workId: number): Promise<Purchase> => {

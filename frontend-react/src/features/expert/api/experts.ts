@@ -252,6 +252,11 @@ export const expertsApi = {
     return data;
   },
 
+  async updateApplication(id: number, payload: Partial<CreateExpertApplicationRequest>): Promise<ExpertApplication> {
+    const { data } = await apiClient.patch(`/experts/applications/${id}/`, payload);
+    return data;
+  },
+
   
   async getSpecializations(): Promise<Specialization[]> {
     const { data } = await apiClient.get('/experts/specializations/');

@@ -982,6 +982,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 
                 # Сбрасываем статус на pending при повторной подаче
                 existing_application.status = 'pending'
+                existing_application.rejection_reason = ''
                 existing_application.save()
                 
                 # Удаляем старые записи об образовании и создаем новые
@@ -994,6 +995,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 for field, value in serializer.validated_data.items():
                     setattr(existing_application, field, value)
                 existing_application.status = 'pending'
+                existing_application.rejection_reason = ''
                 existing_application.save()
                 return existing_application
         
@@ -1015,6 +1017,16 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             return application
         else:
             return serializer.save(expert=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        # Если пользователь обновляет свою анкету и она была отклонена или отправлена на доработку
+        if self.request.user == instance.expert and instance.status in ['rejected', 'needs_revision']:
+            # Сбрасываем статус на 'pending' и очищаем причину отказа
+            serializer.save(status='pending', rejection_reason='')
+            logger.info(f"Application {instance.id} status reset to pending after update by user {self.request.user.id}")
+        else:
+            serializer.save()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

@@ -254,7 +254,7 @@ class EducationSerializer(serializers.ModelSerializer):
 
 class ExpertApplicationSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)
-    educations = EducationSerializer(many=True, read_only=True)
+    educations = EducationSerializer(many=True, required=False)
     status_display = serializers.CharField(
         source='get_status_display',
         read_only=True
@@ -270,6 +270,22 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
             'reviewed_by', 'reviewed_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['expert', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'created_at', 'updated_at']
+
+    def update(self, instance, validated_data):
+        educations_data = validated_data.pop('educations', None)
+        
+        # Update standard fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update educations if provided
+        if educations_data is not None:
+            instance.educations.all().delete()
+            for education_data in educations_data:
+                Education.objects.create(application=instance, **education_data)
+        
+        return instance
 
 
 class ExpertApplicationCreateSerializer(serializers.Serializer):

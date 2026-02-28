@@ -1,7 +1,8 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber as AntInputNumber, message } from 'antd';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select } from 'antd';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
+import { catalogApi } from '@/features/common/api/catalog';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import styles from './SpecializationModal.module.css';
 
@@ -28,6 +29,11 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isMobile] = React.useState(window.innerWidth <= 768);
+
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: CreateSpecializationRequest) => expertsApi.createSpecialization(data),
@@ -123,9 +129,10 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         form={form}
         layout="vertical"
         onFinish={(values: SpecializationFormValues) => {
+          const selectedSubject = subjects.find(s => s.id === values.subject_id);
           const dataToSend: CreateSpecializationRequest = {
             subject_id: values.subject_id,
-            custom_name: values.custom_name,
+            custom_name: values.custom_name || selectedSubject?.name,
             experience_years: Number(values.experience_years),
             hourly_rate: Number(values.hourly_rate),
             description: values.description,
@@ -144,13 +151,34 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         }}
       >
         <Form.Item
-          label="Название специализации"
+          label="Специализация"
+          name="subject_id"
+          rules={[{ required: true, message: 'Выберите специализацию' }]}
+        >
+          <Select
+            size={isMobile ? 'middle' : 'large'}
+            placeholder="Выберите предмет из списка"
+            className={styles.inputField}
+            showSearch
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={subjects.map(subject => ({
+              value: subject.id,
+              label: subject.name,
+            }))}
+          />
+        </Form.Item>
+        
+        <Form.Item
+          label="Своё название (необязательно)"
           name="custom_name"
-          rules={[{ required: true, message: 'Введите название специализации' }]}
+          tooltip="Оставьте пустым, чтобы использовать название предмета"
         >
           <Input
             size={isMobile ? 'middle' : 'large'}
-            placeholder="Например: Высшая математика, Программирование на Python"
+            placeholder="Например: Высшая математика (профильный уровень)"
             className={styles.inputField}
             maxLength={100}
           />
@@ -234,7 +262,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           <Input.TextArea 
             rows={isMobile ? 3 : 4} 
             placeholder="Опишите ваш опыт в этой области"
-            className={`${styles.textareaField} ${isMobile ? styles.specializationModalTextareaMobile : styles.specializationModalTextareaDesktop}`}
+            className={styles.textareaField}
           />
         </Form.Item>
       </Form>

@@ -14,7 +14,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.inputField.ant-input-number {
+.inputField:global(.ant-input-number) {
   padding: 0;
   height: auto;
   min-height: 40px;
@@ -53,7 +53,6 @@
   }
 }
 
-/* Shared Button Styles */
 .buttonPrimary {
   background: #1890ff;
   border: none;
@@ -85,13 +84,6 @@
 .buttonSecondary:hover {
   background: rgba(102, 126, 234, 0.1);
   border-color: rgba(102, 126, 234, 0.4);
-}
-
-/* Specialization Modal Specific Styles */
-.specializationModalWrap :global(.ant-modal-mask) {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .specializationModalWrap :global(.ant-modal-content) {
@@ -130,6 +122,10 @@
 .specializationModalWrap :global(.ant-modal-body) {
   padding: 32px;
   background: rgba(255, 255, 255, 0.95);
+}
+
+.specializationModalWrap :global(.ant-form-item-label > label) {
+  font-family: 'Syncopate', sans-serif;
 }
 
 .specializationModalWrapMobile :global(.ant-modal-body) {

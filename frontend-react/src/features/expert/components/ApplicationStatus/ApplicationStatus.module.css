@@ -55,6 +55,11 @@
   color: #ef4444;
 }
 
+.statusWarning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
 .applicationLoadingCard {
   text-align: center;
   padding: 48px;

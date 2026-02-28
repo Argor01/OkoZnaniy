@@ -38,6 +38,11 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         work_type = self.request.query_params.get('work_type')
         if work_type:
             queryset = queryset.filter(work_type_id=work_type)
+            
+        # Фильтрация по автору
+        author = self.request.query_params.get('author')
+        if author:
+            queryset = queryset.filter(author_id=author)
         
         # Поиск по названию
         search = self.request.query_params.get('search')

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Layout, Modal, message, Spin } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -13,14 +13,14 @@ import styles from './DashboardLayout.module.css';
 import '@/styles/modals.css';
 
 
-import ProfileModal from '@/features/expert/modals/ProfileModal';
-import MessageModal from '@/features/expert/modals/MessageModalNew';
-import NotificationsModal from '@/features/expert/modals/NotificationsModalNew';
-import ArbitrationModal from '@/features/expert/modals/ArbitrationModal';
-import FinanceModal from '@/features/expert/modals/FinanceModal';
-import FriendsModal from '@/features/expert/modals/FriendsModal';
-import FaqModal from '@/features/expert/modals/FaqModal';
-import FriendProfileModal from '@/features/expert/modals/FriendProfileModal';
+const ProfileModal = lazy(() => import('@/features/expert/modals/ProfileModal'));
+const MessageModal = lazy(() => import('@/features/expert/modals/MessageModalNew'));
+const NotificationsModal = lazy(() => import('@/features/expert/modals/NotificationsModalNew'));
+const ArbitrationModal = lazy(() => import('@/features/expert/modals/ArbitrationModal'));
+const FinanceModal = lazy(() => import('@/features/expert/modals/FinanceModal'));
+const FriendsModal = lazy(() => import('@/features/expert/modals/FriendsModal'));
+const FaqModal = lazy(() => import('@/features/expert/modals/FaqModal'));
+const FriendProfileModal = lazy(() => import('@/features/expert/modals/FriendProfileModal'));
 
 const { Content } = Layout;
 
@@ -333,71 +333,73 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </Layout>
 
       
-      <ProfileModal 
-        visible={profileModalVisible} 
-        onClose={() => setProfileModalVisible(false)} 
-        profile={userProfile}
-        userProfile={userProfile}
-      />
-      <MessageModal 
-        visible={messageModalVisible} 
-        onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); setSelectedChatContextTitle(undefined); }}
-        isMobile={isMobile}
-        isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
-        isDesktop={window.innerWidth > 1024}
-        selectedUserId={selectedUserIdForChat}
-        selectedOrderId={selectedOrderIdForChat}
-        chatContextTitle={selectedChatContextTitle}
-        supportUserId={supportUserId ?? undefined}
-        userProfile={userProfile}
-      />
-      <NotificationsModal 
-        visible={notificationsModalVisible} 
-        onClose={() => setNotificationsModalVisible(false)}
-        isMobile={isMobile}
-      />
-      <ArbitrationModal 
-        visible={arbitrationModalVisible} 
-        onClose={() => setArbitrationModalVisible(false)}
-        cases={[]} 
-        isMobile={isMobile}
-      />
-      <FinanceModal 
-        visible={financeModalVisible} 
-        onClose={() => setFinanceModalVisible(false)}
-        profile={userProfile}
-        isMobile={isMobile}
-      />
-      <FriendsModal 
-        visible={friendsModalVisible} 
-        onClose={() => setFriendsModalVisible(false)}
-        isMobile={isMobile}
-        onOpenChat={(friend) => {
-            setFriendsModalVisible(false);
-            setSelectedUserIdForChat(friend.id);
-            setMessageModalVisible(true);
-        }}
-        onOpenProfile={(friend) => {
-            setFriendsModalVisible(false);
-            setSelectedFriend(friend);
-            setFriendProfileModalVisible(true);
-        }}
-      />
-      <FaqModal 
-        visible={faqModalVisible} 
-        onClose={() => setFaqModalVisible(false)}
-        isMobile={isMobile}
-      />
-      <FriendProfileModal
-        visible={friendProfileModalVisible}
-        onClose={() => setFriendProfileModalVisible(false)}
-        friend={selectedFriend}
-        onOpenChat={() => {
-            setFriendProfileModalVisible(false);
-            setMessageModalVisible(true);
-            if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
-        }}
-      />
+      <Suspense fallback={null}>
+        <ProfileModal 
+          visible={profileModalVisible} 
+          onClose={() => setProfileModalVisible(false)} 
+          profile={userProfile}
+          userProfile={userProfile}
+        />
+        <MessageModal 
+          visible={messageModalVisible} 
+          onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); setSelectedChatContextTitle(undefined); }}
+          isMobile={isMobile}
+          isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
+          isDesktop={window.innerWidth > 1024}
+          selectedUserId={selectedUserIdForChat}
+          selectedOrderId={selectedOrderIdForChat}
+          chatContextTitle={selectedChatContextTitle}
+          supportUserId={supportUserId ?? undefined}
+          userProfile={userProfile}
+        />
+        <NotificationsModal 
+          visible={notificationsModalVisible} 
+          onClose={() => setNotificationsModalVisible(false)}
+          isMobile={isMobile}
+        />
+        <ArbitrationModal 
+          visible={arbitrationModalVisible} 
+          onClose={() => setArbitrationModalVisible(false)}
+          cases={[]} 
+          isMobile={isMobile}
+        />
+        <FinanceModal 
+          visible={financeModalVisible} 
+          onClose={() => setFinanceModalVisible(false)}
+          profile={userProfile}
+          isMobile={isMobile}
+        />
+        <FriendsModal 
+          visible={friendsModalVisible} 
+          onClose={() => setFriendsModalVisible(false)}
+          isMobile={isMobile}
+          onOpenChat={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedUserIdForChat(friend.id);
+              setMessageModalVisible(true);
+          }}
+          onOpenProfile={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedFriend(friend);
+              setFriendProfileModalVisible(true);
+          }}
+        />
+        <FaqModal 
+          visible={faqModalVisible} 
+          onClose={() => setFaqModalVisible(false)}
+          isMobile={isMobile}
+        />
+        <FriendProfileModal
+          visible={friendProfileModalVisible}
+          onClose={() => setFriendProfileModalVisible(false)}
+          friend={selectedFriend}
+          onOpenChat={() => {
+              setFriendProfileModalVisible(false);
+              setMessageModalVisible(true);
+              if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
+          }}
+        />
+      </Suspense>
     </DashboardContext.Provider>
   );
 };

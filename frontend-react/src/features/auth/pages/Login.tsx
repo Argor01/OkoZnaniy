@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Tabs } from 'antd';
+import { Form, Input, Button, message, Tabs, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '@/features/auth/api/auth';
@@ -68,12 +68,12 @@ const Login: React.FC = () => {
   const [resetLoading, setResetLoading] = useState(false);
 
   
-  const loginUsernamePh = useTypewriter('Email', 35, 100);
-  const loginPasswordPh = useTypewriter('Пароль', 35, 250);
-  const regEmailPh = useTypewriter('Email', 35, 120);
-  const regPasswordPh = useTypewriter('Пароль', 35, 420);
-  const regPassword2Ph = useTypewriter('Подтвердите пароль', 35, 560);
-  const regReferralPh = useTypewriter('Реферальный код', 35, 700);
+  const loginUsernamePh = 'Email';
+  const loginPasswordPh = 'Пароль';
+  const regEmailPh = 'Email';
+  const regPasswordPh = 'Пароль';
+  const regPassword2Ph = 'Подтвердите пароль';
+  const regReferralPh = 'Реферальный код';
   
   
   const bubbleQuestionText = 'Можете сделать курсовую за час?';
@@ -557,6 +557,49 @@ const Login: React.FC = () => {
       >
         <Input placeholder={regReferralPh || ' '} />
       </Form.Item>
+
+      <Form.Item
+        name="agreement"
+        valuePropName="checked"
+        style={{ marginBottom: 8 }}
+        rules={[
+          {
+            validator: (_, value) =>
+              value ? Promise.resolve() : Promise.reject(new Error('Необходимо принять согласие на обработку персональных данных')),
+          },
+        ]}
+      >
+        <Checkbox>
+          Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff' }}>обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff' }}>Политикой обработки персональных данных</a>
+        </Checkbox>
+      </Form.Item>
+
+      <Form.Item
+        name="userAgreement"
+        valuePropName="checked"
+        style={{ marginBottom: 8 }}
+        rules={[
+          {
+            validator: (_, value) =>
+              value ? Promise.resolve() : Promise.reject(new Error('Необходимо принять пользовательское соглашение')),
+          },
+        ]}
+      >
+        <Checkbox>
+          Я принимаю <a href={selectedRole === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff' }}>пользовательское соглашение</a>
+        </Checkbox>
+      </Form.Item>
+
+      <Form.Item
+        name="newsletter"
+        valuePropName="checked"
+        style={{ marginBottom: 16 }}
+      >
+        <Checkbox>
+          Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff' }}>согласие на получение новостной и рекламной рассылки</a>
+        </Checkbox>
+      </Form.Item>
+
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
           Зарегистрироваться

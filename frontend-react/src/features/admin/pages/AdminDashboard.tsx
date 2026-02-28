@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Layout, Spin, Alert, Result, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -14,30 +14,33 @@ import {
 import { User } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
 import { AdminLayout } from '@/features/admin/components/Layout';
-import { 
-  OverviewSection, 
-  PartnersSection, 
-  EarningsSection, 
-  SupportChatsSection,
-  TicketSystemSection,
-  UsersManagementSection,
-  BlockedUsersSection,
-  RolesManagementSection,
-  AllOrdersSection,
-  ProblemOrdersSection,
-  NewClaimsSection,
-  InProgressClaimsSection,
-  CompletedClaimsSection,
-  PendingApprovalSection,
-  AdminChatsSection,
-  UserConversationsSection,
-  TariffsSettingsSection,
-} from '@/features/admin/components/Sections';
-import { PartnerModal, DisputeModal, SupportRequestModal } from '@/features/admin/components/Modals';
-import AdminLogin from '@/features/admin/pages/AdminLogin';
 import type { MenuKey } from '@/features/admin/types';
 import '@/styles/modals.css';
 import '@/styles/admin-dashboard.css';
+
+const OverviewSection = lazy(() => import('@/features/admin/components/Sections/OverviewSection').then(m => ({ default: m.OverviewSection })));
+const PartnersSection = lazy(() => import('@/features/admin/components/Sections/PartnersSection').then(m => ({ default: m.PartnersSection })));
+const EarningsSection = lazy(() => import('@/features/admin/components/Sections/EarningsSection').then(m => ({ default: m.EarningsSection })));
+const SupportChatsSection = lazy(() => import('@/features/admin/components/Sections/SupportChatsSection').then(m => ({ default: m.SupportChatsSection })));
+const TicketSystemSection = lazy(() => import('@/features/admin/components/Sections/TicketSystemSection').then(m => ({ default: m.TicketSystemSection })));
+const UsersManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.UsersManagementSection })));
+const BlockedUsersSection = lazy(() => import('@/features/admin/components/Sections/BlockedUsersSection').then(m => ({ default: m.BlockedUsersSection })));
+const RolesManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.RolesManagementSection })));
+const AllOrdersSection = lazy(() => import('@/features/admin/components/Sections/AllOrdersSection').then(m => ({ default: m.AllOrdersSection })));
+const ProblemOrdersSection = lazy(() => import('@/features/admin/components/Sections/ProblemOrdersSection').then(m => ({ default: m.ProblemOrdersSection })));
+const NewClaimsSection = lazy(() => import('@/features/admin/components/Sections/NewClaimsSection').then(m => ({ default: m.NewClaimsSection })));
+const InProgressClaimsSection = lazy(() => import('@/features/admin/components/Sections/InProgressClaimsSection').then(m => ({ default: m.InProgressClaimsSection })));
+const CompletedClaimsSection = lazy(() => import('@/features/admin/components/Sections/CompletedClaimsSection').then(m => ({ default: m.CompletedClaimsSection })));
+const PendingApprovalSection = lazy(() => import('@/features/admin/components/Sections/PendingApprovalSection').then(m => ({ default: m.PendingApprovalSection })));
+const AdminChatsSection = lazy(() => import('@/features/admin/components/Sections/AdminChatsSection').then(m => ({ default: m.AdminChatsSection })));
+const UserConversationsSection = lazy(() => import('@/features/admin/components/Sections/UserConversationsSection').then(m => ({ default: m.UserConversationsSection })));
+const TariffsSettingsSection = lazy(() => import('@/features/admin/components/Sections/TariffsSettingsSection').then(m => ({ default: m.TariffsSettingsSection })));
+
+const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
+const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
+const SupportRequestModal = lazy(() => import('@/features/admin/components/Modals/SupportRequestModal').then(m => ({ default: m.SupportRequestModal })));
+
+const AdminLogin = lazy(() => import('@/features/admin/pages/AdminLogin'));
 
 const { Content } = Layout;
 
@@ -70,7 +73,17 @@ const AdminDashboard: React.FC = () => {
 
   
   if (!hasToken || !user) {
-    return <AdminLogin onSuccess={handleLoginSuccess} />;
+    return (
+      <Suspense fallback={
+        <Layout className="adminPageLayout">
+          <Content className="adminPageCenter">
+            <Spin size="large" />
+          </Content>
+        </Layout>
+      }>
+        <AdminLogin onSuccess={handleLoginSuccess} />
+      </Suspense>
+    );
   }
 
   
@@ -266,45 +279,47 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       onMenuSelect={handleMenuClick}
       onLogout={onLogout}
     >
-      {renderSection()}
-      
-      <PartnerModal
-        visible={partnerEditModalVisible}
-        partner={selectedPartner}
-        onCancel={closePartnerModals}
-        onUpdate={handleUpdatePartner}
-        isUpdating={isUpdatingPartner}
-        mode="edit"
-      />
-      
-      <PartnerModal
-        visible={partnerViewModalVisible}
-        partner={selectedPartner}
-        onCancel={closePartnerModals}
-        onUpdate={handleUpdatePartner}
-        isUpdating={isUpdatingPartner}
-        mode="view"
-      />
-      
-      <DisputeModal
-        visible={disputeModalVisible}
-        dispute={selectedDispute}
-        onCancel={closeDisputeModals}
-        onAssignArbitrator={(dispute) => {
-          
-          closeDisputeModals();
-        }}
-      />
-      
-      <SupportRequestModal
-        request={null}
-        messages={[]}
-        isOpen={false}
-        onClose={() => {}}
-        onTakeRequest={async (requestId: number) => {  return true; }}
-        onCompleteRequest={async (requestId: number) => {  return true; }}
-        onSendMessage={async (requestId: number, message: string) => {  return true; }}
-      />
+      <Suspense fallback={<div className="adminPageCenter"><Spin size="large" /></div>}>
+        {renderSection()}
+        
+        <PartnerModal
+          visible={partnerEditModalVisible}
+          partner={selectedPartner}
+          onCancel={closePartnerModals}
+          onUpdate={handleUpdatePartner}
+          isUpdating={isUpdatingPartner}
+          mode="edit"
+        />
+        
+        <PartnerModal
+          visible={partnerViewModalVisible}
+          partner={selectedPartner}
+          onCancel={closePartnerModals}
+          onUpdate={handleUpdatePartner}
+          isUpdating={isUpdatingPartner}
+          mode="view"
+        />
+        
+        <DisputeModal
+          visible={disputeModalVisible}
+          dispute={selectedDispute}
+          onCancel={closeDisputeModals}
+          onAssignArbitrator={(dispute) => {
+            
+            closeDisputeModals();
+          }}
+        />
+        
+        <SupportRequestModal
+          request={null}
+          messages={[]}
+          isOpen={false}
+          onClose={() => {}}
+          onTakeRequest={async (requestId: number) => {  return true; }}
+          onCompleteRequest={async (requestId: number) => {  return true; }}
+          onSendMessage={async (requestId: number, message: string) => {  return true; }}
+        />
+      </Suspense>
     </AdminLayout>
   );
 };

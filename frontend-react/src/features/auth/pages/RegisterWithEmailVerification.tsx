@@ -271,7 +271,7 @@ const RegisterWithEmailVerification: React.FC = () => {
               </div>
               <div className="ml-3 text-sm">
                 <label htmlFor="newsletter" className="font-medium text-gray-700">
-                  Я предоставляю своё согласие на получение новостной и рекламной рассылки
+                  Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">согласие на получение новостной и рекламной рассылки</a>
                 </label>
               </div>
             </div>

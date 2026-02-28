@@ -1,8 +1,10 @@
 import React from 'react';
-import { Button, Typography, Spin, Space, Tag } from 'antd';
-import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Typography, Spin, Space, Tag, Tooltip, Popconfirm } from 'antd';
+import { EditOutlined, CheckCircleOutlined, DeleteOutlined, ClockCircleOutlined, DollarOutlined } from '@ant-design/icons';
 import type { Specialization } from '@/features/expert/api/experts';
 import styles from './SpecializationsTab.module.css';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppButton } from '@/components/ui/AppButton';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -24,17 +26,16 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
   onDelete,
 }) => {
   return (
-    <div className={styles.sectionCard}>
+    <AppCard className={styles.sectionCard}>
       <div className={`${styles.sectionCardHeader} ${styles.specializationsHeader}`}>
         <h2 className={styles.sectionTitle}>Мои специализации</h2>
-        <Button 
-          type="primary"
+        <AppButton 
+          variant="primary"
           icon={<EditOutlined />}
-          className={styles.buttonPrimary}
           onClick={onAdd}
         >
           {!isMobile && 'Добавить'}
-        </Button>
+        </AppButton>
       </div>
       {specializationsLoading ? (
         <div className={styles.emptyState}>
@@ -47,60 +48,85 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
       ) : (
         <div className={styles.specializationsGrid}>
           {specializations.map((spec) => (
-            <div key={spec.id} className={styles.card}>
-              <div className={styles.specializationHeaderRow}>
-                <div>
-                  <Title level={4} className={styles.specializationTitle}>
+            <AppCard key={spec.id} className={styles.specCard}>
+              <div className={styles.specCardHeader}>
+                <div className={styles.specCardHeaderInfo}>
+                  <Title level={4} className={styles.specTitle}>
                     {spec.custom_name || spec.subject?.name || 'Специализация'}
                     {spec.is_verified && (
-                      <CheckCircleOutlined className={styles.specializationVerifiedIcon} />
+                      <CheckCircleOutlined className={styles.verifiedIcon} />
                     )}
                   </Title>
-                  <Text type="secondary" className={styles.specializationMeta}>
-                    Опыт: {spec.experience_years} лет | Ставка: {spec.hourly_rate} ₽/час
-                  </Text>
-                  {spec.description && (
-                    <Paragraph className={styles.specializationDescription}>
-                      {spec.description}
-                    </Paragraph>
-                  )}
-                  {spec.skills && (
-                    <div className={styles.specializationSkills}>
-                      <div className={styles.specializationSkillsList}>
-                        {spec.skills.split(',').map((skill: string, index: number) => {
-                          const trimmedSkill = skill.trim();
-                          return trimmedSkill ? (
-                            <Tag key={index} color="blue" className={styles.specializationSkillTag}>
-                              {trimmedSkill}
-                            </Tag>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  )}
+                  <Space size={8} wrap className={styles.specTags}>
+                    <Tag className={styles.largeTag} color="blue">
+                      Опыт: {spec.experience_years} {spec.experience_years === 1 ? 'год' : [2, 3, 4].includes(spec.experience_years % 10) && ![12, 13, 14].includes(spec.experience_years % 100) ? 'года' : 'лет'}
+                    </Tag>
+                    <Tag className={styles.largeTag} color="green">
+                      {spec.hourly_rate} ₽/час
+                    </Tag>
+                    {spec.is_verified && (
+                      <Tag color="success" className={styles.verifiedTag}>
+                        Проверено
+                      </Tag>
+                    )}
+                  </Space>
                 </div>
-                <Space>
-                  <Button
-                    size="small"
-                    onClick={() => onEdit(spec)}
-                  >
-                    Изменить
-                  </Button>
-
-                    <Button
-                      size="small"
-                      danger
-                       onClick={() => onDelete(spec)}
+                
+                <div className={styles.specCardActions}>
+                  <div className={styles.specCardActionsRow}>
+                    <Tooltip title="Редактировать">
+                      <AppButton
+                        variant="text"
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => onEdit(spec)}
+                      />
+                    </Tooltip>
+                    <Popconfirm
+                      title="Удалить специализацию?"
+                      okText="Удалить"
+                      cancelText="Отмена"
+                      onConfirm={() => onDelete(spec)}
                     >
-                      Удалить
-                    </Button>
-                </Space>
+                      <AppButton
+                        variant="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                      />
+                    </Popconfirm>
+                  </div>
+                </div>
               </div>
-            </div>
+
+              {spec.description && (
+                <Paragraph 
+                  ellipsis={{ rows: 2 }}
+                  className={styles.specDescription}
+                >
+                  {spec.description}
+                </Paragraph>
+              )}
+
+              {spec.skills && (
+                <div className={styles.skillsBlock}>
+                  <Space size={8} wrap>
+                    {spec.skills.split(',').map((skill: string, index: number) => {
+                      const trimmedSkill = skill.trim();
+                      return trimmedSkill ? (
+                        <Tag key={index} color="default" className={styles.skillTag}>
+                          {trimmedSkill}
+                        </Tag>
+                      ) : null;
+                    })}
+                  </Space>
+                </div>
+              )}
+            </AppCard>
           ))}
         </div>
       )}
-    </div>
+    </AppCard>
   );
 };
 

@@ -133,7 +133,7 @@ export interface Employee {
 
 export interface ExpertApplication {
   id: number;
-  user: Employee;
+  expert: Employee;
   experience_years?: number;
   education?: string;
   skills?: string;
@@ -141,7 +141,7 @@ export interface ExpertApplication {
   bio?: string;
   biography?: string;
   specializations?: string[];
-  status?: 'new' | 'under_review' | 'approved' | 'rejected' | 'deactivated';
+  status?: 'new' | 'under_review' | 'approved' | 'rejected' | 'deactivated' | 'needs_revision';
   submitted_at?: string;
   reviewed_at?: string;
   application_submitted_at?: string;

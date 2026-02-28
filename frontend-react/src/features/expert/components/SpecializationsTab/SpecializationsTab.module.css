@@ -1,74 +1,3 @@
-.card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
-  border-color: rgba(102, 126, 234, 0.2);
-}
-
-.emptyState {
-  text-align: center;
-  padding: 48px;
-  color: #6b7280;
-}
-
-.specializationsHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.specializationsGrid {
-  display: grid;
-  gap: 16px;
-}
-
-.specializationHeaderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.specializationTitle {
-  margin: 0;
-  margin-bottom: 8px;
-}
-
-.specializationVerifiedIcon {
-  color: #10b981;
-  margin-left: 8px;
-}
-
-.specializationMeta {
-  font-size: 14px;
-}
-
-.specializationDescription {
-  margin-top: 8px;
-  color: #6b7280;
-}
-
-.specializationSkills {
-  margin-top: 12px;
-}
-
-.specializationSkillsList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.specializationSkillTag {
-  padding: 4px 12px;
-  font-size: 13px;
-}
-
 .sectionCard {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -85,6 +14,12 @@
   border-bottom: 1px solid rgba(102, 126, 234, 0.1);
 }
 
+.specializationsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .sectionTitle {
   font-size: 20px;
   font-weight: 600;
@@ -93,19 +28,145 @@
   font-family: 'Syncopate', sans-serif;
 }
 
-.buttonPrimary {
-  background: #1890ff;
-  border: none;
+.specializationsGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 768px) {
+  .specializationsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.specCard {
   border-radius: 12px;
-  height: 44px;
-  font-size: 15px;
-  font-weight: 500;
-  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 0;
+  height: 100%;
   transition: all 0.3s ease;
 }
 
-.buttonPrimary:hover {
-  background: #40a9ff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+.specCard:hover {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.specCard :global(.ant-card-body) {
+  padding: 20px;
+}
+
+.specCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.specCardHeaderInfo {
+  flex: 1;
+}
+
+.specTitle {
+  margin-bottom: 10px ;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px !important;
+  font-family: 'Syncopate', sans-serif;
+}
+
+.verifiedIcon {
+  color: #10b981;
+  margin-left: 8px;
+  font-size: 16px;
+}
+
+.specTags {
+  margin-top: 4px;
+}
+
+.largeTag {
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.subjectTag {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.verifiedTag {
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.specCardActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.specCardActionsRow {
+  display: flex;
+  gap: 4px;
+}
+
+.specHourlyRate {
+  font-size: 18px;
+  font-weight: 700;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.specDescription {
+  color: #4b5563;
+  margin-bottom: 16px !important;
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+.skillsBlock {
+  margin-bottom: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.skillTag {
+  border-radius: 6px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.specMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: auto;
+}
+
+.specMetaIcon {
+  color: #9ca3af;
+}
+
+.specMetaText {
+  font-size: 14px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px;
+  color: #6b7280;
 }

@@ -27,9 +27,10 @@ export interface ExpertApplication {
   work_experience_years: number;
   specializations: string;
   educations: Education[];
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_revision';
   status_display: string;
   rejection_reason?: string;
+  comment?: string;
   reviewed_by?: number;
   reviewed_at?: string;
   created_at: string;
@@ -41,6 +42,7 @@ export interface CreateExpertApplicationRequest {
   work_experience_years: number;
   specializations: string;
   educations: Education[];
+  email?: string;
 }
 
 export interface Specialization {

@@ -23,24 +23,47 @@
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 24px;
   flex: 1;
   min-width: 0;
 }
 
-.navMenu {
-  flex: 1;
-  border-bottom: none;
-  background: transparent;
-  margin-left: 24px;
-  line-height: 64px;
-  min-width: 0;
-  font-family: 'Syncopate', sans-serif;
+.menuIconWrapper {
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
 }
 
-.navMenu :global(.ant-menu-item), 
-.navMenu :global(.ant-menu-submenu-title) {
+.customNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navItem {
   font-family: 'Syncopate', sans-serif !important;
+  font-size: 13px !important;
+  padding: 0 12px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  color: #333 !important;
+  border-radius: 6px;
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.navItem:hover {
+  color: #1890ff !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.navItemActive {
+  color: #1890ff !important;
+  background-color: #e6f7ff !important;
+  font-weight: 600;
 }
 
 .headerLogo {

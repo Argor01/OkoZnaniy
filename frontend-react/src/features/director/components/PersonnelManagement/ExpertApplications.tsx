@@ -81,6 +81,9 @@ const ExpertApplications: React.FC = () => {
       if (statusFilter === 'rejected') {
         return app.status === 'rejected' || app.status === 'deactivated';
       }
+      if (statusFilter === 'needs_revision') {
+        return app.status === 'needs_revision';
+      }
       return true;
     });
   }, [allApplications, statusFilter]);
@@ -178,6 +181,7 @@ const ExpertApplications: React.FC = () => {
       approved: { color: 'green', text: 'Одобрена' },
       rejected: { color: 'red', text: 'Отклонена' },
       deactivated: { color: 'red', text: 'Деактивирована' },
+      needs_revision: { color: 'gold', text: 'Требуется доработка' },
     };
     const config = statusConfig[status as keyof typeof statusConfig] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;
@@ -186,23 +190,23 @@ const ExpertApplications: React.FC = () => {
   const columns = [
     {
       title: 'Фамилия',
-      dataIndex: ['user', 'last_name'],
+      dataIndex: ['expert', 'last_name'],
       key: 'last_name',
     },
     {
       title: 'Имя',
-      dataIndex: ['user', 'first_name'],
+      dataIndex: ['expert', 'first_name'],
       key: 'first_name',
     },
     {
       title: 'Отчество',
-      dataIndex: ['user', 'middle_name'],
+      dataIndex: ['expert', 'middle_name'],
       key: 'middle_name',
       render: (text: string) => text || '-',
     },
     {
       title: 'Email',
-      dataIndex: ['user', 'email'],
+      dataIndex: ['expert', 'email'],
       key: 'email',
     },
     {
@@ -217,10 +221,10 @@ const ExpertApplications: React.FC = () => {
       key: 'status',
       render: (status: string | undefined, record: ExpertApplication) => {
         
-        if (status) return getStatusTag(status, record.user);
-        if (record.application_approved) return getStatusTag('approved', record.user);
-        if (record.application_reviewed_at || record.application_submitted_at) return getStatusTag('under_review', record.user);
-        return getStatusTag('new', record.user);
+        if (status) return getStatusTag(status, record.expert);
+        if (record.application_approved) return getStatusTag('approved', record.expert);
+        if (record.application_reviewed_at || record.application_submitted_at) return getStatusTag('under_review', record.expert);
+        return getStatusTag('new', record.expert);
       },
     },
     {
@@ -283,12 +287,12 @@ const ExpertApplications: React.FC = () => {
       >
         <div className={styles.mobileUserInfo}>
           <div className={styles.mobileUserName}>
-            {[application.user.last_name, application.user.first_name, application.user.middle_name]
+            {[application.expert.last_name, application.expert.first_name, application.expert.middle_name]
               .filter(Boolean)
               .join(' ')}
           </div>
           <div className={styles.mobileUserEmail}>
-            {application.user.email}
+            {application.expert.email}
           </div>
         </div>
         
@@ -300,12 +304,12 @@ const ExpertApplications: React.FC = () => {
           </span>
           <div className={styles.statusTag}>
             {application.status
-              ? getStatusTag(application.status, application.user)
+              ? getStatusTag(application.status, application.expert)
               : application.application_approved
-                ? getStatusTag('approved', application.user)
+                ? getStatusTag('approved', application.expert)
                 : (application.application_reviewed_at || application.application_submitted_at)
-                  ? getStatusTag('under_review', application.user)
-                  : getStatusTag('new', application.user)}
+                  ? getStatusTag('under_review', application.expert)
+                  : getStatusTag('new', application.expert)}
           </div>
         </div>
         
@@ -374,6 +378,12 @@ const ExpertApplications: React.FC = () => {
             Отклоненные
           </Button>
           <Button
+            type={statusFilter === 'needs_revision' ? 'primary' : 'default'}
+            onClick={() => setStatusFilter('needs_revision')}
+          >
+            На доработку
+          </Button>
+          <Button
             type={statusFilter === 'all' ? 'primary' : 'default'}
             onClick={() => setStatusFilter('all')}
           >
@@ -425,40 +435,40 @@ const ExpertApplications: React.FC = () => {
               size={isMobile ? 'small' : 'default'}
             >
               <Descriptions.Item label="Фамилия">
-                {selectedApplication.user.last_name}
+                {selectedApplication.expert.last_name}
               </Descriptions.Item>
               <Descriptions.Item label="Имя">
-                {selectedApplication.user.first_name}
+                {selectedApplication.expert.first_name}
               </Descriptions.Item>
               <Descriptions.Item label="Отчество">
-                {selectedApplication.user.middle_name || 'Не указано'}
+                {selectedApplication.expert.middle_name || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {selectedApplication.user.email}
+                {selectedApplication.expert.email}
               </Descriptions.Item>
               <Descriptions.Item label="Телефон">
-                {selectedApplication.user.phone || 'Не указан'}
+                {selectedApplication.expert.phone || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Опыт работы">
-                {selectedApplication.experience_years || selectedApplication.user.experience_years || 0} лет
+                {selectedApplication.experience_years || selectedApplication.expert.experience_years || 0} лет
               </Descriptions.Item>
               <Descriptions.Item label="Образование">
-                {selectedApplication.education || selectedApplication.user.education || 'Не указано'}
+                {selectedApplication.education || selectedApplication.expert.education || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Навыки" span={isMobile ? 1 : 2}>
-                {selectedApplication.skills || selectedApplication.user.skills || 'Не указано'}
+                {selectedApplication.skills || selectedApplication.expert.skills || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Портфолио" span={isMobile ? 1 : 2}>
-                {selectedApplication.portfolio_url || selectedApplication.user.portfolio_url ? (
-                  <a href={selectedApplication.portfolio_url || selectedApplication.user.portfolio_url} target="_blank" rel="noopener noreferrer">
-                    {selectedApplication.portfolio_url || selectedApplication.user.portfolio_url}
+                {selectedApplication.portfolio_url || selectedApplication.expert.portfolio_url ? (
+                  <a href={selectedApplication.portfolio_url || selectedApplication.expert.portfolio_url} target="_blank" rel="noopener noreferrer">
+                    {selectedApplication.portfolio_url || selectedApplication.expert.portfolio_url}
                   </a>
                 ) : (
                   'Не указано'
                 )}
               </Descriptions.Item>
               <Descriptions.Item label="Биография" span={isMobile ? 1 : 2}>
-                {selectedApplication.biography || selectedApplication.bio || selectedApplication.user.bio || 'Не указано'}
+                {selectedApplication.biography || selectedApplication.bio || selectedApplication.expert.bio || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Специализации" span={isMobile ? 1 : 2}>
                 {(selectedApplication.specializations || []).length > 0 ? (
@@ -476,12 +486,12 @@ const ExpertApplications: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
                 {selectedApplication.status
-                  ? getStatusTag(selectedApplication.status, selectedApplication.user)
+                  ? getStatusTag(selectedApplication.status, selectedApplication.expert)
                   : selectedApplication.application_approved
-                    ? getStatusTag('approved', selectedApplication.user)
+                    ? getStatusTag('approved', selectedApplication.expert)
                     : (selectedApplication.application_reviewed_at || selectedApplication.application_submitted_at)
-                      ? getStatusTag('under_review', selectedApplication.user)
-                      : getStatusTag('new', selectedApplication.user)}
+                      ? getStatusTag('under_review', selectedApplication.expert)
+                      : getStatusTag('new', selectedApplication.expert)}
               </Descriptions.Item>
             </Descriptions>
             <div

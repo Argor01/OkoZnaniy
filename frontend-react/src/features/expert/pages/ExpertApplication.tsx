@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Form, Input, InputNumber, Button, Card, Typography, message, Alert, Tag, Descriptions, Modal } from 'antd';
 import { FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { authApi } from '@/features/auth/api/auth';
+import SkillsSelect from '../components/inputs/SkillsSelect';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
@@ -24,16 +25,16 @@ const ExpertApplication: React.FC = () => {
         
         
         if (user.has_submitted_application) {
-          form.setFieldsValue({
-            first_name: user.first_name,
-            last_name: user.last_name,
-            bio: user.bio,
-            experience_years: user.experience_years,
-            education: user.education,
-            skills: user.skills,
-            portfolio_url: user.portfolio_url,
-          });
-        }
+            form.setFieldsValue({
+              first_name: user.first_name,
+              last_name: user.last_name,
+              bio: user.bio,
+              experience_years: user.experience_years,
+              education: user.education,
+              skills: user.skills ? user.skills.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+              portfolio_url: user.portfolio_url,
+            });
+          }
       } catch (error) {
         message.error('Не удалось загрузить данные пользователя');
         navigate('/login');
@@ -46,7 +47,11 @@ const ExpertApplication: React.FC = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const updatedUser = await authApi.submitExpertApplication(values);
+      const dataToSend = {
+        ...values,
+        skills: Array.isArray(values.skills) ? values.skills.join(', ') : values.skills
+      };
+      const updatedUser = await authApi.submitExpertApplication(dataToSend);
       
       setCurrentUser(updatedUser);
       
@@ -313,14 +318,13 @@ const ExpertApplication: React.FC = () => {
 
               <Form.Item
                 name="skills"
-                label={<span style={{ fontWeight: 600 }}>Навыки</span>}
-                extra={<span style={{ color: '#666' }}>Перечислите ваши навыки и компетенции</span>}
+                label={<span style={{ fontWeight: 600 }}>Навыки и специализации</span>}
+                extra={<span style={{ color: '#666' }}>Выберите ваши навыки и специализации из списка. Вы также можете добавить свои варианты.</span>}
               >
-                <TextArea 
-                  rows={4} 
-                  placeholder="Например: Python, Django, математический анализ, статистика..."
+                <SkillsSelect
+                  placeholder="Например: Математический анализ, Python..."
                   disabled={hasSubmitted}
-                  style={{ borderRadius: '8px' }}
+                  className="expert-application-skills-select"
                 />
               </Form.Item>
 

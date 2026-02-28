@@ -34,20 +34,17 @@ const ShopWorkDetail: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: works } = useQuery({
-    queryKey: ['shop-works'],
-    queryFn: () => shopApi.getWorks(),
+  const { data: work, isLoading: isWorkLoading, isError } = useQuery({
+    queryKey: ['shop-work', workId],
+    queryFn: () => shopApi.getWork(Number(workId)),
+    enabled: !!workId,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   const { data: purchases = [] } = useQuery({
     queryKey: ['shop-purchases'],
     queryFn: () => shopApi.getPurchases(),
   });
-
-  const work = React.useMemo(() => {
-    if (!works || !workId) return null;
-    return works.find((w) => w.id === Number(workId));
-  }, [works, workId]);
 
   const purchase = React.useMemo(() => {
     const list = Array.isArray(purchases) ? purchases : [];
@@ -61,6 +58,7 @@ const ShopWorkDetail: React.FC = () => {
     onSuccess: () => {
       message.success('Работа успешно удалена!');
       queryClient.invalidateQueries({ queryKey: ['shop-works'] });
+      queryClient.invalidateQueries({ queryKey: ['shop-work', Number(workId)] });
       navigate('/shop/ready-works');
     },
     onError: () => {
@@ -68,7 +66,7 @@ const ShopWorkDetail: React.FC = () => {
     },
   });
 
-  if (!works) {
+  if (isWorkLoading) {
     return (
       <div className={styles.centered}>
         <Spin size="large" />
@@ -76,7 +74,7 @@ const ShopWorkDetail: React.FC = () => {
     );
   }
 
-  if (!work) {
+  if (isError || !work) {
     return (
       <div className={styles.notFound}>
         <Title level={3}>Работа не найдена</Title>
@@ -124,7 +122,6 @@ const ShopWorkDetail: React.FC = () => {
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(-1)}
           className={styles.backButton}
-          variant="default"
           size={isMobile ? 'middle' : 'large'}
         >
           Назад
@@ -270,22 +267,17 @@ const ShopWorkDetail: React.FC = () => {
               </div>
             </div>
 
-            <AppCard 
-              title="Описание работы"
-              className={styles.contentCard}
-            >
+            <div>
+              <Title level={4}>Описание работы</Title>
               <div 
                 className={styles.description}
                 dangerouslySetInnerHTML={{ __html: work.description || 'Описание отсутствует' }}
               />
-            </AppCard>
-
+            </div>
             
             {work.files && work.files.length > 0 && (
-              <AppCard 
-                title="Прикрепленные файлы"
-                className={styles.contentCard}
-              >
+              <div>
+                <Title level={4}>Прикрепленные файлы</Title>
                 <List
                   dataSource={work.files}
                   renderItem={(file: WorkFile) => (
@@ -314,7 +306,7 @@ const ShopWorkDetail: React.FC = () => {
                     </List.Item>
                   )}
                 />
-              </AppCard>
+              </div>
             )}
 
             

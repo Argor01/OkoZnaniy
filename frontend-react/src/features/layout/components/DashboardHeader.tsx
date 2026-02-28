@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback } from 'react';
-import { Badge, Button, Dropdown, Layout, Menu, Space, Typography, message } from 'antd';
+import { Badge, Button, Dropdown, Layout, Space, Typography, message } from 'antd';
 import {
   UserOutlined,
   MessageOutlined,
@@ -16,6 +16,7 @@ import {
   MailOutlined,
   ClockCircleOutlined,
   CopyOutlined,
+  DownOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -64,8 +65,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
 
-  const navItems = useMemo<MenuProps['items']>(() => {
-    const items: MenuProps['items'] = [
+  const navItems = useMemo(() => {
+    const items = [
       {
         key: '/orders-feed',
         label: 'Лента заказов',
@@ -105,18 +106,70 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         icon: <PlusOutlined />,
       });
       items.push({
-        key: '/shop/ready-works',
-        label: 'Магазин работ',
+        key: 'shop-menu',
+        label: 'Магазин',
         icon: <ShopOutlined />,
-      });
-      items.push({
-        key: '/shop/purchased',
-        label: 'Купленные работы',
-        icon: <FileDoneOutlined />,
+        children: [
+          {
+            key: '/shop/ready-works',
+            label: 'Каталог',
+          },
+          {
+            key: '/shop/purchased',
+            label: 'Мои покупки',
+          },
+        ],
       });
     }
     return items;
   }, [isExpert, isClient]);
+
+  const renderNavItems = () => {
+    return (
+      <div className={styles.customNav}>
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.key;
+          
+          if (item.children) {
+            const isChildActive = item.children.some(child => location.pathname === child.key);
+            const menuItems: MenuProps['items'] = item.children.map(child => ({
+              key: child.key,
+              label: child.label,
+              onClick: () => navigate(child.key),
+            }));
+
+            return (
+              <Dropdown 
+                key={item.key} 
+                menu={{ items: menuItems }}
+                trigger={['hover']}
+              >
+                <Button 
+                  type="text" 
+                  className={`${styles.navItem} ${isChildActive ? styles.navItemActive : ''}`}
+                  icon={item.icon}
+                >
+                  {item.label} <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+                </Button>
+              </Dropdown>
+            );
+          }
+
+          return (
+            <Button
+              key={item.key}
+              type="text"
+              className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+              icon={item.icon}
+              onClick={() => navigate(item.key)}
+            >
+              {item.label}
+            </Button>
+          );
+        })}
+      </div>
+    );
+  };
 
   const profileMenuItems = useMemo<MenuProps['items']>(() => [
     {
@@ -137,11 +190,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     },
   ], [onProfileClick, onLogout]);
 
-  const handleNavClick: MenuProps['onClick'] = useCallback(({ key }) => {
-    if (key !== 'shop-menu') {
-      navigate(key);
+  const handleProfileMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'profile') {
+      onProfileClick?.();
+    } else if (key === 'logout') {
+      onLogout?.();
     }
-  }, [navigate]);
+  };
 
   const supportMenuItems = useMemo<MenuProps['items']>(() => [
     {
@@ -213,21 +268,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   return (
     <Header className={styles.dashboardHeader}>
       <div className={styles.headerLeft}>
-        <Button
-          type="text"
-          icon={<MenuOutlined />}
-          onClick={onMenuClick}
-          className={styles.menuButton}
-        />
-        {!isMobile && (
-          <Menu
-            mode="horizontal"
-            selectedKeys={[location.pathname]}
-            items={navItems}
-            className={styles.navMenu}
-            onClick={handleNavClick}
+        <div className={styles.menuIconWrapper}>
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMenuClick}
+            className={styles.menuButton}
           />
-        )}
+        </div>
+        {!isMobile && renderNavItems()}
       </div>
 
       <div className={styles.headerLogo}>

@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { Empty, Card, Tag, Typography, Button, Spin, Space, Tooltip } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { EyeOutlined, DownloadOutlined, FileTextOutlined } from '@ant-design/icons';
 import { shopApi } from '@/features/shop/api/shop';
 import { UserProfile } from '../../types';
 import { Work } from '@/features/shop/types/shop';
 import styles from './WorksTab.module.css';
+import { ROUTES } from '@/utils/constants';
 
 const { Text, Paragraph } = Typography;
 
@@ -15,15 +17,12 @@ interface WorksTabProps {
 }
 
 const WorksTab: React.FC<WorksTabProps> = ({ isMobile, userProfile }) => {
-  const { data: allWorks, isLoading } = useQuery({
-    queryKey: ['shop-works'],
-    queryFn: () => shopApi.getWorks(),
+  const navigate = useNavigate();
+  const { data: myWorks = [], isLoading } = useQuery({
+    queryKey: ['shop-works', { author: userProfile?.id }],
+    queryFn: () => shopApi.getWorks({ author: userProfile?.id }),
+    enabled: !!userProfile?.id,
   });
-
-  const myWorks = useMemo(() => {
-    if (!allWorks || !userProfile) return [];
-    return allWorks.filter((work: Work) => work.author.id === userProfile.id);
-  }, [allWorks, userProfile]);
 
   if (isLoading) {
     return (
@@ -62,6 +61,7 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile, userProfile }) => {
               key={work.id}
               hoverable
               className={styles.workCard}
+              onClick={() => navigate(ROUTES.shop.workDetail.replace(':workId', String(work.id)))}
               cover={
                 work.preview ? (
                   <img

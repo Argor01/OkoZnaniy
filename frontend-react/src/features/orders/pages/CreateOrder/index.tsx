@@ -43,6 +43,7 @@ const CreateOrder: React.FC = () => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<CreateOrderFormValues>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
@@ -109,6 +110,7 @@ const CreateOrder: React.FC = () => {
 
   const onFinish = async (values: CreateOrderFormValues) => {
     try {
+      setIsUploading(true);
       const orderData: CreateOrderRequest = {
         title: values.title,
         description: values.description,
@@ -123,37 +125,52 @@ const CreateOrder: React.FC = () => {
 
       if (fileList.length > 0) {
         const total = fileList.length;
-        for (let i = 0; i < fileList.length; i++) {
-          const item = fileList[i];
-          
+        message.loading({ content: `Загрузка файлов: 0 из ${total}`, key: 'upload', duration: 0 });
+
+        // Parallel upload with concurrency limit (e.g. 3) to avoid overwhelming the server
+        const concurrency = 3;
+        const queue = [...fileList];
+        let completed = 0;
+
+        const uploadFile = async (item: UploadFile) => {
           const rawFile = item.originFileObj ?? item;
           if (!(rawFile instanceof File)) {
-            message.warning(`Файл ${i + 1}: неверный объект, пропуск`);
-            continue;
+            message.warning(`Файл ${item.name}: неверный объект, пропуск`);
+            return;
           }
+
           try {
             await ordersApi.uploadOrderFile(createdOrder.id, rawFile, {
               file_type: 'task',
               description: 'Файл задания'
             });
-            if (total > 1) {
-              message.loading({ content: `Загружено файлов: ${i + 1} из ${total}`, key: 'upload', duration: 0 });
-            }
+            completed++;
+            message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
           } catch (error) {
             console.error('Ошибка загрузки файла:', error);
             const errMsg = (error as any)?.response?.data?.detail || (error as any)?.response?.data?.file?.[0] || (error as Error)?.message;
             message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: 'uploadErr' });
           }
-        }
-        if (total > 1) {
-          message.destroy('upload');
-        }
+        };
+
+        const workers = Array(Math.min(concurrency, total)).fill(null).map(async () => {
+          while (queue.length > 0) {
+            const file = queue.shift();
+            if (file) await uploadFile(file);
+          }
+        });
+
+        await Promise.all(workers);
+        
+        message.success({ content: 'Все файлы загружены', key: 'upload', duration: 2 });
         queryClient.invalidateQueries({ queryKey: ['order', String(createdOrder.id)] });
       }
 
       navigate(`/orders/${createdOrder.id}`, { state: { from: '/orders-feed' } });
     } catch (error) {
       console.error('Ошибка при создании заказа:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -373,10 +390,10 @@ const CreateOrder: React.FC = () => {
               htmlType="submit" 
               className={styles.submitButton}
               size="large"
-              loading={createOrderMutation.isPending}
-              disabled={createOrderMutation.isPending}
+              loading={createOrderMutation.isPending || isUploading}
+              disabled={createOrderMutation.isPending || isUploading}
             >
-              {createOrderMutation.isPending ? 'Создание заказа...' : 'Создать заказ'}
+              {createOrderMutation.isPending || isUploading ? 'Создание заказа...' : 'Создать заказ'}
             </AppButton>
           </Form.Item>
         </Form>

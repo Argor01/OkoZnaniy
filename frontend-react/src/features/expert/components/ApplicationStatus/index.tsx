@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Button, Typography, Spin, Space } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, EditOutlined } from '@ant-design/icons';
 import type { ExpertApplication } from '@/features/expert/api/experts';
 import type { UserProfile } from '../../types';
 import styles from './ApplicationStatus.module.css';
@@ -19,7 +19,19 @@ const getApplicationStatusIcon = (status: ExpertApplication['status']) => {
     case 'pending': return <ClockCircleOutlined />;
     case 'approved': return <CheckCircleOutlined />;
     case 'rejected': return <CloseCircleOutlined />;
+    case 'needs_revision': return <EditOutlined />;
     default: return null;
+  }
+};
+
+const getStatusText = (status: ExpertApplication['status'], display?: string) => {
+  if (display) return display;
+  switch (status) {
+    case 'pending': return 'На рассмотрении';
+    case 'approved': return 'Одобрено';
+    case 'rejected': return 'Отклонено';
+    case 'needs_revision': return 'Требуется доработка';
+    default: return 'Неизвестный статус';
   }
 };
 
@@ -56,10 +68,11 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
     const statusClass = isDeactivated ? styles.statusRejected :
       application.status === 'pending' ? styles.statusPending :
       application.status === 'approved' ? styles.statusApproved :
+      application.status === 'needs_revision' ? styles.statusWarning :
       styles.statusRejected;
 
     const statusIcon = isDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon(application.status);
-    const statusText = isDeactivated ? 'Деактивирован' : application.status_display;
+    const statusText = isDeactivated ? 'Деактивирован' : getStatusText(application.status, application.status_display);
 
     return (
       <div className={styles.applicationCard}>
@@ -73,14 +86,14 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
             <span>{statusText}</span>
           </div>
         </div>
-        {application.status === 'rejected' && application.rejection_reason && (
+        {(application.status === 'rejected' || application.status === 'needs_revision') && (application.rejection_reason || application.comment) && (
           <div className={styles.applicationRejectBox}>
             <Text type="danger" className={styles.applicationRejectText}>
-              <strong>Причина отклонения:</strong> {application.rejection_reason}
+              <strong>{application.status === 'needs_revision' ? 'Комментарий:' : 'Причина отклонения:'}</strong> {application.rejection_reason || application.comment}
             </Text>
           </div>
         )}
-        {application.status === 'rejected' && (
+        {(application.status === 'rejected' || application.status === 'needs_revision') && (
           <div className={styles.applicationActionRow}>
             <Button
               type="primary"
@@ -88,7 +101,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
               size="large"
               onClick={onOpenApplicationModal}
             >
-              Подать анкету заново
+              {application.status === 'needs_revision' ? 'Исправить анкету' : 'Подать анкету заново'}
             </Button>
           </div>
         )}
