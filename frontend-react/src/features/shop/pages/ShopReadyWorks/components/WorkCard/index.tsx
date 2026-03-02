@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Space, Typography, Rate, Popconfirm } from 'antd';
+import { Tag, Space, Typography, Rate, Popconfirm, Avatar } from 'antd';
 import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Work } from '@/features/shop/types';
@@ -49,7 +49,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
         <Space size={4}>
           <AppButton
             variant="text"
-            icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
+            icon={work.is_favorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
             onClick={(e) => {
               e.stopPropagation();
               onFavorite(work.id);
@@ -85,8 +85,13 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
 
       {work.author && (
         <div className={styles.author}>
-          <Space size={8}>
-            <UserOutlined className={styles.authorIcon} />
+          <Space size={8} align="center">
+            <Avatar 
+              size="small" 
+              src={work.author.avatar || work.author_avatar} 
+              icon={<UserOutlined />} 
+              className={styles.authorAvatar}
+            />
             <AppButton 
               variant="link" 
               className={styles.authorLink}
@@ -118,21 +123,23 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
             {work.price} ₽
           </Text>
         </div>
-        <AppButton
-          variant="primary"
-          icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
-          disabled={isPurchased ? !canDownload : false}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isPurchased) {
-              onDownload?.(work.id);
-              return;
-            }
-            onPurchase(work.id);
-          }}
-        >
-          {isPurchased ? 'Скачать' : 'Купить'}
-        </AppButton>
+        {!allowDelete && (
+          <AppButton
+            variant="primary"
+            icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
+            disabled={isPurchased ? !canDownload : false}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isPurchased) {
+                onDownload?.(work.id);
+                return;
+              }
+              onPurchase(work.id);
+            }}
+          >
+            {isPurchased ? 'Скачать' : 'Купить'}
+          </AppButton>
+        )}
       </div>
     </AppCard>
   );

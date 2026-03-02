@@ -23,7 +23,7 @@ const ShopWorkDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isLoading: isUserLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
@@ -149,35 +149,24 @@ const ShopWorkDetail: React.FC = () => {
             )}
 
             <div className={styles.sectionStack}>
-              <AppCard 
-                className={styles.authorCard}
-              >
-                <Space direction="vertical" size={12} className={styles.fullWidth}>
-                  <Text type="secondary" className={styles.authorLabel}>
-                    АВТОР
-                  </Text>
-                  <Space align="center" size={16}>
-                    <Avatar 
-                      size={48} 
-                      src={work.author?.avatar} 
-                      icon={<UserOutlined />}
-                      className={styles.authorAvatar}
-                    />
-                    <div>
-                      <AppButton 
-                        variant="link" 
-                        onClick={() => navigate(`/user/${work.author?.id}`)}
-                        className={styles.authorLink}
-                      >
-                        {work.author_name || work.author?.name || work.author?.username || 'Автор'}
-                      </AppButton>
-                      <div className={styles.authorHint}>
-                        Нажмите, чтобы посмотреть профиль
-                      </div>
-                    </div>
-                  </Space>
+              <div className={styles.clientInfo}>
+                <Space size={12}>
+                  <Avatar 
+                    size={48} 
+                    src={work.author?.avatar || work.author_avatar} 
+                    icon={<UserOutlined />}
+                    className={styles.clientAvatar}
+                  />
+                  <div>
+                    <Text strong className={styles.clientName}>
+                      {work.author_name || work.author?.name || work.author?.username || 'Автор'}
+                    </Text>
+                    <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
+                      Рейтинг: {work.author?.rating || 0}
+                    </Text>
+                  </div>
                 </Space>
-              </AppCard>
+              </div>
 
               <div className={styles.infoGrid}>
 
@@ -311,7 +300,11 @@ const ShopWorkDetail: React.FC = () => {
 
             
             <div className={styles.actionRow}>
-              {userProfile?.id === work.author?.id ? (
+              {isUserLoading ? (
+                <div className={styles.centered}>
+                  <Spin />
+                </div>
+              ) : userProfile?.id === work.author?.id ? (
 
                 <Popconfirm
                   title="Удалить работу?"

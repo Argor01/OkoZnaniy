@@ -35,13 +35,15 @@ export interface Work {
   purchasesCount: number;
   author: ShopAuthor;
   author_name?: string;
+  author_avatar?: string;
   preview?: string;
   files: WorkFile[];
   tags?: string[];
   created_at?: string;
   updated_at?: string;
-  isFavorite?: boolean;
+  is_favorite?: boolean;
   is_active?: boolean;
+  isLocal?: boolean;
 }
 
 export interface CreateWorkPayload {

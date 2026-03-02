@@ -233,22 +233,15 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', os.getenv('REDIS_URL', 'redis
 
 AUTH_USER_MODEL = "users.User"
 
-# Используем PostgreSQL из DATABASE_URL или SQLite для разработки
+# Используем PostgreSQL из DATABASE_URL
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
-    # Production: используем PostgreSQL
     DATABASES = {
         'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
 else:
-    # Development: используем SQLite
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    raise RuntimeError("DATABASE_URL is required. SQLite is disabled for this project.")
 
 
 # Password validation

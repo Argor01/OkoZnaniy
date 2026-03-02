@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, message } from 'antd';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
@@ -16,13 +16,17 @@ const { Title } = Typography;
 const ShopReadyWorks: React.FC = () => {
   const navigate = useNavigate();
   const dashboard = useDashboard();
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<FiltersType>({ sortBy: 'newness' });
-  const [works, setWorks] = useState<Work[]>([]);
 
-  
-  const { data: apiWorks } = useQuery({
-    queryKey: ['shop-works'],
-    queryFn: () => shopApi.getWorks(),
+  const { data: apiWorks, isLoading } = useQuery({
+    queryKey: ['shop-works', filters.sortBy],
+    queryFn: async () => {
+      const data = await shopApi.getWorks({
+        is_favorite: filters.sortBy === 'favorites' ? true : undefined
+      });
+      return data;
+    },
   });
 
   const { data: purchases = [] } = useQuery({
@@ -45,8 +49,51 @@ const ShopReadyWorks: React.FC = () => {
     queryFn: () => catalogApi.getWorkTypes(),
   });
 
+  const processedWorks = React.useMemo(() => {
+    const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : [];
+    
+    interface RawWork extends Work {
+      subjectId?: number;
+      subject_id?: number;
+      workTypeId?: number;
+      work_type_id?: number;
+      createdAt?: string;
+      updatedAt?: string;
+      category?: string;
+    }
+
+    return base.map((work: Work) => {
+      const extended = work as RawWork;
+      const subject = Number(work.subject ?? extended.subjectId ?? extended.subject_id ?? 0);
+      const work_type = Number(work.work_type ?? extended.workTypeId ?? extended.work_type_id ?? 0);
+
+      return {
+        ...work,
+        created_at: work.created_at || extended.createdAt,
+        updated_at: work.updated_at || extended.updatedAt,
+        category: work.work_type_name || extended.category || 'Другое',
+        subject,
+        work_type,
+        rating: work.rating || 0,
+        reviewsCount: work.reviewsCount || 0,
+        viewsCount: work.viewsCount || 0,
+        purchasesCount: work.purchasesCount || 0,
+        author: work.author ? {
+          ...work.author,
+          avatar: work.author.avatar,
+        } : {
+          id: 0,
+          name: work.author_name || 'Неизвестен',
+          username: work.author_name || 'Неизвестен',
+          rating: 0,
+          avatar: work.author_avatar,
+        },
+      };
+    });
+  }, [apiWorks]);
+
   const handlePurchase = async (id: number) => {
-    const work = works.find((w) => w.id === id);
+    const work = processedWorks.find((w) => w.id === id);
     const sellerId = work?.author?.id;
     if (!work || !sellerId) {
       message.error('Не удалось открыть чат: неизвестен продавец');
@@ -59,6 +106,41 @@ const ShopReadyWorks: React.FC = () => {
       const detail = error?.response?.data?.error || error?.response?.data?.detail;
       message.error(detail || 'Не удалось купить работу');
     }
+  };
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: (id: number) => shopApi.toggleFavorite(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['shop-works', filters.sortBy] });
+      const previousWorks = queryClient.getQueryData<Work[]>(['shop-works', filters.sortBy]);
+
+      queryClient.setQueryData<Work[]>(['shop-works', filters.sortBy], (old) => {
+        if (!old) return [];
+        return old.map(w => w.id === id ? { ...w, is_favorite: !w.is_favorite } : w);
+      });
+
+      return { previousWorks };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousWorks) {
+        queryClient.setQueryData(['shop-works', filters.sortBy], context.previousWorks);
+      }
+      message.error('Не удалось обновить избранное');
+    },
+    onSuccess: (data, id) => {
+      message.success(data.is_favorite ? 'Добавлено в избранное' : 'Удалено из избранного');
+      queryClient.setQueryData<Work[]>(['shop-works', filters.sortBy], (old) => {
+        if (!old) return [];
+        if (filters.sortBy === 'favorites' && !data.is_favorite) {
+          return old.filter(w => w.id !== id);
+        }
+        return old.map(w => w.id === id ? { ...w, is_favorite: data.is_favorite } : w);
+      });
+    },
+  });
+
+  const handleFavorite = (id: number) => {
+    toggleFavoriteMutation.mutate(id);
   };
 
   const handleDownload = (id: number) => {
@@ -88,7 +170,10 @@ const ShopReadyWorks: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await shopApi.deleteWork(id);
-      setWorks((prev) => prev.filter((w) => w.id !== id));
+      queryClient.setQueryData(['shop-works', filters.sortBy], (oldData: Work[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(w => w.id !== id);
+      });
     } catch (error) {
       console.error('Error deleting work:', error);
     }
@@ -96,7 +181,7 @@ const ShopReadyWorks: React.FC = () => {
 
   
   const filteredWorks = React.useMemo(() => {
-    let result = [...works];
+    let result = [...processedWorks];
 
     
     if (filters.search) {
@@ -130,6 +215,10 @@ const ShopReadyWorks: React.FC = () => {
       case 'popular':
         result.sort((a, b) => b.viewsCount - a.viewsCount);
         break;
+      case 'favorites':
+        // Сортировка по умолчанию (например, по новизне)
+        result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+        break;
       case 'newness':
       default:
         result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
@@ -137,56 +226,7 @@ const ShopReadyWorks: React.FC = () => {
     }
 
     return result;
-  }, [works, filters]);
-
-  React.useEffect(() => {
-    let local: Work[] = [];
-    try {
-      local = JSON.parse(localStorage.getItem('shop_custom_works') || '[]');
-    } catch {
-      local = [];
-    }
-    const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : [];
-    
-    interface RawWork extends Work {
-      subjectId?: number;
-      subject_id?: number;
-      workTypeId?: number;
-      work_type_id?: number;
-      createdAt?: string;
-      updatedAt?: string;
-      category?: string;
-    }
-
-    const transformedBase = base.map((work: Work) => {
-      const extended = work as RawWork;
-      const subject = Number(work.subject ?? extended.subjectId ?? extended.subject_id ?? 0);
-      const work_type = Number(work.work_type ?? extended.workTypeId ?? extended.work_type_id ?? 0);
-
-      return {
-        ...work,
-        created_at: work.created_at || extended.createdAt,
-        updated_at: work.updated_at || extended.updatedAt,
-        category: work.work_type_name || extended.category || 'Другое',
-        subject,
-        work_type,
-        rating: work.rating || 0,
-        reviewsCount: work.reviewsCount || 0,
-        viewsCount: work.viewsCount || 0,
-        purchasesCount: work.purchasesCount || 0,
-        author: work.author || {
-          id: 0,
-          name: work.author_name || 'Неизвестен',
-          username: work.author_name || 'Неизвестен',
-          rating: 0,
-        },
-      };
-    });
-    
-    const all = [...local, ...transformedBase];
-    const uniqueById = Array.from(new Map(all.map((w) => [w.id, w])).values());
-    setWorks(uniqueById);
-  }, [apiWorks]);
+  }, [processedWorks, filters]);
 
   const purchasesByWorkId = React.useMemo(() => {
     const list = Array.isArray(purchases) ? purchases : [];
@@ -208,12 +248,14 @@ const ShopReadyWorks: React.FC = () => {
       
       <WorksList
         works={filteredWorks}
+        loading={isLoading}
         onWorkClick={(id) => navigate(`/shop/works/${id}`)}
-        onFavorite={(id) => console.log('Favorite:', id)}
+        onFavorite={handleFavorite}
         onPurchase={handlePurchase}
         onDownload={handleDownload}
         purchasesByWorkId={purchasesByWorkId}
         onDelete={handleDelete}
+        currentUserId={_profile?.id}
       />
     </div>
   );

@@ -53,41 +53,27 @@
   gap: 16px;
 }
 
-.authorCard {
-  background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
-  border: 2px solid #d3adf7;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
-  padding: 8px 16px;
+.clientInfo {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
-.authorCard :global(.ant-card-body) {
-  padding: 16px 20px;
+.clientAvatar {
+  border: 2px solid var(--bg-primary);
+  box-shadow: var(--shadow-sm);
 }
 
-.authorLabel {
+.clientName {
   font-size: 14px;
-  font-weight: 600;
-  color: #722ed1;
+  margin-bottom: 2px !important;
+  display: block;
 }
 
-.authorAvatar {
-  border: 3px solid #722ed1;
-  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.2);
-}
-
-.authorLink {
-  padding: 0;
-  height: auto;
-  font-size: 18px;
-  font-weight: 700;
-  color: #722ed1;
-}
-
-.authorHint {
+.clientOrders {
   font-size: 12px;
-  color: #8c8c8c;
-  margin-top: 2px;
 }
 
 .infoGrid {
@@ -101,12 +87,20 @@
 }
 
 .infoCard :global(.ant-card-body) {
-  padding: 12px 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
 }
 
 .infoLabel {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .centeredStat {
@@ -115,10 +109,10 @@
 }
 
 .statLabel {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .centeredRow {
@@ -128,53 +122,53 @@
 
 .mutedIcon {
   color: #8c8c8c;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .mutedValue {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: #595959;
 }
 
 .subjectValue {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #1f2937;
 }
 
 .priceIcon {
   color: #52c41a;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .priceValue {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #389e0d;
 }
 
 .ratingIcon {
   color: #faad14;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .ratingCount {
-  font-size: 13px;
+  font-size: 14px;
   color: #8c8c8c;
 }
 
 .rateSmall {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .createdIcon {
   color: #8c8c8c;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .createdValue {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: #595959;
 }

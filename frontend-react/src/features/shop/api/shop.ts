@@ -4,13 +4,18 @@ import { CreateWorkPayload, Purchase, Work } from '@/features/shop/types/shop';
 export type { CreateWorkPayload, Purchase, Work };
 
 export const shopApi = {
-  getWorks: async (params?: { author?: number }): Promise<Work[]> => {
+  getWorks: async (params?: { author?: number; is_favorite?: boolean }): Promise<Work[]> => {
     const response = await apiClient.get('/shop/works/', { params });
     return response.data.results || response.data;
   },
 
   getWork: async (id: number): Promise<Work> => {
     const response = await apiClient.get(`/shop/works/${id}/`);
+    return response.data;
+  },
+
+  toggleFavorite: async (id: number): Promise<{ status: string; is_favorite: boolean }> => {
+    const response = await apiClient.post(`/shop/works/${id}/toggle_favorite/`);
     return response.data;
   },
 

@@ -106,3 +106,29 @@ class Purchase(models.Model):
     
     def __str__(self):
         return f"{self.buyer.username} купил {self.work.title}"
+
+
+class FavoriteWork(models.Model):
+    """Избранные работы"""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorite_works',
+        verbose_name="Пользователь"
+    )
+    work = models.ForeignKey(
+        ReadyWork,
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+        verbose_name="Работа"
+    )
+    created_at = models.DateTimeField("Дата добавления", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Избранная работа"
+        verbose_name_plural = "Избранные работы"
+        unique_together = ['user', 'work']
+
+    def __str__(self):
+        return f"{self.user.username} добавил в избранное {self.work.title}"

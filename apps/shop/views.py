@@ -1,12 +1,12 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 from django.db.models import Avg, Count
 from django.http import FileResponse
 import mimetypes
 from django.conf import settings
-from .models import ReadyWork, Purchase
+from .models import ReadyWork, Purchase, FavoriteWork
 from .serializers import (
     ReadyWorkSerializer, 
     CreateReadyWorkSerializer, 
@@ -27,7 +27,19 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        queryset = ReadyWork.objects.filter(is_active=True)
+        queryset = ReadyWork.objects.filter(is_active=True).order_by('-created_at')
+        user = self.request.user
+
+        # Аннотация избранного
+        if user.is_authenticated:
+             queryset = queryset.annotate(
+                is_favorite=Exists(FavoriteWork.objects.filter(user=user, work=OuterRef('pk')))
+            )
+        
+        # Фильтрация по избранному
+        is_favorite_filter = self.request.query_params.get('is_favorite')
+        if is_favorite_filter == 'true' and user.is_authenticated:
+            queryset = queryset.filter(is_favorite=True)
         
         # Фильтрация по предмету
         subject = self.request.query_params.get('subject')
@@ -66,8 +78,10 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         return ReadyWorkSerializer
 
     def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAuthenticated(), IsExpertOrStaff()]
+            return [permissions.IsAuthenticated()]
         return super().get_permissions()
     
     def create(self, request, *args, **kwargs):
@@ -126,6 +140,18 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(works, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def toggle_favorite(self, request, pk=None):
+        """Добавить/удалить из избранного"""
+        work = self.get_object()
+        favorite, created = FavoriteWork.objects.get_or_create(user=request.user, work=work)
+        
+        if not created:
+            favorite.delete()
+            return Response({'status': 'removed', 'is_favorite': False})
+            
+        return Response({'status': 'added', 'is_favorite': True})
     
     @action(detail=True, methods=['post'])
     def purchase(self, request, pk=None):

@@ -7,19 +7,28 @@ from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 class AuthorSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
     
     class Meta:
         from django.contrib.auth import get_user_model
         User = get_user_model()
         model = User
-        fields = ['id', 'username', 'name', 'rating']
+        fields = ['id', 'username', 'name', 'rating', 'avatar']
     
     def get_name(self, obj):
         return obj.get_full_name() or obj.username
     
     def get_rating(self, obj):
-
+        # TODO: Implement rating calculation
         return 0
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
 
 
 class ReadyWorkFileSerializer(serializers.ModelSerializer):
@@ -34,22 +43,43 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     work_type_name = serializers.CharField(source='work_type.name', read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
     author = AuthorSerializer(read_only=True)
+    author_avatar = serializers.SerializerMethodField()
     preview = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     reviewsCount = serializers.SerializerMethodField()
     purchasesCount = serializers.SerializerMethodField()
     viewsCount = serializers.SerializerMethodField()
+    is_favorite = serializers.SerializerMethodField()
     
     class Meta:
         model = ReadyWork
         fields = [
             'id', 'title', 'description', 'price', 'subject', 'work_type',
-            'subject_name', 'work_type_name', 'author', 'author_name',
+            'subject_name', 'work_type_name', 'author', 'author_name', 'author_avatar',
             'preview', 'rating', 'reviewsCount', 'viewsCount', 'purchasesCount',
-            'is_active', 'created_at', 'updated_at', 'files'
+            'is_favorite', 'is_active', 'created_at', 'updated_at', 'files'
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
     
+    def get_is_favorite(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            # Check if annotated first
+            if hasattr(obj, 'is_favorite'):
+                return obj.is_favorite
+            # Fallback to query
+            return obj.favorited_by.filter(user=request.user).exists()
+        return False
+
+    
+    def get_author_avatar(self, obj):
+        if obj.author.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.author.avatar.url)
+            return obj.author.avatar.url
+        return None
+
     def get_preview(self, obj):
         if obj.preview:
             request = self.context.get('request')

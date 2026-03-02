@@ -9,7 +9,7 @@ export interface Filters {
   priceMin?: number;
   priceMax?: number;
   rating?: number;
-  sortBy?: 'newness' | 'price-asc' | 'price-desc' | 'rating' | 'popular';
+  sortBy?: 'newness' | 'price-asc' | 'price-desc' | 'rating' | 'popular' | 'favorites';
 }
 
 export interface UserProfile {

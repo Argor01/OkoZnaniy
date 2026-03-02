@@ -228,7 +228,7 @@ const CreateOrder: React.FC = () => {
                   filterOption={(input, option) =>
                     String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
                   }
-                  dropdownRender={(menu) => (
+                  popupRender={(menu) => (
                     <>
                       {menu}
                       <div className={styles.selectDropdownFooter}>
@@ -266,7 +266,7 @@ const CreateOrder: React.FC = () => {
                   filterOption={(input, option) =>
                     String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
                   }
-                  dropdownRender={(menu) => (
+                  popupRender={(menu) => (
                     <>
                       {menu}
                       <div className={styles.selectDropdownFooter}>

@@ -94,7 +94,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       <Space direction="vertical" className={styles.spaceFullWidth} size="large">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text strong className={styles.label}>
+            <Text className={styles.label}>
               Название работы
             </Text>
             <AppInput
@@ -105,7 +105,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             />
           </Col>
           <Col xs={24} sm={12}>
-            <Text strong className={styles.label}>
+            <Text className={styles.label}>
               Стоимость работы
             </Text>
             <AppInput.Number
@@ -115,13 +115,14 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               className={styles.priceInput}
               min={0}
               addonAfter="₽"
+              size="middle"
             />
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text strong className={styles.label}>
+            <Text className={styles.label}>
               Тип работы
             </Text>
             <AppSelect
@@ -131,7 +132,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               className={styles.select}
               showSearch
               filterOption={filterSelectByLabel}
-              dropdownRender={(menu) => (
+              popupRender={(menu) => (
                 <>
                   {menu}
                   <div className={styles.selectDropdownFooter}>
@@ -155,7 +156,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </AppSelect>
           </Col>
           <Col xs={24} sm={12}>
-            <Text strong className={styles.label}>
+            <Text className={styles.label}>
               Предмет
             </Text>
             <AppSelect
@@ -165,7 +166,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               className={styles.select}
               showSearch
               filterOption={filterSelectByLabel}
-              dropdownRender={(menu) => (
+              popupRender={(menu) => (
                 <>
                   {menu}
                   <div className={styles.selectDropdownFooter}>
@@ -191,7 +192,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </Row>
 
         <div>
-          <Text strong className={styles.label}>
+          <Text className={styles.label}>
             Подробное описание
           </Text>
           <RichTextEditor
@@ -202,13 +203,13 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text strong className={styles.label}>
+          <Text className={styles.label}>
             Превью работы (изображение)
           </Text>
-          <AppUpload
+          <AppUpload.Dragger
             name="preview"
             listType="picture-card"
-            className={styles.previewUpload}
+            className={styles.uploadArea}
             showUploadList={false}
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/');
@@ -235,11 +236,13 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               />
             ) : (
               <div>
-                <PlusOutlined />
-                <div className={styles.previewHint}>Загрузить</div>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <div className={styles.previewHint}>Нажмите или перетащите изображение</div>
               </div>
             )}
-          </AppUpload>
+          </AppUpload.Dragger>
           {formData.preview && (
             <AppButton 
               variant="text" 
@@ -252,7 +255,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text strong className={styles.label}>
+          <Text className={styles.label}>
             Файлы работы (необязательно)
           </Text>
           <AppUpload.Dragger

@@ -11,10 +11,7 @@
   align-items: center !important;
 }
 
-.default :global(.ant-select-selector) {
-  border: 1px solid var(--border-color) !important;
-  background-color: var(--bg-primary) !important;
-}
+
 
 .default:hover :global(.ant-select-selector) {
   border-color: var(--primary-blue-hover) !important;

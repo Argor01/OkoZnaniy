@@ -66,6 +66,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
         >
           <Option value="newness">Новые</Option>
           <Option value="popular">Популярные</Option>
+          <Option value="favorites">Избранные</Option>
           <Option value="price-asc">Цена: по возрастанию</Option>
           <Option value="price-desc">Цена: по убыванию</Option>
           <Option value="rating">Рейтинг</Option>
