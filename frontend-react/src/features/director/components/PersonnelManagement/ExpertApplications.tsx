@@ -189,20 +189,9 @@ const ExpertApplications: React.FC = () => {
 
   const columns = [
     {
-      title: 'Фамилия',
-      dataIndex: ['expert', 'last_name'],
-      key: 'last_name',
-    },
-    {
-      title: 'Имя',
-      dataIndex: ['expert', 'first_name'],
-      key: 'first_name',
-    },
-    {
-      title: 'Отчество',
-      dataIndex: ['expert', 'middle_name'],
-      key: 'middle_name',
-      render: (text: string) => text || '-',
+      title: 'ФИО',
+      key: 'full_name',
+      render: (record: ExpertApplication) => record.full_name || `${record.expert?.last_name || ''} ${record.expert?.first_name || ''} ${record.expert?.middle_name || ''}`.trim() || '-',
     },
     {
       title: 'Email',
@@ -287,12 +276,14 @@ const ExpertApplications: React.FC = () => {
       >
         <div className={styles.mobileUserInfo}>
           <div className={styles.mobileUserName}>
-            {[application.expert.last_name, application.expert.first_name, application.expert.middle_name]
+            {application.full_name || 
+             [application.expert?.last_name, application.expert?.first_name, application.expert?.middle_name]
               .filter(Boolean)
-              .join(' ')}
+              .join(' ') || 
+             'Не указано'}
           </div>
           <div className={styles.mobileUserEmail}>
-            {application.expert.email}
+            {application.expert?.email || 'Не указан'}
           </div>
         </div>
         
@@ -434,23 +425,19 @@ const ExpertApplications: React.FC = () => {
               bordered 
               size={isMobile ? 'small' : 'default'}
             >
-              <Descriptions.Item label="Фамилия">
-                {selectedApplication.expert.last_name}
-              </Descriptions.Item>
-              <Descriptions.Item label="Имя">
-                {selectedApplication.expert.first_name}
-              </Descriptions.Item>
-              <Descriptions.Item label="Отчество">
-                {selectedApplication.expert.middle_name || 'Не указано'}
+              <Descriptions.Item label="ФИО" span={isMobile ? 1 : 2}>
+                {selectedApplication.full_name || 
+                 `${selectedApplication.expert?.last_name || ''} ${selectedApplication.expert?.first_name || ''} ${selectedApplication.expert?.middle_name || ''}`.trim() || 
+                 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {selectedApplication.expert.email}
+                {selectedApplication.expert?.email || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Телефон">
-                {selectedApplication.expert.phone || 'Не указан'}
+                {selectedApplication.expert?.phone || 'Не указан'}
               </Descriptions.Item>
-              <Descriptions.Item label="Опыт работы">
-                {selectedApplication.experience_years || selectedApplication.expert.experience_years || 0} лет
+              <Descriptions.Item label="Опыт работы" span={isMobile ? 1 : 2}>
+                {selectedApplication.work_experience_years || selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
               </Descriptions.Item>
               <Descriptions.Item label="Образование">
                 {selectedApplication.education || selectedApplication.expert.education || 'Не указано'}
@@ -471,9 +458,9 @@ const ExpertApplications: React.FC = () => {
                 {selectedApplication.biography || selectedApplication.bio || selectedApplication.expert.bio || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Специализации" span={isMobile ? 1 : 2}>
-                {(selectedApplication.specializations || []).length > 0 ? (
-                  selectedApplication.specializations!.map((spec: string, index: number) => (
-                    <Tag key={index}>{spec}</Tag>
+                {Array.isArray(selectedApplication.specializations) && selectedApplication.specializations.length > 0 ? (
+                  selectedApplication.specializations.map((spec: any, index: number) => (
+                    <Tag key={index}>{typeof spec === 'string' ? spec : spec.name}</Tag>
                   ))
                 ) : (
                   'Не указано'

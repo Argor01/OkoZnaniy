@@ -17,7 +17,7 @@ import PersonnelManagement from '../components/PersonnelManagement/PersonnelMana
 import FinancialStatistics from '../components/FinancialStatistics/FinancialStatistics';
 import PartnerPanel from '../components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics';
-import ArbitratorCommunication from '../components/ArbitratorCommunication/ArbitratorCommunication';
+import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
 import '@/styles/modals.css';
 import '@/styles/director.css';
@@ -145,7 +145,7 @@ const DirectorDashboard: React.FC = () => {
       key: 'internal-communication',
       icon: <MessageOutlined />,
       label: 'Внутренняя коммуникация',
-      component: <ArbitratorCommunication />,
+      component: <DirectorChatsSection />,
     },
     {
       key: 'contact-bans',

@@ -975,6 +975,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             # Обновляем существующую анкету (только если не деактивирована)
             if isinstance(serializer, ExpertApplicationCreateSerializer):
                 educations_data = serializer.validated_data.pop('educations', [])
+                specialization_ids = serializer.validated_data.pop('specialization_ids', [])
                 
                 # Обновляем поля анкеты
                 for field, value in serializer.validated_data.items():
@@ -984,6 +985,10 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 existing_application.status = 'pending'
                 existing_application.rejection_reason = ''
                 existing_application.save()
+                
+                # Обновляем специальности
+                if specialization_ids:
+                    existing_application.specializations.set(specialization_ids)
                 
                 # Удаляем старые записи об образовании и создаем новые
                 existing_application.educations.all().delete()
@@ -1003,11 +1008,16 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         logger.info(f"Creating new application for user {self.request.user.id}")
         if isinstance(serializer, ExpertApplicationCreateSerializer):
             educations_data = serializer.validated_data.pop('educations', [])
+            specialization_ids = serializer.validated_data.pop('specialization_ids', [])
             
             application = ExpertApplication.objects.create(
                 expert=self.request.user,
                 **serializer.validated_data
             )
+            
+            # Устанавливаем специальности
+            if specialization_ids:
+                application.specializations.set(specialization_ids)
             
             # Создаем записи об образовании
             for education_data in educations_data:

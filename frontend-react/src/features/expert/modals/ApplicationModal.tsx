@@ -40,11 +40,12 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         const firstName = nameParts[1] || user.first_name;
         const middleName = nameParts.slice(2).join(' ') || '';
 
-        let specs: string[] = [];
+        let specs: number[] = [];
         if (Array.isArray(application.specializations)) {
-             specs = application.specializations;
-        } else if (typeof application.specializations === 'string') {
-             specs = (application.specializations as string).split(',').map(s => s.trim()).filter(Boolean);
+          // Если это массив объектов с id
+          specs = application.specializations.map((s: any) => 
+            typeof s === 'object' && s.id ? s.id : s
+          ).filter((id: any) => typeof id === 'number');
         }
 
         applicationForm.setFieldsValue({
@@ -147,10 +148,10 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             .filter(Boolean)
             .join(' ');
           
-          
-          const specializations = Array.isArray(values.specializations)
-            ? values.specializations.join(', ')
-            : values.specializations;
+          // Отправляем массив ID специальностей
+          const specialization_ids = Array.isArray(values.specializations)
+            ? values.specializations
+            : [];
           
           if (application && application.id) {
             updateApplicationMutation.mutate({
@@ -158,7 +159,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
               data: {
                 full_name,
                 work_experience_years: values.work_experience_years,
-                specializations,
+                specialization_ids,
                 educations,
                 email: values.email
               }
@@ -167,7 +168,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             createApplicationMutation.mutate({
               full_name,
               work_experience_years: values.work_experience_years,
-              specializations,
+              specialization_ids,
               educations,
               email: values.email
             });
@@ -258,8 +259,18 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         <Form.Item
           label="Специальности"
           name="specializations"
-          rules={[{ required: true, message: 'Выберите специальности' }]}
-          extra="Выберите из списка или введите свои специальности"
+          rules={[
+            { required: true, message: 'Выберите хотя бы одну специальность' },
+            {
+              validator: (_, value) => {
+                if (!value || value.length === 0) {
+                  return Promise.reject(new Error('Выберите хотя бы одну специальность'));
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
+          extra="Выберите предметы, по которым вы можете выполнять работы"
         >
           <SkillsSelect placeholder="Например: Математика, Физика, Информатика" />
         </Form.Item>

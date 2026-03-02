@@ -89,6 +89,7 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
       return {
         id: app.id,
         expert: app.expert || app.user,
+        full_name: app.full_name,
         experience_years: app.work_experience_years ?? app.experience_years,
         education: educationStr,
         skills: app.skills,

@@ -260,12 +260,20 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
         read_only=True
     )
     reviewed_by = SimpleUserSerializer(read_only=True)
+    specializations = SubjectSerializer(many=True, read_only=True)
+    specialization_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        write_only=True,
+        source='specializations',
+        queryset=Subject.objects.filter(is_active=True),
+        required=False
+    )
 
     class Meta:
         model = ExpertApplication
         fields = [
             'id', 'expert', 'full_name', 'work_experience_years',
-            'specializations', 'educations',
+            'specializations', 'specialization_ids', 'educations',
             'status', 'status_display', 'rejection_reason',
             'reviewed_by', 'reviewed_at', 'created_at', 'updated_at'
         ]
@@ -273,11 +281,16 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         educations_data = validated_data.pop('educations', None)
+        specializations_data = validated_data.pop('specializations', None)
         
         # Update standard fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+        
+        # Update specializations if provided
+        if specializations_data is not None:
+            instance.specializations.set(specializations_data)
         
         # Update educations if provided
         if educations_data is not None:
@@ -291,8 +304,21 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
 class ExpertApplicationCreateSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=255, required=True)
     work_experience_years = serializers.IntegerField(min_value=0, required=True)
-    specializations = serializers.CharField(required=True, allow_blank=False, help_text="Специальности, которые вы пишете")
-    educations = EducationSerializer(many=True, required=True, min_length=1) 
+    specialization_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=True,
+        min_length=1,
+        help_text="ID предметов, по которым вы можете выполнять работы"
+    )
+    educations = EducationSerializer(many=True, required=True, min_length=1)
+    
+    def validate_specialization_ids(self, value):
+        """Проверяем, что все ID существуют"""
+        existing_ids = set(Subject.objects.filter(id__in=value, is_active=True).values_list('id', flat=True))
+        invalid_ids = set(value) - existing_ids
+        if invalid_ids:
+            raise serializers.ValidationError(f"Предметы с ID {invalid_ids} не найдены или неактивны")
+        return value 
 
 
 

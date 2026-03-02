@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { catalogApi } from '@/features/common/api/catalog';
 
 interface SkillsSelectProps {
-  value?: string[];
-  onChange?: (value: string[]) => void;
+  value?: number[];
+  onChange?: (value: number[]) => void;
   placeholder?: string;
   size?: 'small' | 'middle' | 'large';
   className?: string;
@@ -14,46 +14,39 @@ interface SkillsSelectProps {
 const SkillsSelect: React.FC<SkillsSelectProps> = ({
   value,
   onChange,
-  placeholder = 'Выберите или введите свои навыки',
+  placeholder = 'Выберите специальности',
   size = 'large',
   className
 }) => {
   const selectClassName = [className, 'fullWidthSelect'].filter(Boolean).join(' ');
 
-  const { data: subjects = [] } = useQuery({
+  const { data: subjects = [], isLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
   });
 
   const options = React.useMemo(() => {
-    const fromDb = subjects.map((s) => s.name).filter(Boolean);
-    const unique: string[] = [];
-    const seen = new Set<string>();
-    for (const name of fromDb) {
-      const normalized = String(name).trim();
-      if (!normalized) continue;
-      const key = normalized.toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      unique.push(normalized);
-    }
-    return unique.map((subject) => ({ label: subject, value: subject }));
+    return subjects.map((subject) => ({
+      label: subject.name,
+      value: subject.id
+    }));
   }, [subjects]);
 
   return (
     <Select
-      mode="tags"
+      mode="multiple"
       size={size}
       placeholder={placeholder}
       className={selectClassName}
       value={value}
-      onChange={(vals) => {
-        const cleaned = (vals || []).map((v) => String(v).trim()).filter(Boolean);
-        onChange?.(cleaned);
-      }}
+      onChange={onChange}
       options={options}
-      tokenSeparators={[',']}
+      loading={isLoading}
       maxTagCount="responsive"
+      showSearch
+      filterOption={(input, option) =>
+        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+      }
     />
   );
 };

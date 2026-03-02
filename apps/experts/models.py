@@ -379,11 +379,19 @@ class ExpertApplication(models.Model):
         verbose_name="Опыт работы (лет)",
         validators=[MinValueValidator(0)]
     )
-    specializations = models.TextField(
-        verbose_name="Специальности",
-        help_text="Укажите специальности, которые вы пишете (можно через запятую или каждую на новой строке)",
+    specializations_old = models.TextField(
+        verbose_name="Специальности (старое)",
+        help_text="Старое текстовое поле",
         blank=True,
-        default=''
+        default='',
+        null=True
+    )
+    specializations = models.ManyToManyField(
+        Subject,
+        verbose_name="Специальности",
+        related_name='expert_applications',
+        blank=True,
+        help_text="Выберите предметы, по которым вы можете выполнять работы"
     )
     status = models.CharField(
         max_length=20,

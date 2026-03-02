@@ -134,6 +134,7 @@ export interface Employee {
 export interface ExpertApplication {
   id: number;
   expert: Employee;
+  full_name?: string;
   experience_years?: number;
   education?: string;
   skills?: string;
