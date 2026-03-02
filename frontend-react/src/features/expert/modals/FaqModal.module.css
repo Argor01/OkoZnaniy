@@ -43,7 +43,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 8px;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .faqModalContent {
@@ -66,7 +66,7 @@
   color: #1f2937;
   display: block;
   margin-bottom: 16px;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .faqModalCollapse {

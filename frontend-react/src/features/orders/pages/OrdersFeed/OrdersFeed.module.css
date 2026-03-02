@@ -37,9 +37,17 @@
 
 .pageTitle {
   margin: 0;
-  margin-bottom: 8px;
   font-family: var(--font-display);
-  font-size: 20px !important;
+  font-size: 36px !important;
+  line-height: 1.2;
+  margin-bottom: -4px;
+}
+
+.pageSubtitle {
+  display: block;
+  font-size: 18px;
+  margin-top: 0;
+  line-height: 1.4;
 }
 
 .fullWidth {
@@ -56,10 +64,20 @@
   user-select: none;
 }
 
+.filterToggleExpanded {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--primary-blue);
+  font-weight: 500;
+  margin-bottom: 16px;
+  user-select: none;
+  margin-left: -15px;
+}
+
 .filtersRow {
   display: flex;
   gap: 16px;
-  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
@@ -71,7 +89,10 @@
 }
 
 .budgetRow {
-  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 8px;
 }
 
 .budgetInputGroup {
@@ -85,7 +106,7 @@
 }
 
 .budgetInput {
-  width: 120px;
+  width: 90px;
 }
 
 .ordersCount {

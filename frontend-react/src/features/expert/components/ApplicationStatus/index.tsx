@@ -74,16 +74,21 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
     const statusIcon = isDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon(application.status);
     const statusText = isDeactivated ? 'Деактивирован' : getStatusText(application.status, application.status_display);
 
+    const isRejected = application.status === 'rejected';
+
     return (
       <div className={styles.applicationCard}>
         <div className={styles.applicationHeader}>
           <div>
             <h3 className={styles.applicationTitle}>Анкета</h3>
-            <p className={styles.applicationSubtitle}>Статус рассмотрения</p>
+            {!isRejected && <p className={styles.applicationSubtitle}>Статус рассмотрения</p>}
           </div>
-          <div className={`${styles.statusBadge} ${statusClass}`}>
-            {statusIcon}
-            <span>{statusText}</span>
+          <div className={isRejected ? styles.statusContainer : ''}>
+            {isRejected && <span className={styles.statusLabel}>Статус рассмотрения</span>}
+            <div className={`${styles.statusBadge} ${statusClass}`}>
+              {statusIcon}
+              <span>{statusText}</span>
+            </div>
           </div>
         </div>
         {(application.status === 'rejected' || application.status === 'needs_revision') && (application.rejection_reason || application.comment) && (

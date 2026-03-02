@@ -194,12 +194,12 @@
   font-size: 24px;
   font-weight: 600;
   color: #1f2937;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .profileModalExpertTitle {
-  font-family: 'Syncopate', sans-serif !important;
-  font-size: 12px !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-size: 12px;
   margin: 0 0 8px 0;
   color: #0369a1;
 }
@@ -275,17 +275,17 @@
 }
 
 .profileModalWrap :global(.ant-modal-title) {
-  font-family: 'Syncopate', sans-serif !important;
-  font-size: 12px !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-size: 16px !important;
 }
 
 .profileModalWrap :global(.ant-form-item-label > label) {
-  font-family: 'Syncopate', sans-serif !important;
-  font-size: 12px !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-size: 18px !important;
 }
 
 /* Tabs */
 .profileModalWrap :global(.ant-tabs-tab),
 .profileModalWrap :global(.ant-tabs-tab-btn) {
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
 }

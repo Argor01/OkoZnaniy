@@ -24,8 +24,8 @@
   --color-grey-100: #edf7ff;
 
   /* Fonts */
-  --font-family-sans: 'Jost', sans-serif;
-  --font-family-display: 'Alegreya', sans-serif;
+  --font-family-sans: 'Jost-Regular', sans-serif;
+  --font-family-display: 'Jost-SemiBold', sans-serif;
 
   /* Radii */
   --radius-xl: 64px;
@@ -62,8 +62,8 @@
   --border-color-hover: #d1d5db;
 
   /* Typography */
-  --font-display: 'Syncopate', sans-serif;
-  --font-body: 'BwSurco-Medium', sans-serif;
+  --font-display: 'Jost-SemiBold', sans-serif;
+  --font-body: 'Jost-Regular', sans-serif;
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-hover) 100%);

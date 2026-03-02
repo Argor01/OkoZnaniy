@@ -7,7 +7,6 @@ import {
   WalletOutlined,
   LogoutOutlined,
   MenuOutlined,
-  UnorderedListOutlined,
   ShopOutlined,
   FileDoneOutlined,
   PlusOutlined,
@@ -17,6 +16,7 @@ import {
   ClockCircleOutlined,
   CopyOutlined,
   DownOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -70,7 +70,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
       {
         key: '/orders-feed',
         label: 'Лента заказов',
-        icon: <UnorderedListOutlined />,
+        icon: <AppstoreOutlined />,
       },
     ];
 

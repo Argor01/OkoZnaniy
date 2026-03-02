@@ -40,8 +40,8 @@
 }
 
 .navItem {
-  font-family: 'Syncopate', sans-serif !important;
-  font-size: 13px !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-size: 18px !important;
   padding: 0 12px !important;
   height: 40px !important;
   line-height: 40px !important;
@@ -77,14 +77,16 @@
 }
 
 .logoImage {
-  height: 32px;
+  height: 40px;
   width: auto;
 }
 
 .logoText {
-  font-family: 'Syncopate', sans-serif;
+  display: flex;
+  align-items: center;
+  font-family: 'Jost-SemiBold', sans-serif;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 20px;
   color: #333;
   text-transform: uppercase;
 }
@@ -127,38 +129,14 @@
 }
 
 .balanceButton:hover {
-  background: #40a9ff;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  background: #1890ff !important;
+  color: white !important;
 }
 
-.balanceButton:hover .balanceText {
-  color: white;
-}
 
-.balanceButton .anticon {
-  color: white;
-}
 
-.balanceButton:hover .anticon {
-  color: white;
-}
 
-.balanceButton span {
-  color: white;
-}
 
-.balanceButton:hover span {
-  color: white;
-}
-
-.balanceText {
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
 
 .iconButton {
   font-size: 18px;
@@ -194,7 +172,7 @@
 
 .username {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
 }
 
@@ -280,10 +258,10 @@
   color: #6b7280;
 }
 
-/* Apply Syncopate font to all header elements */
+/* Apply Jost-SemiBold font to all header elements */
 .dashboardHeader,
 .dashboardHeader :global(*) {
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
 }
 
 /* Ensure icons keep their font family if needed, though Ant Design icons are usually SVGs */

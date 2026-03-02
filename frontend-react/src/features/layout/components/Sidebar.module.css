@@ -42,15 +42,15 @@
   flex: 1;
 }
 .sidebarProfileName {
-  margin: 0;
-  font-size: 12px !important;
+  font-size: 24px;
   color: white !important; 
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
+  margin-bottom: 0 !important;
 }
 .sidebarProfileRole {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
-  font-family: 'BwSurco-Medium', sans-serif;
+  font-family: 'Jost-Regular', sans-serif;
 }
 .mobileProfileClose {
   position: absolute;
@@ -78,8 +78,21 @@
 .sidebarMenu :global(.ant-menu-item) :global(.ant-menu-title-content),
 .sidebarMenu :global(.ant-menu-submenu-title) :global(.ant-menu-title-content),
 .sidebarMenu :global(.ant-badge) {
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-size: 18px !important;
   cursor: pointer;
+}
+
+.sidebarMenu :global(.ant-menu-item) .anticon,
+.sidebarMenu :global(.ant-menu-submenu-title) .anticon {
+  font-size: 22px !important;
+}
+
+.sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item),
+.sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item) :global(.ant-menu-title-content) {
+  font-family: 'Jost-Regular', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: normal !important;
 }
 
 .logoutMenuItem {

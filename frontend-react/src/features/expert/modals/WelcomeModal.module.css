@@ -40,11 +40,11 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
 }
 
 .welcomeModalWrap :global(.ant-modal-title) {
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
 }
 
 .welcomeModalButton {

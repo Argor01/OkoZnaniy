@@ -27,7 +27,7 @@
 }
 
 .orderTitle {
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
   font-size: 18px !important;
   margin-bottom: 8px !important;
   display: block;
@@ -46,7 +46,7 @@
 }
 
 .orderBudget {
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--primary-blue);

@@ -7,11 +7,13 @@
 }
 
 .expertContentContainer :global(.ant-tabs-tab) {
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 20px;
 }
 
 .expertContentContainer :global(.ant-tabs-tab-btn) {
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 20px;
 }
 
 @media (max-width: 768px) {

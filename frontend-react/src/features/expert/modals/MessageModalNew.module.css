@@ -223,14 +223,14 @@
 }
 
 .chatListName {
-  font-size: 10px;
+  font-size: 16px;
   color: #1f2937;
   font-weight: 500;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .chatListNameMobile {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .chatListNameUnread {
@@ -238,12 +238,12 @@
 }
 
 .chatListTime {
-  font-size: 11px;
+  font-size: 13px;
   color: #9ca3af;
 }
 
 .chatListTimeMobile {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .chatListMetaRow {
@@ -253,13 +253,13 @@
 }
 
 .chatListPreview {
-  font-size: 12px;
+  font-size: 14px;
   color: #6b7280;
   font-weight: 400;
 }
 
 .chatListPreviewMobile {
-  font-size: 11px;
+  font-size: 13px;
   max-width: 140px;
 }
 
@@ -361,24 +361,24 @@
 }
 
 .chatHeaderTitle {
-  font-size: 15px;
+  font-size: 16px;
   color: #1f2937;
   font-weight: 500;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .chatHeaderTitleMobile {
-  font-size: 13px;
+  font-size: 18px;
 }
 
 .chatHeaderSubtitle {
-  font-size: 12px;
+  font-size: 15px;
   color: #6b7280;
   display: block;
 }
 
 .chatHeaderSubtitleMobile {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .chatClaimButton {
@@ -409,7 +409,7 @@
   font-size: 14px;
   color: #0369a1;
   font-weight: 500;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .chatHeaderEmptyTextMobile {
@@ -445,7 +445,7 @@
 }
 
 .orderTabs :global(.ant-tabs-tab) {
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .orderToggleButton {

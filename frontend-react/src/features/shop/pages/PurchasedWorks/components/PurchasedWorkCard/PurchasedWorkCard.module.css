@@ -132,7 +132,7 @@
 }
 
 .downloadButton {
-  background: #3b82f6;
+  background: var(--primary-purple);
 }
 
 .downloadedButton {

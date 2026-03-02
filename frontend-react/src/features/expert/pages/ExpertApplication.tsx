@@ -165,7 +165,7 @@ const ExpertApplication: React.FC = () => {
             <Title level={1} style={{ 
               margin: 0, 
               marginBottom: 12,
-              fontFamily: "'Syncopate', sans-serif",
+              fontFamily: "'Jost-SemiBold', sans-serif",
               fontWeight: 800,
               color: '#fff'
             }}>

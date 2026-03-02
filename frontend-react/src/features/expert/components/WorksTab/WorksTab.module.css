@@ -34,14 +34,14 @@
 }
 
 .workCardTitle {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .workCardPrice {
@@ -49,7 +49,7 @@
   font-weight: 700;
   color: #3b82f6;
   margin-bottom: 8px;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .workCardMeta {
@@ -84,11 +84,11 @@
 }
 
 .sectionTitle {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 600;
   margin: 0;
   color: #1f2937;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 @media (max-width: 1024px) {

@@ -1,19 +1,5 @@
-@font-face {
-  font-family: 'Syncopate';
-  src: url('./assets/fonts/SyncopateRus.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'BwSurco-Medium';
-  src: url('./assets/fonts/BwSurco-Medium.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 :root {
-  font-family: 'BwSurco-Medium', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Jost-Regular', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -28,8 +14,8 @@
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Syncopate', sans-serif;
-  font-weight: normal;
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-weight: 600;
 }
 
 a {

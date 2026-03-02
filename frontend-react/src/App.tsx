@@ -31,11 +31,11 @@ const App: React.FC = () => {
         theme={{
           token: {
             colorPrimary: '#1890ff',
-            fontFamily: 'BwSurco-Medium, system-ui, Avenir, Helvetica, Arial, sans-serif',
+            fontFamily: 'Jost-Regular, system-ui, Avenir, Helvetica, Arial, sans-serif',
           },
           components: {
             Typography: {
-              fontFamilyCode: 'Syncopate, sans-serif',
+              fontFamilyCode: 'Jost-SemiBold, sans-serif',
             }
           }
         }}

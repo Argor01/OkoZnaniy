@@ -132,13 +132,13 @@
   font-size: 24px;
   font-weight: 600;
   color: #1f2937;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .applicationModalWrap :global(.ant-modal-title),
 .applicationModalWrap :global(.ant-form-item-label > label),
 .applicationModalWrap label {
-  font-family: 'Syncopate', sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
   font-size: 12px !important;
 }
 

@@ -12,6 +12,12 @@
   height: calc(100vh - 80px);
 }
 
+.financeModalWrap :global(.ant-modal-header) {
+  background: transparent;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .financeModalWrapMobile :global(.ant-modal-content) {
   border-radius: 0;
   padding: 16px;
@@ -36,12 +42,10 @@
 }
 
 .financeModalTitle {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1f2937;
+  font-family: 'Jost-SemiBold', sans-serif;
   margin-bottom: 8px;
 }
 
@@ -77,7 +81,7 @@
 .financeModalHeading {
   display: block;
   color: #1f2937;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .financeModalHeadingMobile {

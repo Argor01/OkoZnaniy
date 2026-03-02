@@ -21,6 +21,7 @@
 
 .card :global(.ant-form-item-label) > label {
   font-family: var(--font-display);
+  font-size: 18px;
 }
 
 .header {
@@ -38,6 +39,10 @@
   color: var(--text-primary);
   margin: 0;
   font-family: var(--font-display);
+}
+
+.buttonSecondary {
+  font-size: 18px !important;
 }
 
 .orderSection {
@@ -108,7 +113,7 @@
 
 .uploadArea :global(.ant-upload-hint) {
   color: var(--text-tertiary);
-  font-size: 14px;
+  font-size: 18px;
   padding: 0 var(--spacing-md);
 }
 
@@ -120,6 +125,14 @@
 
 .submitButton {
   min-width: 200px;
+  background-color: var(--color-brand-orange-500) !important;
+  border-color: var(--color-brand-orange-500) !important;
+  color: #fff !important;
+}
+
+.submitButton:hover {
+  background-color: var(--color-brand-orange-600) !important;
+  border-color: var(--color-brand-orange-600) !important;
 }
 
 .selectDropdownFooter {

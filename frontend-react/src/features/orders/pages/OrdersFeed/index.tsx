@@ -266,7 +266,7 @@ const OrdersFeed: React.FC = () => {
             <Title level={2} className={styles.pageTitle}>
               Лента работ
             </Title>
-            <Text type="secondary">
+            <Text type="secondary" className={styles.pageSubtitle}>
               Найдите подходящий заказ или создайте свой
             </Text>
           </div>
@@ -342,7 +342,7 @@ const OrdersFeed: React.FC = () => {
         </div>
 
         {showFilters && (
-          <Row gutter={[16, 16]} className={styles.filtersRow}>
+          <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} md={8}>
               <div className={styles.filterLabel}>
                 <Text strong>Бюджет</Text>
@@ -351,7 +351,7 @@ const OrdersFeed: React.FC = () => {
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>От</Text>
                   <AppInput.Number
-                    size="large"
+                    size="middle"
                     min={0}
                     max={budgetRange[1]}
                     value={budgetRange[0]}
@@ -369,7 +369,7 @@ const OrdersFeed: React.FC = () => {
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>До</Text>
                   <AppInput.Number
-                    size="large"
+                    size="middle"
                     min={budgetRange[0]}
                     max={100000}
                     value={budgetRange[1]}

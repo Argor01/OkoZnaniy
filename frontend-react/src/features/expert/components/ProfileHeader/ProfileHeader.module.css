@@ -51,8 +51,8 @@
 .profileNameTitle {
   margin: 0;
   color: #1f2937;
-  font-size: 20px !important;
-  font-family: 'Syncopate', sans-serif;
+  font-size: 26px !important;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .profileOnlineDot {
@@ -61,7 +61,7 @@
   border-radius: 50%;
   background-color: #10b981;
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .profileOnlineText {
@@ -98,16 +98,16 @@
 }
 
 .profileStatLabel {
-  font-size: 14px;
+  font-size: 15px;
   color: #1f2937;
 }
 
 .profileStatRate {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .profileStatSubtext {
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .profileRight {
@@ -127,12 +127,12 @@
 .profileStatsMeta {
   display: block;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
 }
 
 .profileStatsLine {
-  font-size: 14px;
+  font-size: 16px;
   color: #1f2937;
 }
 

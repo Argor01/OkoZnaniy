@@ -35,7 +35,7 @@
 .ordersFilterButton {
   font-weight: 500;
   text-align: center;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .ordersFilterButtonLeft {
@@ -101,10 +101,10 @@
 }
 
 .orderTitle {
-  font-size: 16px;
+  font-size: 20px;
   display: block;
   margin-bottom: 24px;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .orderCardActions {
@@ -119,7 +119,7 @@
 
 .orderBudget {
   font-size: 18px;
-  font-family: 'Syncopate';
+  font-family: 'Jost-SemiBold';
   color: #3b82f6;
 }
 
@@ -127,7 +127,7 @@
   color: #666;
   margin-bottom: 32px;
   font-size: 18px;
-  font-family: 'BwSurco-Medium', sans-serif;
+  font-family: 'Jost-Regular', sans-serif;
 }
 
 .orderMetaRow {
@@ -272,7 +272,7 @@
   font-weight: 600;
   font-size: 18px;
   color: #1f2937;
-  font-family: 'BwSurco-Medium', sans-serif;
+  font-family: 'Jost-Regular', sans-serif;
 }
 
 /* Shared Styles from Dashboard */
@@ -293,11 +293,11 @@
 }
 
 .sectionTitle {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 600;
   margin: 0;
   color: #1f2937;
-  font-family: 'Syncopate', sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 @media (max-width: 1024px) {
