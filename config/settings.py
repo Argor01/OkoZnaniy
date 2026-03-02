@@ -417,3 +417,12 @@ PAYMENT_ENCRYPTION_KEY = os.getenv('PAYMENT_ENCRYPTION_KEY', Fernet.generate_key
 
 # Telegram Bot settings
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+
+# Support chat settings
+# ID пользователя технической поддержки (для исключения из обычных чатов)
+SUPPORT_USER_ID = os.getenv('SUPPORT_USER_ID', None)
+if SUPPORT_USER_ID:
+    try:
+        SUPPORT_USER_ID = int(SUPPORT_USER_ID)
+    except (ValueError, TypeError):
+        SUPPORT_USER_ID = None

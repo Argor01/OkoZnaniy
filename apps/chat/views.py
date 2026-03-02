@@ -11,6 +11,17 @@ from apps.orders.models import Order
 from decimal import Decimal, InvalidOperation
 
 class ChatViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet для управления обычными чатами между клиентами и экспертами.
+    
+    ВАЖНО: Чаты с технической поддержкой НЕ отображаются в этом списке.
+    Они управляются через отдельный SupportChatViewSet и отображаются
+    только в разделе "Чаты поддержки" в админ-панели.
+    
+    Фильтрация чатов поддержки происходит по:
+    1. SUPPORT_USER_ID - ID пользователя технической поддержки (из настроек)
+    2. context_title - чаты с маркерами "поддержка", "support", "техподдержка"
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
@@ -65,7 +76,9 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Chat.objects.filter(
+        # Исключаем чаты с технической поддержкой из списка обычных чатов
+        # Чаты поддержки отображаются только в разделе "Чаты поддержки" в админ-панели
+        queryset = Chat.objects.filter(
             participants=user
         ).prefetch_related(
             'participants',
@@ -73,6 +86,23 @@ class ChatViewSet(viewsets.ModelViewSet):
         ).annotate(
             last_message_time=Max('messages__created_at')
         ).order_by('-last_message_time')
+        
+        # Получаем ID пользователя поддержки из настроек или переменной окружения
+        from django.conf import settings
+        support_user_id = getattr(settings, 'SUPPORT_USER_ID', None)
+        
+        # Если ID поддержки задан, исключаем чаты с этим пользователем
+        if support_user_id:
+            queryset = queryset.exclude(participants__id=support_user_id)
+        
+        # Также исключаем чаты, где context_title содержит маркеры поддержки
+        queryset = queryset.exclude(
+            Q(context_title__icontains='поддержка') |
+            Q(context_title__icontains='support') |
+            Q(context_title__icontains='техподдержка')
+        )
+        
+        return queryset
 
     def perform_create(self, serializer):
         chat = serializer.save()
@@ -856,7 +886,16 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class SupportChatViewSet(viewsets.ModelViewSet):
-    """ViewSet для чатов технической поддержки"""
+    """
+    ViewSet для управления чатами технической поддержки.
+    
+    Эти чаты отображаются ТОЛЬКО в разделе "Чаты поддержки" в админ-панели
+    и НЕ отображаются на странице обычных чатов пользователей.
+    
+    Права доступа:
+    - Админы видят все чаты поддержки
+    - Клиенты видят только свои чаты с поддержкой
+    """
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
