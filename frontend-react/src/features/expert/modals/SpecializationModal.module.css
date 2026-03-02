@@ -20,6 +20,28 @@
   min-height: 40px;
 }
 
+/* Special fix for Ant Select to avoid double borders */
+.inputField:global(.ant-select) {
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.inputField:global(.ant-select) :global(.ant-select-selector) {
+  border-radius: 12px !important;
+  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  padding: 8px 16px !important;
+  height: auto !important;
+  min-height: 48px;
+  transition: all 0.3s ease;
+}
+
+.inputField:global(.ant-select-focused) :global(.ant-select-selector),
+.inputField:global(.ant-select:hover) :global(.ant-select-selector) {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
 .inputField :global(.ant-input-number-input) {
   height: auto;
   line-height: 1.5715;

@@ -296,8 +296,7 @@ const ExpertDashboard: FC = () => {
               setSpecializationModalVisible(false);
               setEditingSpecialization(null);
             }}
-            specialization={editingSpecialization}
-            profile={userProfile || null}
+            editingSpecialization={editingSpecialization}
           />
         )}
         

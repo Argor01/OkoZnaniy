@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, message, Result } from 'antd';
+import { Modal, Form, message, Result, Checkbox } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '@/features/orders/api/orders';
 import { AppButton, AppInput } from '@/components/ui';
@@ -16,12 +16,14 @@ interface BidModalProps {
 type BidFormValues = {
   amount: number;
   comment?: string;
+  is_negotiable?: boolean;
 };
 
 const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [bidSuccess, setBidSuccess] = useState(false);
+  const [isNegotiable, setIsNegotiable] = useState(false);
 
   const placeBidMutation = useMutation({
     mutationFn: (data: { amount: number; comment?: string }) => 
@@ -40,7 +42,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
 
   const handleSubmit = (values: BidFormValues) => {
     placeBidMutation.mutate({
-      amount: Number(values.amount),
+      amount: isNegotiable ? 0 : Number(values.amount),
       comment: values.comment,
     });
   };
@@ -48,6 +50,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
   const handleClose = () => {
     form.resetFields();
     setBidSuccess(false);
+    setIsNegotiable(false);
     onClose();
   };
 
@@ -85,26 +88,42 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
-            initialValues={{ amount: orderBudget }}
+            initialValues={{ amount: orderBudget, is_negotiable: false }}
           >
             <Form.Item
               name="amount"
               label="Ваша цена"
               rules={[
-                { required: true, message: 'Укажите цену' },
+                { required: !isNegotiable, message: 'Укажите цену' },
                 { 
-                  type: 'number', 
-                  min: 1, 
-                  message: 'Цена должна быть больше 0',
-                  transform: (value) => Number(value)
+                  validator: (_, value) => {
+                    if (isNegotiable) return Promise.resolve();
+                    if (!value || Number(value) < 1) {
+                      return Promise.reject(new Error('Цена должна быть больше 0'));
+                    }
+                    return Promise.resolve();
+                  }
                 },
               ]}
             >
-              <AppInput.Number
-                style={{ width: '100%' }}
-                placeholder="Введите сумму"
-                size="large"
+              <AppInput 
+                placeholder="Например: 5000" 
+                type="number" 
+                disabled={isNegotiable}
               />
+            </Form.Item>
+
+            <Form.Item name="is_negotiable" valuePropName="checked" style={{ marginBottom: 12, marginTop: -12 }}>
+              <Checkbox onChange={(e) => {
+                setIsNegotiable(e.target.checked);
+                if (e.target.checked) {
+                  form.setFieldsValue({ amount: undefined });
+                } else if (orderBudget) {
+                  form.setFieldsValue({ amount: orderBudget });
+                }
+              }}>
+                Договорная цена
+              </Checkbox>
             </Form.Item>
 
             <Form.Item

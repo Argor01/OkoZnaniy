@@ -140,11 +140,20 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
   };
 
   const safeNotifications = Array.isArray(notifications) ? notifications : [];
-  const filteredNotifications = safeNotifications.filter(notification => {
+  const filteredNotifications = safeNotifications
+    .filter(notification => !['new_message', 'message', 'chat_message', 'private_message'].includes(notification.type))
+    .filter(notification => {
     if (notificationTab === 'all') return true;
     const category = getNotificationCategory(notification.type);
     return category === notificationTab;
   });
+
+  const formatNotificationMessage = (message: string) => {
+    return message
+      .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
+      .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
+      .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная');
+  };
 
   return (
     <Modal
@@ -231,7 +240,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                     )}
                   </div>
                   <Text className={`${styles.notificationsModalItemText} ${isMobile ? styles.notificationsModalItemTextMobile : styles.notificationsModalItemTextDesktop}`}>
-                    {notification.message}
+                    {formatNotificationMessage(notification.message)}
                   </Text>
                   <Text type="secondary" className={`${styles.notificationsModalItemTime} ${isMobile ? styles.notificationsModalItemTimeMobile : styles.notificationsModalItemTimeDesktop}`}>
                     <ClockCircleOutlined className={styles.notificationsModalItemTimeIcon} />

@@ -27,7 +27,10 @@ export const useNotifications = () => {
       id: apiNotif.id,
       type: apiNotif.type as any,
       title: apiNotif.title,
-      message: apiNotif.message,
+      message: apiNotif.message
+        .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
+        .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
+        .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная'),
       timestamp: formatTimestamp(apiNotif.created_at),
       isRead: apiNotif.is_read,
       actionUrl: apiNotif.related_object_id 
@@ -40,7 +43,9 @@ export const useNotifications = () => {
     setLoading(true);
     try {
       const apiNotifications = await notificationsApi.getAll();
-      const formatted = apiNotifications.map(formatNotification);
+      const formatted = apiNotifications
+        .filter(n => !['new_message', 'message', 'chat_message', 'private_message'].includes(n.type))
+        .map(formatNotification);
       setNotifications(formatted);
       setUnreadCount(formatted.filter(n => !n.isRead).length);
     } catch (error) {

@@ -4,19 +4,25 @@ import { useQuery } from '@tanstack/react-query';
 import { catalogApi } from '@/features/common/api/catalog';
 
 interface SkillsSelectProps {
-  value?: number[];
-  onChange?: (value: number[]) => void;
+  value?: string[] | number[];
+  onChange?: (value: any[]) => void;
   placeholder?: string;
   size?: 'small' | 'middle' | 'large';
   className?: string;
+  disabled?: boolean;
+  valueType?: 'id' | 'name';
+  mode?: 'multiple' | 'tags';
 }
 
 const SkillsSelect: React.FC<SkillsSelectProps> = ({
   value,
   onChange,
-  placeholder = 'Выберите специальности',
+  placeholder = 'Выберите навыки или добавьте свои',
   size = 'large',
-  className
+  className,
+  disabled,
+  valueType = 'id',
+  mode = 'multiple'
 }) => {
   const selectClassName = [className, 'fullWidthSelect'].filter(Boolean).join(' ');
 
@@ -28,13 +34,13 @@ const SkillsSelect: React.FC<SkillsSelectProps> = ({
   const options = React.useMemo(() => {
     return subjects.map((subject) => ({
       label: subject.name,
-      value: subject.id
+      value: valueType === 'id' ? subject.id : subject.name
     }));
-  }, [subjects]);
+  }, [subjects, valueType]);
 
   return (
     <Select
-      mode="multiple"
+      mode={mode}
       size={size}
       placeholder={placeholder}
       className={selectClassName}
@@ -44,6 +50,7 @@ const SkillsSelect: React.FC<SkillsSelectProps> = ({
       loading={isLoading}
       maxTagCount="responsive"
       showSearch
+      disabled={disabled}
       filterOption={(input, option) =>
         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
       }

@@ -325,6 +325,8 @@ const ExpertApplication: React.FC = () => {
                   placeholder="Например: Математический анализ, Python..."
                   disabled={hasSubmitted}
                   className="expert-application-skills-select"
+                  valueType="name"
+                  mode="tags"
                 />
               </Form.Item>
 

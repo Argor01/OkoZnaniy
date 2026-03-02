@@ -30,6 +30,20 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   const queryClient = useQueryClient();
   const [isMobile] = React.useState(window.innerWidth <= 768);
 
+  React.useEffect(() => {
+    if (visible) {
+      document.body.style.setProperty('overflow', 'hidden', 'important');
+      document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+    } else {
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
+    }
+    return () => {
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
+    };
+  }, [visible]);
+
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => catalogApi.getSubjects(),
@@ -253,6 +267,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           <SkillsSelect
             size={isMobile ? 'middle' : 'large'}
             placeholder="Начните писать навык"
+            valueType="name"
+            mode="tags"
           />
         </Form.Item>
         <Form.Item

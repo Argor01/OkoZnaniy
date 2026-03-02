@@ -2,6 +2,17 @@
   min-height: 100vh;
   background: #f5f5f5;
   padding: 24px;
+  margin: -24px;
+  width: calc(100% + 48px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 840px) {
+  .page {
+    margin: -16px;
+    padding: 16px;
+    width: calc(100% + 32px);
+  }
 }
 
 .pageInner {
@@ -118,12 +129,7 @@
 .priceIcon {
   color: #52c41a;
   font-size: 16px;
-}
-
-.priceValue {
-  font-size: 16px;
-  font-weight: 700;
-  color: #389e0d;
+  font-weight: 500;
 }
 
 .createdValue {
@@ -132,164 +138,49 @@
   color: #595959;
 }
 
-.description {
-  white-space: pre-wrap;
+.descriptionTitle {
+  margin-bottom: 16px;
+  font-size: 18px;
 }
 
-.bidAction {
-  margin-top: 24px;
+.filesList {
+  margin-top: 16px;
 }
 
-.bidButton {
-  width: auto;
-}
-
-.statusTagWrap {
-  margin-top: 24px;
-}
-
-.statusTagLarge {
-  font-size: 16px;
-  padding: 8px 16px;
-}
-
-.bidsBadge :global(.ant-badge-count) {
-  background-color: #52c41a;
-  font-size: 10px;
-  height: 16px;
-  min-width: 16px;
-  line-height: 16px;
-}
-
-.bidsBadgeText {
-  margin-right: 8px;
-}
-
-.bidItem {
-  background: #fff;
-  border: 1px solid #f0f0f0;
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f5f5f5;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.bidItemSelected {
-  background: #f6ffed;
-  border: 2px solid #52c41a;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
+.fileName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.bidAvatar {
-  cursor: pointer;
-}
-
-.bidUserLink {
-  padding: 0;
-  height: auto;
+.actionButton {
+  height: 48px;
   font-size: 16px;
-}
-
-.ratingStar {
-  color: #faad14;
-}
-
-.bidBio {
-  font-size: 13px;
-}
-
-.bidMeta {
-  width: 100%;
-}
-
-.bidAmountTag {
-  font-size: 13px;
-}
-
-.bidMetaText {
-  font-size: 12px;
-}
-
-.bidComment {
-  margin: 0;
-  font-size: 14px;
-  white-space: pre-wrap;
-}
-
-.expertLink {
-  padding: 0;
-  height: auto;
-}
-
-.expertName {
-  font-size: 16px;
-}
-
-.expertRole {
-  font-size: 14px;
 }
 
 .centered {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .notFound {
-  padding: 40px;
-  text-align: center;
-}
-
-@media (max-width: 768px) {
-  .page {
-    padding: 16px;
-  }
-
-  .statusTag {
-    font-size: 12px;
-    padding: 2px 8px;
-  }
-
-  .infoGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .bidButton {
-    width: 100%;
-  }
-
-  .bidItem,
-  .bidItemSelected {
-    padding: 12px;
-  }
-
-  .bidUserLink {
-    font-size: 14px;
-  }
-
-  .bidBio {
-    font-size: 12px;
-  }
-
-  .bidAmountTag {
-    font-size: 11px;
-  }
-
-  .bidMetaText {
-    font-size: 11px;
-  }
-
-  .bidComment {
-    font-size: 12px;
-  }
-
-  .expertName {
-    font-size: 14px;
-  }
-
-  .expertRole {
-    font-size: 12px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
 }

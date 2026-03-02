@@ -351,7 +351,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               />
             </Form.Item>
             <Form.Item label="Навыки" name="skills">
-              <SkillsSelect />
+              <SkillsSelect 
+                placeholder="Выберите навыки или добавьте свои" 
+                valueType="name"
+                mode="tags"
+              />
             </Form.Item>
             <Form.Item label="Портфолио (ссылка)" name="portfolio_url">
               <Input placeholder="https://example.com/portfolio" className={styles.inputField} size="large" />

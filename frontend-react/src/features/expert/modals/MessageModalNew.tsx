@@ -1301,7 +1301,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const formatTimestamp = (dateString: string) => {
     try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: ru });
+      const result = formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: ru });
+      if (result.includes('меньше минуты')) {
+        return '1 минуту назад';
+      }
+      return result;
     } catch {
       return dateString;
     }

@@ -65,14 +65,16 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   }, [userProfile?.id]);
 
   if (hasValidApplication) {
-    const statusClass = isDeactivated ? styles.statusRejected :
+    const showDeactivated = isDeactivated && application.status !== 'approved';
+
+    const statusClass = showDeactivated ? styles.statusRejected :
       application.status === 'pending' ? styles.statusPending :
       application.status === 'approved' ? styles.statusApproved :
       application.status === 'needs_revision' ? styles.statusWarning :
       styles.statusRejected;
 
-    const statusIcon = isDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon(application.status);
-    const statusText = isDeactivated ? 'Деактивирован' : getStatusText(application.status, application.status_display);
+    const statusIcon = showDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon(application.status);
+    const statusText = showDeactivated ? 'Деактивирован' : getStatusText(application.status, application.status_display);
 
     const isRejected = application.status === 'rejected';
 
