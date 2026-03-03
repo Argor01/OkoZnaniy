@@ -653,8 +653,6 @@ export const TicketDetailPage: React.FC = () => {
             </div>
           </div>
         </Modal>
-          </Col>
-        </Row>
       </div>
     </AdminLayout>
   );
