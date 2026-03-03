@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Input, Button, message, Spin, Empty, Avatar, Tag } from 'antd';
-import { SendOutlined, ArrowLeftOutlined, PaperClipOutlined } from '@ant-design/icons';
+import { SendOutlined, ArrowLeftOutlined, PaperClipOutlined, FileTextOutlined } from '@ant-design/icons';
 import { supportApi, SupportMessage } from '@/features/support/api/support';
 import { DashboardLayout } from '@/features/layout';
 import '@/styles/support.css';
@@ -19,6 +19,7 @@ const SupportChat: React.FC = () => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [creatingTicket, setCreatingTicket] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -73,6 +74,30 @@ const SupportChat: React.FC = () => {
     }
   };
 
+  const handleCreateTicket = async () => {
+    if (!chatId) return;
+
+    setCreatingTicket(true);
+    try {
+      const result = await supportApi.createTicket(parseInt(chatId));
+      
+      if (result.created) {
+        message.success(`Тикет #${result.ticket_id} успешно создан`);
+      } else {
+        message.info(`Тикет #${result.ticket_id} уже существует`);
+      }
+      
+      // Можно добавить навигацию к тикету
+      // navigate(`/admin/tickets/${result.ticket_id}`);
+      
+    } catch (error) {
+      if (isDebugEnabled()) console.error('Ошибка создания тикета:', error);
+      message.error('Не удалось создать тикет');
+    } finally {
+      setCreatingTicket(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -95,6 +120,17 @@ const SupportChat: React.FC = () => {
             />
             <span>Чат с технической поддержкой</span>
           </div>
+        }
+        extra={
+          <Button
+            type="default"
+            icon={<FileTextOutlined />}
+            onClick={handleCreateTicket}
+            loading={creatingTicket}
+            size="small"
+          >
+            Создать тикет
+          </Button>
         }
         className="supportChatCard"
       >

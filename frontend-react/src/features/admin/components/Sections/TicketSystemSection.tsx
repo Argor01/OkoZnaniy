@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Input, 
   Button, 
@@ -30,7 +31,8 @@ import {
   ExclamationCircleOutlined,
   FlagOutlined,
   MessageOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -42,6 +44,7 @@ const { Option } = Select;
 
 interface Ticket {
   id: number;
+  ticket_number: string; // Добавляем номер тикета
   type: 'support_request' | 'claim';
   user: {
     id: number;
@@ -55,12 +58,21 @@ interface Ticket {
     first_name: string;
     last_name: string;
   };
+  assigned_users?: Array<{
+    id: number;
+    first_name: string;
+    last_name: string;
+  }>;
   subject: string;
   description: string;
   status: 'open' | 'in_progress' | 'completed' | 'new' | 'pending_approval';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   claim_type?: string;
   order_id?: number;
+  support_chat_id?: number;
+  auto_created?: boolean;
+  tags?: string;
+  tags_list?: string[];
   messages: Array<{
     id: number;
     sender: {
@@ -78,6 +90,7 @@ interface Ticket {
 }
 
 export const TicketSystemSection: React.FC = () => {
+  const navigate = useNavigate();
   const { tickets: rawTickets = [], loading, refetch } = useTickets(true);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
 
@@ -345,13 +358,13 @@ export const TicketSystemSection: React.FC = () => {
                 renderItem={(ticket) => (
                   <Card
                     size="small"
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
                     className={`ticketSystemTicketCard ${selectedTicket?.id === ticket.id ? 'ticketSystemTicketCardSelected' : ''}`}
                     hoverable
                   >
                     <div className="ticketSystemTicketHeader">
                       <Text strong className="ticketSystemTicketNumber">
-                        Тикет #{ticket.id}
+                        Тикет {ticket.ticket_number}
                       </Text>
                       <div className="ticketSystemTicketTags">
                         <Tag 
@@ -373,13 +386,46 @@ export const TicketSystemSection: React.FC = () => {
                     
                     <Text strong className="ticketSystemTicketSubject">
                       {ticket.subject}
+                      {ticket.auto_created && (
+                        <Tag color="blue" size="small" style={{ marginLeft: 8 }}>
+                          Из чата
+                        </Tag>
+                      )}
                     </Text>
+                    
+                    {/* Отображение тегов */}
+                    {ticket.tags_list && ticket.tags_list.length > 0 && (
+                      <div style={{ marginTop: 4 }}>
+                        <Space wrap size="small">
+                          {ticket.tags_list.slice(0, 3).map(tag => (
+                            <Tag 
+                              key={tag} 
+                              size="small"
+                              color={tag.includes('негатив') ? 'red' : 'blue'}
+                            >
+                              {tag}
+                            </Tag>
+                          ))}
+                          {ticket.tags_list.length > 3 && (
+                            <Tag size="small" color="default">
+                              +{ticket.tags_list.length - 3}
+                            </Tag>
+                          )}
+                        </Space>
+                      </div>
+                    )}
                     
                     <div className="ticketSystemTicketUser">
                       <Avatar size={20} icon={<UserOutlined />} />
                       <Text type="secondary" className="ticketSystemTicketUserName">
                         {ticket.user.first_name} {ticket.user.last_name}
                       </Text>
+                      {/* Отображение назначенных пользователей */}
+                      {ticket.assigned_users && ticket.assigned_users.length > 0 && (
+                        <Tag size="small" icon={<TeamOutlined />} style={{ marginLeft: 8 }}>
+                          {ticket.assigned_users.length}
+                        </Tag>
+                      )}
                     </div>
                     
                     <div className="ticketSystemTicketFooter">
@@ -422,6 +468,13 @@ export const TicketSystemSection: React.FC = () => {
               }
               extra={
                 <Space>
+                  <Button 
+                    size="small"
+                    icon={<FileTextOutlined />}
+                    onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
+                  >
+                    Открыть отдельно
+                  </Button>
                   <Select
                     value={selectedTicket.status}
                     onChange={(value) => handleUpdateStatus(selectedTicket.id, value)}
@@ -471,6 +524,13 @@ export const TicketSystemSection: React.FC = () => {
                   <Descriptions.Item label="Заказ" span={2}>
                     <a href={`/orders/${selectedTicket.order_id}`} target="_blank" rel="noopener noreferrer">
                       Заказ #{selectedTicket.order_id}
+                    </a>
+                  </Descriptions.Item>
+                )}
+                {selectedTicket.support_chat_id && (
+                  <Descriptions.Item label="Чат поддержки" span={2}>
+                    <a href={`/support/chat/${selectedTicket.support_chat_id}`} target="_blank" rel="noopener noreferrer">
+                      Чат #{selectedTicket.support_chat_id}
                     </a>
                   </Descriptions.Item>
                 )}

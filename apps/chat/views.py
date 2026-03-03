@@ -1098,6 +1098,63 @@ class SupportChatViewSet(viewsets.ModelViewSet):
         
         return Response(messages_data)
     
+    @action(detail=True, methods=['post'])
+    def create_ticket(self, request, pk=None):
+        """Создать тикет из чата поддержки"""
+        chat = self.get_object()
+        
+        # Проверяем права доступа
+        if request.user.role != 'admin' and request.user != chat.client:
+            return Response(
+                {'detail': 'Недостаточно прав'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Проверяем, не создан ли уже тикет
+        from apps.admin_panel.models import SupportRequest
+        existing_ticket = SupportRequest.objects.filter(support_chat=chat).first()
+        
+        if existing_ticket:
+            return Response({
+                'ticket_id': existing_ticket.id,
+                'created': False,
+                'status': 'already_exists',
+                'message': 'Тикет уже существует'
+            })
+        
+        # Получаем первое сообщение для описания
+        first_message = chat.support_messages.first()
+        description = first_message.text if first_message else chat.subject
+        
+        # Создаем тикет
+        ticket = SupportRequest.objects.create(
+            user=chat.client,
+            support_chat=chat,
+            subject=chat.subject,
+            description=description,
+            status='open',
+            priority=chat.priority,
+            auto_created=False  # Создан вручную через action
+        )
+        
+        # Копируем все сообщения из чата в тикет
+        from apps.admin_panel.models import SupportMessage as AdminSupportMessage
+        for msg in chat.support_messages.all():
+            if msg.message_type == 'text':
+                AdminSupportMessage.objects.create(
+                    request=ticket,
+                    sender=msg.sender,
+                    message=msg.text,
+                    is_admin=(msg.sender.role == 'admin')
+                )
+        
+        return Response({
+            'ticket_id': ticket.id,
+            'created': True,
+            'status': 'success',
+            'message': 'Тикет успешно создан'
+        })
+    
     def list(self, request, *args, **kwargs):
         """Список чатов поддержки"""
         queryset = self.get_queryset()

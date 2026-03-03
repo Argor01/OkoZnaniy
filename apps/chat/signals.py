@@ -21,7 +21,8 @@ def create_support_request_from_chat(sender, instance, created, **kwargs):
             subject=instance.subject,
             description=description,
             status='open',
-            priority=instance.priority
+            priority=instance.priority,
+            auto_created=True
         )
         
         # Если есть первое сообщение, добавляем его в тикет

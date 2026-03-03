@@ -4,7 +4,7 @@ export { PartnersSection } from './PartnersSection';
 export { EarningsSection } from './EarningsSection';
 export { DisputesSection } from './DisputesSection';
 export { SupportRequestsSection } from './SupportRequestsSection';
-export { SupportChatsSection } from './SupportChatsSection';
+
 export { TicketSystemSection } from './TicketSystemSection';
 export { UsersManagementSection } from './UserRolesSection';
 export { RolesManagementSection } from './UserRolesSection';

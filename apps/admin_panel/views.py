@@ -149,6 +149,57 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         return Response({'message': 'Запрос взят в работу'})
     
     @action(detail=True, methods=['post'])
+    def assign_users(self, request, pk=None):
+        """Назначить пользователей на тикет"""
+        support_request = self.get_object()
+        user_ids = request.data.get('user_ids', [])
+        
+        if not isinstance(user_ids, list):
+            return Response({'error': 'user_ids должен быть списком'}, status=400)
+        
+        # Проверяем, что все пользователи существуют и являются админами
+        users = User.objects.filter(id__in=user_ids, role__in=['admin', 'director'])
+        if len(users) != len(user_ids):
+            return Response({'error': 'Некоторые пользователи не найдены или не являются админами'}, status=400)
+        
+        support_request.assigned_users.set(users)
+        return Response({'message': f'Назначено {len(users)} пользователей'})
+    
+    @action(detail=True, methods=['post'])
+    def add_tag(self, request, pk=None):
+        """Добавить тег к тикету"""
+        support_request = self.get_object()
+        tag = request.data.get('tag', '').strip()
+        
+        if not tag:
+            return Response({'error': 'Тег не может быть пустым'}, status=400)
+        
+        support_request.add_tag(tag)
+        return Response({'message': f'Тег {tag} добавлен', 'tags': support_request.get_tags_list()})
+    
+    @action(detail=True, methods=['post'])
+    def remove_tag(self, request, pk=None):
+        """Удалить тег из тикета"""
+        support_request = self.get_object()
+        tag = request.data.get('tag', '').strip()
+        
+        if not tag:
+            return Response({'error': 'Тег не может быть пустым'}, status=400)
+        
+        support_request.remove_tag(tag)
+        return Response({'message': f'Тег {tag} удален', 'tags': support_request.get_tags_list()})
+    
+    @action(detail=True, methods=['post'])
+    def update_tags(self, request, pk=None):
+        """Обновить все теги тикета"""
+        support_request = self.get_object()
+        tags = request.data.get('tags', '')
+        
+        support_request.tags = tags
+        support_request.save(update_fields=['tags'])
+        return Response({'message': 'Теги обновлены', 'tags': support_request.get_tags_list()})
+    
+    @action(detail=True, methods=['post'])
     def complete_request(self, request, pk=None):
         """Завершить запрос"""
         support_request = self.get_object()
@@ -255,6 +306,57 @@ class ClaimViewSet(viewsets.ModelViewSet):
         )
         serializer = ClaimMessageSerializer(message)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def assign_users(self, request, pk=None):
+        """Назначить пользователей на претензию"""
+        claim = self.get_object()
+        user_ids = request.data.get('user_ids', [])
+        
+        if not isinstance(user_ids, list):
+            return Response({'error': 'user_ids должен быть списком'}, status=400)
+        
+        # Проверяем, что все пользователи существуют и являются админами
+        users = User.objects.filter(id__in=user_ids, role__in=['admin', 'director'])
+        if len(users) != len(user_ids):
+            return Response({'error': 'Некоторые пользователи не найдены или не являются админами'}, status=400)
+        
+        claim.assigned_users.set(users)
+        return Response({'message': f'Назначено {len(users)} пользователей'})
+    
+    @action(detail=True, methods=['post'])
+    def add_tag(self, request, pk=None):
+        """Добавить тег к претензии"""
+        claim = self.get_object()
+        tag = request.data.get('tag', '').strip()
+        
+        if not tag:
+            return Response({'error': 'Тег не может быть пустым'}, status=400)
+        
+        claim.add_tag(tag)
+        return Response({'message': f'Тег {tag} добавлен', 'tags': claim.get_tags_list()})
+    
+    @action(detail=True, methods=['post'])
+    def remove_tag(self, request, pk=None):
+        """Удалить тег из претензии"""
+        claim = self.get_object()
+        tag = request.data.get('tag', '').strip()
+        
+        if not tag:
+            return Response({'error': 'Тег не может быть пустым'}, status=400)
+        
+        claim.remove_tag(tag)
+        return Response({'message': f'Тег {tag} удален', 'tags': claim.get_tags_list()})
+    
+    @action(detail=True, methods=['post'])
+    def update_tags(self, request, pk=None):
+        """Обновить все теги претензии"""
+        claim = self.get_object()
+        tags = request.data.get('tags', '')
+        
+        claim.tags = tags
+        claim.save(update_fields=['tags'])
+        return Response({'message': 'Теги обновлены', 'tags': claim.get_tags_list()})
 
 
 # ============= ЧАТЫ АДМИНИСТРАТОРОВ =============

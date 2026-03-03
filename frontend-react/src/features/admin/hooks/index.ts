@@ -51,7 +51,9 @@ export {
 
 export { 
   useTickets, 
-  useTicketActions 
+  useTicket,
+  useTicketActions,
+  useAdminUsers
 } from './useAdminTickets';
 
 export { useAdminStats } from './useAdminStats';

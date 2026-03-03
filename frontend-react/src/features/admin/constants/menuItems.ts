@@ -113,11 +113,7 @@ export const menuItems: MenuItem[] = [
       },
     ],
   },
-  {
-    key: 'support_chats',
-    icon: MessageOutlined,
-    label: 'Чаты поддержки',
-  },
+
   {
     key: 'tickets',
     icon: FileTextOutlined,
@@ -183,7 +179,7 @@ export const titleMap: Record<MenuKey, string> = {
   support_open: 'Открытые запросы поддержки',
   support_in_progress: 'Запросы поддержки в работе',
   support_completed: 'Завершенные запросы поддержки',
-  support_chats: 'Чаты поддержки',
+
   tickets: 'Тикеты поддержки',
   admin_chats: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',

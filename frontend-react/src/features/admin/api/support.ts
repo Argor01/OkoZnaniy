@@ -44,6 +44,11 @@ export const supportApi = {
     return [];
   },
 
+  getSupportRequest: async (requestId: number): Promise<SupportRequest> => {
+    const response = await apiClient.get(API_ENDPOINTS.admin.support.requests.detail(requestId));
+    return response.data;
+  },
+
   takeSupportRequest: async (requestId: number) => {
     const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.take(requestId));
     return response.data;
@@ -83,6 +88,11 @@ export const supportApi = {
     if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
     if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
     return [];
+  },
+
+  getClaim: async (claimId: number): Promise<Claim> => {
+    const response = await apiClient.get(API_ENDPOINTS.admin.support.claims.detail(claimId));
+    return response.data;
   },
 
   takeClaimInWork: async (claimId: number) => {
@@ -132,6 +142,46 @@ export const supportApi = {
 
   sendClaimMessage: async (claimId: number, message: string) => {
     const response = await apiClient.post(API_ENDPOINTS.admin.support.claims.messages(claimId), { message });
+    return response.data;
+  },
+
+  // Управление назначениями
+  assignUsersToTicket: async (ticketId: number, userIds: number[], type: 'support_request' | 'claim') => {
+    const endpoint = type === 'support_request' 
+      ? `/admin-panel/support-requests/${ticketId}/assign_users/`
+      : `/admin-panel/claims/${ticketId}/assign_users/`;
+    const response = await apiClient.post(endpoint, { user_ids: userIds });
+    return response.data;
+  },
+
+  // Управление тегами
+  addTagToTicket: async (ticketId: number, tag: string, type: 'support_request' | 'claim') => {
+    const endpoint = type === 'support_request' 
+      ? `/admin-panel/support-requests/${ticketId}/add_tag/`
+      : `/admin-panel/claims/${ticketId}/add_tag/`;
+    const response = await apiClient.post(endpoint, { tag });
+    return response.data;
+  },
+
+  removeTagFromTicket: async (ticketId: number, tag: string, type: 'support_request' | 'claim') => {
+    const endpoint = type === 'support_request' 
+      ? `/admin-panel/support-requests/${ticketId}/remove_tag/`
+      : `/admin-panel/claims/${ticketId}/remove_tag/`;
+    const response = await apiClient.post(endpoint, { tag });
+    return response.data;
+  },
+
+  updateTicketTags: async (ticketId: number, tags: string, type: 'support_request' | 'claim') => {
+    const endpoint = type === 'support_request' 
+      ? `/admin-panel/support-requests/${ticketId}/update_tags/`
+      : `/admin-panel/claims/${ticketId}/update_tags/`;
+    const response = await apiClient.post(endpoint, { tags });
+    return response.data;
+  },
+
+  // Получение списка админов для назначения
+  getAdminUsers: async () => {
+    const response = await apiClient.get('/admin-panel/users/?role=admin');
     return response.data;
   },
 };

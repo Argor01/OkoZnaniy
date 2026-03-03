@@ -134,6 +134,7 @@ export const API_ENDPOINTS = {
     sendMessage: (chatId: number) => `/chat/support/${chatId}/send_message/`,
     take: (chatId: number) => `/chat/support/${chatId}/take_chat/`,
     close: (chatId: number) => `/chat/support/${chatId}/close_chat/`,
+    createTicket: (chatId: number) => `/chat/support/${chatId}/create_ticket/`,
   },
   partners: {
     dashboard: '/users/partner_dashboard/',

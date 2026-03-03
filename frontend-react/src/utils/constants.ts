@@ -106,6 +106,7 @@ export const ROUTES = {
     directorLogin: '/admin/directorlogin',
     dashboard: '/admin/dashboard',
     directorDashboard: '/admin/directordashboard',
+    ticketDetail: '/admin/tickets/:ticketId',
   },
   arbitrator: {
     root: '/arbitrator',

@@ -21,7 +21,7 @@ import '@/styles/admin-dashboard.css';
 const OverviewSection = lazy(() => import('@/features/admin/components/Sections/OverviewSection').then(m => ({ default: m.OverviewSection })));
 const PartnersSection = lazy(() => import('@/features/admin/components/Sections/PartnersSection').then(m => ({ default: m.PartnersSection })));
 const EarningsSection = lazy(() => import('@/features/admin/components/Sections/EarningsSection').then(m => ({ default: m.EarningsSection })));
-const SupportChatsSection = lazy(() => import('@/features/admin/components/Sections/SupportChatsSection').then(m => ({ default: m.SupportChatsSection })));
+
 const TicketSystemSection = lazy(() => import('@/features/admin/components/Sections/TicketSystemSection').then(m => ({ default: m.TicketSystemSection })));
 const UsersManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.UsersManagementSection })));
 const BlockedUsersSection = lazy(() => import('@/features/admin/components/Sections/BlockedUsersSection').then(m => ({ default: m.BlockedUsersSection })));
@@ -227,11 +227,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         );
 
 
-      
-      case 'support_chats':
-        return (
-          <SupportChatsSection />
-        );
+
 
       case 'tickets':
         return (

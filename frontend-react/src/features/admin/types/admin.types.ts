@@ -78,7 +78,7 @@ export type MenuKey =
   | 'support_open'                 
   | 'support_in_progress'          
   | 'support_completed'            
-  | 'support_chats'                
+
   | 'tickets'                      
   | 'admin_chats'
   | 'admin_group_chats'            

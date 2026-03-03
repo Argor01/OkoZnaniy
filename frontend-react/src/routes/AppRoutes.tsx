@@ -20,6 +20,7 @@ const BecomePartner = lazy(() => import('@/features/partner/pages/BecomePartner'
 const PartnerDashboard = lazy(() => import('@/features/partner/pages/PartnerDashboard'));
 const AdminDashboard = lazy(() => import('@/features/admin/pages/AdminDashboard'));
 const AdminLogin = lazy(() => import('@/features/admin/pages/AdminLogin'));
+const TicketDetailPage = lazy(() => import('@/features/admin/pages/TicketDetailPage'));
 const DirectorDashboard = lazy(() => import('@/features/director/pages/DirectorDashboard'));
 const ArbitratorDashboard = lazy(() => import('@/features/arbitrator/pages/ArbitratorDashboard'));
 const ShopReadyWorks = lazy(() => import('@/features/shop/pages/ShopReadyWorks'));
@@ -156,6 +157,10 @@ export const AppRoutes: React.FC = () => {
       <Route 
         path={ROUTES.admin.dashboard} 
         element={<AdminDashboard />} 
+      />
+      <Route 
+        path="/admin/tickets/:ticketId"
+        element={<TicketDetailPage />} 
       />
       <Route 
         path={ROUTES.admin.directorDashboard}

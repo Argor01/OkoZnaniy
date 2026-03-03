@@ -64,7 +64,7 @@ export const useAdminUI = () => {
     
     if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(menu)) {
       setOpenKeys(['claims']);
-    } else if (['support_open', 'support_in_progress', 'support_completed', 'support_chats'].includes(menu)) {
+    } else if (['support_open', 'support_in_progress', 'support_completed'].includes(menu)) {
       setOpenKeys(['support']);
     } else if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(menu)) {
       setOpenKeys(['request_processing']);

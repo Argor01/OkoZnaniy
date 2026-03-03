@@ -49,4 +49,10 @@ export const supportApi = {
   closeChat: async (chatId: number): Promise<void> => {
     await apiClient.post(API_ENDPOINTS.support.close(chatId));
   },
+
+  
+  createTicket: async (chatId: number): Promise<{ ticket_id: number; created: boolean; status: string; message: string }> => {
+    const response = await apiClient.post(API_ENDPOINTS.support.createTicket(chatId));
+    return response.data;
+  },
 };
