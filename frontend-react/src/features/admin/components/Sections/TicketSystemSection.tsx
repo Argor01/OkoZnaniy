@@ -19,7 +19,8 @@ import {
   Divider,
   Timeline,
   Tooltip,
-  Drawer
+  Drawer,
+  Modal
 } from 'antd';
 import {
   SearchOutlined,
@@ -35,7 +36,8 @@ import {
   FileTextOutlined,
   TeamOutlined,
   CloseOutlined,
-  ExpandOutlined
+  ExpandOutlined,
+  TagOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -109,6 +111,10 @@ export const TicketSystemSection: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(50); // Ширина боковой панели в процентах
+  const [isResizing, setIsResizing] = useState(false);
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [newTag, setNewTag] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,6 +134,42 @@ export const TicketSystemSection: React.FC = () => {
     setDetailsVisible(false);
     setSelectedTicket(null);
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      const container = document.querySelector(`.${styles.ticketSystemWrapper}`) as HTMLElement;
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
+      
+      // Ограничиваем ширину от 30% до 70%
+      if (newWidth >= 30 && newWidth <= 70) {
+        setPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -288,7 +330,7 @@ export const TicketSystemSection: React.FC = () => {
   // Компонент деталей тикета
   const TicketDetails: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
     <div>
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '8px' }}>
+      <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <Select
           value={ticket.status}
           onChange={(value) => handleUpdateStatus(ticket.id, value)}
@@ -310,6 +352,33 @@ export const TicketSystemSection: React.FC = () => {
           <Option value="high">Высокий</Option>
           <Option value="urgent">Срочный</Option>
         </Select>
+        <Button 
+          size="small" 
+          icon={<TagOutlined />}
+          onClick={() => setTagModalVisible(true)}
+        >
+          Теги
+        </Button>
+        <Button 
+          size="small" 
+          icon={<MessageOutlined />}
+          onClick={() => {
+            // Открыть чат с пользователем
+            antMessage.info('Открытие чата с пользователем...');
+          }}
+        >
+          Чат с клиентом
+        </Button>
+        <Button 
+          size="small" 
+          icon={<TeamOutlined />}
+          onClick={() => {
+            // Открыть внутренний чат команды
+            antMessage.info('Открытие внутреннего чата...');
+          }}
+        >
+          Чат команды
+        </Button>
       </div>
 
       <Card size="small" title="Информация о тикете" style={{ marginBottom: '16px' }}>
@@ -427,8 +496,8 @@ export const TicketSystemSection: React.FC = () => {
       <div 
         className={styles.ticketSystemMainContent}
         style={{
-          marginRight: detailsVisible && !isMobile ? '50%' : '0',
-          width: detailsVisible && !isMobile ? '50%' : '100%'
+          marginRight: detailsVisible && !isMobile ? `${panelWidth}%` : '0',
+          width: detailsVisible && !isMobile ? `${100 - panelWidth}%` : '100%'
         }}
       >
         <Card 
@@ -631,38 +700,148 @@ export const TicketSystemSection: React.FC = () => {
             {selectedTicket && <TicketDetails ticket={selectedTicket} />}
           </Drawer>
         ) : (
-          <div
-            className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''}`}
-          >
-            {selectedTicket && (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FileTextOutlined />
-                    <Text strong>Тикет #{selectedTicket.ticket_number}</Text>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <Button 
-                      size="small"
-                      icon={<ExpandOutlined />}
-                      onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
-                    >
-                      Открыть отдельно
-                    </Button>
-                    <Button 
-                      size="small"
-                      icon={<CloseOutlined />}
-                      onClick={handleCloseDetails}
-                    />
-                  </div>
-                </div>
-                <TicketDetails ticket={selectedTicket} />
-              </div>
+          <>
+            {/* Разделитель для изменения ширины */}
+            {detailsVisible && (
+              <div
+                className={styles.ticketSystemResizer}
+                onMouseDown={handleMouseDown}
+                style={{
+                  left: `${100 - panelWidth}%`,
+                  cursor: isResizing ? 'col-resize' : 'col-resize'
+                }}
+              />
             )}
-          </div>
+            
+            <div
+              className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''}`}
+              style={{ width: `${panelWidth}%` }}
+            >
+              {selectedTicket && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <FileTextOutlined />
+                      <Text strong>Тикет #{selectedTicket.ticket_number}</Text>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <Button 
+                        size="small"
+                        icon={<ExpandOutlined />}
+                        onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
+                      >
+                        Открыть отдельно
+                      </Button>
+                      <Button 
+                        size="small"
+                        icon={<CloseOutlined />}
+                        onClick={handleCloseDetails}
+                      />
+                    </div>
+                  </div>
+                  <TicketDetails ticket={selectedTicket} />
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
-    );
+      
+      {/* Модальное окно для управления тегами */}
+      <Modal
+        title="Управление тегами"
+        open={tagModalVisible}
+        onCancel={() => {
+          setTagModalVisible(false);
+          setNewTag('');
+        }}
+        footer={null}
+        width={400}
+      >
+        {selectedTicket && (
+          <div>
+            <div style={{ marginBottom: '16px' }}>
+              <Text strong>Текущие теги:</Text>
+              <div style={{ marginTop: '8px' }}>
+                {selectedTicket.tags_list && selectedTicket.tags_list.length > 0 ? (
+                  <Space wrap size="small">
+                    {selectedTicket.tags_list.map(tag => (
+                      <Tag 
+                        key={tag}
+                        closable
+                        onClose={() => {
+                          // Удалить тег
+                          antMessage.success(`Тег ${tag} удален`);
+                        }}
+                        color={tag.includes('нарушение') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </Space>
+                ) : (
+                  <Text type="secondary">Нет тегов</Text>
+                )}
+              </div>
+            </div>
+            
+            <Divider />
+            
+            <div>
+              <Text strong>Добавить тег:</Text>
+              <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                <Input
+                  placeholder="Введите тег (например: #срочно)"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onPressEnter={() => {
+                    if (newTag.trim()) {
+                      const tag = newTag.startsWith('#') ? newTag : `#${newTag}`;
+                      antMessage.success(`Тег ${tag} добавлен`);
+                      setNewTag('');
+                    }
+                  }}
+                  size="small"
+                />
+                <Button 
+                  type="primary" 
+                  size="small"
+                  onClick={() => {
+                    if (newTag.trim()) {
+                      const tag = newTag.startsWith('#') ? newTag : `#${newTag}`;
+                      antMessage.success(`Тег ${tag} добавлен`);
+                      setNewTag('');
+                    }
+                  }}
+                >
+                  Добавить
+                </Button>
+              </div>
+              
+              <div style={{ marginTop: '12px' }}>
+                <Text type="secondary" style={{ fontSize: '12px' }}>Быстрые теги:</Text>
+                <div style={{ marginTop: '4px' }}>
+                  <Space wrap size="small">
+                    {['#срочно', '#негатив', '#баг', '#нарушение', '#важно'].map(tag => (
+                      <Tag 
+                        key={tag}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          antMessage.success(`Тег ${tag} добавлен`);
+                        }}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </Space>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
 };
 
 export default TicketSystemSection;

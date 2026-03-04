@@ -29,6 +29,25 @@
   transform: translateX(0);
 }
 
+.ticketSystemResizer {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #d9d9d9;
+  cursor: col-resize;
+  z-index: 101;
+  transition: background-color 0.2s ease;
+}
+
+.ticketSystemResizer:hover {
+  background-color: #1890ff;
+}
+
+.ticketSystemResizer:active {
+  background-color: #096dd9;
+}
+
 .ticketSystemTitleRow {
   display: flex;
   align-items: center;
