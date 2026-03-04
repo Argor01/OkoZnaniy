@@ -11,7 +11,7 @@ export interface Message {
   is_read: boolean;
   is_mine: boolean;
   created_at: string;
-  message_type?: 'text' | 'offer' | 'work_offer' | 'work_delivery';
+  message_type?: 'text' | 'offer' | 'work_offer' | 'work_delivery' | 'system';
   offer_data?: {
     description?: string;
     work_type?: string;
@@ -45,6 +45,8 @@ export interface ChatListItem {
   } | null;
   last_message_time: string;
   unread_count: number;
+  is_frozen?: boolean;
+  frozen_reason?: string;
 }
 
 export interface ChatDetail {
@@ -59,4 +61,6 @@ export interface ChatDetail {
   other_user: UserSummary;
   messages: Message[];
   unread_count: number;
+  is_frozen?: boolean;
+  frozen_reason?: string;
 }

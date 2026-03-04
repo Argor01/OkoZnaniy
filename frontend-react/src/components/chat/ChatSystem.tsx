@@ -30,6 +30,8 @@ export interface Chat {
   isOnline: boolean;
   unreadCount: number;
   messages: ChatMessage[];
+  is_frozen?: boolean;
+  frozen_reason?: string;
 }
 
 interface ChatSystemProps {
@@ -180,26 +182,28 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                 ))}
                 <div ref={messagesEndRef} />
               </div>
-              <div className={styles.chatWindowInput}>
-                <TextArea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: 4 }}
-                  onPressEnter={(e) => {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim()}
-                />
-              </div>
+              {!selectedChat.is_frozen && (
+                <div className={styles.chatWindowInput}>
+                  <TextArea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Введите сообщение..."
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim()}
+                  />
+                </div>
+              )}
             </>
           ) : (
             <div className={styles.emptyChatWindow}>

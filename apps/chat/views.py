@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render
+from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -116,6 +117,20 @@ class ChatViewSet(viewsets.ModelViewSet):
     def send_message(self, request, pk=None):
         """Отправка сообщения в чат (текст и/или файл). Для файла — multipart/form-data: text, file."""
         chat = self.get_object()
+        
+        # Проверяем, не заморожен ли чат
+        if chat.is_frozen:
+            # Админы могут писать в замороженные чаты
+            if not (hasattr(request.user, 'role') and request.user.role in ['admin', 'director']):
+                return Response(
+                    {
+                        'detail': 'Чат заморожен из-за нарушения правил. Отправка сообщений временно недоступна.',
+                        'frozen': True,
+                        'frozen_reason': chat.frozen_reason
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
         if request.user not in chat.participants.all():
             return Response(
                 {'detail': 'Вы не являетесь участником этого чата'},
@@ -1154,6 +1169,90 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             'status': 'success',
             'message': 'Тикет успешно создан'
         })
+
+
+class ContactViolationViewSet(viewsets.ModelViewSet):
+    """ViewSet для управления нарушениями обмена контактами"""
+    from .models import ContactViolationLog
+    from .serializers import ContactViolationSerializer
+    
+    queryset = ContactViolationLog.objects.all()
+    serializer_class = ContactViolationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Админы видят все нарушения
+        if user.role == 'admin':
+            return self.queryset.select_related('chat', 'user', 'message', 'reviewed_by')
+        
+        # Обычные пользователи видят только свои нарушения
+        return self.queryset.filter(user=user).select_related('chat', 'message')
+    
+    @action(detail=True, methods=['post'])
+    def approve_violation(self, request, pk=None):
+        """Одобрить нарушение (разморозить чат)"""
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        violation = self.get_object()
+        decision = request.data.get('decision', 'Одобрено администратором')
+        
+        # Размораживаем чат
+        from .services import ChatModerationService
+        ChatModerationService.unfreeze_chat(
+            chat=violation.chat,
+            admin_user=request.user,
+            decision=decision
+        )
+        
+        # Обновляем статус нарушения
+        violation.status = 'approved'
+        violation.reviewed_by = request.user
+        violation.reviewed_at = timezone.now()
+        violation.admin_decision = decision
+        violation.save()
+        
+        return Response({'message': 'Чат разморожен, нарушение одобрено'})
+    
+    @action(detail=True, methods=['post'])
+    def reject_violation(self, request, pk=None):
+        """Отклонить нарушение (оставить чат замороженным)"""
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        violation = self.get_object()
+        decision = request.data.get('decision', 'Нарушение подтверждено')
+        
+        # Обновляем статус нарушения
+        violation.status = 'rejected'
+        violation.reviewed_by = request.user
+        violation.reviewed_at = timezone.now()
+        violation.admin_decision = decision
+        violation.save()
+        
+        # Чат остается замороженным
+        return Response({'message': 'Нарушение подтверждено, чат остается замороженным'})
+    
+    @action(detail=False, methods=['get'])
+    def pending_violations(self, request):
+        """Получить список нарушений, ожидающих проверки"""
+        if request.user.role != 'admin':
+            return Response(
+                {'detail': 'Доступно только для администраторов'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        violations = self.get_queryset().filter(status='pending').order_by('-created_at')
+        serializer = self.get_serializer(violations, many=True)
+        return Response(serializer.data)
     
     def list(self, request, *args, **kwargs):
         """Список чатов поддержки"""

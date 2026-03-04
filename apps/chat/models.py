@@ -20,6 +20,11 @@ class Chat(models.Model):
     expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='expert_chats')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
     context_title = models.CharField(max_length=255, null=True, blank=True)
+    
+    # Поля для модерации
+    is_frozen = models.BooleanField(default=False, verbose_name='Заморожен')
+    frozen_reason = models.TextField(blank=True, verbose_name='Причина заморозки')
+    frozen_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата заморозки')
 
     class Meta:
         constraints = [
@@ -34,6 +39,21 @@ class Chat(models.Model):
         if self.order:
             return f"Чат по заказу #{self.order.id}"
         return f"Чат #{self.id}"
+    
+    def freeze(self, reason: str):
+        """Заморозить чат"""
+        from django.utils import timezone
+        self.is_frozen = True
+        self.frozen_reason = reason
+        self.frozen_at = timezone.now()
+        self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
+    
+    def unfreeze(self):
+        """Разморозить чат"""
+        self.is_frozen = False
+        self.frozen_reason = ''
+        self.frozen_at = None
+        self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
 
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
@@ -47,6 +67,7 @@ class Message(models.Model):
         ('offer', 'Индивидуальное предложение'),
         ('work_offer', 'Предложение готовой работы'),
         ('work_delivery', 'Отправка готовой работы'),
+        ('system', 'Системное сообщение'),
     ]
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text', verbose_name="Тип сообщения")
     offer_data = models.JSONField(blank=True, null=True, verbose_name="Данные предложения")
@@ -64,10 +85,7 @@ class Message(models.Model):
     def clean(self):
         if not (self.text or self.file or (self.message_type in ['offer', 'work_offer'] and self.offer_data)):
             raise ValidationError("Укажите текст сообщения, прикрепите файл или создайте предложение.")
-        if self.text:
-            import re
-            if re.search(r"(?:@|\+7|https?://|\d{9,})", self.text, re.I):
-                raise ValidationError("Контактные данные запрещены в чате.")
+        # Убираем проверку контактов из clean - она будет в сигналах после сохранения
 
     def __str__(self):
         preview = (self.text or (self.file_name or "файл"))[:30]
@@ -215,49 +233,125 @@ class SupportMessage(models.Model):
 class ContactViolationLog(models.Model):
     """Лог нарушений обмена контактными данными"""
     
-    ACTION_CHOICES = [
-        ('warning', 'Предупреждение'),
-        ('ban', 'Бан'),
-        ('message_blocked', 'Сообщение заблокировано'),
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает проверки'),
+        ('approved', 'Одобрено'),
+        ('rejected', 'Отклонено'),
+        ('resolved', 'Решено'),
     ]
     
+    VIOLATION_TYPES = [
+        ('phone', 'Номер телефона'),
+        ('email', 'Email адрес'),
+        ('telegram', 'Telegram'),
+        ('whatsapp', 'WhatsApp'),
+        ('social', 'Социальные сети'),
+        ('keywords', 'Подозрительные ключевые слова'),
+        ('multiple', 'Несколько типов контактов'),
+    ]
+    
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name='contact_violations',
+        verbose_name='Чат'
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='contact_violations',
         verbose_name='Пользователь'
     )
-    chat = models.ForeignKey(
-        Chat,
-        on_delete=models.CASCADE,
-        related_name='violations',
-        verbose_name='Чат'
-    )
     message = models.ForeignKey(
         Message,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='violations',
+        related_name='contact_violations',
         verbose_name='Сообщение'
     )
-    violation_text = models.TextField(verbose_name='Текст нарушения')
-    detected_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата обнаружения')
-    action_taken = models.CharField(
+    violation_type = models.CharField(
         max_length=20,
-        choices=ACTION_CHOICES,
-        verbose_name='Принятое действие'
+        choices=VIOLATION_TYPES,
+        verbose_name='Тип нарушения'
     )
-    notes = models.TextField(blank=True, null=True, verbose_name='Заметки')
+    detected_data = models.JSONField(
+        default=dict,
+        verbose_name='Обнаруженные данные'
+    )
+    risk_level = models.CharField(
+        max_length=10,
+        choices=[
+            ('low', 'Низкий'),
+            ('medium', 'Средний'),
+            ('high', 'Высокий'),
+        ],
+        default='medium',
+        verbose_name='Уровень риска'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Статус'
+    )
+    
+    # Поля для администратора
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_violations',
+        verbose_name='Проверил'
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Дата проверки'
+    )
+    admin_decision = models.TextField(
+        blank=True,
+        verbose_name='Решение администратора'
+    )
+    
+    # Временные метки
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
     
     class Meta:
-        verbose_name = 'Лог нарушения обмена контактами'
-        verbose_name_plural = 'Логи нарушений обмена контактами'
-        ordering = ['-detected_at']
+        verbose_name = 'Нарушение обмена контактами'
+        verbose_name_plural = 'Нарушения обмена контактами'
+        ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['user', '-detected_at']),
-            models.Index(fields=['chat', '-detected_at']),
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['chat', '-created_at']),
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['risk_level', '-created_at']),
         ]
+    
+    def __str__(self):
+        return f"Нарушение в чате #{self.chat.id} от {self.user.username} ({self.get_violation_type_display()})"
+    
+    def get_detected_contacts_summary(self):
+        """Возвращает краткое описание обнаруженных контактов"""
+        summary = []
+        data = self.detected_data
+        
+        if 'phones' in data and data['phones']:
+            summary.append(f"Телефоны: {len(data['phones'])}")
+        if 'emails' in data and data['emails']:
+            summary.append(f"Email: {len(data['emails'])}")
+        if 'telegram' in data and data['telegram']:
+            summary.append(f"Telegram: {len(data['telegram'])}")
+        if 'whatsapp' in data and data['whatsapp']:
+            summary.append(f"WhatsApp: {len(data['whatsapp'])}")
+        if 'social' in data and data['social']:
+            summary.append(f"Соц.сети: {len(data['social'])}")
+        if 'keywords' in data and data['keywords']:
+            summary.append(f"Ключевые слова: {len(data['keywords'])}")
+        
+        return '; '.join(summary) if summary else 'Нет данных'
     
     def __str__(self):
         return f"Нарушение от {self.user.username} в чате #{self.chat.id}"

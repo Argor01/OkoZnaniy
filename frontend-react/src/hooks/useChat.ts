@@ -22,9 +22,18 @@ export const useChat = () => {
   }, []);
 
   const sendMessage = async (chatId: number, text: string, file?: File): Promise<Message> => {
-    const message = await chatApi.sendMessage(chatId, text, file);
-    await loadChats();
-    return message;
+    try {
+      const message = await chatApi.sendMessage(chatId, text, file);
+      await loadChats();
+      return message;
+    } catch (error: any) {
+      // Если это ошибка заморозки чата, показываем пользователю
+      if (error.message && error.message.includes('заморожен')) {
+        throw new Error(error.message);
+      }
+      // Для других ошибок показываем общее сообщение
+      throw new Error('Не удалось отправить сообщение. Попробуйте позже.');
+    }
   };
 
   const getMessages = async (chatId: number): Promise<Message[]> => {

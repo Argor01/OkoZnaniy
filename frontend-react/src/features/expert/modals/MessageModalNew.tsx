@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Alert } from 'antd';
 import { ErrorBoundary } from '@/features/common';
 import {
   MessageOutlined,
@@ -16,6 +16,7 @@ import {
   CloseCircleOutlined,
   UploadOutlined,
   ExclamationCircleOutlined,
+  StopOutlined,
   MoreOutlined
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
@@ -516,6 +517,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (visible) {
       loadChats();
 
+      // Обновляем данные выбранного чата при открытии модального окна
+      if (selectedChat?.id) {
+        loadChatDetail(selectedChat.id);
+      }
+
       if (selectedOrderId && selectedUserId) {
         loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
         return;
@@ -525,7 +531,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
+  }, [visible, selectedUserId, selectedOrderId, selectedChat?.id, loadChats, loadChatDetail, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
 
   useEffect(() => {
     if (!visible) return;
@@ -1264,9 +1270,34 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
       setMessageText('');
       setAttachedFiles([]);
+      
+      // Обновляем данные чата и список чатов после отправки сообщения
+      // Это важно для получения информации о возможной заморозке чата
+      await Promise.all([
+        loadChatDetail(selectedChat.id),
+        loadChats()
+      ]);
+      
       antMessage.success('Сообщение отправлено');
     } catch (error: unknown) {
-      antMessage.error('Не удалось отправить сообщение');
+      console.error('Ошибка отправки сообщения:', error);
+      
+      // Обновляем данные чата в любом случае, чтобы получить актуальную информацию о заморозке
+      try {
+        await Promise.all([
+          loadChatDetail(selectedChat.id),
+          loadChats()
+        ]);
+      } catch (updateError) {
+        console.error('Ошибка обновления данных чата:', updateError);
+      }
+      
+      // Проверяем, если это ошибка заморозки чата
+      if (error instanceof Error && error.message.includes('заморожен')) {
+        antMessage.error(error.message);
+      } else {
+        antMessage.error('Не удалось отправить сообщение');
+      }
     } finally {
       setSending(false);
     }
@@ -1888,9 +1919,58 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     </div>
                   </div>
                 ) : null}
+                
+                {selectedChat.is_frozen && (
+                  <Alert
+                    message="Чат заморожен"
+                    description={selectedChat.frozen_reason || "Чат заморожен администратором для проверки"}
+                    type="warning"
+                    showIcon
+                    icon={<StopOutlined />}
+                    style={{ margin: '16px' }}
+                  />
+                )}
+                
+                {/* Явно скрываем инпут для замороженных чатов */}
+                {selectedChat.is_frozen && (
+                  <div style={{ 
+                    padding: '16px', 
+                    textAlign: 'center', 
+                    color: '#999',
+                    fontStyle: 'italic',
+                    borderTop: '1px solid #f0f0f0'
+                  }}>
+                    Отправка сообщений в замороженном чате недоступна
+                  </div>
+                )}
+                
+                {/* DEBUG: Отладочная информация для замороженного чата */}
+                {process.env.NODE_ENV === 'development' && selectedChat && (
+                  <div style={{ fontSize: '12px', color: '#999', padding: '4px', border: '1px solid #ddd', margin: '8px' }}>
+                    DEBUG Chat {selectedChat.id}: is_frozen = {String(selectedChat.is_frozen)}, frozen_reason = {selectedChat.frozen_reason || 'null'}
+                    <br />
+                    Системных сообщений: {selectedChat.messages?.filter(m => m.message_type === 'system').length || 0}
+                    <br />
+                    Последнее обновление: {new Date().toLocaleTimeString()}
+                    <br />
+                    Условие инпута: selectedChat={!!selectedChat}, is_frozen={selectedChat.is_frozen}, is_frozen !== true = {selectedChat.is_frozen !== true}
+                    <br />
+                    <button 
+                      onClick={() => {
+                        console.log('Принудительное обновление чата', selectedChat.id);
+                        loadChatDetail(selectedChat.id);
+                      }}
+                      style={{ fontSize: '10px', padding: '2px 4px', marginTop: '4px' }}
+                    >
+                      Обновить данные чата
+                    </button>
+                  </div>
+                )}
+                
                 {selectedChat.messages.map((msg: Message, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
+                  const isSystemMessage = msg.message_type === 'system';
                   const canReviewOrder =
                     (isOrderClient || currentRole === 'client') && currentRole !== 'expert';
                   const showWorkActions =
@@ -1923,6 +2003,29 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     currentRole === 'expert' &&
                     workOfferStatus === 'accepted' &&
                     workDeliveryStatus === 'awaiting_upload';
+                  
+                  // System message styling
+                  if (isSystemMessage) {
+                    return (
+                      <div
+                        key={msg.id}
+                        className={styles.messageRowSystem}
+                      >
+                        <div className={styles.messageBubbleSystem}>
+                          <div className={styles.messageSystemCard}>
+                            <StopOutlined className={styles.messageSystemIcon} />
+                            <Text className={`${styles.messageSystemText} ${isMobile ? styles.messageSystemTextMobile : ''}`}>
+                              {msg.text}
+                            </Text>
+                            <div className={styles.messageSystemTime}>
+                              Система безопасности • {formatMessageTime(msg.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
                   const messageRowClass = `${styles.messageRow} ${msg.is_mine ? styles.messageRowMine : styles.messageRowOther}`;
                   const messageBubbleClass = `${styles.messageBubble} ${
                     isCardMessage ? styles.messageBubbleCard : styles.messageBubbleRegular
@@ -2242,8 +2345,32 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           </div>
 
           
-          {selectedChat && (
-            <div className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}>
+          {selectedChat && selectedChat.is_frozen !== true && (
+            <div 
+              key={`chat-input-${selectedChat.id}-${selectedChat.is_frozen}`}
+              className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}
+              style={{ 
+                display: selectedChat?.is_frozen === true ? 'none' : 'block'
+              }}
+            >
+              {/* ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Если чат заморожен, показываем ошибку */}
+              {selectedChat.is_frozen === true && (
+                <div style={{ 
+                  color: 'red', 
+                  fontWeight: 'bold', 
+                  padding: '10px', 
+                  border: '2px solid red',
+                  background: '#ffe6e6'
+                }}>
+                  ОШИБКА: Инпут не должен отображаться для замороженного чата!
+                </div>
+              )}
+              {/* DEBUG: Отладочная информация */}
+              {process.env.NODE_ENV === 'development' && (
+                <div style={{ fontSize: '12px', color: '#999', padding: '4px' }}>
+                  DEBUG: is_frozen = {String(selectedChat.is_frozen)}, frozen_reason = {selectedChat.frozen_reason || 'null'}
+                </div>
+              )}
               
               {isSupportChatSelected && (
                 <div className={`${styles.claimCarouselWrapper} ${isMobile ? styles.claimCarouselWrapperMobile : ''}`}>
@@ -2267,7 +2394,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 </div>
               )}
               
-              <div className={`${styles.chatInputRow} ${isMobile ? styles.chatInputRowMobile : ''}`}>
+              <div 
+                className={`${styles.chatInputRow} ${isMobile ? styles.chatInputRowMobile : ''}`}
+                style={{ 
+                  display: selectedChat?.is_frozen === true ? 'none' : 'flex'
+                }}
+              >
                 <div className={styles.chatInputField}>
                   <Input.TextArea
                     value={messageText}
@@ -2275,6 +2407,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     placeholder="Введите сообщение..."
                     autoSize={{ minRows: isMobile ? 1 : 1, maxRows: isMobile ? 4 : 4 }}
                     className={`${styles.chatInput} ${isMobile ? styles.chatInputMobile : ''}`}
+                    style={{ 
+                      display: selectedChat?.is_frozen === true ? 'none' : 'block'
+                    }}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();

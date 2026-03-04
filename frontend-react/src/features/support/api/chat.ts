@@ -59,23 +59,33 @@ export const chatApi = {
     messageType: 'text' | 'offer' | 'work_offer' | 'work_delivery' = 'text',
     offerData?: any
   ): Promise<Message> => {
-    if (file) {
-      const formData = new FormData();
-      formData.append('text', text);
-      formData.append('file', file);
-      formData.append('message_type', messageType);
-      if (offerData) {
-        formData.append('offer_data', JSON.stringify(offerData));
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append('text', text);
+        formData.append('file', file);
+        formData.append('message_type', messageType);
+        if (offerData) {
+          formData.append('offer_data', JSON.stringify(offerData));
+        }
+        const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, formData);
+        return response.data;
       }
-      const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, formData);
+      const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, { 
+        text, 
+        message_type: messageType,
+        offer_data: offerData 
+      });
       return response.data;
+    } catch (error: any) {
+      // Проверяем, если чат заморожен
+      if (error.response?.status === 400 && error.response?.data?.frozen) {
+        const errorMessage = error.response.data.detail || 'Чат заморожен из-за нарушения правил';
+        throw new Error(errorMessage);
+      }
+      // Перебрасываем другие ошибки
+      throw error;
     }
-    const response = await apiClient.post(`/chat/chats/${chatId}/send_message/`, { 
-      text, 
-      message_type: messageType,
-      offer_data: offerData 
-    });
-    return response.data;
   },
 
   acceptOffer: async (chatId: number, messageId: number): Promise<any> => {

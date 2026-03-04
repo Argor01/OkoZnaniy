@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Typography, Empty } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Typography, Empty, Alert } from 'antd';
 import {
   UserOutlined,
   SendOutlined,
   SearchOutlined,
   CloseOutlined,
+  LockOutlined,
+  ExclamationCircleOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import styles from './ChatSystem.module.css';
 
@@ -17,6 +20,7 @@ export interface ChatMessage {
   timestamp: string;
   isMine: boolean;
   isRead: boolean;
+  message_type?: string;
 }
 
 export interface Chat {
@@ -30,6 +34,8 @@ export interface Chat {
   isOnline: boolean;
   unreadCount: number;
   messages: ChatMessage[];
+  is_frozen?: boolean;
+  frozen_reason?: string;
 }
 
 interface ChatSystemProps {
@@ -67,7 +73,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
   );
 
   const handleSendMessage = () => {
-    if (messageText.trim() && selectedChat) {
+    if (messageText.trim() && selectedChat && !selectedChat.is_frozen) {
       onSendMessage(selectedChat.chatId, messageText.trim());
       setMessageText('');
     }
@@ -116,6 +122,12 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                     <div className={styles.chatItemHeader}>
                       <Text strong className={styles.chatItemName}>
                         {chat.userName}
+                        {chat.is_frozen && (
+                          <LockOutlined 
+                            style={{ marginLeft: 8, color: '#ff4d4f' }} 
+                            title="Чат заморожен"
+                          />
+                        )}
                       </Text>
                       <Text type="secondary" className={styles.chatItemTime}>
                         {chat.timestamp}
@@ -158,48 +170,86 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                   icon={<UserOutlined />}
                 />
                 <div className={styles.chatWindowHeaderInfo}>
-                  <Text strong>{selectedChat.userName}</Text>
+                  <Text strong>
+                    {selectedChat.userName}
+                    {selectedChat.is_frozen && (
+                      <LockOutlined 
+                        style={{ marginLeft: 8, color: '#ff4d4f' }} 
+                        title="Чат заморожен"
+                      />
+                    )}
+                  </Text>
                   <Text type="secondary" className={styles.chatWindowStatus}>
                     {selectedChat.isOnline ? 'Онлайн' : 'Не в сети'}
                   </Text>
                 </div>
               </div>
+              
+              {selectedChat.is_frozen && (
+                <Alert
+                  message="Чат заморожен"
+                  description={selectedChat.frozen_reason || "Чат заморожен администратором для проверки"}
+                  type="warning"
+                  showIcon
+                  style={{ margin: '16px' }}
+                />
+              )}
+              
               <div className={styles.chatWindowMessages}>
                 {selectedChat.messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`${styles.message} ${msg.isMine ? styles.mine : styles.theirs}`}
+                    className={`${styles.message} ${
+                      msg.message_type === 'system' 
+                        ? styles.systemMessage 
+                        : msg.isMine 
+                          ? styles.mine 
+                          : styles.theirs
+                    }`}
                   >
                     <div className={styles.messageContent}>
-                      <Text>{msg.text}</Text>
+                      {msg.message_type === 'system' && (
+                        <StopOutlined className={styles.systemMessageIcon} />
+                      )}
+                      <Text 
+                        style={{
+                          color: msg.message_type === 'system' ? '#ff4d4f' : undefined,
+                          fontWeight: msg.message_type === 'system' ? '600' : undefined,
+                          whiteSpace: 'pre-line'
+                        }}
+                      >
+                        {msg.text}
+                      </Text>
                     </div>
                     <Text type="secondary" className={styles.messageTime}>
-                      {msg.timestamp}
+                      {msg.message_type === 'system' ? 'Система безопасности' : msg.timestamp}
                     </Text>
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
               </div>
-              <div className={styles.chatWindowInput}>
-                <TextArea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Введите сообщение..."
-                  autoSize={{ minRows: 1, maxRows: 4 }}
-                  onPressEnter={(e) => {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  type="primary"
-                  icon={<SendOutlined />}
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim()}
-                />
-              </div>
+              {!selectedChat.is_frozen && (
+                <div className={styles.chatWindowInput}>
+                  <TextArea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Введите сообщение..."
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim()}
+                  />
+                </div>
+              )}
             </>
           ) : (
             <div className={styles.emptyChatWindow}>

@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import SupportChat, SupportMessage
+from .models import SupportChat, SupportMessage, Message, Chat
+from .services import ContactDetectionService, ChatModerationService
 from apps.admin_panel.models import SupportRequest, SupportMessage as AdminSupportMessage
 
 
@@ -57,3 +58,94 @@ def sync_message_to_support_request(sender, instance, created, **kwargs):
                 message=instance.text,
                 is_admin=(instance.sender.role == 'admin')
             )
+
+
+@receiver(post_save, sender=Message)
+def check_message_for_contacts(sender, instance, created, **kwargs):
+    """
+    Проверяет сообщения на наличие контактных данных
+    """
+    if not created or not instance.text:
+        return
+    
+    # Пропускаем сообщения от админов
+    if hasattr(instance.sender, 'role') and instance.sender.role in ['admin', 'director']:
+        return
+    
+    # Пропускаем уже замороженные чаты
+    if instance.chat.is_frozen:
+        return
+    
+    # Пропускаем системные сообщения
+    if instance.message_type == 'system':
+        return
+    
+    # Проверяем сообщение на контакты
+    detection_result = ContactDetectionService.detect_contacts(instance.text)
+    
+    if detection_result['has_contacts']:
+        # Определяем тип нарушения
+        contact_types = detection_result['contact_types']
+        if len(contact_types) > 1:
+            violation_type = 'multiple'
+        else:
+            violation_type = contact_types[0]
+        
+        # Замораживаем чат только при высоком или среднем риске
+        if detection_result['risk_level'] in ['high', 'medium']:
+            # Проверяем, нет ли уже нарушения для этого сообщения
+            from .models import ContactViolationLog
+            existing_violation = ContactViolationLog.objects.filter(
+                chat=instance.chat,
+                message=instance
+            ).first()
+            
+            if existing_violation:
+                return  # Уже обработано
+            
+            # Замораживаем чат
+            ChatModerationService.freeze_chat(
+                chat=instance.chat,
+                violation_type=violation_type,
+                detected_data=detection_result['detected_data'],
+                message=instance
+            )
+            
+            # Создаем запись о нарушении
+            ContactViolationLog.objects.create(
+                chat=instance.chat,
+                user=instance.sender,
+                message=instance,
+                violation_type=violation_type,
+                detected_data=detection_result['detected_data'],
+                risk_level=detection_result['risk_level'],
+                status='pending'
+            )
+            
+            # Добавляем системное сообщение о заморозке
+            from django.db import transaction
+            
+            # Используем transaction.on_commit чтобы избежать рекурсивного вызова сигнала
+            def create_system_message():
+                # Получаем или создаем системного пользователя
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                
+                system_user, created = User.objects.get_or_create(
+                    username='system',
+                    defaults={
+                        'email': 'system@platform.com',
+                        'first_name': 'Система',
+                        'last_name': 'Безопасности',
+                        'is_active': False,  # Системный пользователь неактивен
+                    }
+                )
+                
+                Message.objects.create(
+                    chat=instance.chat,
+                    sender=system_user,  # От системного пользователя
+                    text="ЧАТ ЗАМОРОЖЕН\n\nВаше сообщение содержит контактные данные. Обмен контактными данными запрещен правилами платформы.\n\nИдет проверка администратором\nОтправлять контактные данные категорически нельзя\n\nПожалуйста, дождитесь решения администратора.",
+                    message_type='system'
+                )
+            
+            transaction.on_commit(create_system_message)

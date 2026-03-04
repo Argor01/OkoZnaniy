@@ -80,6 +80,7 @@ export type MenuKey =
   | 'support_completed'            
 
   | 'tickets'                      
+  | 'contact_violations'
   | 'admin_chats'
   | 'admin_group_chats'            
   | 'request_processing'
