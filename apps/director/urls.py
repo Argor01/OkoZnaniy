@@ -10,6 +10,7 @@ from .views import (
     InternalMessageViewSet,
     InternalCommunicationViewSet,
     MeetingRequestViewSet,
+    DirectorChatRoomViewSet,
 )
 
 router = DefaultRouter()
@@ -21,6 +22,7 @@ router.register(r'statistics', DirectorStatisticsViewSet, basename='director-sta
 router.register(r'messages', InternalMessageViewSet, basename='director-messages')
 router.register(r'internal-communication', InternalCommunicationViewSet, basename='internal-communication')
 router.register(r'meeting-requests', MeetingRequestViewSet, basename='meeting-requests')
+router.register(r'chat-rooms', DirectorChatRoomViewSet, basename='director-chat-rooms')
 
 urlpatterns = [
     path('', include(router.urls)),

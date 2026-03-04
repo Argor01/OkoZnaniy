@@ -321,7 +321,7 @@ const PartnerTurnover: React.FC = () => {
             </Row>
 
             
-            {topPartners.length > 0 && (
+            {topPartners.length > 0 && totalTurnover > 0 ? (
               <Row gutter={[16, isMobile ? 12 : 16]} className={styles.topPartnersRow}>
                 <Col xs={24} lg={12}>
                   <Card 
@@ -416,9 +416,15 @@ const PartnerTurnover: React.FC = () => {
                   </Card>
                 </Col>
               </Row>
-            )}
+            ) : topPartners.length > 0 && totalTurnover === 0 ? (
+              <Card style={{ marginBottom: 16, textAlign: 'center', padding: '40px 20px' }}>
+                <Text type="secondary" style={{ fontSize: 16 }}>
+                  📊 У партнеров пока нет оборота за выбранный период
+                </Text>
+              </Card>
+            ) : null}
 
-            {topPartners.length > 0 && (
+            {topPartners.length > 0 && totalTurnover > 0 && (
               <Card 
                 title="Детали топ-5 партнёров" 
                 className={[

@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConfigProvider, Spin } from 'antd';
+import { ConfigProvider, Spin, App as AntApp } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -40,19 +40,21 @@ const App: React.FC = () => {
           }
         }}
       >
-        <Router>
-          <Suspense fallback={
-            <div className="fullScreenCenter">
-              <Spin size="large" />
-            </div>
-          }>
-            <div className="App">
-              <AppRoutes />
-              <SupportButton />
-              <CookieConsent />
-            </div>
-          </Suspense>
-        </Router>
+        <AntApp>
+          <Router>
+            <Suspense fallback={
+              <div className="fullScreenCenter">
+                <Spin size="large" />
+              </div>
+            }>
+              <div className="App">
+                <AppRoutes />
+                <SupportButton />
+                <CookieConsent />
+              </div>
+            </Suspense>
+          </Router>
+        </AntApp>
       </ConfigProvider>
     </QueryClientProvider>
   );
