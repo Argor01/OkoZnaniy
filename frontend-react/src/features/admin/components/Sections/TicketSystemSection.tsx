@@ -768,7 +768,7 @@ export const TicketSystemSection: React.FC = () => {
                     {selectedTicket.tags_list.map((tag) => (
                       <Tag 
                         key={tag}
-                        closable
+                        closable={true}
                         onClose={(e) => {
                           e.preventDefault();
                           antMessage.success('Тег ' + tag + ' удален');
