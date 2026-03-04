@@ -18,7 +18,8 @@ import {
   Descriptions,
   Divider,
   Timeline,
-  Tooltip
+  Tooltip,
+  Drawer
 } from 'antd';
 import {
   SearchOutlined,
@@ -32,11 +33,14 @@ import {
   FlagOutlined,
   MessageOutlined,
   FileTextOutlined,
-  TeamOutlined
+  TeamOutlined,
+  CloseOutlined,
+  ExpandOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useTickets, useTicketActions } from '@/features/admin/hooks';
+import styles from './TicketSystemSection.module.css';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -104,6 +108,7 @@ export const TicketSystemSection: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [sending, setSending] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [detailsVisible, setDetailsVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -113,6 +118,16 @@ export const TicketSystemSection: React.FC = () => {
   }, []);
 
   const isMobile = windowWidth < 768;
+
+  const handleTicketClick = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+    setDetailsVisible(true);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsVisible(false);
+    setSelectedTicket(null);
+  };
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -271,45 +286,47 @@ export const TicketSystemSection: React.FC = () => {
   };
 
   return (
-    <div className={`ticketSystemWrapper ${isMobile ? 'ticketSystemWrapperMobile' : ''}`}>
-      <Row gutter={[16, 16]}>
-        <Col 
-          xs={24} 
-          lg={10}
-          className={isMobile && selectedTicket ? 'ticketSystemListColHidden' : 'ticketSystemListCol'}
+    <div className={styles.ticketSystemWrapper}>
+      <div 
+        className={styles.ticketSystemMainContent}
+        style={{
+          marginRight: detailsVisible && !isMobile ? '50%' : '0',
+          width: detailsVisible && !isMobile ? '50%' : '100%'
+        }}
+      >
+        <Card 
+          title={
+            <div className={styles.ticketSystemTitleRow}>
+              <FileTextOutlined className={styles.ticketSystemTitleIcon} />
+              <span>Тикеты поддержки</span>
+            </div>
+          }
+          extra={
+            <Button 
+              type="text" 
+              icon={<ReloadOutlined />} 
+              loading={loading}
+              size="small"
+              onClick={() => refetch()}
+            />
+          }
         >
-          <Card 
-            title={
-              <div className="ticketSystemTitleRow">
-                <FileTextOutlined className="ticketSystemTitleIcon" />
-                <span>Тикеты поддержки</span>
+            <div className={styles.ticketSystemStatsGrid}>
+              <div className={styles.ticketSystemStatItem}>
+                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatTotal}`}>{ticketStats.total}</div>
+                <div className={styles.ticketSystemStatLabel}>Всего</div>
               </div>
-            }
-            extra={
-              <Button 
-                type="text" 
-                icon={<ReloadOutlined />} 
-                loading={loading}
-                size="small"
-              />
-            }
-          >
-            <div className="ticketSystemStatsGrid">
-              <div className="ticketSystemStatItem">
-                <div className="ticketSystemStatValue ticketSystemStatTotal">{ticketStats.total}</div>
-                <div className="ticketSystemStatLabel">Всего</div>
+              <div className={styles.ticketSystemStatItem}>
+                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatOpen}`}>{ticketStats.open}</div>
+                <div className={styles.ticketSystemStatLabel}>Открыто</div>
               </div>
-              <div className="ticketSystemStatItem">
-                <div className="ticketSystemStatValue ticketSystemStatOpen">{ticketStats.open}</div>
-                <div className="ticketSystemStatLabel">Открыто</div>
+              <div className={styles.ticketSystemStatItem}>
+                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatInProgress}`}>{ticketStats.inProgress}</div>
+                <div className={styles.ticketSystemStatLabel}>В работе</div>
               </div>
-              <div className="ticketSystemStatItem">
-                <div className="ticketSystemStatValue ticketSystemStatInProgress">{ticketStats.inProgress}</div>
-                <div className="ticketSystemStatLabel">В работе</div>
-              </div>
-              <div className="ticketSystemStatItem">
-                <div className="ticketSystemStatValue ticketSystemStatCompleted">{ticketStats.completed}</div>
-                <div className="ticketSystemStatLabel">Завершено</div>
+              <div className={styles.ticketSystemStatItem}>
+                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatCompleted}`}>{ticketStats.completed}</div>
+                <div className={styles.ticketSystemStatLabel}>Завершено</div>
               </div>
             </div>
 
@@ -318,15 +335,15 @@ export const TicketSystemSection: React.FC = () => {
               placeholder="Поиск по номеру, теме, клиенту..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="ticketSystemSearch"
+              className={styles.ticketSystemSearch}
               allowClear
             />
             
-            <div className="ticketSystemFiltersRow">
+            <div className={styles.ticketSystemFiltersRow}>
               <Select
                 value={statusFilter}
                 onChange={setStatusFilter}
-                className="ticketSystemFilterSelect"
+                className={styles.ticketSystemFilterSelect}
                 size="small"
               >
                 <Option value="all">Все статусы</Option>
@@ -339,7 +356,7 @@ export const TicketSystemSection: React.FC = () => {
               <Select
                 value={priorityFilter}
                 onChange={setPriorityFilter}
-                className="ticketSystemFilterSelect"
+                className={styles.ticketSystemFilterSelect}
                 size="small"
               >
                 <Option value="all">Все приоритеты</Option>
@@ -350,7 +367,7 @@ export const TicketSystemSection: React.FC = () => {
               </Select>
             </div>
             
-            <div className="ticketSystemListBody">
+            <div className={styles.ticketSystemListBody}>
               <List
                 loading={loading}
                 dataSource={filteredTickets}
@@ -358,33 +375,33 @@ export const TicketSystemSection: React.FC = () => {
                 renderItem={(ticket) => (
                   <Card
                     size="small"
-                    onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
-                    className={`ticketSystemTicketCard ${selectedTicket?.id === ticket.id ? 'ticketSystemTicketCardSelected' : ''}`}
+                    onClick={() => handleTicketClick(ticket)}
+                    className={`${styles.ticketSystemTicketCard} ${selectedTicket?.id === ticket.id ? styles.ticketSystemTicketCardSelected : ''}`}
                     hoverable
                   >
-                    <div className="ticketSystemTicketHeader">
-                      <Text strong className="ticketSystemTicketNumber">
+                    <div className={styles.ticketSystemTicketHeader}>
+                      <Text strong className={styles.ticketSystemTicketNumber}>
                         Тикет {ticket.ticket_number}
                       </Text>
-                      <div className="ticketSystemTicketTags">
+                      <div className={styles.ticketSystemTicketTags}>
                         <Tag 
                           color={getStatusColor(ticket.status)} 
                           icon={getStatusIcon(ticket.status)}
-                          className="ticketSystemTag"
+                          className={styles.ticketSystemTag}
                         >
                           {getStatusText(ticket.status)}
                         </Tag>
                         <Tag 
                           color={getPriorityColor(ticket.priority)}
                           icon={ticket.priority === 'urgent' || ticket.priority === 'high' ? <FlagOutlined /> : undefined}
-                          className="ticketSystemTag"
+                          className={styles.ticketSystemTag}
                         >
                           {getPriorityText(ticket.priority)}
                         </Tag>
                       </div>
                     </div>
                     
-                    <Text strong className="ticketSystemTicketSubject">
+                    <Text strong className={styles.ticketSystemTicketSubject}>
                       {ticket.subject}
                       {ticket.auto_created && (
                         <Tag color="blue" size="small" style={{ marginLeft: 8 }}>
@@ -415,9 +432,9 @@ export const TicketSystemSection: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="ticketSystemTicketUser">
+                    <div className={styles.ticketSystemTicketUser}>
                       <Avatar size={20} icon={<UserOutlined />} />
-                      <Text type="secondary" className="ticketSystemTicketUserName">
+                      <Text type="secondary" className={styles.ticketSystemTicketUserName}>
                         {ticket.user.first_name} {ticket.user.last_name}
                       </Text>
                       {/* Отображение назначенных пользователей */}
@@ -428,14 +445,14 @@ export const TicketSystemSection: React.FC = () => {
                       )}
                     </div>
                     
-                    <div className="ticketSystemTicketFooter">
-                      <Text type="secondary" className="ticketSystemTicketTime">
+                    <div className={styles.ticketSystemTicketFooter}>
+                      <Text type="secondary" className={styles.ticketSystemTicketTime}>
                         {formatTimestamp(ticket.created_at)}
                       </Text>
                       {ticket.messages && ticket.messages.length > 0 && (
                         <Badge 
                           count={ticket.messages.length} 
-                          className="ticketSystemMessageBadge"
+                          className={styles.ticketSystemMessageBadge}
                           overflowCount={99}
                         />
                       )}
@@ -445,179 +462,207 @@ export const TicketSystemSection: React.FC = () => {
               />
             </div>
           </Card>
-        </Col>
+        </div>
 
-        <Col xs={24} lg={14}>
-          {selectedTicket ? (
-            <Card 
-              title={
-                <div>
-                  {isMobile && (
-                    <Button 
-                      size="small" 
-                      onClick={() => setSelectedTicket(null)}
-                      className="ticketSystemBackButton"
-                    >
-                      ← Назад
-                    </Button>
-                  )}
-                  <Text strong className="ticketSystemDetailTitle">
-                    Тикет #{selectedTicket.id}: {selectedTicket.subject}
-                  </Text>
+        {/* Боковая панель с деталями тикета */}
+        {isMobile ? (
+          <Drawer
+            title={
+              selectedTicket ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileTextOutlined />
+                  <span>Тикет #{selectedTicket.ticket_number}</span>
                 </div>
-              }
-              extra={
-                <Space>
-                  <Button 
-                    size="small"
-                    icon={<FileTextOutlined />}
-                    onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
-                  >
-                    Открыть отдельно
-                  </Button>
-                  <Select
-                    value={selectedTicket.status}
-                    onChange={(value) => handleUpdateStatus(selectedTicket.id, value)}
-                    className="ticketSystemStatusSelect"
-                    size="small"
-                  >
-                    <Option value="open">Открыт</Option>
-                    <Option value="in_progress">В работе</Option>
-                    <Option value="completed">Завершен</Option>
-                  </Select>
-                  <Select
-                    value={selectedTicket.priority}
-                    onChange={(value) => handleUpdatePriority(selectedTicket.id, value)}
-                    className="ticketSystemPrioritySelect"
-                    size="small"
-                  >
-                    <Option value="low">Низкий</Option>
-                    <Option value="medium">Средний</Option>
-                    <Option value="high">Высокий</Option>
-                    <Option value="urgent">Срочный</Option>
-                  </Select>
-                </Space>
-              }
-            >
-              <Descriptions bordered size="small" column={2} className="ticketSystemDetails">
-                <Descriptions.Item label="Клиент">
-                  <Space>
-                    <Avatar size={24} icon={<UserOutlined />} />
-                    <span>{selectedTicket.user.first_name} {selectedTicket.user.last_name}</span>
-                  </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {selectedTicket.user.email}
-                </Descriptions.Item>
-                <Descriptions.Item label="Создан">
-                  {new Date(selectedTicket.created_at).toLocaleString('ru-RU')}
-                </Descriptions.Item>
-                <Descriptions.Item label="Обновлен">
-                  {formatTimestamp(selectedTicket.updated_at)}
-                </Descriptions.Item>
-                {selectedTicket.admin && (
-                  <Descriptions.Item label="Ответственный" span={2}>
-                    {selectedTicket.admin.first_name} {selectedTicket.admin.last_name}
-                  </Descriptions.Item>
-                )}
-                {selectedTicket.order_id && (
-                  <Descriptions.Item label="Заказ" span={2}>
-                    <a href={`/orders/${selectedTicket.order_id}`} target="_blank" rel="noopener noreferrer">
-                      Заказ #{selectedTicket.order_id}
-                    </a>
-                  </Descriptions.Item>
-                )}
-                {selectedTicket.support_chat_id && (
-                  <Descriptions.Item label="Чат поддержки" span={2}>
-                    <a href={`/support/chat/${selectedTicket.support_chat_id}`} target="_blank" rel="noopener noreferrer">
-                      Чат #{selectedTicket.support_chat_id}
-                    </a>
-                  </Descriptions.Item>
-                )}
-              </Descriptions>
-
-              
-              <Card 
-                size="small" 
-                title="Описание проблемы" 
-                className="ticketSystemDescriptionCard"
-              >
-                <Text>{selectedTicket.description}</Text>
-              </Card>
-
-              <Divider>Переписка</Divider>
-
-              
-              <div className="ticketSystemMessages">
-                {selectedTicket.messages && selectedTicket.messages.length > 0 ? (
-                  <Timeline>
-                    {selectedTicket.messages.map((msg) => (
-                      <Timeline.Item
-                        key={msg.id}
-                        color={msg.is_admin ? '#1890ff' : '#52c41a'}
-                        dot={msg.is_admin ? <MessageOutlined /> : <UserOutlined />}
-                      >
-                        <div className="ticketSystemMessageBubble">
-                          <div className="ticketSystemMessageHeader">
-                            <Text strong>{msg.sender.first_name} {msg.sender.last_name}</Text>
-                            <Text type="secondary" className="ticketSystemMessageTime">
-                              {formatMessageTime(msg.created_at)}
-                            </Text>
-                            {msg.is_admin && (
-                              <Tag color="blue" className="ticketSystemSupportTag">Поддержка</Tag>
-                            )}
-                          </div>
-                          <Text>{msg.message}</Text>
-                        </div>
-                      </Timeline.Item>
-                    ))}
-                  </Timeline>
-                ) : (
-                  <Empty description="Нет сообщений" />
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              
-              <div className="ticketSystemReplyRow">
-                <TextArea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Введите ответ..."
-                  rows={3}
-                  className="ticketSystemReplyInput"
-                  onPressEnter={(e) => {
-                    if (e.ctrlKey) {
-                      sendMessage();
-                    }
-                  }}
-                />
+              ) : 'Детали тикета'
+            }
+            placement="right"
+            onClose={handleCloseDetails}
+            open={detailsVisible}
+            width="100%"
+            extra={
+              selectedTicket && (
                 <Button 
-                  type="primary" 
-                  icon={<SendOutlined />}
-                  onClick={sendMessage}
-                  loading={sending}
-                  disabled={!messageText.trim()}
-                  className="ticketSystemSendButton"
+                  size="small"
+                  icon={<ExpandOutlined />}
+                  onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
                 >
-                  Отправить
+                  Открыть отдельно
                 </Button>
+              )
+            }
+          >
+            {selectedTicket && <TicketDetails ticket={selectedTicket} />}
+          </Drawer>
+        ) : (
+          <div
+            className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''}`}
+          >
+            {selectedTicket && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileTextOutlined />
+                    <Text strong>Тикет #{selectedTicket.ticket_number}</Text>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Button 
+                      size="small"
+                      icon={<ExpandOutlined />}
+                      onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
+                    >
+                      Открыть отдельно
+                    </Button>
+                    <Button 
+                      size="small"
+                      icon={<CloseOutlined />}
+                      onClick={handleCloseDetails}
+                    />
+                  </div>
+                </div>
+                <TicketDetails ticket={selectedTicket} />
               </div>
-              <Text type="secondary" className="ticketSystemHint">
-                💡 Ctrl+Enter для отправки
-              </Text>
-            </Card>
-          ) : (
-            <Card>
-              <Empty 
-                description="Выберите тикет для просмотра деталей"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            </Card>
+            )}
+          </div>
+        )}
+      </div>
+    );
+
+  // Компонент деталей тикета
+  const TicketDetails: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
+    <div>
+      <div style={{ marginBottom: '16px', display: 'flex', gap: '8px' }}>
+        <Select
+          value={ticket.status}
+          onChange={(value) => handleUpdateStatus(ticket.id, value)}
+          size="small"
+          style={{ minWidth: '120px' }}
+        >
+          <Option value="open">Открыт</Option>
+          <Option value="in_progress">В работе</Option>
+          <Option value="completed">Завершен</Option>
+        </Select>
+        <Select
+          value={ticket.priority}
+          onChange={(value) => handleUpdatePriority(ticket.id, value)}
+          size="small"
+          style={{ minWidth: '120px' }}
+        >
+          <Option value="low">Низкий</Option>
+          <Option value="medium">Средний</Option>
+          <Option value="high">Высокий</Option>
+          <Option value="urgent">Срочный</Option>
+        </Select>
+      </div>
+
+      <Card size="small" title="Информация о тикете" style={{ marginBottom: '16px' }}>
+        <Descriptions size="small" column={1}>
+          <Descriptions.Item label="Тема">{ticket.subject}</Descriptions.Item>
+          <Descriptions.Item label="Клиент">
+            <Space>
+              <Avatar size={20} icon={<UserOutlined />} />
+              <span>{ticket.user.first_name} {ticket.user.last_name}</span>
+            </Space>
+          </Descriptions.Item>
+          <Descriptions.Item label="Email">{ticket.user.email}</Descriptions.Item>
+          <Descriptions.Item label="Создан">
+            {new Date(ticket.created_at).toLocaleString('ru-RU')}
+          </Descriptions.Item>
+          <Descriptions.Item label="Статус">
+            <Tag color={getStatusColor(ticket.status)}>
+              {getStatusText(ticket.status)}
+            </Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="Приоритет">
+            <Tag color={getPriorityColor(ticket.priority)}>
+              {getPriorityText(ticket.priority)}
+            </Tag>
+          </Descriptions.Item>
+          {ticket.tags_list && ticket.tags_list.length > 0 && (
+            <Descriptions.Item label="Теги">
+              <Space wrap size="small">
+                {ticket.tags_list.map(tag => (
+                  <Tag 
+                    key={tag} 
+                    size="small"
+                    color={tag.includes('нарушение') ? 'red' : 'blue'}
+                  >
+                    {tag}
+                  </Tag>
+                ))}
+              </Space>
+            </Descriptions.Item>
           )}
-        </Col>
-      </Row>
+        </Descriptions>
+      </Card>
+
+      <Card size="small" title="Описание" style={{ marginBottom: '16px' }}>
+        <Text>{ticket.description}</Text>
+      </Card>
+
+      <Card size="small" title="Переписка" style={{ marginBottom: '16px' }}>
+        <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+          {ticket.messages && ticket.messages.length > 0 ? (
+            <Timeline size="small">
+              {ticket.messages.map((msg) => (
+                <Timeline.Item
+                  key={msg.id}
+                  color={msg.is_admin ? '#1890ff' : '#52c41a'}
+                  dot={msg.is_admin ? <MessageOutlined /> : <UserOutlined />}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <Text strong style={{ fontSize: '12px' }}>
+                        {msg.sender.first_name} {msg.sender.last_name}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: '11px' }}>
+                        {formatMessageTime(msg.created_at)}
+                      </Text>
+                      {msg.is_admin && (
+                        <Tag color="blue" size="small">Поддержка</Tag>
+                      )}
+                    </div>
+                    <Text style={{ fontSize: '13px' }}>{msg.message}</Text>
+                  </div>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          ) : (
+            <Empty description="Нет сообщений" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </Card>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <TextArea
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          placeholder="Введите ответ..."
+          rows={3}
+          onPressEnter={(e) => {
+            if (e.ctrlKey) {
+              sendMessage();
+            }
+          }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            💡 Ctrl+Enter для отправки
+          </Text>
+          <Button 
+            type="primary" 
+            icon={<SendOutlined />}
+            onClick={sendMessage}
+            loading={sending}
+            disabled={!messageText.trim()}
+            size="small"
+          >
+            Отправить
+          </Button>
+        </div>
+      </div>
     </div>
+  );
   );
 };
 

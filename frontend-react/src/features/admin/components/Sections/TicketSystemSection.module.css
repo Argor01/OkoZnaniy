@@ -1,0 +1,217 @@
+.ticketSystemWrapper {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.ticketSystemMainContent {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  overflow: auto;
+}
+
+.ticketSystemSidePanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow: auto;
+  padding: 24px;
+  transform: translateX(100%);
+}
+
+.ticketSystemSidePanel.open {
+  transform: translateX(0);
+}
+
+.ticketSystemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticketSystemTitleIcon {
+  color: #1890ff;
+}
+
+.ticketSystemStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ticketSystemStatItem {
+  text-align: center;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.ticketSystemStatValue {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.ticketSystemStatTotal {
+  color: #1890ff;
+}
+
+.ticketSystemStatOpen {
+  color: #fa8c16;
+}
+
+.ticketSystemStatInProgress {
+  color: #1890ff;
+}
+
+.ticketSystemStatCompleted {
+  color: #52c41a;
+}
+
+.ticketSystemStatLabel {
+  font-size: 12px;
+  color: #666;
+}
+
+.ticketSystemSearch {
+  margin-bottom: 16px;
+}
+
+.ticketSystemFiltersRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ticketSystemFilterSelect {
+  flex: 1;
+}
+
+.ticketSystemListBody {
+  max-height: calc(100vh - 400px);
+  overflow: auto;
+}
+
+.ticketSystemTicketCard {
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ticketSystemTicketCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ticketSystemTicketCardSelected {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.ticketSystemTicketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.ticketSystemTicketNumber {
+  color: #1890ff;
+  font-size: 12px;
+}
+
+.ticketSystemTicketTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ticketSystemTag {
+  font-size: 11px;
+  margin: 0;
+}
+
+.ticketSystemTicketSubject {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.ticketSystemTicketUser {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ticketSystemTicketUserName {
+  font-size: 12px;
+}
+
+.ticketSystemTicketFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticketSystemTicketTime {
+  font-size: 11px;
+}
+
+.ticketSystemMessageBadge {
+  font-size: 11px;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+  .ticketSystemStatsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .ticketSystemStatValue {
+    font-size: 18px;
+  }
+  
+  .ticketSystemFiltersRow {
+    flex-direction: column;
+  }
+  
+  .ticketSystemListBody {
+    max-height: calc(100vh - 300px);
+  }
+}
+
+/* Анимации */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.ticketSystemSidePanel.entering {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ticketSystemSidePanel.exiting {
+  animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
