@@ -663,7 +663,6 @@ export const TicketSystemSection: React.FC = () => {
       </div>
     </div>
   );
-  );
 };
 
 export default TicketSystemSection;
