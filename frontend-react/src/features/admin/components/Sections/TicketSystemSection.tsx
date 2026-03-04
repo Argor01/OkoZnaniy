@@ -770,8 +770,7 @@ export const TicketSystemSection: React.FC = () => {
                         key={tag}
                         closable
                         onClose={() => {
-                          // Удалить тег
-                          antMessage.success(`Тег ${tag} удален`);
+                          antMessage.success('Тег ' + tag + ' удален');
                         }}
                         color={tag.includes('нарушение') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'}
                       >
@@ -796,8 +795,8 @@ export const TicketSystemSection: React.FC = () => {
                   onChange={(e) => setNewTag(e.target.value)}
                   onPressEnter={() => {
                     if (newTag.trim()) {
-                      const tag = newTag.startsWith('#') ? newTag : `#${newTag}`;
-                      antMessage.success(`Тег ${tag} добавлен`);
+                      const tag = newTag.startsWith('#') ? newTag : '#' + newTag;
+                      antMessage.success('Тег ' + tag + ' добавлен');
                       setNewTag('');
                     }
                   }}
@@ -808,8 +807,8 @@ export const TicketSystemSection: React.FC = () => {
                   size="small"
                   onClick={() => {
                     if (newTag.trim()) {
-                      const tag = newTag.startsWith('#') ? newTag : `#${newTag}`;
-                      antMessage.success(`Тег ${tag} добавлен`);
+                      const tag = newTag.startsWith('#') ? newTag : '#' + newTag;
+                      antMessage.success('Тег ' + tag + ' добавлен');
                       setNewTag('');
                     }
                   }}
@@ -827,7 +826,7 @@ export const TicketSystemSection: React.FC = () => {
                         key={tag}
                         style={{ cursor: 'pointer' }}
                         onClick={() => {
-                          antMessage.success(`Тег ${tag} добавлен`);
+                          antMessage.success('Тег ' + tag + ' добавлен');
                         }}
                       >
                         {tag}
