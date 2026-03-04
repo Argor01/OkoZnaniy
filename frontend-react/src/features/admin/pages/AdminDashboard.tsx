@@ -23,7 +23,6 @@ const PartnersSection = lazy(() => import('@/features/admin/components/Sections/
 const EarningsSection = lazy(() => import('@/features/admin/components/Sections/EarningsSection').then(m => ({ default: m.EarningsSection })));
 
 const TicketSystemSection = lazy(() => import('@/features/admin/components/Sections/TicketSystemSection').then(m => ({ default: m.TicketSystemSection })));
-const ContactViolationsPage = lazy(() => import('@/features/admin/pages/ContactViolationsPage'));
 const UsersManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.UsersManagementSection })));
 const BlockedUsersSection = lazy(() => import('@/features/admin/components/Sections/BlockedUsersSection').then(m => ({ default: m.BlockedUsersSection })));
 const RolesManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.RolesManagementSection })));
@@ -233,11 +232,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'tickets':
         return (
           <TicketSystemSection />
-        );
-
-      case 'contact_violations':
-        return (
-          <ContactViolationsPage />
         );
 
       case 'admin_chats':

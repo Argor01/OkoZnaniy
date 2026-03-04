@@ -16,7 +16,6 @@ import {
   SafetyOutlined,      
   UnorderedListOutlined, 
   ExclamationCircleOutlined,
-  LockOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -121,11 +120,6 @@ export const menuItems: MenuItem[] = [
     label: 'Тикеты поддержки',
   },
   {
-    key: 'contact_violations',
-    icon: LockOutlined,
-    label: 'Нарушения контактов',
-  },
-  {
     key: 'admin_chats',
     icon: CommentOutlined,
     label: 'Внутренняя коммуникация',
@@ -187,7 +181,6 @@ export const titleMap: Record<MenuKey, string> = {
   support_completed: 'Завершенные запросы поддержки',
 
   tickets: 'Тикеты поддержки',
-  contact_violations: 'Нарушения обмена контактами',
   admin_chats: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
   user_conversations: 'Переписки пользователей',
