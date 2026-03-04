@@ -765,11 +765,12 @@ export const TicketSystemSection: React.FC = () => {
               <div style={{ marginTop: '8px' }}>
                 {selectedTicket.tags_list && selectedTicket.tags_list.length > 0 ? (
                   <Space wrap size="small">
-                    {selectedTicket.tags_list.map(tag => (
+                    {selectedTicket.tags_list.map((tag) => (
                       <Tag 
                         key={tag}
                         closable
-                        onClose={() => {
+                        onClose={(e) => {
+                          e.preventDefault();
                           antMessage.success('Тег ' + tag + ' удален');
                         }}
                         color={tag.includes('нарушение') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'}
@@ -821,7 +822,7 @@ export const TicketSystemSection: React.FC = () => {
                 <Text type="secondary" style={{ fontSize: '12px' }}>Быстрые теги:</Text>
                 <div style={{ marginTop: '4px' }}>
                   <Space wrap size="small">
-                    {['#срочно', '#негатив', '#баг', '#нарушение', '#важно'].map(tag => (
+                    {['#срочно', '#негатив', '#баг', '#нарушение', '#важно'].map((tag) => (
                       <Tag 
                         key={tag}
                         style={{ cursor: 'pointer' }}
