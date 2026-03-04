@@ -20,7 +20,7 @@ import {
   ExclamationCircleOutlined,
   LockOutlined
 } from '@ant-design/icons';
-import AdminLayout from '../components/AdminLayout';
+import { AdminLayout } from '../components/Layout';
 import { useAdminViolations } from '../hooks/useAdminViolations';
 
 const { Title, Text } = Typography;
