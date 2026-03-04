@@ -1,6 +1,6 @@
 .ticketSystemWrapper {
   position: relative;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -11,15 +11,15 @@
 }
 
 .ticketSystemSidePanel {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   width: 50%;
-  height: 100vh;
+  height: 100%;
   background-color: #fff;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
+  z-index: 100;
   overflow: auto;
   padding: 24px;
   transform: translateX(100%);
@@ -95,7 +95,7 @@
 }
 
 .ticketSystemListBody {
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 450px);
   overflow: auto;
 }
 
@@ -185,7 +185,11 @@
   }
   
   .ticketSystemListBody {
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 350px);
+  }
+  
+  .ticketSystemSidePanel {
+    width: 100%;
   }
 }
 
