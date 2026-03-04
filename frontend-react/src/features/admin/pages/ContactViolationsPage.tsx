@@ -17,10 +17,8 @@ import {
   EyeOutlined, 
   CheckOutlined, 
   CloseOutlined,
-  ExclamationCircleOutlined,
-  LockOutlined
+  ExclamationCircleOutlined
 } from '@ant-design/icons';
-import { AdminLayout } from '../components/Layout';
 import { useAdminViolations } from '../hooks/useAdminViolations';
 
 const { Title, Text } = Typography;
@@ -273,18 +271,13 @@ const ContactViolationsPage: React.FC = () => {
   ];
 
   return (
-    <AdminLayout>
-      <div style={{ padding: '24px' }}>
-        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={2}>
-            <LockOutlined style={{ marginRight: '8px' }} />
-            Нарушения обмена контактами
-          </Title>
-          <Select
-            value={statusFilter}
-            onChange={setStatusFilter}
-            style={{ width: 200 }}
-          >
+    <div style={{ padding: '24px' }}>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Select
+          value={statusFilter}
+          onChange={setStatusFilter}
+          style={{ width: 200 }}
+        >
             <Option value="all">Все статусы</Option>
             <Option value="pending">Ожидают проверки</Option>
             <Option value="approved">Одобренные</Option>
@@ -464,7 +457,7 @@ const ContactViolationsPage: React.FC = () => {
           </div>
         </Modal>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 
