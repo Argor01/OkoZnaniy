@@ -122,6 +122,63 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
                 status='pending'
             )
             
+            # Создаем тикет для админов и директоров
+            from apps.admin_panel.models import SupportRequest
+            
+            # Формируем описание нарушения
+            detected_contacts = []
+            data = detection_result['detected_data']
+            if 'phones' in data and data['phones']:
+                detected_contacts.append(f"Телефоны: {', '.join(data['phones'])}")
+            if 'emails' in data and data['emails']:
+                detected_contacts.append(f"Email: {', '.join(data['emails'])}")
+            if 'telegram' in data and data['telegram']:
+                detected_contacts.append(f"Telegram: {', '.join(data['telegram'])}")
+            if 'whatsapp' in data and data['whatsapp']:
+                detected_contacts.append(f"WhatsApp: {', '.join(data['whatsapp'])}")
+            if 'social' in data and data['social']:
+                detected_contacts.append(f"Соц.сети: {', '.join(data['social'])}")
+            if 'keywords' in data and data['keywords']:
+                detected_contacts.append(f"Ключевые слова: {', '.join(data['keywords'])}")
+            
+            contacts_summary = '; '.join(detected_contacts) if detected_contacts else 'Обнаружены контактные данные'
+            
+            # Создаем тикет
+            ticket_subject = f"🚨 Нарушение: обмен контактными данными в чате #{instance.chat.id}"
+            ticket_description = f"""АВТОМАТИЧЕСКОЕ УВЕДОМЛЕНИЕ О НАРУШЕНИИ
+
+📋 Детали нарушения:
+• Чат: #{instance.chat.id}
+• Пользователь: {instance.sender.username} ({instance.sender.first_name} {instance.sender.last_name})
+• Тип нарушения: {violation_type}
+• Уровень риска: {detection_result['risk_level']}
+
+📞 Обнаруженные контактные данные:
+{contacts_summary}
+
+💬 Сообщение пользователя:
+"{instance.text}"
+
+⚠️ Действия системы:
+• Чат автоматически заморожен
+• Пользователю отправлено предупреждение
+• Требуется решение администратора
+
+🔗 Ссылка на чат: /admin/chat/{instance.chat.id}
+"""
+            
+            support_ticket = SupportRequest.objects.create(
+                user=instance.sender,
+                subject=ticket_subject,
+                description=ticket_description,
+                status='open',
+                priority='high',  # Высокий приоритет для нарушений
+                auto_created=True,
+                tags=['#нарушение', '#контакты', f'#{violation_type}']
+            )
+            
+            print(f"Создан тикет #{support_ticket.ticket_number} для нарушения в чате #{instance.chat.id}")
+            
             # Добавляем системное сообщение о заморозке
             from django.db import transaction
             

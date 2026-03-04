@@ -1920,16 +1920,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   </div>
                 ) : null}
                 
-                {selectedChat.is_frozen && (
-                  <Alert
-                    message="Чат заморожен"
-                    description={selectedChat.frozen_reason || "Чат заморожен администратором для проверки"}
-                    type="warning"
-                    showIcon
-                    icon={<StopOutlined />}
-                    style={{ margin: '16px' }}
-                  />
-                )}
                 
                 {/* Явно скрываем инпут для замороженных чатов */}
                 {selectedChat.is_frozen && (
@@ -1941,29 +1931,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     borderTop: '1px solid #f0f0f0'
                   }}>
                     Отправка сообщений в замороженном чате недоступна
-                  </div>
-                )}
-                
-                {/* DEBUG: Отладочная информация для замороженного чата */}
-                {process.env.NODE_ENV === 'development' && selectedChat && (
-                  <div style={{ fontSize: '12px', color: '#999', padding: '4px', border: '1px solid #ddd', margin: '8px' }}>
-                    DEBUG Chat {selectedChat.id}: is_frozen = {String(selectedChat.is_frozen)}, frozen_reason = {selectedChat.frozen_reason || 'null'}
-                    <br />
-                    Системных сообщений: {selectedChat.messages?.filter(m => m.message_type === 'system').length || 0}
-                    <br />
-                    Последнее обновление: {new Date().toLocaleTimeString()}
-                    <br />
-                    Условие инпута: selectedChat={!!selectedChat}, is_frozen={selectedChat.is_frozen}, is_frozen !== true = {selectedChat.is_frozen !== true}
-                    <br />
-                    <button 
-                      onClick={() => {
-                        console.log('Принудительное обновление чата', selectedChat.id);
-                        loadChatDetail(selectedChat.id);
-                      }}
-                      style={{ fontSize: '10px', padding: '2px 4px', marginTop: '4px' }}
-                    >
-                      Обновить данные чата
-                    </button>
                   </div>
                 )}
                 
@@ -2353,24 +2320,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 display: selectedChat?.is_frozen === true ? 'none' : 'block'
               }}
             >
-              {/* ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Если чат заморожен, показываем ошибку */}
-              {selectedChat.is_frozen === true && (
-                <div style={{ 
-                  color: 'red', 
-                  fontWeight: 'bold', 
-                  padding: '10px', 
-                  border: '2px solid red',
-                  background: '#ffe6e6'
-                }}>
-                  ОШИБКА: Инпут не должен отображаться для замороженного чата!
-                </div>
-              )}
-              {/* DEBUG: Отладочная информация */}
-              {process.env.NODE_ENV === 'development' && (
-                <div style={{ fontSize: '12px', color: '#999', padding: '4px' }}>
-                  DEBUG: is_frozen = {String(selectedChat.is_frozen)}, frozen_reason = {selectedChat.frozen_reason || 'null'}
-                </div>
-              )}
               
               {isSupportChatSelected && (
                 <div className={`${styles.claimCarouselWrapper} ${isMobile ? styles.claimCarouselWrapperMobile : ''}`}>
