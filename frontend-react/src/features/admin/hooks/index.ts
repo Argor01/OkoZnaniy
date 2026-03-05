@@ -52,6 +52,7 @@ export {
 export { 
   useTickets, 
   useTicket,
+  useTicketByNumber,
   useTicketActions,
   useAdminUsers
 } from './useAdminTickets';

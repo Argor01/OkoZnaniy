@@ -67,6 +67,48 @@ export const useTicket = (ticketId: number) => {
   return { ticket, loading, refetch };
 };
 
+export const useTicketByNumber = (ticketNumber: string) => {
+  const { tickets, loading: ticketsLoading } = useTickets(true);
+  
+  const ticket = tickets.find((t: any) => t.ticket_number === ticketNumber);
+  
+  const { data: fullTicket, isLoading: detailLoading, refetch } = useQuery({
+    queryKey: ['admin_ticket_by_number', ticketNumber],
+    queryFn: async () => {
+      if (!ticket) {
+        throw new Error('Тикет не найден');
+      }
+      
+      // Получаем полную информацию о тикете по ID
+      try {
+        const supportRequest = await adminPanelApi.getSupportRequest(ticket.id);
+        return {
+          ...supportRequest,
+          type: 'support_request' as const,
+          claim_type: null
+        };
+      } catch (error) {
+        try {
+          const claim = await adminPanelApi.getClaim(ticket.id);
+          return {
+            ...claim,
+            type: 'claim' as const
+          };
+        } catch (claimError) {
+          throw new Error('Тикет не найден');
+        }
+      }
+    },
+    enabled: !!ticket && !!ticketNumber,
+  });
+
+  return { 
+    ticket: fullTicket, 
+    loading: ticketsLoading || detailLoading, 
+    refetch 
+  };
+};
+
 export const useAdminUsers = () => {
   const { data: adminUsers = [], isLoading: loading } = useQuery({
     queryKey: ['admin_users'],

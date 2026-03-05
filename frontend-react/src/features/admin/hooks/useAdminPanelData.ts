@@ -8,5 +8,5 @@ export { useWorks, useWorkActions } from './useAdminWorks';
 export { useTariffs, useTariffActions, useCommissions, useCommissionActions } from './useAdminFinance';
 export { useSupportChats, useSupportActions } from './useAdminSupport';
 export { useChatRooms as useAdminChatRooms, useChatRoomActions } from './useAdminChats';
-export { useTickets, useTicketActions } from './useAdminTickets';
+export { useTickets, useTicketActions, useTicketByNumber } from './useAdminTickets';
 export { useAdminStats } from './useAdminStats';

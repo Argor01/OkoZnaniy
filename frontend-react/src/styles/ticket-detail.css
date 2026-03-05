@@ -1,62 +1,101 @@
-/* Стили для страницы детального просмотра тикета */
+/* Стили для страницы детального просмотра тикета - Pyrus Style */
 
 .ticketDetailPage {
   padding: 0 24px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
 .ticketDetailBreadcrumb {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding-top: 16px;
 }
 
-.ticketDetailBreadcrumb .ant-btn-link {
-  padding: 0;
-  height: auto;
+.ticketDetailBreadcrumb .ant-breadcrumb {
+  font-size: 14px;
+}
+
+.ticketDetailBreadcrumb a {
   color: #1890ff;
+  transition: color 0.2s;
 }
 
+.ticketDetailBreadcrumb a:hover {
+  color: #40a9ff;
+}
+
+/* Заголовок тикета */
 .ticketDetailHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
 }
 
 .ticketDetailTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
+  color: #262626;
+  line-height: 1.4;
 }
 
-.ticketDetailAutoCreatedTag {
-  background: #e6f7ff;
-  border-color: #91d5ff;
-  color: #1890ff;
+/* Карточки */
+.ticketDetailPage .ant-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 16px;
+  transition: box-shadow 0.3s;
 }
 
-.ticketDetailActions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+.ticketDetailPage .ant-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.ticketDetailMainContent {
-  margin-bottom: 24px;
+.ticketDetailPage .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px;
+  min-height: auto;
 }
 
+.ticketDetailPage .ant-card-head-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+  padding: 0;
+}
+
+.ticketDetailPage .ant-card-body {
+  padding: 20px;
+}
+
+.ticketDetailPage .ant-card-small > .ant-card-head {
+  padding: 12px 16px;
+}
+
+.ticketDetailPage .ant-card-small > .ant-card-body {
+  padding: 16px;
+}
+
+/* Описание проблемы */
 .ticketDetailDescription {
   background: #fafafa;
-  border: 1px solid #d9d9d9;
+  border: 1px solid #e8e8e8;
   border-radius: 6px;
   padding: 16px;
-  margin-bottom: 24px;
+  line-height: 1.6;
+  color: #595959;
 }
 
+/* История обращения */
 .ticketDetailMessages {
-  max-height: 500px;
+  max-height: 600px;
   overflow-y: auto;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   padding-right: 8px;
 }
 
@@ -65,42 +104,50 @@
 }
 
 .ticketDetailMessages::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+  background: transparent;
 }
 
 .ticketDetailMessages::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #d9d9d9;
   border-radius: 3px;
 }
 
 .ticketDetailMessages::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #bfbfbf;
+}
+
+.ticketDetailPage .ant-timeline {
+  margin-top: 16px;
+}
+
+.ticketDetailPage .ant-timeline-item {
+  padding-bottom: 24px;
 }
 
 .ticketDetailMessageBubble {
-  background: #f5f5f5;
-  padding: 12px 16px;
+  background: white;
+  padding: 14px 16px;
   border-radius: 8px;
-  margin-bottom: 8px;
-  border-left: 3px solid #1890ff;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s;
 }
 
-.ticketDetailMessageBubble.admin {
-  border-left-color: #52c41a;
-  background: #f6ffed;
+.ticketDetailMessageBubble:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .ticketDetailMessageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .ticketDetailMessageSender {
   font-weight: 600;
   color: #262626;
+  font-size: 14px;
 }
 
 .ticketDetailMessageTime {
@@ -110,23 +157,32 @@
 
 .ticketDetailMessageText {
   color: #595959;
-  line-height: 1.5;
+  line-height: 1.6;
   word-wrap: break-word;
+  font-size: 14px;
 }
 
+/* Форма ответа */
 .ticketDetailReplyForm {
   display: flex;
   gap: 12px;
   align-items: flex-end;
+  margin-top: 16px;
 }
 
 .ticketDetailReplyInput {
   flex: 1;
 }
 
-.ticketDetailReplyButton {
-  height: auto;
-  padding: 8px 16px;
+.ticketDetailPage .ant-input-textarea textarea {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s;
+}
+
+.ticketDetailPage .ant-input-textarea textarea:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
 
 .ticketDetailHint {
@@ -136,123 +192,107 @@
   display: block;
 }
 
-.ticketDetailSidebar {
+/* Боковая панель */
+.ticketDetailSidebar .ant-card {
+  background: white;
+}
+
+.ticketDetailPage .ant-descriptions-item-label {
+  font-weight: 500;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.ticketDetailPage .ant-descriptions-item-content {
+  color: #262626;
+  font-size: 14px;
+}
+
+/* Теги */
+.ticketDetailPage .ant-tag {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 2px 10px;
+  border: none;
+  font-weight: 500;
+}
+
+/* Команда */
+.ticketDetailTeamMember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
   background: #fafafa;
   border-radius: 6px;
-  padding: 16px;
+  transition: background 0.2s;
 }
 
-.ticketDetailInfo {
-  margin-bottom: 16px;
+.ticketDetailTeamMember:hover {
+  background: #f0f0f0;
 }
 
-.ticketDetailInfoItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.ticketDetailInfoItem:last-child {
-  border-bottom: none;
-}
-
-.ticketDetailInfoLabel {
+/* Кнопки */
+.ticketDetailPage .ant-btn {
+  border-radius: 6px;
   font-weight: 500;
+  transition: all 0.3s;
+}
+
+.ticketDetailPage .ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.ticketDetailPage .ant-btn-primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.ticketDetailPage .ant-btn-dashed {
+  border-color: #d9d9d9;
   color: #595959;
 }
 
-.ticketDetailInfoValue {
-  color: #262626;
-}
-
-.ticketDetailUserInfo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ticketDetailUserName {
-  font-weight: 500;
-}
-
-.ticketDetailUserEmail {
-  font-size: 12px;
-  color: #8c8c8c;
-}
-
-.ticketDetailQuickActions {
-  margin-top: 16px;
-}
-
-.ticketDetailQuickActions .ant-btn {
-  margin-bottom: 8px;
-}
-
-.ticketDetailStatusTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.ticketDetailPriorityTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.ticketDetailLink {
-  color: #1890ff;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.ticketDetailLink:hover {
+.ticketDetailPage .ant-btn-dashed:hover {
+  border-color: #40a9ff;
   color: #40a9ff;
-  text-decoration: underline;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .ticketDetailPage {
-    padding: 0 16px;
-  }
-  
-  .ticketDetailHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  
-  .ticketDetailActions {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-  
-  .ticketDetailReplyForm {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .ticketDetailReplyButton {
-    align-self: flex-end;
-    width: auto;
-  }
-  
-  .ticketDetailMessages {
-    max-height: 300px;
-  }
+/* Select */
+.ticketDetailPage .ant-select {
+  border-radius: 6px;
+}
+
+.ticketDetailPage .ant-select-selector {
+  border-radius: 6px !important;
+  border-color: #d9d9d9 !important;
+}
+
+/* Divider */
+.ticketDetailPage .ant-divider {
+  margin: 20px 0;
+  border-color: #e8e8e8;
+}
+
+.ticketDetailPage .ant-divider-inner-text {
+  font-weight: 600;
+  color: #595959;
+  font-size: 14px;
+}
+
+/* Быстрые действия */
+.ticketDetailQuickActions .ant-btn {
+  justify-content: flex-start;
+  text-align: left;
+  height: auto;
+  padding: 10px 16px;
 }
 
 /* Анимации */
-.ticketDetailMessageBubble {
-  animation: fadeInUp 0.3s ease-out;
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -264,21 +304,36 @@
   }
 }
 
-.ticketDetailPage .ant-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+.ticketDetailMessageBubble {
+  animation: fadeInUp 0.3s ease-out;
 }
 
-.ticketDetailPage .ant-descriptions-item-label {
-  font-weight: 500;
-  color: #595959;
+/* Адаптивность */
+@media (max-width: 992px) {
+  .ticketDetailPage {
+    padding: 0 16px;
+  }
+  
+  .ticketDetailMessages {
+    max-height: 400px;
+  }
 }
 
-.ticketDetailPage .ant-timeline-item-content {
-  margin-left: 8px;
-}
-
-.ticketDetailPage .ant-tag {
-  border-radius: 4px;
-  font-size: 12px;
+@media (max-width: 768px) {
+  .ticketDetailHeader {
+    padding: 16px;
+  }
+  
+  .ticketDetailTitle {
+    font-size: 18px;
+  }
+  
+  .ticketDetailReplyForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ticketDetailPage .ant-card-body {
+    padding: 16px;
+  }
 }

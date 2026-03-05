@@ -38,7 +38,7 @@ import {
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useTicket, useTicketActions, useAdminUsers } from '@/features/admin/hooks';
+import { useTicket, useTicketActions, useAdminUsers, useTicketByNumber } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import '@/styles/ticket-detail.css';
 
@@ -104,8 +104,8 @@ export const TicketDetailPage: React.FC = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Используем существующие хуки
-  const { ticket, loading, refetch } = useTicket(ticketId ? parseInt(ticketId) : 0);
+  // Используем новый хук для поиска по номеру тикета
+  const { ticket, loading, refetch } = useTicketByNumber(ticketId || '');
   const { adminUsers } = useAdminUsers();
   const { 
     sendMessage: sendTicketMessage, 
@@ -116,6 +116,27 @@ export const TicketDetailPage: React.FC = () => {
     removeTag,
     updateTags
   } = useTicketActions();
+
+  // Обработка параметра action из URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const action = searchParams.get('action');
+    
+    if (action === 'tags') {
+      setTagModalVisible(true);
+    } else if (action === 'client-chat') {
+      // Прокрутить к форме ответа
+      setTimeout(() => {
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+          textarea.focus();
+          textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    } else if (action === 'team-chat') {
+      setAssignModalVisible(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -297,16 +318,15 @@ export const TicketDetailPage: React.FC = () => {
     <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
       <div style={{ padding: '0 24px' }}>
         {/* Breadcrumb */}
-        <Breadcrumb style={{ marginBottom: 16 }}>
+        <Breadcrumb style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
           <Breadcrumb.Item>
-            <Button 
-              type="link" 
-              icon={<ArrowLeftOutlined />}
+            <a 
               onClick={() => navigate('/admin/dashboard')}
-              style={{ padding: 0 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
             >
-              Админ панель
-            </Button>
+              <ArrowLeftOutlined />
+              <span>Админ панель</span>
+            </a>
           </Breadcrumb.Item>
           <Breadcrumb.Item>Тикеты</Breadcrumb.Item>
           <Breadcrumb.Item>Тикет {ticket.ticket_number}</Breadcrumb.Item>
@@ -352,12 +372,12 @@ export const TicketDetailPage: React.FC = () => {
               }
             >
               {/* Описание проблемы */}
-              <Card size="small" title="Описание проблемы" style={{ marginBottom: 24 }}>
+              <Card size="small" title="Описание проблемы" style={{ marginBottom: 16 }}>
                 <Text>{ticket.description}</Text>
               </Card>
 
-              {/* Переписка */}
-              <Divider>Переписка</Divider>
+              {/* История обращения */}
+              <Divider>История обращения</Divider>
               
               <div style={{ maxHeight: '500px', overflowY: 'auto', marginBottom: 24 }}>
                 {ticket.messages && ticket.messages.length > 0 ? (
@@ -433,7 +453,7 @@ export const TicketDetailPage: React.FC = () => {
 
           {/* Боковая панель с информацией */}
           <Col xs={24} lg={8}>
-            <Card title="Информация о тикете" size="small">
+            <Card title="Информация о тикете" size="small" style={{ marginBottom: 16 }}>
               <Descriptions column={1} size="small">
                 <Descriptions.Item label="Статус">
                   <Tag 
@@ -461,44 +481,6 @@ export const TicketDetailPage: React.FC = () => {
                     </div>
                   </Space>
                 </Descriptions.Item>
-
-                {ticket.admin && (
-                  <Descriptions.Item label="Ответственный">
-                    <Space>
-                      <Avatar size={24} icon={<UserOutlined />} />
-                      <span>{ticket.admin.first_name} {ticket.admin.last_name}</span>
-                    </Space>
-                  </Descriptions.Item>
-                )}
-
-                {ticket.assigned_users && ticket.assigned_users.length > 0 && (
-                  <Descriptions.Item label="Назначенные" span={2}>
-                    <Space wrap>
-                      {ticket.assigned_users.map(user => (
-                        <Tag key={user.id} icon={<UserOutlined />}>
-                          {user.first_name} {user.last_name}
-                        </Tag>
-                      ))}
-                    </Space>
-                  </Descriptions.Item>
-                )}
-
-                {ticket.tags_list && ticket.tags_list.length > 0 && (
-                  <Descriptions.Item label="Теги" span={2}>
-                    <Space wrap>
-                      {ticket.tags_list.map(tag => (
-                        <Tag 
-                          key={tag} 
-                          color={tag.includes('негатив') ? 'red' : 'blue'}
-                          closable
-                          onClose={() => handleRemoveTag(tag)}
-                        >
-                          {tag}
-                        </Tag>
-                      ))}
-                    </Space>
-                  </Descriptions.Item>
-                )}
 
                 <Descriptions.Item label="Создан">
                   {new Date(ticket.created_at).toLocaleString('ru-RU')}
@@ -536,6 +518,103 @@ export const TicketDetailPage: React.FC = () => {
               </Descriptions>
             </Card>
 
+            {/* Команда */}
+            <Card title="Команда" size="small" style={{ marginBottom: 16 }}>
+              <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                {/* Ответственный */}
+                {ticket.admin && (
+                  <div>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginBottom: 8 }}>
+                      Ответственный:
+                    </Text>
+                    <Space>
+                      <Avatar size={32} icon={<UserOutlined />} />
+                      <div>
+                        <div style={{ fontWeight: 500 }}>
+                          {ticket.admin.first_name} {ticket.admin.last_name}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                          Администратор
+                        </Text>
+                      </div>
+                    </Space>
+                  </div>
+                )}
+
+                {/* Наблюдатели */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      Наблюдатели ({ticket.assigned_users?.length || 0}):
+                    </Text>
+                    <Button 
+                      size="small" 
+                      type="dashed" 
+                      icon={<PlusOutlined />}
+                      onClick={() => setAssignModalVisible(true)}
+                    >
+                      Добавить
+                    </Button>
+                  </div>
+                  {ticket.assigned_users && ticket.assigned_users.length > 0 ? (
+                    <Space direction="vertical" style={{ width: '100%' }} size="small">
+                      {ticket.assigned_users.map(user => (
+                        <div 
+                          key={user.id}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 8,
+                            padding: '6px 8px',
+                            background: '#f5f5f5',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          <Avatar size={24} icon={<UserOutlined />} />
+                          <span style={{ fontSize: '13px' }}>
+                            {user.first_name} {user.last_name}
+                          </span>
+                        </div>
+                      ))}
+                    </Space>
+                  ) : (
+                    <Text type="secondary" style={{ fontSize: '13px' }}>
+                      Нет наблюдателей
+                    </Text>
+                  )}
+                </div>
+              </Space>
+            </Card>
+
+            {/* Теги */}
+            <Card title="Теги" size="small" style={{ marginBottom: 16 }}>
+              <Space direction="vertical" style={{ width: '100%' }} size="small">
+                {ticket.tags_list && ticket.tags_list.length > 0 && (
+                  <Space wrap size="small">
+                    {ticket.tags_list.map(tag => (
+                      <Tag 
+                        key={tag} 
+                        color={tag.includes('негатив') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'}
+                        closable
+                        onClose={() => handleRemoveTag(tag)}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </Space>
+                )}
+                <Button 
+                  block
+                  size="small" 
+                  type="dashed" 
+                  icon={<PlusOutlined />}
+                  onClick={() => setTagModalVisible(true)}
+                >
+                  Добавить тег
+                </Button>
+              </Space>
+            </Card>
+
             {/* Быстрые действия */}
             <Card title="Быстрые действия" size="small" style={{ marginTop: 16 }}>
               <Space direction="vertical" style={{ width: '100%' }}>
@@ -559,20 +638,6 @@ export const TicketDetailPage: React.FC = () => {
                   disabled={ticket.priority === 'high' || ticket.priority === 'urgent'}
                 >
                   Повысить приоритет
-                </Button>
-                <Button 
-                  block 
-                  icon={<TeamOutlined />}
-                  onClick={() => setAssignModalVisible(true)}
-                >
-                  Назначить сотрудников
-                </Button>
-                <Button 
-                  block 
-                  icon={<TagOutlined />}
-                  onClick={() => setTagModalVisible(true)}
-                >
-                  Добавить тег
                 </Button>
               </Space>
             </Card>

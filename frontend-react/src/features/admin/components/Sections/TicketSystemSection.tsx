@@ -337,6 +337,7 @@ export const TicketSystemSection: React.FC = () => {
           size="small"
           style={{ minWidth: '120px' }}
         >
+          <Option value="new">Новый</Option>
           <Option value="open">Открыт</Option>
           <Option value="in_progress">В работе</Option>
           <Option value="completed">Завершен</Option>
@@ -355,27 +356,21 @@ export const TicketSystemSection: React.FC = () => {
         <Button 
           size="small" 
           icon={<TagOutlined />}
-          onClick={() => setTagModalVisible(true)}
+          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=tags`)}
         >
           Теги
         </Button>
         <Button 
           size="small" 
           icon={<MessageOutlined />}
-          onClick={() => {
-            // Открыть чат с пользователем
-            antMessage.info('Открытие чата с пользователем...');
-          }}
+          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=client-chat`)}
         >
           Чат с клиентом
         </Button>
         <Button 
           size="small" 
           icon={<TeamOutlined />}
-          onClick={() => {
-            // Открыть внутренний чат команды
-            antMessage.info('Открытие внутреннего чата...');
-          }}
+          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=team-chat`)}
         >
           Чат команды
         </Button>
@@ -494,7 +489,7 @@ export const TicketSystemSection: React.FC = () => {
   return (
     <div className={styles.ticketSystemWrapper}>
       <div 
-        className={styles.ticketSystemMainContent}
+        className={`${styles.ticketSystemMainContent} ${isResizing ? styles.resizing : ''}`}
         style={{
           marginRight: detailsVisible && !isMobile ? `${panelWidth}%` : '0',
           width: detailsVisible && !isMobile ? `${100 - panelWidth}%` : '100%'
@@ -690,7 +685,7 @@ export const TicketSystemSection: React.FC = () => {
                 <Button 
                   size="small"
                   icon={<ExpandOutlined />}
-                  onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
+                  onClick={() => navigate(`/admin/tickets/${selectedTicket.ticket_number}`)}
                 >
                   Открыть отдельно
                 </Button>
@@ -714,7 +709,7 @@ export const TicketSystemSection: React.FC = () => {
             )}
             
             <div
-              className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''}`}
+              className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''} ${isResizing ? styles.resizing : ''}`}
               style={{ width: `${panelWidth}%` }}
             >
               {selectedTicket && (
@@ -728,7 +723,7 @@ export const TicketSystemSection: React.FC = () => {
                       <Button 
                         size="small"
                         icon={<ExpandOutlined />}
-                        onClick={() => navigate(`/admin/tickets/${selectedTicket.id}`)}
+                        onClick={() => navigate(`/admin/tickets/${selectedTicket.ticket_number}`)}
                       >
                         Открыть отдельно
                       </Button>
@@ -745,10 +740,9 @@ export const TicketSystemSection: React.FC = () => {
             </div>
           </>
         )}
-      </div>
-      
-      {/* Модальное окно для управления тегами */}
-      <Modal
+        
+        {/* Модальное окно для управления тегами */}
+        <Modal
         title="Управление тегами"
         open={tagModalVisible}
         onCancel={() => {
@@ -768,8 +762,8 @@ export const TicketSystemSection: React.FC = () => {
                     {selectedTicket.tags_list.map((tag) => (
                       <Tag 
                         key={tag}
-                        closable={true}
-                        onClose={(e) => {
+                        closable
+                        onClose={(e: any) => {
                           e.preventDefault();
                           antMessage.success('Тег ' + tag + ' удален');
                         }}
