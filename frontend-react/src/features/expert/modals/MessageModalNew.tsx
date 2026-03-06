@@ -514,7 +514,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
-  const loadOrCreateSupportChat = useCallback(async () => {
+  const loadOrCreateSupportChat = useCallback(async (userId?: number) => {
     setLoading(true);
     try {
       // Сначала пытаемся получить существующие чаты поддержки
@@ -555,8 +555,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
       } else {
         // Если нет чата, создаем новый через обычный API с пользователем поддержки
-        if (supportUserId) {
-          await loadOrCreateChatWithUser(supportUserId);
+        if (userId) {
+          await loadOrCreateChatWithUser(userId);
         }
       }
       
@@ -564,15 +564,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch (error: unknown) {
       console.error('Ошибка загрузки чата поддержки:', error);
       // Fallback: создаем обычный чат с пользователем поддержки
-      if (supportUserId) {
-        await loadOrCreateChatWithUser(supportUserId);
+      if (userId) {
+        await loadOrCreateChatWithUser(userId);
       } else {
         antMessage.error('Не удалось открыть чат с поддержкой');
       }
     } finally {
       setLoading(false);
     }
-  }, [supportUserId, loadOrCreateChatWithUser, loadChats]);
+  }, [loadOrCreateChatWithUser, loadChats]);
 
   useEffect(() => {
     if (visible) {
@@ -598,7 +598,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   useEffect(() => {
     const handleLoadSupportChatInModal = () => {
       if (visible) {
-        loadOrCreateSupportChat();
+        const userId = (() => {
+          if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
+          const raw = localStorage.getItem('support_user_id');
+          if (!raw) return null;
+          const parsed = Number(raw);
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+        })();
+        loadOrCreateSupportChat(userId || undefined);
       }
     };
 
@@ -606,7 +613,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return () => {
       window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
     };
-  }, [visible, loadOrCreateSupportChat]);
+  }, [visible, loadOrCreateSupportChat, supportUserIdProp]);
 
   useEffect(() => {
     if (!visible) return;
@@ -1652,7 +1659,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             {showPinnedSupport && (
               <div 
                 onClick={() => {
-                  loadOrCreateSupportChat();
+                  loadOrCreateSupportChat(supportUserId || undefined);
                 }}
                 className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
               >
