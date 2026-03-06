@@ -21,7 +21,6 @@ import {
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
-import { supportApi } from '@/features/support/api/support';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../config/api';
@@ -515,94 +514,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateSupportChat = useCallback(async (userId?: number) => {
-    setLoading(true);
-    try {
-      // Сначала пытаемся получить существующие чаты поддержки
-      const supportChats = await supportApi.getChats();
-      
-      if (supportChats.length > 0) {
-        // Если есть существующий чат, открываем его
-        const existingChat = supportChats[0];
-        // Преобразуем SupportChat в формат ChatDetail для совместимости
-        const chatData = {
-          id: existingChat.id,
-          participants: [existingChat.client, existingChat.admin].filter(Boolean),
-          messages: [], // Сообщения загрузятся отдельно
-          unread_count: existingChat.unread_count || 0,
-          last_message: existingChat.last_message || null,
-          other_user: existingChat.admin || existingChat.client,
-          context_title: existingChat.subject,
-          is_frozen: false,
-          frozen_reason: null
-        };
-        setSelectedChat(chatData as any);
-        
-        // Загружаем сообщения поддержки
-        const messages = await supportApi.getMessages(existingChat.id);
-        // Преобразуем SupportMessage в формат Message
-        const convertedMessages = messages.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          sender: msg.sender,
-          created_at: msg.created_at,
-          is_read: msg.is_read,
-          file: msg.file || null,
-          file_name: '',
-          message_type: msg.message_type || 'text',
-          offer_data: null
-        }));
-        
-        setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
-      } else {
-        // Если нет чата поддержки, создаем новый через supportApi
-        const newSupportChat = await supportApi.createChat({
-          subject: 'Обращение в техническую поддержку',
-          message: 'Здравствуйте! У меня есть вопрос.',
-          priority: 'medium'
-        });
-        
-        // Преобразуем созданный чат в формат ChatDetail
-        const chatData = {
-          id: newSupportChat.id,
-          participants: [newSupportChat.client, newSupportChat.admin].filter(Boolean),
-          messages: [],
-          unread_count: 0,
-          last_message: null,
-          other_user: newSupportChat.admin || newSupportChat.client,
-          context_title: newSupportChat.subject,
-          is_frozen: false,
-          frozen_reason: null
-        };
-        setSelectedChat(chatData as any);
-        
-        // Загружаем сообщения нового чата
-        const messages = await supportApi.getMessages(newSupportChat.id);
-        const convertedMessages = messages.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          sender: msg.sender,
-          created_at: msg.created_at,
-          is_read: msg.is_read,
-          file: msg.file || null,
-          file_name: '',
-          message_type: msg.message_type || 'text',
-          offer_data: null
-        }));
-        
-        setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
-      }
-      
-      // Не вызываем loadChats() для чатов поддержки, так как они не отображаются в обычном списке
-      if (!isSupportChat) {
-        await loadChats();
-      }
-    } catch (error: unknown) {
-      console.error('Ошибка загрузки чата поддержки:', error);
-      antMessage.error('Не удалось открыть чат с поддержкой');
-    } finally {
-      setLoading(false);
+    if (!userId) {
+      antMessage.error('ID пользователя поддержки не найден. Обратитесь к администратору.');
+      return;
     }
-  }, [loadChats]);
+    await loadOrCreateChatWithUser(userId);
+  }, [loadOrCreateChatWithUser]);
 
   useEffect(() => {
     if (visible) {
@@ -626,16 +543,38 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   // Обработчик события для загрузки чата поддержки
   useEffect(() => {
-    const handleLoadSupportChatInModal = () => {
+    const handleLoadSupportChatInModal = async () => {
       if (visible) {
-        const userId = (() => {
+        let userId = (() => {
           if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
           const raw = localStorage.getItem('support_user_id');
           if (!raw) return null;
           const parsed = Number(raw);
           return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
         })();
-        loadOrCreateSupportChat(userId || undefined);
+
+        // Если support user ID не найден, попробуем получить его из API
+        if (!userId) {
+          try {
+            const response = await fetch('/api/users/support_user/', {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data?.id) {
+                localStorage.setItem('support_user_id', String(data.id));
+                userId = data.id;
+              }
+            }
+          } catch (error) {
+            console.error('Ошибка получения support user ID:', error);
+          }
+        }
+
+        await loadOrCreateSupportChat(userId || undefined);
       }
     };
 
@@ -1349,54 +1288,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         return true;
       });
 
-      // Проверяем, является ли это чатом поддержки
-      const isSupportChat = selectedChat.context_title?.includes('техническую поддержку') || 
-                           selectedChat.context_title?.includes('Обращение в техническую поддержку');
-
       let createdMessages: Message[] = [];
-      
-      if (isSupportChat) {
-        // Для чатов поддержки используем supportApi
-        if (filesToSend.length > 0) {
-          // Отправляем файлы по одному (supportApi не поддерживает множественные файлы)
-          for (const file of filesToSend) {
-            const supportMsg = await supportApi.sendMessage(selectedChat.id, textForFirst, file);
-            const convertedMsg = {
-              id: supportMsg.id,
-              text: supportMsg.text,
-              sender: supportMsg.sender,
-              created_at: supportMsg.created_at,
-              is_read: supportMsg.is_read,
-              file: supportMsg.file || null,
-              file_name: '',
-              message_type: supportMsg.message_type || 'text',
-              offer_data: null
-            };
-            createdMessages.push(convertedMsg);
-          }
-        } else {
-          const supportMsg = await supportApi.sendMessage(selectedChat.id, textForFirst);
-          const convertedMsg = {
-            id: supportMsg.id,
-            text: supportMsg.text,
-            sender: supportMsg.sender,
-            created_at: supportMsg.created_at,
-            is_read: supportMsg.is_read,
-            file: supportMsg.file || null,
-            file_name: '',
-            message_type: supportMsg.message_type || 'text',
-            offer_data: null
-          };
-          createdMessages = [convertedMsg];
-        }
+      if (filesToSend.length > 0) {
+        createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, textForFirst, filesToSend);
       } else {
-        // Для обычных чатов используем chatApi
-        if (filesToSend.length > 0) {
-          createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, textForFirst, filesToSend);
-        } else {
-          const msg = await chatApi.sendMessage(selectedChat.id, textForFirst);
-          createdMessages = msg ? [msg] : [];
-        }
+        const msg = await chatApi.sendMessage(selectedChat.id, textForFirst);
+        createdMessages = msg ? [msg] : [];
       }
 
       if (createdMessages.length > 0) {
@@ -1413,7 +1310,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 ...chat,
                 last_message: {
                   text: messageText.trim() || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
-                  sender_id: lastMessage.sender_id || lastMessage.sender?.id,
+                  sender_id: lastMessage.sender_id,
                   created_at: lastMessage.created_at
                 },
                 last_message_time: lastMessage.created_at
@@ -1425,50 +1322,24 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setMessageText('');
       setAttachedFiles([]);
       
-      if (isSupportChat) {
-        // Для чатов поддержки обновляем через supportApi
-        const messages = await supportApi.getMessages(selectedChat.id);
-        const convertedMessages = messages.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          sender: msg.sender,
-          created_at: msg.created_at,
-          is_read: msg.is_read,
-          file: msg.file || null,
-          file_name: '',
-          message_type: msg.message_type || 'text',
-          offer_data: null
-        }));
-        
-        setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
-        // Не обновляем обычный список чатов для чатов поддержки
-      } else {
-        // Обновляем данные чата и список чатов после отправки сообщения
-        // Это важно для получения информации о возможной заморозке чата
-        await Promise.all([
-          loadChatDetail(selectedChat.id),
-          loadChats()
-        ]);
-      }
+      // Обновляем данные чата и список чатов после отправки сообщения
+      await Promise.all([
+        loadChatDetail(selectedChat.id),
+        loadChats()
+      ]);
       
       antMessage.success('Сообщение отправлено');
     } catch (error: unknown) {
       console.error('Ошибка отправки сообщения:', error);
       
-      // Обновляем данные чата в любом случае, чтобы получить актуальную информацию о заморозке
-      // Но только для обычных чатов, не для чатов поддержки
-      const isSupportChat = selectedChat?.context_title?.includes('техническую поддержку') || 
-                           selectedChat?.context_title?.includes('Обращение в техническую поддержку');
-      
-      if (!isSupportChat) {
-        try {
-          await Promise.all([
-            loadChatDetail(selectedChat.id),
-            loadChats()
-          ]);
-        } catch (updateError) {
-          console.error('Ошибка обновления данных чата:', updateError);
-        }
+      // Обновляем данные чата в любом случае
+      try {
+        await Promise.all([
+          loadChatDetail(selectedChat.id),
+          loadChats()
+        ]);
+      } catch (updateError) {
+        console.error('Ошибка обновления данных чата:', updateError);
       }
       
       // Проверяем, если это ошибка заморозки чата
@@ -1755,8 +1626,36 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           <div className={styles.chatList}>
             {showPinnedSupport && (
               <div 
-                onClick={() => {
-                  loadOrCreateSupportChat(supportUserId || undefined);
+                onClick={async () => {
+                  let userId = supportUserId;
+                  
+                  // Если support user ID не найден, попробуем получить его из API
+                  if (!userId) {
+                    try {
+                      const response = await fetch('/api/users/support_user/', {
+                        headers: {
+                          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                          'Content-Type': 'application/json',
+                        },
+                      });
+                      if (response.ok) {
+                        const data = await response.json();
+                        if (data?.id) {
+                          localStorage.setItem('support_user_id', String(data.id));
+                          userId = data.id;
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Ошибка получения support user ID:', error);
+                    }
+                  }
+
+                  if (!userId) {
+                    antMessage.error('Поддержка не настроена. Обратитесь к администратору.');
+                    return;
+                  }
+                  
+                  await loadOrCreateSupportChat(userId);
                 }}
                 className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
               >
