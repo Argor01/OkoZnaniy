@@ -6,8 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Max, Count, Prefetch
-from .models import Chat, Message
-from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer
+from .models import Chat, Message, SupportChat, SupportMessage
+from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
 from apps.orders.models import Order
 from decimal import Decimal, InvalidOperation
 
@@ -912,6 +912,7 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     - Клиенты видят только свои чаты с поддержкой
     """
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SupportChatSerializer
     
     def get_queryset(self):
         user = self.request.user
