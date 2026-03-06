@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   },
   users: {
     recent: '/users/recent_users/',
+    publicStats: '/public/stats/',
     supportUser: '/users/support_user/',
     updateProfile: '/users/update_me/',
     submitExpertApplication: '/users/submit_expert_application/',
