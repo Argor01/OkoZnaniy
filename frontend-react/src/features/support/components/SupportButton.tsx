@@ -16,9 +16,26 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [subject, setSubject] = useState('Помощь в размещении заказа');
   const [messageText, setMessageText] = useState('');
-  const [priority, setPriority] = useState('medium');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Автоматическое определение приоритета по теме
+  const getPriorityBySubject = (subject: string): string => {
+    switch (subject) {
+      case 'Технические проблемы':
+        return 'high'; // Высокий приоритет для технических проблем
+      case 'Проблема с заказом':
+        return 'high'; // Высокий приоритет для проблем с заказами
+      case 'Вопрос по оплате':
+        return 'medium'; // Средний приоритет для вопросов по оплате
+      case 'Помощь в размещении заказа':
+        return 'low'; // Низкий приоритет для помощи в размещении
+      case 'Другое':
+        return 'medium'; // Средний приоритет для прочих вопросов
+      default:
+        return 'medium';
+    }
+  };
 
   // Слушаем событие для открытия модального окна
   React.useEffect(() => {
@@ -40,7 +57,6 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
     setIsModalVisible(false);
     setSubject('Помощь в размещении заказа');
     setMessageText('');
-    setPriority('medium');
   };
 
   const handleSubmit = async () => {
@@ -49,6 +65,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
       return;
     }
 
+    const priority = getPriorityBySubject(subject);
     console.log('🔧 Создание чата поддержки:', { subject, messageText, priority });
     setLoading(true);
     try {
@@ -124,22 +141,6 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
             </Select>
           </div>
 
-          <div className="supportField">
-            <label className="supportLabel">
-              Приоритет
-            </label>
-            <Select
-              value={priority}
-              onChange={setPriority}
-              className="supportSelect"
-            >
-              <Option value="low">Низкий</Option>
-              <Option value="medium">Средний</Option>
-              <Option value="high">Высокий</Option>
-              <Option value="urgent">Срочный</Option>
-            </Select>
-          </div>
-
           <div>
             <label className="supportLabel">
               Опишите ваш вопрос
@@ -206,22 +207,6 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
             <Option value="Проблема с заказом">Проблема с заказом</Option>
             <Option value="Технические проблемы">Технические проблемы</Option>
             <Option value="Другое">Другое</Option>
-          </Select>
-        </div>
-
-        <div className="supportField">
-          <label className="supportLabel">
-            Приоритет
-          </label>
-          <Select
-            value={priority}
-            onChange={setPriority}
-            className="supportSelect"
-          >
-            <Option value="low">Низкий</Option>
-            <Option value="medium">Средний</Option>
-            <Option value="high">Высокий</Option>
-            <Option value="urgent">Срочный</Option>
           </Select>
         </div>
 
