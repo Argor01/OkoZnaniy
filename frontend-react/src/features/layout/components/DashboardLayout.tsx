@@ -132,6 +132,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setMessageModalVisible(true);
   }, [closeAllModals]);
 
+  // Обработчик события для открытия чата с поддержкой
+  React.useEffect(() => {
+    const handleOpenSupportChat = () => {
+      closeAllModals();
+      setMessageModalVisible(true);
+      // Отправляем событие для загрузки чата поддержки в MessageModalNew
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('loadSupportChatInModal'));
+      }, 100);
+    };
+
+    window.addEventListener('openSupportChat', handleOpenSupportChat);
+    return () => {
+      window.removeEventListener('openSupportChat', handleOpenSupportChat);
+    };
+  }, [closeAllModals]);
+
   const handleNotificationsClick = useCallback(() => {
     closeAllModals();
     setNotificationsModalVisible(true);

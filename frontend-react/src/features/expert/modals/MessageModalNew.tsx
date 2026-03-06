@@ -21,6 +21,7 @@ import {
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
+import { supportApi } from '@/features/support/api/support';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../config/api';
@@ -513,6 +514,66 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
+  const loadOrCreateSupportChat = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Сначала пытаемся получить существующие чаты поддержки
+      const supportChats = await supportApi.getChats();
+      
+      if (supportChats.length > 0) {
+        // Если есть существующий чат, открываем его
+        const existingChat = supportChats[0];
+        // Преобразуем SupportChat в формат ChatDetail для совместимости
+        const chatData = {
+          id: existingChat.id,
+          participants: [existingChat.client, existingChat.admin].filter(Boolean),
+          messages: [], // Сообщения загрузятся отдельно
+          unread_count: existingChat.unread_count || 0,
+          last_message: existingChat.last_message || null,
+          other_user: existingChat.admin || existingChat.client,
+          context_title: existingChat.subject,
+          is_frozen: false,
+          frozen_reason: null
+        };
+        setSelectedChat(chatData as any);
+        
+        // Загружаем сообщения поддержки
+        const messages = await supportApi.getMessages(existingChat.id);
+        // Преобразуем SupportMessage в формат Message
+        const convertedMessages = messages.map(msg => ({
+          id: msg.id,
+          text: msg.text,
+          sender: msg.sender,
+          created_at: msg.created_at,
+          is_read: msg.is_read,
+          file: msg.file || null,
+          file_name: '',
+          message_type: msg.message_type || 'text',
+          offer_data: null
+        }));
+        
+        setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
+      } else {
+        // Если нет чата, создаем новый через обычный API с пользователем поддержки
+        if (supportUserId) {
+          await loadOrCreateChatWithUser(supportUserId);
+        }
+      }
+      
+      await loadChats();
+    } catch (error: unknown) {
+      console.error('Ошибка загрузки чата поддержки:', error);
+      // Fallback: создаем обычный чат с пользователем поддержки
+      if (supportUserId) {
+        await loadOrCreateChatWithUser(supportUserId);
+      } else {
+        antMessage.error('Не удалось открыть чат с поддержкой');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [supportUserId, loadOrCreateChatWithUser, loadChats]);
+
   useEffect(() => {
     if (visible) {
       loadChats();
@@ -531,7 +592,21 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId, selectedOrderId, selectedChat?.id, loadChats, loadChatDetail, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
+  }, [visible, selectedUserId, selectedOrderId, selectedChat?.id, loadChats, loadChatDetail, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser, loadOrCreateSupportChat]);
+
+  // Обработчик события для загрузки чата поддержки
+  useEffect(() => {
+    const handleLoadSupportChatInModal = () => {
+      if (visible) {
+        loadOrCreateSupportChat();
+      }
+    };
+
+    window.addEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
+    return () => {
+      window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
+    };
+  }, [visible, loadOrCreateSupportChat]);
 
   useEffect(() => {
     if (!visible) return;
@@ -1577,19 +1652,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             {showPinnedSupport && (
               <div 
                 onClick={() => {
-                  // Закрываем модальное окно чата
-                  onClose();
-                  
-                  // Открываем модальное окно поддержки
-                  // Для этого нужно импортировать и использовать SupportButton
-                  // Или создать событие для открытия модального окна поддержки
-                  const supportButton = document.querySelector('.supportButtonFloat') as HTMLElement;
-                  if (supportButton) {
-                    supportButton.click();
-                  } else {
-                    // Если кнопка не найдена, создаем событие
-                    window.dispatchEvent(new CustomEvent('openSupportModal'));
-                  }
+                  loadOrCreateSupportChat();
                 }}
                 className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
               >
@@ -1616,7 +1679,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       ellipsis 
                       className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
                     >
-                      {supportChat?.last_message?.text || 'Создать обращение в поддержку'}
+                      {supportChat?.last_message?.text || 'Написать в поддержку'}
                     </Text>
                     {(supportChat?.unread_count ?? 0) > 0 && (
                       <Badge 
