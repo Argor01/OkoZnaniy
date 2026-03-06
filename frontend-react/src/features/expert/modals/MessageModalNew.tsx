@@ -112,6 +112,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   supportUserId: supportUserIdProp,
   userProfile
 }) => {
+  console.log('🔧 MessageModalNew rendered with supportUserIdProp:', supportUserIdProp);
+  
   const [messageText, setMessageText] = useState<string>('');
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
@@ -500,13 +502,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
+    console.log('🔧 loadOrCreateChatWithUser called with userId:', userId, 'chatContextTitle:', chatContextTitle);
     setLoading(true);
     try {
       const chatData = await chatApi.getOrCreateByUser(userId, chatContextTitle);
+      console.log('🔧 Chat data received:', chatData);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
+      console.log('🔧 Selected chat set to:', chatData);
       await loadChats();
     } catch (error: unknown) {
+      console.error('🔧 Error in loadOrCreateChatWithUser:', error);
       antMessage.error('Не удалось открыть чат с пользователем');
     } finally {
       setLoading(false);
@@ -514,10 +520,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateSupportChat = useCallback(async (userId?: number) => {
+    console.log('🔧 loadOrCreateSupportChat called with userId:', userId);
     if (!userId) {
+      console.error('🔧 No userId provided to loadOrCreateSupportChat');
       antMessage.error('ID пользователя поддержки не найден. Обратитесь к администратору.');
       return;
     }
+    console.log('🔧 Calling loadOrCreateChatWithUser with userId:', userId);
     await loadOrCreateChatWithUser(userId);
   }, [loadOrCreateChatWithUser]);
 
@@ -1403,11 +1412,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const safeChatList = Array.isArray(chatList) ? chatList : [];
   const supportUserId = (() => {
-    if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
+    const fromProp = typeof supportUserIdProp === 'number' && supportUserIdProp > 0 ? supportUserIdProp : null;
     const raw = localStorage.getItem('support_user_id');
-    if (!raw) return null;
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    const fromStorage = raw ? Number(raw) : null;
+    const finalId = fromProp || (Number.isFinite(fromStorage) && fromStorage > 0 ? fromStorage : null);
+    
+    console.log('🔧 Support user ID calculation:', {
+      supportUserIdProp,
+      fromProp,
+      rawFromStorage: raw,
+      fromStorage,
+      finalId
+    });
+    
+    return finalId;
   })();
   const supportAvatarSrc = '/assets/icons/support.png';
   const supportChat =
@@ -1628,9 +1646,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               <div 
                 onClick={async () => {
                   let userId = supportUserId;
+                  console.log('🔧 Support chat click - initial supportUserId:', userId);
                   
                   // Если support user ID не найден, попробуем получить его из API
                   if (!userId) {
+                    console.log('🔧 Support user ID not found, fetching from API...');
                     try {
                       const response = await fetch('/api/users/support_user/', {
                         headers: {
@@ -1640,10 +1660,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       });
                       if (response.ok) {
                         const data = await response.json();
+                        console.log('🔧 API response:', data);
                         if (data?.id) {
                           localStorage.setItem('support_user_id', String(data.id));
                           userId = data.id;
+                          console.log('🔧 Set support user ID to:', userId);
                         }
+                      } else {
+                        console.error('🔧 API response not ok:', response.status, response.statusText);
                       }
                     } catch (error) {
                       console.error('Ошибка получения support user ID:', error);
@@ -1651,10 +1675,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   }
 
                   if (!userId) {
+                    console.error('🔧 No support user ID available');
                     antMessage.error('Поддержка не настроена. Обратитесь к администратору.');
                     return;
                   }
                   
+                  console.log('🔧 Opening support chat with user ID:', userId);
                   await loadOrCreateSupportChat(userId);
                 }}
                 className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
