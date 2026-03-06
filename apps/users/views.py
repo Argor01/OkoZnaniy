@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -19,7 +20,8 @@ from apps.orders.serializers import OrderSerializer, TransactionSerializer
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     PasswordResetSerializer, PasswordResetConfirmSerializer,
-    CustomTokenObtainPairSerializer, ExpertApplicationSerializer
+    CustomTokenObtainPairSerializer, ExpertApplicationSerializer,
+    SimpleUserSerializer
 )
 from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
 from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
@@ -73,7 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'request_password_reset', 'reset_password_with_code']:
+        if self.action in ['create', 'request_password_reset', 'reset_password_with_code', 'public_stats']:
             return [permissions.AllowAny()]
         if self.action == 'retrieve':
             return [permissions.AllowAny()]  # Публичный доступ к профилям
@@ -923,6 +925,52 @@ class UserViewSet(viewsets.ModelViewSet):
             'message': f'Пользователь {user.username} разбанен',
             'user': self.get_serializer(user).data
         })
+
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def public_stats_view(request):
+    """
+    Публичная статистика для футера
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Общее количество пользователей (только эксперты и клиенты)
+    total_experts = User.objects.filter(role='expert').count()
+    total_clients = User.objects.filter(role='client').count()
+    total_users = total_experts + total_clients
+    
+    # Новые пользователи за 24 часа (только эксперты и клиенты)
+    yesterday = timezone.now() - timedelta(days=1)
+    new_users_today = User.objects.filter(
+        date_joined__gte=yesterday,
+        role__in=['expert', 'client']
+    ).count()
+    
+    # Заказы
+    total_orders = Order.objects.count()
+    completed_orders = Order.objects.filter(status='completed').count()
+    
+    # Заказы за 24 часа
+    orders_today = Order.objects.filter(created_at__gte=yesterday).count()
+    
+    # Активные пользователи (за последние 15 минут)
+    fifteen_minutes_ago = timezone.now() - timedelta(minutes=15)
+    online_users = User.objects.filter(last_login__gte=fifteen_minutes_ago).count()
+    
+    return Response({
+        'total_experts': total_experts,
+        'total_clients': total_clients,
+        'total_users': total_users,
+        'new_users_today': new_users_today,
+        'total_orders': total_orders,
+        'completed_orders': completed_orders,
+        'orders_today': orders_today,
+        'online_users': online_users
+    })
 
 
 # Telegram Auth Status Check

@@ -21,11 +21,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from apps.core.health import health_check
+from apps.users.views import public_stats_view
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),  # Изменили с admin/ на django-admin/
     path('hijack/', include('hijack.urls')),
     path('api/health/', health_check, name='health_check'),
+    path('api/public/stats/', public_stats_view, name='public_stats'),
     path('api/users/', include('apps.users.urls')),
     path('api/orders/', include('apps.orders.urls')),
     path('api/catalog/', include('apps.catalog.urls')),
@@ -40,3 +42,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Reload trigger
