@@ -1578,7 +1578,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               <div 
                 onClick={() => {
                   // Закрываем модальное окно чата
-                  setIsModalVisible(false);
+                  onClose();
                   
                   // Открываем модальное окно поддержки
                   // Для этого нужно импортировать и использовать SupportButton
@@ -2451,7 +2451,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         okText="Продлить"
         cancelText="Отмена"
         title="Продлить дедлайн"
-        destroyOnClose
+        destroyOnHidden
         width={isMobile ? '90%' : 520}
       >
         <div className={styles.simpleModalContent}>
@@ -2491,7 +2491,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             Подача претензии
           </div>
         }
-        destroyOnClose
+        destroyOnHidden
         width={isMobile ? '90%' : 600}
       >
         <div className={styles.claimModalContent}>
@@ -2647,7 +2647,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         okText="Отправить"
         cancelText="Позже"
         title="Оставьте отзыв об эксперте"
-        destroyOnClose
+        destroyOnHidden
       >
         <div className={styles.simpleModalContent}>
           <div>
@@ -2676,7 +2676,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         okText="Принять"
         cancelText="Отмена"
         title="Оцените работу"
-        destroyOnClose
+        destroyOnHidden
       >
         <div className={styles.simpleModalContent}>
           <div>
