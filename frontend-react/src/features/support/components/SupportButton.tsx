@@ -80,8 +80,9 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
       setIsModalVisible(false);
       setMessageText('');
       
-      
+      // Переходим на страницу чата поддержки
       navigate(`/support-chat/${chat.id}`);
+      
     } catch (error) {
       console.error('❌ Ошибка создания обращения:', error);
       message.error('Не удалось создать обращение');
