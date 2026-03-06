@@ -20,6 +20,18 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Слушаем событие для открытия модального окна
+  React.useEffect(() => {
+    const handleOpenSupportModal = () => {
+      setIsModalVisible(true);
+    };
+
+    window.addEventListener('openSupportModal', handleOpenSupportModal);
+    return () => {
+      window.removeEventListener('openSupportModal', handleOpenSupportModal);
+    };
+  }, []);
+
   const showModal = () => {
     setIsModalVisible(true);
   };

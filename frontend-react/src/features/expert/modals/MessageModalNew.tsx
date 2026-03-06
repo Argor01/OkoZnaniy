@@ -1577,12 +1577,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             {showPinnedSupport && (
               <div 
                 onClick={() => {
-                  if (supportChat) {
-                    loadChatDetail(supportChat.id);
-                    return;
-                  }
-                  if (supportUserId) {
-                    loadOrCreateChatWithUser(supportUserId);
+                  // Закрываем модальное окно чата
+                  setIsModalVisible(false);
+                  
+                  // Открываем модальное окно поддержки
+                  // Для этого нужно импортировать и использовать SupportButton
+                  // Или создать событие для открытия модального окна поддержки
+                  const supportButton = document.querySelector('.supportButtonFloat') as HTMLElement;
+                  if (supportButton) {
+                    supportButton.click();
+                  } else {
+                    // Если кнопка не найдена, создаем событие
+                    window.dispatchEvent(new CustomEvent('openSupportModal'));
                   }
                 }}
                 className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
@@ -1610,7 +1616,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       ellipsis 
                       className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
                     >
-                      {supportChat?.last_message?.text || 'Написать в поддержку'}
+                      {supportChat?.last_message?.text || 'Создать обращение в поддержку'}
                     </Text>
                     {(supportChat?.unread_count ?? 0) > 0 && (
                       <Badge 
