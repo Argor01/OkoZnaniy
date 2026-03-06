@@ -14,7 +14,10 @@ export const supportApi = {
 
   
   createChat: async (data: CreateSupportChatRequest): Promise<SupportChat> => {
+    console.log('🔧 API: Отправка запроса на создание чата:', data);
+    console.log('🔧 API: Endpoint:', API_ENDPOINTS.support.chats);
     const response = await apiClient.post(API_ENDPOINTS.support.chats, data);
+    console.log('✅ API: Ответ от сервера:', response.data);
     return response.data;
   },
 

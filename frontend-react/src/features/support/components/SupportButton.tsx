@@ -37,6 +37,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
       return;
     }
 
+    console.log('🔧 Создание чата поддержки:', { subject, messageText, priority });
     setLoading(true);
     try {
       const chat = await supportApi.createChat({
@@ -45,6 +46,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
         priority,
       });
 
+      console.log('✅ Чат создан:', chat);
       message.success('Обращение создано! Администратор скоро ответит');
       setIsModalVisible(false);
       setMessageText('');
@@ -52,7 +54,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
       
       navigate(`/support-chat/${chat.id}`);
     } catch (error) {
-      console.error('Ошибка создания обращения:', error);
+      console.error('❌ Ошибка создания обращения:', error);
       message.error('Не удалось создать обращение');
     } finally {
       setLoading(false);
