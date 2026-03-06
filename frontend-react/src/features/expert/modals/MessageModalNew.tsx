@@ -592,7 +592,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
       }
       
-      await loadChats();
+      // Не вызываем loadChats() для чатов поддержки, так как они не отображаются в обычном списке
+      if (!isSupportChat) {
+        await loadChats();
+      }
     } catch (error: unknown) {
       console.error('Ошибка загрузки чата поддержки:', error);
       antMessage.error('Не удалось открыть чат с поддержкой');
@@ -1438,7 +1441,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         }));
         
         setSelectedChat(prev => prev ? { ...prev, messages: convertedMessages } : null);
-        await loadChats();
+        // Не обновляем обычный список чатов для чатов поддержки
       } else {
         // Обновляем данные чата и список чатов после отправки сообщения
         // Это важно для получения информации о возможной заморозке чата
@@ -1453,13 +1456,19 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       console.error('Ошибка отправки сообщения:', error);
       
       // Обновляем данные чата в любом случае, чтобы получить актуальную информацию о заморозке
-      try {
-        await Promise.all([
-          loadChatDetail(selectedChat.id),
-          loadChats()
-        ]);
-      } catch (updateError) {
-        console.error('Ошибка обновления данных чата:', updateError);
+      // Но только для обычных чатов, не для чатов поддержки
+      const isSupportChat = selectedChat?.context_title?.includes('техническую поддержку') || 
+                           selectedChat?.context_title?.includes('Обращение в техническую поддержку');
+      
+      if (!isSupportChat) {
+        try {
+          await Promise.all([
+            loadChatDetail(selectedChat.id),
+            loadChats()
+          ]);
+        } catch (updateError) {
+          console.error('Ошибка обновления данных чата:', updateError);
+        }
       }
       
       // Проверяем, если это ошибка заморозки чата
