@@ -17,5 +17,4 @@ export { default as PartnerForm } from './components/sections/PartnerForm';
 export { default as PartnerSteps } from './components/sections/PartnerSteps';
 export { default as PlaceTask } from './components/sections/PlaceTask';
 export { default as PlaceTaskInfo } from './components/sections/PlaceTaskInfo';
-export { default as Prices } from './components/sections/Prices';
 export { default as Reviews } from './components/sections/Reviews';

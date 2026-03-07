@@ -35,7 +35,7 @@ export interface ChatListItem {
   client?: UserSummary | null;
   expert?: UserSummary | null;
   participants: UserSummary[];
-  other_user: UserSummary;
+  other_user?: UserSummary;
   last_message: {
     text: string;
     sender_id: number;
@@ -58,7 +58,7 @@ export interface ChatDetail {
   client?: UserSummary | null;
   expert?: UserSummary | null;
   participants: UserSummary[];
-  other_user: UserSummary;
+  other_user?: UserSummary;
   messages: Message[];
   unread_count: number;
   is_frozen?: boolean;

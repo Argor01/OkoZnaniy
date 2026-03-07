@@ -19,9 +19,17 @@ const redirectToLoginIfAllowed = () => {
 apiClient.interceptors.request.use((config) => {
 
   if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    // For FormData, let the browser set the Content-Type with boundary
+    // We need to explicitly remove the default Content-Type header
     if (config.headers) {
-      delete (config.headers as any)['Content-Type'];
-      delete (config.headers as any)['content-type'];
+      // Handle AxiosHeaders object (axios v1.x+)
+      if (typeof (config.headers as any).delete === 'function') {
+        (config.headers as any).delete('Content-Type');
+      } else {
+        // Handle plain object headers (older axios)
+        delete (config.headers as any)['Content-Type'];
+        delete (config.headers as any)['content-type'];
+      }
     }
   }
 

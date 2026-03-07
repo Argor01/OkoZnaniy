@@ -6,10 +6,11 @@ from apps.users.serializers import UserSerializer
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
+    file_url = serializers.FileField(source='file', read_only=True)
     
     class Meta:
         model = Message
-        fields = ['id', 'text', 'file', 'file_name', 'message_type', 'offer_data', 
+        fields = ['id', 'text', 'file', 'file_url', 'file_name', 'message_type', 'offer_data', 
                   'sender', 'created_at', 'is_read', 'is_mine']
     
     def get_is_mine(self, obj):
@@ -23,19 +24,30 @@ class ChatListSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
+    other_user = serializers.SerializerMethodField()
     
     class Meta:
         model = Chat
         fields = ['id', 'order', 'participants', 'context_title', 'is_frozen', 
-                  'frozen_reason', 'last_message', 'unread_count']
+                  'frozen_reason', 'last_message', 'unread_count', 'other_user']
     
+    def get_other_user(self, obj):
+        request = self.context.get('request')
+        if request and request.user:
+            other = obj.participants.exclude(id=request.user.id).first()
+            if other:
+                return UserSerializer(other).data
+        return None
+
     def get_last_message(self, obj):
         last_message = obj.messages.order_by('-created_at').first()
         if last_message:
             return {
                 'text': last_message.text,
-                'sender': last_message.sender.username,
-                'created_at': last_message.created_at
+                'sender_id': last_message.sender.id,
+                'created_at': last_message.created_at,
+                'file_name': last_message.file_name,
+                'file_url': last_message.file.url if last_message.file else None
             }
         return None
     
@@ -49,20 +61,30 @@ class ChatListSerializer(serializers.ModelSerializer):
 class ChatDetailSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
+    other_user = serializers.SerializerMethodField()
     
     class Meta:
         model = Chat
         fields = ['id', 'order', 'participants', 'context_title', 'is_frozen', 
-                  'frozen_reason', 'frozen_at', 'messages']
+                  'frozen_reason', 'frozen_at', 'messages', 'other_user']
+
+    def get_other_user(self, obj):
+        request = self.context.get('request')
+        if request and request.user:
+            other = obj.participants.exclude(id=request.user.id).first()
+            if other:
+                return UserSerializer(other).data
+        return None
 
 
 class SupportMessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
+    file_url = serializers.FileField(source='file', read_only=True)
     
     class Meta:
         model = SupportMessage
-        fields = ['id', 'text', 'file', 'message_type', 'sender', 'created_at', 
+        fields = ['id', 'text', 'file', 'file_url', 'message_type', 'sender', 'created_at', 
                   'is_read', 'is_mine']
     
     def get_is_mine(self, obj):
