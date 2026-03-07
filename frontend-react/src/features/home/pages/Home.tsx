@@ -6,7 +6,6 @@ import {
   FirstScreen,
   PlaceTask,
   Advantages,
-  Prices,
   OnlyPro,
   Reviews,
   LeaveOrder,
@@ -44,7 +43,6 @@ const Home: React.FC = () => {
         <FirstScreen />
         <PlaceTask />
         <Advantages />
-        <Prices />
         <OnlyPro />
         <Reviews />
         <LeaveOrder />
