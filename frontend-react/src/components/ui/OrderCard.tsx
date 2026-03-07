@@ -200,7 +200,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         <Space size={12}>
           <Avatar 
             size={48}
-            src={order.client?.avatar || order.client_avatar || userProfile?.avatar}
+            src={order.client?.avatar || order.client_avatar}
             icon={<UserOutlined />}
             className={styles.clientAvatar}
           />
@@ -209,7 +209,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               {order.client?.username || order.client_name || 
                 (order.client?.first_name && order.client?.last_name 
                   ? `${order.client.first_name} ${order.client.last_name}` 
-                  : userProfile?.username || 'Заказчик')}
+                  : 'Заказчик')}
             </Text>
             <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
               Заказов: {order.client_orders_count || 1}
