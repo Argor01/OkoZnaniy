@@ -105,7 +105,7 @@
 
 .sidebarMenu :global(.ant-menu-sub .ant-menu-item) {
   padding-left: 48px;
-  font-size: 20px;
+  font-size: 13px;
   height: 36px;
   line-height: 36px;
   border-left: 3px solid transparent;

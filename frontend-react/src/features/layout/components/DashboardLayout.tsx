@@ -49,7 +49,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [selectedChatContextTitle, setSelectedChatContextTitle] = useState<string | undefined>(undefined);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
 
-  const { unreadCount: unreadNotifications } = useNotifications();
+  const { unreadCount: unreadNotifications, loadNotifications: refreshNotifications } = useNotifications();
+
+  const handleNotificationsOpen = () => {
+    setNotificationsModalVisible(true);
+    // При открытии модального окна обновляем список уведомлений, 
+    // чтобы получить актуальное состояние (хотя polling и так работает)
+    refreshNotifications();
+  };
+
+  const handleNotificationsClose = () => {
+    setNotificationsModalVisible(false);
+    // При закрытии модального окна обязательно обновляем счетчик,
+    // так как пользователь мог прочитать уведомления внутри модалки
+    refreshNotifications();
+  };
 
   
   const { data: userProfile, isLoading } = useQuery({
@@ -314,7 +328,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             unreadMessages={unreadMessages}
             unreadNotifications={unreadNotifications}
             onMessagesClick={handleMessagesClick}
-            onNotificationsClick={handleNotificationsClick}
+            onNotificationsClick={handleNotificationsOpen}
             onSupportClick={handleSupportClick}
             onBalanceClick={handleFinanceClick}
             onProfileClick={handleProfileClick}
@@ -350,30 +364,41 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </Layout>
 
       
-      <Suspense fallback={null}>
-        <ProfileModal 
-          visible={profileModalVisible} 
-          onClose={() => setProfileModalVisible(false)} 
-          profile={userProfile}
-          userProfile={userProfile}
-        />
-        <MessageModal 
-          visible={messageModalVisible} 
-          onClose={() => { setMessageModalVisible(false); setSelectedUserIdForChat(undefined); setSelectedOrderIdForChat(undefined); setSelectedChatContextTitle(undefined); }}
-          isMobile={isMobile}
-          isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
-          isDesktop={window.innerWidth > 1024}
-          selectedUserId={selectedUserIdForChat}
-          selectedOrderId={selectedOrderIdForChat}
-          chatContextTitle={selectedChatContextTitle}
-          supportUserId={supportUserId ?? undefined}
-          userProfile={userProfile}
-        />
-        <NotificationsModal 
-          visible={notificationsModalVisible} 
-          onClose={() => setNotificationsModalVisible(false)}
-          isMobile={isMobile}
-        />
+      <Suspense fallback={<Spin size="large" />}>
+        {profileModalVisible && (
+          <ProfileModal
+            visible={profileModalVisible}
+            onClose={() => setProfileModalVisible(false)}
+            userProfile={userProfile}
+            isMobile={window.innerWidth <= 768}
+          />
+        )}
+        {messageModalVisible && (
+          <MessageModal
+            visible={messageModalVisible}
+            onClose={() => {
+              setMessageModalVisible(false);
+              setSelectedUserIdForChat(undefined);
+              setSelectedOrderIdForChat(undefined);
+              setSelectedChatContextTitle(undefined);
+            }}
+            isMobile={window.innerWidth <= 768}
+            isTablet={window.innerWidth > 768 && window.innerWidth <= 1024}
+            isDesktop={window.innerWidth > 1024}
+            selectedUserId={selectedUserIdForChat}
+            selectedOrderId={selectedOrderIdForChat}
+            chatContextTitle={selectedChatContextTitle}
+            supportUserId={supportUserId || undefined}
+            userProfile={userProfile}
+          />
+        )}
+        {notificationsModalVisible && (
+          <NotificationsModal
+            visible={notificationsModalVisible}
+            onClose={handleNotificationsClose}
+            isMobile={window.innerWidth <= 768}
+          />
+        )}
         <ArbitrationModal 
           visible={arbitrationModalVisible} 
           onClose={() => setArbitrationModalVisible(false)}
