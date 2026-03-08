@@ -53,15 +53,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleNotificationsOpen = () => {
     setNotificationsModalVisible(true);
-    // При открытии модального окна обновляем список уведомлений, 
-    // чтобы получить актуальное состояние (хотя polling и так работает)
     refreshNotifications();
   };
 
   const handleNotificationsClose = () => {
     setNotificationsModalVisible(false);
-    // При закрытии модального окна обязательно обновляем счетчик,
-    // так как пользователь мог прочитать уведомления внутри модалки
     refreshNotifications();
   };
 
