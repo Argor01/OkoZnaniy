@@ -914,11 +914,17 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-top: 8px;
-  width: fit-content;
-  min-width: 120px;
+  width: 120px;
   cursor: pointer;
   transition: background 0.2s;
+  text-decoration: none;
+}
+
+.attachedFilesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .messageFileBlockOther {

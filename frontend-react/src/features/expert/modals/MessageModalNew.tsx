@@ -106,6 +106,21 @@ const parseContextTitle = (raw?: string | null): { title: string; workId?: numbe
   return { title, workId };
 };
 
+const truncateFileName = (name: string, maxLength: number = 20) => {
+  if (name.length <= maxLength) return name;
+  const extIndex = name.lastIndexOf('.');
+  if (extIndex === -1) return name.substring(0, maxLength) + '...';
+  
+  const ext = name.substring(extIndex);
+  const nameWithoutExt = name.substring(0, extIndex);
+  
+  // Reserve space for extension and ellipsis
+  const availableLength = maxLength - ext.length - 3; 
+  if (availableLength <= 0) return name.substring(0, maxLength) + '...';
+  
+  return nameWithoutExt.substring(0, availableLength) + '...' + ext;
+};
+
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
   onClose,
@@ -1625,6 +1640,57 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       'поддержка'.includes(normalizedSearchQuery) ||
       'support'.includes(normalizedSearchQuery);
 
+  const groupedMessages = useMemo(() => {
+    if (!selectedChat?.messages) return [];
+    
+    const result: (Message & { attached_files?: { name: string; url: string }[] })[] = [];
+    let currentGroup: (Message & { attached_files?: { name: string; url: string }[] }) | null = null;
+
+    selectedChat.messages.forEach((msg) => {
+      const isSimpleMessage = !msg.message_type || msg.message_type === 'text';
+      const hasFile = !!(msg.file_url && msg.file_name);
+      
+      if (isSimpleMessage && hasFile) {
+        if (currentGroup && 
+            currentGroup.sender_id === msg.sender_id && 
+            currentGroup.is_mine === msg.is_mine &&
+            (currentGroup.attached_files?.length || 0) < 5 &&
+            (new Date(msg.created_at).getTime() - new Date(currentGroup.created_at).getTime() < 60000)
+           ) {
+          
+          if (!currentGroup.attached_files) {
+             currentGroup.attached_files = [];
+             if (currentGroup.file_url && currentGroup.file_name) {
+               currentGroup.attached_files.push({ name: currentGroup.file_name, url: currentGroup.file_url });
+             }
+          }
+          currentGroup.attached_files.push({ name: msg.file_name!, url: msg.file_url! });
+          
+          if (msg.text) {
+             currentGroup.text = currentGroup.text ? `${currentGroup.text}\n${msg.text}` : msg.text;
+          }
+          return;
+        } else {
+             if (currentGroup) result.push(currentGroup);
+             currentGroup = { ...msg, attached_files: [{ name: msg.file_name!, url: msg.file_url! }] };
+             return;
+        }
+      }
+      
+      if (currentGroup) {
+         result.push(currentGroup);
+         currentGroup = null;
+      }
+      result.push(msg);
+    });
+    
+    if (currentGroup) {
+      result.push(currentGroup);
+    }
+    
+    return result;
+  }, [selectedChat?.messages]);
+
   return (
     <Modal
       open={visible}
@@ -2132,7 +2198,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   </div>
                 )}
                 
-                {selectedChat.messages.map((msg: Message, idx: number) => {
+                {groupedMessages.map((msg: any, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
                   const isSystemMessage = msg.message_type === 'system';
@@ -2440,19 +2506,40 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 {msg.text}
                               </Text>
                             ) : null}
-                            {msg.file_url && msg.file_name ? (
+                            {msg.attached_files && msg.attached_files.length > 0 ? (
+                              <div className={styles.attachedFilesGrid}>
+                                {msg.attached_files.map((file: any, fIdx: number) => (
+                                  <a
+                                    key={fIdx}
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
+                                    title={file.name}
+                                  >
+                                    <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
+                                      <FileOutlined />
+                                    </div>
+                                    <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
+                                      {truncateFileName(file.name)}
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            ) : msg.file_url && msg.file_name ? (
                               <div className={`${styles.messageFile} ${msg.text ? styles.messageFileWithText : ''}`}>
                                 <a
                                   href={msg.file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
+                                  title={msg.file_name}
                                 >
                                   <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
                                     <FileOutlined />
                                   </div>
                                   <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
-                                    {msg.file_name}
+                                    {truncateFileName(msg.file_name)}
                                   </div>
                                 </a>
                               </div>
