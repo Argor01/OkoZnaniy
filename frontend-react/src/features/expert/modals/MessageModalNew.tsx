@@ -17,7 +17,13 @@ import {
   UploadOutlined,
   ExclamationCircleOutlined,
   StopOutlined,
-  MoreOutlined
+  MoreOutlined,
+  BookOutlined,
+  ClockCircleOutlined,
+  DownOutlined,
+  UpOutlined,
+  MenuOutlined,
+  DollarOutlined
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
@@ -98,6 +104,21 @@ const parseContextTitle = (raw?: string | null): { title: string; workId?: numbe
   const workId = Number.isFinite(workIdRaw) && workIdRaw > 0 ? workIdRaw : undefined;
   const title = value.replace(/\s*\|\s*work:\d+\s*$/, '').trim();
   return { title, workId };
+};
+
+const truncateFileName = (name: string, maxLength: number = 20) => {
+  if (name.length <= maxLength) return name;
+  const extIndex = name.lastIndexOf('.');
+  if (extIndex === -1) return name.substring(0, maxLength) + '...';
+  
+  const ext = name.substring(extIndex);
+  const nameWithoutExt = name.substring(0, extIndex);
+  
+  // Reserve space for extension and ellipsis
+  const availableLength = maxLength - ext.length - 3; 
+  if (availableLength <= 0) return name.substring(0, maxLength) + '...';
+  
+  return nameWithoutExt.substring(0, availableLength) + '...' + ext;
 };
 
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
@@ -661,18 +682,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const formatRemaining = (deadline?: string, status?: string) => {
     if (!deadline) return '';
     const baseEnd = new Date(deadline).getTime();
-    const reviewExtraMs = status === 'review' ? 5 * 24 * 60 * 60 * 1000 : 0;
-    const end = baseEnd + reviewExtraMs;
+    // const reviewExtraMs = status === 'review' ? 5 * 24 * 60 * 60 * 1000 : 0;
+    // const end = baseEnd + reviewExtraMs;
+    const end = baseEnd; // Пока без учета reviewExtraMs, если нужно - раскомментировать
     if (Number.isNaN(end)) return '';
+    
     const diff = end - Date.now();
     if (diff <= 0) return 'Срок истёк';
-    const totalMinutes = Math.floor(diff / (1000 * 60));
-    const days = Math.floor(totalMinutes / (60 * 24));
-    const hours = Math.floor((totalMinutes - days * 24 * 60) / 60);
-    const minutes = totalMinutes % 60;
-    if (days > 0) return `${days}д ${hours}ч`;
-    if (hours > 0) return `${hours}ч ${minutes}м`;
-    return `${minutes}м`;
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    const dd = String(days).padStart(2, '0');
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+    
+    if (days > 0) {
+      return `Осталось: ${dd} д. ${hh}:${mm}:${ss}`;
+    }
+    return `Осталось: ${hh}:${mm}:${ss}`;
   };
 
   const isDeadlineExpired = (deadline?: string | null) => {
@@ -701,8 +732,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const deadline = order?.deadline;
     if (!deadline) return;
 
+    // Обновляем таймер каждую секунду для отображения секунд
     setDeadlineTick((v) => v + 1);
-    const id = window.setInterval(() => setDeadlineTick((v) => v + 1), 30000);
+    const id = window.setInterval(() => setDeadlineTick((v) => v + 1), 1000);
     return () => window.clearInterval(id);
   }, [visible, order?.deadline]);
 
@@ -820,19 +852,48 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return !isChatInitiator;
   })();
   const isOrderClient = (() => {
+    // Если заказ загружен, проверяем по ID клиента заказа
     const clientId = order?.client?.id ?? order?.client_id;
     if (clientId) return Number(clientId) === currentUserId;
+    
+    // Если заказ не загружен, но есть выбранный чат, проверяем инициатора чата
+    // В большинстве случаев инициатор чата - это клиент
     if (selectedChat) return isChatInitiator;
-    return false;
+    
+    // Fallback: если ничего не известно, полагаемся на глобальную роль
+    return currentRole === 'client';
   })();
 
+  const isOrderExpert = (() => {
+    // Если заказ загружен, проверяем, назначен ли этот пользователь исполнителем
+    // (Поле expert в заказе может называться expert или expert_id)
+    const expertId = (order as any)?.expert?.id ?? (order as any)?.expert_id;
+    if (expertId) return Number(expertId) === currentUserId;
+
+    // Если заказ еще не имеет исполнителя (например, стадия обсуждения),
+    // то экспертом считается тот, кто НЕ является клиентом заказа
+    return !isOrderClient;
+  })();
+
+  const canOverdueClientActions = useMemo(() => {
+    if (isClosedOrder || !order) return false;
+    // Действия с просрочкой доступны только клиенту данного заказа
+    if (!isOrderClient) return false;
+    
+    return isDeadlineExpired(order.deadline);
+  }, [isClosedOrder, order, isOrderClient]);
+
   const showExpertUploadButton = useMemo(() => {
-    if (currentRole !== 'expert') return false;
+    // Кнопку видит ТОЛЬКО тот, кто является исполнителем (экспертом) в данном заказе
+    if (!isOrderExpert) return false;
+
+    // Если заказ не загружен или закрыт, тоже нет
     if (!order || isClosedOrder) return false;
-    if (isOrderClient) return false;
+
+    // Проверяем статус заказа: выгрузка возможна только "В работе" или "На доработке"
     const status = String(order?.status ?? '');
     return status === 'in_progress' || status === 'revision';
-  }, [currentRole, isClosedOrder, isOrderClient, order]);
+  }, [isOrderExpert, isClosedOrder, order]);
 
   const remainingLabel = useMemo(() => {
     void deadlineTick;
@@ -1474,13 +1535,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
   }, [deletingChat, hasActiveOffersInSelectedChat, loadChats, selectedChat]);
 
-  const canOverdueClientActions =
-    !!selectedChat &&
-    isOrderClient &&
-    !!effectiveOrderId &&
-    (order?.is_overdue === true || isDeadlineExpired(order?.deadline)) &&
-    (order?.status === 'in_progress' || order?.status === 'revision');
-
   const openOverdueExtendModal = () => {
     setOverdueDeadlineValue(dayjs().add(1, 'day'));
     setOverdueExtendModalOpen(true);
@@ -1585,6 +1639,57 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       'техническая поддержка'.includes(normalizedSearchQuery) ||
       'поддержка'.includes(normalizedSearchQuery) ||
       'support'.includes(normalizedSearchQuery);
+
+  const groupedMessages = useMemo(() => {
+    if (!selectedChat?.messages) return [];
+    
+    const result: (Message & { attached_files?: { name: string; url: string }[] })[] = [];
+    let currentGroup: (Message & { attached_files?: { name: string; url: string }[] }) | null = null;
+
+    selectedChat.messages.forEach((msg) => {
+      const isSimpleMessage = !msg.message_type || msg.message_type === 'text';
+      const hasFile = !!(msg.file_url && msg.file_name);
+      
+      if (isSimpleMessage && hasFile) {
+        if (currentGroup && 
+            currentGroup.sender_id === msg.sender_id && 
+            currentGroup.is_mine === msg.is_mine &&
+            (currentGroup.attached_files?.length || 0) < 5 &&
+            (new Date(msg.created_at).getTime() - new Date(currentGroup.created_at).getTime() < 60000)
+           ) {
+          
+          if (!currentGroup.attached_files) {
+             currentGroup.attached_files = [];
+             if (currentGroup.file_url && currentGroup.file_name) {
+               currentGroup.attached_files.push({ name: currentGroup.file_name, url: currentGroup.file_url });
+             }
+          }
+          currentGroup.attached_files.push({ name: msg.file_name!, url: msg.file_url! });
+          
+          if (msg.text) {
+             currentGroup.text = currentGroup.text ? `${currentGroup.text}\n${msg.text}` : msg.text;
+          }
+          return;
+        } else {
+             if (currentGroup) result.push(currentGroup);
+             currentGroup = { ...msg, attached_files: [{ name: msg.file_name!, url: msg.file_url! }] };
+             return;
+        }
+      }
+      
+      if (currentGroup) {
+         result.push(currentGroup);
+         currentGroup = null;
+      }
+      result.push(msg);
+    });
+    
+    if (currentGroup) {
+      result.push(currentGroup);
+    }
+    
+    return result;
+  }, [selectedChat?.messages]);
 
   return (
     <Modal
@@ -1921,86 +2026,147 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   className={styles.orderTabs}
                   items={tabsOrderIds.map((id) => ({
                     key: String(id),
-                    label: `Заказ #${id}${effectiveOrderId === id && remainingLabel ? ` • ${remainingLabel}` : ''}`,
+                    label: `Заказ #${id}`,
                   }))}
                 />
-                <Button size="small" disabled={isClosedOrder} onClick={() => setOrderPanelOpen((v) => !v)} className={styles.orderToggleButton}>
-                  {orderPanelOpen ? 'Скрыть' : 'Показать'}
-                </Button>
               </div>
-              {orderPanelOpen && !isClosedOrder ? (
-                <div className={`${styles.orderPanel} ${isMobile ? styles.orderPanelMobile : ''}`}>
+              
+              {!isClosedOrder && (
+                <div className={styles.orderSummaryContainer}>
                   {orderLoading ? (
                     <div className={styles.orderLoading}>
                       <Spin size="small" />
                     </div>
                   ) : order ? (
-                    <div className={styles.orderInfo}>
-                      <div className={styles.orderInfoRow}>
-                        <div className={styles.orderInfoMeta}>
-                          <Text strong>{order.title || `Заказ #${order.id}`}</Text>
-                          <Text type="secondary">{formatOrderStatus(order.status)}</Text>
+                    <>
+                      {/* Compact Header (Always Visible) */}
+                      <div 
+                        className={`${styles.orderSummaryHeader} ${orderPanelOpen ? styles.orderSummaryHeaderOpen : ''}`} 
+                        onClick={() => setOrderPanelOpen(!orderPanelOpen)}
+                      >
+                        <div className={styles.orderSummaryLeft}>
+                          <div className={styles.orderSummaryId}>#{order.id}</div>
+                          <div className={`${styles.orderSummaryStatus} ${styles[`status-${order.status}`] || ''}`}>
+                            {formatOrderStatus(order.status)}
+                          </div>
                         </div>
-                        {canOverdueClientActions ? (
-                          <Space size={8} wrap>
-                            <Button
-                              type="primary"
-                              size="small"
-                              disabled={overdueCancelling}
-                              loading={overdueExtending}
-                              onClick={openOverdueExtendModal}
-                            >
-                              Продлить дедлайн
-                            </Button>
-                            <Button
-                              danger
-                              size="small"
-                              disabled={overdueExtending}
-                              loading={overdueCancelling}
-                              onClick={handleCancelOverdueOrder}
-                            >
-                              Отменить заказ
-                            </Button>
-                            <Button
-                              size="small"
-                              disabled={overdueExtending || overdueCancelling}
-                              onClick={handleOverdueComplaint}
-                            >
-                              Жалоба
-                            </Button>
-                          </Space>
-                        ) : null}
+                        
+                        <div className={styles.orderSummaryCenter} />
+
+                        <div className={styles.orderSummaryRight}>
+                          <ClockCircleOutlined className={remainingLabel === 'Срок истёк' ? styles.iconDanger : styles.iconWarning} /> 
+                          <span className={styles.orderTimerText}>
+                            {remainingLabel}
+                          </span>
+                          <div className={styles.orderToggleIcon}>
+                            {orderPanelOpen ? <UpOutlined /> : <DownOutlined />}
+                          </div>
+                        </div>
                       </div>
-                      <Text type="secondary">
-                        Дедлайн: {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'не указан'}{remainingLabel ? ` • осталось ${remainingLabel}` : ''}
-                      </Text>
-                      <Text>
-                        Предмет: {order.subject?.name || order.custom_subject || '—'} · Тип: {order.work_type?.name || order.custom_work_type || '—'}
-                      </Text>
-                      <Text>
-                        Стоимость: <Text strong className={styles.textSuccess}>{order.budget ? `${Number(order.budget).toLocaleString('ru-RU')} ₽` : '—'}</Text>
-                      </Text>
-                      {order.description ? <Text className={styles.orderDescription}>{order.description}</Text> : null}
-                      {showExpertUploadButton ? (
-                        <div className={styles.orderUploadWrapper}>
-                          <Button
-                            type="primary"
-                            icon={<UploadOutlined />}
-                            loading={workUploading}
-                            disabled={isDeadlineExpired(order?.deadline)}
-                            onClick={() => workFileInputRef.current?.click()}
-                            className={styles.buttonSuccess}
-                          >
-                            Выгрузить работу
-                          </Button>
+
+                      {/* Expanded Details */}
+                      {orderPanelOpen && (
+                        <div className={styles.orderSummaryDetails}>
+                          <div className={styles.orderGrid}>
+                            <div className={styles.orderGridItem}>
+                              <div className={styles.gridIcon}><BookOutlined /></div>
+                              <div>
+                                <div className={styles.gridLabel}>Предмет</div>
+                                <div className={styles.gridValue}>{order.subject?.name || order.custom_subject || '—'}</div>
+                              </div>
+                            </div>
+                            <div className={styles.orderGridItem}>
+                              <div className={styles.gridIcon}><FileTextOutlined /></div>
+                              <div>
+                                <div className={styles.gridLabel}>Тип работы</div>
+                                <div className={styles.gridValue}>{order.work_type?.name || order.custom_work_type || '—'}</div>
+                              </div>
+                            </div>
+                            <div className={styles.orderGridItem}>
+                              <div className={styles.gridIcon}><ClockCircleOutlined /></div>
+                              <div>
+                                <div className={styles.gridLabel}>Дедлайн</div>
+                                <div className={styles.gridValue}>
+                                  {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'не указан'}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={styles.goToOrderContainer}>
+                            <Button 
+                              onClick={() => {}}
+                              className={styles.goToOrderButton}
+                            >
+                              Перейти в заказ
+                            </Button>
+                          </div>
+
+                          <div className={styles.orderActionsBar}>
+                             {showExpertUploadButton && (
+                                <Button
+                                  type="primary"
+                                  icon={<UploadOutlined />}
+                                  loading={workUploading}
+                                  disabled={isDeadlineExpired(order?.deadline)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    workFileInputRef.current?.click();
+                                  }}
+                                  className={styles.actionButtonPrimary}
+                                  block
+                                >
+                                  Выгрузить работу
+                                </Button>
+                             )}
+                             
+                             {canOverdueClientActions && (
+                                <div className={styles.secondaryActions}>
+                                  <Button
+                                    size="small"
+                                    disabled={overdueCancelling}
+                                    loading={overdueExtending}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openOverdueExtendModal();
+                                    }}
+                                  >
+                                    Продлить дедлайн
+                                  </Button>
+                                  <Button
+                                    danger
+                                    size="small"
+                                    disabled={overdueExtending}
+                                    loading={overdueCancelling}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCancelOverdueOrder();
+                                    }}
+                                  >
+                                    Отменить
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    disabled={overdueExtending || overdueCancelling}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOverdueComplaint();
+                                    }}
+                                    icon={<ExclamationCircleOutlined />}
+                                  >
+                                    Жалоба
+                                  </Button>
+                                </div>
+                             )}
+                          </div>
                         </div>
-                      ) : null}
-                    </div>
+                      )}
+                    </>
                   ) : (
-                    <Text type="secondary">Не удалось загрузить данные заказа</Text>
+                    <div className={styles.orderError}>Не удалось загрузить данные</div>
                   )}
                 </div>
-              ) : null}
+              )}
             </>
           ) : null}
 
@@ -2032,12 +2198,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   </div>
                 )}
                 
-                {selectedChat.messages.map((msg: Message, idx: number) => {
+                {groupedMessages.map((msg: any, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
                   const isSystemMessage = msg.message_type === 'system';
-                  const canReviewOrder =
-                    (isOrderClient || currentRole === 'client') && currentRole !== 'expert';
+                  const canReviewOrder = isOrderClient;
                   const showWorkActions =
                     canReviewOrder &&
                     !!effectiveOrderId &&
@@ -2055,17 +2220,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
                     : 'pending';
                   const showWorkOfferActions =
-                    isWorkOffer && !msg.is_mine && currentRole !== 'expert' && workOfferStatus === 'new';
+                    isWorkOffer && !msg.is_mine && isOrderClient && workOfferStatus === 'new';
                   const showWorkDeliveryActions =
                     isWorkOffer &&
                     !msg.is_mine &&
-                    currentRole !== 'expert' &&
+                    isOrderClient &&
                     workOfferStatus === 'accepted' &&
                     workDeliveryStatus === 'delivered';
                   const showExpertUploadForWorkOffer =
                     isWorkOffer &&
                     msg.is_mine &&
-                    currentRole === 'expert' &&
+                    isOrderExpert &&
                     workOfferStatus === 'accepted' &&
                     workDeliveryStatus === 'awaiting_upload';
                   
@@ -2150,67 +2315,79 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             </div>
                           </Card>
                         ) : isOffer ? (
-                          <Card size="small" className={messageCardClass}>
-                            <div className={styles.messageCardTitle}>Индивидуальное предложение</div>
-                            <div className={styles.messageCardSectionSm}>
-                              <Text type="secondary">Тип работы</Text>
-                              <div>{msg.offer_data?.work_type}</div>
+                          <Card size="small" className={`${messageCardClass} ${styles.offerCard}`}>
+                            <div className={styles.offerCardHeader}>
+                              <div className={styles.offerCardHeaderIcon}><FileTextOutlined /></div>
+                              <div className={styles.offerCardTitle}>Индивидуальное предложение</div>
                             </div>
-                            <div className={styles.messageCardSectionSm}>
-                              <Text type="secondary">Предмет</Text>
-                              <div>{msg.offer_data?.subject}</div>
-                            </div>
-                            <div className={styles.messageCardSection}>
-                              <Text type="secondary">Описание</Text>
-                              <div className={styles.messageCardDescription}>{msg.offer_data?.description}</div>
-                            </div>
-                            <div className={styles.messageCardRow}>
-                              <div>
-                                <Text type="secondary">Стоимость</Text>
-                                <div className={styles.messageCardPrice}>
-                                  {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                            
+                            <div className={styles.offerCardBody}>
+                              <div className={styles.offerGrid}>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><BookOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Предмет</div>
+                                    <div className={styles.offerValue}>{msg.offer_data?.subject}</div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><FileTextOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Тип работы</div>
+                                    <div className={styles.offerValue}>{msg.offer_data?.work_type}</div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><ClockCircleOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Срок выполнения</div>
+                                    <div className={styles.offerValue}>
+                                      {msg.offer_data?.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={`${styles.offerGridIcon} ${styles.offerGridIconGreen}`}><DollarOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Стоимость</div>
+                                    <div className={styles.offerValue}>
+                                      {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                              <div>
-                                <Text type="secondary">Срок</Text>
-                                <div>
-                                  {msg.offer_data?.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+
+                              <div className={styles.offerDescription}>
+                                {msg.offer_data?.description}
+                              </div>
+
+                              {offerStatus === 'accepted' ? (
+                                <div className={`${styles.messageStatusSuccess} ${styles.messageCardActionsTop}`}>
+                                  <CheckCircleOutlined /> Предложение принято
                                 </div>
-                              </div>
-                            </div>
-
-                            {offerStatus === 'accepted' ? (
-                              <div className={styles.messageStatusSuccess}>
-                                <CheckCircleOutlined /> Предложение принято
-                              </div>
-                            ) : offerStatus === 'rejected' ? (
-                              <div className={styles.messageStatusDanger}>
-                                <CloseCircleOutlined /> Предложение отклонено
-                              </div>
-                            ) : offerExpired ? (
-                              <div className={styles.messageStatusMuted}>Срок предложения истек</div>
-                            ) : showOfferActions ? (
-                              <div className={styles.messageCardActions}>
-                                <Button
-                                  type="primary"
-                                  className={styles.buttonSuccess}
-                                  onClick={() => handleAcceptOffer(msg.id)}
-                                  block
-                                >
-                                  Принять
-                                </Button>
-                                <Button danger onClick={() => handleRejectOffer(msg.id)} block>
-                                  Отказаться
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className={styles.messageStatusMuted}>Ожидает решения получателя</div>
-                            )}
-
-                            <div className={styles.messageCardTime}>
-                              <Text type="secondary" className={styles.messageCardTimeText}>
-                                {formatMessageTime(msg.created_at)}
-                              </Text>
+                              ) : offerStatus === 'rejected' ? (
+                                <div className={`${styles.messageStatusDanger} ${styles.messageCardActionsTop}`}>
+                                  <CloseCircleOutlined /> Предложение отклонено
+                                </div>
+                              ) : offerExpired ? (
+                                <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>Срок предложения истек</div>
+                              ) : showOfferActions ? (
+                                <div className={`${styles.messageCardActions} ${styles.messageCardActionsTop}`}>
+                                  <Button
+                                    type="primary"
+                                    className={styles.buttonSuccess}
+                                    onClick={() => handleAcceptOffer(msg.id)}
+                                    block
+                                  >
+                                    Принять
+                                  </Button>
+                                  <Button danger onClick={() => handleRejectOffer(msg.id)} block>
+                                    Отказаться
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>Ожидает решения получателя</div>
+                              )}
                             </div>
                           </Card>
                         ) : isWorkOffer ? (
@@ -2329,17 +2506,41 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                 {msg.text}
                               </Text>
                             ) : null}
-                            {msg.file_url && msg.file_name ? (
+                            {msg.attached_files && msg.attached_files.length > 0 ? (
+                              <div className={styles.attachedFilesGrid}>
+                                {msg.attached_files.map((file: any, fIdx: number) => (
+                                  <a
+                                    key={fIdx}
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
+                                    title={file.name}
+                                  >
+                                    <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
+                                      <FileOutlined />
+                                    </div>
+                                    <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
+                                      {truncateFileName(file.name)}
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            ) : msg.file_url && msg.file_name ? (
                               <div className={`${styles.messageFile} ${msg.text ? styles.messageFileWithText : ''}`}>
                                 <a
                                   href={msg.file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`${styles.messageFileLink} ${isMobile ? styles.messageFileLinkMobile : ''} ${
-                                    msg.is_mine ? styles.messageFileLinkMine : styles.messageFileLinkOther
-                                  }`}
+                                  className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
+                                  title={msg.file_name}
                                 >
-                                  📎 {msg.file_name}
+                                  <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
+                                    <FileOutlined />
+                                  </div>
+                                  <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
+                                    {truncateFileName(msg.file_name)}
+                                  </div>
                                 </a>
                               </div>
                             ) : null}

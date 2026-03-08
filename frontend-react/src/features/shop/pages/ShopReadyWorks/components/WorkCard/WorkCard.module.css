@@ -3,7 +3,7 @@
   overflow: hidden;
   transition: all 0.3s;
   border: 1px solid var(--border-color);
-  height: 560px;
+  height: 480px;
   display: flex;
   flex-direction: column;
 }
@@ -86,12 +86,12 @@
 
 .description {
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 12px;
-  min-height: 4.5em; /* Ensure consistent height even if text is short */
+  min-height: 4.5em;
   line-height: 1.5;
 }
 

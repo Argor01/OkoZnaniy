@@ -145,7 +145,6 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             © {currentYear} «Око Знаний». Все права защищены.
           </div>
           <div className={styles.socialLinks}>
-            {/* Social links removed as requested */}
           </div>
         </div>
       </div>
