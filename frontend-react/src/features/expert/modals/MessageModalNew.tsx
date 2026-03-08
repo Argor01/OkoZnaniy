@@ -22,7 +22,8 @@ import {
   ClockCircleOutlined,
   DownOutlined,
   UpOutlined,
-  MenuOutlined
+  MenuOutlined,
+  DollarOutlined
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
@@ -2248,67 +2249,79 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             </div>
                           </Card>
                         ) : isOffer ? (
-                          <Card size="small" className={messageCardClass}>
-                            <div className={styles.messageCardTitle}>Индивидуальное предложение</div>
-                            <div className={styles.messageCardSectionSm}>
-                              <Text type="secondary">Тип работы</Text>
-                              <div>{msg.offer_data?.work_type}</div>
+                          <Card size="small" className={`${messageCardClass} ${styles.offerCard}`}>
+                            <div className={styles.offerCardHeader}>
+                              <div className={styles.offerCardHeaderIcon}><FileTextOutlined /></div>
+                              <div className={styles.offerCardTitle}>Индивидуальное предложение</div>
                             </div>
-                            <div className={styles.messageCardSectionSm}>
-                              <Text type="secondary">Предмет</Text>
-                              <div>{msg.offer_data?.subject}</div>
-                            </div>
-                            <div className={styles.messageCardSection}>
-                              <Text type="secondary">Описание</Text>
-                              <div className={styles.messageCardDescription}>{msg.offer_data?.description}</div>
-                            </div>
-                            <div className={styles.messageCardRow}>
-                              <div>
-                                <Text type="secondary">Стоимость</Text>
-                                <div className={styles.messageCardPrice}>
-                                  {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                            
+                            <div className={styles.offerCardBody}>
+                              <div className={styles.offerGrid}>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><BookOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Предмет</div>
+                                    <div className={styles.offerValue}>{msg.offer_data?.subject}</div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><FileTextOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Тип работы</div>
+                                    <div className={styles.offerValue}>{msg.offer_data?.work_type}</div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><ClockCircleOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Срок выполнения</div>
+                                    <div className={styles.offerValue}>
+                                      {msg.offer_data?.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={`${styles.offerGridIcon} ${styles.offerGridIconGreen}`}><DollarOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Стоимость</div>
+                                    <div className={styles.offerValue}>
+                                      {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                              <div>
-                                <Text type="secondary">Срок</Text>
-                                <div>
-                                  {msg.offer_data?.deadline ? new Date(msg.offer_data.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
+
+                              <div className={styles.offerDescription}>
+                                {msg.offer_data?.description}
+                              </div>
+
+                              {offerStatus === 'accepted' ? (
+                                <div className={`${styles.messageStatusSuccess} ${styles.messageCardActionsTop}`}>
+                                  <CheckCircleOutlined /> Предложение принято
                                 </div>
-                              </div>
-                            </div>
-
-                            {offerStatus === 'accepted' ? (
-                              <div className={styles.messageStatusSuccess}>
-                                <CheckCircleOutlined /> Предложение принято
-                              </div>
-                            ) : offerStatus === 'rejected' ? (
-                              <div className={styles.messageStatusDanger}>
-                                <CloseCircleOutlined /> Предложение отклонено
-                              </div>
-                            ) : offerExpired ? (
-                              <div className={styles.messageStatusMuted}>Срок предложения истек</div>
-                            ) : showOfferActions ? (
-                              <div className={styles.messageCardActions}>
-                                <Button
-                                  type="primary"
-                                  className={styles.buttonSuccess}
-                                  onClick={() => handleAcceptOffer(msg.id)}
-                                  block
-                                >
-                                  Принять
-                                </Button>
-                                <Button danger onClick={() => handleRejectOffer(msg.id)} block>
-                                  Отказаться
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className={styles.messageStatusMuted}>Ожидает решения получателя</div>
-                            )}
-
-                            <div className={styles.messageCardTime}>
-                              <Text type="secondary" className={styles.messageCardTimeText}>
-                                {formatMessageTime(msg.created_at)}
-                              </Text>
+                              ) : offerStatus === 'rejected' ? (
+                                <div className={`${styles.messageStatusDanger} ${styles.messageCardActionsTop}`}>
+                                  <CloseCircleOutlined /> Предложение отклонено
+                                </div>
+                              ) : offerExpired ? (
+                                <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>Срок предложения истек</div>
+                              ) : showOfferActions ? (
+                                <div className={`${styles.messageCardActions} ${styles.messageCardActionsTop}`}>
+                                  <Button
+                                    type="primary"
+                                    className={styles.buttonSuccess}
+                                    onClick={() => handleAcceptOffer(msg.id)}
+                                    block
+                                  >
+                                    Принять
+                                  </Button>
+                                  <Button danger onClick={() => handleRejectOffer(msg.id)} block>
+                                    Отказаться
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>Ожидает решения получателя</div>
+                              )}
                             </div>
                           </Card>
                         ) : isWorkOffer ? (
@@ -2433,11 +2446,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                   href={msg.file_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`${styles.messageFileLink} ${isMobile ? styles.messageFileLinkMobile : ''} ${
-                                    msg.is_mine ? styles.messageFileLinkMine : styles.messageFileLinkOther
-                                  }`}
+                                  className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
                                 >
-                                  📎 {msg.file_name}
+                                  <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
+                                    <FileOutlined />
+                                  </div>
+                                  <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
+                                    {msg.file_name}
+                                  </div>
                                 </a>
                               </div>
                             ) : null}
