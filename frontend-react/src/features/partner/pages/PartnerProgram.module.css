@@ -1,0 +1,236 @@
+/* Стили для страницы партнерской программы */
+
+.partnerProgramContainer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.partnerProgramCard {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.partnerProgramTitle {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+
+.partnerProgramDescription {
+  font-size: 16px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 0;
+}
+
+.referralLinkContainer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.referralLinkBox {
+  flex: 1;
+  min-width: 300px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.promotionMethod {
+  text-align: center;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.promotionIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.promotionIconBlue {
+  color: #1890ff;
+}
+
+.promotionIconGreen {
+  color: #52c41a;
+}
+
+.promotionIconOrange {
+  color: #fa8c16;
+}
+
+.promotionIconPink {
+  color: #eb2f96;
+}
+
+.promotionIconPurple {
+  color: #722ed1;
+}
+
+.promotionText {
+  margin-bottom: 0;
+}
+
+.paymentTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+}
+
+.paymentTableHeader {
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.paymentTableHeaderCell {
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+  background: #fafafa;
+}
+
+.paymentTableHeaderCellCenter {
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  background: #fafafa;
+}
+
+.paymentTableRow {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.paymentTableCell {
+  padding: 12px;
+}
+
+.paymentTableCellCenter {
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.paymentTableCellCustomers {
+  color: #1890ff;
+}
+
+.paymentTableCellExecutors {
+  color: #52c41a;
+}
+
+.bonusCard {
+  text-align: center;
+  background: #fff7e6;
+  border: 2px solid #ffa940;
+}
+
+.bonusCardNext {
+  text-align: center;
+  background: #f6ffed;
+  border: 2px dashed #52c41a;
+}
+
+.bonusNumber {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 16px 0;
+}
+
+.bonusNumberCurrent {
+  color: #fa8c16;
+}
+
+.bonusNumberNext {
+  color: #52c41a;
+}
+
+.infoBox {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.infoBoxGreen {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+}
+
+.infoBoxOrange {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+}
+
+.progressContainer {
+  margin-top: 24px;
+}
+
+.progressText {
+  font-size: 16px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.progressSubtext {
+  color: #666;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .partnerProgramContainer {
+    padding: 16px;
+  }
+  
+  .referralLinkContainer {
+    flex-direction: column;
+  }
+  
+  .referralLinkBox {
+    min-width: auto;
+  }
+  
+  .promotionMethod {
+    padding: 12px;
+  }
+  
+  .promotionIcon {
+    font-size: 24px;
+  }
+  
+  .bonusNumber {
+    font-size: 36px;
+  }
+  
+  .paymentTableHeaderCell,
+  .paymentTableHeaderCellCenter,
+  .paymentTableCell,
+  .paymentTableCellCenter {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bonusNumber {
+    font-size: 28px;
+  }
+  
+  .paymentTable {
+    font-size: 12px;
+  }
+  
+  .paymentTableHeaderCell,
+  .paymentTableHeaderCellCenter,
+  .paymentTableCell,
+  .paymentTableCellCenter {
+    padding: 6px;
+  }
+}
