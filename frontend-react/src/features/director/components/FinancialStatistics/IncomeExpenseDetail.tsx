@@ -29,11 +29,15 @@ const IncomeExpenseDetail: React.FC = () => {
   const { data: incomeData, isLoading: incomeLoading } = useQuery({
     queryKey: ['income-detail', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
     queryFn: () => getIncomeDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const { data: expenseData, isLoading: expenseLoading } = useQuery({
     queryKey: ['expense-detail', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
     queryFn: () => getExpenseDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   const isLoading = incomeLoading || expenseLoading;
@@ -247,33 +251,34 @@ const IncomeExpenseDetail: React.FC = () => {
           isMobile ? 'incomeExpenseChartCardMobile' : '',
         ].filter(Boolean).join(' ')}
       >
-        <div
-          className={[
-            'incomeExpenseChartContainer',
-            isMobile ? 'incomeExpenseChartContainerMobile' : '',
-          ].filter(Boolean).join(' ')}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart 
-              data={chartData}
-              margin={{
-                top: 20,
-                right: isMobile ? 10 : 30,
-                left: isMobile ? 10 : 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                fontSize={isMobile ? 10 : 12}
-                interval={isMobile ? 1 : 0}
-              />
-              <YAxis 
-                fontSize={isMobile ? 10 : 12}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-              />
-              <Tooltip 
+        {chartData.length > 0 ? (
+          <div
+            className={[
+              'incomeExpenseChartContainer',
+              isMobile ? 'incomeExpenseChartContainerMobile' : '',
+            ].filter(Boolean).join(' ')}
+          >
+            <ResponsiveContainer width="100%" height="100%" key={`${dateRange[0].format('YYYY-MM-DD')}-${dateRange[1].format('YYYY-MM-DD')}`}>
+              <BarChart 
+                data={chartData}
+                margin={{
+                  top: 20,
+                  right: isMobile ? 10 : 30,
+                  left: isMobile ? 10 : 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="date" 
+                  fontSize={isMobile ? 10 : 12}
+                  interval={isMobile ? 1 : 0}
+                />
+                <YAxis 
+                  fontSize={isMobile ? 10 : 12}
+                  tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                />
+                <Tooltip 
                 formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
               />
               <Legend />
@@ -282,6 +287,12 @@ const IncomeExpenseDetail: React.FC = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#999' }}>
+            <p style={{ fontSize: 16, marginBottom: 8 }}>📊 Нет данных за выбранный период</p>
+            <p style={{ fontSize: 14 }}>Выберите другой период или дождитесь появления транзакций</p>
+          </div>
+        )}
       </Card>
     </div>
   );

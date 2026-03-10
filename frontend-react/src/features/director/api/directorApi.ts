@@ -515,3 +515,98 @@ export const directorApi = {
   markMessageAsRead,
   deleteMessage,
 };
+
+
+// Chat Rooms API
+export const getChatRooms = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/director/chat-rooms/');
+    // API возвращает объект с пагинацией, берем results
+    const data = response.data;
+    return data.results || data || [];
+  } catch (error) {
+    console.error('Error fetching chat rooms:', error);
+    throw error;
+  }
+};
+
+export const createChatRoom = async (data: { name: string; description?: string; type: string }): Promise<any> => {
+  try {
+    const response = await apiClient.post('/director/chat-rooms/', {
+      name: data.name,
+      description: data.description || '',
+      type: data.type,  // Используем type, который сериализатор преобразует в room_type
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating chat room:', error);
+    throw error;
+  }
+};
+
+export const getChatRoomMessages = async (roomId: number): Promise<any[]> => {
+  try {
+    const response = await apiClient.get(`/director/chat-rooms/${roomId}/messages/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching chat room messages:', error);
+    throw error;
+  }
+};
+
+export const sendChatRoomMessage = async (roomId: number, message: string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/director/chat-rooms/${roomId}/send_message/`, {
+      message,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+export const joinChatRoom = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/join_room/`);
+  } catch (error) {
+    console.error('Error joining chat room:', error);
+    throw error;
+  }
+};
+
+export const leaveChatRoom = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/leave_room/`);
+  } catch (error) {
+    console.error('Error leaving chat room:', error);
+    throw error;
+  }
+};
+
+export const inviteToChatRoom = async (roomId: number, userId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/invite_user/`, {
+      user_id: userId,
+    });
+  } catch (error) {
+    console.error('Error inviting user:', error);
+    throw error;
+  }
+};
+
+export const uploadChatRoomFile = async (roomId: number, file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post(`/director/chat-rooms/${roomId}/upload_file/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
+};

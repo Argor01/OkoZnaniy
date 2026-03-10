@@ -11,6 +11,7 @@ import {
   FileTextOutlined,
   MenuOutlined,
   CalendarOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs, { Dayjs } from 'dayjs';
@@ -18,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
 import { authApi } from '@/features/auth/api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '@/features/partner/api/partners';
+import { PartnerProgram } from './PartnerProgram';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -346,7 +348,7 @@ const PartnerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
-  const [selectedMenu, setSelectedMenu] = useState<string>('statistics');
+  const [selectedMenu, setSelectedMenu] = useState<string>('program');
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
 
@@ -366,6 +368,18 @@ const PartnerDashboard: React.FC = () => {
   });
 
   const menuItems: MenuItem[] = data ? [
+    {
+      key: 'program',
+      icon: <InfoCircleOutlined />,
+      label: 'Партнерская программа',
+      component: (
+        <PartnerProgram 
+          referralLink={data.partner_info.referral_link}
+          currentEarnings={data.partner_info.total_earnings}
+          nextBonusThreshold={10000}
+        />
+      ),
+    },
     {
       key: 'statistics',
       icon: <DollarOutlined />,

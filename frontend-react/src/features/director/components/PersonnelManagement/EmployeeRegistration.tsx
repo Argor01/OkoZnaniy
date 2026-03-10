@@ -179,7 +179,6 @@ const EmployeeRegistration: React.FC = () => {
               size="large"
             >
               <Option value="admin">Администратор</Option>
-              <Option value="arbitrator">Арбитр</Option>
               <Option value="partner">Партнёр</Option>
               <Option value="expert">Эксперт</Option>
             </Select>

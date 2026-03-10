@@ -675,11 +675,15 @@
 .incomeExpenseChartContainer {
   width: 100%;
   height: 400px;
+  min-height: 400px;
+  min-width: 300px;
   overflow-x: visible;
 }
 
 .incomeExpenseChartContainerMobile {
   height: 300px;
+  min-height: 300px;
+  min-width: 250px;
   overflow-x: auto;
 }
 

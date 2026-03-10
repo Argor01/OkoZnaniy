@@ -13,7 +13,8 @@ import {
   Badge,
   Form,
   Upload,
-  Select
+  Select,
+  App
 } from 'antd';
 import { 
   PlusOutlined,
@@ -74,6 +75,7 @@ interface ChatMessage {
 }
 
 export const DirectorChatsSection: React.FC = () => {
+  const { modal } = App.useApp();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -88,6 +90,36 @@ export const DirectorChatsSection: React.FC = () => {
   const [createRoomForm] = Form.useForm();
   const [inviteUserForm] = Form.useForm();
 
+  // Загрузка чатов
+  useEffect(() => {
+    loadChatRooms();
+  }, []);
+
+  const loadChatRooms = async () => {
+    setLoading(true);
+    try {
+      const { getChatRooms } = await import('@/features/director/api/directorApi');
+      const rooms = await getChatRooms();
+      console.log('=== CHAT ROOMS DEBUG ===');
+      console.log('Raw response:', rooms);
+      console.log('Is array:', Array.isArray(rooms));
+      console.log('Length:', rooms?.length);
+      
+      // Убедимся, что это массив
+      const roomsArray = Array.isArray(rooms) ? rooms : [];
+      console.log('Final rooms array:', roomsArray);
+      console.log('Setting chat rooms...');
+      setChatRooms(roomsArray);
+      console.log('Chat rooms set successfully');
+    } catch (error) {
+      console.error('Error loading chat rooms:', error);
+      message.error('Ошибка загрузки чатов');
+      setChatRooms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -96,10 +128,15 @@ export const DirectorChatsSection: React.FC = () => {
 
   const isMobile = windowWidth < 768;
 
-  const filteredRooms = chatRooms.filter(room =>
+  const filteredRooms = (Array.isArray(chatRooms) ? chatRooms : []).filter(room =>
     (room.name || '').toLowerCase().includes(searchText.toLowerCase()) ||
     room.description?.toLowerCase().includes(searchText.toLowerCase())
   );
+  
+  console.log('=== RENDER DEBUG ===');
+  console.log('chatRooms:', chatRooms);
+  console.log('filteredRooms:', filteredRooms);
+  console.log('loading:', loading);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedRoom) return;
@@ -116,12 +153,22 @@ export const DirectorChatsSection: React.FC = () => {
   const handleCreateRoom = async () => {
     try {
       const values = await createRoomForm.validateFields();
-      // TODO: Implement API call
+      console.log('Creating room with values:', values);
+      const { createChatRoom } = await import('@/features/director/api/directorApi');
+      const newRoom = await createChatRoom({
+        name: values.name,
+        description: values.description,
+        type: values.type,
+      });
+      console.log('Room created:', newRoom);
       message.success('Чат создан');
       setCreateRoomModalVisible(false);
       createRoomForm.resetFields();
+      // Перезагружаем список чатов
+      await loadChatRooms();
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error('Error creating room:', error);
+      message.error('Ошибка создания чата');
     }
   };
 
@@ -150,7 +197,7 @@ export const DirectorChatsSection: React.FC = () => {
   };
 
   const handleReportMessage = (messageId: number, messageSender: string) => {
-    Modal.confirm({
+    modal.confirm({
       title: 'Пожаловаться на сообщение',
       icon: <WarningOutlined />,
       content: `Вы уверены, что хотите пожаловаться на сообщение от ${messageSender}?`,
@@ -186,10 +233,7 @@ export const DirectorChatsSection: React.FC = () => {
   return (
     <div className={styles.chatContainer}>
       <Card 
-        className={[
-          styles.chatListCard,
-          isMobile && selectedRoom ? styles.chatListCardHidden : ''
-        ].filter(Boolean).join(' ')}
+        className={`${styles.chatListCard} ${isMobile && selectedRoom ? styles.chatListCardHidden : ''}`}
       >
         <div className={styles.chatListHeader}>
           <div className={styles.chatListHeaderRow}>
@@ -221,22 +265,18 @@ export const DirectorChatsSection: React.FC = () => {
             locale={{ emptyText: 'Нет чатов' }}
             renderItem={(room) => (
               <List.Item
-                className={[
-                  styles.chatRoomItem,
-                  selectedRoom?.id === room.id ? styles.chatRoomItemActive : ''
-                ].filter(Boolean).join(' ')}
+                className={`${styles.chatRoomItem} ${selectedRoom?.id === room.id ? styles.chatRoomItemActive : ''}`}
                 onClick={() => setSelectedRoom(room)}
               >
                 <List.Item.Meta
                   avatar={
                     <Badge count={room.unread_count}>
-                      <div className={[
-                        styles.chatRoomAvatar,
-                        room.type === 'general' ? styles.roomTypeGeneral : '',
-                        room.type === 'department' ? styles.roomTypeDepartment : '',
-                        room.type === 'project' ? styles.roomTypeProject : '',
+                      <div className={`${styles.chatRoomAvatar} ${
+                        room.type === 'general' ? styles.roomTypeGeneral :
+                        room.type === 'department' ? styles.roomTypeDepartment :
+                        room.type === 'project' ? styles.roomTypeProject :
                         room.type === 'private' ? styles.roomTypePrivate : ''
-                      ].filter(Boolean).join(' ')}>
+                      }`}>
                         <TeamOutlined />
                       </div>
                     </Badge>
@@ -331,10 +371,7 @@ export const DirectorChatsSection: React.FC = () => {
                     status={participant.online ? 'success' : 'default'}
                     offset={[-2, 2]}
                   >
-                    <div className={[
-                      styles.participantAvatar,
-                      participant.online ? styles.participantOnline : styles.participantOffline
-                    ].filter(Boolean).join(' ')}>
+                    <div className={`${styles.participantAvatar} ${participant.online ? styles.participantOnline : styles.participantOffline}`}>
                       {participant.first_name[0]}{participant.last_name[0]}
                     </div>
                   </Badge>
@@ -356,10 +393,7 @@ export const DirectorChatsSection: React.FC = () => {
             )}
             {messages.map((msg: ChatMessage) => (
               <div key={msg.id} className={styles.messageRow}>
-                <div className={[
-                  styles.messageAvatar,
-                  msg.is_system ? styles.messageAvatarSystem : styles.messageAvatarUser
-                ].filter(Boolean).join(' ')}>
+                <div className={`${styles.messageAvatar} ${msg.is_system ? styles.messageAvatarSystem : styles.messageAvatarUser}`}>
                   {msg.is_system ? 'S' : `${msg.sender.first_name[0]}${msg.sender.last_name[0]}`}
                 </div>
                 
@@ -382,15 +416,8 @@ export const DirectorChatsSection: React.FC = () => {
                   </div>
                 
                   <div className={styles.messageBubbleWrapper}>
-                    <div className={[
-                      styles.messageBubble,
-                      msg.is_system ? styles.messageBubbleSystem : '',
-                      msg.is_pinned ? styles.messageBubblePinned : ''
-                    ].filter(Boolean).join(' ')}>
-                      <Text className={[
-                        styles.messageText,
-                        msg.is_system ? styles.messageTextSystem : ''
-                      ].filter(Boolean).join(' ')}>
+                    <div className={`${styles.messageBubble} ${msg.is_system ? styles.messageBubbleSystem : ''} ${msg.is_pinned ? styles.messageBubblePinned : ''}`}>
+                      <Text className={`${styles.messageText} ${msg.is_system ? styles.messageTextSystem : ''}`}>
                         {msg.text}
                       </Text>
                     </div>
@@ -455,9 +482,11 @@ export const DirectorChatsSection: React.FC = () => {
           </div>
         </Card>
       ) : (
-        <div className={styles.chatEmptyState}>
-          <Text type="secondary">Выберите чат или создайте новый</Text>
-        </div>
+        <Card className={styles.chatMainCard}>
+          <div className={styles.chatEmptyState}>
+            <Text type="secondary">Выберите чат или создайте новый</Text>
+          </div>
+        </Card>
       )}
 
       <Modal

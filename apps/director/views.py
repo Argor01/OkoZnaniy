@@ -15,10 +15,12 @@ from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.users.models import User, PartnerEarning
-from .models import InternalMessage, MeetingRequest, MessageAttachment
+from .models import InternalMessage, MeetingRequest, MessageAttachment, DirectorChatRoom, DirectorChatMessage
 from .serializers import (
     InternalMessageSerializer,
     InternalMessageCreateSerializer,
+    DirectorChatRoomSerializer,
+    DirectorChatMessageSerializer,
 )
 
 
@@ -732,8 +734,8 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
         
         return Response(partners_data)
 
-    @action(detail=False, methods=['get'])
-    def turnover(self, request):
+    @action(detail=False, methods=['get'], url_path='turnover')
+    def all_turnover(self, request):
         """Оборот по всем партнерам за период"""
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
@@ -749,50 +751,74 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
-        # Получаем обороты по партнерам (пока заглушка)
-        partner_turnovers = []
-        try:
-            partner_turnovers = PartnerEarning.objects.filter(
-                created_at__gte=start_dt,
-                created_at__lte=end_dt
-            ).values(
-                'partner__id',
-                'partner__username',
-                'partner__first_name',
-                'partner__last_name'
-            ).annotate(
-                total_turnover=Sum('source_amount'),
-                total_commission=Sum('amount'),
-                orders_count=Count('order', distinct=True)
-            ).order_by('-total_turnover')
-        except Exception:
-            # Таблица может не существовать
-            pass
-
+        # Получаем всех партнеров
+        partners = User.objects.filter(role='partner', is_active=True)
+        
         partners_data = []
         total_turnover = 0
         total_commission = 0
 
-        for item in partner_turnovers:
-            turnover = float(item['total_turnover'] or 0)
-            commission = float(item['total_commission'] or 0)
+        for partner in partners:
+            # Получаем обороты по партнеру
+            try:
+                partner_earnings = PartnerEarning.objects.filter(
+                    partner=partner,
+                    created_at__gte=start_dt,
+                    created_at__lte=end_dt
+                )
+                
+                turnover = float(partner_earnings.aggregate(
+                    total=Sum('source_amount')
+                )['total'] or 0)
+                
+                commission = float(partner_earnings.aggregate(
+                    total=Sum('amount')
+                )['total'] or 0)
+                
+                orders_count = partner_earnings.filter(order__isnull=False).values('order').distinct().count()
+            except Exception:
+                # Таблица может не существовать
+                turnover = 0
+                commission = 0
+                orders_count = 0
             
+            # Получаем количество рефералов
+            referrals_count = User.objects.filter(
+                partner=partner,
+                is_active=True
+            ).count()
+            
+            # Добавляем партнера в список, даже если оборот = 0
             partners_data.append({
-                'partner_id': item['partner__id'],
-                'partner_name': f"{item['partner__first_name'] or ''} {item['partner__last_name'] or ''}".strip() or item['partner__username'],
+                'id': partner.id,
+                'firstName': partner.first_name or '',
+                'lastName': partner.last_name or '',
+                'first_name': partner.first_name or '',
+                'last_name': partner.last_name or '',
+                'email': partner.email,
+                'partnerEmail': partner.email,
                 'turnover': turnover,
                 'commission': commission,
-                'orders_count': item['orders_count']
+                'referralsCount': referrals_count,
+                'referrals_count': referrals_count,
+                'ordersCount': orders_count,
+                'orders_count': orders_count
             })
             
             total_turnover += turnover
             total_commission += commission
 
+        # Сортируем по обороту
+        partners_data.sort(key=lambda x: x['turnover'], reverse=True)
+
         return Response({
             'period': f"{start_date} - {end_date}",
             'partners': partners_data,
+            'totalTurnover': total_turnover,
             'total_turnover': total_turnover,
+            'totalCommission': total_commission,
             'total_commission': total_commission,
+            'partnersCount': len(partners_data),
             'partners_count': len(partners_data)
         })
 
@@ -1514,3 +1540,144 @@ class MeetingRequestViewSet(viewsets.ModelViewSet):
             })
         
         return Response(meetings_data)
+
+
+
+# ViewSet для чат-комнат директора
+
+class DirectorChatRoomViewSet(viewsets.ModelViewSet):
+    """ViewSet для чат-комнат директора"""
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = DirectorChatRoomSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Только админы и директор могут видеть чаты
+        if user.role not in ['admin', 'director']:
+            return DirectorChatRoom.objects.none()
+        
+        # Показываем чаты, где пользователь - участник
+        return DirectorChatRoom.objects.filter(
+            members=user,
+            is_active=True
+        ).prefetch_related('members', 'messages__sender').order_by('-updated_at')
+    
+    def perform_create(self, serializer):
+        room = serializer.save(created_by=self.request.user)
+        # Автоматически добавляем создателя в участники
+        room.members.add(self.request.user)
+        
+        # Создаем системное сообщение о создании чата
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=self.request.user,
+            message=f'Чат "{room.name}" создан',
+            is_system=True
+        )
+    
+    @action(detail=True, methods=['post'])
+    def send_message(self, request, pk=None):
+        """Отправить сообщение в чат"""
+        room = self.get_object()
+        message_text = request.data.get('message')
+        
+        if not message_text:
+            return Response(
+                {'error': 'message обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        message = DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=message_text
+        )
+        
+        serializer = DirectorChatMessageSerializer(message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'])
+    def join_room(self, request, pk=None):
+        """Присоединиться к чату"""
+        room = self.get_object()
+        room.members.add(request.user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{request.user.get_full_name() or request.user.username} присоединился к чату',
+            is_system=True
+        )
+        
+        return Response({'message': 'Вы присоединились к чату'})
+    
+    @action(detail=True, methods=['post'])
+    def leave_room(self, request, pk=None):
+        """Покинуть чат"""
+        room = self.get_object()
+        room.members.remove(request.user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{request.user.get_full_name() or request.user.username} покинул чат',
+            is_system=True
+        )
+        
+        return Response({'message': 'Вы покинули чат'})
+    
+    @action(detail=True, methods=['get'])
+    def messages(self, request, pk=None):
+        """Получить сообщения чата"""
+        room = self.get_object()
+        messages = room.messages.all().select_related('sender')
+        serializer = DirectorChatMessageSerializer(messages, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def invite_user(self, request, pk=None):
+        """Пригласить пользователя в чат"""
+        room = self.get_object()
+        user_id = request.data.get('user_id')
+        
+        if not user_id:
+            return Response(
+                {'error': 'user_id обязателен'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        room.members.add(user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{user.get_full_name() or user.username} был приглашен в чат',
+            is_system=True
+        )
+        
+        # Уведомляем пользователя
+        from apps.notifications.services import NotificationService
+        NotificationService.create_notification(
+            recipient=user,
+            type='new_contact',
+            title='Приглашение в чат',
+            message=f'{request.user.get_full_name() or request.user.username} пригласил вас в чат "{room.name}"',
+            related_object_id=room.id,
+            related_object_type='director_chat_room'
+        )
+        
+        return Response({'message': 'Пользователь приглашен'})
+
+
