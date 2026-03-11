@@ -1,0 +1,229 @@
+/* Стили для страницы промоматериалов */
+
+.promoMaterials {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.header h2 {
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.promoTabs {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configCard,
+.previewCard {
+  height: 100%;
+}
+
+.configCard .ant-card-body,
+.previewCard .ant-card-body {
+  height: calc(100% - 57px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Секции конфигурации с отступами */
+.configSection {
+  margin-top: 24px;
+}
+
+/* Предварительный просмотр баннера */
+.bannerPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  margin-bottom: 16px;
+}
+
+.bannerPlaceholder {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+}
+
+.bannerContent {
+  color: white;
+  text-align: center;
+  padding: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.bannerLogo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.bannerText {
+  font-size: 16px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.bannerButton {
+  background: #ffa940;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.bannerSize {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Ссылки */
+.linkSection {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.linkBox {
+  flex: 1;
+  min-width: 300px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  border: 1px solid #d9d9d9;
+}
+
+.shortLink {
+  margin-bottom: 16px;
+}
+
+.shortLink:last-child {
+  margin-bottom: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .promoMaterials {
+    padding: 16px;
+  }
+
+  .linkBox {
+    min-width: auto;
+  }
+
+  .linkSection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bannerPlaceholder {
+    max-width: 100%;
+  }
+
+  .bannerContent {
+    padding: 12px;
+  }
+
+  .bannerLogo {
+    font-size: 16px;
+  }
+
+  .bannerText {
+    font-size: 14px;
+  }
+
+  .bannerButton {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .promoTabs {
+    padding: 16px;
+  }
+
+  .configSection {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h2 {
+    font-size: 20px;
+  }
+
+  .bannerContent {
+    padding: 8px;
+  }
+
+  .bannerLogo {
+    font-size: 14px;
+  }
+
+  .bannerText {
+    font-size: 12px;
+  }
+
+  .bannerButton {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .bannerSize {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  .configSection {
+    margin-top: 16px;
+  }
+}
+
+/* Стили для табов */
+.promoTabs .ant-tabs-tab {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.promoTabs .ant-tabs-tab-active {
+  color: #1890ff;
+}
+
+/* Стили для радио кнопок размеров */
+.promoTabs .ant-radio-group button {
+  margin: 2px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.promoTabs .ant-radio-group button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

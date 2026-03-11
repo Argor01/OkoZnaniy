@@ -12,6 +12,8 @@ import {
   MenuOutlined,
   CalendarOutlined,
   InfoCircleOutlined,
+  MessageOutlined,
+  FileImageOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs, { Dayjs } from 'dayjs';
@@ -20,6 +22,8 @@ import { ROUTES } from '@/utils/constants';
 import { authApi } from '@/features/auth/api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '@/features/partner/api/partners';
 import { PartnerProgram } from './PartnerProgram';
+import { PartnerChatsSection } from '../components/InternalCommunication/PartnerChatsSection';
+import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -379,6 +383,18 @@ const PartnerDashboard: React.FC = () => {
           nextBonusThreshold={10000}
         />
       ),
+    },
+    {
+      key: 'promo',
+      icon: <FileImageOutlined />,
+      label: 'Промоматериалы',
+      component: <PromoMaterials />,
+    },
+    {
+      key: 'chats',
+      icon: <MessageOutlined />,
+      label: 'Внутренняя коммуникация',
+      component: <PartnerChatsSection />,
     },
     {
       key: 'statistics',
