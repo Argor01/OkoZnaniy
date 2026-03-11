@@ -159,6 +159,7 @@ export interface RegisterEmployeeRequest {
   role: 'admin' | 'arbitrator' | 'partner' | 'expert';
   password?: string;
   username?: string;
+  city?: string; // Город проживания для партнеров
 }
 
 

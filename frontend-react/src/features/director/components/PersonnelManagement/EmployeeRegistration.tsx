@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Select, Button, Card, Space, message, Typography } from 'antd';
-import { UserOutlined, MailOutlined, PhoneOutlined, LockOutlined, PlusOutlined } from '@ant-design/icons';
+import { UserOutlined, MailOutlined, PhoneOutlined, LockOutlined, PlusOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { registerEmployee } from '@/features/director/api/directorApi';
 import type { RegisterEmployeeRequest } from '@/features/director/api/types';
@@ -12,6 +12,7 @@ const EmployeeRegistration: React.FC = () => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [autoGeneratePassword, setAutoGeneratePassword] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<string>('');
   const isMobile = window.innerWidth <= 840;
 
   const generatePassword = () => {
@@ -71,6 +72,7 @@ const EmployeeRegistration: React.FC = () => {
       phone: values.phone ? values.phone.replace(/[^\d+]/g, '') : undefined,
       role: values.role,
       password: autoGeneratePassword ? undefined : values.password,
+      city: values.role === 'partner' ? values.city : undefined, // Добавляем город только для партнеров
     };
 
     registerMutation.mutate(data);
@@ -177,12 +179,31 @@ const EmployeeRegistration: React.FC = () => {
             <Select
               placeholder="Выберите роль"
               size="large"
+              onChange={(value) => setSelectedRole(value)}
             >
               <Option value="admin">Администратор</Option>
               <Option value="partner">Партнёр</Option>
               <Option value="expert">Эксперт</Option>
             </Select>
           </Form.Item>
+
+          {/* Поле города для партнеров */}
+          {selectedRole === 'partner' && (
+            <Form.Item
+              name="city"
+              label="Город проживания"
+              rules={[
+                { required: true, message: 'Введите город проживания' },
+                { min: 2, message: 'Название города должно содержать минимум 2 символа' },
+              ]}
+            >
+              <Input
+                prefix={<EnvironmentOutlined />}
+                placeholder="Москва"
+                size="large"
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             name="password"

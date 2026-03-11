@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar', 'bio', 'experience_years', 'hourly_rate', 'education', 
             'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate', 'total_referrals', 
-            'active_referrals', 'total_earnings',
+            'active_referrals', 'total_earnings', 'city',  # Добавляем поле города
             'has_submitted_application', 'application_approved',
             'application_submitted_at', 'application_reviewed_at'
         ]

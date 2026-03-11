@@ -353,11 +353,17 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         role = data.get('role')
         password = data.get('password')
         username = data.get('username')
+        city = data.get('city') or None  # Добавляем поле города
 
         if not (email or phone):
             return Response({'detail': 'Укажите email или телефон'}, status=status.HTTP_400_BAD_REQUEST)
         if not role:
             return Response({'detail': 'Укажите роль'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Проверяем обязательность города для партнеров
+        if role == 'partner' and not city:
+            return Response({'detail': 'Для партнеров обязательно указание города проживания'}, status=status.HTTP_400_BAD_REQUEST)
+            
         # Генерируем пароль если не указан
         if not password:
             import secrets, string
@@ -395,6 +401,7 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
             role=role,
             first_name=first_name,
             last_name=last_name,
+            city=city,  # Добавляем город при создании пользователя
         )
 
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)

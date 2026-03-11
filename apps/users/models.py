@@ -45,6 +45,7 @@ class User(AbstractUser):
     total_referrals = models.PositiveIntegerField(default=0, verbose_name="Всего рефералов")
     active_referrals = models.PositiveIntegerField(default=0, verbose_name="Активных рефералов")
     total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Общий доход")
+    city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Город проживания")
     
     # Поля для бана за обмен контактами
     is_banned_for_contacts = models.BooleanField(default=False, verbose_name="Забанен за обмен контактами")
