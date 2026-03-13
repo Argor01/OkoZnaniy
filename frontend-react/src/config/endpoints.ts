@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     submit: (id: number) => `/orders/orders/${id}/submit/`,
     approve: (id: number) => `/orders/orders/${id}/approve/`,
     revision: (id: number) => `/orders/orders/${id}/revision/`,
+    reject: (id: number) => `/orders/orders/${id}/reject/`,
     extendDeadline: (id: number) => `/orders/orders/${id}/extend_deadline/`,
     cancelOverdue: (id: number) => `/orders/orders/${id}/cancel_overdue/`,
     uploadFile: (id: number) => `/orders/orders/${id}/files/`,

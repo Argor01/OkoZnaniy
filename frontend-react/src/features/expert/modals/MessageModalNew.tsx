@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Alert } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/features/common';
 import {
   MessageOutlined,
@@ -23,16 +24,18 @@ import {
   DownOutlined,
   UpOutlined,
   MenuOutlined,
-  DollarOutlined
+  DollarOutlined,
+  PercentageOutlined
 } from '@ant-design/icons';
 import dayjs, { type Dayjs } from 'dayjs';
-import { chatApi, ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
+import { chatApi, ChatListItem, ChatDetail, Message, ChatFrozenError } from '@/features/support/api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
+import { ROUTES } from '@/utils/constants';
 import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
@@ -57,6 +60,7 @@ type OfferData = {
   work_type?: string;
   subject?: string;
   cost?: number;
+  prepayment_percent?: number;
   deadline?: string | null;
   status?: 'new' | 'accepted' | 'rejected';
   order_id?: number;
@@ -79,6 +83,9 @@ type OrderForChat = {
   deadline?: string | null;
   status?: string | null;
   is_overdue?: boolean | null;
+  is_frozen?: boolean | null;
+  frozen_reason?: string | null;
+  frozen_at?: string | null;
   client?: { id?: number | null } | null;
   client_id?: number | null;
   expert?: { id?: number | null } | null;
@@ -134,6 +141,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   userProfile
 }) => {
   console.log('🔧 MessageModalNew rendered with supportUserIdProp:', supportUserIdProp);
+  const navigate = useNavigate();
   
   const [messageText, setMessageText] = useState<string>('');
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
@@ -143,6 +151,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [deletingChat, setDeletingChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [isDragOverChat, setIsDragOverChat] = useState(false);
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [workOfferModalOpen, setWorkOfferModalOpen] = useState(false);
   const [acceptWorkDeliveryModalOpen, setAcceptWorkDeliveryModalOpen] = useState(false);
@@ -169,6 +178,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [showClaimCategories, setShowClaimCategories] = useState(false);
   const [selectedClaimCategory, setSelectedClaimCategory] = useState<string>('');
   const [claimFiles, setClaimFiles] = useState<File[]>([]);
+  const [expertViolationModalOpen, setExpertViolationModalOpen] = useState(false);
+  const [lastViolationOrderId, setLastViolationOrderId] = useState<number | null>(null);
   const [overdueExtendModalOpen, setOverdueExtendModalOpen] = useState(false);
   const [overdueDeadlineValue, setOverdueDeadlineValue] = useState<Dayjs | null>(null);
   const [overdueExtending, setOverdueExtending] = useState(false);
@@ -180,6 +191,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
+  const dragDepthRef = useRef(0);
   
   
   const claimCategories = [
@@ -448,8 +460,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setChatList((prev) => prev.map((chat) =>
         chat.id === chatId ? { ...chat, unread_count: 0 } : chat
       ));
+      return data;
     } catch (error: unknown) {
       antMessage.error('Не удалось загрузить чат');
+      return null;
     }
   }, [hydrateClosedOrdersForChat]);
 
@@ -555,11 +569,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (visible) {
       loadChats();
 
-      // Обновляем данные выбранного чата при открытии модального окна
-      if (selectedChat?.id) {
-        loadChatDetail(selectedChat.id);
-      }
-
       if (selectedOrderId && selectedUserId) {
         loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
         return;
@@ -569,7 +578,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId, selectedOrderId, selectedChat?.id, loadChats, loadChatDetail, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser, loadOrCreateSupportChat]);
+  }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
+
+  useEffect(() => {
+    if (!visible || !selectedChat?.id) return;
+    loadChatDetail(selectedChat.id);
+  }, [visible, selectedChat?.id, loadChatDetail]);
 
   // Обработчик события для загрузки чата поддержки
   useEffect(() => {
@@ -679,7 +693,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const formatRemaining = (deadline?: string, status?: string) => {
+  const formatRemaining = (deadline?: string, status?: string, isFrozen?: boolean | null) => {
+    if (isFrozen) return 'Срок заморожен';
+    if (status === 'review') return 'На проверке';
     if (!deadline) return '';
     const baseEnd = new Date(deadline).getTime();
     // const reviewExtraMs = status === 'review' ? 5 * 24 * 60 * 60 * 1000 : 0;
@@ -706,7 +722,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return `Осталось: ${hh}:${mm}:${ss}`;
   };
 
-  const isDeadlineExpired = (deadline?: string | null) => {
+  const isDeadlineExpired = (deadline?: string | null, isFrozen?: boolean | null) => {
+    if (isFrozen) return false;
     if (!deadline) return false;
     const end = new Date(deadline).getTime();
     if (Number.isNaN(end)) return false;
@@ -809,18 +826,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [selectedChat?.messages]);
 
-  const currentRole =
-    userProfile?.role ||
-    (() => {
-      try {
-        const raw = localStorage.getItem('user');
-        if (!raw) return undefined;
-        return JSON.parse(raw)?.role;
-      } catch {
-        return undefined;
-      }
-    })();
   const currentUserId = (() => {
+    const profileId = Number((userProfile as { id?: unknown } | undefined)?.id);
+    if (Number.isFinite(profileId) && profileId > 0) return profileId;
     const rawId = localStorage.getItem('user_id');
     const parsed = rawId ? Number(rawId) : NaN;
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
@@ -839,9 +847,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
       (selectedChat as { client_id?: unknown } | null)?.client_id;
     if (chatClientId) return Number(chatClientId) === currentUserId;
-    const msgs = (selectedChat as { messages?: unknown } | null)?.messages;
-    if (!Array.isArray(msgs) || msgs.length === 0) return false;
-    return !!(msgs[0] as { is_mine?: unknown } | undefined)?.is_mine;
+    const chatExpertId =
+      (selectedChat as { expert?: { id?: unknown } | null; expert_id?: unknown } | null)?.expert?.id ??
+      (selectedChat as { expert_id?: unknown } | null)?.expert_id;
+    if (chatExpertId && currentUserId > 0) return Number(chatExpertId) !== currentUserId;
+    return false;
   })();
   const isChatExpert = (() => {
     if (!selectedChat) return false;
@@ -849,8 +859,27 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       (selectedChat as { expert?: { id?: unknown } | null; expert_id?: unknown } | null)?.expert?.id ??
       (selectedChat as { expert_id?: unknown } | null)?.expert_id;
     if (chatExpertId) return Number(chatExpertId) === currentUserId;
-    return !isChatInitiator;
+    const chatClientId =
+      (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
+      (selectedChat as { client_id?: unknown } | null)?.client_id;
+    if (chatClientId && currentUserId > 0) return Number(chatClientId) !== currentUserId;
+    const otherRole = String(selectedChat.other_user?.role ?? '').trim().toLowerCase();
+    return otherRole === 'client';
   })();
+  const currentUserRole = (() => {
+    const roleFromProfile = String(userProfile?.role ?? '').trim().toLowerCase();
+    if (roleFromProfile) return roleFromProfile;
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw) as { role?: unknown };
+      return String(parsed?.role ?? '').trim().toLowerCase();
+    } catch {
+      return '';
+    }
+  })();
+  const isGlobalExpert = currentUserRole === 'expert';
+  const canUseExpertOfferButtons = isGlobalExpert && isChatExpert && !isChatInitiator;
   const isOrderClient = (() => {
     // Если заказ загружен, проверяем по ID клиента заказа
     const clientId = order?.client?.id ?? order?.client_id;
@@ -860,8 +889,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     // В большинстве случаев инициатор чата - это клиент
     if (selectedChat) return isChatInitiator;
     
-    // Fallback: если ничего не известно, полагаемся на глобальную роль
-    return currentRole === 'client';
+    return false;
   })();
 
   const isOrderExpert = (() => {
@@ -870,9 +898,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const expertId = (order as any)?.expert?.id ?? (order as any)?.expert_id;
     if (expertId) return Number(expertId) === currentUserId;
 
-    // Если заказ еще не имеет исполнителя (например, стадия обсуждения),
-    // то экспертом считается тот, кто НЕ является клиентом заказа
-    return !isOrderClient;
+    if (selectedChat) return isChatExpert;
+    return false;
   })();
 
   const canOverdueClientActions = useMemo(() => {
@@ -880,7 +907,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     // Действия с просрочкой доступны только клиенту данного заказа
     if (!isOrderClient) return false;
     
-    return isDeadlineExpired(order.deadline);
+    return isDeadlineExpired(order.deadline, order.is_frozen);
   }, [isClosedOrder, order, isOrderClient]);
 
   const showExpertUploadButton = useMemo(() => {
@@ -899,8 +926,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     void deadlineTick;
     if (isClosedOrder) return '';
     if (!order?.deadline) return '';
-    return formatRemaining(order.deadline, order.status);
+    return formatRemaining(order.deadline, order.status, order.is_frozen);
   }, [order?.deadline, order?.status, deadlineTick, isClosedOrder]);
+
+  useEffect(() => {
+    if (!visible) return;
+    if (!order?.id) return;
+    if (!isOrderClient) return;
+    if (!order.is_frozen) return;
+    if (lastViolationOrderId === order.id) return;
+    setLastViolationOrderId(order.id);
+    setExpertViolationModalOpen(true);
+  }, [visible, order?.id, order?.is_frozen, isOrderClient, lastViolationOrderId]);
 
   const handleOfferSubmit = async (data: OfferData) => {
     if (!selectedChat) return;
@@ -1392,13 +1429,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setMessageText('');
       setAttachedFiles([]);
       
-      // Обновляем данные чата и список чатов после отправки сообщения
-      await Promise.all([
-        loadChatDetail(selectedChat.id),
-        loadChats()
-      ]);
-      
-      antMessage.success('Сообщение отправлено');
+      const refreshedChat = await loadChatDetail(selectedChat.id);
+      await loadChats();
+
+      if (refreshedChat?.is_frozen) {
+        antMessage.warning('Сообщение отклонено: переписка заморожена из-за проверки правил безопасности.');
+      } else {
+        antMessage.success('Сообщение отправлено');
+      }
     } catch (error: unknown) {
       console.error('Ошибка отправки сообщения:', error);
       
@@ -1413,8 +1451,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }
       
       // Проверяем, если это ошибка заморозки чата
-      if (error instanceof Error && error.message.includes('заморожен')) {
-        antMessage.error(error.message);
+      if (error instanceof ChatFrozenError) {
+        antMessage.error(error.frozenReason || error.message);
       } else {
         antMessage.error('Не удалось отправить сообщение');
       }
@@ -1423,32 +1461,95 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const handleFileSelect = (file: File) => {
-    if (typeof file.size === 'number' && file.size <= 0) {
-      antMessage.error('Передаваемый файл пуст');
-      return false;
-    }
-
+  const addAttachedFiles = useCallback((files: File[]) => {
+    if (!Array.isArray(files) || files.length === 0) return;
     const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      antMessage.error('Размер файла не должен превышать 10 МБ');
-      return false;
+    const existing = new Set(attachedFiles.map((f) => `${f.name}_${f.size}`));
+    const next: File[] = [];
+
+    for (const file of files) {
+      if (!file) continue;
+      if (typeof file.size === 'number' && file.size <= 0) {
+        antMessage.error(`Файл "${file.name}" пустой и не будет добавлен`);
+        continue;
+      }
+      if (file.size > maxSize) {
+        antMessage.error(`Файл "${file.name}" больше 10 МБ и не будет добавлен`);
+        continue;
+      }
+      const key = `${file.name}_${file.size}`;
+      if (existing.has(key) || next.some((f) => f.name === file.name && f.size === file.size)) {
+        antMessage.warning(`Файл "${file.name}" уже прикреплен`);
+        continue;
+      }
+      next.push(file);
     }
 
-    if (attachedFiles.find(f => f.name === file.name && f.size === file.size)) {
-      antMessage.warning('Этот файл уже прикреплен');
-      return false;
+    if (next.length > 0) {
+      setAttachedFiles((prev) => [...prev, ...next]);
+      antMessage.success(
+        next.length === 1
+          ? `Файл "${next[0].name}" прикреплен`
+          : `Прикреплено файлов: ${next.length}`
+      );
     }
+  }, [attachedFiles]);
 
-    setAttachedFiles(prev => [...prev, file]);
-    antMessage.success(`Файл "${file.name}" прикреплен`);
+  const handleFileSelect = (file: File) => {
+    addAttachedFiles([file]);
     return false;
   };
+
+  const handleChatDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!Array.from(e.dataTransfer.types || []).includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current += 1;
+    setIsDragOverChat(true);
+  }, [selectedChat, sending]);
+
+  const handleChatDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!Array.from(e.dataTransfer.types || []).includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    if (!isDragOverChat) setIsDragOverChat(true);
+  }, [selectedChat, sending, isDragOverChat]);
+
+  const handleChatDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setIsDragOverChat(false);
+    }
+  }, [selectedChat, sending]);
+
+  const handleChatDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current = 0;
+    setIsDragOverChat(false);
+    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    const dropped = Array.from(e.dataTransfer.files || []);
+    if (dropped.length === 0) return;
+    addAttachedFiles(dropped);
+  }, [selectedChat, sending, addAttachedFiles]);
 
   const removeAttachedFile = (fileToRemove: File) => {
     setAttachedFiles(prev => prev.filter(file => file !== fileToRemove));
     antMessage.info('Файл удален');
   };
+
+  useEffect(() => {
+    if (!visible) {
+      dragDepthRef.current = 0;
+      setIsDragOverChat(false);
+    }
+  }, [visible]);
 
   const formatTimestamp = (dateString: string) => {
     try {
@@ -1618,6 +1719,26 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     setShowClaimCategories(false);
     setClaimModalOpen(true);
   };
+
+  const handleGoToOrder = useCallback(() => {
+    if (!effectiveOrderId) return;
+    const path = ROUTES.orders.detail.replace(':orderId', String(effectiveOrderId));
+    onClose();
+    navigate(path, {
+      state: {
+        from: `${window.location.pathname}${window.location.search}`,
+        source: 'order-chat',
+      },
+    });
+  }, [effectiveOrderId, navigate, onClose]);
+
+  const handleContactSupport = useCallback(async () => {
+    if (!supportUserId) {
+      antMessage.error('Поддержка не настроена');
+      return;
+    }
+    await loadOrCreateSupportChat(supportUserId);
+  }, [loadOrCreateSupportChat, supportUserId]);
 
   const filteredChats = safeChatList.filter(chat => {
 
@@ -1940,7 +2061,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     if (f) handleOfferWorkUpload(f);
                   }}
                 />
-                {currentRole === 'expert' && !isSupportChatSelected ? (
+                {canUseExpertOfferButtons && !isSupportChatSelected ? (
                   headerContextTitle ? (
                     <Button
                       type="primary"
@@ -2093,17 +2214,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             </div>
                           </div>
 
-                          <div className={styles.goToOrderContainer}>
-                            <Button 
-                              onClick={() => {}}
-                              className={styles.goToOrderButton}
-                            >
-                              Перейти в заказ
-                            </Button>
-                          </div>
-
                           <div className={styles.orderActionsBar}>
-                             {showExpertUploadButton && (
+                             <div className={styles.primaryActionsRow}>
+                              <Button 
+                                onClick={handleGoToOrder}
+                                className={styles.goToOrderButton}
+                              >
+                                Перейти в заказ
+                              </Button>
+                              {showExpertUploadButton && (
                                 <Button
                                   type="primary"
                                   icon={<UploadOutlined />}
@@ -2114,11 +2233,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                     workFileInputRef.current?.click();
                                   }}
                                   className={styles.actionButtonPrimary}
-                                  block
                                 >
                                   Выгрузить работу
                                 </Button>
-                             )}
+                              )}
+                             </div>
                              
                              {canOverdueClientActions && (
                                 <div className={styles.secondaryActions}>
@@ -2171,7 +2290,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           ) : null}
 
           
-          <div className={`${styles.chatMessages} ${isMobile ? styles.chatMessagesMobile : ''}`}>
+          <div
+            className={`${styles.chatMessages} ${isMobile ? styles.chatMessagesMobile : ''} ${isDragOverChat ? styles.chatMessagesDragOver : ''}`}
+            onDragEnter={handleChatDragEnter}
+            onDragOver={handleChatDragOver}
+            onDragLeave={handleChatDragLeave}
+            onDrop={handleChatDrop}
+          >
             {selectedChat ? (
               <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
                 {orderIntroByChatId[selectedChat.id] ? (
@@ -2183,6 +2308,25 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     </div>
                   </div>
                 ) : null}
+                {(order?.is_frozen || selectedChat.is_frozen) && (
+                  <div className={styles.chatIntroWrapper}>
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="Переписка временно недоступна"
+                      description={
+                        selectedChat.frozen_reason ||
+                        order?.frozen_reason ||
+                        'Чат находится на проверке правил безопасности. При необходимости можно обратиться в техподдержку.'
+                      }
+                      action={
+                        <Button size="small" onClick={handleContactSupport}>
+                          Написать в поддержку
+                        </Button>
+                      }
+                    />
+                  </div>
+                )}
                 
                 
                 {/* Явно скрываем инпут для замороженных чатов */}
@@ -2352,6 +2496,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                     <div className={styles.offerLabel}>Стоимость</div>
                                     <div className={styles.offerValue}>
                                       {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={styles.offerGridItem}>
+                                  <div className={styles.offerGridIcon}><PercentageOutlined /></div>
+                                  <div>
+                                    <div className={styles.offerLabel}>Предоплата</div>
+                                    <div className={styles.offerValue}>
+                                      {Number(msg.offer_data?.prepayment_percent ?? 0)}%
                                     </div>
                                   </div>
                                 </div>
@@ -2615,9 +2768,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             <div 
               key={`chat-input-${selectedChat.id}-${selectedChat.is_frozen}`}
               className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}
-              style={{ 
-                display: selectedChat?.is_frozen === true ? 'none' : 'block'
-              }}
             >
               
               {isSupportChatSelected && (
@@ -2644,9 +2794,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               
               <div 
                 className={`${styles.chatInputRow} ${isMobile ? styles.chatInputRowMobile : ''}`}
-                style={{ 
-                  display: selectedChat?.is_frozen === true ? 'none' : 'flex'
-                }}
               >
                 <div className={styles.chatInputField}>
                   <Input.TextArea
@@ -2655,9 +2802,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     placeholder="Введите сообщение..."
                     autoSize={{ minRows: isMobile ? 1 : 1, maxRows: isMobile ? 4 : 4 }}
                     className={`${styles.chatInput} ${isMobile ? styles.chatInputMobile : ''}`}
-                    style={{ 
-                      display: selectedChat?.is_frozen === true ? 'none' : 'block'
-                    }}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -2759,10 +2903,40 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </Modal>
       
+      <Modal
+        open={expertViolationModalOpen}
+        centered
+        onCancel={() => setExpertViolationModalOpen(false)}
+        onOk={() => setExpertViolationModalOpen(false)}
+        okText="Понятно"
+        cancelButtonProps={{ style: { display: 'none' } }}
+        title={
+          <div className={styles.claimModalTitle}>
+            <ExclamationCircleOutlined className={styles.claimModalTitleIcon} />
+            Нарушение правил платформы
+          </div>
+        }
+        destroyOnHidden
+        width={isMobile ? '90%' : 560}
+      >
+        <div className={styles.claimModalContent}>
+          <div className={styles.claimWarningBox}>
+            <Text className={styles.claimWarningText}>
+              Эксперт нарушил правила платформы, чат и сроки заказа временно заморожены. 
+              Пожалуйста, дождитесь решения администратора.
+            </Text>
+          </div>
+          {order?.frozen_reason && (
+            <div>
+              <Text type="secondary">{order.frozen_reason}</Text>
+            </div>
+          )}
+        </div>
+      </Modal>
+      
       
       <Modal
         open={claimModalOpen}
-        centered
         onCancel={() => {
           setClaimModalOpen(false);
           setSelectedClaimCategory('');

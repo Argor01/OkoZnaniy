@@ -64,6 +64,7 @@ const MyWorks: React.FC = () => {
   }, [myOrdersData]);
 
   const isOverdueOrder = (order: Order) => {
+    if (order?.is_frozen) return false;
     if (order?.is_overdue === true) return true;
     const status = String(order?.status ?? '');
     if (!(status === 'in_progress' || status === 'revision')) return false;

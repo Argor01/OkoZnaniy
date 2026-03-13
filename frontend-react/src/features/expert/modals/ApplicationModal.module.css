@@ -139,7 +139,7 @@
 .applicationModalWrap :global(.ant-form-item-label > label),
 .applicationModalWrap label {
   font-family: 'Jost-SemiBold', sans-serif !important;
-  font-size: 12px !important;
+  font-size: 18px;
 }
 
 /* Mobile specific overrides */

@@ -2,7 +2,7 @@ import React from 'react';
 import { Select, SelectProps } from 'antd';
 import styles from './AppSelect.module.css';
 
-export interface AppSelectProps extends SelectProps {
+export interface AppSelectProps extends Omit<SelectProps, 'variant'> {
   variant?: 'default' | 'filled';
 }
 

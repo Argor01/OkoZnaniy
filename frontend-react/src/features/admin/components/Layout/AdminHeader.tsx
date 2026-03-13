@@ -13,7 +13,7 @@ const { Header } = Layout;
 const { Title, Text } = Typography;
 
 interface AdminHeaderProps {
-  user: User;
+  user?: User;
   selectedMenu: MenuKey;
   onLogout: () => void;
   onMenuToggle?: () => void;

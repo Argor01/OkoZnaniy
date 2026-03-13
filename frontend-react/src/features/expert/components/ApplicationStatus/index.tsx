@@ -41,14 +41,6 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   userProfile,
   onOpenApplicationModal,
 }) => {
-  if (applicationLoading) {
-    return (
-      <div className={`${styles.applicationCard} ${styles.applicationLoadingCard}`}>
-        <Spin size="large" />
-      </div>
-    );
-  }
-
   const hasValidApplication = application && 
     typeof application === 'object' && 
     !Array.isArray(application) &&
@@ -63,6 +55,14 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
       return false;
     }
   }, [userProfile?.id]);
+
+  if (applicationLoading) {
+    return (
+      <div className={`${styles.applicationCard} ${styles.applicationLoadingCard}`}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   if (hasValidApplication) {
     const showDeactivated = isDeactivated && application.status !== 'approved';

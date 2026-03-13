@@ -17,6 +17,7 @@ export interface Message {
     work_type?: string;
     subject?: string;
     cost?: number;
+    prepayment_percent?: number;
     deadline?: string;
     status?: 'new' | 'accepted' | 'rejected';
     order_id?: number;

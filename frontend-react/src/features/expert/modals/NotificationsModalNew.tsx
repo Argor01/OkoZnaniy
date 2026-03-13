@@ -27,6 +27,7 @@ interface NotificationsModalProps {
 const getNotificationIcon = (type: string) => {
   const iconClassMap: Record<string, string> = {
     'new_order': styles.notificationsIconPrimary,
+    'new_bid': styles.notificationsIconPrimary,
     'order_taken': styles.notificationsIconSuccess,
     'order_assigned': styles.notificationsIconSuccess,
     'file_uploaded': styles.notificationsIconInfo,
@@ -43,10 +44,12 @@ const getNotificationIcon = (type: string) => {
     'new_contact': styles.notificationsIconPrimary,
     'application_approved': styles.notificationsIconSuccess,
     'application_rejected': styles.notificationsIconDanger,
+    'expert_violation': styles.notificationsIconDanger,
   };
   const iconClassName = iconClassMap[type] || styles.notificationsIconMuted;
   const iconMap: Record<string, React.ReactNode> = {
     'new_order': <FileDoneOutlined className={iconClassName} />,
+    'new_bid': <FileDoneOutlined className={iconClassName} />,
     'order_taken': <CheckCircleOutlined className={iconClassName} />,
     'order_assigned': <CheckCircleOutlined className={iconClassName} />,
     'file_uploaded': <FileDoneOutlined className={iconClassName} />,
@@ -63,13 +66,14 @@ const getNotificationIcon = (type: string) => {
     'new_contact': <QuestionCircleOutlined className={iconClassName} />,
     'application_approved': <CheckCircleOutlined className={iconClassName} />,
     'application_rejected': <ClockCircleOutlined className={iconClassName} />,
+    'expert_violation': <QuestionCircleOutlined className={iconClassName} />,
   };
   return iconMap[type] || <BellOutlined className={iconClassName} />;
 };
 
 
 const getNotificationCategory = (type: string): string => {
-  if (['new_order', 'order_taken', 'order_assigned', 'order_completed', 'status_changed'].includes(type)) {
+  if (['new_order', 'new_bid', 'order_taken', 'order_assigned', 'order_completed', 'status_changed', 'expert_violation'].includes(type)) {
     return 'orders';
   }
   if (['new_comment', 'file_uploaded'].includes(type)) {

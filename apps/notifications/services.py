@@ -45,6 +45,25 @@ class NotificationService:
             )
 
     @staticmethod
+    def notify_new_bid(order, bid, expert, is_updated=False):
+        NotificationService.create_notification(
+            recipient=order.client,
+            type=NotificationType.NEW_BID,
+            title=(
+                f"Отклик обновлён: {order.title or 'Без названия'}"
+                if is_updated
+                else f"Новый отклик на заказ: {order.title or 'Без названия'}"
+            ),
+            message=(
+                f"Эксперт {expert.get_full_name() or expert.username} "
+                f"{'обновил отклик' if is_updated else 'откликнулся на ваш заказ'}. "
+                f"Ставка: {bid.amount} ₽"
+            ),
+            related_object_id=order.id,
+            related_object_type='order'
+        )
+
+    @staticmethod
     def notify_order_taken(order):
         # Уведомляем клиента о том, что его заказ взят в работу
         NotificationService.create_notification(

@@ -319,6 +319,7 @@ const ExpertDashboard: FC = () => {
           <NotificationsModal
             visible={notificationsModalVisible}
             onClose={() => setNotificationsModalVisible(false)}
+            isMobile={isMobile}
           />
         )}
         
@@ -327,6 +328,7 @@ const ExpertDashboard: FC = () => {
             visible={arbitrationModalVisible}
             onClose={() => setArbitrationModalVisible(false)}
             cases={arbitrationCases}
+            isMobile={isMobile}
           />
         )}
         
@@ -334,7 +336,8 @@ const ExpertDashboard: FC = () => {
           <FinanceModal
             visible={financeModalVisible}
             onClose={() => setFinanceModalVisible(false)}
-            balance={userProfile?.balance || 0}
+            profile={userProfile || null}
+            isMobile={isMobile}
           />
         )}
         
@@ -342,6 +345,17 @@ const ExpertDashboard: FC = () => {
           <FriendsModal
             visible={friendsModalVisible}
             onClose={() => setFriendsModalVisible(false)}
+            isMobile={isMobile}
+            onOpenChat={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedUserIdForChat(friend.id);
+              setMessageModalVisible(true);
+            }}
+            onOpenProfile={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedFriend(friend);
+              setFriendProfileModalVisible(true);
+            }}
           />
         )}
         
@@ -349,6 +363,7 @@ const ExpertDashboard: FC = () => {
           <FaqModal
             visible={faqModalVisible}
             onClose={() => setFaqModalVisible(false)}
+            isMobile={isMobile}
           />
         )}
         
@@ -359,10 +374,10 @@ const ExpertDashboard: FC = () => {
               setFriendProfileModalVisible(false);
               setSelectedFriend(null);
             }}
-            user={selectedFriend}
-            onOpenChat={(userId) => {
+            friend={selectedFriend}
+            onOpenChat={() => {
               setFriendProfileModalVisible(false);
-              setSelectedUserIdForChat(userId);
+              if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
               setMessageModalVisible(true);
             }}
           />

@@ -108,13 +108,27 @@ const CreateOrder: React.FC = () => {
     },
   });
 
+  const getDisabledTime = (current: dayjs.Dayjs | null) => {
+    if (!current) return {};
+    const now = dayjs();
+    if (!current.isSame(now, 'day')) return {};
+
+    const currentHour = now.hour();
+    const currentMinute = now.minute();
+    return {
+      disabledHours: () => Array.from({ length: currentHour }, (_, i) => i),
+      disabledMinutes: (selectedHour: number) =>
+        selectedHour === currentHour ? Array.from({ length: currentMinute + 1 }, (_, i) => i) : [],
+    };
+  };
+
   const onFinish = async (values: CreateOrderFormValues) => {
     try {
       setIsUploading(true);
       const orderData: CreateOrderRequest = {
         title: values.title,
         description: values.description,
-        deadline: values.deadline.format('YYYY-MM-DD'),
+        deadline: values.deadline.second(0).millisecond(0).toISOString(),
         subject_id: values.subject,
         work_type_id: values.work_type,
         budget: values.budget,
@@ -293,13 +307,24 @@ const CreateOrder: React.FC = () => {
               <Form.Item
                 name="deadline"
                 label="Дата сдачи"
-                rules={[{ required: true, message: 'Выберите дату сдачи' }]}
+                rules={[
+                  { required: true, message: 'Выберите дату и время сдачи' },
+                  {
+                    validator: (_, value: dayjs.Dayjs | null) => {
+                      if (!value) return Promise.resolve();
+                      if (value.isAfter(dayjs())) return Promise.resolve();
+                      return Promise.reject(new Error('Выберите время позже текущего'));
+                    },
+                  },
+                ]}
                 className={styles.dateField}
               >
                 <AppDatePicker
-                  placeholder="Дата сдачи"
-                  format="DD.MM.YYYY"
+                  placeholder="Дата и время сдачи"
+                  format="DD.MM.YYYY HH:mm"
+                  showTime={{ format: 'HH:mm' }}
                   disabledDate={(current) => current && current < dayjs().startOf('day')}
+                  disabledTime={getDisabledTime}
                   className={styles.dateInput}
                 />
               </Form.Item>

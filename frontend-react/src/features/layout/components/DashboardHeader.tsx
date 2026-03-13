@@ -26,6 +26,16 @@ import { formatCurrency } from '@/utils/formatters';
 const { Header } = Layout;
 const { Text } = Typography;
 
+type HeaderNavItem = {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  children?: Array<{
+    key: string;
+    label: string;
+  }>;
+};
+
 interface DashboardHeaderProps {
   userProfile?: {
     username: string;
@@ -66,7 +76,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   const isClient = userProfile?.role === 'client';
 
   const navItems = useMemo(() => {
-    const items = [
+    const items: HeaderNavItem[] = [
       {
         key: '/orders-feed',
         label: 'Лента заказов',

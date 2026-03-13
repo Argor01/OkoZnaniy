@@ -14,13 +14,7 @@ export const useAdminAuth = () => {
 
   const { data: user = null, isLoading: userLoading, isError } = useQuery({
     queryKey: ['current-user'],
-    queryFn: async () => {
-      try {
-        return await authApi.getCurrentUser();
-      } catch (error) {
-        throw error;
-      }
-    },
+    queryFn: () => authApi.getCurrentUser(),
     enabled: hasToken,
     retry: false,
     staleTime: Infinity, // User data rarely changes automatically

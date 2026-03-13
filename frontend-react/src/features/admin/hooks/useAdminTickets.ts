@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
+import { supportApi } from '@/features/admin/api/support';
 import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 import { message } from 'antd';
 
@@ -37,7 +38,7 @@ export const useTickets = (enabled: boolean = true) => {
 };
 
 export const useTicket = (ticketId: number) => {
-  const { data: ticket, isLoading: loading, refetch } = useQuery({
+  const { data: ticket, isLoading: loading, refetch } = useQuery<any>({
     queryKey: ['admin_ticket', ticketId],
     queryFn: async () => {
       // Сначала пытаемся получить как support_request
@@ -72,7 +73,7 @@ export const useTicketByNumber = (ticketNumber: string) => {
   
   const ticket = tickets.find((t: any) => t.ticket_number === ticketNumber);
   
-  const { data: fullTicket, isLoading: detailLoading, refetch } = useQuery({
+  const { data: fullTicket, isLoading: detailLoading, refetch } = useQuery<any>({
     queryKey: ['admin_ticket_by_number', ticketNumber],
     queryFn: async () => {
       if (!ticket) {

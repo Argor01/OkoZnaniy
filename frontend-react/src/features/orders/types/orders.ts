@@ -44,6 +44,7 @@ export interface Bid {
   order: number;
   expert: OrderExpert;
   amount: string;
+  prepayment_percent: number;
   comment?: string;
   created_at: string;
   status: 'active' | 'rejected' | 'cancelled';
@@ -58,6 +59,9 @@ export interface Order {
   deadline: string;
   status: string;
   is_overdue?: boolean;
+  is_frozen?: boolean;
+  frozen_reason?: string;
+  frozen_at?: string;
   client?: OrderClient;
   client_id?: number;
   client_name?: string;

@@ -14,17 +14,6 @@ interface AboutTabProps {
 }
 
 const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobile, onEdit }) => {
-  if (loading) {
-    return (
-      <div className={styles.sectionCard}>
-        <div className={styles.sectionCardHeader}>
-          <h2 className={styles.sectionTitle}>О себе</h2>
-        </div>
-        <Skeleton active paragraph={{ rows: 4 }} />
-      </div>
-    );
-  }
-
   const isExpert = profile?.role === 'expert';
   
   const defaultBio = isExpert 
@@ -36,8 +25,19 @@ const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobi
 
   const skills = useMemo(() => 
     profile?.skills ? profile.skills.split(',').map(s => s.trim()).filter(s => s) : (isExpert ? defaultSkills : []),
-    [profile?.skills, isExpert]
+    [profile?.skills, isExpert, defaultSkills]
   );
+
+  if (loading) {
+    return (
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionCardHeader}>
+          <h2 className={styles.sectionTitle}>О себе</h2>
+        </div>
+        <Skeleton active paragraph={{ rows: 4 }} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.sectionCard}>

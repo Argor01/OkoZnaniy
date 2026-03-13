@@ -405,7 +405,6 @@ export const TicketSystemSection: React.FC = () => {
                 {ticket.tags_list.map(tag => (
                   <Tag 
                     key={tag} 
-                    size="small"
                     color={tag.includes('нарушение') ? 'red' : 'blue'}
                   >
                     {tag}
@@ -424,7 +423,7 @@ export const TicketSystemSection: React.FC = () => {
       <Card size="small" title="Переписка" style={{ marginBottom: '16px' }}>
         <div style={{ maxHeight: '400px', overflow: 'auto' }}>
           {ticket.messages && ticket.messages.length > 0 ? (
-            <Timeline size="small">
+            <Timeline>
               {ticket.messages.map((msg) => (
                 <Timeline.Item
                   key={msg.id}
@@ -440,7 +439,7 @@ export const TicketSystemSection: React.FC = () => {
                         {formatMessageTime(msg.created_at)}
                       </Text>
                       {msg.is_admin && (
-                        <Tag color="blue" size="small">Поддержка</Tag>
+                        <Tag color="blue">Поддержка</Tag>
                       )}
                     </div>
                     <Text style={{ fontSize: '13px' }}>{msg.message}</Text>
@@ -605,7 +604,7 @@ export const TicketSystemSection: React.FC = () => {
                     <Text strong className={styles.ticketSystemTicketSubject}>
                       {ticket.subject}
                       {ticket.auto_created && (
-                        <Tag color="blue" size="small" style={{ marginLeft: 8 }}>
+                        <Tag color="blue" style={{ marginLeft: 8 }}>
                           Из чата
                         </Tag>
                       )}
@@ -618,14 +617,13 @@ export const TicketSystemSection: React.FC = () => {
                           {ticket.tags_list.slice(0, 3).map(tag => (
                             <Tag 
                               key={tag} 
-                              size="small"
                               color={tag.includes('негатив') ? 'red' : 'blue'}
                             >
                               {tag}
                             </Tag>
                           ))}
                           {ticket.tags_list.length > 3 && (
-                            <Tag size="small" color="default">
+                            <Tag color="default">
                               +{ticket.tags_list.length - 3}
                             </Tag>
                           )}
@@ -640,7 +638,7 @@ export const TicketSystemSection: React.FC = () => {
                       </Text>
                       {/* Отображение назначенных пользователей */}
                       {ticket.assigned_users && ticket.assigned_users.length > 0 && (
-                        <Tag size="small" icon={<TeamOutlined />} style={{ marginLeft: 8 }}>
+                        <Tag icon={<TeamOutlined />} style={{ marginLeft: 8 }}>
                           {ticket.assigned_users.length}
                         </Tag>
                       )}

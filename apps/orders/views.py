@@ -13,8 +13,10 @@ from apps.notifications.services import NotificationService
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse
 import mimetypes
+import logging
 
 # Create your views here.
+logger = logging.getLogger(__name__)
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -341,6 +343,22 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             message.full_clean()
             message.save()
+        return Response(self.get_serializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def reject(self, request, pk=None):
+        """Клиент отклоняет работу: review -> cancelled."""
+        order = self.get_object()
+        user = request.user
+        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if order.status != 'review':
+            return Response({'detail': 'Отклонить можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
+        old_status = order.status
+        order.status = 'cancelled'
+        order.save(update_fields=['status', 'updated_at'])
+        if order.expert_id:
+            NotificationService.notify_status_changed(order, old_status)
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'])
@@ -699,24 +717,14 @@ class BidViewSet(viewsets.ModelViewSet):
                 setattr(bid, attr, value)
             bid.save()
 
-        # Уведомляем клиента о новом отклике
-        if created:
-            try:
-                from apps.notifications.models import NotificationType
-
-                NotificationService.create_notification(
-                    recipient=order.client,
-                    type=NotificationType.NEW_BID,
-                    title=f"Новый отклик на заказ: {order.title or 'Без названия'}",
-                    message=(
-                        f"Эксперт {user.get_full_name() or user.username} откликнулся на ваш заказ. "
-                        f"Ставка: {bid.amount} ₽"
-                    ),
-                    related_object_id=order.id,
-                    related_object_type='order'
-                )
-            except Exception:
-                # Не блокируем создание отклика из-за проблем с уведомлениями
-                pass
+        try:
+            NotificationService.notify_new_bid(
+                order=order,
+                bid=bid,
+                expert=user,
+                is_updated=not created
+            )
+        except Exception:
+            logger.exception("Не удалось создать уведомление о новом отклике", extra={"order_id": order.id, "bid_id": bid.id, "expert_id": user.id})
         
         return bid

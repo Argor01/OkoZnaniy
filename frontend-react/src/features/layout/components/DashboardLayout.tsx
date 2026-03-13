@@ -221,6 +221,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openProfileModal: () => { closeAllModals(); setProfileModalVisible(true); },
     openMessageModal: (userId?: number) => { 
         closeAllModals(); 
+        setSelectedOrderIdForChat(undefined);
         if (userId) setSelectedUserIdForChat(userId);
         setSelectedChatContextTitle(undefined);
         setMessageModalVisible(true); 
@@ -229,7 +230,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         closeAllModals();
         setSelectedOrderIdForChat(orderId);
         setSelectedUserIdForChat(userId);
-        setSelectedChatContextTitle(undefined);
+        setSelectedChatContextTitle(`Заказ #${orderId}`);
         setMessageModalVisible(true);
     },
     openContextChat: (userId: number, title: string, workId?: number) => {
@@ -365,8 +366,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <ProfileModal
             visible={profileModalVisible}
             onClose={() => setProfileModalVisible(false)}
+            profile={userProfile || null}
             userProfile={userProfile}
-            isMobile={window.innerWidth <= 768}
           />
         )}
         {messageModalVisible && (

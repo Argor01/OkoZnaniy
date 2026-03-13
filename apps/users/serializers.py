@@ -46,7 +46,8 @@ class UserSerializer(serializers.ModelSerializer):
             'referral_code', 'partner_commission_rate', 'total_referrals', 
             'active_referrals', 'total_earnings',
             'has_submitted_application', 'application_approved',
-            'application_submitted_at', 'application_reviewed_at'
+            'application_submitted_at', 'application_reviewed_at',
+            'is_banned_for_contacts', 'contact_ban_reason', 'contact_ban_date'
         ]
         read_only_fields = ['email', 'date_joined', 'last_login', 'is_verified', 'has_submitted_application', 'application_approved', 'application_submitted_at', 'application_reviewed_at']
     

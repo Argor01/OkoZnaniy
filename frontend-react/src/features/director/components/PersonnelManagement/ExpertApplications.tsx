@@ -437,7 +437,7 @@ const ExpertApplications: React.FC = () => {
                 {selectedApplication.expert?.phone || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Опыт работы" span={isMobile ? 1 : 2}>
-                {selectedApplication.work_experience_years || selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
+                {selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
               </Descriptions.Item>
               <Descriptions.Item label="Образование">
                 {selectedApplication.education || selectedApplication.expert.education || 'Не указано'}

@@ -10,7 +10,7 @@ import styles from './AdminLayout.module.css';
 const { Content } = Layout;
 
 interface AdminLayoutProps {
-  user: User;
+  user?: User;
   selectedMenu: MenuKey;
   onMenuSelect: (key: MenuKey) => void;
   onLogout: () => void;

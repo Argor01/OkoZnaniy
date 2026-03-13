@@ -173,7 +173,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </Text>
           <Space size={8} wrap>
             {order.files.map((file) => {
-              const fileName = file.filename || file.file_name || 'file';
+              const fileName = file.filename || 'file';
               return (
                 <Tooltip
                   key={String(file.id ?? fileName)}
@@ -256,7 +256,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </AppButton>
         ) : userProfile?.role === 'expert' ? (
           <AppButton 
-            variant={hasMyBid ? 'default' : 'primary'}
+            variant={hasMyBid ? 'secondary' : 'primary'}
             disabled={hasMyBid || checkingMyBid}
             size={isMobile ? 'middle' : 'large'}
             className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
