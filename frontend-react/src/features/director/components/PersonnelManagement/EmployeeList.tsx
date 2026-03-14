@@ -189,7 +189,9 @@ const EmployeeList: React.FC = () => {
       employee.last_name?.toLowerCase().includes(searchText.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchText.toLowerCase());
     
-    const isDeactivatedExpert = employee.role === 'client' && employee.application_approved === false;
+    const isDeactivatedExpert = employee.role === 'client' &&
+      employee.application_approved === false &&
+      employee.has_submitted_application === true;
     
     
     const matchesRole = 
@@ -199,10 +201,12 @@ const EmployeeList: React.FC = () => {
     
     const isActive = employee.is_active !== false; 
     
+    const isDeactivatedEmployee = !isActive || isDeactivatedExpert;
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && isActive && !isDeactivatedExpert) ||
-      (statusFilter === 'inactive' && (!isActive || isDeactivatedExpert));
+      (statusFilter === 'inactive' && !isActive) ||
+      (statusFilter === 'deactivated' && isDeactivatedEmployee);
     
     return matchesSearch && matchesRole && matchesStatus;
   }) || [];
@@ -407,6 +411,7 @@ const EmployeeList: React.FC = () => {
             <Option value="all">Все статусы</Option>
             <Option value="active">Активные</Option>
             <Option value="inactive">Неактивные</Option>
+            <Option value="deactivated">Деактивированные</Option>
           </Select>
         </div>
         <Spin spinning={isLoading}>

@@ -181,7 +181,7 @@ const ExpertApplications: React.FC = () => {
       approved: { color: 'green', text: 'Одобрена' },
       rejected: { color: 'red', text: 'Отклонена' },
       deactivated: { color: 'red', text: 'Деактивирована' },
-      needs_revision: { color: 'gold', text: 'Требуется доработка' },
+      needs_revision: { color: 'gold', text: 'На доработке' },
     };
     const config = statusConfig[status as keyof typeof statusConfig] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;
@@ -372,7 +372,7 @@ const ExpertApplications: React.FC = () => {
             type={statusFilter === 'needs_revision' ? 'primary' : 'default'}
             onClick={() => setStatusFilter('needs_revision')}
           >
-            На доработку
+            На доработке
           </Button>
           <Button
             type={statusFilter === 'all' ? 'primary' : 'default'}

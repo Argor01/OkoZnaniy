@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Alert } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/features/common';
 import {
@@ -1501,43 +1501,43 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const handleChatDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!selectedChat || selectedChat.is_frozen || order?.is_frozen || sending) return;
     if (!Array.from(e.dataTransfer.types || []).includes('Files')) return;
     e.preventDefault();
     e.stopPropagation();
     dragDepthRef.current += 1;
     setIsDragOverChat(true);
-  }, [selectedChat, sending]);
+  }, [selectedChat, order?.is_frozen, sending]);
 
   const handleChatDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!selectedChat || selectedChat.is_frozen || order?.is_frozen || sending) return;
     if (!Array.from(e.dataTransfer.types || []).includes('Files')) return;
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'copy';
     if (!isDragOverChat) setIsDragOverChat(true);
-  }, [selectedChat, sending, isDragOverChat]);
+  }, [selectedChat, order?.is_frozen, sending, isDragOverChat]);
 
   const handleChatDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!selectedChat || selectedChat.is_frozen || order?.is_frozen || sending) return;
     e.preventDefault();
     e.stopPropagation();
     dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
     if (dragDepthRef.current === 0) {
       setIsDragOverChat(false);
     }
-  }, [selectedChat, sending]);
+  }, [selectedChat, order?.is_frozen, sending]);
 
   const handleChatDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     dragDepthRef.current = 0;
     setIsDragOverChat(false);
-    if (!selectedChat || selectedChat.is_frozen || sending) return;
+    if (!selectedChat || selectedChat.is_frozen || order?.is_frozen || sending) return;
     const dropped = Array.from(e.dataTransfer.files || []);
     if (dropped.length === 0) return;
     addAttachedFiles(dropped);
-  }, [selectedChat, sending, addAttachedFiles]);
+  }, [selectedChat, order?.is_frozen, sending, addAttachedFiles]);
 
   const removeAttachedFile = (fileToRemove: File) => {
     setAttachedFiles(prev => prev.filter(file => file !== fileToRemove));
@@ -1811,6 +1811,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     
     return result;
   }, [selectedChat?.messages]);
+  const isChatFrozen = Boolean(selectedChat?.is_frozen || order?.is_frozen);
 
   return (
     <Modal
@@ -2299,50 +2300,26 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           >
             {selectedChat ? (
               <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
-                {orderIntroByChatId[selectedChat.id] ? (
-                  <div className={styles.chatIntroWrapper}>
-                    <div
-                      className={`${styles.chatIntroBubble} ${isMobile ? styles.chatIntroBubbleMobile : ''}`}
-                    >
-                      {orderIntroByChatId[selectedChat.id]}
-                    </div>
+                {isChatFrozen ? (
+                  <div className={styles.chatFrozenNotice}>
+                    <Text className={styles.chatFrozenTitle}>Переписка временно недоступна</Text>
+                    <Text className={styles.chatFrozenReason}>Обнаружен обмен контактами</Text>
+                    <Button size="small" onClick={handleContactSupport} className={styles.chatFrozenSupportButton}>
+                      Написать в поддержку
+                    </Button>
                   </div>
-                ) : null}
-                {(order?.is_frozen || selectedChat.is_frozen) && (
-                  <div className={styles.chatIntroWrapper}>
-                    <Alert
-                      type="warning"
-                      showIcon
-                      message="Переписка временно недоступна"
-                      description={
-                        selectedChat.frozen_reason ||
-                        order?.frozen_reason ||
-                        'Чат находится на проверке правил безопасности. При необходимости можно обратиться в техподдержку.'
-                      }
-                      action={
-                        <Button size="small" onClick={handleContactSupport}>
-                          Написать в поддержку
-                        </Button>
-                      }
-                    />
-                  </div>
-                )}
-                
-                
-                {/* Явно скрываем инпут для замороженных чатов */}
-                {selectedChat.is_frozen && (
-                  <div style={{ 
-                    padding: '16px', 
-                    textAlign: 'center', 
-                    color: '#999',
-                    fontStyle: 'italic',
-                    borderTop: '1px solid #f0f0f0'
-                  }}>
-                    Отправка сообщений в замороженном чате недоступна
-                  </div>
-                )}
-                
-                {groupedMessages.map((msg: any, idx: number) => {
+                ) : (
+                  <>
+                    {orderIntroByChatId[selectedChat.id] ? (
+                      <div className={styles.chatIntroWrapper}>
+                        <div
+                          className={`${styles.chatIntroBubble} ${isMobile ? styles.chatIntroBubbleMobile : ''}`}
+                        >
+                          {orderIntroByChatId[selectedChat.id]}
+                        </div>
+                      </div>
+                    ) : null}
+                    {groupedMessages.map((msg: any, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
                   const isSystemMessage = msg.message_type === 'system';
@@ -2752,8 +2729,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       </div>
                     </div>
                   );
-                })}
-                <div ref={messagesEndRef} />
+                    })}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
               </div>
             ) : (
               <div className={`${styles.chatEmptyState} ${isMobile ? styles.chatEmptyStateMobile : ''}`}>
@@ -2764,9 +2743,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           </div>
 
           
-          {selectedChat && selectedChat.is_frozen !== true && (
+          {selectedChat && !isChatFrozen && (
             <div 
-              key={`chat-input-${selectedChat.id}-${selectedChat.is_frozen}`}
+              key={`chat-input-${selectedChat.id}-${isChatFrozen}`}
               className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}
             >
               

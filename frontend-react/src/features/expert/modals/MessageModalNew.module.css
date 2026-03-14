@@ -574,6 +574,35 @@
   font-size: 12px;
 }
 
+.chatFrozenNotice {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fff1f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.chatFrozenTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.chatFrozenReason {
+  font-size: 14px;
+  color: #991b1b;
+}
+
+.chatFrozenSupportButton {
+  align-self: center;
+}
+
 .chatEmptyState {
   text-align: center;
   color: #9ca3af;

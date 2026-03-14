@@ -114,7 +114,13 @@ const OrdersFeed: React.FC = () => {
           }
         }
       }
-      return data;
+      return Array.isArray(data)
+        ? [...data].sort((a, b) => {
+            const left = new Date(a?.created_at || 0).getTime();
+            const right = new Date(b?.created_at || 0).getTime();
+            return right - left;
+          })
+        : data;
     },
   });
 
@@ -132,6 +138,10 @@ const OrdersFeed: React.FC = () => {
       if (order.is_active === false) return false;
       if (order.deleted === true) return false;
       return !!order.id && !!order.title;
+    }).sort((a, b) => {
+      const left = new Date(a?.created_at || 0).getTime();
+      const right = new Date(b?.created_at || 0).getTime();
+      return right - left;
     });
   }, [ordersData]);
 

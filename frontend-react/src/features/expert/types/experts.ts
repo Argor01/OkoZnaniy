@@ -27,7 +27,7 @@ export interface ExpertApplication {
   work_experience_years: number;
   specializations: Array<{ id: number; name: string }>;
   educations: Education[];
-  status: 'pending' | 'approved' | 'rejected' | 'needs_revision';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_revision' | 'deactivated';
   status_display: string;
   rejection_reason?: string;
   comment?: string;

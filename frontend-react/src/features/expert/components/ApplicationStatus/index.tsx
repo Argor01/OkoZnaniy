@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Button, Typography, Spin, Space } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, EditOutlined } from '@ant-design/icons';
 import type { ExpertApplication } from '@/features/expert/api/experts';
@@ -20,41 +20,31 @@ const getApplicationStatusIcon = (status: ExpertApplication['status']) => {
     case 'approved': return <CheckCircleOutlined />;
     case 'rejected': return <CloseCircleOutlined />;
     case 'needs_revision': return <EditOutlined />;
+    case 'deactivated': return <CloseCircleOutlined />;
     default: return null;
   }
 };
 
 const getStatusText = (status: ExpertApplication['status'], display?: string) => {
-  if (display) return display;
   switch (status) {
     case 'pending': return 'На рассмотрении';
     case 'approved': return 'Одобрено';
-    case 'rejected': return 'Отклонено';
-    case 'needs_revision': return 'Требуется доработка';
-    default: return 'Неизвестный статус';
+    case 'rejected': return 'Отказано';
+    case 'needs_revision': return 'На доработке';
+    case 'deactivated': return 'Деактивирован';
+    default: return display || 'Неизвестный статус';
   }
 };
 
 const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   application,
   applicationLoading,
-  userProfile,
   onOpenApplicationModal,
 }) => {
   const hasValidApplication = application && 
     typeof application === 'object' && 
     !Array.isArray(application) &&
     'status' in application;
-
-  const isDeactivated = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('director_deactivated_employees');
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) && userProfile?.id ? arr.includes(userProfile.id) : false;
-    } catch {
-      return false;
-    }
-  }, [userProfile?.id]);
 
   if (applicationLoading) {
     return (
@@ -65,38 +55,39 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   }
 
   if (hasValidApplication) {
-    const showDeactivated = isDeactivated && application.status !== 'approved';
-
-    const statusClass = showDeactivated ? styles.statusRejected :
+    const statusClass =
       application.status === 'pending' ? styles.statusPending :
       application.status === 'approved' ? styles.statusApproved :
       application.status === 'needs_revision' ? styles.statusWarning :
       styles.statusRejected;
 
-    const statusIcon = showDeactivated ? <CloseCircleOutlined /> : getApplicationStatusIcon(application.status);
-    const statusText = showDeactivated ? 'Деактивирован' : getStatusText(application.status, application.status_display);
-
-    const isRejected = application.status === 'rejected';
+    const statusIcon = getApplicationStatusIcon(application.status);
+    const statusText = getStatusText(application.status, application.status_display);
+    const isNegativeStatus = application.status === 'rejected' || application.status === 'deactivated';
+    const rawReviewComment = String(application.rejection_reason || application.comment || '').trim();
+    const reviewComment = application.status === 'needs_revision'
+      ? rawReviewComment.replace(/^(требуется\s*доработка\s*:\s*)+/i, '').trim()
+      : rawReviewComment;
 
     return (
       <div className={styles.applicationCard}>
         <div className={styles.applicationHeader}>
           <div>
             <h3 className={styles.applicationTitle}>Анкета</h3>
-            {!isRejected && <p className={styles.applicationSubtitle}>Статус рассмотрения</p>}
+            {!isNegativeStatus && <p className={styles.applicationSubtitle}>Статус рассмотрения</p>}
           </div>
-          <div className={isRejected ? styles.statusContainer : ''}>
-            {isRejected && <span className={styles.statusLabel}>Статус рассмотрения</span>}
+          <div className={isNegativeStatus ? styles.statusContainer : ''}>
+            {isNegativeStatus && <span className={styles.statusLabel}>Статус рассмотрения</span>}
             <div className={`${styles.statusBadge} ${statusClass}`}>
               {statusIcon}
               <span>{statusText}</span>
             </div>
           </div>
         </div>
-        {(application.status === 'rejected' || application.status === 'needs_revision') && (application.rejection_reason || application.comment) && (
+        {(application.status === 'rejected' || application.status === 'needs_revision') && reviewComment && (
           <div className={styles.applicationRejectBox}>
             <Text type="danger" className={styles.applicationRejectText}>
-              <strong>{application.status === 'needs_revision' ? 'Комментарий:' : 'Причина отклонения:'}</strong> {application.rejection_reason || application.comment}
+              <strong>{application.status === 'needs_revision' ? 'Требуется доработка:' : 'Причина отказа:'}</strong> {reviewComment}
             </Text>
           </div>
         )}

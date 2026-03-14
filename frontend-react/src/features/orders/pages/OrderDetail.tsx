@@ -231,6 +231,11 @@ const OrderDetail: React.FC = () => {
   const isOrderOwner = order.client?.id === userProfile?.id;
   const openedFromChat = (location.state as any)?.source === 'order-chat';
   const isExpertViewer = userProfile?.role === 'expert';
+  const currentUserId = Number(userProfile?.id ?? 0);
+  const orderClientId = Number(order.client?.id ?? 0);
+  const orderExpertId = Number(order.expert?.id ?? 0);
+  const canSeeDeliveredWorkBlock =
+    currentUserId > 0 && (currentUserId === orderClientId || currentUserId === orderExpertId);
   const clientRoleLabel = 'Заказчик';
   const clientRating = (() => {
     const raw = (order.client as any)?.rating ?? (order.client as any)?.average_rating;
@@ -420,33 +425,35 @@ const OrderDetail: React.FC = () => {
               </Paragraph>
             </div>
 
-            <div className={styles.deliveredWorkSection}>
-              <Title level={4}>Выгруженная работа</Title>
-              <div className={`${styles.deliveredWorkCard} ${!latestDeliveredWork ? styles.deliveredWorkCardEmpty : ''}`}>
-                {latestDeliveredWork ? (
-                  <>
-                    <a
-                      href="#"
-                      className={styles.deliveredWorkLink}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDownloadFile(latestDeliveredWork);
-                      }}
-                    >
-                      <span className={styles.deliveredWorkIconBox}>
-                        <FileOutlined />
-                      </span>
-                      <span className={styles.deliveredWorkFileName}>
-                        {latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`}
-                      </span>
-                    </a>
-                    <Text type="secondary" className={styles.deliveredWorkMeta}>
-                      Загружено: {new Date(latestDeliveredWork.created_at).toLocaleString('ru-RU')}
-                    </Text>
-                  </>
-                ) : null}
+            {canSeeDeliveredWorkBlock ? (
+              <div className={styles.deliveredWorkSection}>
+                <Title level={4}>Выгруженная работа</Title>
+                <div className={`${styles.deliveredWorkCard} ${!latestDeliveredWork ? styles.deliveredWorkCardEmpty : ''}`}>
+                  {latestDeliveredWork ? (
+                    <>
+                      <a
+                        href="#"
+                        className={styles.deliveredWorkLink}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDownloadFile(latestDeliveredWork);
+                        }}
+                      >
+                        <span className={styles.deliveredWorkIconBox}>
+                          <FileOutlined />
+                        </span>
+                        <span className={styles.deliveredWorkFileName}>
+                          {latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`}
+                        </span>
+                      </a>
+                      <Text type="secondary" className={styles.deliveredWorkMeta}>
+                        Загружено: {new Date(latestDeliveredWork.created_at).toLocaleString('ru-RU')}
+                      </Text>
+                    </>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
 
             {order.files && order.files.length > 0 && (
               <div>

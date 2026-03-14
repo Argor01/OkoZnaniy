@@ -103,6 +103,8 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
         application_submitted_at: app.created_at,
         application_reviewed_at: app.reviewed_at,
         application_approved: app.status === 'approved',
+        rejection_reason: app.rejection_reason,
+        comment: app.comment,
       } as ExpertApplication;
     });
   } catch (error) {

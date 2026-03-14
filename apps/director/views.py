@@ -141,9 +141,9 @@ class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         
         application = self.get_object()
         
-        # Возвращаем в рассмотрение (pending) и сохраняем комментарий в поле причины
-        application.status = 'pending'
-        application.rejection_reason = f"Требуется доработка: {comment}"
+        # Помечаем анкету как требующую доработки и сохраняем комментарий директора
+        application.status = 'needs_revision'
+        application.rejection_reason = comment
         application.reviewed_by = request.user
         application.reviewed_at = timezone.now()
         application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
@@ -168,31 +168,33 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         User = get_user_model()
         from django.db.models import Q
+        deactivated_expert_filter = Q(role='client', expert_application__status='deactivated') | Q(
+            role='client',
+            application_approved=False,
+            has_submitted_application=True
+        )
         
         # Для действия restore разрешаем доступ к архивированным пользователям И деактивированным экспертам
         if self.action == 'restore':
             return User.objects.filter(
                 Q(is_active=False) |  # Архивированные
-                Q(role='client', application_approved=False, has_submitted_application=True)  # Деактивированные эксперты
+                deactivated_expert_filter  # Деактивированные эксперты
             ).exclude(
-                Q(role='client', has_submitted_application=False)  # Обычные клиенты
+                Q(role='client') & ~deactivated_expert_filter  # Обычные клиенты
             )
         
         # Для действия activate разрешаем доступ к деактивированным экспертам
         if self.action == 'activate':
             return User.objects.all().exclude(
-                Q(role='client', has_submitted_application=False)  # Обычные клиенты
-            )
+                Q(role='client') & ~deactivated_expert_filter  # Обычные клиенты
+            ).distinct()
         
-        # Показываем активных сотрудников:
-        # - Все роли кроме client (admin, expert, partner, arbitrator)
-        # - Исключаем только обычных клиентов (role=client)
-        # - Архивированные (is_active=False) не показываем
-        return User.objects.filter(
-            is_active=True
-        ).exclude(
-            role='client'  # Исключаем всех клиентов (обычных и деактивированных экспертов)
-        )
+        # Показываем всех сотрудников:
+        # - Все роли кроме обычных клиентов
+        # - Включаем архивированных и деактивированных экспертов для фильтров
+        return User.objects.exclude(
+            Q(role='client') & ~deactivated_expert_filter
+        ).distinct()
 
     def get_serializer_class(self):
         return UserSerializer
@@ -241,7 +243,8 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         if user.role == 'expert':
             user.role = 'client'
             user.application_approved = False
-            user.save(update_fields=['role', 'application_approved'])
+            user.has_submitted_application = True
+            user.save(update_fields=['role', 'application_approved', 'has_submitted_application'])
             
             # Деактивируем анкету, если она есть (нельзя подавать заново)
             try:

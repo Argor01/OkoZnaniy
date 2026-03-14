@@ -129,6 +129,7 @@ export interface Employee {
   portfolio_url?: string;
   bio?: string;
   application_approved?: boolean;
+  has_submitted_application?: boolean;
 }
 
 export interface ExpertApplication {
@@ -149,6 +150,8 @@ export interface ExpertApplication {
   application_reviewed_at?: string;
   application_approved?: boolean;
   status_display?: string;
+  rejection_reason?: string;
+  comment?: string;
 }
 
 export interface RegisterEmployeeRequest {
