@@ -2,6 +2,7 @@ import React, { useState, useRef, Suspense, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message, Tabs, Skeleton, Spin } from 'antd';
 import type { FC } from 'react';
+import { useLocation } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
 import type { User } from '@/features/auth/api/auth';
 import { expertsApi, type Specialization } from '@/features/expert/api/experts';
@@ -34,6 +35,7 @@ const FaqModal = React.lazy(() => import('../../modals/FaqModal'));
 const FriendProfileModal = React.lazy(() => import('../../modals/FriendProfileModal'));
 
 const ExpertDashboard: FC = () => {
+  const location = useLocation();
   const queryClient = useQueryClient();
   
   
@@ -60,6 +62,7 @@ const ExpertDashboard: FC = () => {
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
+  const applicationStatusRef = useRef<HTMLDivElement>(null);
 
   const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
@@ -240,6 +243,24 @@ const ExpertDashboard: FC = () => {
     return list;
   }, [userProfile, isMobile, specializations, specializationsLoading, closeAllModals, deleteSpecializationMutation, handleEditProfile]);
 
+  React.useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (!tab) return;
+    const allowedTabs = items.map(item => item.key);
+    if (allowedTabs.includes(tab) && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [location.search, items, activeTab]);
+
+  React.useEffect(() => {
+    const focus = new URLSearchParams(location.search).get('focus');
+    if (focus !== 'application') return;
+    const timer = window.setTimeout(() => {
+      applicationStatusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [location.search]);
+
   return (
     <>
       <div className={styles.expertContentContainer}>
@@ -252,12 +273,14 @@ const ExpertDashboard: FC = () => {
           onEditProfile={handleEditProfile}
         />
         
-        <ApplicationStatus
-          application={application || null}
-          applicationLoading={applicationLoading}
-          userProfile={userProfile}
-          onOpenApplicationModal={handleOpenApplicationModal}
-        />
+        <div ref={applicationStatusRef}>
+          <ApplicationStatus
+            application={application || null}
+            applicationLoading={applicationLoading}
+            userProfile={userProfile}
+            onOpenApplicationModal={handleOpenApplicationModal}
+          />
+        </div>
         
         <div ref={tabsRef}>
           <Suspense fallback={<div style={{ padding: '24px' }}><Skeleton active paragraph={{ rows: 6 }} /></div>}>

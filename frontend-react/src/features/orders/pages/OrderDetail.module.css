@@ -32,6 +32,18 @@
   width: 100%;
 }
 
+.orderContent {
+  width: 100%;
+}
+
+.sectionBlock {
+  margin-bottom: 20px;
+}
+
+.orderContent > .sectionBlock:last-child {
+  margin-bottom: 0;
+}
+
 .headerRow {
   width: 100%;
   justify-content: space-between;
@@ -55,15 +67,9 @@
 
 .clientGlassCard {
   border-radius: 18px;
-  border: 1px solid var(--color-brand-blue-200);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-brand-blue-100) 58%, #ffffff 42%) 0%,
-    color-mix(in srgb, var(--color-brand-blue-100) 36%, #ffffff 64%) 100%
-  );
-  box-shadow: 0 10px 28px rgba(44, 152, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .clientGlassCard :global(.ant-card-body) {
@@ -73,7 +79,7 @@
 .clientGlassInner {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
 }
 
 .clientAvatar {
@@ -84,7 +90,7 @@
 .clientMeta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -95,6 +101,8 @@
   font-weight: 700;
   color: var(--color-grey-900);
   text-align: left;
+  margin: 0 !important;
+  justify-content: flex-start;
 }
 
 .clientSubline {
@@ -150,44 +158,48 @@
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background: #ffffff;
+  background: var(--bg-primary);
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  min-width: 0;
 }
 
 .expertOfferGridIcon {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-  color: #0284c7;
+  background: color-mix(in srgb, var(--color-brand-blue-100) 78%, var(--bg-primary) 22%);
+  color: var(--color-brand-blue-700);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 72%, var(--bg-primary) 28%);
 }
 
 .expertOfferGridItem:nth-child(2) .expertOfferGridIcon {
-  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-  color: #9333ea;
+  background: color-mix(in srgb, var(--color-brand-purple-500) 18%, var(--bg-primary) 82%);
+  color: var(--color-brand-purple-700);
+  border-color: color-mix(in srgb, var(--color-brand-purple-500) 28%, var(--bg-primary) 72%);
 }
 
 .expertOfferGridItem:nth-child(3) .expertOfferGridIcon {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #dc2626;
+  background: color-mix(in srgb, var(--color-brand-orange-400) 34%, var(--bg-primary) 66%);
+  color: var(--color-brand-orange-600);
+  border-color: color-mix(in srgb, var(--color-brand-orange-500) 38%, var(--bg-primary) 62%);
 }
 
 .expertOfferGridIconGreen {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
-  color: #16a34a !important;
+  background: color-mix(in srgb, #bbf7d0 68%, var(--bg-primary) 32%) !important;
+  color: #15803d !important;
+  border-color: color-mix(in srgb, #86efac 72%, var(--bg-primary) 28%) !important;
 }
 
 .expertOfferLabel {
   font-size: 10px;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -197,8 +209,94 @@
 .expertOfferValue {
   font-size: 13px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orderFilesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orderFilesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.orderFileTile {
+  width: 120px;
+  min-height: 114px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.orderFileTile:hover {
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.orderFileIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-blue) 11%, var(--bg-primary) 89%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.orderFileName {
+  font-size: 12px;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.orderFileDownloadIcon {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.fileIconPdf {
+  color: #dc2626;
+}
+
+.fileIconDoc {
+  color: var(--primary-blue-hover);
+}
+
+.fileIconImage {
+  color: #16a34a;
+}
+
+.fileIconArchive {
+  color: var(--color-brand-purple-700);
+}
+
+.fileIconDefault {
+  color: var(--text-secondary);
 }
 
 .infoCard {
@@ -246,6 +344,214 @@
 .descriptionTitle {
   margin-bottom: 16px;
   font-size: 18px;
+}
+
+.sectionTitle {
+  margin-bottom: 12px !important;
+}
+
+.description {
+  margin-bottom: 0 !important;
+}
+
+.bidsBadgeText {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.bidsTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bidsBadge :global(.ant-badge-count) {
+  box-shadow: none;
+}
+
+.bidsList :global(.ant-list-items) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bidsList :global(.ant-list-item) {
+  border-bottom: 0 !important;
+}
+
+.bidItem,
+.bidItemSelected {
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px !important;
+  align-items: flex-start !important;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.bidItem:hover,
+.bidItemSelected:hover {
+  border-color: color-mix(in srgb, var(--primary-blue) 32%, var(--border-color) 68%);
+  box-shadow: var(--shadow-md);
+}
+
+.bidItemSelected {
+  border-color: color-mix(in srgb, #16a34a 46%, var(--border-color) 54%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #22c55e 24%, transparent 76%), var(--shadow-md);
+  background: color-mix(in srgb, #f0fdf4 36%, var(--bg-primary) 64%);
+}
+
+.bidItem :global(.ant-list-item-action),
+.bidItemSelected :global(.ant-list-item-action) {
+  margin-left: 12px;
+  align-self: center;
+  margin-top: 8px;
+}
+
+.bidItem :global(.ant-list-item-meta),
+.bidItemSelected :global(.ant-list-item-meta) {
+  width: 100%;
+  align-items: flex-start;
+}
+
+.bidItem :global(.ant-list-item-meta-title),
+.bidItemSelected :global(.ant-list-item-meta-title) {
+  margin-bottom: 8px !important;
+}
+
+.bidAvatar {
+  border: 2px solid color-mix(in srgb, var(--color-brand-blue-300) 56%, #ffffff 44%);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.18);
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.bidHeader {
+  width: 100%;
+  padding-right: 0;
+}
+
+.bidIdentityRow {
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+.bidUserLink {
+  padding: 0 !important;
+  height: auto !important;
+  color: var(--color-grey-900);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.bidRatingRow {
+  color: var(--text-secondary);
+  position: static;
+  margin: 0;
+}
+
+.ratingStar {
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.bidBio {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.bidMeta {
+  width: 100%;
+}
+
+.bidChipsRow {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bidAmountTag {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--primary-blue) 13%, #ffffff 87%) !important;
+  color: var(--primary-blue-hover) !important;
+}
+
+.bidPrepaymentTag {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 700;
+  color: #7a4a00 !important;
+  background: color-mix(in srgb, #fde68a 52%, #ffffff 48%) !important;
+}
+
+.bidMeta :global(.ant-tag-gold) {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 700;
+  color: #7a4a00;
+  background: color-mix(in srgb, #fde68a 52%, #ffffff 48%);
+}
+
+.bidTimeWrap {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.bidMetaText {
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.bidComment {
+  margin-bottom: 0 !important;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-brand-blue-100) 42%, #ffffff 58%);
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 58%, #ffffff 42%);
+  color: var(--text-primary);
+}
+
+.bidAction,
+.statusTagWrap {
+  display: flex;
+  align-items: center;
+}
+
+.bidButton {
+  min-width: 220px;
+}
+
+.statusTagLarge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.expertLink {
+  padding: 0 !important;
+  height: auto !important;
+}
+
+.expertName {
+  font-size: 17px;
+}
+
+.expertRole {
+  font-size: 13px;
 }
 
 .filesList {
@@ -296,45 +602,8 @@
   gap: 12px;
 }
 
-.deliveredWorkCard {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fafafa;
-}
-
-.deliveredWorkCardEmpty {
-  min-height: 64px;
-}
-
-.deliveredWorkLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-
-.deliveredWorkIconBox {
-  width: 38px;
-  height: 38px;
-  background: #eff6ff;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #2563eb;
-  font-size: 18px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.deliveredWorkFileName {
+.readyWorkEmptyText {
   font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-  word-break: break-word;
 }
 
 .deliveredWorkMeta {
@@ -342,11 +611,36 @@
 }
 
 .reviewActionsRow {
-  margin-top: 4px;
+  margin-top: 0;
 }
 
 @media (max-width: 768px) {
   .expertOfferGrid {
     grid-template-columns: 1fr;
+  }
+
+  .bidItem,
+  .bidItemSelected {
+    padding: 12px !important;
+  }
+
+  .bidItem :global(.ant-list-item-action),
+  .bidItemSelected :global(.ant-list-item-action) {
+    margin-top: 10px;
+    margin-left: 0;
+  }
+
+  .bidChipsRow {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .bidHeader {
+    padding-right: 0;
+  }
+
+  .bidRatingRow {
+    position: static;
+    margin-left: 0;
   }
 }

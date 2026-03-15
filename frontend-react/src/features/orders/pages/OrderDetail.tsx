@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, FileTextOutlined, ClockCircleOutlined, FileOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import BidModal from '../components/BidModal';
@@ -112,6 +112,25 @@ const OrderDetail: React.FC = () => {
       }
     }
   }, [orderId]);
+
+  const getOrderFileIcon = React.useCallback((filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
+    if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
+    if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
+    if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
+    return <FileOutlined className={styles.fileIconDefault} />;
+  }, []);
+
+  const formatOrderFileTileName = React.useCallback((filename: string, maxLength = 30) => {
+    if (filename.length <= maxLength) return filename;
+    const extIndex = filename.lastIndexOf('.');
+    if (extIndex <= 0) return `${filename.slice(0, maxLength - 1)}…`;
+    const ext = filename.slice(extIndex);
+    const base = filename.slice(0, extIndex);
+    const allowedBaseLength = Math.max(6, maxLength - ext.length - 1);
+    return `${base.slice(0, allowedBaseLength)}…${ext}`;
+  }, []);
 
   const deliveredWorkFiles = React.useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
@@ -230,7 +249,6 @@ const OrderDetail: React.FC = () => {
 
   const isOrderOwner = order.client?.id === userProfile?.id;
   const openedFromChat = (location.state as any)?.source === 'order-chat';
-  const isExpertViewer = userProfile?.role === 'expert';
   const currentUserId = Number(userProfile?.id ?? 0);
   const orderClientId = Number(order.client?.id ?? 0);
   const orderExpertId = Number(order.expert?.id ?? 0);
@@ -268,17 +286,19 @@ const OrderDetail: React.FC = () => {
         </AppButton>
 
         <AppCard className={styles.mainCard}>
-          <Space direction="vertical" size="large" className={styles.fullWidth}>
-            <div>
+          <Space direction="vertical" size={0} className={`${styles.fullWidth} ${styles.orderContent}`}>
+            <div className={styles.sectionBlock}>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
                 <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
-                <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
-                  {getStatusText(order.status)}
-                </Tag>
+                {!isOrderOwner && (
+                  <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
+                    {getStatusText(order.status)}
+                  </Tag>
+                )}
               </Space>
             </div>
 
-            <div className={styles.sectionStack}>
+            <div className={`${styles.sectionStack} ${styles.sectionBlock}`}>
               <AppCard className={styles.clientGlassCard}>
                 <div className={styles.clientGlassInner}>
                   <Avatar 
@@ -299,184 +319,116 @@ const OrderDetail: React.FC = () => {
                       <span className={styles.clientRolePill}>{clientRoleLabel}</span>
                       <span className={styles.clientRatingPill}>
                         <StarFilled className={styles.clientRatingIcon} />
-                        {clientRating ? clientRating.toFixed(1) : 'Н/Д'}
+                        {clientRating ? clientRating.toFixed(1) : 'Нет отзывов'}
                       </span>
                     </div>
                   </div>
                 </div>
               </AppCard>
 
-              {isExpertViewer ? (
-                <div className={styles.expertOfferGrid}>
-                  <div className={styles.expertOfferGridItem}>
-                    <div className={styles.expertOfferGridIcon}><BookOutlined /></div>
-                    <div>
-                      <div className={styles.expertOfferLabel}>Предмет</div>
-                      <div className={styles.expertOfferValue}>{order.subject?.name || 'Не указан'}</div>
-                    </div>
-                  </div>
-                  <div className={styles.expertOfferGridItem}>
-                    <div className={styles.expertOfferGridIcon}><FileTextOutlined /></div>
-                    <div>
-                      <div className={styles.expertOfferLabel}>Тип работы</div>
-                      <div className={styles.expertOfferValue}>{order.work_type?.name || 'Не указан'}</div>
-                    </div>
-                  </div>
-                  <div className={styles.expertOfferGridItem}>
-                    <div className={styles.expertOfferGridIcon}><ClockCircleOutlined /></div>
-                    <div>
-                      <div className={styles.expertOfferLabel}>Дедлайн</div>
-                      <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
-                    </div>
-                  </div>
-                  <div className={styles.expertOfferGridItem}>
-                    <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconGreen}`}><DollarOutlined /></div>
-                    <div>
-                      <div className={styles.expertOfferLabel}>Цена</div>
-                      <div className={styles.expertOfferValue}>{formatCurrency(order.budget)}</div>
-                    </div>
+              <div className={styles.expertOfferGrid}>
+                <div className={styles.expertOfferGridItem}>
+                  <div className={styles.expertOfferGridIcon}><BookOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Предмет</div>
+                    <div className={styles.expertOfferValue}>{order.subject?.name || 'Не указан'}</div>
                   </div>
                 </div>
-              ) : (
-                <div className={styles.infoGrid}>
-                  <AppCard 
-                    size="small" 
-                    className={styles.infoCard}
-                  >
-                    <Space direction="vertical" size={2} className={styles.fullWidth}>
-                      <Text type="secondary" className={styles.infoLabel}>
-                        Дедлайн
-                      </Text>
-                      <Space align="center">
-                        <CalendarOutlined className={styles.deadlineIcon} />
-                        <Text className={styles.deadlineValue}>
-                          {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}
-                        </Text>
-                      </Space>
-                    </Space>
-                  </AppCard>
-
-                  <AppCard 
-                    size="small" 
-                    className={styles.infoCard}
-                  >
-                    <Space direction="vertical" size={4} className={styles.fullWidth}>
-                      <Text type="secondary" className={styles.infoLabel}>
-                        Предмет
-                      </Text>
-                      <Text className={styles.subjectValue}>
-                        {order.subject?.name || 'Не указан'}
-                      </Text>
-                    </Space>
-                  </AppCard>
-
-                  <AppCard 
-                    size="small" 
-                    className={styles.infoCard}
-                  >
-                    <Space direction="vertical" size={4} className={styles.fullWidth}>
-                      <Text type="secondary" className={styles.infoLabel}>
-                        Цена
-                      </Text>
-                      <Space align="center">
-                        <DollarOutlined className={styles.priceIcon} />
-                        <Text className={styles.priceValue}>
-                          {formatCurrency(order.budget)}
-                        </Text>
-                      </Space>
-                    </Space>
-                  </AppCard>
-
-                  <AppCard 
-                    size="small" 
-                    className={styles.infoCard}
-                  >
-                    <Space direction="vertical" size={4} className={styles.fullWidth}>
-                      <Text type="secondary" className={styles.infoLabel}>
-                        Тип работы
-                      </Text>
-                      <Text className={styles.subjectValue}>
-                        {order.work_type?.name || 'Не указан'}
-                      </Text>
-                    </Space>
-                  </AppCard>
-
-                  <AppCard 
-                    size="small" 
-                    className={styles.infoCard}
-                  >
-                    <Space direction="vertical" size={4} className={styles.fullWidth}>
-                      <Text type="secondary" className={styles.infoLabel}>
-                        Размещен
-                      </Text>
-                      <Text className={styles.createdValue}>
-                        {formatDistanceToNow(new Date(order.created_at), { addSuffix: true, locale: ru })}
-                      </Text>
-                    </Space>
-                  </AppCard>
+                <div className={styles.expertOfferGridItem}>
+                  <div className={styles.expertOfferGridIcon}><ReadOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Тип работы</div>
+                    <div className={styles.expertOfferValue}>{order.work_type?.name || 'Не указан'}</div>
+                  </div>
                 </div>
-              )}
+                <div className={styles.expertOfferGridItem}>
+                  <div className={styles.expertOfferGridIcon}><ClockCircleOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Дедлайн</div>
+                    <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
+                  </div>
+                </div>
+                <div className={styles.expertOfferGridItem}>
+                  <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconGreen}`}><DollarOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Цена</div>
+                    <div className={styles.expertOfferValue}>{formatCurrency(order.budget)}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Title level={4}>Описание заказа</Title>
+            <div className={styles.sectionBlock}>
+              <Title level={4} className={styles.sectionTitle}>Описание заказа</Title>
               <Paragraph className={styles.description}>
                 {order.description || 'Описание отсутствует'}
               </Paragraph>
             </div>
 
             {canSeeDeliveredWorkBlock ? (
-              <div className={styles.deliveredWorkSection}>
-                <Title level={4}>Выгруженная работа</Title>
-                <div className={`${styles.deliveredWorkCard} ${!latestDeliveredWork ? styles.deliveredWorkCardEmpty : ''}`}>
-                  {latestDeliveredWork ? (
-                    <>
-                      <a
-                        href="#"
-                        className={styles.deliveredWorkLink}
+              <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
+                <Title level={4} className={styles.sectionTitle}>Готовая работа</Title>
+                {latestDeliveredWork ? (
+                  <>
+                    <div className={styles.orderFilesGrid}>
+                      <button
+                        type="button"
+                        className={styles.orderFileTile}
                         onClick={(e) => {
-                          e.preventDefault();
+                          e.stopPropagation();
                           handleDownloadFile(latestDeliveredWork);
                         }}
                       >
-                        <span className={styles.deliveredWorkIconBox}>
-                          <FileOutlined />
-                        </span>
-                        <span className={styles.deliveredWorkFileName}>
-                          {latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`}
-                        </span>
-                      </a>
-                      <Text type="secondary" className={styles.deliveredWorkMeta}>
-                        Загружено: {new Date(latestDeliveredWork.created_at).toLocaleString('ru-RU')}
-                      </Text>
-                    </>
-                  ) : null}
-                </div>
+                        <div className={styles.orderFileIconBox}>
+                          {getOrderFileIcon(latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`)}
+                        </div>
+                        <div className={styles.orderFileName}>
+                          {formatOrderFileTileName(latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`)}
+                        </div>
+                        <DownloadOutlined className={styles.orderFileDownloadIcon} />
+                      </button>
+                    </div>
+                    <Text type="secondary" className={styles.deliveredWorkMeta}>
+                      Загружено: {new Date(latestDeliveredWork.created_at).toLocaleString('ru-RU')}
+                    </Text>
+                  </>
+                ) : (
+                  <Text type="secondary" className={styles.readyWorkEmptyText}>
+                    Работа еще не выгружена.
+                  </Text>
+                )}
               </div>
             ) : null}
 
             {order.files && order.files.length > 0 && (
-              <div>
-                <Title level={4}>Прикрепленные файлы</Title>
-                <Space direction="vertical">
+              <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
+                <Title level={4} className={styles.sectionTitle}>Прикрепленные файлы</Title>
+                <div className={styles.orderFilesGrid}>
                   {order.files.map((file: any, index: number) => (
-                    <a
+                    <button
+                      type="button"
+                      className={styles.orderFileTile}
                       key={file.id ?? index}
-                      href="#"
                       onClick={(e) => {
-                        e.preventDefault();
+                        e.stopPropagation();
                         handleDownloadFile(file);
                       }}
                     >
-                      {file.filename || `Файл ${index + 1}`}
-                    </a>
+                      <div className={styles.orderFileIconBox}>
+                        {getOrderFileIcon(file.filename || file.file_name || `Файл ${index + 1}`)}
+                      </div>
+                      <div className={styles.orderFileName}>
+                        {formatOrderFileTileName(file.filename || file.file_name || `Файл ${index + 1}`)}
+                      </div>
+                      <DownloadOutlined className={styles.orderFileDownloadIcon} />
+                    </button>
                   ))}
-                </Space>
+                </div>
               </div>
             )}
 
             {isOrderOwner && order.status === 'review' ? (
-              <Space className={styles.reviewActionsRow} wrap>
+              <Space className={`${styles.reviewActionsRow} ${styles.sectionBlock}`} wrap>
                 <AppButton
                   variant="success"
                   loading={reviewActionLoading === 'approve'}
@@ -506,7 +458,7 @@ const OrderDetail: React.FC = () => {
              !order.expert && 
              !userHasBid && 
              order.client?.id !== userProfile?.id && (
-                <div className={styles.bidAction}>
+                <div className={`${styles.bidAction} ${styles.sectionBlock}`}>
                     <AppButton 
                         variant="primary" 
                         size="large" 
@@ -519,16 +471,8 @@ const OrderDetail: React.FC = () => {
             )}
             
             
-            {order.client?.id === userProfile?.id && (
-                <div className={styles.statusTagWrap}>
-                    <Tag color="blue" className={styles.statusTagLarge}>
-                        Это ваш заказ
-                    </Tag>
-                </div>
-            )}
-            
             {userHasBid && (
-                 <div className={styles.statusTagWrap}>
+                 <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
                     <Tag color="success" className={styles.statusTagLarge}>
                         Вы уже откликнулись на этот заказ
                     </Tag>
@@ -537,16 +481,15 @@ const OrderDetail: React.FC = () => {
 
             
             {isOrderOwner && !openedFromChat && Array.isArray(bids) && (
-              <div>
+              <div className={styles.sectionBlock}>
                 <Divider />
-                <Title level={4}>
+                <Title level={4} className={`${styles.sectionTitle} ${styles.bidsTitle}`}>
+                  <span>Отклики экспертов</span>
                   <Badge
                     count={bids.length}
                     size="small"
                     className={styles.bidsBadge}
-                  >
-                    <span className={styles.bidsBadgeText}>Отклики экспертов</span>
-                  </Badge>
+                  />
                 </Title>
 
                 {bidsLoading ? (
@@ -556,9 +499,16 @@ const OrderDetail: React.FC = () => {
                 ) : (
                   <>
                     <List
+                      className={styles.bidsList}
                       dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
-                      renderItem={(bid: Bid) => (
-                        <List.Item
+                      renderItem={(bid: Bid) => {
+                        const bidAmount = Number(bid.amount ?? 0);
+                        const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
+                        const prepaymentAmount = Number.isFinite(bidAmount) && Number.isFinite(prepaymentPercent)
+                          ? Math.max(0, (bidAmount * prepaymentPercent) / 100)
+                          : 0;
+
+                        return <List.Item
                           key={bid.id}
                           className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
                           actions={
@@ -590,8 +540,8 @@ const OrderDetail: React.FC = () => {
                               />
                             }
                             title={
-                              <Space direction="vertical" size={4}>
-                                <Space>
+                              <Space direction="vertical" size={4} className={styles.bidHeader}>
+                                <Space className={styles.bidIdentityRow} wrap>
                                   <AppButton 
                                     variant="link" 
                                     onClick={() => navigate(`/user/${bid.expert.id}`)}
@@ -599,7 +549,7 @@ const OrderDetail: React.FC = () => {
                                   >
                                     <Text strong>{bid.expert.username}</Text>
                                   </AppButton>
-                                  <Space size={4}>
+                                  <Space size={4} className={styles.bidRatingRow}>
                                       <StarOutlined className={styles.ratingStar} />
                                       <Text>{bid.expert_rating || 0}</Text>
                                   </Space>
@@ -613,17 +563,19 @@ const OrderDetail: React.FC = () => {
                             }
                             description={
                               <Space direction="vertical" size={8} className={styles.bidMeta}>
-                                <Space wrap>
+                                <div className={styles.bidChipsRow}>
                                   <Tag color="blue" className={styles.bidAmountTag}>
                                     <DollarOutlined /> {formatCurrency(bid.amount)}
                                   </Tag>
-                                  <Tag color="gold">
-                                    Предоплата: {Number(bid.prepayment_percent ?? 0)}%
+                                  <Tag color="gold" className={styles.bidPrepaymentTag}>
+                                    Предоплата: {formatCurrency(prepaymentAmount)}
                                   </Tag>
-                                  <Text type="secondary" className={styles.bidMetaText}>
-                                    {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
-                                  </Text>
-                                </Space>
+                                  <span className={styles.bidTimeWrap}>
+                                    <Text type="secondary" className={styles.bidMetaText}>
+                                      {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
+                                    </Text>
+                                  </span>
+                                </div>
                                 {bid.comment && (
                                   <Paragraph 
                                     className={styles.bidComment}
@@ -634,8 +586,8 @@ const OrderDetail: React.FC = () => {
                               </Space>
                             }
                           />
-                        </List.Item>
-                      )}
+                        </List.Item>;
+                      }}
                     />
                   </>
                 )}
@@ -643,7 +595,7 @@ const OrderDetail: React.FC = () => {
             )}
 
             {order.expert && (
-              <div>
+              <div className={styles.sectionBlock}>
                 <Divider />
                 <Title level={4}>Исполнитель</Title>
                 <Space>

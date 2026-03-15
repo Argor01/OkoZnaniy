@@ -10,7 +10,8 @@ import {
   FileImageOutlined, 
   FileZipOutlined, 
   DownloadOutlined, 
-  ShareAltOutlined 
+  ShareAltOutlined,
+  ReadOutlined
 } from '@ant-design/icons';
 import { Order, OrderFile } from '@/features/orders/types/orders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
@@ -84,6 +85,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 }) => {
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_LABELS[status] || status;
+  const subjectText = order.custom_subject || order.subject?.name || order.subject_name || 'Не указан';
+  const workTypeText = order.custom_work_type || order.work_type?.name || order.work_type_name || 'Не указан';
+  const responsesText = `${order.bids?.length || order.responses_count || 0} откликов`;
 
   const isOrderOwner = (order: OrderCardData) => {
     return order.client?.id === userProfile?.id || 
@@ -127,12 +131,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </Tag>
             {(order.custom_subject || order.subject?.name || order.subject_name) && (
               <Tag className={styles.subjectTag}>
-                {order.custom_subject || order.subject?.name || order.subject_name}
+                {subjectText}
               </Tag>
             )}
             {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
               <Tag className={styles.workTypeTag}>
-                {order.custom_work_type || order.work_type?.name || order.work_type_name}
+                {workTypeText}
               </Tag>
             )}
             {order.topic?.name && (
@@ -159,12 +163,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </div>
       </div>
 
-      <Paragraph 
-        ellipsis={{ rows: 2 }}
-        className={styles.orderDescription}
-      >
-        {order.description || 'Описание не указано'}
-      </Paragraph>
+      {order.description && (
+        <Paragraph 
+          ellipsis={{ rows: 2 }}
+          className={styles.orderDescription}
+        >
+          {order.description}
+        </Paragraph>
+      )}
       
       {order.files && order.files.length > 0 && (
         <div className={styles.filesBlock}>
@@ -220,24 +226,18 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
       <div className={styles.orderMetaRow}>
         <Space size={16} wrap>
-          <Space size={4}>
-            <ClockCircleOutlined className={styles.orderMetaIcon} />
-            <Text type="secondary" className={styles.orderMetaText}>
-              {order.deadline ? dayjs(order.deadline).fromNow() : 'Не указан'}
-            </Text>
-          </Space>
+          {order.deadline && (
+            <Space size={4}>
+              <ClockCircleOutlined className={styles.orderMetaIcon} />
+              <Text type="secondary" className={styles.orderMetaText}>
+                {dayjs(order.deadline).fromNow()}
+              </Text>
+            </Space>
+          )}
           <Space size={4}>
             <UserOutlined className={styles.orderMetaIcon} />
-            <Text 
-              className={`${styles.responsesCount} ${
-                (order.bids?.length || order.responses_count || 0) === 0
-                  ? styles.responsesCountNone
-                  : (order.bids?.length || order.responses_count || 0) > 5
-                    ? styles.responsesCountMany
-                    : styles.responsesCountSome
-              }`}
-            >
-              {order.bids?.length || order.responses_count || 0} откликов
+            <Text type="secondary" className={styles.orderMetaText}>
+              {responsesText}
             </Text>
           </Space>
         </Space>

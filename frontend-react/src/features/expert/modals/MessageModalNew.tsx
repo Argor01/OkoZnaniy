@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Popover } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/features/common';
 import {
@@ -27,6 +27,8 @@ import {
   DollarOutlined,
   PercentageOutlined
 } from '@ant-design/icons';
+import { SmileOutlined } from '@ant-design/icons';
+import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message, ChatFrozenError } from '@/features/support/api/chat';
 import { formatDistanceToNow } from 'date-fns';
@@ -128,6 +130,86 @@ const truncateFileName = (name: string, maxLength: number = 20) => {
   return nameWithoutExt.substring(0, availableLength) + '...' + ext;
 };
 
+const normalizeMessageText = (value: string): string => value.normalize('NFC');
+
+const hasVisibleMessageContent = (value: string): boolean => {
+  const normalized = normalizeMessageText(value);
+  const stripped = normalized
+    .replace(/\s+/gu, '')
+    .replace(/\u200B|\u200C|\u200D/gu, '')
+    .replace(/\uFE0E/gu, '')
+    .replace(/\uFE0F/gu, '')
+    .replace(/\p{Emoji_Modifier}/gu, '')
+    .replace(/\u20E3/gu, '');
+  return stripped.length > 0;
+};
+
+type DeviceEmojiFamily = 'ios' | 'android' | 'windows' | 'mac' | 'linux' | 'other';
+type EmojiVersionLevel = '12.0' | '13.0' | '14.0' | '15.0';
+
+const detectDeviceEmojiFamily = (): DeviceEmojiFamily => {
+  if (typeof navigator === 'undefined') return 'other';
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+  if (/Android/i.test(ua)) return 'android';
+  if (/Windows/i.test(ua)) return 'windows';
+  if (/Macintosh|Mac OS X/i.test(ua)) return 'mac';
+  if (/Linux/i.test(ua)) return 'linux';
+  return 'other';
+};
+
+const emojiVersionRank: Record<EmojiVersionLevel, number> = {
+  '12.0': 12,
+  '13.0': 13,
+  '14.0': 14,
+  '15.0': 15,
+};
+
+const clampEmojiVersion = (target: EmojiVersionLevel, detected: EmojiVersionLevel): EmojiVersionLevel =>
+  emojiVersionRank[detected] <= emojiVersionRank[target] ? detected : target;
+
+const isEmojiRenderable = (emoji: string): boolean => {
+  if (typeof document === 'undefined') return true;
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return true;
+
+  const render = (symbol: string): Uint8ClampedArray => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.textBaseline = 'top';
+    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+    ctx.fillText(symbol, 0, 0);
+    return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  };
+
+  const sample = render(emoji);
+  const fallback = render('\uFFFD');
+
+  for (let i = 0; i < sample.length; i += 1) {
+    if (sample[i] !== fallback[i]) return true;
+  }
+  return false;
+};
+
+const resolveEmojiVersionByDevice = (family: DeviceEmojiFamily): EmojiVersionLevel => {
+  const targetByFamily: Record<DeviceEmojiFamily, EmojiVersionLevel> = {
+    ios: '15.0',
+    android: '14.0',
+    windows: '13.0',
+    mac: '15.0',
+    linux: '13.0',
+    other: '13.0',
+  };
+
+  const target = targetByFamily[family];
+  if (isEmojiRenderable('🩷')) return clampEmojiVersion(target, '15.0');
+  if (isEmojiRenderable('🫶')) return clampEmojiVersion(target, '14.0');
+  if (isEmojiRenderable('🥲')) return clampEmojiVersion(target, '13.0');
+  return '12.0';
+};
+
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
   onClose,
@@ -144,6 +226,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const navigate = useNavigate();
   
   const [messageText, setMessageText] = useState<string>('');
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -189,9 +272,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [contextChat, setContextChat] = useState<{ userId: number; title: string } | null>(null);
   const [orderIntroByChatId, setOrderIntroByChatId] = useState<Record<number, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<any>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   const dragDepthRef = useRef(0);
+
+  const emojiVersion = useMemo<EmojiVersionLevel>(() => {
+    const family = detectDeviceEmojiFamily();
+    return resolveEmojiVersionByDevice(family);
+  }, []);
   
   
   const claimCategories = [
@@ -1373,7 +1462,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
   const sendMessage = async () => {
-    if (!messageText.trim() && attachedFiles.length === 0) {
+    if (!hasVisibleMessageContent(messageText) && attachedFiles.length === 0) {
       antMessage.warning('Введите сообщение или прикрепите файл');
       return;
     }
@@ -1385,7 +1474,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     setSending(true);
     try {
-      const textForFirst = messageText.trim();
+      const textForFirst = normalizeMessageText(messageText).trim();
       const filesToSend = [...attachedFiles].filter((f) => {
         if (!f) return false;
         if (typeof f.size === 'number' && f.size <= 0) {
@@ -1416,7 +1505,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             ? {
                 ...chat,
                 last_message: {
-                  text: messageText.trim() || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
+                  text: textForFirst || (attachedFiles.length > 0 ? `📎 ${attachedFiles.length} файл(ов)` : ''),
                   sender_id: lastMessage.sender_id,
                   created_at: lastMessage.created_at
                 },
@@ -1459,6 +1548,25 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } finally {
       setSending(false);
     }
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    const currentText = messageText || '';
+    const textArea = messageInputRef.current?.resizableTextArea?.textArea as HTMLTextAreaElement | undefined;
+    if (textArea) {
+      const start = textArea.selectionStart ?? currentText.length;
+      const end = textArea.selectionEnd ?? currentText.length;
+      const nextText = `${currentText.slice(0, start)}${emojiData.emoji}${currentText.slice(end)}`;
+      setMessageText(nextText);
+      setTimeout(() => {
+        const position = start + emojiData.emoji.length;
+        textArea.setSelectionRange(position, position);
+        textArea.focus();
+      }, 0);
+    } else {
+      setMessageText(`${currentText}${emojiData.emoji}`);
+    }
+    setEmojiPickerOpen(false);
   };
 
   const addAttachedFiles = useCallback((files: File[]) => {
@@ -1554,10 +1662,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const formatTimestamp = (dateString: string) => {
     try {
       const result = formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: ru });
-      if (result.includes('меньше минуты')) {
-        return '1 минуту назад';
-      }
-      return result;
+      return result
+        .replace(/меньше минуты/gi, '1 м')
+        .replace(/(\d+)\s+минут(?:а|ы|у)?/gi, '$1 м');
     } catch {
       return dateString;
     }
@@ -1922,7 +2029,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   <div className={styles.chatListHeaderRow}>
                     <Text
                       strong
-                      className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListNameUnread : ''}`}
+                      ellipsis
+                      className={`${styles.chatListName} ${styles.chatListNameSupport} ${isMobile ? styles.chatListNameMobile : ''} ${isMobile ? styles.chatListNameSupportMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListNameUnread : ''}`}
                     >
                       Техническая поддержка
                     </Text>
@@ -1933,7 +2041,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                   <div className={styles.chatListMetaRow}>
                     <Text 
                       ellipsis 
-                      className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
+                      className={`${styles.chatListPreview} ${styles.chatListPreviewSupport} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${isMobile ? styles.chatListPreviewSupportMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
                     >
                       {supportChat?.last_message?.text || 'Написать в поддержку'}
                     </Text>
@@ -1973,6 +2081,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     <div className={styles.chatListHeaderRow}>
                       <Text
                         strong
+                        ellipsis
                         className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
                       >
                         {chat.other_user?.username || 'Пользователь'}
@@ -2776,6 +2885,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               >
                 <div className={styles.chatInputField}>
                   <Input.TextArea
+                    ref={messageInputRef}
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Введите сообщение..."
@@ -2792,6 +2902,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 </div>
                 
                 <div className={`${styles.chatInputActions} ${isMobile ? styles.chatInputActionsMobile : ''}`}>
+                  <Popover
+                    content={
+                      <EmojiPicker
+                        onEmojiClick={handleEmojiClick}
+                        width={isMobile ? 280 : 320}
+                        height={380}
+                        emojiVersion={emojiVersion as any}
+                      />
+                    }
+                    trigger="click"
+                    open={emojiPickerOpen}
+                    onOpenChange={setEmojiPickerOpen}
+                    placement="topRight"
+                  >
+                    <Button
+                      type="default"
+                      icon={<SmileOutlined />}
+                      className={`${styles.chatEmojiButton} ${isMobile ? styles.chatEmojiButtonMobile : ''}`}
+                      disabled={sending}
+                      title="Добавить эмодзи"
+                    />
+                  </Popover>
                   
                   <Upload
                     beforeUpload={handleFileSelect}
@@ -2812,11 +2944,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     type="primary"
                     icon={<SendOutlined />}
                     className={`${styles.chatSendButton} ${isMobile ? styles.chatSendButtonMobile : ''} ${
-                      (!messageText.trim() && attachedFiles.length === 0) ? styles.chatSendButtonDisabled : ''
+                      (!hasVisibleMessageContent(messageText) && attachedFiles.length === 0) ? styles.chatSendButtonDisabled : ''
                     }`}
                     onClick={sendMessage}
                     loading={sending}
-                    disabled={!messageText.trim() && attachedFiles.length === 0}
+                    disabled={!hasVisibleMessageContent(messageText) && attachedFiles.length === 0}
                   />
                 </div>
               </div>

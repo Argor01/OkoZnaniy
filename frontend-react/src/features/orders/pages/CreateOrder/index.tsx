@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Form, Typography, message, Modal } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
-import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
+import { InboxOutlined, PlusOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -44,10 +44,22 @@ const CreateOrder: React.FC = () => {
   const [form] = Form.useForm<CreateOrderFormValues>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [submitLocked, setSubmitLocked] = useState(false);
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
+  const submitGuardRef = useRef(false);
+
+  const lockSubmit = () => {
+    submitGuardRef.current = true;
+    setSubmitLocked(true);
+  };
+
+  const unlockSubmit = () => {
+    submitGuardRef.current = false;
+    setSubmitLocked(false);
+  };
 
   
   const { data: subjects = [] } = useQuery<Subject[]>({
@@ -123,6 +135,8 @@ const CreateOrder: React.FC = () => {
   };
 
   const onFinish = async (values: CreateOrderFormValues) => {
+    if (submitGuardRef.current) return;
+    lockSubmit();
     try {
       setIsUploading(true);
       const orderData: CreateOrderRequest = {
@@ -136,56 +150,83 @@ const CreateOrder: React.FC = () => {
       };
 
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
-
-      if (fileList.length > 0) {
-        const total = fileList.length;
-        message.loading({ content: `Загрузка файлов: 0 из ${total}`, key: 'upload', duration: 0 });
-
-        // Parallel upload with concurrency limit (e.g. 3) to avoid overwhelming the server
-        const concurrency = 3;
-        const queue = [...fileList];
-        let completed = 0;
-
-        const uploadFile = async (item: UploadFile) => {
-          const rawFile = item.originFileObj ?? item;
-          if (!(rawFile instanceof File)) {
-            message.warning(`Файл ${item.name}: неверный объект, пропуск`);
-            return;
-          }
-
-          try {
-            await ordersApi.uploadOrderFile(createdOrder.id, rawFile, {
-              file_type: 'task',
-              description: 'Файл задания'
-            });
-            completed++;
-            message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
-          } catch (error) {
-            console.error('Ошибка загрузки файла:', error);
-            const errMsg = (error as any)?.response?.data?.detail || (error as any)?.response?.data?.file?.[0] || (error as Error)?.message;
-            message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: 'uploadErr' });
-          }
-        };
-
-        const workers = Array(Math.min(concurrency, total)).fill(null).map(async () => {
-          while (queue.length > 0) {
-            const file = queue.shift();
-            if (file) await uploadFile(file);
-          }
-        });
-
-        await Promise.all(workers);
-        
-        message.success({ content: 'Все файлы загружены', key: 'upload', duration: 2 });
-        queryClient.invalidateQueries({ queryKey: ['order', String(createdOrder.id)] });
-      }
-
+      const filesToUpload = [...fileList];
+      setFileList([]);
       navigate(`/orders/${createdOrder.id}`, { state: { from: '/orders-feed' } });
+
+      if (filesToUpload.length > 0) {
+        void (async () => {
+          const total = filesToUpload.length;
+          message.loading({ content: `Загрузка файлов: 0 из ${total}`, key: 'upload', duration: 0 });
+
+          const concurrency = 3;
+          const queue = [...filesToUpload];
+          let completed = 0;
+
+          const uploadFile = async (item: UploadFile) => {
+            const rawFile = item.originFileObj ?? item;
+            if (!(rawFile instanceof File)) {
+              message.warning(`Файл ${item.name}: неверный объект, пропуск`);
+              return;
+            }
+
+            try {
+              await ordersApi.uploadOrderFile(createdOrder.id, rawFile, {
+                file_type: 'task',
+                description: 'Файл задания'
+              });
+              completed++;
+              message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
+            } catch (error) {
+              console.error('Ошибка загрузки файла:', error);
+              const errMsg = (error as any)?.response?.data?.detail || (error as any)?.response?.data?.file?.[0] || (error as Error)?.message;
+              message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: `uploadErr-${item.uid}` });
+            }
+          };
+
+          const workers = Array(Math.min(concurrency, total)).fill(null).map(async () => {
+            while (queue.length > 0) {
+              const file = queue.shift();
+              if (file) await uploadFile(file);
+            }
+          });
+
+          await Promise.all(workers);
+          message.success({ content: 'Все файлы загружены', key: 'upload', duration: 2 });
+          await queryClient.invalidateQueries({ queryKey: ['order', String(createdOrder.id)] });
+        })();
+      }
     } catch (error) {
       console.error('Ошибка при создании заказа:', error);
+      const errMsg =
+        (error as any)?.response?.data?.detail ||
+        (error as any)?.response?.data?.deadline?.[0] ||
+        (error as any)?.response?.data?.budget?.[0] ||
+        (error as Error)?.message;
+      message.error(errMsg || 'Не удалось создать заказ');
     } finally {
       setIsUploading(false);
+      unlockSubmit();
     }
+  };
+
+  const getOrderFileIcon = (filename: string) => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
+    if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
+    if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
+    if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
+    return <FileOutlined className={styles.fileIconDefault} />;
+  };
+
+  const formatOrderFileTileName = (filename: string, maxLength = 30) => {
+    if (filename.length <= maxLength) return filename;
+    const extIndex = filename.lastIndexOf('.');
+    if (extIndex <= 0) return `${filename.slice(0, maxLength - 1)}…`;
+    const ext = filename.slice(extIndex);
+    const base = filename.slice(0, extIndex);
+    const allowedBaseLength = Math.max(6, maxLength - ext.length - 1);
+    return `${base.slice(0, allowedBaseLength)}…${ext}`;
   };
 
   return (
@@ -208,6 +249,7 @@ const CreateOrder: React.FC = () => {
           form={form}
           layout="vertical"
           onFinish={onFinish}
+          onFinishFailed={unlockSubmit}
           initialValues={{
             deadline: dayjs().add(7, 'day'),
           }}
@@ -376,6 +418,7 @@ const CreateOrder: React.FC = () => {
                 name="files"
                 multiple
                 fileList={fileList}
+                showUploadList={false}
                 beforeUpload={(file) => {
                   const isLt10M = file.size < 10 * 1024 * 1024;
                   if (!isLt10M) {
@@ -405,6 +448,29 @@ const CreateOrder: React.FC = () => {
                   Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg
                 </p>
               </AppUpload.Dragger>
+              {fileList.length > 0 && (
+                <div className={styles.orderFilesGrid}>
+                  {fileList.map((file) => (
+                    <button
+                      key={file.uid}
+                      type="button"
+                      className={styles.orderFileTile}
+                      onClick={() => {
+                        setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+                      }}
+                      title={`Убрать ${file.name}`}
+                    >
+                      <div className={styles.orderFileIconBox}>
+                        {getOrderFileIcon(file.name)}
+                      </div>
+                      <div className={styles.orderFileName}>
+                        {formatOrderFileTileName(file.name)}
+                      </div>
+                      <DeleteOutlined className={styles.orderFileDeleteIcon} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </Form.Item>
           </div>
 
@@ -415,10 +481,10 @@ const CreateOrder: React.FC = () => {
               htmlType="submit" 
               className={styles.submitButton}
               size="large"
-              loading={createOrderMutation.isPending || isUploading}
-              disabled={createOrderMutation.isPending || isUploading}
+              loading={submitLocked || createOrderMutation.isPending || isUploading}
+              disabled={submitLocked || createOrderMutation.isPending || isUploading}
             >
-              {createOrderMutation.isPending || isUploading ? 'Создание заказа...' : 'Создать заказ'}
+              {submitLocked || createOrderMutation.isPending || isUploading ? 'Создание заказа...' : 'Создать заказ'}
             </AppButton>
           </Form.Item>
         </Form>

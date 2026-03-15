@@ -10,6 +10,8 @@ from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
 from apps.orders.models import Order, OrderFile
+from apps.notifications.models import NotificationType
+from apps.notifications.services import NotificationService
 from decimal import Decimal, InvalidOperation
 
 class ChatViewSet(viewsets.ModelViewSet):
@@ -255,6 +257,36 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        if message_type == 'offer':
+            try:
+                recipient = chat.client
+                if not recipient:
+                    recipient = (
+                        chat.participants.exclude(id=request.user.id).filter(role='client').first()
+                        or chat.participants.exclude(id=request.user.id).first()
+                    )
+
+                if recipient and recipient.id != request.user.id:
+                    offer_payload = offer_data if isinstance(offer_data, dict) else {}
+                    offer_title = (offer_payload.get('title') or '').strip()
+                    offer_cost = offer_payload.get('cost')
+                    cost_suffix = f" Сумма: {offer_cost} ₽." if offer_cost not in [None, ''] else ''
+                    target_label = f"по заказу '{chat.order.title}'" if getattr(chat, 'order', None) else "в чате"
+                    NotificationService.create_notification(
+                        recipient=recipient,
+                        type=NotificationType.NEW_BID,
+                        title=f"Индивидуальное предложение{f': {offer_title}' if offer_title else ''}",
+                        message=f"Эксперт {request.user.get_full_name() or request.user.username} отправил вам индивидуальное предложение {target_label}.{cost_suffix}",
+                        related_object_id=chat.order_id if chat.order_id else chat.id,
+                        related_object_type='order' if chat.order_id else 'chat',
+                        data={
+                            'chat_id': chat.id,
+                            'message_id': message.id
+                        }
+                    )
+            except Exception:
+                pass
+
         return Response(MessageSerializer(message, context={'request': request}).data)
 
     @action(detail=True, methods=['post'])
@@ -392,7 +424,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         offer_message.offer_data = offer_data
         offer_message.save(update_fields=['offer_data'])
 
-        if chat.order_id and chat.order and chat.order.expert_id == request.user.id:
+        if chat.order_id and chat.order:
             marker = f'chat_delivery_message_id:{delivery_message.id}'
             already_attached = OrderFile.objects.filter(
                 order_id=chat.order_id,
@@ -504,6 +536,27 @@ class ChatViewSet(viewsets.ModelViewSet):
                         'rated_at',
                     ]
                     purchase.save(update_fields=update_fields)
+        except Exception:
+            pass
+
+        try:
+            delivered_message_id = offer_data.get('delivered_message_id')
+            if chat.order_id and delivered_message_id:
+                delivered_message = Message.objects.filter(id=delivered_message_id, chat=chat).first()
+                if delivered_message and delivered_message.file:
+                    marker = f'chat_delivery_message_id:{delivered_message.id}'
+                    already_attached = OrderFile.objects.filter(
+                        order_id=chat.order_id,
+                        description=marker
+                    ).exists()
+                    if not already_attached:
+                        OrderFile.objects.create(
+                            order=chat.order,
+                            file=delivered_message.file,
+                            file_type='solution',
+                            uploaded_by=delivered_message.sender,
+                            description=marker
+                        )
         except Exception:
             pass
 
@@ -674,6 +727,23 @@ class ChatViewSet(viewsets.ModelViewSet):
             if chat.order_id != order.id:
                 chat.order = order
                 chat.save(update_fields=['order'])
+
+            try:
+                NotificationService.create_notification(
+                    recipient=expert_user,
+                    type=NotificationType.ORDER_ASSIGNED,
+                    title="Индивидуальное предложение принято",
+                    message=f"Клиент принял ваше индивидуальное предложение. Можно начинать работу по заказу '{order.title or f'#{order.id}'}'.",
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={
+                        'order_id': order.id,
+                        'chat_id': chat.id,
+                        'offer_message_id': message.id
+                    }
+                )
+            except Exception:
+                pass
                 
             return Response({'status': 'success', 'order_id': order.id})
             

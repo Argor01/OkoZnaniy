@@ -220,6 +220,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2px;
+  min-width: 0;
 }
 
 .chatListName {
@@ -227,6 +228,13 @@
   color: #1f2937;
   font-weight: 500;
   font-family: 'Jost-SemiBold', sans-serif;
+  display: block;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chatListNameMobile {
@@ -237,9 +245,19 @@
   font-weight: 600;
 }
 
+.chatListNameSupport {
+  font-size: 14px;
+}
+
+.chatListNameSupportMobile {
+  font-size: 13px;
+}
+
 .chatListTime {
   font-size: 13px;
   color: #9ca3af;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .chatListTimeMobile {
@@ -256,6 +274,7 @@
   font-size: 14px;
   color: #6b7280;
   font-weight: 400;
+  font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 .chatListPreviewMobile {
@@ -270,6 +289,14 @@
 .chatListPreviewUnread {
   color: #059669;
   font-weight: 500;
+}
+
+.chatListPreviewSupport {
+  font-size: 12px;
+}
+
+.chatListPreviewSupportMobile {
+  font-size: 11px;
 }
 
 .chatBadge :global(.ant-badge-dot) {
@@ -720,6 +747,31 @@
   gap: 6px;
 }
 
+.chatEmojiButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+
+.chatEmojiButton:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+}
+
+.chatEmojiButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
 .chatInput {
   width: 100%;
   border-radius: 12px;
@@ -727,6 +779,7 @@
   font-size: 15px;
   padding: 10px 14px;
   resize: none;
+  font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 .chatInputMobile {
@@ -1224,6 +1277,7 @@
   display: block;
   margin-bottom: 4px;
   font-size: 16px;
+  font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 .messageTextMobile {

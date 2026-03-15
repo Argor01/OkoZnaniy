@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Typography, Spin, message as antMessage } from 'antd';
 import { ErrorBoundary } from '@/features/common';
+import { useNavigate } from 'react-router-dom';
 import { 
   BellOutlined, 
   FileDoneOutlined, 
@@ -85,11 +86,53 @@ const getNotificationCategory = (type: string): string => {
   return 'all';
 };
 
+const extractOrderId = (notification: Notification): number | null => {
+  if (notification.related_object_type === 'order' && notification.related_object_id) {
+    return notification.related_object_id;
+  }
+  const source = `${notification.title || ''} ${notification.message || ''}`;
+  const match = source.match(/#(\d+)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isFinite(value) && value > 0 ? value : null;
+};
+
+const resolveNotificationTarget = (notification: Notification): string | null => {
+  const orderId = extractOrderId(notification);
+  if (orderId) return `/orders/${orderId}`;
+
+  if (notification.type === 'application_approved' || notification.type === 'application_rejected') {
+    return '/expert?focus=application';
+  }
+
+  if (notification.type === 'specialization_verified') {
+    return '/expert?tab=specializations';
+  }
+
+  if (notification.type === 'review_received' || notification.type === 'new_rating' || notification.type === 'rating_milestone') {
+    return '/expert?tab=reviews';
+  }
+
+  if (notification.related_object_type === 'expert_application') return '/expert?focus=application';
+  if (notification.related_object_type === 'specialization') return '/expert?tab=specializations';
+  if (notification.related_object_type === 'review') return '/expert?tab=reviews';
+  if (notification.related_object_type === 'order') return '/orders-feed';
+
+  if (
+    ['new_bid', 'new_order', 'order_taken', 'order_assigned', 'status_changed', 'order_completed', 'payment_received', 'deadline_soon', 'expert_violation'].includes(notification.type)
+  ) {
+    return '/orders-feed';
+  }
+
+  return '/expert';
+};
+
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
   isMobile
 }) => {
+  const navigate = useNavigate();
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -123,6 +166,21 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     } catch (error) {
       antMessage.error('Не удалось отметить уведомление');
     }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await handleMarkAsRead(notification);
+    }
+
+    const target = resolveNotificationTarget(notification);
+    if (!target) {
+      antMessage.info('Для этого уведомления переход не настроен');
+      return;
+    }
+
+    onClose();
+    navigate(target);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -225,7 +283,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                onClick={() => handleMarkAsRead(notification)}
+                onClick={() => void handleNotificationClick(notification)}
                 className={`${styles.notificationsModalItem} ${notification.is_read ? styles.notificationsModalItemRead : styles.notificationsModalItemUnread} ${isMobile ? styles.notificationsModalItemMobile : styles.notificationsModalItemDesktop}`}
               >
                 
