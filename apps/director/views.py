@@ -244,7 +244,9 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
             user.role = 'client'
             user.application_approved = False
             user.has_submitted_application = True
-            user.save(update_fields=['role', 'application_approved', 'has_submitted_application'])
+            user.application_reviewed_at = timezone.now()
+            user.application_reviewed_by = request.user
+            user.save(update_fields=['role', 'application_approved', 'has_submitted_application', 'application_reviewed_at', 'application_reviewed_by'])
             
             # Деактивируем анкету, если она есть (нельзя подавать заново)
             try:
@@ -258,7 +260,18 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 from apps.notifications.services import NotificationService
                 NotificationService.notify_application_rejected(application, 'Ваш статус эксперта был деактивирован администратором')
             except ExpertApplication.DoesNotExist:
-                pass
+                full_name = f"{(user.last_name or '').strip()} {(user.first_name or '').strip()}".strip() or user.username
+                application = ExpertApplication.objects.create(
+                    expert=user,
+                    full_name=full_name,
+                    work_experience_years=user.experience_years or 0,
+                    status='deactivated',
+                    rejection_reason='Деактивирован администратором',
+                    reviewed_by=request.user,
+                    reviewed_at=timezone.now(),
+                )
+                from apps.notifications.services import NotificationService
+                NotificationService.notify_application_rejected(application, 'Ваш статус эксперта был деактивирован администратором')
         else:
             # Для других ролей просто деактивируем аккаунт
             user.is_active = False

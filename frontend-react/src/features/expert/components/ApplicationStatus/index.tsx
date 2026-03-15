@@ -39,12 +39,18 @@ const getStatusText = (status: ExpertApplication['status'], display?: string) =>
 const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
   application,
   applicationLoading,
+  userProfile,
   onOpenApplicationModal,
 }) => {
   const hasValidApplication = application && 
     typeof application === 'object' && 
     !Array.isArray(application) &&
     'status' in application;
+  const isDeactivatedWithoutApplication =
+    !hasValidApplication &&
+    userProfile?.role === 'client' &&
+    userProfile?.has_submitted_application === true &&
+    userProfile?.application_approved === false;
 
   if (applicationLoading) {
     return (
@@ -91,6 +97,13 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
             </Text>
           </div>
         )}
+        {application.status === 'deactivated' && (
+          <div className={styles.applicationRejectBox}>
+            <Text type="danger" className={styles.applicationRejectText}>
+              <strong>Анкета деактивирована.</strong> Вы всё ещё можете выступать на платформе в качестве клиента или обратиться в техническую поддержку.
+            </Text>
+          </div>
+        )}
         {(application.status === 'rejected' || application.status === 'needs_revision') && (
           <div className={styles.applicationActionRow}>
             <Button
@@ -103,6 +116,30 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = React.memo(({
             </Button>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (isDeactivatedWithoutApplication) {
+    return (
+      <div className={styles.applicationCard}>
+        <div className={styles.applicationHeader}>
+          <div>
+            <h3 className={styles.applicationTitle}>Анкета</h3>
+          </div>
+          <div className={styles.statusContainer}>
+            <span className={styles.statusLabel}>Статус рассмотрения</span>
+            <div className={`${styles.statusBadge} ${styles.statusRejected}`}>
+              <CloseCircleOutlined />
+              <span>Деактивирован</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.applicationRejectBox}>
+          <Text type="danger" className={styles.applicationRejectText}>
+            <strong>Анкета деактивирована.</strong> Вы всё ещё можете выступать на платформе в качестве клиента или обратиться в техническую поддержку.
+          </Text>
+        </div>
       </div>
     );
   }

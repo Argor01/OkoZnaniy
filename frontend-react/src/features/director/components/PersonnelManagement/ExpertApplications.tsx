@@ -434,16 +434,13 @@ const ExpertApplications: React.FC = () => {
                 {selectedApplication.expert?.email || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Телефон">
-                {selectedApplication.expert?.phone || 'Не указан'}
+                {selectedApplication.phone || selectedApplication.expert?.phone || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Опыт работы" span={isMobile ? 1 : 2}>
                 {selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
               </Descriptions.Item>
               <Descriptions.Item label="Образование">
                 {selectedApplication.education || selectedApplication.expert.education || 'Не указано'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Навыки" span={isMobile ? 1 : 2}>
-                {selectedApplication.skills || selectedApplication.expert.skills || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Портфолио" span={isMobile ? 1 : 2}>
                 {selectedApplication.portfolio_url || selectedApplication.expert.portfolio_url ? (

@@ -254,6 +254,9 @@ class EducationSerializer(serializers.ModelSerializer):
 
 class ExpertApplicationSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)
+    phone = serializers.CharField(source='expert.phone', read_only=True)
+    biography = serializers.CharField(source='expert.bio', read_only=True)
+    portfolio_url = serializers.CharField(source='expert.portfolio_url', read_only=True)
     educations = EducationSerializer(many=True, required=False)
     status_display = serializers.CharField(
         source='get_status_display',
@@ -273,6 +276,7 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
         model = ExpertApplication
         fields = [
             'id', 'expert', 'full_name', 'work_experience_years',
+            'phone', 'biography', 'portfolio_url',
             'specializations', 'specialization_ids', 'educations',
             'status', 'status_display', 'rejection_reason',
             'reviewed_by', 'reviewed_at', 'created_at', 'updated_at'
@@ -304,6 +308,9 @@ class ExpertApplicationSerializer(serializers.ModelSerializer):
 class ExpertApplicationCreateSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=255, required=True)
     work_experience_years = serializers.IntegerField(min_value=0, required=True)
+    phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    biography = serializers.CharField(required=False, allow_blank=True)
+    portfolio_url = serializers.URLField(required=False, allow_blank=True)
     specialization_ids = serializers.ListField(
         child=serializers.IntegerField(),
         required=True,

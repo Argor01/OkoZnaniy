@@ -14,6 +14,9 @@ export interface UserProfile {
   skills?: string;
   portfolio_url?: string;
   is_verified?: boolean;
+  has_submitted_application?: boolean;
+  application_approved?: boolean;
+  application_reviewed_at?: string;
   date_joined?: string;
   balance?: string;
   frozen_balance?: string;

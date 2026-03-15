@@ -1,7 +1,7 @@
 .footer {
-  background-color: var(--bg-tertiary);
+  background-color: var(--color-brand-blue-500);
   padding: 40px 0 20px;
-  color: var(--text-primary);
+  color: #ffffff;
   font-family: var(--font-body);
   font-size: 14px;
 }
@@ -35,7 +35,7 @@
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
@@ -49,18 +49,18 @@
 }
 
 .link {
-  color: var(--text-secondary);
+  color: #ffffff;
   text-decoration: none;
   transition: color 0.2s;
   font-size: 14px;
 }
 
 .link:hover {
-  color: var(--primary-blue);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .linkWithIcon {
-  color: var(--text-primary);
+  color: #ffffff;
   text-decoration: none;
   transition: color 0.2s;
   font-size: 14px;
@@ -70,7 +70,7 @@
 }
 
 .linkWithIcon:hover {
-  color: var(--primary-blue);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* Contact Section Specifics */
@@ -78,27 +78,27 @@
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #ffffff;
   display: block;
   margin-bottom: 4px;
 }
 
 .contactEmail {
-  color: var(--text-secondary);
+  color: #ffffff;
   font-size: 14px;
   margin-bottom: 16px;
   display: block;
 }
 
 .workHoursLabel {
-  color: var(--text-secondary);
+  color: #ffffff;
   font-size: 14px;
   margin-bottom: 4px;
   display: block;
 }
 
 .workHoursValue {
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 500;
   margin-bottom: 20px;
   display: block;
@@ -135,7 +135,7 @@
 
 .statRow {
   font-size: 14px;
-  color: var(--text-primary);
+  color: #ffffff;
   display: flex;
   align-items: baseline;
   gap: 6px;
@@ -144,12 +144,12 @@
 .statValue {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 15px;
 }
 
 .statLabel {
-  color: var(--text-secondary);
+  color: #ffffff;
 }
 
 .statValueGreen {
@@ -165,10 +165,10 @@
 
 /* Copyright Section */
 .copyright {
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding-top: 24px;
   text-align: center;
-  color: var(--text-secondary);
+  color: #ffffff;
   font-size: 13px;
   display: flex;
   justify-content: space-between;
@@ -176,7 +176,7 @@
 }
 
 .copyrightText {
-  color: var(--text-secondary);
+  color: #ffffff;
 }
 
 .socialLinks {

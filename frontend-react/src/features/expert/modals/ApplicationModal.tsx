@@ -13,6 +13,84 @@ interface ApplicationModalProps {
   application?: ExpertApplication | null;
 }
 
+const formatPhoneRu = (rawValue: string): string => {
+  const digitsOnly = rawValue.replace(/\D/g, '');
+  if (!digitsOnly) return '';
+
+  let normalized = digitsOnly;
+  if (normalized.startsWith('8')) {
+    normalized = `7${normalized.slice(1)}`;
+  } else if (!normalized.startsWith('7')) {
+    normalized = `7${normalized}`;
+  }
+
+  const limited = normalized.slice(0, 11);
+  const local = limited.slice(1);
+
+  let formatted = '+7';
+  if (local.length > 0) {
+    formatted += ` (${local.slice(0, 3)}`;
+  }
+  if (local.length >= 3) {
+    formatted += ')';
+  }
+  if (local.length > 3) {
+    formatted += ` ${local.slice(3, 6)}`;
+  }
+  if (local.length > 6) {
+    formatted += `-${local.slice(6, 8)}`;
+  }
+  if (local.length > 8) {
+    formatted += `-${local.slice(8, 10)}`;
+  }
+
+  return formatted;
+};
+
+const getCaretPositionByDigitsCount = (formattedValue: string, digitsCount: number): number => {
+  if (digitsCount <= 0) return 0;
+
+  let seenDigits = 0;
+  for (let i = 0; i < formattedValue.length; i += 1) {
+    if (/\d/.test(formattedValue[i])) {
+      seenDigits += 1;
+      if (seenDigits === digitsCount) {
+        return i + 1;
+      }
+    }
+  }
+
+  return formattedValue.length;
+};
+
+const extractApiErrorMessage = (
+  error: unknown,
+  fallback: string
+): string => {
+  const responseData = (error as { response?: { data?: unknown } })?.response?.data as
+    | { detail?: string; message?: string; non_field_errors?: string[]; [key: string]: unknown }
+    | undefined;
+
+  if (!responseData) return fallback;
+  if (responseData.detail && typeof responseData.detail === 'string') return responseData.detail;
+  if (responseData.message && typeof responseData.message === 'string') return responseData.message;
+  if (Array.isArray(responseData.non_field_errors) && responseData.non_field_errors[0]) {
+    return String(responseData.non_field_errors[0]);
+  }
+
+  for (const [field, value] of Object.entries(responseData)) {
+    if (field === 'detail' || field === 'message' || field === 'non_field_errors') continue;
+    if (Array.isArray(value) && value[0]) {
+      return `${field}: ${String(value[0])}`;
+    }
+    if (typeof value === 'string' && value) {
+      return `${field}: ${value}`;
+    }
+  }
+
+  return fallback;
+};
+
 const ApplicationModal: React.FC<ApplicationModalProps> = ({ 
   visible, 
   onClose,
@@ -53,6 +131,9 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           last_name: lastName,
           middle_name: middleName,
           email: user.email,
+          phone: formatPhoneRu(application.phone || user.phone || ''),
+          biography: application.biography || user.bio || '',
+          portfolio_url: application.portfolio_url || user.portfolio_url || '',
           work_experience_years: application.work_experience_years,
           specializations: specs,
           educations: application.educations && application.educations.length > 0 ? application.educations : [{}],
@@ -62,6 +143,9 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
+          phone: formatPhoneRu(user.phone || ''),
+          biography: user.bio || '',
+          portfolio_url: user.portfolio_url || '',
           educations: [{}]
         });
       }
@@ -78,10 +162,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ['expert-application'] });
     },
     onError: (error: unknown) => {
-      const errorMessage =
-        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
-        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
-        'Ошибка при обновлении анкеты';
+      const errorMessage = extractApiErrorMessage(error, 'Ошибка при обновлении анкеты');
       message.error(errorMessage);
     }
   });
@@ -96,10 +177,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ['expert-application'] });
     },
     onError: (error: unknown) => {
-      const errorMessage =
-        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
-        (error as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
-        'Ошибка при отправке анкеты';
+      const errorMessage = extractApiErrorMessage(error, 'Ошибка при отправке анкеты');
       message.error(errorMessage);
     }
   });
@@ -134,9 +212,19 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         initialValues={{ educations: [{}] }}
         onFinish={(values) => {
           
-          const educations = values.educations?.filter((edu: Education) => 
-            edu.university && edu.start_year
-          ) || [];
+          const educations = (values.educations || [])
+            .filter((edu: Education) => edu.university && edu.start_year)
+            .map((edu: Education) => {
+              const rawEndYear = (edu as unknown as Record<string, unknown>)['end_year'];
+              return {
+                university: String(edu.university || '').trim(),
+                start_year: Number(edu.start_year),
+                end_year: rawEndYear === '' || rawEndYear === undefined || rawEndYear === null
+                  ? null
+                  : Number(rawEndYear),
+                degree: edu.degree ? String(edu.degree).trim() : '',
+              };
+            });
           
           if (educations.length === 0) {
             message.error('Добавьте хотя бы одно образование');
@@ -159,6 +247,9 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
               data: {
                 full_name,
                 work_experience_years: values.work_experience_years,
+                phone: values.phone,
+                biography: values.biography,
+                portfolio_url: values.portfolio_url,
                 specialization_ids,
                 educations,
                 email: values.email
@@ -168,6 +259,9 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             createApplicationMutation.mutate({
               full_name,
               work_experience_years: values.work_experience_years,
+              phone: values.phone,
+              biography: values.biography,
+              portfolio_url: values.portfolio_url,
               specialization_ids,
               educations,
               email: values.email
@@ -209,6 +303,88 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         >
           <Input 
             placeholder="Иванович" 
+            className={styles.inputField}
+            size="large"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Телефон"
+          name="phone"
+          normalize={(value) => formatPhoneRu(String(value || ''))}
+          rules={[{ required: true, message: 'Введите телефон' }]}
+        >
+          <Input
+            placeholder="+7 (999) 123-45-67"
+            className={styles.inputField}
+            size="large"
+            maxLength={18}
+            onKeyDown={(e) => {
+              const input = e.currentTarget;
+              const value = input.value;
+              const selectionStart = input.selectionStart ?? value.length;
+              const selectionEnd = input.selectionEnd ?? value.length;
+
+              if (selectionStart !== selectionEnd) return;
+
+              if (e.key === 'Backspace') {
+                if (selectionStart === 0) return;
+
+                const charBeforeCaret = value[selectionStart - 1];
+                if (/\d/.test(charBeforeCaret)) return;
+
+                const digits = value.replace(/\D/g, '');
+                const digitsBeforeCaret = value.slice(0, selectionStart).replace(/\D/g, '').length;
+                const removeIndex = digitsBeforeCaret - 1;
+                if (removeIndex < 0 || removeIndex >= digits.length) return;
+
+                e.preventDefault();
+                const nextDigits = `${digits.slice(0, removeIndex)}${digits.slice(removeIndex + 1)}`;
+                const nextFormatted = formatPhoneRu(nextDigits);
+                const nextCaretPos = getCaretPositionByDigitsCount(nextFormatted, removeIndex);
+                applicationForm.setFieldsValue({ phone: nextFormatted });
+                requestAnimationFrame(() => input.setSelectionRange(nextCaretPos, nextCaretPos));
+                return;
+              }
+
+              if (e.key === 'Delete') {
+                const charAtCaret = value[selectionStart];
+                if (!charAtCaret || /\d/.test(charAtCaret)) return;
+
+                const digits = value.replace(/\D/g, '');
+                const digitsBeforeCaret = value.slice(0, selectionStart).replace(/\D/g, '').length;
+                const removeIndex = digitsBeforeCaret;
+                if (removeIndex < 0 || removeIndex >= digits.length) return;
+
+                e.preventDefault();
+                const nextDigits = `${digits.slice(0, removeIndex)}${digits.slice(removeIndex + 1)}`;
+                const nextFormatted = formatPhoneRu(nextDigits);
+                const nextCaretPos = getCaretPositionByDigitsCount(nextFormatted, digitsBeforeCaret);
+                applicationForm.setFieldsValue({ phone: nextFormatted });
+                requestAnimationFrame(() => input.setSelectionRange(nextCaretPos, nextCaretPos));
+              }
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Дополнительно"
+          name="biography"
+        >
+          <Input.TextArea
+            placeholder="Расскажите немного о себе"
+            className={styles.inputField}
+            autoSize={{ minRows: 4, maxRows: 8 }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Портфолио (ссылка)"
+          name="portfolio_url"
+          rules={[{ type: 'url', message: 'Введите корректную ссылку' }]}
+        >
+          <Input
+            placeholder="https://example.com/portfolio"
             className={styles.inputField}
             size="large"
           />
@@ -272,7 +448,10 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           ]}
           extra="Выберите предметы, по которым вы можете выполнять работы"
         >
-          <SkillsSelect placeholder="Например: Математика, Физика, Информатика" />
+          <SkillsSelect
+            placeholder="Например: Математика, Физика, Информатика"
+            allowCreateSubject
+          />
         </Form.Item>
 
         <Form.Item label="Образование">

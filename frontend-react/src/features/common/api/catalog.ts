@@ -49,17 +49,40 @@ export const catalogApi = {
 
   
   createSubject: async (name: string): Promise<Subject> => {
-    console.log('🆕 Создание нового предмета:', name);
+    const normalizedName = name.trim();
+    console.log('🆕 Создание нового предмета:', normalizedName);
     try {
       const response = await apiClient.post('/catalog/subjects/', {
-        name: name.trim(),
-        description: `Предмет "${name.trim()}" добавлен пользователем`,
-        is_active: true
+        name: normalizedName
       });
       console.log('✅ Предмет создан:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      const responseData = (error as { response?: { data?: any } })?.response?.data;
+      const nameErrors: string[] = Array.isArray(responseData?.name) ? responseData.name : [];
+      const duplicateByName = nameErrors.some((text) =>
+        typeof text === 'string' &&
+        (text.toLowerCase().includes('already exists') || text.toLowerCase().includes('уже существует'))
+      );
+
+      if (status === 400 && duplicateByName) {
+        const subjects = await catalogApi.getSubjects();
+        const existing = subjects.find(
+          (subject) => (subject.name || '').trim().toLowerCase() === normalizedName.toLowerCase()
+        );
+        if (existing) {
+          return existing;
+        }
+      }
+
       console.error('❌ Ошибка создания предмета:', error);
+      if (responseData?.detail) {
+        throw new Error(responseData.detail);
+      }
+      if (nameErrors.length > 0) {
+        throw new Error(nameErrors[0]);
+      }
       throw error;
     }
   },
