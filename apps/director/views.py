@@ -203,30 +203,51 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
     def activate(self, request, pk=None):
         """Активация сотрудника или восстановление эксперта"""
         user = self.get_object()
+        applications_qs = ExpertApplication.objects.filter(expert=user).order_by('-updated_at', '-id')
+        application = applications_qs.first()
         
-        # Если это деактивированный эксперт (client с application_approved=False)
-        # возвращаем заявку на рассмотрение
-        if user.role == 'client' and user.application_approved == False:
-            try:
-                application = ExpertApplication.objects.get(expert=user)
-                if application.status == 'deactivated':
-                    # Возвращаем заявку на рассмотрение
-                    application.status = 'pending'
-                    application.rejection_reason = ''  # Очищаем причину деактивации
-                    application.reviewed_by = None
-                    application.reviewed_at = None
-                    application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
-                    
-                    # Пользователь остается клиентом до одобрения заявки
-                    user.application_approved = False
-                    user.has_submitted_application = True
-                    user.save(update_fields=['application_approved', 'has_submitted_application'])
-                    
-                    # Отправляем уведомление пользователю о восстановлении
-                    from apps.notifications.services import NotificationService
-                    NotificationService.notify_application_restored(application)
-            except ExpertApplication.DoesNotExist:
-                pass
+        # Для бывшего/деактивированного эксперта всегда восстанавливаем expert + approved
+        is_deactivated_expert = (
+            (
+                user.role == 'client' and (
+                    application is not None or user.has_submitted_application or user.application_approved is False
+                )
+            ) or (
+                user.role == 'expert' and application is not None and application.status != 'approved'
+            )
+        )
+        if is_deactivated_expert:
+            if application is not None:
+                reviewed_at = timezone.now()
+                applications_qs.update(
+                    status='approved',
+                    rejection_reason='',
+                    reviewed_by=request.user,
+                    reviewed_at=reviewed_at,
+                )
+                application.refresh_from_db()
+            else:
+                full_name = f"{(user.last_name or '').strip()} {(user.first_name or '').strip()}".strip() or user.username
+                application = ExpertApplication.objects.create(
+                    expert=user,
+                    full_name=full_name,
+                    work_experience_years=user.experience_years or 0,
+                    status='approved',
+                    rejection_reason='',
+                    reviewed_by=request.user,
+                    reviewed_at=timezone.now(),
+                )
+
+            user.role = 'expert'
+            user.application_approved = True
+            user.has_submitted_application = True
+            user.application_reviewed_at = application.reviewed_at or timezone.now()
+            user.application_reviewed_by = request.user
+            user.is_active = True
+            user.save(update_fields=['role', 'application_approved', 'has_submitted_application', 'application_reviewed_at', 'application_reviewed_by', 'is_active'])
+
+            from apps.notifications.services import NotificationService
+            NotificationService.notify_application_approved(application)
         else:
             # Обычная активация аккаунта
             user.is_active = True
@@ -292,30 +313,49 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         """Восстановление сотрудника из архива или деактивированного эксперта"""
         user = self.get_object()
         
-        # Если это деактивированный эксперт (client с application_approved=False)
-        # возвращаем заявку на рассмотрение
+        # Если это бывший эксперт (client с application_approved=False),
+        # восстанавливаем и сразу одобряем анкету
         if user.role == 'client' and user.application_approved == False and user.has_submitted_application:
             try:
                 application = ExpertApplication.objects.get(expert=user)
-                if application.status == 'deactivated':
-                    # Возвращаем заявку на рассмотрение
-                    application.status = 'pending'
-                    application.rejection_reason = ''  # Очищаем причину деактивации
-                    application.reviewed_by = None
-                    application.reviewed_at = None
-                    application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
-                    
-                    # Пользователь остается клиентом до одобрения заявки
-                    user.application_approved = False
-                    user.has_submitted_application = True
-                    user.is_active = True
-                    user.save(update_fields=['application_approved', 'has_submitted_application', 'is_active'])
-                    
-                    # Отправляем уведомление пользователю о восстановлении
-                    from apps.notifications.services import NotificationService
-                    NotificationService.notify_application_restored(application)
+                application.status = 'approved'
+                application.rejection_reason = ''
+                application.reviewed_by = request.user
+                application.reviewed_at = timezone.now()
+                application.save(update_fields=['status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_at'])
+
+                user.role = 'expert'
+                user.application_approved = True
+                user.has_submitted_application = True
+                user.is_active = True
+                user.application_reviewed_at = application.reviewed_at
+                user.application_reviewed_by = request.user
+                user.save(update_fields=['role', 'application_approved', 'has_submitted_application', 'is_active', 'application_reviewed_at', 'application_reviewed_by'])
+
+                from apps.notifications.services import NotificationService
+                NotificationService.notify_application_approved(application)
             except ExpertApplication.DoesNotExist:
-                pass
+                full_name = f"{(user.last_name or '').strip()} {(user.first_name or '').strip()}".strip() or user.username
+                application = ExpertApplication.objects.create(
+                    expert=user,
+                    full_name=full_name,
+                    work_experience_years=user.experience_years or 0,
+                    status='approved',
+                    rejection_reason='',
+                    reviewed_by=request.user,
+                    reviewed_at=timezone.now(),
+                )
+
+                user.role = 'expert'
+                user.application_approved = True
+                user.has_submitted_application = True
+                user.is_active = True
+                user.application_reviewed_at = application.reviewed_at
+                user.application_reviewed_by = request.user
+                user.save(update_fields=['role', 'application_approved', 'has_submitted_application', 'is_active', 'application_reviewed_at', 'application_reviewed_by'])
+
+                from apps.notifications.services import NotificationService
+                NotificationService.notify_application_approved(application)
         else:
             # Обычное восстановление архивированного аккаунта
             user.is_active = True

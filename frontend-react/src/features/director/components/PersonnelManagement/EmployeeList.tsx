@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Table,
   Card,
@@ -25,11 +25,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import {
   getPersonnel,
+  getExpertApplications,
   deactivateEmployee,
   activateEmployee,
   archiveEmployee,
 } from '@/features/director/api/directorApi';
-import { type Employee } from '@/features/director/api/types';
+import { type Employee, type ExpertApplication } from '@/features/director/api/types';
 import styles from './EmployeeList.module.css';
 
 const { Title } = Typography;
@@ -49,14 +50,59 @@ const EmployeeList: React.FC = () => {
     queryFn: getPersonnel,
   });
 
+  const { data: expertApplications = [] } = useQuery({
+    queryKey: ['director-expert-applications'],
+    queryFn: getExpertApplications,
+  });
+
+  const selectedExpertApplication = useMemo(() => {
+    if (!selectedEmployee) return null;
+    return (
+      expertApplications.find((application: ExpertApplication) => application.expert?.id === selectedEmployee.id) ||
+      null
+    );
+  }, [expertApplications, selectedEmployee]);
+
+  const selectedSpecializationNames = useMemo(() => {
+    const raw = selectedExpertApplication?.specializations;
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && 'name' in item) {
+          return String((item as { name?: unknown }).name || '');
+        }
+        return '';
+      })
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }, [selectedExpertApplication]);
+
+  const selectedApplicationNameParts = useMemo(() => {
+    const fullName = (selectedExpertApplication?.full_name || '').trim();
+    if (!fullName) {
+      return {
+        firstName: selectedEmployee?.first_name || '',
+        lastName: selectedEmployee?.last_name || '',
+      };
+    }
+
+    const parts = fullName.split(/\s+/).filter(Boolean);
+    return {
+      lastName: parts[0] || selectedEmployee?.last_name || '',
+      firstName: parts[1] || selectedEmployee?.first_name || '',
+    };
+  }, [selectedEmployee, selectedExpertApplication?.full_name]);
+
   const deactivateMutation = useMutation({
     mutationFn: (id: number) => deactivateEmployee(id),
     onSuccess: (updated: Employee) => {
       message.success('Сотрудник деактивирован');
       queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
         if (!prev) return prev;
-        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: false, role: updated.role, application_approved: updated.application_approved } : e));
+        return prev.map((e) => (e.id === updated.id ? { ...e, ...updated } : e));
       });
+      setSelectedEmployee((prev) => (prev && prev.id === updated.id ? { ...prev, ...updated } : prev));
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
       queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
@@ -72,8 +118,9 @@ const EmployeeList: React.FC = () => {
       message.success('Сотрудник активирован');
       queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
         if (!prev) return prev;
-        return prev.map((e) => (e.id === updated.id ? { ...e, is_active: true } : e));
+        return prev.map((e) => (e.id === updated.id ? { ...e, ...updated } : e));
       });
+      setSelectedEmployee((prev) => (prev && prev.id === updated.id ? { ...prev, ...updated } : prev));
       try {
         const raw = localStorage.getItem('director_deactivated_employees');
         const arr = raw ? JSON.parse(raw) : [];
@@ -85,6 +132,7 @@ const EmployeeList: React.FC = () => {
         void e;
       }
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
     onError: (error: any, id: number) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при активации сотрудника';
@@ -104,6 +152,7 @@ const EmployeeList: React.FC = () => {
         return prev.map((e) => (e.id === id ? { ...e, is_active: true } : e));
       });
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
   });
 
@@ -443,35 +492,66 @@ const EmployeeList: React.FC = () => {
           setSelectedEmployee(null);
         }}
         footer={null}
-        width={isMobile ? '100%' : 600}
+        width={isMobile ? '100%' : 1000}
         wrapClassName={[
           styles.employeeDetailModalWrap,
           isMobile ? styles.employeeDetailModalMobile : '',
         ].filter(Boolean).join(' ')}
       >
         {selectedEmployee && (
-          <Descriptions column={1} bordered>
+          <Descriptions column={isMobile ? 1 : 2} bordered>
             <Descriptions.Item label="Имя">
-              {selectedEmployee.first_name}
+              {selectedApplicationNameParts.firstName || 'Не указано'}
             </Descriptions.Item>
             <Descriptions.Item label="Фамилия">
-              {selectedEmployee.last_name}
+              {selectedApplicationNameParts.lastName || 'Не указана'}
             </Descriptions.Item>
             <Descriptions.Item label="Email">
               {selectedEmployee.email}
             </Descriptions.Item>
             <Descriptions.Item label="Телефон">
-              {selectedEmployee.phone || 'Не указан'}
+              {selectedExpertApplication?.phone || selectedEmployee.phone || 'Не указан'}
             </Descriptions.Item>
             <Descriptions.Item label="Роль">
               <Tag color={getRoleColor(selectedEmployee.role)}>
                 {getRoleLabel(selectedEmployee.role)}
               </Tag>
             </Descriptions.Item>
+            <Descriptions.Item label="ФИО в анкете">
+              {selectedExpertApplication?.full_name || 'Не указано'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Опыт работы">
+              {selectedExpertApplication?.experience_years !== undefined
+                ? `${selectedExpertApplication.experience_years} лет`
+                : 'Не указан'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Образование">
+              {selectedExpertApplication?.education || selectedEmployee.education || 'Не указано'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Специализации">
+              {selectedSpecializationNames.length
+                ? selectedSpecializationNames.join(', ')
+                : 'Не указаны'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Портфолио">
+              {selectedExpertApplication?.portfolio_url || selectedEmployee.portfolio_url || 'Не указано'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Дополнительно (биография)">
+              {selectedExpertApplication?.biography || selectedExpertApplication?.bio || selectedEmployee.bio || 'Не указано'}
+            </Descriptions.Item>
             <Descriptions.Item label="Статус">
               <Tag color={selectedEmployee.is_active !== false ? 'green' : 'red'}>
                 {selectedEmployee.is_active !== false ? 'Активен' : 'Неактивен'}
               </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Статус анкеты эксперта">
+              {selectedExpertApplication?.status === 'approved' && <Tag color="green">Одобрено</Tag>}
+              {selectedExpertApplication?.status === 'under_review' && <Tag color="blue">На рассмотрении</Tag>}
+              {selectedExpertApplication?.status === 'needs_revision' && <Tag color="orange">На доработке</Tag>}
+              {selectedExpertApplication?.status === 'rejected' && <Tag color="red">Отклонено</Tag>}
+              {selectedExpertApplication?.status === 'deactivated' && <Tag color="volcano">Деактивировано</Tag>}
+              {selectedExpertApplication?.status === 'new' && <Tag color="default">Новая</Tag>}
+              {!selectedExpertApplication?.status && 'Не указано'}
             </Descriptions.Item>
             <Descriptions.Item label="Дата регистрации">
               {dayjs(selectedEmployee.date_joined).format('DD.MM.YYYY HH:mm')}

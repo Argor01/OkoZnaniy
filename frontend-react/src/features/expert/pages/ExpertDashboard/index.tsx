@@ -80,7 +80,9 @@ const ExpertDashboard: FC = () => {
   const { data: userProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: application, isLoading: applicationLoading } = useQuery({
@@ -93,6 +95,10 @@ const ExpertDashboard: FC = () => {
       }
     },
     retry: false
+    ,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: specializationsData, isLoading: specializationsLoading } = useQuery({
