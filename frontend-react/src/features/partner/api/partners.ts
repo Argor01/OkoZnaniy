@@ -14,4 +14,9 @@ export const partnersApi = {
     const response = await apiClient.post(API_ENDPOINTS.partners.generateLink);
     return response.data;
   },
+
+  getPartnersList: async (): Promise<any[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.partners.list);
+    return response.data;
+  },
 };

@@ -140,5 +140,6 @@ export const API_ENDPOINTS = {
   partners: {
     dashboard: '/users/partner_dashboard/',
     generateLink: '/users/generate_referral_link/',
+    list: '/users/partners_list/',
   },
 } as const;

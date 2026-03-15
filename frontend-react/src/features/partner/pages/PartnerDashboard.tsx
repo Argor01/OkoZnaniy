@@ -14,6 +14,7 @@ import {
   InfoCircleOutlined,
   MessageOutlined,
   FileImageOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs, { Dayjs } from 'dayjs';
@@ -24,6 +25,7 @@ import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarn
 import { PartnerProgram } from './PartnerProgram';
 import { PartnerChatsSection } from '../components/InternalCommunication/PartnerChatsSection';
 import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
+import PartnersMap from './PartnersMap';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -383,6 +385,12 @@ const PartnerDashboard: React.FC = () => {
           nextBonusThreshold={10000}
         />
       ),
+    },
+    {
+      key: 'map',
+      icon: <EnvironmentOutlined />,
+      label: 'Карта партнеров',
+      component: <PartnersMap />,
     },
     {
       key: 'promo',

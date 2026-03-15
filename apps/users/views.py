@@ -567,6 +567,53 @@ class UserViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def partners_list(self, request):
+        """Получение списка всех партнеров с их городами для карты"""
+        user = request.user
+        if user.role != 'partner':
+            return Response(
+                {'error': 'Доступно только для партнеров'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Получаем всех партнеров с указанным городом
+        partners = User.objects.filter(
+            role='partner',
+            city__isnull=False
+        ).exclude(city='').order_by('city', 'username')
+        
+        partners_data = []
+        for partner in partners:
+            # Подсчитываем статистику для каждого партнера
+            total_referrals = partner.referrals.count()
+            active_referrals = partner.referrals.filter(
+                models.Q(client_orders__isnull=False) | models.Q(expert_orders__isnull=False)
+            ).distinct().count()
+            
+            # Подсчитываем общий доход
+            from .models import PartnerEarning
+            total_earnings = PartnerEarning.objects.filter(
+                partner=partner
+            ).aggregate(
+                total=models.Sum('amount')
+            )['total'] or 0
+            
+            partners_data.append({
+                'id': partner.id,
+                'username': partner.username,
+                'email': partner.email,
+                'city': partner.city,
+                'phone': partner.phone,
+                'role': partner.role,
+                'date_joined': partner.date_joined,
+                'total_referrals': total_referrals,
+                'active_referrals': active_referrals,
+                'total_earnings': float(total_earnings),
+            })
+        
+        return Response(partners_data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def admin_partners(self, request):
         """Получение списка всех партнеров для админки"""
         user = request.user
