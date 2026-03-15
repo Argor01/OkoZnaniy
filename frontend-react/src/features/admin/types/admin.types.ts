@@ -69,31 +69,22 @@ export type MenuKey =
   | 'overview'
   | 'partners' 
   | 'earnings'
-  | 'claims'
-  | 'new_claims'
-  | 'in_progress_claims'
-  | 'completed_claims'
-  | 'pending_approval'
   | 'internal_communication'       
   | 'support_open'                 
   | 'support_in_progress'          
   | 'support_completed'            
 
   | 'tickets'                      
-  | 'admin_chats'
+  | 'communication'
   | 'admin_group_chats'            
-  | 'request_processing'
-  | 'request_processing_open'      
-  | 'request_processing_progress'  
-  | 'request_processing_completed' 
+ 
   | 'users_management'            
   | 'all_users'
   | 'blocked_users'
-  | 'user_roles'
+
   | 'orders_management'           
   | 'all_orders'
   | 'problem_orders'
-  | 'user_conversations'
   | 'tariffs_settings';
 
 

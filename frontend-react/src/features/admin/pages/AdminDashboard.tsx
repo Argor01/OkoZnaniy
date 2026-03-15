@@ -40,8 +40,6 @@ const PartnerModal = lazy(() => import('@/features/admin/components/Modals/Partn
 const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
 const SupportRequestModal = lazy(() => import('@/features/admin/components/Modals/SupportRequestModal').then(m => ({ default: m.SupportRequestModal })));
 
-const AdminLogin = lazy(() => import('@/features/admin/pages/AdminLogin'));
-
 const { Content } = Layout;
 
 
@@ -52,11 +50,7 @@ const AdminDashboard: React.FC = () => {
   const { 
     user, 
     loading, 
-    hasToken,
-    isAuthenticated, 
-    canLoadData,
     isDirector,
-    handleLoginSuccess,
     handleLogout
   } = useAdminAuth();
 
@@ -72,28 +66,13 @@ const AdminDashboard: React.FC = () => {
   }
 
   
-  if (!hasToken || !user) {
-    return (
-      <Suspense fallback={
-        <Layout className="adminPageLayout">
-          <Content className="adminPageCenter">
-            <Spin size="large" />
-          </Content>
-        </Layout>
-      }>
-        <AdminLogin onSuccess={handleLoginSuccess} />
-      </Suspense>
-    );
-  }
-
-  
   if (isDirector) {
     navigate(ROUTES.admin.directorDashboard);
     return null;
   }
 
   
-  if (user.role !== 'admin') {
+  if (!user || user.role !== 'admin') {
     return (
       <Layout className="adminPageLayout">
         <Content className="adminPageCenterPadded">
