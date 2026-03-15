@@ -66,7 +66,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
           icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
           onClick={(e) => {
             e.stopPropagation();
-            onFavorite && onFavorite(work.id);
+            onFavorite?.(work.id);
           }}
         />
       </div>

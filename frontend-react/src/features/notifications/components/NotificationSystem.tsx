@@ -18,7 +18,7 @@ const { TabPane } = Tabs;
 
 export interface Notification {
   id: number;
-  type: 'order' | 'claim' | 'message' | 'balance' | 'bid' | 'system';
+  type: 'order' | 'claim' | 'message' | 'balance' | 'bid' | 'system' | 'expert_violation';
   title: string;
   message: string;
   timestamp: string;
@@ -69,6 +69,8 @@ const NotificationSystem: React.FC<NotificationSystemProps> = ({
         return <DollarOutlined className={styles.iconBalance} />;
       case 'bid':
         return <CheckCircleOutlined className={styles.iconBid} />;
+      case 'expert_violation':
+        return <QuestionCircleOutlined className={styles.iconClaim} />;
       default:
         return <BellOutlined className={styles.iconDefault} />;
     }

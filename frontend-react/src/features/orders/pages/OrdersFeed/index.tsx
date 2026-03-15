@@ -103,9 +103,8 @@ const OrdersFeed: React.FC = () => {
         if (debugEnabled) console.warn('⚠️ Заказов нет! Возможные причины:');
         if (userProfile?.role === 'client') {
           if (debugEnabled) {
-            console.warn('   ❗ Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
-            console.warn('   💡 РЕШЕНИЕ: Перейдите на главный дашборд → https://okoznaniy.ru/expert');
-            console.warn('   📋 Там вы увидите все свои созданные заказы во вкладке "Заказы"');
+            console.warn('   Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
+
           }
         } else {
           if (debugEnabled) {
@@ -115,7 +114,13 @@ const OrdersFeed: React.FC = () => {
           }
         }
       }
-      return data;
+      return Array.isArray(data)
+        ? [...data].sort((a, b) => {
+            const left = new Date(a?.created_at || 0).getTime();
+            const right = new Date(b?.created_at || 0).getTime();
+            return right - left;
+          })
+        : data;
     },
   });
 
@@ -133,6 +138,10 @@ const OrdersFeed: React.FC = () => {
       if (order.is_active === false) return false;
       if (order.deleted === true) return false;
       return !!order.id && !!order.title;
+    }).sort((a, b) => {
+      const left = new Date(a?.created_at || 0).getTime();
+      const right = new Date(b?.created_at || 0).getTime();
+      return right - left;
     });
   }, [ordersData]);
 
@@ -264,7 +273,7 @@ const OrdersFeed: React.FC = () => {
         <div className={styles.pageHeader}>
           <div className={styles.headerContent}>
             <Title level={2} className={styles.pageTitle}>
-              Лента работ
+              Лента заказов
             </Title>
             <Text type="secondary" className={styles.pageSubtitle}>
               Найдите подходящий заказ или создайте свой
@@ -459,7 +468,9 @@ const OrdersFeed: React.FC = () => {
             const checkingMyBid = cachedMyBid === 'loading';
             const hasMyBid =
               userProfile?.role === 'expert'
-                ? (typeof order.user_has_bid === 'boolean'
+                ? (typeof cachedMyBid === 'boolean'
+                    ? cachedMyBid
+                    : typeof order.user_has_bid === 'boolean'
                     ? order.user_has_bid
                     : (Array.isArray(order.bids) && order.bids.some((bid) => bid.expert?.id === userProfile?.id))
                       ? true
@@ -509,6 +520,9 @@ const OrdersFeed: React.FC = () => {
           onClose={() => {
             setBidModalVisible(false);
             setSelectedOrderForBid(null);
+          }}
+          onBidSubmitted={(orderId) => {
+            setMyBidsByOrderId((prev) => ({ ...prev, [orderId]: true }));
           }}
           orderId={selectedOrderForBid.id}
           orderTitle={selectedOrderForBid.title}

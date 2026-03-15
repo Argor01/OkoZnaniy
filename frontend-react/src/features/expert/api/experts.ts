@@ -235,8 +235,8 @@ export const expertsApi = {
   async getMyApplication(): Promise<ExpertApplication | null> {
     try {
       const { data } = await apiClient.get('/experts/applications/my_application/');
-      
-      return data;
+      if (!data || typeof data !== 'object') return data;
+      return data as ExpertApplication;
     } catch (error: unknown) {
       
       const status = (error as { response?: { status?: number } })?.response?.status;

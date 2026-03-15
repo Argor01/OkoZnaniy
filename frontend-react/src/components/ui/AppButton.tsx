@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, ButtonProps } from 'antd';
 import styles from './AppButton.module.css';
 
-export interface AppButtonProps extends ButtonProps {
+export interface AppButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'gradient' | 'danger' | 'success' | 'link' | 'text';
 }
 
@@ -21,7 +21,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
     if (variant === 'danger') return 'primary';
     if (variant === 'link') return 'link';
     if (variant === 'text') return 'text';
-    return type;
+    return type || 'default';
   };
 
   const buttonClasses = [

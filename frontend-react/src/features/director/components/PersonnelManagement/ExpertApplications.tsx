@@ -181,7 +181,7 @@ const ExpertApplications: React.FC = () => {
       approved: { color: 'green', text: 'Одобрена' },
       rejected: { color: 'red', text: 'Отклонена' },
       deactivated: { color: 'red', text: 'Деактивирована' },
-      needs_revision: { color: 'gold', text: 'Требуется доработка' },
+      needs_revision: { color: 'gold', text: 'На доработке' },
     };
     const config = statusConfig[status as keyof typeof statusConfig] || { color: 'default', text: status };
     return <Tag color={config.color}>{config.text}</Tag>;
@@ -372,7 +372,7 @@ const ExpertApplications: React.FC = () => {
             type={statusFilter === 'needs_revision' ? 'primary' : 'default'}
             onClick={() => setStatusFilter('needs_revision')}
           >
-            На доработку
+            На доработке
           </Button>
           <Button
             type={statusFilter === 'all' ? 'primary' : 'default'}
@@ -434,16 +434,13 @@ const ExpertApplications: React.FC = () => {
                 {selectedApplication.expert?.email || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Телефон">
-                {selectedApplication.expert?.phone || 'Не указан'}
+                {selectedApplication.phone || selectedApplication.expert?.phone || 'Не указан'}
               </Descriptions.Item>
               <Descriptions.Item label="Опыт работы" span={isMobile ? 1 : 2}>
-                {selectedApplication.work_experience_years || selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
+                {selectedApplication.experience_years || selectedApplication.expert?.experience_years || 0} лет
               </Descriptions.Item>
               <Descriptions.Item label="Образование">
                 {selectedApplication.education || selectedApplication.expert.education || 'Не указано'}
-              </Descriptions.Item>
-              <Descriptions.Item label="Навыки" span={isMobile ? 1 : 2}>
-                {selectedApplication.skills || selectedApplication.expert.skills || 'Не указано'}
               </Descriptions.Item>
               <Descriptions.Item label="Портфолио" span={isMobile ? 1 : 2}>
                 {selectedApplication.portfolio_url || selectedApplication.expert.portfolio_url ? (

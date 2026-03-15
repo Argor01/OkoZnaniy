@@ -6,9 +6,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Max, Count, Prefetch
+from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
-from apps.orders.models import Order
+from apps.orders.models import Order, OrderFile
+from apps.notifications.models import NotificationType
+from apps.notifications.services import NotificationService
 from decimal import Decimal, InvalidOperation
 
 class ChatViewSet(viewsets.ModelViewSet):
@@ -117,6 +120,27 @@ class ChatViewSet(viewsets.ModelViewSet):
     def send_message(self, request, pk=None):
         """Отправка сообщения в чат (текст и/или файл). Для файла — multipart/form-data: text, file."""
         chat = self.get_object()
+
+        if hasattr(request.user, 'role') and request.user.role not in ['admin', 'director']:
+            if getattr(request.user, 'is_banned_for_contacts', False):
+                return Response(
+                    {
+                        'detail': 'Отправка сообщений временно недоступна. Пользователь находится на проверке.',
+                        'frozen': True,
+                        'frozen_reason': request.user.contact_ban_reason or 'Пользователь находится на проверке'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            other_user = chat.participants.exclude(id=request.user.id).first()
+            if other_user and getattr(other_user, 'is_banned_for_contacts', False):
+                return Response(
+                    {
+                        'detail': 'Отправка сообщений временно недоступна. Собеседник находится на проверке.',
+                        'frozen': True,
+                        'frozen_reason': other_user.contact_ban_reason or 'Собеседник находится на проверке'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # Проверяем, не заморожен ли чат
         if chat.is_frozen:
@@ -233,23 +257,35 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        from apps.notifications.services import NotificationService
-        other_user = chat.participants.exclude(id=request.user.id).first()
-        if other_user:
-            notification_text = (message.text or f'Файл: {message.file_name}')[:100]
-            if message_type == 'offer':
-                notification_text = 'Вам поступило индивидуальное предложение'
-            elif message_type == 'work_offer':
-                notification_text = 'Вам поступило предложение готовой работы'
-            
-            NotificationService.create_notification(
-                recipient=other_user,
-                type='new_comment',
-                title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
-                message=notification_text,
-                related_object_id=chat.id,
-                related_object_type='chat'
-            )
+        if message_type == 'offer':
+            try:
+                recipient = chat.client
+                if not recipient:
+                    recipient = (
+                        chat.participants.exclude(id=request.user.id).filter(role='client').first()
+                        or chat.participants.exclude(id=request.user.id).first()
+                    )
+
+                if recipient and recipient.id != request.user.id:
+                    offer_payload = offer_data if isinstance(offer_data, dict) else {}
+                    offer_title = (offer_payload.get('title') or '').strip()
+                    offer_cost = offer_payload.get('cost')
+                    cost_suffix = f" Сумма: {offer_cost} ₽." if offer_cost not in [None, ''] else ''
+                    target_label = f"по заказу '{chat.order.title}'" if getattr(chat, 'order', None) else "в чате"
+                    NotificationService.create_notification(
+                        recipient=recipient,
+                        type=NotificationType.NEW_BID,
+                        title=f"Индивидуальное предложение{f': {offer_title}' if offer_title else ''}",
+                        message=f"Эксперт {request.user.get_full_name() or request.user.username} отправил вам индивидуальное предложение {target_label}.{cost_suffix}",
+                        related_object_id=chat.order_id if chat.order_id else chat.id,
+                        related_object_type='order' if chat.order_id else 'chat',
+                        data={
+                            'chat_id': chat.id,
+                            'message_id': message.id
+                        }
+                    )
+            except Exception:
+                pass
 
         return Response(MessageSerializer(message, context={'request': request}).data)
 
@@ -388,17 +424,23 @@ class ChatViewSet(viewsets.ModelViewSet):
         offer_message.offer_data = offer_data
         offer_message.save(update_fields=['offer_data'])
 
-        from apps.notifications.services import NotificationService
-        other_user = chat.participants.exclude(id=request.user.id).first()
-        if other_user:
-            NotificationService.create_notification(
-                recipient=other_user,
-                type='new_comment',
-                title=f'Новое сообщение от {request.user.get_full_name() or request.user.username}',
-                message='Эксперт отправил работу по предложению',
-                related_object_id=chat.id,
-                related_object_type='chat'
-            )
+        if chat.order_id and chat.order:
+            marker = f'chat_delivery_message_id:{delivery_message.id}'
+            already_attached = OrderFile.objects.filter(
+                order_id=chat.order_id,
+                description=marker
+            ).exists()
+            if not already_attached:
+                try:
+                    OrderFile.objects.create(
+                        order=chat.order,
+                        file=delivery_message.file,
+                        file_type='solution',
+                        uploaded_by=request.user,
+                        description=marker
+                    )
+                except Exception:
+                    pass
 
         return Response(MessageSerializer(delivery_message, context={'request': request}).data)
 
@@ -494,6 +536,27 @@ class ChatViewSet(viewsets.ModelViewSet):
                         'rated_at',
                     ]
                     purchase.save(update_fields=update_fields)
+        except Exception:
+            pass
+
+        try:
+            delivered_message_id = offer_data.get('delivered_message_id')
+            if chat.order_id and delivered_message_id:
+                delivered_message = Message.objects.filter(id=delivered_message_id, chat=chat).first()
+                if delivered_message and delivered_message.file:
+                    marker = f'chat_delivery_message_id:{delivered_message.id}'
+                    already_attached = OrderFile.objects.filter(
+                        order_id=chat.order_id,
+                        description=marker
+                    ).exists()
+                    if not already_attached:
+                        OrderFile.objects.create(
+                            order=chat.order,
+                            file=delivered_message.file,
+                            file_type='solution',
+                            uploaded_by=delivered_message.sender,
+                            description=marker
+                        )
         except Exception:
             pass
 
@@ -664,6 +727,23 @@ class ChatViewSet(viewsets.ModelViewSet):
             if chat.order_id != order.id:
                 chat.order = order
                 chat.save(update_fields=['order'])
+
+            try:
+                NotificationService.create_notification(
+                    recipient=expert_user,
+                    type=NotificationType.ORDER_ASSIGNED,
+                    title="Индивидуальное предложение принято",
+                    message=f"Клиент принял ваше индивидуальное предложение. Можно начинать работу по заказу '{order.title or f'#{order.id}'}'.",
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={
+                        'order_id': order.id,
+                        'chat_id': chat.id,
+                        'offer_message_id': message.id
+                    }
+                )
+            except Exception:
+                pass
                 
             return Response({'status': 'success', 'order_id': order.id})
             
@@ -810,13 +890,45 @@ class ChatViewSet(viewsets.ModelViewSet):
             client=client,
             expert=expert,
             context_title=context_title
-        ).first()
+        ).order_by('id').first()
 
-        created = False
         if not chat:
-            created = True
-            chat = Chat.objects.create(order=None, client=client, expert=expert, context_title=context_title)
-            chat.participants.add(client, expert)
+            chat = Chat.objects.filter(
+                order__isnull=True
+            ).filter(
+                Q(client_id=client.id, expert_id=expert.id) |
+                Q(client_id=expert.id, expert_id=client.id)
+            ).order_by('id').first()
+
+        if not chat:
+            try:
+                with transaction.atomic():
+                    chat = Chat.objects.create(order=None, client=client, expert=expert, context_title=context_title)
+                    chat.participants.add(client, expert)
+            except IntegrityError:
+                chat = Chat.objects.filter(
+                    order__isnull=True
+                ).filter(
+                    Q(client_id=client.id, expert_id=expert.id) |
+                    Q(client_id=expert.id, expert_id=client.id)
+                ).order_by('id').first()
+                if not chat:
+                    raise
+
+        updated_fields = []
+        if chat.client_id != client.id:
+            chat.client = client
+            updated_fields.append('client')
+        if chat.expert_id != expert.id:
+            chat.expert = expert
+            updated_fields.append('expert')
+        if not chat.context_title or chat.context_title != context_title:
+            chat.context_title = context_title
+            updated_fields.append('context_title')
+        if updated_fields:
+            chat.save(update_fields=updated_fields)
+        chat.participants.add(client, expert)
+        chat.hidden_for_users.remove(request.user)
 
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
@@ -851,43 +963,110 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Ищем существующий чат между этими двумя пользователями (без привязки к заказу)
-        chat = Chat.objects.filter(
-            participants=request.user,
-            order__isnull=True
-        ).filter(
-            participants=other_user
-        ).first()
-
-        request_role = getattr(request.user, 'role', None)
+        requester_role = getattr(request.user, 'role', None)
         other_role = getattr(other_user, 'role', None)
-        if request_role == 'expert' and other_role != 'expert':
+        resolved_client = request.user
+        resolved_expert = other_user
+        if requester_role == 'expert' and other_role == 'client':
             resolved_client = other_user
             resolved_expert = request.user
-        elif other_role == 'expert' and request_role != 'expert':
+        elif requester_role == 'client' and other_role == 'expert':
             resolved_client = request.user
             resolved_expert = other_user
-        else:
-            resolved_client = request.user
-            resolved_expert = other_user
-        
-        # Если чат не найден, создаем новый
-        if not chat:
-            chat = Chat.objects.create(order=None, client=resolved_client, expert=resolved_expert, context_title=context_title)
-            chat.participants.add(request.user, other_user)
-        else:
-            updated_fields = []
-            if (not chat.client_id) or (resolved_client and chat.client_id != resolved_client.id):
+        user_ids = sorted([request.user.id, other_user.id])
+
+        def find_pair_chat():
+            return Chat.objects.filter(
+                order__isnull=True
+            ).filter(
+                Q(client_id=request.user.id, expert_id=other_user.id) |
+                Q(client_id=other_user.id, expert_id=request.user.id)
+            ).order_by('id').first()
+
+        with transaction.atomic():
+            User.objects.select_for_update().filter(id__in=user_ids).order_by('id')
+
+            chat = Chat.objects.filter(
+                participants=request.user,
+                order__isnull=True
+            ).filter(
+                participants=other_user
+            ).order_by('id').first()
+
+            if not chat:
+                try:
+                    with transaction.atomic():
+                        chat = Chat.objects.create(
+                            order=None,
+                            client=resolved_client,
+                            expert=resolved_expert,
+                            context_title=context_title
+                        )
+                        chat.participants.add(request.user, other_user)
+                except IntegrityError:
+                    chat = Chat.objects.filter(
+                        participants=request.user,
+                        order__isnull=True
+                    ).filter(
+                        participants=other_user
+                    ).order_by('id').first()
+                    if not chat:
+                        chat = find_pair_chat()
+                        if chat:
+                            chat.participants.add(request.user, other_user)
+                    if not chat:
+                        raise
+            else:
+                duplicates = Chat.objects.filter(
+                    participants=request.user,
+                    order__isnull=True
+                ).filter(
+                    participants=other_user
+                ).exclude(id=chat.id).order_by('id')
+                if duplicates.exists():
+                    duplicates.delete()
+
+                updated_fields = []
+                if resolved_client and chat.client_id != resolved_client.id:
+                    chat.client = resolved_client
+                    updated_fields.append('client')
+                if resolved_expert and chat.expert_id != resolved_expert.id:
+                    chat.expert = resolved_expert
+                    updated_fields.append('expert')
+                if context_title and chat.order_id is None and (not chat.context_title or chat.context_title != context_title):
+                    chat.context_title = context_title
+                    updated_fields.append('context_title')
+                if updated_fields:
+                    try:
+                        with transaction.atomic():
+                            chat.save(update_fields=updated_fields)
+                    except IntegrityError:
+                        chat = Chat.objects.filter(
+                            participants=request.user,
+                            order__isnull=True
+                        ).filter(
+                            participants=other_user
+                        ).order_by('id').first()
+                        if not chat:
+                            chat = find_pair_chat()
+                            if chat:
+                                chat.participants.add(request.user, other_user)
+                        if not chat:
+                            raise
+            normalize_fields = []
+            if resolved_client and chat.client_id != resolved_client.id:
                 chat.client = resolved_client
-                updated_fields.append('client')
-            if (not chat.expert_id) or (resolved_expert and chat.expert_id != resolved_expert.id):
+                normalize_fields.append('client')
+            if resolved_expert and chat.expert_id != resolved_expert.id:
                 chat.expert = resolved_expert
-                updated_fields.append('expert')
+                normalize_fields.append('expert')
             if context_title and chat.order_id is None and (not chat.context_title or chat.context_title != context_title):
                 chat.context_title = context_title
-                updated_fields.append('context_title')
-            if updated_fields:
-                chat.save(update_fields=updated_fields)
+                normalize_fields.append('context_title')
+            if normalize_fields:
+                chat.save(update_fields=normalize_fields)
+            chat.participants.add(request.user, other_user)
+        chat.hidden_for_users.remove(request.user)
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
@@ -955,21 +1134,6 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             text=initial_message
         )
         
-        # Уведомляем админов
-        from apps.notifications.services import NotificationService
-        from apps.users.models import User
-        
-        admins = User.objects.filter(role='admin')
-        for admin in admins:
-            NotificationService.create_notification(
-                recipient=admin,
-                type='support_request',
-                title='Новое обращение в поддержку',
-                message=f'{request.user.get_full_name() or request.user.username}: {initial_message[:100]}',
-                related_object_id=chat.id,
-                related_object_type='support_chat'
-            )
-        
         return Response({
             'id': chat.id,
             'subject': chat.subject,
@@ -1002,20 +1166,6 @@ class SupportChatViewSet(viewsets.ModelViewSet):
         
         # Обновляем время последнего обновления чата
         chat.save(update_fields=['updated_at'])
-        
-        # Уведомляем получателя
-        from apps.notifications.services import NotificationService
-        
-        recipient = chat.admin if request.user == chat.client else chat.client
-        if recipient:
-            NotificationService.create_notification(
-                recipient=recipient,
-                type='support_message',
-                title=f'Новое сообщение в чате поддержки',
-                message=text[:100] if text else 'Файл',
-                related_object_id=chat.id,
-                related_object_type='support_chat'
-            )
         
         return Response({
             'id': message.id,

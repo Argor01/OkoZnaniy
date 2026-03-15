@@ -88,6 +88,11 @@ export const ordersApi = {
     return response.data;
   },
 
+  rejectOrder: async (id: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.reject(id));
+    return response.data;
+  },
+
   
   extendDeadline: async (id: number, deadline: string) => {
     const response = await apiClient.post(API_ENDPOINTS.orders.extendDeadline(id), { deadline });
@@ -142,7 +147,7 @@ export const ordersApi = {
   },
 
   
-  placeBid: async (orderId: number, data: { amount: number; comment?: string }): Promise<Bid> => {
+  placeBid: async (orderId: number, data: { amount: number; prepayment_percent: number; comment?: string }): Promise<Bid> => {
     const response = await apiClient.post(API_ENDPOINTS.orders.bids(orderId), data);
     return response.data;
   },

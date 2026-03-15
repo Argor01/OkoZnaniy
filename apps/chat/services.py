@@ -4,6 +4,7 @@
 import re
 from typing import List, Dict, Any
 from django.conf import settings
+from django.utils import timezone
 
 
 class ContactDetectionService:
@@ -188,16 +189,14 @@ class ChatModerationService:
     """Сервис для модерации чатов"""
     
     @staticmethod
-    def freeze_chat(chat, violation_type: str, detected_data: Dict, message=None):
+    def freeze_chat(chat, violation_type: str, detected_data: Dict, message=None, risk_level: str = 'medium'):
         """
         Замораживает чат и создает запись о нарушении
         """
         from .models import Chat, ContactViolationLog
         
         # Замораживаем чат
-        chat.is_frozen = True
-        chat.frozen_reason = f"Обнаружен обмен контактами: {violation_type}"
-        chat.save(update_fields=['is_frozen', 'frozen_reason'])
+        chat.freeze(f"Обнаружен обмен контактами: {violation_type}")
         
         # Создаем запись о нарушении
         violation = ContactViolationLog.objects.create(
@@ -206,11 +205,13 @@ class ChatModerationService:
             message=message,
             violation_type=violation_type,
             detected_data=detected_data,
+            risk_level=risk_level,
             status='pending'
         )
         
         # Уведомляем администраторов
         ChatModerationService._notify_admins_about_violation(violation)
+        ChatModerationService._freeze_expert_scope_if_needed(chat, message, violation)
         
         return violation
     
@@ -234,21 +235,90 @@ class ChatModerationService:
             )
     
     @staticmethod
+    def _freeze_expert_scope_if_needed(chat, message, violation):
+        expert = ChatModerationService._get_violation_expert(chat, message)
+        if not expert:
+            return
+        reason = f"Эксперт {expert.get_full_name() or expert.username} нарушил правила платформы. Обмен контактными данными запрещен."
+        from .models import Chat as ChatModel
+        from apps.orders.models import Order
+        from apps.notifications.models import NotificationType
+        from apps.notifications.services import NotificationService
+
+        chats = ChatModel.objects.filter(expert=expert, is_frozen=False)
+        for expert_chat in chats:
+            expert_chat.freeze(reason)
+
+        active_orders = Order.objects.filter(
+            expert=expert,
+            status__in=['in_progress', 'review', 'revision'],
+            is_frozen=False
+        )
+        for order in active_orders:
+            order.freeze(reason)
+
+        for order in active_orders:
+            if not order.client_id:
+                continue
+            NotificationService.create_notification(
+                recipient=order.client,
+                type=NotificationType.EXPERT_VIOLATION,
+                title='Эксперт нарушил правила платформы',
+                message=f"Эксперт по заказу #{order.id} временно отстранен. Сроки заказа заморожены до решения администратора.",
+                related_object_id=order.id,
+                related_object_type='order',
+                data={'order_id': order.id, 'expert_id': expert.id}
+            )
+
+    @staticmethod
+    def _get_violation_expert(chat, message):
+        if message:
+            return message.sender if getattr(message.sender, 'role', None) == 'expert' else None
+        expert = getattr(chat, 'expert', None)
+        if expert and getattr(expert, 'role', None) == 'expert':
+            return expert
+        order = getattr(chat, 'order', None)
+        if order and getattr(order, 'expert', None):
+            return order.expert
+        return None
+
+    @staticmethod
     def unfreeze_chat(chat, admin_user, decision: str):
         """
         Размораживает чат после проверки администратором
         """
-        chat.is_frozen = False
-        chat.frozen_reason = None
-        chat.save(update_fields=['is_frozen', 'frozen_reason'])
+        chat.unfreeze()
         
         # Обновляем статус нарушения
         violation = chat.contact_violations.filter(status='pending').first()
         if violation:
-            violation.status = 'resolved'
+            violation.status = 'approved'
             violation.admin_decision = decision
             violation.reviewed_by = admin_user
             violation.reviewed_at = timezone.now()
             violation.save()
+
+        ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
         
         return violation
+
+    @staticmethod
+    def _unfreeze_expert_scope_if_possible(chat, violation):
+        expert = ChatModerationService._get_violation_expert(chat, None)
+        if violation and getattr(violation.user, 'role', None) == 'expert':
+            expert = violation.user
+        if not expert:
+            return
+        from .models import Chat as ChatModel, ContactViolationLog
+        from apps.orders.models import Order
+
+        if ContactViolationLog.objects.filter(user=expert, status='pending').exists():
+            return
+
+        chats = ChatModel.objects.filter(expert=expert, is_frozen=True)
+        for expert_chat in chats:
+            expert_chat.unfreeze()
+
+        orders = Order.objects.filter(expert=expert, is_frozen=True)
+        for order in orders:
+            order.unfreeze()

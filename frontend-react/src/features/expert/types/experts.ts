@@ -25,9 +25,12 @@ export interface ExpertApplication {
   expert: number;
   full_name: string;
   work_experience_years: number;
+  phone?: string;
+  biography?: string;
+  portfolio_url?: string;
   specializations: Array<{ id: number; name: string }>;
   educations: Education[];
-  status: 'pending' | 'approved' | 'rejected' | 'needs_revision';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_revision' | 'deactivated';
   status_display: string;
   rejection_reason?: string;
   comment?: string;
@@ -40,6 +43,9 @@ export interface ExpertApplication {
 export interface CreateExpertApplicationRequest {
   full_name: string;
   work_experience_years: number;
+  phone?: string;
+  biography?: string;
+  portfolio_url?: string;
   specialization_ids: number[];
   educations: Education[];
   email?: string;

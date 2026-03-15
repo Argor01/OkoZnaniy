@@ -47,6 +47,7 @@ const EmployeeArchive: React.FC = () => {
       message.success('Сотрудник восстановлен');
       queryClient.invalidateQueries({ queryKey: ['director-personnel-archive'] });
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
+      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при восстановлении сотрудника';

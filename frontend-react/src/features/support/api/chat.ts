@@ -3,6 +3,16 @@ import { ChatDetail, ChatListItem, Message } from '@/features/support/types/chat
 
 export type { ChatDetail, ChatListItem, Message };
 
+export class ChatFrozenError extends Error {
+  frozenReason?: string;
+
+  constructor(message: string, frozenReason?: string) {
+    super(message);
+    this.name = 'ChatFrozenError';
+    this.frozenReason = frozenReason;
+  }
+}
+
 export const chatApi = {
   
   getAll: async (): Promise<ChatListItem[]> => {
@@ -78,12 +88,11 @@ export const chatApi = {
       });
       return response.data;
     } catch (error: any) {
-      // Проверяем, если чат заморожен
       if (error.response?.status === 400 && error.response?.data?.frozen) {
-        const errorMessage = error.response.data.detail || 'Чат заморожен из-за нарушения правил';
-        throw new Error(errorMessage);
+        const errorMessage = error.response.data.detail || 'Переписка временно недоступна из-за проверки правил безопасности.';
+        const frozenReason = error.response.data.frozen_reason;
+        throw new ChatFrozenError(errorMessage, frozenReason);
       }
-      // Перебрасываем другие ошибки
       throw error;
     }
   },

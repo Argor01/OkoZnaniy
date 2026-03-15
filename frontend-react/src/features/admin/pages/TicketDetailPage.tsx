@@ -38,7 +38,7 @@ import {
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useTicket, useTicketActions, useAdminUsers, useTicketByNumber } from '@/features/admin/hooks';
+import { useTicketActions, useAdminUsers, useTicketByNumber } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import '@/styles/ticket-detail.css';
 
@@ -105,7 +105,8 @@ export const TicketDetailPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Используем новый хук для поиска по номеру тикета
-  const { ticket, loading, refetch } = useTicketByNumber(ticketId || '');
+  const { ticket: rawTicket, loading, refetch } = useTicketByNumber(ticketId || '');
+  const ticket = rawTicket as unknown as TicketDetail | null;
   const { adminUsers } = useAdminUsers();
   const { 
     sendMessage: sendTicketMessage, 
@@ -406,7 +407,7 @@ export const TicketDetailPage: React.FC = () => {
                                 {formatMessageTime(msg.created_at)}
                               </Text>
                               {msg.is_admin && (
-                                <Tag color="blue" size="small">Поддержка</Tag>
+                                <Tag color="blue">Поддержка</Tag>
                               )}
                             </div>
                           </div>

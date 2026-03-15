@@ -17,7 +17,7 @@ const { Title } = Typography;
 
 const isInProgressGroup = (order: Order) => {
   const status = String(order?.status ?? '');
-  return status === 'in_progress' || status === 'revision';
+  return status === 'in_progress';
 };
 
 const isReviewGroup = (order: Order) => {
@@ -37,7 +37,7 @@ const isAllTabGroup = (order: Order) => {
 const MyWorks: React.FC = () => {
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
-  const [activeTab, setActiveTab] = useState<'in_progress' | 'review' | 'completed' | 'all'>('in_progress');
+  const [activeTab, setActiveTab] = useState<'in_progress' | 'revision' | 'review' | 'completed' | 'all'>('in_progress');
 
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
@@ -64,6 +64,7 @@ const MyWorks: React.FC = () => {
   }, [myOrdersData]);
 
   const isOverdueOrder = (order: Order) => {
+    if (order?.is_frozen) return false;
     if (order?.is_overdue === true) return true;
     const status = String(order?.status ?? '');
     if (!(status === 'in_progress' || status === 'revision')) return false;
@@ -76,10 +77,11 @@ const MyWorks: React.FC = () => {
 
   const counts = useMemo(() => {
     const inProgress = orders.filter((o) => isInProgressGroup(o)).length;
+    const revision = orders.filter((o) => String(o?.status ?? '') === 'revision').length;
     const review = orders.filter((o) => isReviewGroup(o)).length;
     const completed = orders.filter((o) => o?.status === 'completed').length;
     const all = orders.filter((o) => isAllTabGroup(o)).length;
-    return { in_progress: inProgress, review, completed, all };
+    return { in_progress: inProgress, revision, review, completed, all };
   }, [orders]);
 
   const filteredOrders = useMemo(() => {
@@ -88,6 +90,8 @@ const MyWorks: React.FC = () => {
       if (activeTab !== 'all') {
         if (activeTab === 'review') {
           if (!isReviewGroup(order)) return false;
+        } else if (activeTab === 'revision') {
+          if (String(order?.status ?? '') !== 'revision') return false;
         } else if (activeTab === 'in_progress') {
           if (!isInProgressGroup(order)) return false;
         } else if (order.status !== activeTab) {
@@ -261,6 +265,13 @@ const MyWorks: React.FC = () => {
           </button>
           <button
             type="button"
+            className={`${styles.tabButton} ${activeTab === 'revision' ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab('revision')}
+          >
+            На доработке <span className={`${styles.countBadge} ${styles.countOrange}`}>{counts.revision}</span>
+          </button>
+          <button
+            type="button"
             className={`${styles.tabButton} ${activeTab === 'completed' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('completed')}
           >
@@ -293,7 +304,7 @@ const MyWorks: React.FC = () => {
         loading={isLoading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
         onRow={(record) => ({
-          onClick: () => navigate(`/works/${record.id}`),
+          onClick: () => navigate(`/orders/${record.id}`),
           style: { cursor: 'pointer' },
         })}
       />

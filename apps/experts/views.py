@@ -967,15 +967,31 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             # Если анкета деактивирована - запрещаем повторную подачу
             if existing_application.status == 'deactivated':
                 logger.warning(f"User {self.request.user.id} tried to resubmit deactivated application")
-                raise serializers.ValidationError(
-                    'Ваша анкета была деактивирована администратором. Повторная подача невозможна.'
-                )
+                raise serializers.ValidationError({
+                    'detail': 'Ваша анкета была деактивирована администратором. Повторная подача невозможна.'
+                })
             
             logger.info(f"User {self.request.user.id} already has application {existing_application.id}, updating it")
             # Обновляем существующую анкету (только если не деактивирована)
             if isinstance(serializer, ExpertApplicationCreateSerializer):
                 educations_data = serializer.validated_data.pop('educations', [])
                 specialization_ids = serializer.validated_data.pop('specialization_ids', [])
+                phone = serializer.validated_data.pop('phone', None)
+                biography = serializer.validated_data.pop('biography', None)
+                portfolio_url = serializer.validated_data.pop('portfolio_url', None)
+
+                user_update_fields = []
+                if phone is not None:
+                    self.request.user.phone = phone
+                    user_update_fields.append('phone')
+                if biography is not None:
+                    self.request.user.bio = biography
+                    user_update_fields.append('bio')
+                if portfolio_url is not None:
+                    self.request.user.portfolio_url = portfolio_url
+                    user_update_fields.append('portfolio_url')
+                if user_update_fields:
+                    self.request.user.save(update_fields=user_update_fields)
                 
                 # Обновляем поля анкеты
                 for field, value in serializer.validated_data.items():
@@ -984,6 +1000,8 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 # Сбрасываем статус на pending при повторной подаче
                 existing_application.status = 'pending'
                 existing_application.rejection_reason = ''
+                existing_application.reviewed_by = None
+                existing_application.reviewed_at = None
                 existing_application.save()
                 
                 # Обновляем специальности
@@ -1001,6 +1019,8 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                     setattr(existing_application, field, value)
                 existing_application.status = 'pending'
                 existing_application.rejection_reason = ''
+                existing_application.reviewed_by = None
+                existing_application.reviewed_at = None
                 existing_application.save()
                 return existing_application
         
@@ -1009,6 +1029,22 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         if isinstance(serializer, ExpertApplicationCreateSerializer):
             educations_data = serializer.validated_data.pop('educations', [])
             specialization_ids = serializer.validated_data.pop('specialization_ids', [])
+            phone = serializer.validated_data.pop('phone', None)
+            biography = serializer.validated_data.pop('biography', None)
+            portfolio_url = serializer.validated_data.pop('portfolio_url', None)
+
+            user_update_fields = []
+            if phone is not None:
+                self.request.user.phone = phone
+                user_update_fields.append('phone')
+            if biography is not None:
+                self.request.user.bio = biography
+                user_update_fields.append('bio')
+            if portfolio_url is not None:
+                self.request.user.portfolio_url = portfolio_url
+                user_update_fields.append('portfolio_url')
+            if user_update_fields:
+                self.request.user.save(update_fields=user_update_fields)
             
             application = ExpertApplication.objects.create(
                 expert=self.request.user,
@@ -1030,11 +1066,32 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = serializer.instance
-        # Если пользователь обновляет свою анкету и она была отклонена или отправлена на доработку
-        if self.request.user == instance.expert and instance.status in ['rejected', 'needs_revision']:
-            # Сбрасываем статус на 'pending' и очищаем причину отказа
-            serializer.save(status='pending', rejection_reason='')
-            logger.info(f"Application {instance.id} status reset to pending after update by user {self.request.user.id}")
+        phone = self.request.data.get('phone')
+        biography = self.request.data.get('biography')
+        portfolio_url = self.request.data.get('portfolio_url')
+        user_update_fields = []
+        if phone is not None:
+            instance.expert.phone = phone
+            user_update_fields.append('phone')
+        if biography is not None:
+            instance.expert.bio = biography
+            user_update_fields.append('bio')
+        if portfolio_url is not None:
+            instance.expert.portfolio_url = portfolio_url
+            user_update_fields.append('portfolio_url')
+        if user_update_fields:
+            instance.expert.save(update_fields=user_update_fields)
+        if self.request.user == instance.expert and instance.status != 'deactivated':
+            has_review_comment = bool((instance.rejection_reason or '').strip())
+            should_reset_for_resubmission = instance.status in ['rejected', 'needs_revision'] or (
+                instance.status == 'pending' and has_review_comment
+            )
+            if should_reset_for_resubmission:
+                serializer.save(status='pending', rejection_reason='', reviewed_by=None, reviewed_at=None)
+                logger.info(f"Application {instance.id} status reset to pending after update by user {self.request.user.id}")
+                return
+            serializer.save()
+            return
         else:
             serializer.save()
 

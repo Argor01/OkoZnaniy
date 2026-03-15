@@ -19,6 +19,7 @@ class Chat(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='client_chats')
     expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='expert_chats')
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    hidden_for_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='hidden_chats', blank=True)
     context_title = models.CharField(max_length=255, null=True, blank=True)
     
     # Поля для модерации
@@ -32,6 +33,12 @@ class Chat(models.Model):
                 fields=['order', 'client', 'expert'],
                 condition=models.Q(order__isnull=False, client__isnull=False, expert__isnull=False),
                 name='unique_chat_per_order_client_expert'
+            ),
+            models.UniqueConstraint(
+                models.functions.Least('client_id', 'expert_id'),
+                models.functions.Greatest('client_id', 'expert_id'),
+                condition=models.Q(order__isnull=True, client__isnull=False, expert__isnull=False),
+                name='unique_direct_chat_pair'
             )
         ]
 

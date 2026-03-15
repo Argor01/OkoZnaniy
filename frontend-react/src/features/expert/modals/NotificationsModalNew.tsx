@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Typography, Spin, message as antMessage } from 'antd';
 import { ErrorBoundary } from '@/features/common';
+import { useNavigate } from 'react-router-dom';
 import { 
   BellOutlined, 
   FileDoneOutlined, 
@@ -27,6 +28,7 @@ interface NotificationsModalProps {
 const getNotificationIcon = (type: string) => {
   const iconClassMap: Record<string, string> = {
     'new_order': styles.notificationsIconPrimary,
+    'new_bid': styles.notificationsIconPrimary,
     'order_taken': styles.notificationsIconSuccess,
     'order_assigned': styles.notificationsIconSuccess,
     'file_uploaded': styles.notificationsIconInfo,
@@ -43,10 +45,12 @@ const getNotificationIcon = (type: string) => {
     'new_contact': styles.notificationsIconPrimary,
     'application_approved': styles.notificationsIconSuccess,
     'application_rejected': styles.notificationsIconDanger,
+    'expert_violation': styles.notificationsIconDanger,
   };
   const iconClassName = iconClassMap[type] || styles.notificationsIconMuted;
   const iconMap: Record<string, React.ReactNode> = {
     'new_order': <FileDoneOutlined className={iconClassName} />,
+    'new_bid': <FileDoneOutlined className={iconClassName} />,
     'order_taken': <CheckCircleOutlined className={iconClassName} />,
     'order_assigned': <CheckCircleOutlined className={iconClassName} />,
     'file_uploaded': <FileDoneOutlined className={iconClassName} />,
@@ -63,13 +67,14 @@ const getNotificationIcon = (type: string) => {
     'new_contact': <QuestionCircleOutlined className={iconClassName} />,
     'application_approved': <CheckCircleOutlined className={iconClassName} />,
     'application_rejected': <ClockCircleOutlined className={iconClassName} />,
+    'expert_violation': <QuestionCircleOutlined className={iconClassName} />,
   };
   return iconMap[type] || <BellOutlined className={iconClassName} />;
 };
 
 
 const getNotificationCategory = (type: string): string => {
-  if (['new_order', 'order_taken', 'order_assigned', 'order_completed', 'status_changed'].includes(type)) {
+  if (['new_order', 'new_bid', 'order_taken', 'order_assigned', 'order_completed', 'status_changed', 'expert_violation'].includes(type)) {
     return 'orders';
   }
   if (['new_comment', 'file_uploaded'].includes(type)) {
@@ -81,11 +86,53 @@ const getNotificationCategory = (type: string): string => {
   return 'all';
 };
 
+const extractOrderId = (notification: Notification): number | null => {
+  if (notification.related_object_type === 'order' && notification.related_object_id) {
+    return notification.related_object_id;
+  }
+  const source = `${notification.title || ''} ${notification.message || ''}`;
+  const match = source.match(/#(\d+)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isFinite(value) && value > 0 ? value : null;
+};
+
+const resolveNotificationTarget = (notification: Notification): string | null => {
+  const orderId = extractOrderId(notification);
+  if (orderId) return `/orders/${orderId}`;
+
+  if (notification.type === 'application_approved' || notification.type === 'application_rejected') {
+    return '/expert?focus=application';
+  }
+
+  if (notification.type === 'specialization_verified') {
+    return '/expert?tab=specializations';
+  }
+
+  if (notification.type === 'review_received' || notification.type === 'new_rating' || notification.type === 'rating_milestone') {
+    return '/expert?tab=reviews';
+  }
+
+  if (notification.related_object_type === 'expert_application') return '/expert?focus=application';
+  if (notification.related_object_type === 'specialization') return '/expert?tab=specializations';
+  if (notification.related_object_type === 'review') return '/expert?tab=reviews';
+  if (notification.related_object_type === 'order') return '/orders-feed';
+
+  if (
+    ['new_bid', 'new_order', 'order_taken', 'order_assigned', 'status_changed', 'order_completed', 'payment_received', 'deadline_soon', 'expert_violation'].includes(notification.type)
+  ) {
+    return '/orders-feed';
+  }
+
+  return '/expert';
+};
+
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
   isMobile
 }) => {
+  const navigate = useNavigate();
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -119,6 +166,21 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     } catch (error) {
       antMessage.error('Не удалось отметить уведомление');
     }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await handleMarkAsRead(notification);
+    }
+
+    const target = resolveNotificationTarget(notification);
+    if (!target) {
+      antMessage.info('Для этого уведомления переход не настроен');
+      return;
+    }
+
+    onClose();
+    navigate(target);
   };
 
   const handleMarkAllAsRead = async () => {
@@ -221,7 +283,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                onClick={() => handleMarkAsRead(notification)}
+                onClick={() => void handleNotificationClick(notification)}
                 className={`${styles.notificationsModalItem} ${notification.is_read ? styles.notificationsModalItemRead : styles.notificationsModalItemUnread} ${isMobile ? styles.notificationsModalItemMobile : styles.notificationsModalItemDesktop}`}
               >
                 

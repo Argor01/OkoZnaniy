@@ -90,6 +90,7 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
         id: app.id,
         expert: app.expert || app.user,
         full_name: app.full_name,
+        phone: app.phone || app.expert?.phone || app.user?.phone,
         experience_years: app.work_experience_years ?? app.experience_years,
         education: educationStr,
         skills: app.skills,
@@ -103,6 +104,8 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
         application_submitted_at: app.created_at,
         application_reviewed_at: app.reviewed_at,
         application_approved: app.status === 'approved',
+        rejection_reason: app.rejection_reason,
+        comment: app.comment,
       } as ExpertApplication;
     });
   } catch (error) {

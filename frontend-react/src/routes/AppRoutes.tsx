@@ -6,7 +6,6 @@ import { DashboardRedirect } from '@/features/auth/components/DashboardRedirect'
 import { ROUTES } from '@/utils/constants';
 
 const OrderDetail = lazy(() => import('@/features/orders/pages/OrderDetail'));
-const WorkDetail = lazy(() => import('@/features/orders/pages/WorkDetail'));
 const ShopWorkDetail = lazy(() => import('@/features/shop/pages/ShopWorkDetail'));
 const UserProfile = lazy(() => import('@/features/user/pages/UserProfile'));
 const Home = lazy(() => import('@/features/home/pages/Home'));
@@ -56,16 +55,6 @@ export const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <DashboardLayout>
               <OrderDetail />
-            </DashboardLayout>
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path={ROUTES.works.detail} 
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <WorkDetail />
             </DashboardLayout>
           </ProtectedRoute>
         } 

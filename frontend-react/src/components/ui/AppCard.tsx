@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardProps } from 'antd';
 import styles from './AppCard.module.css';
 
-export interface AppCardProps extends CardProps {
+export interface AppCardProps extends Omit<CardProps, 'variant'> {
   variant?: 'default' | 'elevated' | 'outlined' | 'gradient';
   fullHeight?: boolean;
 }

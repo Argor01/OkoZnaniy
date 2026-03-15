@@ -321,7 +321,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
 };
 
 export const BlockedUsersSection: React.FC = () => {
-  const { users, loading } = useBlockedUsers(true);
+  const { users, loading } = useBlockedUsers();
   const { unblockUser } = useUserActions();
 
   return (

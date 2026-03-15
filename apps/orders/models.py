@@ -1,4 +1,4 @@
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -172,6 +172,19 @@ class Order(models.Model):
         verbose_name="Есть проблемы",
         help_text="Отметка о наличии проблем с заказом"
     )
+    is_frozen = models.BooleanField(
+        default=False,
+        verbose_name="Заморожен"
+    )
+    frozen_reason = models.TextField(
+        blank=True,
+        verbose_name="Причина заморозки"
+    )
+    frozen_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дата заморозки"
+    )
 
     class Meta:
         verbose_name = "Заказ"
@@ -188,6 +201,28 @@ class Order(models.Model):
 
     def get_status_display(self):
         return self.status.capitalize()
+
+    def freeze(self, reason: str):
+        if self.is_frozen:
+            return
+        self.is_frozen = True
+        self.frozen_reason = reason
+        self.frozen_at = timezone.now()
+        self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at', 'updated_at'])
+
+    def unfreeze(self):
+        if not self.is_frozen:
+            return
+        now = timezone.now()
+        if self.frozen_at and self.deadline:
+            self.deadline = self.deadline + (now - self.frozen_at)
+        self.is_frozen = False
+        self.frozen_reason = ''
+        self.frozen_at = None
+        update_fields = ['is_frozen', 'frozen_reason', 'frozen_at', 'updated_at']
+        if self.deadline:
+            update_fields.append('deadline')
+        self.save(update_fields=update_fields)
 
     def apply_discount(self, discount: DiscountRule) -> bool:
         """
@@ -341,6 +376,11 @@ class Bid(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="bids", verbose_name="Заказ")
     expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bids", verbose_name="Эксперт")
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ставка")
+    prepayment_percent = models.PositiveSmallIntegerField(
+        default=50,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Процент предоплаты"
+    )
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
     status = models.CharField(max_length=20, choices=BidStatus.choices, default=BidStatus.ACTIVE, verbose_name="Статус")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")

@@ -204,7 +204,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
         <div>
           <Text className={styles.label}>
-            Превью работы (изображение)
+            Обложка работы (изображение)
           </Text>
           <AppUpload.Dragger
             name="preview"

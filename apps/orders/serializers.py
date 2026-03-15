@@ -79,7 +79,7 @@ class BidSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bid
-        fields = ['id', 'order', 'expert', 'amount', 'comment', 'created_at', 'status', 'expert_rating']
+        fields = ['id', 'order', 'expert', 'amount', 'prepayment_percent', 'comment', 'created_at', 'status', 'expert_rating']
         read_only_fields = ['id', 'expert', 'created_at', 'order', 'status', 'expert_rating']
 
     def get_expert_rating(self, obj):
@@ -162,7 +162,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
-            'user_has_bid', 'is_overdue'
+            'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -236,6 +236,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_is_overdue(self, obj):
         try:
+            if getattr(obj, 'is_frozen', False):
+                return False
             if obj.status not in ['in_progress', 'revision']:
                 return False
             if not obj.deadline:

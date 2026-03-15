@@ -2,6 +2,7 @@ import React, { useState, useRef, Suspense, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message, Tabs, Skeleton, Spin } from 'antd';
 import type { FC } from 'react';
+import { useLocation } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
 import type { User } from '@/features/auth/api/auth';
 import { expertsApi, type Specialization } from '@/features/expert/api/experts';
@@ -34,6 +35,7 @@ const FaqModal = React.lazy(() => import('../../modals/FaqModal'));
 const FriendProfileModal = React.lazy(() => import('../../modals/FriendProfileModal'));
 
 const ExpertDashboard: FC = () => {
+  const location = useLocation();
   const queryClient = useQueryClient();
   
   
@@ -60,6 +62,7 @@ const ExpertDashboard: FC = () => {
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
+  const applicationStatusRef = useRef<HTMLDivElement>(null);
 
   const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
@@ -80,7 +83,9 @@ const ExpertDashboard: FC = () => {
   const { data: userProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: application, isLoading: applicationLoading } = useQuery({
@@ -93,6 +98,10 @@ const ExpertDashboard: FC = () => {
       }
     },
     retry: false
+    ,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   const { data: specializationsData, isLoading: specializationsLoading } = useQuery({
@@ -234,6 +243,24 @@ const ExpertDashboard: FC = () => {
     return list;
   }, [userProfile, isMobile, specializations, specializationsLoading, closeAllModals, deleteSpecializationMutation, handleEditProfile]);
 
+  React.useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (!tab) return;
+    const allowedTabs = items.map(item => item.key);
+    if (allowedTabs.includes(tab) && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [location.search, items, activeTab]);
+
+  React.useEffect(() => {
+    const focus = new URLSearchParams(location.search).get('focus');
+    if (focus !== 'application') return;
+    const timer = window.setTimeout(() => {
+      applicationStatusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [location.search]);
+
   return (
     <>
       <div className={styles.expertContentContainer}>
@@ -246,12 +273,14 @@ const ExpertDashboard: FC = () => {
           onEditProfile={handleEditProfile}
         />
         
-        <ApplicationStatus
-          application={application || null}
-          applicationLoading={applicationLoading}
-          userProfile={userProfile}
-          onOpenApplicationModal={handleOpenApplicationModal}
-        />
+        <div ref={applicationStatusRef}>
+          <ApplicationStatus
+            application={application || null}
+            applicationLoading={applicationLoading}
+            userProfile={userProfile}
+            onOpenApplicationModal={handleOpenApplicationModal}
+          />
+        </div>
         
         <div ref={tabsRef}>
           <Suspense fallback={<div style={{ padding: '24px' }}><Skeleton active paragraph={{ rows: 6 }} /></div>}>
@@ -319,6 +348,7 @@ const ExpertDashboard: FC = () => {
           <NotificationsModal
             visible={notificationsModalVisible}
             onClose={() => setNotificationsModalVisible(false)}
+            isMobile={isMobile}
           />
         )}
         
@@ -327,6 +357,7 @@ const ExpertDashboard: FC = () => {
             visible={arbitrationModalVisible}
             onClose={() => setArbitrationModalVisible(false)}
             cases={arbitrationCases}
+            isMobile={isMobile}
           />
         )}
         
@@ -334,7 +365,8 @@ const ExpertDashboard: FC = () => {
           <FinanceModal
             visible={financeModalVisible}
             onClose={() => setFinanceModalVisible(false)}
-            balance={userProfile?.balance || 0}
+            profile={userProfile || null}
+            isMobile={isMobile}
           />
         )}
         
@@ -342,6 +374,17 @@ const ExpertDashboard: FC = () => {
           <FriendsModal
             visible={friendsModalVisible}
             onClose={() => setFriendsModalVisible(false)}
+            isMobile={isMobile}
+            onOpenChat={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedUserIdForChat(friend.id);
+              setMessageModalVisible(true);
+            }}
+            onOpenProfile={(friend) => {
+              setFriendsModalVisible(false);
+              setSelectedFriend(friend);
+              setFriendProfileModalVisible(true);
+            }}
           />
         )}
         
@@ -349,6 +392,7 @@ const ExpertDashboard: FC = () => {
           <FaqModal
             visible={faqModalVisible}
             onClose={() => setFaqModalVisible(false)}
+            isMobile={isMobile}
           />
         )}
         
@@ -359,10 +403,10 @@ const ExpertDashboard: FC = () => {
               setFriendProfileModalVisible(false);
               setSelectedFriend(null);
             }}
-            user={selectedFriend}
-            onOpenChat={(userId) => {
+            friend={selectedFriend}
+            onOpenChat={() => {
               setFriendProfileModalVisible(false);
-              setSelectedUserIdForChat(userId);
+              if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
               setMessageModalVisible(true);
             }}
           />

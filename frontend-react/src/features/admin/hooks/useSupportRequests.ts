@@ -101,11 +101,11 @@ export const useSupportRequests = () => {
 
   // Placeholder stats - in real app should come from API
   const stats: SupportStats = {
-    total: 0,
-    open: 0,
-    inProgress: 0,
-    resolved: 0,
-    avgResponseTime: '0h',
+    openRequests: 0,
+    inProgressRequests: 0,
+    completedToday: 0,
+    averageResponseTime: 0,
+    customerSatisfaction: 0,
   };
 
   return {

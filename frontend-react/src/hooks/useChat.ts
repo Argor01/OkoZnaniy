@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { chatApi, ChatListItem, Message } from '@/features/support/api/chat';
+import { chatApi, ChatListItem, Message, ChatFrozenError } from '@/features/support/api/chat';
 
 export const useChat = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
@@ -27,11 +27,9 @@ export const useChat = () => {
       await loadChats();
       return message;
     } catch (error: any) {
-      // Если это ошибка заморозки чата, показываем пользователю
-      if (error.message && error.message.includes('заморожен')) {
-        throw new Error(error.message);
+      if (error instanceof ChatFrozenError) {
+        throw new Error(error.frozenReason || error.message);
       }
-      // Для других ошибок показываем общее сообщение
       throw new Error('Не удалось отправить сообщение. Попробуйте позже.');
     }
   };

@@ -362,6 +362,7 @@ class ExpertApplication(models.Model):
         ('pending', 'В рассмотрении'),
         ('approved', 'Одобрено'),
         ('rejected', 'Отклонено'),
+        ('needs_revision', 'На доработке'),
         ('deactivated', 'Деактивировано'),
     ]
     

@@ -2,7 +2,7 @@ import React from 'react';
 import { DatePicker, DatePickerProps } from 'antd';
 import styles from './AppDatePicker.module.css';
 
-export interface AppDatePickerProps extends DatePickerProps {
+export interface AppDatePickerProps extends Omit<DatePickerProps, 'variant'> {
   variant?: 'default' | 'filled';
 }
 

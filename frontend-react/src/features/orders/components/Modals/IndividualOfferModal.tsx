@@ -25,6 +25,7 @@ type OfferSubmitData = {
   subject_id?: number;
   subject?: string;
   cost: number;
+  prepayment_percent?: number;
   deadline: string | null;
 } & Record<string, unknown>;
 
@@ -33,6 +34,7 @@ type OfferFormValues = {
   work_type_id?: number;
   subject_id?: number;
   cost: number;
+  prepayment_percent?: number;
   deadline: { toISOString: () => string } | null;
 } & Record<string, unknown>;
 
@@ -119,6 +121,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
           form={form}
           layout="vertical"
           onFinish={handleFinish}
+          initialValues={{ prepayment_percent: 50 }}
           requiredMark={false}
         >
           <Form.Item
@@ -187,14 +190,57 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
 
           {isIndividual ? (
             <Form.Item
+              name="prepayment_percent"
+              label={<Text strong>Процент предоплаты</Text>}
+              rules={[
+                { required: true, message: 'Укажите процент предоплаты' },
+                {
+                  validator: (_, value) => {
+                    const num = Number(value);
+                    if (!Number.isFinite(num) || num < 0 || num > 100) {
+                      return Promise.reject(new Error('Процент должен быть от 0 до 100'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
+            >
+              <AppInput.Number
+                className={styles.fullWidth}
+                min={0}
+                max={100}
+                placeholder="0-100"
+              />
+            </Form.Item>
+          ) : null}
+
+          {isIndividual ? (
+            <Form.Item
               name="deadline"
               label={<Text strong>Срок выполнения</Text>}
-              rules={[{ required: true, message: 'Укажите срок выполнения' }]}
+              rules={[
+                { required: true, message: 'Укажите срок выполнения' },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const selected = dayjs(value);
+                    if (!selected.isValid()) {
+                      return Promise.reject(new Error('Укажите корректные дату и время'));
+                    }
+                    if (selected.valueOf() <= dayjs().valueOf()) {
+                      return Promise.reject(new Error('Срок должен быть позже текущего времени'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
               <AppDatePicker 
                 className={styles.fullWidth}
-                placeholder="Выберите дату"
-                disabledDate={(current) => current && current < dayjs().endOf('day')}
+                placeholder="Выберите дату и время"
+                showTime
+                format="DD.MM.YYYY HH:mm"
+                disabledDate={(current) => current && current < dayjs().startOf('day')}
               />
             </Form.Item>
           ) : (

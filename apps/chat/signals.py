@@ -84,6 +84,7 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
     detection_result = ContactDetectionService.detect_contacts(instance.text)
     
     if detection_result['has_contacts']:
+        original_text = instance.text
         # Определяем тип нарушения
         contact_types = detection_result['contact_types']
         if len(contact_types) > 1:
@@ -108,18 +109,8 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
                 chat=instance.chat,
                 violation_type=violation_type,
                 detected_data=detection_result['detected_data'],
-                message=instance
-            )
-            
-            # Создаем запись о нарушении
-            ContactViolationLog.objects.create(
-                chat=instance.chat,
-                user=instance.sender,
                 message=instance,
-                violation_type=violation_type,
-                detected_data=detection_result['detected_data'],
-                risk_level=detection_result['risk_level'],
-                status='pending'
+                risk_level=detection_result['risk_level']
             )
             
             # Создаем тикет для админов и директоров
@@ -157,7 +148,7 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
 {contacts_summary}
 
 💬 Сообщение пользователя:
-"{instance.text}"
+"{original_text}"
 
 ⚠️ Действия системы:
 • Чат автоматически заморожен
@@ -206,3 +197,27 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
                 )
             
             transaction.on_commit(create_system_message)
+            
+            if instance.file:
+                instance.file.delete(save=False)
+            instance.delete()
+        else:
+            from .models import ContactViolationLog
+            existing_violation = ContactViolationLog.objects.filter(
+                chat=instance.chat,
+                message=instance
+            ).first()
+            if existing_violation:
+                return
+            ContactViolationLog.objects.create(
+                chat=instance.chat,
+                user=instance.sender,
+                message=instance,
+                violation_type=violation_type,
+                detected_data=detection_result['detected_data'],
+                risk_level=detection_result['risk_level'],
+                status='pending'
+            )
+            if instance.file:
+                instance.file.delete(save=False)
+            instance.delete()

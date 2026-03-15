@@ -27,16 +27,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
   isMobile,
   onEditProfile,
 }) => {
-  if (loading) {
-    return (
-      <div className={styles.profileBlock}>
-        <div className={styles.profileBlockContent}>
-          <Skeleton avatar active paragraph={{ rows: 2 }} />
-        </div>
-      </div>
-    );
-  }
-
   const displayName =
     (profile?.first_name || profile?.last_name)
       ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
@@ -68,6 +58,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
       return Number(expertId) === currentUserId;
     };
     const isOverdue = (order: Order) => {
+      if (order.is_frozen) return false;
       if (order.is_overdue === true) return true;
       if (!(order.status === 'in_progress' || order.status === 'revision')) return false;
       const deadlineTime = new Date(order.deadline).getTime();
@@ -90,6 +81,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
     typeof computedSuccessRate === 'number'
       ? computedSuccessRate
       : (expertStats?.success_rate ? Number(expertStats.success_rate) : 0);
+
+  if (loading) {
+    return (
+      <div className={styles.profileBlock}>
+        <div className={styles.profileBlockContent}>
+          <Skeleton avatar active paragraph={{ rows: 2 }} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.profileBlock}>
