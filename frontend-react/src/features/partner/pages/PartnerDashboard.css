@@ -2,6 +2,89 @@
   margin-bottom: 24px;
 }
 
+.partnerDashboardStatsRow {
+  margin-top: 16px !important;
+}
+
+.partnerDashboardStatsRow .ant-col {
+  margin-bottom: 16px;
+}
+
+.partnerDashboardStatsRow .ant-card {
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.partnerDashboardStatsRow .ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  border-color: #1890ff;
+}
+
+.partnerDashboardStatsRow .ant-card-body {
+  padding: 20px;
+}
+
+.partnerDashboardStatsRow .ant-statistic {
+  text-align: center;
+}
+
+.partnerDashboardStatsRow .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content {
+  color: #1890ff;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content-value {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content-prefix {
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content-suffix {
+  margin-left: 4px;
+  font-size: 16px;
+  color: #666;
+}
+
+.partnerDashboardCardSpacing {
+  margin-bottom: 16px;
+}
+
+.partnerDashboardSpaceFull {
+  width: 100%;
+}
+
+.partnerDashboardPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.partnerDashboardTitleReset {
+  margin: 0 !important;
+}
+
+.partnerDashboardRangePicker {
+  width: 100%;
+  max-width: 300px;
+}
+
 .partnerDashboardHeaderRow {
   display: flex;
   justify-content: space-between;
@@ -277,4 +360,44 @@
 
 .partnerDashboardDrawerTitle {
   margin: 0 !important;
+}
+
+/* Адаптивные стили для статистики */
+@media (max-width: 768px) {
+  .partnerDashboardStatsRow .ant-col {
+    margin-bottom: 12px;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content-value {
+    font-size: 20px;
+  }
+  
+  .partnerDashboardPanelHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .partnerDashboardRangePicker {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerDashboardStatsRow {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-col {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content-value {
+    font-size: 18px;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-title {
+    font-size: 12px;
+  }
 }
