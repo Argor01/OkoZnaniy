@@ -36,18 +36,24 @@ services:
     networks:
       - app_network
 
+  frontend-build:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend-react:/app
+    command: sh -c "npm install && npm run build"
+    profiles:
+      - build
+
   frontend:
     build:
       context: ./frontend-react
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./frontend-react:/app
-      - /app/node_modules
+      dockerfile: Dockerfile.prod
     restart: always
     depends_on:
       - backend
     ports:
-      - "5173:5173"
+      - "80:80"
     networks:
       - app_network
 
