@@ -1646,15 +1646,18 @@ img {
 
 .leave-order {
   padding: 0 0 120px;
+  margin-bottom: 100px;
 }
 @media (max-width: 1024px) {
   .leave-order {
     padding-bottom: 90px;
+    margin-bottom: 80px;
   }
 }
 @media (max-width: 576px) {
   .leave-order {
     padding-bottom: 70px;
+    margin-bottom: 60px;
   }
 }
 
@@ -1826,12 +1829,14 @@ img {
 
 .faq {
   position: relative;
-  margin: 120px 0 100px;
+  margin: 120px 0 0;
+  padding-bottom: 100px;
   overflow: hidden;
 }
 @media (max-width: 1024px) {
   .faq {
-    margin: 100px 0 80px;
+    margin: 100px 0 0;
+    padding-bottom: 80px;
   }
 }
 .faq__wrapper {
