@@ -120,7 +120,7 @@ ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv('LOGOUT_REDIRECT_URL', FRONTEND_URL)
 # Настройка для правильного формирования callback URL в production
 # Это важно для Google OAuth на хостинге
 if not DEBUG:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # Измените на 'https' когда будет SSL
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
     # Принудительно используем IP хостинга для callback URL
     SOCIALACCOUNT_CALLBACK_URL = f"{FRONTEND_URL}/api/accounts/google/login/callback/"
 
@@ -344,8 +344,26 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
     "http://172.16.0.1:5173",
+    "https://okoznaniy.ru",
+    "https://www.okoznaniy.ru",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+# Production security settings
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_TRUSTED_ORIGINS = [
+        'https://okoznaniy.ru',
+        'https://www.okoznaniy.ru',
+    ]
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -407,6 +425,7 @@ PAYMENT_FAIL_URL = os.getenv('PAYMENT_FAIL_URL')
 PAYMENT_NOTIFICATION_URL = os.getenv('PAYMENT_NOTIFICATION_URL')
 
 # Настройки шифрования платежных данных
+# ВАЖНО: задай PAYMENT_ENCRYPTION_KEY в .env, иначе при рестарте контейнера ключ меняется
 PAYMENT_ENCRYPTION_KEY = os.getenv('PAYMENT_ENCRYPTION_KEY', Fernet.generate_key().decode())
 
 # Telegram Bot settings
