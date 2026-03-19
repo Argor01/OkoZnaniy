@@ -62,13 +62,9 @@ export const useAdminUI = () => {
   useEffect(() => {
     const menu = selectedMenu;
     
-    if (['new_claims', 'in_progress_claims', 'completed_claims', 'pending_approval'].includes(menu)) {
-      setOpenKeys(['claims']);
-    } else if (['support_open', 'support_in_progress', 'support_completed'].includes(menu)) {
+    if (['support_open', 'support_in_progress', 'support_completed'].includes(menu)) {
       setOpenKeys(['support']);
-    } else if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(menu)) {
-      setOpenKeys(['request_processing']);
-    } else if (['all_users', 'blocked_users', 'user_roles'].includes(menu)) {
+    } else if (['all_users', 'blocked_users'].includes(menu)) {
       setOpenKeys(['users']);
     } else if (['all_orders', 'problem_orders'].includes(menu)) {
       setOpenKeys(['orders']);
@@ -96,10 +92,7 @@ export const useAdminUI = () => {
       setOpenKeys(['support']);
     }
     
-    
-    if (['request_processing_open', 'request_processing_progress', 'request_processing_completed'].includes(key)) {
-      setOpenKeys(['request_processing']);
-    }
+
     
     
     if (isMobile) {

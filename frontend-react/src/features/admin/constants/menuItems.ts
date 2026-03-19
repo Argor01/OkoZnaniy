@@ -60,11 +60,7 @@ export const menuItems: MenuItem[] = [
         icon: StopOutlined,
         label: 'Заблокированные',
       },
-      {
-        key: 'user_roles',
-        icon: SafetyOutlined,
-        label: 'Роли и права',
-      },
+
     ],
   },
   
@@ -86,33 +82,6 @@ export const menuItems: MenuItem[] = [
     ],
   },
 
-  {
-    key: 'claims' as MenuKey,
-    icon: FileTextOutlined,
-    label: 'Обращения',
-    children: [
-      {
-        key: 'new_claims',
-        icon: BellOutlined,
-        label: 'Новые обращения',
-      },
-      {
-        key: 'in_progress_claims',
-        icon: ClockCircleOutlined,
-        label: 'В работе',
-      },
-      {
-        key: 'completed_claims',
-        icon: CheckCircleOutlined,
-        label: 'Завершённые',
-      },
-      {
-        key: 'pending_approval',
-        icon: HourglassOutlined,
-        label: 'Ожидают решения',
-      },
-    ],
-  },
 
   {
     key: 'tickets',
@@ -120,38 +89,12 @@ export const menuItems: MenuItem[] = [
     label: 'Тикеты',
   },
   {
-    key: 'admin_chats',
-    icon: CommentOutlined,
-    label: 'Внутренняя коммуникация',
-  },
-  {
-    key: 'user_conversations',
+    key: 'communication',
     icon: MessageOutlined,
-    label: 'Переписки пользователей',
+    label: 'Коммуникация',
   },
   
-  {
-    key: 'request_processing' as MenuKey,
-    icon: UserOutlined,
-    label: 'Обработка запросов',
-    children: [
-      {
-        key: 'request_processing_open',
-        icon: InboxOutlined,
-        label: 'Открытые запросы',
-      },
-      {
-        key: 'request_processing_progress',
-        icon: ClockCircleOutlined,
-        label: 'В процессе решения',
-      },
-      {
-        key: 'request_processing_completed',
-        icon: CheckCircleOutlined,
-        label: 'Выполненные',
-      },
-    ],
-  },
+
 ];
 
 export const titleMap: Record<MenuKey, string> = {
@@ -160,17 +103,10 @@ export const titleMap: Record<MenuKey, string> = {
   earnings: 'Начисления',
   tariffs_settings: 'Тарифы и комиссии',
   
-  claims: 'Обращения',
-  new_claims: 'Новые обращения',
-  in_progress_claims: 'В работе',
-  completed_claims: 'Завершённые',
-  pending_approval: 'Ожидают решения',
-  internal_communication: 'Внутренняя коммуникация',
-  
   users_management: 'Управление пользователями',
   all_users: 'Все пользователи',
   blocked_users: 'Заблокированные пользователи',
-  user_roles: 'Роли и права',
+
   
   orders_management: 'Управление заказами',
   all_orders: 'Все заказы',
@@ -181,14 +117,9 @@ export const titleMap: Record<MenuKey, string> = {
   support_completed: 'Завершенные запросы поддержки',
 
   tickets: 'Тикеты',
-  admin_chats: 'Внутренняя коммуникация',
-  admin_group_chats: 'Групповые чаты администраторов',
-  user_conversations: 'Переписки пользователей',
+  communication: 'Коммуникация',
   
-  request_processing: 'Обработка запросов',
-  request_processing_open: 'Открытые запросы клиентов',
-  request_processing_progress: 'Запросы в процессе решения',
-  request_processing_completed: 'Выполненные запросы',
+
 };
 
 
@@ -197,20 +128,11 @@ export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
     
     all_users: 'users_management' as MenuKey,
     blocked_users: 'users_management' as MenuKey,
-    user_roles: 'users_management' as MenuKey,
+
     
     all_orders: 'orders_management' as MenuKey,
     problem_orders: 'orders_management' as MenuKey,
 
-    
-    new_claims: 'claims' as MenuKey,
-    in_progress_claims: 'claims' as MenuKey,
-    completed_claims: 'claims' as MenuKey,
-    pending_approval: 'claims' as MenuKey,
-    
-    request_processing_open: 'request_processing' as MenuKey,
-    request_processing_progress: 'request_processing' as MenuKey,
-    request_processing_completed: 'request_processing' as MenuKey,
   };
   
   return childToParent[menuKey] || null;

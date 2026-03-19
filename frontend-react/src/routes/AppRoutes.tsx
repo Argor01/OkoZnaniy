@@ -145,7 +145,11 @@ export const AppRoutes: React.FC = () => {
       />
       <Route 
         path={ROUTES.admin.dashboard} 
-        element={<AdminDashboard />} 
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } 
       />
       <Route 
         path="/admin/tickets/:ticketId"
