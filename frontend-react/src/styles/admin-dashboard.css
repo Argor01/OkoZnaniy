@@ -2198,3 +2198,62 @@
 .directorCommReplyAlert {
   margin-bottom: 16px;
 }
+
+/* ===== ADMIN DASHBOARD PREMIUM THEME OVERRIDES ===== */
+
+/* Force dark sidebar background on Ant Design Sider */
+.ant-layout-sider {
+  background: #0f172a !important;
+}
+
+.ant-layout-sider-children {
+  background: #0f172a !important;
+}
+
+/* Ensure menu inside sider is dark */
+.ant-layout-sider .ant-menu {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+}
+
+.ant-layout-sider .ant-menu-item {
+  color: #94a3b8 !important;
+}
+
+.ant-layout-sider .ant-menu-item-selected {
+  background: rgba(43, 159, 230, 0.15) !important;
+  color: #2b9fe6 !important;
+}
+
+.ant-layout-sider .ant-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #e2e8f0 !important;
+}
+
+.ant-layout-sider .ant-menu-submenu-title {
+  color: #94a3b8 !important;
+}
+
+.ant-layout-sider .ant-menu-submenu-title:hover {
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.ant-layout-sider .ant-menu-sub {
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+.ant-layout-sider .ant-menu-submenu-arrow {
+  color: #64748b !important;
+}
+
+.ant-layout-sider .ant-menu-item .anticon,
+.ant-layout-sider .ant-menu-submenu-title .anticon {
+  color: inherit !important;
+}
+
+/* Header height fix */
+.ant-layout-header {
+  height: 64px !important;
+  line-height: 64px !important;
+}

@@ -1,6 +1,6 @@
 
 .statisticsContainer {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .row {
@@ -12,82 +12,103 @@
 }
 
 .card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.25s ease;
   height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--card-accent, #2b9fe6);
+  border-radius: 12px 0 0 12px;
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   transform: translateY(-2px);
+  border-color: #cbd5e1 !important;
+}
+
+.card :global(.ant-card-body) {
+  padding: 20px 20px 20px 24px !important;
 }
 
 .icon {
-  font-size: 20px;
-  margin-right: 8px;
+  font-size: 22px;
+  margin-right: 10px;
+  opacity: 0.85;
 }
 
-
 .card :global(.ant-statistic-title) {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 10px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .card :global(.ant-statistic-content) {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   display: flex;
   align-items: center;
 }
 
 .card :global(.ant-statistic-content-value) {
   font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
 }
-
 
 @media (max-width: 1024px) {
   .statisticsContainer {
     margin-bottom: 20px;
   }
-  
+
   .row {
     margin-bottom: 12px;
   }
-  
+
   .card :global(.ant-statistic-content-value) {
-    font-size: 24px;
+    font-size: 22px;
   }
-  
+
   .icon {
     font-size: 18px;
   }
 }
 
-
 @media (max-width: 768px) {
   .statisticsContainer {
     margin-bottom: 16px;
   }
-  
+
   .row {
     margin-bottom: 8px;
   }
-  
+
   .card {
-    border-radius: 6px;
+    border-radius: 8px !important;
   }
-  
+
   .card :global(.ant-statistic-content-value) {
     font-size: 20px;
   }
-  
+
   .card :global(.ant-statistic-title) {
-    font-size: 12px;
+    font-size: 11px;
   }
-  
+
   .icon {
     font-size: 16px;
   }
