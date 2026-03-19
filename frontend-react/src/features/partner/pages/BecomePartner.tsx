@@ -8,6 +8,7 @@ import {
   FeedbackForm,
   Footer
 } from '@/features/landing';
+import '@/styles/landing.css';
 import '@/styles/become-pages.css';
 import '@/styles/page-transitions.css';
 
