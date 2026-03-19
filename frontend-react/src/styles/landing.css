@@ -1644,6 +1644,20 @@ img {
   background-color: var(--color-brand-orange-500);
 }
 
+.leave-order {
+  padding-bottom: 100px;
+}
+@media (max-width: 1024px) {
+  .leave-order {
+    padding-bottom: 70px;
+  }
+}
+@media (max-width: 576px) {
+  .leave-order {
+    padding-bottom: 50px;
+  }
+}
+
 .leave-order__title {
   margin: 0 0 30px;
   font-family: var(--font-family-display);
@@ -1812,12 +1826,12 @@ img {
 
 .faq {
   position: relative;
-  margin: 120px 0 80px;
+  margin: 120px 0 100px;
   overflow: hidden;
 }
 @media (max-width: 1024px) {
   .faq {
-    margin: 100px 0 60px;
+    margin: 100px 0 80px;
   }
 }
 .faq__wrapper {
@@ -2061,16 +2075,16 @@ img {
 }
 
 .place-task-info {
-  padding: 200px 0 140px;
+  padding: 200px 0 180px;
 }
 @media (max-width: 1024px) {
   .place-task-info {
-    padding: 70px 0;
+    padding: 70px 0 100px;
   }
 }
 @media (max-width: 768px) {
   .place-task-info {
-    padding: 10px 0 40px;
+    padding: 10px 0 80px;
   }
 }
 .place-task-info__wrapper {

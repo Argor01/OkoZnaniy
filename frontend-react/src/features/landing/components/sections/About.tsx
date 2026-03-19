@@ -26,7 +26,6 @@ const About: React.FC = () => {
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="24" cy="24" r="22" fill="#EBF5FF" stroke="#2b9fe6" strokeWidth="2"/>
                     <path d="M24 10L26.9 17.6L35 18.2L29.1 23.4L31 31.3L24 27.1L17 31.3L18.9 23.4L13 18.2L21.1 17.6L24 10Z" fill="#2b9fe6"/>
-                    <path d="M20 26L22.5 28.5L28 23" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </figure>
                 <div className="about__value-text">Качество</div>
