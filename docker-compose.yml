@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
@@ -62,6 +64,12 @@ services:
       - "5433:5432"
     networks:
       - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d oko_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -80,8 +88,10 @@ services:
     command: celery -A config worker -l INFO
     restart: always
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
@@ -98,9 +108,12 @@ services:
       dockerfile: Dockerfile.bot
     restart: always
     depends_on:
-      - backend
-      - postgres
-      - redis
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
       - REDIS_URL=redis://redis:6379/0
