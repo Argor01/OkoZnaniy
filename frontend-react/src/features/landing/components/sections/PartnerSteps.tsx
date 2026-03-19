@@ -1,115 +1,73 @@
 import React from 'react';
 
+const steps = [
+  {
+    num: '01',
+    title: 'Общение с менеджером',
+    text: 'Связываемся с вами и обсуждаем все детали сотрудничества',
+  },
+  {
+    num: '02',
+    title: 'Заполнение договора',
+    text: 'Оформляем все необходимые документы для начала работы',
+  },
+  {
+    num: '03',
+    title: 'Составление плана запуска',
+    text: 'Разрабатываем индивидуальную стратегию развития вашего бизнеса',
+  },
+  {
+    num: '04',
+    title: 'Открытие точки',
+    text: 'Онлайн без офиса — работайте откуда удобно',
+  },
+  {
+    num: '05',
+    title: 'Получай 25% от заказа',
+    text: 'На протяжении полугода получайте стабильный доход от каждого заказа',
+  },
+  {
+    num: '06',
+    title: 'Первая прибыль через неделю',
+    text: 'Начинайте зарабатывать практически сразу после запуска',
+  },
+];
+
 const PartnerSteps: React.FC = () => {
   return (
-    <section className="advantages">
+    <section className="partner-steps-section">
       <div className="mcontainer">
-        <div className="partner-steps__promo">
-          <h2 className="partner-steps__promo-title">
-            Гарантируем <span className="partner-steps__promo-highlight">1 000 000 ₽</span> оборот вашего агентства через 2 месяца!
+        <div className="partner-steps-section__promo">
+          <div className="partner-steps-section__promo-badge">Гарантия</div>
+          <h2 className="partner-steps-section__promo-title">
+            1 000 000 ₽ оборот вашего агентства через 2 месяца
           </h2>
-          <p className="partner-steps__promo-text">
-            ✅ Персональная поддержка от директора биржи на протяжении 1 месяца
-          </p>
-          <p className="partner-steps__promo-text">
-            ✅ Далее персональный менеджер навсегда
-          </p>
+          <div className="partner-steps-section__promo-items">
+            <div className="partner-steps-section__promo-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Персональная поддержка от директора биржи на протяжении 1 месяца
+            </div>
+            <div className="partner-steps-section__promo-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Далее персональный менеджер навсегда
+            </div>
+          </div>
         </div>
 
-        <h2 className="partner-steps__heading">
-          Как проходит работа
-        </h2>
-        
-        <div className="advantages__wrapper">
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <img
-                className="advantages__card-icon-image"
-                src="/assets/advantages/advantages-icon-1.svg"
-                alt="icon"
-                width={61}
-                height={61}
-              />
-            </figure>
-            <h3 className="advantages__card-title">1. Общение с менеджером по телефону</h3>
-            <p className="advantages__card-text">
-              Связываемся с вами и обсуждаем все детали сотрудничества
-            </p>
-          </div>
+        <h2 className="partner-steps-section__heading">Как проходит работа</h2>
 
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <img
-                className="advantages__card-icon-image"
-                src="/assets/advantages/advantages-icon-2.svg"
-                alt="icon"
-                width={61}
-                height={61}
-              />
-            </figure>
-            <h3 className="advantages__card-title">2. Заполнение договора</h3>
-            <p className="advantages__card-text">
-              Оформляем все необходимые документы для начала работы
-            </p>
-          </div>
-
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <img
-                className="advantages__card-icon-image"
-                src="/assets/advantages/advantages-icon-3.svg"
-                alt="icon"
-                width={61}
-                height={61}
-              />
-            </figure>
-            <h3 className="advantages__card-title">3. Составление плана запуска с менеджером</h3>
-            <p className="advantages__card-text">
-              Разрабатываем индивидуальную стратегию развития вашего бизнеса
-            </p>
-          </div>
-
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <img
-                className="advantages__card-icon-image"
-                src="/assets/advantages/advantages-icon-4.svg"
-                alt="icon"
-                width={61}
-                height={61}
-              />
-            </figure>
-            <h3 className="advantages__card-title">4. Открытие точки в своем городе</h3>
-            <p className="advantages__card-text">
-              Она может быть онлайн без офиса - работайте откуда удобно
-            </p>
-          </div>
-
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <img
-                className="advantages__card-icon-image"
-                src="/assets/advantages/advantages-icon-5.svg"
-                alt="icon"
-                width={61}
-                height={61}
-              />
-            </figure>
-            <h3 className="advantages__card-title">5. Получай 25% от заказа</h3>
-            <p className="advantages__card-text">
-              На протяжении полугода получайте стабильный доход от каждого заказа
-            </p>
-          </div>
-
-          <div className="advantages__card">
-            <figure className="advantages__card-icon">
-              <i className="fi fi-ts-rocket-lunch advantages__card-icon-flaticon"></i>
-            </figure>
-            <h3 className="advantages__card-title">6. Получение прибыли уже через неделю</h3>
-            <p className="advantages__card-text">
-              Начинайте зарабатывать практически сразу после запуска
-            </p>
-          </div>
+        <div className="partner-steps-section__grid">
+          {steps.map((step) => (
+            <div className="partner-steps-section__card" key={step.num}>
+              <div className="partner-steps-section__card-num">{step.num}</div>
+              <div className="partner-steps-section__card-title">{step.title}</div>
+              <div className="partner-steps-section__card-text">{step.text}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

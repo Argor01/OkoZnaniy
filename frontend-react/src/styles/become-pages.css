@@ -1,7 +1,10 @@
-/* Combined styles for Become Expert and Become Partner pages */
+/* ===== SHARED: figure positioning for expert & partner hero ===== */
 
-/* From expert-partner-pages.css */
 .expert-page {
+  background-color: #fff;
+}
+
+.partner-page {
   background-color: #fff;
 }
 
@@ -23,7 +26,6 @@
   align-items: flex-end;
   justify-content: flex-start;
   margin: 0;
-  margin-left: 0px;
   width: 50vw;
 }
 
@@ -37,28 +39,24 @@
   object-position: left bottom;
 }
 
-
 @media (max-width: 1320px) and (min-width: 1025px) {
   .expert-page .first-screen__figure,
   .partner-page .first-screen__figure {
     top: 80px;
     margin-left: 50px;
   }
-  
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
     height: calc(100vh - 80px);
   }
 }
 
-
 @media (max-width: 1315px) and (min-width: 1025px) {
-    .expert-page .first-screen__figure,
-    .partner-page .first-screen__figure {
-        width: 45vw;
-    }
+  .expert-page .first-screen__figure,
+  .partner-page .first-screen__figure {
+    width: 45vw;
+  }
 }
-
 
 @media (max-width: 1024px) {
   .expert-page .first-screen__figure,
@@ -71,162 +69,389 @@
     top: auto;
     width: 100%;
     margin-left: 0;
-    padding: 0 20px; 
+    padding: 0 20px;
   }
-  
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
     max-width: 100%;
-    width: 100%; 
+    width: 100%;
     height: auto;
     object-fit: contain;
     object-position: center;
   }
 }
 
-
 @media (max-width: 576px) {
   .expert-page .first-screen__figure,
   .partner-page .first-screen__figure {
-    padding: 0 15px; 
+    padding: 0 15px;
   }
-
   .expert-page .first-screen__figure-image,
   .partner-page .first-screen__figure-image {
     width: 100%;
   }
 }
 
-/* From partner-pages.css */
-.partner-benefits__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+/* ===== SHARED: hero stats (expert & partner) ===== */
+
+.expert-first-screen__stats,
+.partner-first-screen__stats {
+  display: flex;
   gap: 40px;
-  max-width: 1000px;
-  margin: 0 auto;
+  margin-top: 40px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
-  .partner-benefits__grid {
-    grid-template-columns: 1fr;
-    gap: 25px;
-    max-width: 500px;
-  }
-}
-
-.partner-benefits .place-task__advantages-card {
-  min-height: 240px;
+.expert-first-screen__stat,
+.partner-first-screen__stat {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 45px 35px;
+  gap: 4px;
 }
 
-.partner-benefits .place-task__advantages-card-figure {
-  margin-bottom: 25px;
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 25px rgba(240, 147, 251, 0.4);
-}
-
-.partner-benefits .place-task__advantages-card-icon {
-  font-size: 48px;
-  color: #ffffff;
-}
-
-.partner-benefits .place-task__advantages-card-text {
-  font-size: 22px;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.6;
-  max-width: 90%;
-}
-
-
-.partner-page .advantages__wrapper {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .partner-page .advantages__wrapper {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-}
-
-.partner-page .advantages__card {
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  padding: 30px 25px;
-}
-
-.partner-page .advantages__card-icon {
-  margin-bottom: 20px;
-}
-
-.partner-page .advantages__card-icon-image {
-  width: 70px;
-  height: 70px;
-}
-
-.partner-page .advantages__card-title {
-  font-size: 20px;
-  margin-bottom: 12px;
-}
-
-.partner-page .advantages__card-text {
-  font-size: 16px;
-  line-height: 1.6;
-}
-
-@media (max-width: 576px) {
-  .partner-benefits .place-task__advantages-card {
-    padding: 35px 25px;
-    min-height: 200px;
-  }
-  
-  .partner-benefits .place-task__advantages-card-figure {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .partner-benefits .place-task__advantages-card-icon {
-    font-size: 42px;
-  }
-  
-  .partner-benefits .place-task__advantages-card-text {
-    font-size: 18px;
-  }
-}
-
-
-
-.partner-page .advantages__card-icon-antd {
-  font-size: 61px;
-  color: #ffb34a;
-  font-weight: 300;
-}
-
-
-.partner-page .advantages__card-icon-flaticon {
-  font-size: 61px;
-  color: #ffb34a;
+.expert-first-screen__stat-value,
+.partner-first-screen__stat-value {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--color-brand-orange-500);
   line-height: 1;
 }
 
-.partner-page .advantages__card-icon {
+.expert-first-screen__stat-label,
+.partner-first-screen__stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+
+@media (max-width: 1024px) {
+  .expert-first-screen__stats,
+  .partner-first-screen__stats {
+    justify-content: center;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expert-first-screen__stats,
+  .partner-first-screen__stats {
+    gap: 20px;
+  }
+  .expert-first-screen__stat-value,
+  .partner-first-screen__stat-value {
+    font-size: 26px;
+  }
+}
+
+/* ===== PARTNER: benefits section ===== */
+
+.partner-benefits-section {
+  padding: 100px 0;
+  background: #f8f9fa;
+}
+
+@media (max-width: 1024px) {
+  .partner-benefits-section {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-benefits-section {
+    padding: 60px 0;
+  }
+}
+
+.partner-benefits-section__title {
+  margin: 0 0 12px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-blue-500);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .partner-benefits-section__title {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-benefits-section__title {
+    font-size: 32px;
+  }
+}
+
+.partner-benefits-section__subtitle {
+  margin: 0 0 60px;
+  font-size: 20px;
+  color: var(--color-grey-700);
+  text-align: center;
+  font-weight: 400;
+}
+
+@media (max-width: 576px) {
+  .partner-benefits-section__subtitle {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+.partner-benefits-section__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .partner-benefits-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-benefits-section__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.partner-benefits-section__card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: 1px solid #edf2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partner-benefits-section__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.15);
+}
+
+.partner-benefits-section__card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  color: #fff;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.partner-benefits-section__card-value {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--color-brand-orange-500);
+  line-height: 1;
+}
+
+.partner-benefits-section__card-title {
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+.partner-benefits-section__card-text {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
+}
+
+/* ===== PARTNER: steps section ===== */
+
+.partner-steps-section {
+  padding: 100px 0;
+  background: #fff;
+}
+
+@media (max-width: 1024px) {
+  .partner-steps-section {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section {
+    padding: 60px 0;
+  }
+}
+
+.partner-steps-section__promo {
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  border-radius: 20px;
+  padding: 48px 56px;
+  margin-bottom: 80px;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .partner-steps-section__promo {
+    padding: 36px 28px;
+    margin-bottom: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section__promo {
+    padding: 28px 20px;
+    margin-bottom: 48px;
+  }
+}
+
+.partner-steps-section__promo-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.partner-steps-section__promo-title {
+  margin: 0 0 24px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: #fff;
+  line-height: 1.2;
+  max-width: 700px;
+}
+
+@media (max-width: 768px) {
+  .partner-steps-section__promo-title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section__promo-title {
+    font-size: 26px;
+  }
+}
+
+.partner-steps-section__promo-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.partner-steps-section__promo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.partner-steps-section__promo-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-brand-orange-500);
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section__promo-item {
+    font-size: 15px;
+  }
+}
+
+.partner-steps-section__heading {
+  margin: 0 0 48px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-blue-500);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .partner-steps-section__heading {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section__heading {
+    font-size: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+.partner-steps-section__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .partner-steps-section__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .partner-steps-section__grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.partner-steps-section__card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: 1px solid #edf2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partner-steps-section__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.15);
+}
+
+.partner-steps-section__card-num {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: #e8f4fd;
+  line-height: 1;
+}
+
+.partner-steps-section__card-title {
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+.partner-steps-section__card-text {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
 }
