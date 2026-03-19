@@ -456,7 +456,7 @@ img {
 }
 
 .main {
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .first-screen {
