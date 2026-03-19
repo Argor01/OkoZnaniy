@@ -23,19 +23,33 @@ const About: React.FC = () => {
             <div className="about__values">
               <div className="about__value-item">
                 <figure className="about__value-icon">
-                  <img src="/assets/about/quality-icon.svg" alt="Качество" width={48} height={48} />
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#EBF5FF" stroke="#2b9fe6" strokeWidth="2"/>
+                    <path d="M24 10L26.9 17.6L35 18.2L29.1 23.4L31 31.3L24 27.1L17 31.3L18.9 23.4L13 18.2L21.1 17.6L24 10Z" fill="#2b9fe6"/>
+                    <path d="M20 26L22.5 28.5L28 23" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </figure>
                 <div className="about__value-text">Качество</div>
               </div>
               <div className="about__value-item">
                 <figure className="about__value-icon">
-                  <img src="/assets/about/speed-icon.svg" alt="Оперативность" width={48} height={48} />
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#EBF5FF" stroke="#2b9fe6" strokeWidth="2"/>
+                    <path d="M12 28C12 20.3 17.4 14 24 14C30.6 14 36 20.3 36 28" stroke="#2b9fe6" strokeWidth="2.5" strokeLinecap="round"/>
+                    <path d="M24 28L30 20" stroke="#2b9fe6" strokeWidth="2.5" strokeLinecap="round"/>
+                    <circle cx="24" cy="28" r="3" fill="#2b9fe6"/>
+                    <path d="M18 34H30" stroke="#2b9fe6" strokeWidth="2.5" strokeLinecap="round"/>
+                  </svg>
                 </figure>
                 <div className="about__value-text">Оперативность</div>
               </div>
               <div className="about__value-item">
                 <figure className="about__value-icon">
-                  <img src="/assets/about/reliability-icon.svg" alt="Надежность" width={48} height={48} />
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#EBF5FF" stroke="#2b9fe6" strokeWidth="2"/>
+                    <path d="M24 11L34 15V24C34 29.5 29.5 34.4 24 36C18.5 34.4 14 29.5 14 24V15L24 11Z" fill="#2b9fe6" fillOpacity="0.2" stroke="#2b9fe6" strokeWidth="2.5" strokeLinejoin="round"/>
+                    <path d="M20 24L22.5 26.5L28 21" stroke="#2b9fe6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </figure>
                 <div className="about__value-text">Надежность</div>
               </div>
