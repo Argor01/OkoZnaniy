@@ -64,6 +64,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-password.sh:/usr/local/bin/init-password.sh
+    command: ["/bin/sh", "-c", "chmod +x /usr/local/bin/init-password.sh && /usr/local/bin/init-password.sh"]
     networks:
       - app_network
     healthcheck:
@@ -71,7 +73,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 15s
 
   redis:
     image: redis:7-alpine
