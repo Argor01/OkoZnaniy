@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Button, Typography, Descriptions, Input, Select, Tag, Avatar,
-  Space, message, Spin, Empty, Breadcrumb, Row, Col, Modal, Checkbox, Tabs,
+  Space, message, Spin, Empty, Breadcrumb, Row, Col, Modal, Checkbox,
 } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
   LinkOutlined, TagOutlined, PlusOutlined, SwapOutlined, StarOutlined,
   EyeOutlined, MessageOutlined, HistoryOutlined, CheckCircleOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -41,24 +42,18 @@ interface TicketDetail {
   completed_at?: string;
 }
 
-const activityIcon = (type: string) => {
-  const map: Record<string, React.ReactNode> = {
-    status_change: <SwapOutlined style={{ color: '#1890ff' }} />,
-    priority_change: <StarOutlined style={{ color: '#faad14' }} />,
-    tag_added: <TagOutlined style={{ color: '#52c41a' }} />,
-    tag_removed: <TagOutlined style={{ color: '#ff4d4f' }} />,
-    observer_added: <EyeOutlined style={{ color: '#722ed1' }} />,
-    observer_removed: <EyeOutlined style={{ color: '#ff4d4f' }} />,
-    assigned: <UserOutlined style={{ color: '#1890ff' }} />,
-    message: <MessageOutlined style={{ color: '#13c2c2' }} />,
-    note: <FileTextOutlined style={{ color: '#8c8c8c' }} />,
-    created: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-    completed: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-  };
-  return map[type] ?? <HistoryOutlined />;
+const ACTIVITY_ICON: Record<string, React.ReactNode> = {
+  status_change: <SwapOutlined style={{ color: '#1890ff' }} />,
+  priority_change: <StarOutlined style={{ color: '#faad14' }} />,
+  tag_added: <TagOutlined style={{ color: '#52c41a' }} />,
+  tag_removed: <TagOutlined style={{ color: '#ff4d4f' }} />,
+  observer_added: <EyeOutlined style={{ color: '#722ed1' }} />,
+  observer_removed: <EyeOutlined style={{ color: '#ff4d4f' }} />,
+  assigned: <UserOutlined style={{ color: '#1890ff' }} />,
+  completed: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
 };
 
-const formatTime = (iso: string) => {
+const fmt = (iso: string) => {
   try { return new Date(iso).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); }
   catch { return iso; }
 };
@@ -71,19 +66,20 @@ const getPriorityText = (p: string) => ({ low: 'Низкий', medium: 'Сред
 export const TicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
-  const [messageText, setMessageText] = useState('');
+  const [replyText, setReplyText] = useState('');
+  const [finalText, setFinalText] = useState('');
   const [sending, setSending] = useState(false);
+  const [finalModalVisible, setFinalModalVisible] = useState(false);
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [tagModalVisible, setTagModalVisible] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState('chat');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const feedEndRef = useRef<HTMLDivElement>(null);
 
   const { ticket: rawTicket, loading, refetch } = useTicketByNumber(ticketId || '');
   const ticket = rawTicket as unknown as TicketDetail | null;
   const { adminUsers } = useAdminUsers();
-  const { messages: chatMessages, activities, loading: activityLoading, refetch: refetchActivity } =
+  const { feed, loading: feedLoading, refetch: refetchFeed } =
     useTicketActivity(ticket?.id ?? null, ticket?.type ?? null);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority, assignUsers, addTag, removeTag } = useTicketActions();
 
@@ -94,44 +90,60 @@ export const TicketDetailPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+    feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [feed]);
 
-  const sendMessage = async () => {
-    if (!messageText.trim() || !ticket) { message.warning('Введите сообщение'); return; }
+  const doRefetch = () => { refetch(); refetchFeed(); };
+
+  const sendReply = async () => {
+    if (!replyText.trim() || !ticket) return;
     setSending(true);
-    try { await sendTicketMessage(ticket.id, messageText, ticket.type); setMessageText(''); refetch(); refetchActivity(); }
+    try { await sendTicketMessage(ticket.id, replyText, ticket.type); setReplyText(''); doRefetch(); }
     catch { message.error('Не удалось отправить сообщение'); }
+    finally { setSending(false); }
+  };
+
+  const sendFinalReply = async () => {
+    if (!finalText.trim() || !ticket) return;
+    setSending(true);
+    try {
+      await sendTicketMessage(ticket.id, finalText, ticket.type);
+      await updateTicketStatus(ticket.id, 'completed', ticket.type);
+      setFinalText('');
+      setFinalModalVisible(false);
+      doRefetch();
+      message.success('Финальный ответ отправлен, тикет закрыт');
+    } catch { message.error('Ошибка при отправке финального ответа'); }
     finally { setSending(false); }
   };
 
   const handleUpdateStatus = async (s: string) => {
     if (!ticket) return;
-    try { await updateTicketStatus(ticket.id, s, ticket.type); refetch(); refetchActivity(); }
+    try { await updateTicketStatus(ticket.id, s, ticket.type); doRefetch(); }
     catch { message.error('Не удалось обновить статус'); }
   };
 
   const handleUpdatePriority = async (p: string) => {
     if (!ticket) return;
-    try { await updateTicketPriority(ticket.id, p, ticket.type); refetch(); refetchActivity(); }
+    try { await updateTicketPriority(ticket.id, p, ticket.type); doRefetch(); }
     catch { message.error('Не удалось обновить приоритет'); }
   };
 
   const handleAssignUsers = async () => {
     if (!ticket || selectedUserIds.length === 0) return;
-    try { await assignUsers(ticket.id, selectedUserIds, ticket.type); setAssignModalVisible(false); setSelectedUserIds([]); refetch(); refetchActivity(); }
+    try { await assignUsers(ticket.id, selectedUserIds, ticket.type); setAssignModalVisible(false); setSelectedUserIds([]); doRefetch(); }
     catch { message.error('Не удалось назначить пользователей'); }
   };
 
   const handleAddTag = async () => {
     if (!ticket || !newTag.trim()) return;
-    try { await addTag(ticket.id, newTag.trim(), ticket.type); setTagModalVisible(false); setNewTag(''); refetch(); refetchActivity(); }
+    try { await addTag(ticket.id, newTag.trim(), ticket.type); setTagModalVisible(false); setNewTag(''); doRefetch(); }
     catch { message.error('Не удалось добавить тег'); }
   };
 
   const handleRemoveTag = async (tag: string) => {
     if (!ticket) return;
-    try { await removeTag(ticket.id, tag, ticket.type); refetch(); refetchActivity(); }
+    try { await removeTag(ticket.id, tag, ticket.type); doRefetch(); }
     catch { message.error('Не удалось удалить тег'); }
   };
 
@@ -146,67 +158,60 @@ export const TicketDetailPage: React.FC = () => {
   if (!ticket) {
     return (
       <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
-        <Card><Empty description="Тикет не найден" /><div style={{ textAlign: 'center', marginTop: 16 }}><Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к тикетам</Button></div></Card>
+        <Card>
+          <Empty description="Тикет не найден" />
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к тикетам</Button>
+          </div>
+        </Card>
       </AdminLayout>
     );
   }
 
-  const renderChatTab = () => (
-    <div>
-      <div style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0', marginBottom: 16 }}>
-        {chatMessages.length === 0 ? <Empty description="Нет сообщений" /> : chatMessages.map((msg: any) => {
-          const isAdmin = msg.is_admin;
-          const name = `${msg.sender?.first_name ?? ''} ${msg.sender?.last_name ?? ''}`.trim() || 'Пользователь';
-          return (
-            <div key={msg.id} style={{ display: 'flex', flexDirection: isAdmin ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12, padding: '0 8px' }}>
-              <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#1890ff' : '#52c41a', flexShrink: 0 }} />
-              <div style={{ maxWidth: '70%' }}>
-                <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 2, textAlign: isAdmin ? 'right' : 'left' }}>{name}</div>
-                <div style={{ background: isAdmin ? '#1890ff' : '#f0f0f0', color: isAdmin ? '#fff' : '#000', padding: '8px 12px', borderRadius: isAdmin ? '12px 12px 2px 12px' : '12px 12px 12px 2px', fontSize: 14, wordBreak: 'break-word' }}>
-                  {msg.text}
-                </div>
-                <div style={{ fontSize: 11, color: '#bfbfbf', marginTop: 2, textAlign: isAdmin ? 'right' : 'left' }}>{formatTime(msg.created_at)}</div>
-              </div>
+  // Единая лента: сообщения + события активности, отсортированные по времени
+  const renderFeedItem = (item: any) => {
+    if (item.kind === 'message') {
+      const isAdmin = item.is_admin;
+      const name = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
+      const fromChat = item.source === 'chat';
+      return (
+        <div key={item.id} style={{ display: 'flex', flexDirection: isAdmin ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 16, padding: '0 4px' }}>
+          <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#1890ff' : '#52c41a', flexShrink: 0 }} />
+          <div style={{ maxWidth: '72%' }}>
+            <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 3, textAlign: isAdmin ? 'right' : 'left' }}>
+              {name}
+              {fromChat && <Tag color="cyan" style={{ marginLeft: 4, fontSize: 10, lineHeight: '16px' }}>из чата</Tag>}
             </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-      <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-          <TextArea value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Введите ответ клиенту... (Ctrl+Enter для отправки)" rows={3} style={{ flex: 1 }} onKeyDown={(e) => { if (e.ctrlKey && e.key === 'Enter') sendMessage(); }} />
-          <Button type="primary" icon={<SendOutlined />} onClick={sendMessage} loading={sending} disabled={!messageText.trim()}>Отправить</Button>
-        </div>
-        {ticket.support_chat_id && (
-          <Button size="small" type="link" icon={<LinkOutlined />} style={{ marginTop: 8 }} onClick={() => window.open(`/support-chat/${ticket.support_chat_id}`, '_blank')}>
-            Открыть чат #{ticket.support_chat_id}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderActivityTab = () => (
-    <div style={{ maxHeight: 560, overflowY: 'auto' }}>
-      {activityLoading ? (
-        <div style={{ textAlign: 'center', padding: 32 }}><Spin /></div>
-      ) : activities.length === 0 ? (
-        <Empty description="Нет событий в истории" />
-      ) : (
-        activities.map((act: any) => (
-          <div key={act.id} style={{ display: 'flex', gap: 10, padding: '10px 4px', borderBottom: '1px solid #f5f5f5', alignItems: 'flex-start' }}>
-            <div style={{ fontSize: 18, marginTop: 2, flexShrink: 0 }}>{activityIcon(act.activity_type)}</div>
-            <div style={{ flex: 1 }}>
-              <Text style={{ fontSize: 13 }}>{act.text}</Text>
-              <div style={{ fontSize: 11, color: '#8c8c8c', marginTop: 2 }}>
-                {act.actor ? `${act.actor.first_name} ${act.actor.last_name}`.trim() : 'Система'} · {formatTime(act.created_at)}
-              </div>
+            <div style={{
+              background: isAdmin ? '#1890ff' : '#f0f0f0',
+              color: isAdmin ? '#fff' : '#000',
+              padding: '8px 14px',
+              borderRadius: isAdmin ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+              fontSize: 14,
+              lineHeight: 1.5,
+              wordBreak: 'break-word',
+            }}>
+              {item.text}
             </div>
+            <div style={{ fontSize: 11, color: '#bfbfbf', marginTop: 3, textAlign: isAdmin ? 'right' : 'left' }}>{fmt(item.created_at)}</div>
           </div>
-        ))
-      )}
-    </div>
-  );
+        </div>
+      );
+    }
+
+    // activity item
+    const icon = ACTIVITY_ICON[item.activity_type] ?? <HistoryOutlined style={{ color: '#8c8c8c' }} />;
+    const actor = item.actor ? `${item.actor.first_name} ${item.actor.last_name}`.trim() : 'Система';
+    return (
+      <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 4px', marginBottom: 4 }}>
+        <div style={{ fontSize: 16, flexShrink: 0, width: 24, textAlign: 'center' }}>{icon}</div>
+        <div style={{ flex: 1, fontSize: 12, color: '#595959' }}>
+          {item.text}
+          <span style={{ color: '#bfbfbf', marginLeft: 6 }}>{actor} · {fmt(item.created_at)}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
@@ -222,6 +227,7 @@ export const TicketDetailPage: React.FC = () => {
         </Breadcrumb>
 
         <Row gutter={[24, 24]}>
+          {/* Основная колонка */}
           <Col xs={24} lg={16}>
             <Card
               title={
@@ -247,29 +253,58 @@ export const TicketDetailPage: React.FC = () => {
                 </Space>
               }
             >
+              {/* Описание */}
               <Card size="small" title="Описание проблемы" style={{ marginBottom: 16 }}>
                 <Text>{ticket.description}</Text>
               </Card>
 
-              <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                items={[
-                  {
-                    key: 'chat',
-                    label: <span><MessageOutlined style={{ marginRight: 4 }} />Переписка{chatMessages.length > 0 && <Tag color="blue" style={{ marginLeft: 6, fontSize: 11 }}>{chatMessages.length}</Tag>}</span>,
-                    children: renderChatTab(),
-                  },
-                  {
-                    key: 'activity',
-                    label: <span><HistoryOutlined style={{ marginRight: 4 }} />История действий{activities.length > 0 && <Tag color="default" style={{ marginLeft: 6, fontSize: 11 }}>{activities.length}</Tag>}</span>,
-                    children: renderActivityTab(),
-                  },
-                ]}
-              />
+              {/* Единая лента */}
+              <div style={{ minHeight: 200, maxHeight: 520, overflowY: 'auto', padding: '8px 4px', marginBottom: 16, borderTop: '1px solid #f0f0f0' }}>
+                {feedLoading ? (
+                  <div style={{ textAlign: 'center', padding: 32 }}><Spin /></div>
+                ) : feed.length === 0 ? (
+                  <Empty description="История пуста" style={{ padding: 32 }} />
+                ) : (
+                  feed.map((item: any) => renderFeedItem(item))
+                )}
+                <div ref={feedEndRef} />
+              </div>
+
+              {/* Форма ответа */}
+              <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                  <TextArea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Написать клиенту... (Ctrl+Enter для отправки)"
+                    rows={3}
+                    style={{ flex: 1 }}
+                    onKeyDown={(e) => { if (e.ctrlKey && e.key === 'Enter') sendReply(); }}
+                  />
+                  <Space direction="vertical">
+                    <Button type="primary" icon={<SendOutlined />} onClick={sendReply} loading={sending} disabled={!replyText.trim()}>
+                      Ответить
+                    </Button>
+                    <Button
+                      icon={<CloseCircleOutlined />}
+                      onClick={() => setFinalModalVisible(true)}
+                      disabled={ticket.status === 'completed'}
+                      style={{ borderColor: '#52c41a', color: '#52c41a' }}
+                    >
+                      Закрыть тикет
+                    </Button>
+                  </Space>
+                </div>
+                {ticket.support_chat_id && (
+                  <Button size="small" type="link" icon={<LinkOutlined />} style={{ marginTop: 6 }} onClick={() => window.open(`/support-chat/${ticket.support_chat_id}`, '_blank')}>
+                    Открыть чат #{ticket.support_chat_id}
+                  </Button>
+                )}
+              </div>
             </Card>
           </Col>
 
+          {/* Боковая панель */}
           <Col xs={24} lg={8}>
             <Card title="Информация о тикете" size="small" style={{ marginBottom: 16 }}>
               <Descriptions column={1} size="small">
@@ -350,18 +385,40 @@ export const TicketDetailPage: React.FC = () => {
             <Card title="Быстрые действия" size="small">
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Button block onClick={() => handleUpdateStatus('in_progress')} disabled={ticket.status === 'in_progress'}>Взять в работу</Button>
-                <Button block onClick={() => handleUpdateStatus('completed')} disabled={ticket.status === 'completed'}>Завершить тикет</Button>
                 <Button block onClick={() => handleUpdatePriority('high')} disabled={ticket.priority === 'high' || ticket.priority === 'urgent'}>Повысить приоритет</Button>
               </Space>
             </Card>
           </Col>
         </Row>
 
+        {/* Модал: финальный ответ */}
+        <Modal
+          title="Финальный ответ и закрытие тикета"
+          open={finalModalVisible}
+          onOk={sendFinalReply}
+          onCancel={() => { setFinalModalVisible(false); setFinalText(''); }}
+          okText="Отправить и закрыть"
+          cancelText="Отмена"
+          okButtonProps={{ loading: sending, disabled: !finalText.trim() }}
+        >
+          <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+            Это сообщение будет отправлено клиенту, после чего тикет будет закрыт.
+          </Text>
+          <TextArea
+            value={finalText}
+            onChange={(e) => setFinalText(e.target.value)}
+            placeholder="Введите финальный ответ клиенту..."
+            rows={5}
+            autoFocus
+          />
+        </Modal>
+
+        {/* Модал: назначить сотрудников */}
         <Modal title="Назначить сотрудников" open={assignModalVisible} onOk={handleAssignUsers} onCancel={() => { setAssignModalVisible(false); setSelectedUserIds([]); }} okText="Назначить" cancelText="Отмена">
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {adminUsers.map((u: any) => (
               <div key={u.id} style={{ padding: '8px 0' }}>
-                <Checkbox checked={selectedUserIds.includes(u.id)} onChange={(e) => setSelectedUserIds(e.target.checked ? [...selectedUserIds, u.id] : selectedUserIds.filter(id => id !== u.id))}>
+                <Checkbox checked={selectedUserIds.includes(u.id)} onChange={(e) => setSelectedUserIds(e.target.checked ? [...selectedUserIds, u.id] : selectedUserIds.filter((id: number) => id !== u.id))}>
                   <Space><Avatar size={24} icon={<UserOutlined />} /><span>{u.first_name} {u.last_name}</span><Text type="secondary">({u.email})</Text></Space>
                 </Checkbox>
               </div>
@@ -369,6 +426,7 @@ export const TicketDetailPage: React.FC = () => {
           </div>
         </Modal>
 
+        {/* Модал: добавить тег */}
         <Modal title="Добавить тег" open={tagModalVisible} onOk={handleAddTag} onCancel={() => { setTagModalVisible(false); setNewTag(''); }} okText="Добавить" cancelText="Отмена">
           <Input placeholder="Введите тег (например: #негатив, #срочно)" value={newTag} onChange={(e) => setNewTag(e.target.value)} onPressEnter={handleAddTag} prefix={<TagOutlined />} />
           <div style={{ marginTop: 12 }}>
