@@ -179,9 +179,9 @@ export const supportApi = {
     return response.data;
   },
 
-  // Получение списка админов для назначения
+  // Получение всех пользователей для назначения наблюдателями
   getAdminUsers: async () => {
-    const response = await apiClient.get('/admin-panel/users/?role=admin');
+    const response = await apiClient.get('/admin-panel/users/');
     return response.data;
   },
 

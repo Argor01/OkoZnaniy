@@ -157,10 +157,10 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         if not isinstance(user_ids, list):
             return Response({'error': 'user_ids должен быть списком'}, status=400)
         
-        # Проверяем, что все пользователи существуют и являются админами
-        users = User.objects.filter(id__in=user_ids, role__in=['admin', 'director'])
+        # Проверяем, что все пользователи существуют
+        users = User.objects.filter(id__in=user_ids)
         if len(users) != len(user_ids):
-            return Response({'error': 'Некоторые пользователи не найдены или не являются админами'}, status=400)
+            return Response({'error': 'Некоторые пользователи не найдены'}, status=400)
         
         support_request.assigned_users.set(users)
         return Response({'message': f'Назначено {len(users)} пользователей'})
@@ -316,10 +316,10 @@ class ClaimViewSet(viewsets.ModelViewSet):
         if not isinstance(user_ids, list):
             return Response({'error': 'user_ids должен быть списком'}, status=400)
         
-        # Проверяем, что все пользователи существуют и являются админами
-        users = User.objects.filter(id__in=user_ids, role__in=['admin', 'director'])
+        # Проверяем, что все пользователи существуют
+        users = User.objects.filter(id__in=user_ids)
         if len(users) != len(user_ids):
-            return Response({'error': 'Некоторые пользователи не найдены или не являются админами'}, status=400)
+            return Response({'error': 'Некоторые пользователи не найдены'}, status=400)
         
         claim.assigned_users.set(users)
         return Response({'message': f'Назначено {len(users)} пользователей'})

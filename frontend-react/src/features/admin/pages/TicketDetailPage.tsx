@@ -496,7 +496,7 @@ export const TicketDetailPage: React.FC = () => {
                     <Button 
                       type="link" 
                       icon={<LinkOutlined />}
-                      onClick={() => window.open(`/support/chat/${ticket.support_chat_id}`, '_blank')}
+                      onClick={() => window.open(`/support-chat/${ticket.support_chat_id}`, '_blank')}
                       style={{ padding: 0 }}
                     >
                       Чат #{ticket.support_chat_id}
