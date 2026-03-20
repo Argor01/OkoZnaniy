@@ -77,4 +77,9 @@ export const usersApi = {
     const response = await apiClient.get(API_ENDPOINTS.admin.users.arbitrators);
     return response.data;
   },
+
+  getUserHistory: async (userId: number) => {
+    const response = await apiClient.get(API_ENDPOINTS.admin.users.history(userId));
+    return response.data;
+  },
 };

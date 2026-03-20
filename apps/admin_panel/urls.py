@@ -33,4 +33,7 @@ urlpatterns = [
     
     # Статистика
     path('stats/', views.get_admin_stats, name='admin-stats'),
+    
+    # История пользователя
+    path('users/<int:user_id>/history/', views.get_user_history, name='user-history'),
 ]

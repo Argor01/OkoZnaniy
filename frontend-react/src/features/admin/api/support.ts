@@ -184,4 +184,10 @@ export const supportApi = {
     const response = await apiClient.get('/admin-panel/users/?role=admin');
     return response.data;
   },
+
+  // История пользователя
+  getUserHistory: async (userId: number) => {
+    const response = await apiClient.get(`/admin-panel/users/${userId}/history/`);
+    return response.data;
+  },
 };

@@ -636,6 +636,55 @@ def get_user_chats(request):
     return Response(result)
 
 
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_user_history(request, user_id):
+    """История пользователя: тикеты, заказы, регистрация"""
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'Пользователь не найден'}, status=404)
+
+    # Тикеты поддержки
+    support_requests = SupportRequest.objects.filter(user=user).order_by('-created_at').values(
+        'id', 'ticket_number', 'subject', 'status', 'priority', 'created_at', 'completed_at'
+    )
+
+    # Претензии
+    claims = Claim.objects.filter(user=user).order_by('-created_at').values(
+        'id', 'ticket_number', 'subject', 'status', 'priority', 'claim_type', 'created_at', 'completed_at'
+    )
+
+    # Заказы
+    orders = Order.objects.filter(
+        Q(client=user) | Q(expert=user)
+    ).order_by('-created_at').values(
+        'id', 'title', 'status', 'created_at', 'price'
+    )[:20]
+
+    return Response({
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'role': user.role,
+            'is_active': user.is_active,
+            'date_joined': user.date_joined,
+        },
+        'support_requests': list(support_requests),
+        'claims': list(claims),
+        'orders': list(orders),
+        'stats': {
+            'total_tickets': support_requests.count() + claims.count(),
+            'open_tickets': SupportRequest.objects.filter(user=user, status='open').count() +
+                           Claim.objects.filter(user=user, status='open').count(),
+            'total_orders': Order.objects.filter(Q(client=user) | Q(expert=user)).count(),
+        }
+    })
+
+
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def report_message(request, message_id):

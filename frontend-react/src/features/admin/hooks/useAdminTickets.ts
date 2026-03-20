@@ -120,6 +120,17 @@ export const useAdminUsers = () => {
   return { adminUsers, loading };
 };
 
+export const useUserHistory = (userId: number | null) => {
+  const { data: history, isLoading: loading } = useQuery({
+    queryKey: ['user_history', userId],
+    queryFn: () => supportApi.getUserHistory(userId!),
+    enabled: !!userId,
+    staleTime: 60 * 1000,
+  });
+
+  return { history, loading };
+};
+
 export const useTicketActions = () => {
   const queryClient = useQueryClient();
 
