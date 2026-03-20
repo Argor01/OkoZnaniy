@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q, Count
 from django.utils import timezone
 
-from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage
+from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
 from .serializers import (
     SupportRequestSerializer, SupportMessageSerializer,
     ClaimSerializer, ClaimMessageSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer
@@ -16,6 +16,18 @@ from apps.orders.models import Order
 from apps.orders.serializers import OrderSerializer
 
 User = get_user_model()
+
+
+def log_activity(actor, activity_type, text, meta=None, support_request=None, claim=None):
+    """Записать событие в ленту активности тикета"""
+    TicketActivity.objects.create(
+        actor=actor,
+        activity_type=activity_type,
+        text=text,
+        meta=meta or {},
+        support_request=support_request,
+        claim=claim,
+    )
 
 
 class IsAdminUser(IsAuthenticated):
@@ -146,59 +158,63 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         support_request.admin = request.user
         support_request.status = 'in_progress'
         support_request.save()
+        log_activity(request.user, 'status_change', f'Статус изменён на «В работе»',
+                     meta={'new': 'in_progress'}, support_request=support_request)
         return Response({'message': 'Запрос взят в работу'})
-    
+
     @action(detail=True, methods=['post'])
     def assign_users(self, request, pk=None):
         """Назначить пользователей на тикет"""
         support_request = self.get_object()
         user_ids = request.data.get('user_ids', [])
-        
+
         if not isinstance(user_ids, list):
             return Response({'error': 'user_ids должен быть списком'}, status=400)
-        
-        # Проверяем, что все пользователи существуют
+
         users = User.objects.filter(id__in=user_ids)
         if len(users) != len(user_ids):
             return Response({'error': 'Некоторые пользователи не найдены'}, status=400)
-        
+
         support_request.assigned_users.set(users)
+        names = ', '.join(f'{u.first_name} {u.last_name}'.strip() or u.username for u in users)
+        log_activity(request.user, 'observer_added',
+                     f'Назначены наблюдатели: {names}' if names else 'Наблюдатели обновлены',
+                     meta={'user_ids': user_ids}, support_request=support_request)
         return Response({'message': f'Назначено {len(users)} пользователей'})
-    
+
     @action(detail=True, methods=['post'])
     def add_tag(self, request, pk=None):
         """Добавить тег к тикету"""
         support_request = self.get_object()
         tag = request.data.get('tag', '').strip()
-        
         if not tag:
             return Response({'error': 'Тег не может быть пустым'}, status=400)
-        
         support_request.add_tag(tag)
+        log_activity(request.user, 'tag_added', f'Добавлен тег {tag}',
+                     meta={'tag': tag}, support_request=support_request)
         return Response({'message': f'Тег {tag} добавлен', 'tags': support_request.get_tags_list()})
-    
+
     @action(detail=True, methods=['post'])
     def remove_tag(self, request, pk=None):
         """Удалить тег из тикета"""
         support_request = self.get_object()
         tag = request.data.get('tag', '').strip()
-        
         if not tag:
             return Response({'error': 'Тег не может быть пустым'}, status=400)
-        
         support_request.remove_tag(tag)
+        log_activity(request.user, 'tag_removed', f'Удалён тег {tag}',
+                     meta={'tag': tag}, support_request=support_request)
         return Response({'message': f'Тег {tag} удален', 'tags': support_request.get_tags_list()})
-    
+
     @action(detail=True, methods=['post'])
     def update_tags(self, request, pk=None):
         """Обновить все теги тикета"""
         support_request = self.get_object()
         tags = request.data.get('tags', '')
-        
         support_request.tags = tags
         support_request.save(update_fields=['tags'])
         return Response({'message': 'Теги обновлены', 'tags': support_request.get_tags_list()})
-    
+
     @action(detail=True, methods=['post'])
     def complete_request(self, request, pk=None):
         """Завершить запрос"""
@@ -206,20 +222,44 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         support_request.status = 'completed'
         support_request.completed_at = timezone.now()
         support_request.save()
+        log_activity(request.user, 'completed', 'Тикет завершён',
+                     support_request=support_request)
         return Response({'message': 'Запрос завершен'})
-    
+
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         """Отправить сообщение в запрос"""
         support_request = self.get_object()
+        msg_text = request.data.get('message', '')
         message = SupportMessage.objects.create(
             request=support_request,
             sender=request.user,
-            message=request.data.get('message'),
+            message=msg_text,
             is_admin=True
         )
+        log_activity(request.user, 'message', msg_text, support_request=support_request)
         serializer = SupportMessageSerializer(message)
         return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        old_status = instance.status
+        old_priority = instance.priority
+        response = super().partial_update(request, *args, **kwargs)
+        instance.refresh_from_db()
+        if instance.status != old_status:
+            status_labels = dict(SupportRequest.STATUS_CHOICES)
+            log_activity(request.user, 'status_change',
+                         f'Статус изменён: «{status_labels.get(old_status, old_status)}» → «{status_labels.get(instance.status, instance.status)}»',
+                         meta={'old': old_status, 'new': instance.status},
+                         support_request=instance)
+        if instance.priority != old_priority:
+            priority_labels = dict(SupportRequest.PRIORITY_CHOICES)
+            log_activity(request.user, 'priority_change',
+                         f'Приоритет изменён: «{priority_labels.get(old_priority, old_priority)}» → «{priority_labels.get(instance.priority, instance.priority)}»',
+                         meta={'old': old_priority, 'new': instance.priority},
+                         support_request=instance)
+        return response
 
 
 # ============= ОБРАЩЕНИЯ (CLAIMS) =============
@@ -272,6 +312,8 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.admin = request.user
         claim.status = 'in_progress'
         claim.save()
+        log_activity(request.user, 'status_change', 'Статус изменён на «В работе»',
+                     meta={'new': 'in_progress'}, claim=claim)
         return Response({'message': 'Обращение взято в работу'})
     
     @action(detail=True, methods=['post'])
@@ -282,29 +324,34 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.resolution = request.data.get('resolution', '')
         claim.completed_at = timezone.now()
         claim.save()
+        log_activity(request.user, 'completed', 'Обращение завершено', claim=claim)
         return Response({'message': 'Обращение завершено'})
     
     @action(detail=True, methods=['post'])
     def reject_claim(self, request, pk=None):
         """Отклонить обращение"""
         claim = self.get_object()
+        reason = request.data.get('reason', '')
         claim.status = 'completed'
-        claim.resolution = f"Отклонено: {request.data.get('reason', '')}"
+        claim.resolution = f"Отклонено: {reason}"
         claim.completed_at = timezone.now()
         claim.save()
+        log_activity(request.user, 'completed', f'Обращение отклонено: {reason}', claim=claim)
         return Response({'message': 'Обращение отклонено'})
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         """Отправить сообщение в претензию"""
         claim = self.get_object()
-        message = ClaimMessage.objects.create(
+        msg_text = request.data.get('message', '')
+        msg = ClaimMessage.objects.create(
             claim=claim,
             sender=request.user,
-            message=request.data.get('message'),
-            is_admin=(request.user.role == 'admin')
+            message=msg_text,
+            is_admin=(request.user.role in ['admin', 'director'])
         )
-        serializer = ClaimMessageSerializer(message)
+        log_activity(request.user, 'message', msg_text, claim=claim)
+        serializer = ClaimMessageSerializer(msg)
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
@@ -316,12 +363,15 @@ class ClaimViewSet(viewsets.ModelViewSet):
         if not isinstance(user_ids, list):
             return Response({'error': 'user_ids должен быть списком'}, status=400)
         
-        # Проверяем, что все пользователи существуют
         users = User.objects.filter(id__in=user_ids)
         if len(users) != len(user_ids):
             return Response({'error': 'Некоторые пользователи не найдены'}, status=400)
         
         claim.assigned_users.set(users)
+        names = ', '.join(f'{u.first_name} {u.last_name}'.strip() or u.username for u in users)
+        log_activity(request.user, 'observer_added',
+                     f'Назначены наблюдатели: {names}' if names else 'Наблюдатели обновлены',
+                     meta={'user_ids': user_ids}, claim=claim)
         return Response({'message': f'Назначено {len(users)} пользователей'})
     
     @action(detail=True, methods=['post'])
@@ -334,6 +384,8 @@ class ClaimViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Тег не может быть пустым'}, status=400)
         
         claim.add_tag(tag)
+        log_activity(request.user, 'tag_added', f'Добавлен тег {tag}',
+                     meta={'tag': tag}, claim=claim)
         return Response({'message': f'Тег {tag} добавлен', 'tags': claim.get_tags_list()})
     
     @action(detail=True, methods=['post'])
@@ -346,6 +398,8 @@ class ClaimViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Тег не может быть пустым'}, status=400)
         
         claim.remove_tag(tag)
+        log_activity(request.user, 'tag_removed', f'Удалён тег {tag}',
+                     meta={'tag': tag}, claim=claim)
         return Response({'message': f'Тег {tag} удален', 'tags': claim.get_tags_list()})
     
     @action(detail=True, methods=['post'])
@@ -353,10 +407,29 @@ class ClaimViewSet(viewsets.ModelViewSet):
         """Обновить все теги претензии"""
         claim = self.get_object()
         tags = request.data.get('tags', '')
-        
         claim.tags = tags
         claim.save(update_fields=['tags'])
         return Response({'message': 'Теги обновлены', 'tags': claim.get_tags_list()})
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        old_status = instance.status
+        old_priority = instance.priority
+        response = super().partial_update(request, *args, **kwargs)
+        instance.refresh_from_db()
+        if instance.status != old_status:
+            status_labels = dict(Claim.STATUS_CHOICES)
+            log_activity(request.user, 'status_change',
+                         f'Статус изменён: «{status_labels.get(old_status, old_status)}» → «{status_labels.get(instance.status, instance.status)}»',
+                         meta={'old': old_status, 'new': instance.status},
+                         claim=instance)
+        if instance.priority != old_priority:
+            priority_labels = dict(Claim.PRIORITY_CHOICES)
+            log_activity(request.user, 'priority_change',
+                         f'Приоритет изменён: «{priority_labels.get(old_priority, old_priority)}» → «{priority_labels.get(instance.priority, instance.priority)}»',
+                         meta={'old': old_priority, 'new': instance.priority},
+                         claim=instance)
+        return response
 
 
 # ============= ЧАТЫ АДМИНИСТРАТОРОВ =============
@@ -719,4 +792,136 @@ def report_message(request, message_id):
         'status': 'success',
         'violation_id': violation.id,
         'message': f'Жалоба зарегистрирована. Действие: {violation.get_action_taken_display()}'
+    })
+
+
+# ============= ЛЕНТА АКТИВНОСТИ ТИКЕТА =============
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_ticket_activity(request, ticket_type, pk):
+    """
+    Возвращает объединённую ленту:
+    - Сообщения из тикета (SupportMessage / ClaimMessage)
+    - События активности (TicketActivity)
+    - Сообщения из связанного support_chat (если есть)
+    """
+    from .serializers import TicketActivitySerializer
+
+    if ticket_type == 'support-requests':
+        try:
+            ticket = SupportRequest.objects.get(pk=pk)
+        except SupportRequest.DoesNotExist:
+            return Response({'error': 'Тикет не найден'}, status=404)
+
+        # Сообщения тикета
+        ticket_messages = [
+            {
+                'kind': 'message',
+                'id': f'tm_{m.id}',
+                'sender': {
+                    'id': m.sender.id,
+                    'first_name': m.sender.first_name,
+                    'last_name': m.sender.last_name,
+                    'role': getattr(m.sender, 'role', ''),
+                },
+                'text': m.message,
+                'is_admin': m.is_admin,
+                'source': 'ticket',
+                'created_at': m.created_at.isoformat(),
+            }
+            for m in ticket.messages.select_related('sender').all()
+        ]
+
+        # Сообщения из связанного чата
+        chat_messages = []
+        if ticket.support_chat_id:
+            from apps.chat.models import Message as ChatMessage
+            for m in ChatMessage.objects.filter(chat_id=ticket.support_chat_id).select_related('sender').order_by('created_at'):
+                chat_messages.append({
+                    'kind': 'message',
+                    'id': f'cm_{m.id}',
+                    'sender': {
+                        'id': m.sender.id,
+                        'first_name': m.sender.first_name,
+                        'last_name': m.sender.last_name,
+                        'role': getattr(m.sender, 'role', ''),
+                    },
+                    'text': m.text,
+                    'is_admin': getattr(m.sender, 'role', '') in ['admin', 'director'],
+                    'source': 'chat',
+                    'created_at': m.created_at.isoformat(),
+                })
+
+        # Активность
+        activities = [
+            {
+                'kind': 'activity',
+                'id': f'act_{a.id}',
+                'activity_type': a.activity_type,
+                'text': a.text,
+                'meta': a.meta,
+                'actor': {
+                    'id': a.actor.id if a.actor else None,
+                    'first_name': a.actor.first_name if a.actor else '',
+                    'last_name': a.actor.last_name if a.actor else '',
+                } if a.actor else None,
+                'created_at': a.created_at.isoformat(),
+            }
+            for a in ticket.activities.select_related('actor').all()
+        ]
+
+    elif ticket_type == 'claims':
+        try:
+            ticket = Claim.objects.get(pk=pk)
+        except Claim.DoesNotExist:
+            return Response({'error': 'Тикет не найден'}, status=404)
+
+        ticket_messages = [
+            {
+                'kind': 'message',
+                'id': f'tm_{m.id}',
+                'sender': {
+                    'id': m.sender.id,
+                    'first_name': m.sender.first_name,
+                    'last_name': m.sender.last_name,
+                    'role': getattr(m.sender, 'role', ''),
+                },
+                'text': m.message,
+                'is_admin': m.is_admin,
+                'source': 'ticket',
+                'created_at': m.created_at.isoformat(),
+            }
+            for m in ticket.messages.select_related('sender').all()
+        ]
+
+        chat_messages = []
+
+        activities = [
+            {
+                'kind': 'activity',
+                'id': f'act_{a.id}',
+                'activity_type': a.activity_type,
+                'text': a.text,
+                'meta': a.meta,
+                'actor': {
+                    'id': a.actor.id if a.actor else None,
+                    'first_name': a.actor.first_name if a.actor else '',
+                    'last_name': a.actor.last_name if a.actor else '',
+                } if a.actor else None,
+                'created_at': a.created_at.isoformat(),
+            }
+            for a in ticket.activities.select_related('actor').all()
+        ]
+    else:
+        return Response({'error': 'Неверный тип тикета'}, status=400)
+
+    # Объединяем и сортируем по времени
+    all_items = ticket_messages + chat_messages + activities
+    all_items.sort(key=lambda x: x['created_at'])
+
+    return Response({
+        'messages': ticket_messages + chat_messages,
+        'activities': activities,
+        'feed': all_items,
     })

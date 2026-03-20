@@ -131,6 +131,23 @@ export const useUserHistory = (userId: number | null) => {
   return { history, loading };
 };
 
+export const useTicketActivity = (ticketId: number | null, type: 'support_request' | 'claim' | null) => {
+  const { data, isLoading: loading, refetch } = useQuery({
+    queryKey: ['ticket_activity', ticketId, type],
+    queryFn: () => supportApi.getTicketActivity(ticketId!, type!),
+    enabled: !!ticketId && !!type,
+    refetchInterval: 15000, // обновляем каждые 15 сек
+  });
+
+  return {
+    feed: (data?.feed ?? []) as any[],
+    messages: (data?.messages ?? []) as any[],
+    activities: (data?.activities ?? []) as any[],
+    loading,
+    refetch,
+  };
+};
+
 export const useTicketActions = () => {
   const queryClient = useQueryClient();
 

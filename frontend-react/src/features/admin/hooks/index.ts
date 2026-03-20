@@ -55,7 +55,8 @@ export {
   useTicketByNumber,
   useTicketActions,
   useAdminUsers,
-  useUserHistory
+  useUserHistory,
+  useTicketActivity
 } from './useAdminTickets';
 
 export { useAdminStats } from './useAdminStats';

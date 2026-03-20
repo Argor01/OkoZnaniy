@@ -190,4 +190,19 @@ export const supportApi = {
     const response = await apiClient.get(`/admin-panel/users/${userId}/history/`);
     return response.data;
   },
+
+  // Лента активности тикета
+  getTicketActivity: async (ticketId: number, type: 'support_request' | 'claim') => {
+    const segment = type === 'support_request' ? 'support-requests' : 'claims';
+    const response = await apiClient.get(`/admin-panel/${segment}/${ticketId}/activity/`);
+    return response.data;
+  },
+
+  // Сообщения из чата по chat_id
+  getChatMessages: async (chatId: number) => {
+    const response = await apiClient.get(`/admin-panel/support-chats/`);
+    const chats: any[] = Array.isArray(response.data) ? response.data : [];
+    const chat = chats.find((c: any) => c.id === chatId);
+    return chat ? chat.messages : [];
+  },
 };

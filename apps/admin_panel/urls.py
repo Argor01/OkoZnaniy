@@ -36,4 +36,7 @@ urlpatterns = [
     
     # История пользователя
     path('users/<int:user_id>/history/', views.get_user_history, name='user-history'),
+
+    # Лента активности тикета
+    path('<str:ticket_type>/<int:pk>/activity/', views.get_ticket_activity, name='ticket-activity'),
 ]

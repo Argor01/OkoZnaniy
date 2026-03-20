@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage
+from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
 from apps.users.serializers import UserSerializer
 from apps.orders.serializers import OrderSerializer
 
@@ -108,3 +108,11 @@ class AdminChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdminChatRoom
         fields = ['id', 'name', 'description', 'members', 'created_by', 'created_at', 'messages']
+
+
+class TicketActivitySerializer(serializers.ModelSerializer):
+    actor = UserSerializer(read_only=True)
+
+    class Meta:
+        model = TicketActivity
+        fields = ['id', 'actor', 'activity_type', 'text', 'meta', 'created_at']

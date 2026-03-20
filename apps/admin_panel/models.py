@@ -187,6 +187,47 @@ class ClaimMessage(models.Model):
         verbose_name_plural = 'Сообщения претензий'
 
 
+class TicketActivity(models.Model):
+    """Лента активности тикета — все события: смена статуса, тегов, наблюдателей и т.д."""
+    ACTIVITY_TYPES = [
+        ('status_change', 'Смена статуса'),
+        ('priority_change', 'Смена приоритета'),
+        ('tag_added', 'Тег добавлен'),
+        ('tag_removed', 'Тег удалён'),
+        ('observer_added', 'Наблюдатель добавлен'),
+        ('observer_removed', 'Наблюдатель удалён'),
+        ('assigned', 'Назначен ответственный'),
+        ('note', 'Служебная заметка'),
+        ('message', 'Сообщение клиенту'),
+        ('created', 'Тикет создан'),
+        ('completed', 'Тикет завершён'),
+    ]
+
+    # Один из двух FK — либо support_request, либо claim
+    support_request = models.ForeignKey(
+        SupportRequest, on_delete=models.CASCADE,
+        null=True, blank=True, related_name='activities'
+    )
+    claim = models.ForeignKey(
+        Claim, on_delete=models.CASCADE,
+        null=True, blank=True, related_name='activities'
+    )
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPES)
+    text = models.TextField(blank=True)  # человекочитаемое описание
+    meta = models.JSONField(default=dict, blank=True)  # доп. данные (old/new value и т.д.)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'ticket_activities'
+        ordering = ['created_at']
+        verbose_name = 'Активность тикета'
+        verbose_name_plural = 'Активность тикетов'
+
+    def __str__(self):
+        return f"{self.activity_type} at {self.created_at}"
+
+
 class AdminChatRoom(models.Model):
     """Комнаты чатов администраторов"""
     name = models.CharField(max_length=255)
