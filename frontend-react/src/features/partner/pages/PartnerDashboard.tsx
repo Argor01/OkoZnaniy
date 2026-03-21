@@ -26,6 +26,7 @@ import { PartnerProgram } from './PartnerProgram';
 import { PartnerChatsSection } from '../components/InternalCommunication/PartnerChatsSection';
 import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
 import PartnersMap from './PartnersMap';
+import { AppFooter } from '@/components/layout/AppFooter';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -568,11 +569,7 @@ const PartnerDashboard: React.FC = () => {
         >
           {currentMenuItem?.component}
         </Content>
-        {!isMobile && (
-          <Footer className={`partnerDashboardFooter ${isTablet ? 'partnerDashboardFooterTablet' : ''}`}>
-            Партнерский кабинет © {new Date().getFullYear()}
-          </Footer>
-        )}
+        <AppFooter userRole="partner" />
       </Layout>
     </Layout>
   );
