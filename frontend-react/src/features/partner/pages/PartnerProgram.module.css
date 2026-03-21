@@ -127,32 +127,6 @@
   color: #52c41a;
 }
 
-.bonusCard {
-  text-align: center;
-  background: #fff7e6;
-  border: 2px solid #ffa940;
-}
-
-.bonusCardNext {
-  text-align: center;
-  background: #f6ffed;
-  border: 2px dashed #52c41a;
-}
-
-.bonusNumber {
-  font-size: 48px;
-  font-weight: bold;
-  margin: 16px 0;
-}
-
-.bonusNumberCurrent {
-  color: #fa8c16;
-}
-
-.bonusNumberNext {
-  color: #52c41a;
-}
-
 .infoBox {
   margin-top: 24px;
   padding: 16px;
@@ -167,20 +141,6 @@
 .infoBoxOrange {
   background: #fff7e6;
   border: 1px solid #ffd591;
-}
-
-.progressContainer {
-  margin-top: 24px;
-}
-
-.progressText {
-  font-size: 16px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.progressSubtext {
-  color: #666;
 }
 
 /* Адаптивность */
@@ -205,10 +165,6 @@
     font-size: 24px;
   }
   
-  .bonusNumber {
-    font-size: 36px;
-  }
-  
   .paymentTableHeaderCell,
   .paymentTableHeaderCellCenter,
   .paymentTableCell,
@@ -219,10 +175,6 @@
 }
 
 @media (max-width: 480px) {
-  .bonusNumber {
-    font-size: 28px;
-  }
-  
   .paymentTable {
     font-size: 12px;
   }

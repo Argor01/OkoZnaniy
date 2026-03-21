@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal, Row, Col } from 'antd';
-import { EnvironmentOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
+import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { partnersApi, MapPartner } from '../api/partners';
 import styles from './PartnersMap.module.css';
@@ -131,8 +131,54 @@ const PartnersMap: React.FC = () => {
       });
       
       setPartnersWithCoords(results);
+    } else if (!isLoading && !error) {
+      // Если нет данных от API, создаем тестовые данные
+      const testPartners: PartnerWithCoords[] = [
+        {
+          id: 1,
+          username: 'Тестовый партнер 1',
+          email: 'test1@example.com',
+          city: 'Москва',
+          phone: '+7 (999) 123-45-67',
+          role: 'partner',
+          date_joined: '2024-01-15',
+          total_referrals: 15,
+          active_referrals: 8,
+          total_earnings: 45000,
+          coordinates: { lat: 55.7558, lon: 37.6176 },
+          svgCoords: convertGeoToSvg(55.7558, 37.6176)
+        },
+        {
+          id: 2,
+          username: 'Тестовый партнер 2',
+          email: 'test2@example.com',
+          city: 'Санкт-Петербург',
+          phone: '+7 (999) 234-56-78',
+          role: 'partner',
+          date_joined: '2024-02-10',
+          total_referrals: 22,
+          active_referrals: 12,
+          total_earnings: 67000,
+          coordinates: { lat: 59.9311, lon: 30.3609 },
+          svgCoords: convertGeoToSvg(59.9311, 30.3609)
+        },
+        {
+          id: 3,
+          username: 'Тестовый партнер 3',
+          email: 'test3@example.com',
+          city: 'Новосибирск',
+          role: 'partner',
+          date_joined: '2024-03-05',
+          total_referrals: 9,
+          active_referrals: 5,
+          total_earnings: 28000,
+          coordinates: { lat: 55.0084, lon: 82.9357 },
+          svgCoords: convertGeoToSvg(55.0084, 82.9357)
+        }
+      ];
+      setPartnersWithCoords(testPartners);
     }
-  }, [partners]);
+  }, [partners, isLoading, error]);
 
   const filteredPartners = selectedCity 
     ? partnersWithCoords.filter(partner => partner.city === selectedCity)
@@ -188,6 +234,10 @@ const PartnersMap: React.FC = () => {
             onChange={setSelectedCity}
             allowClear
             className={styles.citySelect}
+            showSearch
+            filterOption={(input, option) =>
+              String(option?.children || '').toLowerCase().includes(input.toLowerCase())
+            }
           >
             {uniqueCities.map(city => (
               <Option key={city} value={city}>
@@ -310,12 +360,21 @@ const PartnersMap: React.FC = () => {
             <Card title="Список партнеров" className={styles.partnersCard}>
               <div className={styles.partnersList}>
                 {filteredPartners.length === 0 ? (
-                  <Text type="secondary">
-                    {selectedCity 
-                      ? `Нет партнеров в городе ${selectedCity}` 
-                      : 'Нет партнеров для отображения'
-                    }
-                  </Text>
+                  <div className={styles.emptyState}>
+                    <div className={styles.emptyStateIcon}>⚠</div>
+                    <Text className={styles.emptyStateText}>
+                      {selectedCity 
+                        ? `Нет партнеров в городе ${selectedCity}` 
+                        : 'Нет партнеров для отображения'
+                      }
+                    </Text>
+                    <Text className={styles.emptyStateSubtext}>
+                      {selectedCity 
+                        ? 'Попробуйте выбрать другой город или сбросить фильтр'
+                        : 'Партнеры появятся здесь после регистрации'
+                      }
+                    </Text>
+                  </div>
                 ) : (
                   filteredPartners.map(partner => (
                     <Card
@@ -325,20 +384,71 @@ const PartnersMap: React.FC = () => {
                       onClick={() => handleMarkerClick(partner)}
                       hoverable
                     >
-                      <div className={styles.partnerInfo}>
-                        <Title level={5} className={styles.partnerName}>
+                      <div className={styles.partnerInfo} style={{ background: '#ffffff', padding: '16px' }}>
+                        <Title 
+                          level={5} 
+                          className={styles.partnerName}
+                          style={{ 
+                            color: '#1f2937 !important', 
+                            fontWeight: 600, 
+                            fontSize: '16px',
+                            marginBottom: '8px'
+                          }}
+                        >
                           {partner.username}
                         </Title>
-                        <Space direction="vertical" size="small">
-                          <Text>
-                            <EnvironmentOutlined /> {partner.city}
-                          </Text>
-                          <Text>
-                            <UserOutlined /> Рефералов: {partner.total_referrals}
-                          </Text>
-                          <Text type="success">
-                            Доход: {partner.total_earnings.toLocaleString('ru-RU')} ₽
-                          </Text>
+                        <div 
+                          className={styles.partnerCity}
+                          style={{ 
+                            color: '#ffffff !important',
+                            background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            marginBottom: '8px',
+                            display: 'inline-block'
+                          }}
+                        >
+                          {partner.city}
+                        </div>
+                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                          <div className={styles.partnerStat} style={{ color: '#374151' }}>
+                            <span className={styles.partnerStatIcon} style={{ color: '#2b9fe6' }}>
+                              <UserOutlined />
+                            </span>
+                            <span style={{ color: '#374151' }}>Рефералов: </span>
+                            <span 
+                              className={styles.partnerStatValue}
+                              style={{ color: '#1f2937', fontWeight: 600 }}
+                            >
+                              {partner.total_referrals}
+                            </span>
+                          </div>
+                          <div className={styles.partnerStat} style={{ color: '#374151' }}>
+                            <span className={styles.partnerStatIcon} style={{ color: '#2b9fe6' }}>
+                              <UserOutlined />
+                            </span>
+                            <span style={{ color: '#374151' }}>Активных: </span>
+                            <span 
+                              className={styles.partnerStatValue}
+                              style={{ color: '#1f2937', fontWeight: 600 }}
+                            >
+                              {partner.active_referrals}
+                            </span>
+                          </div>
+                          <div 
+                            className={styles.partnerEarnings}
+                            style={{ 
+                              color: '#ffffff !important',
+                              background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
+                              padding: '8px 16px',
+                              borderRadius: '4px',
+                              textAlign: 'center',
+                              marginTop: '8px'
+                            }}
+                          >
+                            {partner.total_earnings.toLocaleString('ru-RU')} ₽
+                          </div>
                           {partner.error && (
                             <Text type="danger" className={styles.errorText}>
                               {partner.error}

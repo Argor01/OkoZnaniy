@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Typography, Row, Col, Button, Space, Divider, Progress, Tag, message } from 'antd';
+import { Card, Typography, Row, Col, Button, Space, Tag, message } from 'antd';
 import { 
   CopyOutlined, 
   ShareAltOutlined, 
@@ -16,23 +16,16 @@ const { Title, Text, Paragraph } = Typography;
 
 interface PartnerProgramProps {
   referralLink?: string;
-  currentEarnings?: number;
-  nextBonusThreshold?: number;
 }
 
 export const PartnerProgram: React.FC<PartnerProgramProps> = ({
-  referralLink = "https://okoznaniy.ru/ref/ABC123",
-  currentEarnings = 0,
-  nextBonusThreshold = 10000
+  referralLink = "https://okoznaniy.ru/ref/ABC123"
 }) => {
   
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
     message.success('Ссылка скопирована в буфер обмена');
   };
-
-  const bonusProgress = (currentEarnings / nextBonusThreshold) * 100;
-  const remainingToBonus = nextBonusThreshold - currentEarnings;
 
   return (
     <div className={styles.partnerProgramContainer}>
@@ -185,63 +178,6 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
         <div className={`${styles.infoBox} ${styles.infoBoxOrange}`}>
           <Text>
             <strong>Статистика:</strong> В личном кабинете вы можете отслеживать переходы по ссылке, количество заказанных работ, доход и ожидаемый доход (работы на выполнении и доработке).
-          </Text>
-        </div>
-      </Card>
-
-      {/* Бонусная программа */}
-      <Card className={styles.partnerProgramCard}>
-        <Title level={4}>
-          <TrophyOutlined /> Бонусная программа
-        </Title>
-        <Paragraph style={{ fontSize: '16px' }}>
-          Дополнительно выплачиваем <strong>1 000 ₽</strong> за каждые заработанные вами <strong>10 000 ₽</strong> с рефералов.
-        </Paragraph>
-        <Paragraph>
-          Вы можете в реальном времени отследить сколько вам осталось получить с рефералов до следующей выплаты
-        </Paragraph>
-
-        <Row gutter={[24, 16]} style={{ marginTop: '24px' }}>
-          <Col xs={24} md={12}>
-            <Card size="small" className={styles.bonusCard}>
-              <Title level={5} style={{ color: '#fa8c16', margin: '0 0 8px 0' }}>
-                Текущая выплата
-              </Title>
-              <div className={`${styles.bonusNumber} ${styles.bonusNumberCurrent}`}>
-                0
-              </div>
-              <Text style={{ fontSize: '16px' }}>Выплата бонусов 0</Text>
-              <br />
-              <Text type="secondary">Заработано с рефералов 0 ₽</Text>
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card size="small" className={styles.bonusCardNext}>
-              <Title level={5} style={{ color: '#52c41a', margin: '0 0 8px 0' }}>
-                Следующая выплата
-              </Title>
-              <div className={`${styles.bonusNumber} ${styles.bonusNumberNext}`}>
-                1
-              </div>
-              <Text style={{ fontSize: '16px' }}>Выплата бонусов 1</Text>
-              <br />
-              <Text type="secondary">Заработано с рефералов 10 000 ₽</Text>
-            </Card>
-          </Col>
-        </Row>
-
-        <div className={styles.progressContainer}>
-          <Text className={styles.progressText}>
-            <strong>{remainingToBonus.toLocaleString()} / {nextBonusThreshold.toLocaleString()} ₽ заработано с рефералов</strong>
-          </Text>
-          <Progress 
-            percent={bonusProgress} 
-            strokeColor="#52c41a"
-            trailColor="#f0f0f0"
-            style={{ marginBottom: '8px' }}
-          />
-          <Text className={styles.progressSubtext}>
-            До следующей бонусной выплаты осталось заработать: <strong>{remainingToBonus.toLocaleString()} ₽</strong>
           </Text>
         </div>
       </Card>
