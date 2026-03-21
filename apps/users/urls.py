@@ -28,5 +28,22 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
     path('google/callback/', views.google_callback, name='google_callback'),
+    
+    # Специфичные маршруты должны идти перед общими router.urls
+    path('partners_list/', views.UserViewSet.as_view({'get': 'partners_list'}), name='partners_list'),
+    path('partner_dashboard/', views.UserViewSet.as_view({'get': 'partner_dashboard'}), name='partner_dashboard'),
+    path('generate_referral_link/', views.UserViewSet.as_view({'post': 'generate_referral_link'}), name='generate_referral_link'),
+    path('admin_partners/', views.UserViewSet.as_view({'get': 'admin_partners'}), name='admin_partners'),
+    path('admin_earnings/', views.UserViewSet.as_view({'get': 'admin_earnings'}), name='admin_earnings'),
+    path('admin_mark_earning_paid/', views.UserViewSet.as_view({'post': 'admin_mark_earning_paid'}), name='admin_mark_earning_paid'),
+    path('recent_users/', views.UserViewSet.as_view({'get': 'recent_users'}), name='recent_users'),
+    path('support_user/', views.UserViewSet.as_view({'post': 'support_user'}), name='support_user'),
+    path('client_orders/', views.UserViewSet.as_view({'get': 'client_orders'}), name='client_orders'),
+    path('update_me/', views.UserViewSet.as_view({'put': 'update_me', 'patch': 'update_me'}), name='update_me'),
+    path('submit_expert_application/', views.UserViewSet.as_view({'post': 'submit_expert_application'}), name='submit_expert_application'),
+    path('admin_arbitrators/', views.UserViewSet.as_view({'get': 'admin_arbitrators'}), name='admin_arbitrators'),
+    path('me/', views.UserViewSet.as_view({'get': 'me'}), name='user_me'),
+    
+    # Общие маршруты router должны идти в конце
     path('', include(router.urls)),
 ]

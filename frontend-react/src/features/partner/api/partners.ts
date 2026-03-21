@@ -1,8 +1,8 @@
 import apiClient from '@/api/client';
-import { PartnerDashboardData, PartnerEarning, PartnerInfo, Referral, ReferralLinkResponse } from '@/features/partner/types/partners';
+import { PartnerDashboardData, PartnerEarning, PartnerInfo, Referral, ReferralLinkResponse, MapPartner } from '@/features/partner/types/partners';
 import { API_ENDPOINTS } from '@/config/endpoints';
 
-export type { PartnerDashboardData, PartnerEarning, PartnerInfo, Referral, ReferralLinkResponse };
+export type { PartnerDashboardData, PartnerEarning, PartnerInfo, Referral, ReferralLinkResponse, MapPartner };
 
 export const partnersApi = {
   getDashboard: async (): Promise<PartnerDashboardData> => {
@@ -15,7 +15,7 @@ export const partnersApi = {
     return response.data;
   },
 
-  getPartnersList: async (): Promise<any[]> => {
+  getPartnersList: async (): Promise<MapPartner[]> => {
     const response = await apiClient.get(API_ENDPOINTS.partners.list);
     return response.data;
   },

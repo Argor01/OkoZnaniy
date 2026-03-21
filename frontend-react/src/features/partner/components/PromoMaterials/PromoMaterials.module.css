@@ -1,23 +1,46 @@
 /* Стили для страницы промоматериалов */
 
 .promoMaterials {
-  padding: 24px;
+  padding: var(--spacing-lg, 24px) var(--spacing-xl, 32px);
   max-width: 1200px;
   margin: 0 auto;
+  background: var(--bg-secondary, #fafbfc);
+  min-height: 100vh;
 }
 
 .header {
-  margin-bottom: 32px;
+  margin-bottom: var(--spacing-2xl, 48px);
   text-align: center;
+  padding: var(--spacing-xl, 32px) 0;
 }
 
 .header h2 {
-  color: #1890ff;
-  margin-bottom: 16px;
+  color: var(--primary-blue, #3b82f6);
+  margin-bottom: var(--spacing-md, 16px);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-size: 2.5rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary-blue, #3b82f6) 0%, var(--primary-blue-hover, #2563eb) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header p {
+  color: var(--text-secondary, #6b7280);
+  font-size: 1.125rem;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .promoTabs {
-  background: #fff;
+  background: var(--bg-primary, #ffffff);
+  border-radius: var(--radius-lg, 20px);
+  padding: var(--spacing-xl, 32px);
+  box-shadow: var(--shadow-card, 0 8px 19px 0 rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color, #e5e7eb);
+}
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

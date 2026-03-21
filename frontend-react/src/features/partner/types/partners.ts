@@ -37,3 +37,17 @@ export interface ReferralLinkResponse {
   referral_code: string;
   referral_link: string;
 }
+
+// Тип для партнера в карте
+export interface MapPartner {
+  id: number;
+  username: string;
+  email: string;
+  city: string;
+  phone?: string;
+  role: string;
+  date_joined: string;
+  total_referrals: number;
+  active_referrals: number;
+  total_earnings: number;
+}

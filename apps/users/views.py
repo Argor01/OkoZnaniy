@@ -16,6 +16,7 @@ from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from apps.orders.models import Order, Transaction
+from .models import PartnerEarning
 from apps.orders.serializers import OrderSerializer, TransactionSerializer
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
@@ -515,7 +516,6 @@ class UserViewSet(viewsets.ModelViewSet):
         ).distinct()
         
         # Доходы партнера
-        from .models import PartnerEarning
         earnings = PartnerEarning.objects.filter(partner=user)
         total_earnings = sum(earning.amount for earning in earnings)
         
@@ -606,7 +606,6 @@ class UserViewSet(viewsets.ModelViewSet):
             ).distinct().count()
             
             # Подсчитываем общий доход
-            from .models import PartnerEarning
             total_earnings = PartnerEarning.objects.filter(
                 partner=partner
             ).aggregate(
@@ -652,7 +651,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        from .models import PartnerEarning
         earnings = PartnerEarning.objects.select_related('partner', 'referral').order_by('-created_at')
         
         earnings_data = []
@@ -715,7 +713,6 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            from .models import PartnerEarning
             earning = PartnerEarning.objects.get(id=earning_id)
             earning.is_paid = True
             earning.save()
