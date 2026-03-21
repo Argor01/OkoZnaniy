@@ -8,23 +8,18 @@ import {
   Radio, 
   Space, 
   Tabs, 
-  Image, 
   message,
   Tooltip,
-  Tag,
-  Input
+  Tag
 } from 'antd';
 import { 
   DownloadOutlined, 
   CopyOutlined, 
-  FileImageOutlined,
-  LinkOutlined,
-  CodeOutlined
+  FileImageOutlined
 } from '@ant-design/icons';
 import styles from './PromoMaterials.module.css';
 
 const { Title, Text, Paragraph } = Typography;
-const { TextArea } = Input;
 
 interface BannerConfig {
   id: string;
@@ -59,20 +54,9 @@ export const PromoMaterials: React.FC = () => {
     return `https://cdn.studwork.org/banners/${selectedBannerType}/${selectedSize}/${selectedDesign}.${selectedFormat}`;
   };
 
-  const generateEmbedCode = () => {
-    const bannerUrl = generateBannerUrl();
-    return `<a href="${referralLink}"><img src="${bannerUrl}" alt="Студворк - интернет-сервис помощи студентам" /></a>`;
-  };
-
   const handleDownload = () => {
     // Заглушка - в реальности здесь будет скачивание файла
     message.success('Баннер скачан');
-  };
-
-  const handleCopyCode = () => {
-    const code = generateEmbedCode();
-    navigator.clipboard.writeText(code);
-    message.success('HTML код скопирован в буфер обмена');
   };
 
   const handleCopyLink = () => {
@@ -194,43 +178,17 @@ export const PromoMaterials: React.FC = () => {
                 {renderBannerPreview()}
                 
                 <div style={{ marginTop: 16 }}>
-                  <Space>
-                    <Button 
-                      type="primary" 
-                      icon={<DownloadOutlined />}
-                      onClick={handleDownload}
-                    >
-                      Скачать
-                    </Button>
-                    <Button 
-                      icon={<CopyOutlined />}
-                      onClick={handleCopyCode}
-                    >
-                      Скопировать код
-                    </Button>
-                  </Space>
+                  <Button 
+                    type="primary" 
+                    icon={<DownloadOutlined />}
+                    onClick={handleDownload}
+                  >
+                    Скачать
+                  </Button>
                 </div>
               </Card>
             </Col>
           </Row>
-
-          {/* HTML код */}
-          <Card title="HTML код для вставки" style={{ marginTop: 24 }}>
-            <TextArea
-              value={generateEmbedCode()}
-              readOnly
-              autoSize={{ minRows: 3, maxRows: 6 }}
-              style={{ fontFamily: 'monospace' }}
-            />
-            <div style={{ marginTop: 12 }}>
-              <Button 
-                icon={<CopyOutlined />}
-                onClick={handleCopyCode}
-              >
-                Скопировать код
-              </Button>
-            </div>
-          </Card>
         </div>
       )
     },
@@ -256,34 +214,6 @@ export const PromoMaterials: React.FC = () => {
               Используйте эту ссылку для привлечения новых пользователей. 
               Все регистрации по этой ссылке будут засчитаны как ваши рефералы.
             </Paragraph>
-          </Card>
-
-          <Card title="Короткие ссылки" style={{ marginTop: 24 }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <div className={styles.shortLink}>
-                <Text strong>Для авторов:</Text>
-                <div className={styles.linkSection}>
-                  <div className={styles.linkBox}>
-                    https://studwork.org/authors?ref=ABC123
-                  </div>
-                  <Button icon={<CopyOutlined />} size="small">
-                    Копировать
-                  </Button>
-                </div>
-              </div>
-              
-              <div className={styles.shortLink}>
-                <Text strong>Для студентов:</Text>
-                <div className={styles.linkSection}>
-                  <div className={styles.linkBox}>
-                    https://studwork.org/orders?ref=ABC123
-                  </div>
-                  <Button icon={<CopyOutlined />} size="small">
-                    Копировать
-                  </Button>
-                </div>
-              </div>
-            </Space>
           </Card>
         </div>
       )
