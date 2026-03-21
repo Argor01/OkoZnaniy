@@ -380,7 +380,7 @@ const PartnerDashboard: React.FC = () => {
       label: 'Партнерская программа',
       component: (
         <PartnerProgram 
-          referralLink={data.partner_info.referral_link}
+          referralLink={`https://okoznaniy.ru/ref/${data.partner_info.referral_code}`}
           currentEarnings={data.partner_info.total_earnings}
           nextBonusThreshold={10000}
         />
@@ -554,9 +554,6 @@ const PartnerDashboard: React.FC = () => {
                 onClick={() => setDrawerVisible(true)}
               />
             )}
-            <Title level={4} className="partnerDashboardHeaderTitle">
-              Партнерский кабинет
-            </Title>
           </div>
 
           <Button

@@ -74,7 +74,7 @@ export const PromoMaterials: React.FC = () => {
         >
           <div className={styles.bannerContent}>
             <div className={styles.bannerLogo}>
-              🚀 СТУДВОРК
+              🚀 ОКОЗНАНИЙ
             </div>
             <div className={styles.bannerText}>
               Ищешь работу на дому?
@@ -108,7 +108,6 @@ export const PromoMaterials: React.FC = () => {
                       <Radio.Group 
                         value={selectedOrientation} 
                         onChange={(e) => setSelectedOrientation(e.target.value)}
-                        style={{ marginTop: 12 }}
                       >
                         <Radio value="horizontal">Горизонтальная</Radio>
                         <Radio value="vertical">Вертикальная</Radio>
@@ -117,7 +116,7 @@ export const PromoMaterials: React.FC = () => {
                   )}
 
                   {/* Размер */}
-                  <div>
+                  <div className={styles.configSection}>
                     <Text strong>Размер:</Text>
                     <div style={{ marginTop: 8 }}>
                       {currentConfig?.sizes.map(size => (
@@ -140,7 +139,6 @@ export const PromoMaterials: React.FC = () => {
                     <Radio.Group 
                       value={selectedDesign} 
                       onChange={(e) => setSelectedDesign(e.target.value)}
-                      style={{ marginTop: 12 }}
                     >
                       {currentConfig?.designs.map(design => (
                         <Radio key={design} value={design}>
@@ -156,7 +154,6 @@ export const PromoMaterials: React.FC = () => {
                     <Radio.Group 
                       value={selectedFormat} 
                       onChange={(e) => setSelectedFormat(e.target.value)}
-                      style={{ marginTop: 12 }}
                     >
                       <Radio value="png">PNG</Radio>
                       <Radio value="jpg">JPG</Radio>
@@ -194,7 +191,7 @@ export const PromoMaterials: React.FC = () => {
           <FileImageOutlined /> Промоматериалы
         </Title>
         <Paragraph>
-          Используйте готовые баннеры для продвижения Студворк 
+          Используйте готовые баннеры для продвижения ОкоЗнаний 
           и увеличения количества рефералов
         </Paragraph>
       </div>
