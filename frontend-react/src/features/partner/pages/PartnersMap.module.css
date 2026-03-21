@@ -1,6 +1,6 @@
 .container {
-  padding: 24px;
-  background: #f5f5f5;
+  padding: var(--spacing-lg, 24px);
+  background: var(--bg-secondary, #f5f5f5);
   min-height: 100vh;
 }
 
@@ -8,15 +8,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg, 24px);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
+}
+
+.header h3 {
+  color: var(--text-primary, #1f2937);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  margin: 0;
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
   flex-wrap: wrap;
 }
 
@@ -27,7 +33,7 @@
 .content {
   display: grid;
   grid-template-columns: 1fr 400px;
-  gap: 24px;
+  gap: var(--spacing-lg, 24px);
   height: calc(100vh - 200px);
 }
 
@@ -40,11 +46,15 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-card, 0 8px 19px 0 rgba(0, 0, 0, 0.1));
+  overflow: hidden;
 }
 
 .mapCard .ant-card-body {
   flex: 1;
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
   display: flex;
   flex-direction: column;
 }
@@ -52,9 +62,10 @@
 .mapWrapper {
   flex: 1;
   position: relative;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  border-radius: var(--radius-md, 10px);
   overflow: hidden;
+  box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.1));
 }
 
 .mapSvgContainer {
@@ -67,11 +78,16 @@
   width: 100%;
   height: 100%;
   cursor: grab;
-  background: white;
+  background: var(--bg-primary, white);
+  transition: all 0.3s ease;
 }
 
 .russiaMap:active {
   cursor: grabbing;
+}
+
+.russiaMap:hover {
+  transform: scale(1.01);
 }
 
 .markersOverlay {
@@ -89,43 +105,88 @@
   cursor: pointer;
   transform: translate(-50%, -50%);
   z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .markerDot {
   width: 12px;
   height: 12px;
-  background: #dc3545;
-  border: 2px solid white;
+  background: var(--primary-blue, #3b82f6);
+  border: 2px solid var(--bg-primary, white);
   border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 130, 246, 0.4));
+  position: relative;
+}
+
+.markerDot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--primary-blue, #3b82f6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 24px;
+    height: 24px;
+    opacity: 0;
+  }
 }
 
 .marker:hover .markerDot {
   width: 16px;
   height: 16px;
-  background: #c82333;
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
+  background: var(--primary-blue-hover, #2563eb);
+  box-shadow: var(--shadow-lg, 0 6px 20px rgba(59, 130, 246, 0.6));
 }
 
 .markerLabel {
   position: absolute;
-  top: -25px;
+  top: -30px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--bg-primary, white);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.75rem;
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+.markerLabel::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
 }
 
 .marker:hover .markerLabel {
   opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
 }
 
 .sidebar {
@@ -137,11 +198,26 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-card, 0 8px 19px 0 rgba(0, 0, 0, 0.1));
+  background: var(--gradient-card, linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%));
+}
+
+.partnersCard .ant-card-head {
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-primary, #ffffff);
+}
+
+.partnersCard .ant-card-head-title {
+  color: var(--text-primary, #1f2937);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-weight: 600;
 }
 
 .partnersCard .ant-card-body {
   flex: 1;
-  padding: 16px;
+  padding: var(--spacing-md, 16px);
   display: flex;
   flex-direction: column;
 }
@@ -151,41 +227,96 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md, 12px);
+  padding-right: var(--spacing-xs, 4px);
+}
+
+.partnersList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.partnersList::-webkit-scrollbar-track {
+  background: var(--bg-tertiary, #f3f4f6);
+  border-radius: 3px;
+}
+
+.partnersList::-webkit-scrollbar-thumb {
+  background: var(--border-color, #e5e7eb);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.partnersList::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-blue, #3b82f6);
 }
 
 .partnerCard {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+  border-radius: var(--radius-md, 10px);
+  background: var(--bg-primary, white);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
+  position: relative;
+  overflow: hidden;
+}
+
+.partnerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
 }
 
 .partnerCard:hover {
-  border-color: #1890ff;
+  border-color: var(--primary-blue, #3b82f6);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 130, 246, 0.15));
+}
+
+.partnerCard:hover::before {
+  transform: scaleY(1);
 }
 
 .partnerInfo {
-  padding: 8px 0;
+  padding: var(--spacing-sm, 8px) 0;
 }
 
 .partnerName {
-  margin-bottom: 8px !important;
-  color: #1890ff;
+  margin-bottom: var(--spacing-sm, 8px) !important;
+  color: var(--primary-blue, #3b82f6);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-weight: 600;
+}
+
+.partnerInfo .ant-space-item {
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.875rem;
+}
+
+.partnerInfo .ant-typography-success {
+  color: #10b981 !important;
+  font-weight: 600;
 }
 
 .errorText {
-  font-size: 12px;
+  font-size: 0.75rem;
+  color: #ef4444;
+  font-style: italic;
 }
 
 .partnerDetails {
-  padding: 16px 0;
+  padding: var(--spacing-md, 16px) 0;
 }
 
 .partnerStats {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  margin-top: var(--spacing-lg, 24px);
+  padding-top: var(--spacing-md, 16px);
+  border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
 .loadingContainer {
@@ -194,12 +325,72 @@
   align-items: center;
   justify-content: center;
   height: 400px;
-  gap: 16px;
+  gap: var(--spacing-md, 16px);
+  background: var(--bg-primary, white);
+  border-radius: var(--radius-lg, 20px);
+  box-shadow: var(--shadow-card, 0 8px 19px 0 rgba(0, 0, 0, 0.1));
 }
 
 .loadingText {
-  font-size: 16px;
-  color: #666;
+  font-size: 1rem;
+  color: var(--text-secondary, #6b7280);
+  font-family: var(--font-body, 'Jost-Regular', sans-serif);
+}
+
+/* Стили для Ant Design компонентов */
+.container .ant-select-selector {
+  border-radius: var(--radius-sm, 8px);
+  border-color: var(--border-color, #e5e7eb);
+  transition: all 0.3s ease;
+}
+
+.container .ant-select-selector:hover {
+  border-color: var(--primary-blue, #3b82f6);
+}
+
+.container .ant-select-focused .ant-select-selector {
+  border-color: var(--primary-blue, #3b82f6);
+  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(59, 130, 246, 0.1));
+}
+
+.container .ant-tag {
+  border-radius: var(--radius-sm, 8px);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-weight: 600;
+}
+
+.container .ant-modal-content {
+  border-radius: var(--radius-lg, 20px);
+  overflow: hidden;
+}
+
+.container .ant-modal-header {
+  background: var(--gradient-card, linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%));
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.container .ant-modal-title {
+  color: var(--text-primary, #1f2937);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-weight: 600;
+}
+
+.container .ant-btn {
+  border-radius: var(--radius-sm, 8px);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container .ant-btn-primary {
+  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  border: none;
+}
+
+.container .ant-btn-primary:hover {
+  background: var(--gradient-hover, linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 130, 246, 0.15));
 }
 
 /* Адаптивный дизайн */
@@ -221,13 +412,13 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: var(--spacing-md, 16px);
   }
   
   .header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: var(--spacing-md, 12px);
   }
   
   .controls {
@@ -239,7 +430,7 @@
   }
   
   .content {
-    gap: 16px;
+    gap: var(--spacing-md, 16px);
   }
   
   .mapContainer {
@@ -251,17 +442,17 @@
   }
   
   .partnerCard {
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-sm, 8px);
   }
   
   .partnerInfo {
-    padding: 4px 0;
+    padding: var(--spacing-xs, 4px) 0;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 12px;
+    padding: var(--spacing-sm, 12px);
   }
   
   .mapContainer {
@@ -283,10 +474,14 @@
   }
   
   .markerLabel {
-    font-size: 9px;
+    font-size: 0.625rem;
   }
   
   .partnerName {
-    font-size: 14px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .header h3 {
+    font-size: 1.25rem;
   }
 }

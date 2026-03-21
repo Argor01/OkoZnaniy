@@ -1,27 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal, Row, Col } from 'antd';
 import { EnvironmentOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { partnersApi } from '../api/partners';
+import { partnersApi, MapPartner } from '../api/partners';
 import styles from './PartnersMap.module.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-interface Partner {
-  id: number;
-  username: string;
-  email: string;
-  city: string;
-  phone?: string;
-  role: string;
-  date_joined: string;
-  total_referrals: number;
-  active_referrals: number;
-  total_earnings: number;
-}
-
-interface PartnerWithCoords extends Partner {
+interface PartnerWithCoords extends MapPartner {
   coordinates?: { lat: number; lon: number };
   svgCoords?: { x: number; y: number };
   error?: string;
@@ -112,12 +99,22 @@ const PartnersMap: React.FC = () => {
   }
 
   if (error) {
+    console.error('Ошибка загрузки партнеров:', error);
     return (
       <Alert
         message="Ошибка загрузки"
-        description="Не удалось загрузить список партнеров"
+        description={
+          error instanceof Error 
+            ? `Не удалось загрузить список партнеров: ${error.message}` 
+            : "Не удалось загрузить список партнеров"
+        }
         type="error"
         showIcon
+        action={
+          <Button size="small" onClick={() => window.location.reload()}>
+            Обновить страницу
+          </Button>
+        }
       />
     );
   }
@@ -146,123 +143,141 @@ const PartnersMap: React.FC = () => {
         </div>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.mapContainer}>
-          <Card className={styles.mapCard}>
-            <div className={styles.mapWrapper}>
-              <div className={styles.mapSvgContainer}>
-                <svg
-                  className={styles.russiaMap}
-                  viewBox="0 0 1000 600"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <defs>
-                    <style>
-                      {`
-                        .region { 
-                          fill: #e8f4f8; 
-                          stroke: #2c3e50; 
-                          stroke-width: 0.5; 
-                          transition: all 0.3s ease; 
-                          cursor: pointer;
-                        }
-                        .region:hover { 
-                          fill: #d4edda; 
-                          stroke-width: 1; 
-                        }
-                      `}
-                    </style>
-                  </defs>
-                  
-                  {/* Упрощенная карта России */}
-                  <g id="russia-regions">
-                    <path className="region" d="M50,150 L200,120 L350,140 L350,200 L200,220 L50,200 Z" />
-                    <path className="region" d="M200,120 L400,100 L550,120 L550,180 L400,200 L350,140 Z" />
-                    <path className="region" d="M400,100 L650,80 L800,100 L800,160 L650,180 L550,120 Z" />
-                    <path className="region" d="M650,80 L850,60 L950,80 L950,140 L850,160 L800,100 Z" />
-                    <path className="region" d="M50,200 L200,220 L350,200 L350,280 L200,300 L50,280 Z" />
-                    <path className="region" d="M200,220 L400,200 L550,180 L550,260 L400,280 L350,200 Z" />
-                    <path className="region" d="M400,200 L650,180 L800,160 L800,240 L650,260 L550,180 Z" />
-                    <path className="region" d="M650,180 L850,160 L950,140 L950,220 L850,240 L800,160 Z" />
-                    <path className="region" d="M50,280 L200,300 L350,280 L350,360 L200,380 L50,360 Z" />
-                    <path className="region" d="M200,300 L400,280 L550,260 L550,340 L400,360 L350,280 Z" />
-                    <path className="region" d="M400,280 L650,260 L800,240 L800,320 L650,340 L550,260 Z" />
-                    <path className="region" d="M650,260 L850,240 L950,220 L950,300 L850,320 L800,240 Z" />
-                    <path className="region" d="M50,360 L200,380 L350,360 L350,450 L200,450 L50,450 Z" />
-                    <path className="region" d="M200,380 L400,360 L550,340 L550,420 L400,450 L350,360 Z" />
-                    <path className="region" d="M400,360 L650,340 L800,320 L800,400 L650,420 L550,340 Z" />
-                    <path className="region" d="M650,340 L850,320 L950,300 L950,380 L850,400 L800,320 Z" />
-                    <path className="region" d="M800,400 L950,380 L950,450 L800,450 Z" />
-                  </g>
-                </svg>
-                
-                {/* Маркеры партнеров */}
-                <div className={styles.markersOverlay}>
-                  {filteredPartners.map(partner => {
-                    if (!partner.svgCoords) return null;
+      {partnersWithCoords.length === 0 ? (
+        <Alert
+          message="Нет данных"
+          description="В системе пока нет партнеров с указанными городами"
+          type="info"
+          showIcon
+        />
+      ) : (
+        <div className={styles.content}>
+          <div className={styles.mapContainer}>
+            <Card className={styles.mapCard}>
+              <div className={styles.mapWrapper}>
+                <div className={styles.mapSvgContainer}>
+                  <svg
+                    className={styles.russiaMap}
+                    viewBox="0 0 1000 600"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <style>
+                        {`
+                          .region { 
+                            fill: #e8f4f8; 
+                            stroke: #2c3e50; 
+                            stroke-width: 0.5; 
+                            transition: all 0.3s ease; 
+                            cursor: pointer;
+                          }
+                          .region:hover { 
+                            fill: #d4edda; 
+                            stroke-width: 1; 
+                          }
+                        `}
+                      </style>
+                    </defs>
                     
-                    return (
-                      <div
-                        key={partner.id}
-                        className={styles.marker}
-                        style={{
-                          left: `${(partner.svgCoords.x / 1000) * 100}%`,
-                          top: `${(partner.svgCoords.y / 600) * 100}%`,
-                        }}
-                        onClick={() => handleMarkerClick(partner)}
-                        title={`${partner.username} - ${partner.city}`}
-                      >
-                        <div className={styles.markerDot} />
-                        <div className={styles.markerLabel}>
-                          {partner.city}
+                    {/* Упрощенная карта России */}
+                    <g id="russia-regions">
+                      <path className="region" d="M50,150 L200,120 L350,140 L350,200 L200,220 L50,200 Z" />
+                      <path className="region" d="M200,120 L400,100 L550,120 L550,180 L400,200 L350,140 Z" />
+                      <path className="region" d="M400,100 L650,80 L800,100 L800,160 L650,180 L550,120 Z" />
+                      <path className="region" d="M650,80 L850,60 L950,80 L950,140 L850,160 L800,100 Z" />
+                      <path className="region" d="M50,200 L200,220 L350,200 L350,280 L200,300 L50,280 Z" />
+                      <path className="region" d="M200,220 L400,200 L550,180 L550,260 L400,280 L350,200 Z" />
+                      <path className="region" d="M400,200 L650,180 L800,160 L800,240 L650,260 L550,180 Z" />
+                      <path className="region" d="M650,180 L850,160 L950,140 L950,220 L850,240 L800,160 Z" />
+                      <path className="region" d="M50,280 L200,300 L350,280 L350,360 L200,380 L50,360 Z" />
+                      <path className="region" d="M200,300 L400,280 L550,260 L550,340 L400,360 L350,280 Z" />
+                      <path className="region" d="M400,280 L650,260 L800,240 L800,320 L650,340 L550,260 Z" />
+                      <path className="region" d="M650,260 L850,240 L950,220 L950,300 L850,320 L800,240 Z" />
+                      <path className="region" d="M50,360 L200,380 L350,360 L350,450 L200,450 L50,450 Z" />
+                      <path className="region" d="M200,380 L400,360 L550,340 L550,420 L400,450 L350,360 Z" />
+                      <path className="region" d="M400,360 L650,340 L800,320 L800,400 L650,420 L550,340 Z" />
+                      <path className="region" d="M650,340 L850,320 L950,300 L950,380 L850,400 L800,320 Z" />
+                      <path className="region" d="M800,400 L950,380 L950,450 L800,450 Z" />
+                    </g>
+                  </svg>
+                  
+                  {/* Маркеры партнеров */}
+                  <div className={styles.markersOverlay}>
+                    {filteredPartners.map(partner => {
+                      if (!partner.svgCoords) return null;
+                      
+                      return (
+                        <div
+                          key={partner.id}
+                          className={styles.marker}
+                          style={{
+                            left: `${(partner.svgCoords.x / 1000) * 100}%`,
+                            top: `${(partner.svgCoords.y / 600) * 100}%`,
+                          }}
+                          onClick={() => handleMarkerClick(partner)}
+                          title={`${partner.username} - ${partner.city}`}
+                        >
+                          <div className={styles.markerDot} />
+                          <div className={styles.markerLabel}>
+                            {partner.city}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        <div className={styles.sidebar}>
-          <Card title="Список партнеров" className={styles.partnersCard}>
-            <div className={styles.partnersList}>
-              {filteredPartners.map(partner => (
-                <Card
-                  key={partner.id}
-                  size="small"
-                  className={styles.partnerCard}
-                  onClick={() => handleMarkerClick(partner)}
-                  hoverable
-                >
-                  <div className={styles.partnerInfo}>
-                    <Title level={5} className={styles.partnerName}>
-                      {partner.username}
-                    </Title>
-                    <Space direction="vertical" size="small">
-                      <Text>
-                        <EnvironmentOutlined /> {partner.city}
-                      </Text>
-                      <Text>
-                        <UserOutlined /> Рефералов: {partner.total_referrals}
-                      </Text>
-                      <Text type="success">
-                        Доход: {partner.total_earnings.toLocaleString('ru-RU')} ₽
-                      </Text>
-                      {partner.error && (
-                        <Text type="danger" className={styles.errorText}>
-                          {partner.error}
-                        </Text>
-                      )}
-                    </Space>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </Card>
+          <div className={styles.sidebar}>
+            <Card title="Список партнеров" className={styles.partnersCard}>
+              <div className={styles.partnersList}>
+                {filteredPartners.length === 0 ? (
+                  <Text type="secondary">
+                    {selectedCity 
+                      ? `Нет партнеров в городе ${selectedCity}` 
+                      : 'Нет партнеров для отображения'
+                    }
+                  </Text>
+                ) : (
+                  filteredPartners.map(partner => (
+                    <Card
+                      key={partner.id}
+                      size="small"
+                      className={styles.partnerCard}
+                      onClick={() => handleMarkerClick(partner)}
+                      hoverable
+                    >
+                      <div className={styles.partnerInfo}>
+                        <Title level={5} className={styles.partnerName}>
+                          {partner.username}
+                        </Title>
+                        <Space direction="vertical" size="small">
+                          <Text>
+                            <EnvironmentOutlined /> {partner.city}
+                          </Text>
+                          <Text>
+                            <UserOutlined /> Рефералов: {partner.total_referrals}
+                          </Text>
+                          <Text type="success">
+                            Доход: {partner.total_earnings.toLocaleString('ru-RU')} ₽
+                          </Text>
+                          {partner.error && (
+                            <Text type="danger" className={styles.errorText}>
+                              {partner.error}
+                            </Text>
+                          )}
+                        </Space>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Модальное окно с информацией о партнере */}
       <Modal
