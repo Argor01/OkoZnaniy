@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal, Row, Col } from 'antd';
 import { EnvironmentOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
@@ -27,23 +27,55 @@ interface PartnerWithCoords extends Partner {
   error?: string;
 }
 
-// Координаты основных городов России (в процентах от viewBox)
+interface MapFeature {
+  geometry: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
+  properties?: any;
+}
+
+interface MapData {
+  type: string;
+  features: MapFeature[];
+}
+
+// Координаты основных городов России (в процентах от viewBox SVG карты)
 const CITY_COORDINATES: Record<string, { x: number; y: number }> = {
-  'Москва': { x: 37, y: 32 },
-  'Санкт-Петербург': { x: 30, y: 20 },
-  'Новосибирск': { x: 65, y: 35 },
-  'Екатеринбург': { x: 58, y: 30 },
-  'Краснодар': { x: 35, y: 50 },
-  'Владивосток': { x: 90, y: 55 },
-  'Казань': { x: 50, y: 28 },
-  'Архангельск': { x: 40, y: 15 },
-  'Нижний Новгород': { x: 45, y: 30 },
-  'Красноярск': { x: 70, y: 32 },
-  'Самара': { x: 52, y: 35 },
-  'Уфа': { x: 55, y: 35 },
-  'Ростов-на-Дону': { x: 38, y: 48 },
-  'Омск': { x: 68, y: 32 },
-  'Челябинск': { x: 60, y: 32 }
+  'Москва': { x: 55.7558, y: 37.6176 },
+  'Санкт-Петербург': { x: 59.9311, y: 30.3609 },
+  'Новосибирск': { x: 55.0084, y: 82.9357 },
+  'Екатеринбург': { x: 56.8431, y: 60.6454 },
+  'Краснодар': { x: 45.0355, y: 38.9753 },
+  'Владивосток': { x: 43.1056, y: 131.8735 },
+  'Казань': { x: 55.8304, y: 49.0661 },
+  'Архангельск': { x: 64.5401, y: 40.5433 },
+  'Нижний Новгород': { x: 56.2965, y: 43.9361 },
+  'Красноярск': { x: 56.0184, y: 92.8672 },
+  'Самара': { x: 53.2001, y: 50.1500 },
+  'Уфа': { x: 54.7388, y: 55.9721 },
+  'Ростов-на-Дону': { x: 47.2357, y: 39.7015 },
+  'Омск': { x: 54.9885, y: 73.3242 },
+  'Челябинск': { x: 55.1644, y: 61.4368 }
+};
+
+// Функция для конвертации географических координат в SVG координаты
+const convertGeoToSvg = (lat: number, lon: number): { x: number; y: number } => {
+  // Границы России в географических координатах (более точные)
+  const minLat = 41.2;
+  const maxLat = 81.9;
+  const minLon = 19.6;
+  const maxLon = 169.0;
+  
+  // Размеры SVG viewBox
+  const svgWidth = 1000;
+  const svgHeight = 600;
+  
+  // Конвертация координат с учетом проекции Меркатора
+  const x = ((lon - minLon) / (maxLon - minLon)) * svgWidth;
+  const y = svgHeight - ((lat - minLat) / (maxLat - minLat)) * svgHeight;
+  
+  return { x: Math.max(0, Math.min(svgWidth, x)), y: Math.max(0, Math.min(svgHeight, y)) };
 };
 
 const PartnersMap: React.FC = () => {
@@ -51,6 +83,31 @@ const PartnersMap: React.FC = () => {
   const [selectedPartner, setSelectedPartner] = useState<PartnerWithCoords | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [partnersWithCoords, setPartnersWithCoords] = useState<PartnerWithCoords[]>([]);
+  const [mapData, setMapData] = useState<MapData | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  // Загрузка данных карты
+  useEffect(() => {
+    const loadMapData = async () => {
+      try {
+        setMapError(null);
+        const response = await fetch('/russia-map.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMapData(data);
+      } catch (error) {
+        console.error('Ошибка загрузки карты:', error);
+        setMapError('Не удалось загрузить карту России');
+      } finally {
+        setMapLoading(false);
+      }
+    };
+
+    loadMapData();
+  }, []);
 
   // Запрос к API
   const { data: partners, isLoading, error } = useQuery({
@@ -72,12 +129,11 @@ const PartnersMap: React.FC = () => {
         // Используем встроенные координаты
         const coords = CITY_COORDINATES[partner.city];
         if (coords) {
+          const svgCoords = convertGeoToSvg(coords.x, coords.y);
           results.push({
             ...partner,
-            svgCoords: {
-              x: (coords.x / 100) * 1000,
-              y: (coords.y / 100) * 600
-            }
+            coordinates: { lat: coords.x, lon: coords.y },
+            svgCoords: svgCoords
           });
         } else {
           results.push({
@@ -102,20 +158,22 @@ const PartnersMap: React.FC = () => {
     setModalVisible(true);
   };
 
-  if (isLoading) {
+  if (isLoading || mapLoading) {
     return (
       <div className={styles.loadingContainer}>
         <Spin size="large" />
-        <Text className={styles.loadingText}>Загрузка партнеров...</Text>
+        <Text className={styles.loadingText}>
+          {mapLoading ? 'Загрузка карты...' : 'Загрузка партнеров...'}
+        </Text>
       </div>
     );
   }
 
-  if (error) {
+  if (error || mapError) {
     return (
       <Alert
         message="Ошибка загрузки"
-        description="Не удалось загрузить список партнеров"
+        description={mapError || "Не удалось загрузить список партнеров"}
         type="error"
         showIcon
       />
@@ -162,37 +220,55 @@ const PartnersMap: React.FC = () => {
                         .region { 
                           fill: #e8f4f8; 
                           stroke: #2c3e50; 
-                          stroke-width: 0.5; 
+                          stroke-width: 0.3; 
                           transition: all 0.3s ease; 
-                          cursor: pointer;
                         }
                         .region:hover { 
                           fill: #d4edda; 
-                          stroke-width: 1; 
+                          stroke-width: 0.5; 
                         }
                       `}
                     </style>
                   </defs>
                   
-                  {/* Упрощенная карта России */}
+                  {/* Настоящая карта России из JSON */}
                   <g id="russia-regions">
-                    <path className="region" d="M50,150 L200,120 L350,140 L350,200 L200,220 L50,200 Z" />
-                    <path className="region" d="M200,120 L400,100 L550,120 L550,180 L400,200 L350,140 Z" />
-                    <path className="region" d="M400,100 L650,80 L800,100 L800,160 L650,180 L550,120 Z" />
-                    <path className="region" d="M650,80 L850,60 L950,80 L950,140 L850,160 L800,100 Z" />
-                    <path className="region" d="M50,200 L200,220 L350,200 L350,280 L200,300 L50,280 Z" />
-                    <path className="region" d="M200,220 L400,200 L550,180 L550,260 L400,280 L350,200 Z" />
-                    <path className="region" d="M400,200 L650,180 L800,160 L800,240 L650,260 L550,180 Z" />
-                    <path className="region" d="M650,180 L850,160 L950,140 L950,220 L850,240 L800,160 Z" />
-                    <path className="region" d="M50,280 L200,300 L350,280 L350,360 L200,380 L50,360 Z" />
-                    <path className="region" d="M200,300 L400,280 L550,260 L550,340 L400,360 L350,280 Z" />
-                    <path className="region" d="M400,280 L650,260 L800,240 L800,320 L650,340 L550,260 Z" />
-                    <path className="region" d="M650,260 L850,240 L950,220 L950,300 L850,320 L800,240 Z" />
-                    <path className="region" d="M50,360 L200,380 L350,360 L350,450 L200,450 L50,450 Z" />
-                    <path className="region" d="M200,380 L400,360 L550,340 L550,420 L400,450 L350,360 Z" />
-                    <path className="region" d="M400,360 L650,340 L800,320 L800,400 L650,420 L550,340 Z" />
-                    <path className="region" d="M650,340 L850,320 L950,300 L950,380 L850,400 L800,320 Z" />
-                    <path className="region" d="M800,400 L950,380 L950,450 L800,450 Z" />
+                    {mapData?.features ? (
+                      mapData.features.map((feature, index) => {
+                        const renderPolygon = (coordinates: number[][], polygonIndex = 0) => {
+                          const pathData = coordinates.map((coord, i) => {
+                            // Конвертируем географические координаты в SVG координаты
+                            const svgCoord = convertGeoToSvg(coord[1], coord[0]);
+                            return `${i === 0 ? 'M' : 'L'} ${svgCoord.x} ${svgCoord.y}`;
+                          }).join(' ') + ' Z';
+                          
+                          return (
+                            <path
+                              key={`${index}-${polygonIndex}`}
+                              className="region"
+                              d={pathData}
+                            />
+                          );
+                        };
+
+                        if (feature.geometry.type === 'Polygon') {
+                          return renderPolygon(feature.geometry.coordinates[0] as number[][]);
+                        } else if (feature.geometry.type === 'MultiPolygon') {
+                          return (feature.geometry.coordinates as number[][][][]).map((polygon, polygonIndex) => 
+                            renderPolygon(polygon[0], polygonIndex)
+                          );
+                        }
+                        return null;
+                      })
+                    ) : (
+                      // Fallback: простая карта России
+                      <>
+                        <rect x="50" y="150" width="900" height="300" className="region" />
+                        <text x="500" y="300" textAnchor="middle" fill="#666" fontSize="16">
+                          Карта России
+                        </text>
+                      </>
+                    )}
                   </g>
                 </svg>
                 
