@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Россия"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [19.6, 41.2],
+          [169.0, 41.2],
+          [169.0, 81.9],
+          [19.6, 81.9],
+          [19.6, 41.2]
+        ]]
+      }
+    }
+  ]
+}
