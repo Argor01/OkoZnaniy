@@ -14,7 +14,6 @@ import {
 } from 'antd';
 import { 
   DownloadOutlined, 
-  CopyOutlined, 
   FileImageOutlined
 } from '@ant-design/icons';
 import styles from './PromoMaterials.module.css';
@@ -45,7 +44,6 @@ export const PromoMaterials: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState('970x250');
   const [selectedDesign, setSelectedDesign] = useState(1);
   const [selectedFormat, setSelectedFormat] = useState('png');
-  const [referralLink] = useState('https://studwork.org/ref/ABC123');
 
   const currentConfig = bannerConfigs.find(config => config.id === selectedBannerType);
 
@@ -57,11 +55,6 @@ export const PromoMaterials: React.FC = () => {
   const handleDownload = () => {
     // Заглушка - в реальности здесь будет скачивание файла
     message.success('Баннер скачан');
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    message.success('Реферальная ссылка скопирована');
   };
 
   const renderBannerPreview = () => {
@@ -191,32 +184,6 @@ export const PromoMaterials: React.FC = () => {
           </Row>
         </div>
       )
-    },
-    {
-      key: 'links',
-      label: 'Ссылки',
-      children: (
-        <div>
-          <Card title="Реферальная ссылка">
-            <div className={styles.linkSection}>
-              <div className={styles.linkBox}>
-                {referralLink}
-              </div>
-              <Button 
-                type="primary" 
-                icon={<CopyOutlined />}
-                onClick={handleCopyLink}
-              >
-                Скопировать
-              </Button>
-            </div>
-            <Paragraph type="secondary" style={{ marginTop: 16 }}>
-              Используйте эту ссылку для привлечения новых пользователей. 
-              Все регистрации по этой ссылке будут засчитаны как ваши рефералы.
-            </Paragraph>
-          </Card>
-        </div>
-      )
     }
   ];
 
@@ -227,7 +194,7 @@ export const PromoMaterials: React.FC = () => {
           <FileImageOutlined /> Промоматериалы
         </Title>
         <Paragraph>
-          Используйте готовые баннеры и ссылки для продвижения Студворк 
+          Используйте готовые баннеры для продвижения Студворк 
           и увеличения количества рефералов
         </Paragraph>
       </div>

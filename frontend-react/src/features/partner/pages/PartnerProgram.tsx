@@ -21,7 +21,7 @@ interface PartnerProgramProps {
 }
 
 export const PartnerProgram: React.FC<PartnerProgramProps> = ({
-  referralLink = "https://studwork.org/ref/ABC123",
+  referralLink = "https://okoznaniy.ru/ref/ABC123",
   currentEarnings = 0,
   nextBonusThreshold = 10000
 }) => {
@@ -80,7 +80,7 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
             <div className={styles.promotionMethod}>
               <GlobalOutlined className={`${styles.promotionIcon} ${styles.promotionIconBlue}`} />
               <Paragraph className={styles.promotionText}>
-                <strong>Рекомендуйте Студворк</strong> в соцсетях, личном блоге или на сайте
+                <strong>Рекомендуйте ОкоЗнаний</strong> в соцсетях, личном блоге или на сайте
               </Paragraph>
             </div>
           </Col>
@@ -96,7 +96,7 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
             <div className={styles.promotionMethod}>
               <TeamOutlined className={`${styles.promotionIcon} ${styles.promotionIconOrange}`} />
               <Paragraph className={styles.promotionText}>
-                <strong>Привлекайте заказчиков и исполнителей</strong> на наш ресурс через свою партнёрскую ссылку
+                <strong>Привлекайте клиентов</strong> на наш ресурс через свою партнёрскую ссылку
               </Paragraph>
             </div>
           </Col>
@@ -123,31 +123,22 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
 
       {/* Условия выплат */}
       <Card className={styles.partnerProgramCard}>
-        <Title level={4}>Выплаты и отчисления с заказчиков и исполнителей</Title>
+        <Title level={4}>Партнерские выплаты</Title>
         <Paragraph>
-          Привлекайте заказчиков и исполнителей на наш ресурс через свою партнёрскую ссылку и зарабатывайте с каждого их заказа
+          Привлекайте клиентов через свою партнёрскую ссылку и получайте 25% с каждой покупки работы
         </Paragraph>
         
-        <Title level={5} style={{ marginTop: '24px' }}>Виды и условия выплат и отчислений</Title>
+        <Title level={5} style={{ marginTop: '24px' }}>Условия партнерских выплат</Title>
         
         <Row gutter={[24, 16]} style={{ marginTop: '16px' }}>
-          <Col xs={24} lg={12}>
+          <Col xs={24} lg={24}>
             <Card size="small" style={{ height: '100%' }}>
               <div style={{ textAlign: 'center' }}>
                 <Title level={4} style={{ color: '#1890ff', margin: '0 0 8px 0' }}>
-                  С заказчиков
+                  Партнерская комиссия
                 </Title>
                 <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#1890ff' }}>25%</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card size="small" style={{ height: '100%' }}>
-              <div style={{ textAlign: 'center' }}>
-                <Title level={4} style={{ color: '#52c41a', margin: '0 0 8px 0' }}>
-                  С исполнителей
-                </Title>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#52c41a' }}>5%</div>
+                <Text type="secondary">с каждой покупки работы клиентом</Text>
               </div>
             </Card>
           </Col>
@@ -157,45 +148,43 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
           <thead>
             <tr className={styles.paymentTableHeader}>
               <th className={styles.paymentTableHeaderCell}>
-                Виды и условия выплат и отчислений
+                Условия выплат
               </th>
               <th className={styles.paymentTableHeaderCellCenter}>
-                С заказчиков
+                Размер комиссии
               </th>
               <th className={styles.paymentTableHeaderCellCenter}>
-                С исполнителей
+                Период действия
               </th>
             </tr>
           </thead>
           <tbody>
             <tr className={styles.paymentTableRow}>
-              <td className={styles.paymentTableCell}>Отчисления от суммы каждого заказа</td>
+              <td className={styles.paymentTableCell}>Комиссия с покупки работы</td>
               <td className={`${styles.paymentTableCellCenter} ${styles.paymentTableCellCustomers}`}>25%</td>
-              <td className={`${styles.paymentTableCellCenter} ${styles.paymentTableCellExecutors}`}>5%</td>
+              <td className={styles.paymentTableCellCenter}>6 месяцев</td>
             </tr>
             <tr className={styles.paymentTableRow}>
               <td className={styles.paymentTableCell}>Выплаты по повторным заказам</td>
               <td className={`${styles.paymentTableCellCenter} ${styles.paymentTableCellCustomers}`}>25%</td>
-              <td className={`${styles.paymentTableCellCenter} ${styles.paymentTableCellExecutors}`}>5%</td>
+              <td className={styles.paymentTableCellCenter}>6 месяцев</td>
             </tr>
             <tr>
-              <td className={styles.paymentTableCell}>Продолжительность выплат за повторные заказы</td>
-              <td className={styles.paymentTableCellCenter}>Бессрочно</td>
-              <td className={styles.paymentTableCellCenter}>1 год</td>
+              <td className={styles.paymentTableCell}>Время зачисления средств</td>
+              <td className={styles.paymentTableCellCenter} colSpan={2}>После разблокировки средств</td>
             </tr>
           </tbody>
         </table>
 
         <div className={`${styles.infoBox} ${styles.infoBoxGreen}`}>
           <Text>
-            <strong>Важно:</strong> Если заказчик и исполнитель являются одновременно приглашенными участниками партнёрской 
-            программы, то партнёрские начисления разделяются в равных частях партнёрами, пригласившими заказчика и исполнителя
+            <strong>Важно:</strong> Партнерские выплаты начисляются только после того, как клиент перешел по вашей реферальной ссылке и купил работу. Комиссия выплачивается со всех заказов клиента в течение 6 месяцев с момента первого перехода.
           </Text>
         </div>
 
         <div className={`${styles.infoBox} ${styles.infoBoxOrange}`}>
           <Text>
-            <strong>Промокоды:</strong> Использование промокодов в заказах никак не влияет на % партнёрских отчислений
+            <strong>Статистика:</strong> В личном кабинете вы можете отслеживать переходы по ссылке, количество заказанных работ, доход и ожидаемый доход (работы на выполнении и доработке).
           </Text>
         </div>
       </Card>
