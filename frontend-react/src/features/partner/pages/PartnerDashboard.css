@@ -2,6 +2,10 @@
   margin-bottom: 24px;
 }
 
+.partnerDashboardStatsRow {
+  margin-top: 24px;
+}
+
 .partnerDashboardHeaderRow {
   display: flex;
   justify-content: space-between;
