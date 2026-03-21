@@ -11,7 +11,7 @@ export type { Bid, CreateOrderRequest, Order, OrderComment, OrderFile };
 
 export const ordersApi = {
   
-  getClientOrders: async (params?: { status?: string; ordering?: string }) => {
+  getClientOrders: async (params?: { status?: string; ordering?: string; inactive?: string | boolean }) => {
     const response = await apiClient.get(API_ENDPOINTS.orders.clientOrders, { params });
     return response.data;
   },
@@ -73,6 +73,11 @@ export const ordersApi = {
   
   submitOrder: async (id: number) => {
     const response = await apiClient.post(API_ENDPOINTS.orders.submit(id));
+    return response.data;
+  },
+
+  reactivateOrder: async (id: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.reactivate(id));
     return response.data;
   },
 

@@ -50,6 +50,23 @@
   flex-wrap: wrap;
 }
 
+.orderActionsButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.orderActionsButton:hover {
+  color: var(--text-primary);
+}
+
 .orderTitle {
   margin: 0;
 }
@@ -542,8 +559,22 @@
 }
 
 .expertLink {
-  padding: 0 !important;
-  height: auto !important;
+  padding: 0;
+  height: auto;
+  display: inline-flex;
+  justify-content: flex-start;
+  text-align: left;
+  align-self: flex-start;
+
+}
+
+.expertLink:global(.ant-btn-link) {
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+
+.expertLink:global(.ant-btn) {
+  padding-inline: 0 !important;
 }
 
 .expertName {
@@ -551,6 +582,42 @@
 }
 
 .expertRole {
+  font-size: 13px;
+}
+
+.expertRow {
+  width: 100%;
+  align-items: flex-start;
+}
+
+.expertMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.expertWriteButton {
+  margin-left: auto;
+}
+
+.expertReviewBlock {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.expertReviewRating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.expertReviewText {
   font-size: 13px;
 }
 

@@ -65,18 +65,6 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
                 <li><a href="/about" className={styles.link}>О компании</a></li>
                 <li><a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a></li>
                 <li><a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a></li>
-                <li><a href="/legal" className={styles.link}>Юридическая информация</a></li>
-                <li><a href="/guarantees" className={styles.link}>Гарантии</a></li>
-                <li><a href="/payment" className={styles.link}>Об оплате</a></li>
-                <li><a href="/safe-deal" className={styles.link}>Безопасная сделка</a></li>
-                <li><a href="/reviews" className={styles.link}>Отзывы</a></li>
-                <li><a href="/experts/top" className={styles.link}>Топ экспертов</a></li>
-                <li><a href="/agencies" className={styles.link}>Агентствам</a></li>
-                <li><a href="/partners" className={styles.link}>Партнёрская программа</a></li>
-                <li><a href="/faq" className={styles.link}>Вопросы и ответы</a></li>
-                <li><a href="/contacts" className={styles.link}>Контакты</a></li>
-                <li><a href="/universities" className={styles.link}>ВУЗы</a></li>
-                <li><a href="/sitemap" className={styles.link}>Карта сайта</a></li>
               </ul>
             </div>
           </div>
@@ -87,11 +75,6 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
               <h3 className={styles.heading}>Вакансии</h3>
               <ul className={styles.list}>
                 <li><a href="/become-author" className={styles.link}>Стать автором</a></li>
-                <li><a href="/vacancies" className={styles.link}>Все вакансии</a></li>
-                <li><a href="/vacancies/teachers" className={styles.link}>Работа для преподавателей</a></li>
-                <li><a href="/vacancies/tutors" className={styles.link}>Работа для репетиторов</a></li>
-                <li><a href="/vacancies/school-teachers" className={styles.link}>Работа для учителей</a></li>
-                <li><a href="/vacancies/students" className={styles.link}>Работа для студентов</a></li>
               </ul>
             </div>
 
@@ -123,17 +106,17 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             <div className={styles.section}>
               <h3 className={styles.heading}>Услуги</h3>
               <ul className={styles.list}>
-                <li><a href="/services/diploma" className={styles.link}>Дипломная работа</a></li>
-                <li><a href="/services/coursework" className={styles.link}>Курсовая работа</a></li>
-                <li><a href="/services/control" className={styles.link}>Контрольная работа</a></li>
-                <li><a href="/services/report" className={styles.link}>Отчет по практике</a></li>
-                <li><a href="/services/essay" className={styles.link}>Реферат</a></li>
-                <li><a href="/services/composition" className={styles.link}>Сочинение</a></li>
-                <li><a href="/services/online-help" className={styles.link}>Онлайн-помощь</a></li>
-                <li><a href="/services/drawings" className={styles.link}>Чертежи</a></li>
-                <li><a href="/services/essay-short" className={styles.link}>Эссе</a></li>
-                <li><a href="/services/business-plan" className={styles.link}>Бизнес-план</a></li>
-                <li><a href="/services" className={styles.link}>Все услуги</a></li>
+                <li><p className={styles.link}>Дипломная работа</p></li>
+                <li><p className={styles.link}>Курсовая работа</p></li>
+                <li><p className={styles.link}>Контрольная работа</p></li>
+                <li><p className={styles.link}>Отчет по практике</p></li>
+                <li><p className={styles.link}>Реферат</p></li>
+                <li><p className={styles.link}>Сочинение</p></li>
+                <li><p className={styles.link}>Онлайн-помощь</p></li>
+                <li><p className={styles.link}>Чертежи</p></li>
+                <li><p className={styles.link}>Эссе</p></li>
+                <li><p className={styles.link}>Бизнес-план</p></li>
+                <li><p className={styles.link}>Все услуги</p></li>
               </ul>
             </div>
           </div>

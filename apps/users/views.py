@@ -21,7 +21,7 @@ from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     CustomTokenObtainPairSerializer, ExpertApplicationSerializer,
-    SimpleUserSerializer
+    SimpleUserSerializer, PublicUserProfileSerializer
 )
 from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
 from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
@@ -69,7 +69,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return UserCreateSerializer
         elif self.action == 'retrieve':
-            return SimpleUserSerializer
+            return PublicUserProfileSerializer
         elif self.action in ['update', 'partial_update']:
             return UserUpdateSerializer
         return UserSerializer
@@ -207,6 +207,21 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         user = request.user
         orders = user.client_orders.prefetch_related('bids__expert', 'files', 'comments').all()
+
+        from datetime import timedelta
+        from django.utils import timezone
+
+        inactive_param = str(request.query_params.get('inactive', '')).strip().lower()
+        inactive_requested = inactive_param in {'1', 'true', 'yes'}
+        inactive_filter = models.Q(
+            status='new',
+            expert__isnull=True,
+            created_at__lte=timezone.now() - timedelta(days=7),
+        )
+        if inactive_requested:
+            orders = orders.filter(inactive_filter)
+        else:
+            orders = orders.exclude(inactive_filter)
         
         # Фильтрация по статусу
         status_filter = request.query_params.get('status')

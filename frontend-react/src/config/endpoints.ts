@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
     take: (id: number) => `/orders/orders/${id}/take/`,
     complete: (id: number) => `/orders/orders/${id}/complete/`,
     submit: (id: number) => `/orders/orders/${id}/submit/`,
+    reactivate: (id: number) => `/orders/orders/${id}/reactivate/`,
     approve: (id: number) => `/orders/orders/${id}/approve/`,
     revision: (id: number) => `/orders/orders/${id}/revision/`,
     reject: (id: number) => `/orders/orders/${id}/reject/`,

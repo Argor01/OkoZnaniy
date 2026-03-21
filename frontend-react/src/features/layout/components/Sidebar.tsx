@@ -51,6 +51,7 @@ interface SidebarProps {
   mobileDrawerOpen?: boolean;
   onMobileDrawerChange?: (open: boolean) => void;
   collapsed?: boolean;
+  orderCounts?: Partial<Record<'all' | 'new' | 'confirming' | 'in_progress' | 'waiting_payment' | 'review' | 'completed' | 'revision' | 'download' | 'closed' | 'inactive', number>>;
 }
 
 const Sidebar: React.FC<SidebarProps> = React.memo(({
@@ -69,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   mobileDrawerOpen = false,
   onMobileDrawerChange,
   collapsed = false,
+  orderCounts,
 }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
@@ -143,7 +145,25 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       return;
     }
     if (key.startsWith('orders-') || key === 'orders') {
-      navigate('/expert');
+      const tabMap: Record<string, string> = {
+        'orders-all': 'all',
+        'orders-open': 'new',
+        'orders-confirming': 'confirming',
+        'orders-progress': 'in_progress',
+        'orders-payment': 'waiting_payment',
+        'orders-review': 'review',
+        'orders-completed': 'completed',
+        'orders-revision': 'revision',
+        'orders-download': 'download',
+        'orders-closed': 'closed',
+        'orders-inactive': 'inactive',
+      };
+      const tab = tabMap[key];
+      if (tab) {
+        navigate(`/works?tab=${tab}`);
+      } else {
+        navigate('/works');
+      }
       onMenuSelect(key);
       return;
     }
@@ -164,7 +184,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ]);
 
   const isExpert = userProfile?.role === 'expert';
-  const isClient = userProfile?.role === 'client';
 
   const menuItems = useMemo(() => [
     {
@@ -209,16 +228,17 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <ShoppingOutlined />,
       label: 'Мои заказы',
       children: [
-        { key: 'orders-all', label: 'Все (0)' },
-        { key: 'orders-open', label: 'Открыт (0)' },
-        { key: 'orders-confirming', label: 'На подтверждении (0)' },
-        { key: 'orders-progress', label: 'На выполнении (0)' },
-        { key: 'orders-payment', label: 'Ожидает оплаты (0)' },
-        { key: 'orders-review', label: 'На проверке (0)' },
-        { key: 'orders-completed', label: 'Выполнен (0)' },
-        { key: 'orders-revision', label: 'На доработке (0)' },
-        { key: 'orders-download', label: 'Ожидает скачивания (0)' },
-        { key: 'orders-closed', label: 'Закрыт (0)' },
+        { key: 'orders-all', label: `Все (${orderCounts?.all ?? 0})` },
+        { key: 'orders-open', label: `Открыт (${orderCounts?.new ?? 0})` },
+        { key: 'orders-confirming', label: `На подтверждении (${orderCounts?.confirming ?? 0})` },
+        { key: 'orders-progress', label: `В работе у эксперта (${orderCounts?.in_progress ?? 0})` },
+        { key: 'orders-payment', label: `Ожидает оплаты (${orderCounts?.waiting_payment ?? 0})` },
+        { key: 'orders-review', label: `На проверке (${orderCounts?.review ?? 0})` },
+        { key: 'orders-completed', label: `Выполнен (${orderCounts?.completed ?? 0})` },
+        { key: 'orders-revision', label: `На доработке (${orderCounts?.revision ?? 0})` },
+        { key: 'orders-download', label: `Ожидает скачивания (${orderCounts?.download ?? 0})` },
+        { key: 'orders-closed', label: `Закрыт (${orderCounts?.closed ?? 0})` },
+        { key: 'orders-inactive', label: `Неактивные (${orderCounts?.inactive ?? 0})` },
       ],
     } : (!isExpert && isMobile) ? {
       key: 'orders',
@@ -242,7 +262,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       danger: true,
       className: styles.logoutMenuItem,
     },
-  ].filter(Boolean), [isExpert, isClient, isMobile, unreadMessages, unreadNotifications]);
+  ].filter(Boolean), [isExpert, isMobile, unreadMessages, unreadNotifications, orderCounts]);
 
   const profileSection = useMemo(() => (
     <div className={styles.sidebarProfile}>

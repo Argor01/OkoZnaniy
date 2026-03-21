@@ -400,6 +400,8 @@ class ExpertOrderService:
             status='new',
             subject_id__in=expert_subjects,
             expert__isnull=True
+        ).filter(
+            created_at__gt=timezone.now() - timedelta(days=7)
         ).select_related(
             'client',
             'subject',

@@ -257,6 +257,30 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        if (
+            uploaded_file
+            and chat.order_id
+            and chat.order
+            and message_type != 'work_delivery'
+            and getattr(chat.order, 'expert_id', None) == request.user.id
+        ):
+            marker = f'chat_message_id:{message.id}'
+            already_attached = OrderFile.objects.filter(
+                order_id=chat.order_id,
+                description=marker
+            ).exists()
+            if not already_attached:
+                try:
+                    OrderFile.objects.create(
+                        order=chat.order,
+                        file=message.file,
+                        file_type='solution',
+                        uploaded_by=request.user,
+                        description=marker
+                    )
+                except Exception:
+                    pass
+
         if message_type == 'offer':
             try:
                 recipient = chat.client
@@ -424,16 +448,29 @@ class ChatViewSet(viewsets.ModelViewSet):
         offer_message.offer_data = offer_data
         offer_message.save(update_fields=['offer_data'])
 
-        if chat.order_id and chat.order:
+        delivery_order = chat.order if chat.order_id and chat.order else None
+        if not delivery_order:
+            raw_order_id = offer_data.get('order_id') or offer_data.get('work_id')
+            try:
+                resolved_order_id = int(raw_order_id)
+            except (TypeError, ValueError):
+                resolved_order_id = None
+            if resolved_order_id:
+                delivery_order = Order.objects.filter(id=resolved_order_id).first()
+                if delivery_order and chat.order_id != delivery_order.id:
+                    chat.order = delivery_order
+                    chat.save(update_fields=['order'])
+
+        if delivery_order:
             marker = f'chat_delivery_message_id:{delivery_message.id}'
             already_attached = OrderFile.objects.filter(
-                order_id=chat.order_id,
+                order_id=delivery_order.id,
                 description=marker
             ).exists()
             if not already_attached:
                 try:
                     OrderFile.objects.create(
-                        order=chat.order,
+                        order=delivery_order,
                         file=delivery_message.file,
                         file_type='solution',
                         uploaded_by=request.user,

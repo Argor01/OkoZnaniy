@@ -31,6 +31,55 @@ class SimpleUserSerializer(serializers.ModelSerializer):
             return obj.avatar.url
         return None
 
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+    specializations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'first_name', 'last_name',
+            'role', 'avatar', 'is_verified',
+            'bio', 'experience_years', 'hourly_rate', 'education',
+            'skills', 'portfolio_url', 'specializations'
+        ]
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                url = request.build_absolute_uri(obj.avatar.url)
+                if url.startswith('http://'):
+                    forwarded_proto = request.META.get('HTTP_X_FORWARDED_PROTO')
+                    if forwarded_proto:
+                        forwarded_proto = forwarded_proto.split(',')[0].strip().lower()
+                    if request.is_secure() or forwarded_proto == 'https':
+                        url = url.replace('http://', 'https://', 1)
+                return url
+            return obj.avatar.url
+        return None
+
+    def get_specializations(self, obj):
+        if obj.role != 'expert':
+            return []
+        specializations = obj.specializations.select_related('subject').all()
+        return [
+            {
+                'id': spec.id,
+                'subject': {
+                    'id': spec.subject.id if spec.subject else None,
+                    'name': spec.subject.name if spec.subject else None,
+                },
+                'custom_name': spec.custom_name,
+                'experience_years': spec.experience_years,
+                'hourly_rate': spec.hourly_rate,
+                'description': spec.description,
+                'skills': spec.skills,
+                'is_verified': spec.is_verified,
+            }
+            for spec in specializations
+        ]
+
 class UserSerializer(serializers.ModelSerializer):
     specializations = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()

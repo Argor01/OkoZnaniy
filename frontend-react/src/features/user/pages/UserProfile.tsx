@@ -24,6 +24,8 @@ const UserProfile: FC = () => {
       return response.data;
     },
     enabled: !!userId,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
   });
 
   
@@ -57,7 +59,31 @@ const UserProfile: FC = () => {
     queryKey: ['expert-reviews', userId],
     queryFn: () => expertsApi.getReviews(Number(userId)),
     enabled: !!userId && userData?.role === 'expert',
+    refetchOnWindowFocus: true,
+    refetchInterval: 20000,
   });
+
+  const { data: liveSpecializations = [] } = useQuery({
+    queryKey: ['expert-specializations-public', userId],
+    queryFn: async () => {
+      const all = await expertsApi.getSpecializations();
+      const currentId = Number(userId);
+      if (!Number.isFinite(currentId) || currentId <= 0) return [];
+      return all.filter((spec: any) => {
+        const expertIdRaw = typeof spec?.expert === 'object' ? spec?.expert?.id : spec?.expert;
+        const expertId = Number(expertIdRaw);
+        return Number.isFinite(expertId) && expertId === currentId;
+      });
+    },
+    enabled: !!userId && userData?.role === 'expert',
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+  });
+
+  const profileSpecializations =
+    liveSpecializations.length > 0
+      ? liveSpecializations
+      : (Array.isArray(userData?.specializations) ? userData.specializations : []);
 
   if (userLoading) {
     return (
@@ -104,9 +130,7 @@ const UserProfile: FC = () => {
             
             <div className={styles.profileStack}>
               
-              <Card 
-                className={styles.headerCard}
-              >
+              <Card className={styles.headerCard}>
                 <Space direction="vertical" size={12} className={styles.fullWidth}>
                   <div className={styles.headerRow}>
                     <Text type="secondary" className={styles.profileLabel}>
@@ -118,39 +142,25 @@ const UserProfile: FC = () => {
                       {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
                     </Tag>
                   </div>
-                  <Space align="center" size={20}>
-                    {userData.avatar ? (
-                      <img
-                        src={getMediaUrl(userData.avatar)}
-                        alt="Аватар"
-                        className={styles.avatarImage}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.classList.add(styles.avatarImageHidden);
-                          const fallback = target.parentElement?.querySelector('[data-role="avatar-fallback"]') as HTMLElement;
-                          if (fallback) fallback.classList.remove(styles.avatarFallbackHidden);
-                        }}
-                      />
-                    ) : null}
-                    <div 
-                      data-role="avatar-fallback"
-                      className={`${styles.avatarFallback} ${userData.avatar ? styles.avatarFallbackHidden : ''}`}
-                    >
-                      <UserOutlined />
-                    </div>
-                    <div>
+                  <div className={styles.profileIdentityCard}>
+                    <Avatar
+                      size={72}
+                      src={userData.avatar ? getMediaUrl(userData.avatar) : undefined}
+                      icon={<UserOutlined />}
+                      className={styles.profileIdentityAvatar}
+                    />
+                    <div className={styles.profileIdentityMeta}>
                       <div className={styles.nameRow}>
-                        <Text className={styles.nameText}>
-                          {userData.first_name && userData.last_name 
-                            ? `${userData.first_name} ${userData.last_name}`
-                            : userData.username
-                          }
-                        </Text>
+                        <Text className={styles.nameText}>@{userData.username || 'user'}</Text>
                         {userData.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
                       </div>
-                      <Text className={styles.usernameText}>@{userData.username}</Text>
+                      {userData.first_name && userData.last_name ? (
+                        <Text className={styles.usernameText}>
+                          {`${userData.first_name} ${userData.last_name}`}
+                        </Text>
+                      ) : null}
                     </div>
-                  </Space>
+                  </div>
                 </Space>
               </Card>
 
@@ -238,86 +248,87 @@ const UserProfile: FC = () => {
               )}
 
               
-              {userData.role === 'expert' && userData.education && (
-                <SurfaceCard title="Образование" className={styles.sectionMargin}>
-                  <Paragraph>{userData.education}</Paragraph>
-                </SurfaceCard>
-              )}
-
-              {(userData.role === 'expert' && (userData.experience_years || userData.hourly_rate)) && (
-                <SurfaceCard title="Дополнительно" className={styles.sectionMargin}>
-                  <Space direction="vertical" size={8} className={styles.fullWidth}>
-                    {!!userData.experience_years && (
-                      <Space size={8}>
-                        <Text>Опыт работы:</Text>
-                        <Text strong>{userData.experience_years} лет</Text>
-                      </Space>
-                    )}
-                    {!!userData.hourly_rate && (
-                      <Space size={8}>
-                        <Text>Почасовая ставка:</Text>
-                        <Text strong>{Number(userData.hourly_rate).toLocaleString('ru-RU')} ₽/час</Text>
-                      </Space>
-                    )}
-                  </Space>
-                </SurfaceCard>
-              )}
-
-              
-              {userData.role === 'expert' && userData.skills && (
-                <SurfaceCard title="Навыки" className={styles.sectionMargin}>
-                  <div className={styles.tagList}>
-                    {userData.skills.split(',').map((skill: string, index: number) => (
-                      <Tag key={index} color="green">
-                        {skill.trim()}
-                      </Tag>
-                    ))}
+              {userData.role === 'expert' && (
+                <SurfaceCard title="Профиль эксперта" className={styles.sectionMargin}>
+                  <div className={styles.expertInfoGrid}>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">О себе</Text>
+                      <Text>{userData.bio || 'Не указано'}</Text>
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Образование</Text>
+                      <Text>{userData.education || 'Не указано'}</Text>
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Опыт</Text>
+                      <Text>{userData.experience_years ? `${userData.experience_years} лет` : 'Не указано'}</Text>
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Ставка</Text>
+                      <Text>{userData.hourly_rate ? `${Number(userData.hourly_rate).toLocaleString('ru-RU')} ₽/час` : 'Не указано'}</Text>
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Навыки</Text>
+                      {userData.skills ? (
+                        <div className={styles.tagList}>
+                          {userData.skills.split(',').map((skill: string, index: number) => (
+                            <Tag key={index} color="green">
+                              {skill.trim()}
+                            </Tag>
+                          ))}
+                        </div>
+                      ) : (
+                        <Text>Не указано</Text>
+                      )}
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Специализации</Text>
+                      {Array.isArray(profileSpecializations) && profileSpecializations.length > 0 ? (
+                        <div className={styles.tagList}>
+                          {profileSpecializations.map(
+                            (
+                              spec: {
+                                custom_name?: string;
+                                subject?: { name?: string };
+                                hourly_rate?: number | string;
+                                experience_years?: number | string;
+                              },
+                              index: number
+                            ) => (
+                            <Tag key={index} color="blue">
+                              {[
+                                spec?.custom_name || spec?.subject?.name || 'Специализация не указана',
+                                spec?.hourly_rate ? `${Number(spec.hourly_rate).toLocaleString('ru-RU')} ₽/час` : null,
+                                spec?.experience_years ? `${spec.experience_years} лет` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' • ')}
+                            </Tag>
+                          ))}
+                        </div>
+                      ) : (
+                        <Text>Не указано</Text>
+                      )}
+                    </div>
+                    <div className={styles.expertInfoRow}>
+                      <Text type="secondary">Портфолио</Text>
+                      {userData.portfolio_url ? (
+                        <Button
+                          type="link"
+                          href={userData.portfolio_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Посмотреть портфолио
+                        </Button>
+                      ) : (
+                        <Text>Не указано</Text>
+                      )}
+                    </div>
                   </div>
                 </SurfaceCard>
               )}
-
-              
-              {userData.role === 'expert' && userData.portfolio_url && (
-                <SurfaceCard title="Портфолио" className={styles.sectionMargin}>
-                  <Button 
-                    type="link" 
-                    href={userData.portfolio_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    Посмотреть портфолио
-                  </Button>
-                </SurfaceCard>
-              )}
             </div>
-
-            
-            {userData.role === 'expert' && userData.specializations && Array.isArray(userData.specializations) && userData.specializations.length > 0 && (
-              <SurfaceCard title="Специализации">
-                <div className={styles.tagList}>
-                  {userData.specializations.map(
-                    (
-                      spec: {
-                        custom_name?: string;
-                        subject?: { name?: string };
-                        hourly_rate?: number | string;
-                        experience_years?: number | string;
-                      },
-                      index: number
-                    ) => (
-                    <Tag key={index} color="blue">
-                      {[
-                        spec?.custom_name || spec?.subject?.name || 'Специализация не указана',
-                        spec?.hourly_rate ? `${Number(spec.hourly_rate).toLocaleString('ru-RU')} ₽/час` : null,
-                        spec?.experience_years ? `${spec.experience_years} лет` : null,
-                      ]
-                        .filter(Boolean)
-                        .join(' • ')}
-                    </Tag>
-                  ))}
-                </div>
-              </SurfaceCard>
-            )}
 
             
             {userData.role === 'expert' && (

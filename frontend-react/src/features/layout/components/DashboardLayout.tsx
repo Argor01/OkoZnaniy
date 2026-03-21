@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
 import { chatApi } from '@/features/support/api/chat';
+import { ordersApi, Order } from '@/features/orders/api/orders';
 import DashboardHeader from './DashboardHeader';
 import Sidebar from './Sidebar';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -66,6 +67,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     queryKey: ['user-profile'],
     queryFn: () => authApi.getCurrentUser(),
   });
+
+  const { data: clientOrdersData } = useQuery({
+    queryKey: ['sidebar-client-orders'],
+    queryFn: () => ordersApi.getClientOrders({ ordering: '-created_at' }),
+    enabled: userProfile?.role === 'client',
+    staleTime: 5000,
+    refetchInterval: 15000,
+  });
+
+  const { data: inactiveClientOrdersData } = useQuery({
+    queryKey: ['sidebar-client-orders-inactive'],
+    queryFn: () => ordersApi.getClientOrders({ inactive: true, ordering: '-created_at' }),
+    enabled: userProfile?.role === 'client',
+    staleTime: 5000,
+    refetchInterval: 15000,
+  });
+
+  const sidebarOrderCounts = useMemo(() => {
+    const toArray = (data: unknown): Order[] => {
+      if (Array.isArray(data)) return data as Order[];
+      if (data && typeof data === 'object' && Array.isArray((data as { results?: unknown[] }).results)) {
+        return (data as { results: Order[] }).results;
+      }
+      return [];
+    };
+    const activeOrders = toArray(clientOrdersData);
+    const inactiveOrders = toArray(inactiveClientOrdersData);
+    const countByStatus = (status: string) => activeOrders.filter((order) => order?.status === status).length;
+
+    return {
+      all: activeOrders.length,
+      new: countByStatus('new'),
+      confirming: countByStatus('confirming'),
+      in_progress: countByStatus('in_progress'),
+      waiting_payment: countByStatus('waiting_payment'),
+      review: countByStatus('review'),
+      completed: countByStatus('completed'),
+      revision: countByStatus('revision'),
+      download: countByStatus('download'),
+      closed: countByStatus('closed'),
+      inactive: inactiveOrders.length,
+    };
+  }, [clientOrdersData, inactiveClientOrdersData]);
 
   
   const balance = userProfile?.balance ? parseFloat(userProfile.balance) : 0.00;
@@ -215,7 +259,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     username: userProfile.username,
     avatar: userProfile.avatar,
     role: userProfile.role
-  } : undefined, [userProfile?.username, userProfile?.avatar, userProfile?.role]);
+  } : undefined, [userProfile]);
 
   const contextValue = useMemo(() => ({
     openProfileModal: () => { closeAllModals(); setProfileModalVisible(true); },
@@ -259,7 +303,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleMenuSelect = useCallback((key: string) => {
     if (key.startsWith('orders-') || key === 'orders') {
-      navigate('/expert?tab=orders');
+      const tabMap: Record<string, string> = {
+        'orders-all': 'all',
+        'orders-open': 'new',
+        'orders-confirming': 'confirming',
+        'orders-progress': 'in_progress',
+        'orders-payment': 'waiting_payment',
+        'orders-review': 'review',
+        'orders-completed': 'completed',
+        'orders-revision': 'revision',
+        'orders-download': 'download',
+        'orders-closed': 'closed',
+        'orders-inactive': 'inactive',
+      };
+      const tab = tabMap[key];
+      if (tab) navigate(`/works?tab=${tab}`);
+      else navigate('/works');
       return;
     }
   }, [navigate]);
@@ -271,7 +330,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (path === '/orders-feed') return 'orders-feed';
     if (path.startsWith('/shop/ready-works')) return 'shop-ready-works';
     if (path.startsWith('/shop/add-work')) return 'shop-add-work';
-    if (path.startsWith('/works')) return 'works';
+    if (path.startsWith('/works')) {
+      const tab = new URLSearchParams(location.search).get('tab');
+      const tabKeyMap: Record<string, string> = {
+        all: 'orders-all',
+        new: 'orders-open',
+        confirming: 'orders-confirming',
+        in_progress: 'orders-progress',
+        waiting_payment: 'orders-payment',
+        review: 'orders-review',
+        completed: 'orders-completed',
+        revision: 'orders-revision',
+        download: 'orders-download',
+        closed: 'orders-closed',
+        inactive: 'orders-inactive',
+      };
+      return tab && tabKeyMap[tab] ? tabKeyMap[tab] : 'orders';
+    }
     if (path.startsWith('/shop/purchased')) return 'shop-purchased';
     return '';
   };
@@ -350,6 +425,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           collapsed={!isMobile && !desktopSidebarOpen}
           unreadNotifications={unreadNotifications}
           userProfile={sidebarUserProfile}
+          orderCounts={sidebarOrderCounts}
         />
         
         <Layout className={dashboardLayoutClassName}>

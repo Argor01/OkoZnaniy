@@ -63,7 +63,7 @@ const isOrdersListItem = (o: unknown): o is OrdersListItem => {
 const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [orderFilter, setOrderFilter] = useState<'my' | 'available'>('my');
+  const [orderFilter, setOrderFilter] = useState<'my' | 'available' | 'inactive'>('my');
 
   
   const { data: userProfile, isLoading: userProfileLoading } = useQuery({
@@ -98,11 +98,27 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     enabled: !!userProfile && showAvailableTab,
   });
 
-  const effectiveOrderFilter: 'my' | 'available' = showAvailableTab ? orderFilter : 'my';
+  const { data: inactiveOrdersData, isLoading: inactiveOrdersLoading } = useQuery({
+    queryKey: ['inactive-user-orders'],
+    queryFn: () => ordersApi.getClientOrders({ inactive: 'true', ordering: '-created_at' }),
+    enabled: !!userProfile && showAvailableTab,
+  });
+
+  const effectiveOrderFilter: 'my' | 'available' | 'inactive' = showAvailableTab ? orderFilter : 'my';
 
   
-  const currentOrdersData = effectiveOrderFilter === 'my' ? myOrdersData : availableOrdersData;
-  const isLoading = effectiveOrderFilter === 'my' ? myOrdersLoading : availableOrdersLoading;
+  const currentOrdersData =
+    effectiveOrderFilter === 'my'
+      ? myOrdersData
+      : effectiveOrderFilter === 'inactive'
+        ? inactiveOrdersData
+        : availableOrdersData;
+  const isLoading =
+    effectiveOrderFilter === 'my'
+      ? myOrdersLoading
+      : effectiveOrderFilter === 'inactive'
+        ? inactiveOrdersLoading
+        : availableOrdersLoading;
 
   const sanitizeOrders = (items: unknown): OrdersListItem[] => {
     const results = (items && typeof items === 'object' && 'results' in items)
@@ -169,6 +185,25 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
     }
   };
 
+  const handleReactivateOrder = async (orderId: number) => {
+    try {
+      await ordersApi.reactivateOrder(orderId);
+      message.success('Заказ снова опубликован в ленте');
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['inactive-user-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
+      ]);
+      setOrderFilter('my');
+    } catch (error: unknown) {
+      const errorMessage =
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Не удалось активировать заказ';
+      message.error(errorMessage);
+    }
+  };
+
   if (userProfileLoading || isLoading) {
     return (
       <AppCard className={styles.sectionCard}>
@@ -206,11 +241,20 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               </Radio.Button>
               <Radio.Button 
                 value="available" 
-                className={`${styles.ordersFilterButton} ${styles.ordersFilterButtonRight} ${isMobile ? styles.ordersFilterButtonMobile : styles.ordersFilterButtonDesktop}`}
+                className={`${styles.ordersFilterButton} ${isMobile ? styles.ordersFilterButtonMobile : styles.ordersFilterButtonDesktop}`}
               >
                 <Space>
                   <FilterOutlined />
                   Доступные заказы
+                </Space>
+              </Radio.Button>
+              <Radio.Button
+                value="inactive"
+                className={`${styles.ordersFilterButton} ${styles.ordersFilterButtonRight} ${isMobile ? styles.ordersFilterButtonMobile : styles.ordersFilterButtonDesktop}`}
+              >
+                <Space>
+                  <ClockCircleOutlined />
+                  Неактивные заказы
                 </Space>
               </Radio.Button>
             </Radio.Group>
@@ -224,7 +268,9 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                 <Text className={styles.ordersEmptyText}>
                   {effectiveOrderFilter === 'my' 
                     ? 'У вас пока нет размещенных заказов'
-                    : 'Нет доступных заказов для отклика'}
+                    : effectiveOrderFilter === 'inactive'
+                      ? 'Нет неактивных заказов'
+                      : 'Нет доступных заказов для отклика'}
                 </Text>
               </div>
             }
@@ -302,6 +348,18 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                             onClick={(e) => e.stopPropagation()}
                           />
                         </Popconfirm>
+                      )}
+                      {effectiveOrderFilter === 'inactive' && (
+                        <AppButton
+                          variant="primary"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReactivateOrder(order.id);
+                          }}
+                        >
+                          Активировать
+                        </AppButton>
                       )}
                     </div>
                     <div className={styles.orderBudget}>

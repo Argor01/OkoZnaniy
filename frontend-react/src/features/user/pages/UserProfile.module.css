@@ -33,10 +33,10 @@
 }
 
 .headerCard {
-  background: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
-  border: 2px solid #d3adf7;
+  background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+  border: 1px solid var(--color-brand-blue-200);
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
   padding: 8px 16px;
 }
 
@@ -53,17 +53,39 @@
 .profileLabel {
   font-size: 14px;
   font-weight: 600;
-  color: #722ed1;
+  color: var(--color-brand-blue-700);
 
 }
 
 .roleTag {
   font-size: 11px;
   padding: 2px 8px;
-  background-color: rgba(114, 46, 209, 0.1);
-  color: #722ed1;
-  border: 1px solid rgba(114, 46, 209, 0.2);
+  background-color: rgba(59, 130, 246, 0.12);
+  color: var(--color-brand-blue-700);
+  border: 1px solid rgba(59, 130, 246, 0.24);
   border-radius: 12px;
+}
+
+.profileIdentityCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+}
+
+.profileIdentityAvatar {
+  border: 2px solid var(--color-brand-blue-300);
+  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.16);
+}
+
+.profileIdentityMeta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .avatarImage {
@@ -108,7 +130,7 @@
   font-family: 'Jost-SemiBold', sans-serif;
   font-size: 18px !important;
   font-weight: 700;
-  color: #722ed1;
+  color: var(--color-grey-900);
   margin: 0;
 }
 
@@ -120,7 +142,7 @@
 .usernameText {
   font-size: 14px;
   color: #8c8c8c;
-  margin-bottom: 6px;
+  margin-bottom: 0;
 }
 
 .statsLoading {
@@ -218,6 +240,18 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.expertInfoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expertInfoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .reviewsCard {

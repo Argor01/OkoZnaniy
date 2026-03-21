@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined } from '@ant-design/icons';
+import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
+import { chatApi } from '@/features/support/api/chat';
 import BidModal from '../components/BidModal';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -134,23 +135,24 @@ const OrderDetail: React.FC = () => {
 
   const deliveredWorkFiles = React.useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
-    const expertId = Number(order?.expert?.id ?? 0);
     return order.files.filter((file: any) => {
       const fileType = String(file?.file_type || '').toLowerCase();
       const description = String(file?.description || '');
-      const uploaderId = Number(file?.uploaded_by?.id ?? 0);
-
-      if (fileType === 'solution') return true;
+      if (fileType === 'solution' || fileType === 'revision') return true;
       if (description.includes('chat_delivery_message_id:')) return true;
-      if (expertId > 0 && uploaderId === expertId) return true;
       return false;
     }).sort((a: any, b: any) => {
       const left = new Date(a?.created_at || 0).getTime();
       const right = new Date(b?.created_at || 0).getTime();
       return right - left;
     });
-  }, [order?.files, order?.expert?.id]);
+  }, [order?.files]);
   const latestDeliveredWork = deliveredWorkFiles[0] || null;
+  const attachedOrderFiles = React.useMemo(() => {
+    if (!Array.isArray(order?.files)) return [];
+    const deliveredIds = new Set(deliveredWorkFiles.map((file: any) => Number(file?.id)));
+    return order.files.filter((file: any) => !deliveredIds.has(Number(file?.id)));
+  }, [order?.files, deliveredWorkFiles]);
 
   const refreshOrderWithLists = React.useCallback(async () => {
     await refetchOrder();
@@ -247,13 +249,25 @@ const OrderDetail: React.FC = () => {
     return texts[status] || status;
   };
 
-  const isOrderOwner = order.client?.id === userProfile?.id;
-  const openedFromChat = (location.state as any)?.source === 'order-chat';
   const currentUserId = Number(userProfile?.id ?? 0);
-  const orderClientId = Number(order.client?.id ?? 0);
-  const orderExpertId = Number(order.expert?.id ?? 0);
+  const orderClientId = Number(order.client?.id ?? (order as any)?.client_id ?? 0);
+  const orderExpertId = Number(order.expert?.id ?? (order as any)?.expert_id ?? 0);
+  const isOrderOwner = currentUserId > 0 && currentUserId === orderClientId;
+  const isOrderExpert = currentUserId > 0 && currentUserId === orderExpertId;
+  const canSubmitComplaint = isOrderOwner || isOrderExpert;
+  const openedFromChat = (location.state as any)?.source === 'order-chat';
   const canSeeDeliveredWorkBlock =
-    currentUserId > 0 && (currentUserId === orderClientId || currentUserId === orderExpertId);
+    currentUserId > 0 && (isOrderOwner || currentUserId === orderExpertId);
+  const expertReview = (() => {
+    const raw = (order as any)?.rating ?? (order as any)?.expert_rating;
+    const rating = Number((raw as any)?.rating);
+    if (!raw || typeof raw !== 'object' || !Number.isFinite(rating) || rating <= 0) return null;
+    return {
+      rating,
+      comment: typeof (raw as any)?.comment === 'string' ? (raw as any).comment : '',
+      created_at: (raw as any)?.created_at,
+    };
+  })();
   const clientRoleLabel = 'Заказчик';
   const clientRating = (() => {
     const raw = (order.client as any)?.rating ?? (order.client as any)?.average_rating;
@@ -265,6 +279,50 @@ const OrderDetail: React.FC = () => {
     order.client?.first_name && order.client?.last_name
       ? `${order.client.first_name} ${order.client.last_name}`
       : order.client?.username || order.client_name || 'Неизвестен';
+
+  const makePrefilledComplaintText = () => {
+    const title = order.title || `Заказ #${order.id}`;
+    const deadlineText = order.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан';
+    const expertName = order.expert?.username || 'не назначен';
+    const clientName = order.client?.username || order.client_name || 'не указан';
+    return [
+      `Заказ #${order.id}`,
+      `Название: ${title}`,
+      `Статус: ${getStatusText(String(order.status || ''))}`,
+      `Заказчик: ${clientName}`,
+      `Исполнитель: ${expertName}`,
+      `Дедлайн: ${deadlineText}`,
+      '',
+      'Описание жалобы:',
+      ''
+    ].join('\n');
+  };
+
+  const handleOpenComplaintInSupport = async () => {
+    try {
+      const rawSupportId = localStorage.getItem('support_user_id');
+      let supportUserId = rawSupportId ? Number(rawSupportId) : null;
+      if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
+        const supportUser = await authApi.getSupportUser();
+        supportUserId = Number(supportUser?.id ?? 0);
+        if (supportUserId > 0) {
+          localStorage.setItem('support_user_id', String(supportUserId));
+        }
+      }
+      if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
+        message.error('Поддержка не настроена');
+        return;
+      }
+      const draft = {
+        category: 'Другое',
+        text: makePrefilledComplaintText(),
+      };
+      localStorage.setItem('support_claim_draft', JSON.stringify(draft));
+      dashboard.openOrderChat(order.id, supportUserId);
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось открыть чат поддержки');
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -290,11 +348,28 @@ const OrderDetail: React.FC = () => {
             <div className={styles.sectionBlock}>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
                 <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
-                {!isOrderOwner && (
-                  <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
-                    {getStatusText(order.status)}
-                  </Tag>
-                )}
+                <Space>
+                  {!isOrderOwner && (
+                    <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
+                      {getStatusText(order.status)}
+                    </Tag>
+                  )}
+                  {canSubmitComplaint && (
+                    <Dropdown
+                      trigger={['click']}
+                      menu={{
+                        items: [{ key: 'complaint', label: 'Жалоба администрации' }],
+                        onClick: ({ key }) => {
+                          if (key === 'complaint') void handleOpenComplaintInSupport();
+                        },
+                      }}
+                    >
+                      <button type="button" className={styles.orderActionsButton}>
+                        <EllipsisOutlined />
+                      </button>
+                    </Dropdown>
+                  )}
+                </Space>
               </Space>
             </div>
 
@@ -400,11 +475,11 @@ const OrderDetail: React.FC = () => {
               </div>
             ) : null}
 
-            {order.files && order.files.length > 0 && (
+            {attachedOrderFiles.length > 0 && (
               <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
                 <Title level={4} className={styles.sectionTitle}>Прикрепленные файлы</Title>
                 <div className={styles.orderFilesGrid}>
-                  {order.files.map((file: any, index: number) => (
+                  {attachedOrderFiles.map((file: any, index: number) => (
                     <button
                       type="button"
                       className={styles.orderFileTile}
@@ -598,13 +673,13 @@ const OrderDetail: React.FC = () => {
               <div className={styles.sectionBlock}>
                 <Divider />
                 <Title level={4}>Исполнитель</Title>
-                <Space>
+                <Space align="start" size={6} className={styles.expertRow}>
                   <Avatar 
                     size={isMobile ? 48 : 64} 
                     src={order.expert.avatar} 
                     icon={<UserOutlined />}
                   />
-                  <div>
+                  <div className={styles.expertMeta}>
                     <AppButton 
                       variant="link" 
                       onClick={() => navigate(`/user/${order.expert.id}`)}
@@ -614,9 +689,23 @@ const OrderDetail: React.FC = () => {
                     </AppButton>
                     <br />
                     <Text type="secondary" className={styles.expertRole}>Эксперт</Text>
+                    {expertReview ? (
+                      <div className={styles.expertReviewBlock}>
+                        <span className={styles.expertReviewRating}>
+                          <StarFilled className={styles.clientRatingIcon} />
+                          {expertReview.rating.toFixed(1)}
+                        </span>
+                        <Text type="secondary" className={styles.expertReviewText}>
+                          {expertReview.comment?.trim()
+                            ? `Отзыв по работе: ${expertReview.comment.trim()}`
+                            : 'Отзыв по работе оставлен без комментария'}
+                        </Text>
+                      </div>
+                    ) : null}
                   </div>
                   {isOrderOwner && (
                     <AppButton
+                      className={styles.expertWriteButton}
                       size={isMobile ? 'small' : 'middle'}
                       icon={<MessageOutlined />}
                       onClick={() => dashboard.openOrderChat(order.id, order.expert.id)}
