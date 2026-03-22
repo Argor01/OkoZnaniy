@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin } from 'antd';
+import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin, Table, Tag, Modal, Form, Input, InputNumber, Select, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import {
   BarChart,
   Bar,
@@ -11,17 +12,23 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
-import { useQuery } from '@tanstack/react-query';
-import { getIncomeDetail, getExpenseDetail } from '@/features/director/api/directorApi';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getIncomeDetail, getExpenseDetail, addIncome, addExpense } from '@/features/director/api/directorApi';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const IncomeExpenseDetail: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().startOf('month'),
     dayjs().endOf('month'),
   ]);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [addType, setAddType] = useState<'income' | 'expense'>('income');
+  const [tableFilter, setTableFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
   const isMobile = window.innerWidth <= 840;
 
@@ -106,6 +113,43 @@ const IncomeExpenseDetail: React.FC = () => {
     setDateRange([start, end]);
   };
 
+  const handleAddTransaction = async () => {
+    try {
+      const values = await form.validateFields();
+      const data = {
+        date: values.date.format('YYYY-MM-DD'),
+        description: values.description,
+        amount: values.amount,
+      };
+
+      if (addType === 'income') {
+        await addIncome(data);
+        message.success('Доход успешно добавлен');
+      } else {
+        await addExpense(data);
+        message.success('Расход успешно добавлен');
+      }
+
+      // Обновляем данные
+      queryClient.invalidateQueries({ queryKey: ['income-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['expense-detail'] });
+      
+      setAddModalVisible(false);
+      form.resetFields();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      message.error('Ошибка при добавлении записи');
+    }
+  };
+
+  const openAddModal = (type: 'income' | 'expense') => {
+    setAddType(type);
+    form.setFieldsValue({
+      date: dayjs(),
+    });
+    setAddModalVisible(true);
+  };
+
   return (
     <div>
       <Card
@@ -180,6 +224,28 @@ const IncomeExpenseDetail: React.FC = () => {
             <Button onClick={() => handleQuickSelect('thisYear')}>Этот год</Button>
           </Space>
         )}
+      </Card>
+
+      {/* Кнопки добавления */}
+      <Card style={{ marginTop: 16 }}>
+        <Space wrap>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={() => openAddModal('income')}
+            style={{ background: '#52c41a', borderColor: '#52c41a' }}
+          >
+            Добавить доход
+          </Button>
+          <Button 
+            type="primary" 
+            danger
+            icon={<PlusOutlined />}
+            onClick={() => openAddModal('expense')}
+          >
+            Добавить расход
+          </Button>
+        </Space>
       </Card>
 
       <Row gutter={[16, isMobile ? 12 : 16]} className="incomeExpenseStatsRow">
@@ -257,8 +323,9 @@ const IncomeExpenseDetail: React.FC = () => {
               'incomeExpenseChartContainer',
               isMobile ? 'incomeExpenseChartContainerMobile' : '',
             ].filter(Boolean).join(' ')}
+            style={{ minHeight: 300 }}
           >
-            <ResponsiveContainer width="100%" height="100%" key={`${dateRange[0].format('YYYY-MM-DD')}-${dateRange[1].format('YYYY-MM-DD')}`}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={300} key={`${dateRange[0].format('YYYY-MM-DD')}-${dateRange[1].format('YYYY-MM-DD')}`}>
               <BarChart 
                 data={chartData}
                 margin={{
@@ -294,6 +361,151 @@ const IncomeExpenseDetail: React.FC = () => {
           </div>
         )}
       </Card>
+
+      {/* Объединенная таблица доходов и расходов */}
+      <Card 
+        title="Детализация операций"
+        className={[
+          'incomeExpenseTableCard',
+          isMobile ? 'incomeExpenseTableCardMobile' : '',
+        ].filter(Boolean).join(' ')}
+        style={{ marginTop: 16 }}
+        extra={
+          <Select
+            value={tableFilter}
+            onChange={setTableFilter}
+            style={{ width: 120 }}
+          >
+            <Option value="all">Все</Option>
+            <Option value="income">Доходы</Option>
+            <Option value="expense">Расходы</Option>
+          </Select>
+        }
+      >
+        <Table
+          dataSource={(() => {
+            const allTransactions = [
+              ...(incomeData || []).map(item => ({ ...item, type: 'income' as const })),
+              ...(expenseData || []).map(item => ({ ...item, type: 'expense' as const }))
+            ];
+            
+            if (tableFilter === 'income') {
+              return allTransactions.filter(item => item.type === 'income');
+            }
+            if (tableFilter === 'expense') {
+              return allTransactions.filter(item => item.type === 'expense');
+            }
+            return allTransactions;
+          })()}
+          rowKey={(record) => `${record.type}-${record.id}`}
+          pagination={{ pageSize: 15 }}
+          scroll={{ x: isMobile ? 800 : undefined }}
+          columns={[
+            {
+              title: 'Дата',
+              dataIndex: 'date',
+              key: 'date',
+              render: (date: string) => dayjs(date).format('DD.MM.YYYY'),
+              sorter: (a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf(),
+              defaultSortOrder: 'descend' as const,
+            },
+            {
+              title: 'Тип',
+              dataIndex: 'type',
+              key: 'type',
+              render: (type: 'income' | 'expense') => (
+                <Tag color={type === 'income' ? 'green' : 'red'}>
+                  {type === 'income' ? 'Доход' : 'Расход'}
+                </Tag>
+              ),
+              filters: [
+                { text: 'Доходы', value: 'income' },
+                { text: 'Расходы', value: 'expense' },
+              ],
+              onFilter: (value, record) => record.type === value,
+            },
+            {
+              title: 'Описание',
+              dataIndex: 'description',
+              key: 'description',
+            },
+            {
+              title: 'Сумма',
+              dataIndex: 'amount',
+              key: 'amount',
+              render: (amount: number, record: any) => (
+                <span style={{ 
+                  color: record.type === 'income' ? '#52c41a' : '#ff4d4f', 
+                  fontWeight: 'bold' 
+                }}>
+                  {record.type === 'income' ? '+' : '-'}{amount.toLocaleString('ru-RU')} ₽
+                </span>
+              ),
+              sorter: (a, b) => a.amount - b.amount,
+            },
+          ]}
+          locale={{ emptyText: 'Нет операций за выбранный период' }}
+        />
+      </Card>
+
+      {/* Модальное окно добавления */}
+      <Modal
+        title={addType === 'income' ? 'Добавить доход' : 'Добавить расход'}
+        open={addModalVisible}
+        onOk={handleAddTransaction}
+        onCancel={() => {
+          setAddModalVisible(false);
+          form.resetFields();
+        }}
+        okText="Добавить"
+        cancelText="Отмена"
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            date: dayjs(),
+          }}
+        >
+          <Form.Item
+            name="date"
+            label="Дата"
+            rules={[{ required: true, message: 'Выберите дату' }]}
+          >
+            <DatePicker 
+              format="DD.MM.YYYY" 
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Описание"
+            rules={[{ required: true, message: 'Введите описание' }]}
+          >
+            <Input.TextArea 
+              rows={3}
+              placeholder="Например: Оплата за услуги хостинга"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="amount"
+            label="Сумма (₽)"
+            rules={[
+              { required: true, message: 'Введите сумму' },
+              { type: 'number', min: 0.01, message: 'Сумма должна быть больше 0' }
+            ]}
+          >
+            <InputNumber
+              style={{ width: '100%' }}
+              min={0.01}
+              precision={2}
+              placeholder="0.00"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

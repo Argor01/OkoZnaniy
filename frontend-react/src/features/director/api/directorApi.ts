@@ -251,6 +251,26 @@ export const getExpenseDetail = async (startDate: string, endDate: string): Prom
   }
 };
 
+export const addIncome = async (data: { date: string; description: string; amount: number }): Promise<IncomeDetail> => {
+  try {
+    const response = await apiClient.post('/director/finance/income/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding income:', error);
+    throw error;
+  }
+};
+
+export const addExpense = async (data: { date: string; description: string; amount: number }): Promise<ExpenseDetail> => {
+  try {
+    const response = await apiClient.post('/director/finance/expense/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding expense:', error);
+    throw error;
+  }
+};
+
 export const exportFinancialData = async (
   startDate: string,
   endDate: string,

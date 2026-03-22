@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import dayjs, { Dayjs } from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
-import { getNetProfit } from '@/features/director/api/directorApi';
+import { getIncomeDetail, getExpenseDetail } from '@/features/director/api/directorApi';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
@@ -26,9 +26,14 @@ const NetProfit: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   
-  const { data: profitData, isLoading } = useQuery({
-    queryKey: ['net-profit', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
-    queryFn: () => getNetProfit(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  const { data: incomeData, isLoading: incomeLoading } = useQuery({
+    queryKey: ['income-detail-profit', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getIncomeDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
+  });
+
+  const { data: expenseData, isLoading: expenseLoading } = useQuery({
+    queryKey: ['expense-detail-profit', dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')],
+    queryFn: () => getExpenseDetail(dateRange[0].format('YYYY-MM-DD'), dateRange[1].format('YYYY-MM-DD')),
   });
 
   useEffect(() => {
@@ -41,11 +46,40 @@ const NetProfit: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const totalProfitValue = profitData?.total || 0;
-  const totalIncome = profitData?.income || 0;
-  const totalExpense = profitData?.expense || 0;
-  const changePercent = profitData?.change_percent || 0;
-  const chartData = profitData?.daily_data || [];
+  const isLoading = incomeLoading || expenseLoading;
+
+  const totalIncome = incomeData?.reduce((sum, item) => sum + item.amount, 0) || 0;
+  const totalExpense = expenseData?.reduce((sum, item) => sum + item.amount, 0) || 0;
+  const totalProfitValue = totalIncome - totalExpense;
+  
+  // Вычисляем данные по дням для графика
+  const chartData = React.useMemo(() => {
+    if (!incomeData || !expenseData) return [];
+    
+    const dataByDate: Record<string, { date: string; profit: number; income: number; expense: number }> = {};
+    
+    incomeData.forEach(item => {
+      const date = dayjs(item.date).format('DD.MM');
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, profit: 0, income: 0, expense: 0 };
+      }
+      dataByDate[date].income += item.amount;
+      dataByDate[date].profit += item.amount;
+    });
+    
+    expenseData.forEach(item => {
+      const date = dayjs(item.date).format('DD.MM');
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, profit: 0, income: 0, expense: 0 };
+      }
+      dataByDate[date].expense += item.amount;
+      dataByDate[date].profit -= item.amount;
+    });
+    
+    return Object.values(dataByDate).sort((a, b) => a.date.localeCompare(b.date));
+  }, [incomeData, expenseData]);
+
+  const changePercent = 0; // Можно вычислить сравнивая с предыдущим периодом
 
   if (isLoading) {
     return (
@@ -215,8 +249,9 @@ const NetProfit: React.FC = () => {
             'netProfitChartContainer',
             isMobile ? 'netProfitChartContainerMobile' : '',
           ].filter(Boolean).join(' ')}
+          style={{ minHeight: 300 }}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
             <AreaChart 
               data={chartData}
               margin={{
@@ -241,7 +276,7 @@ const NetProfit: React.FC = () => {
               />
               <Legend />
               <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Прибыль" />
-              <Area type="monotone" dataKey="expenses" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
+              <Area type="monotone" dataKey="expense" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

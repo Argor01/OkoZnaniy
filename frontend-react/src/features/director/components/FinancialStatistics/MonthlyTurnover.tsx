@@ -213,8 +213,9 @@ const MonthlyTurnover: React.FC = () => {
             'monthlyTurnoverChartContainer',
             isMobile ? 'monthlyTurnoverChartContainerMobile' : '',
           ].filter(Boolean).join(' ')}
+          style={{ minHeight: 300 }}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
             <LineChart 
               data={chartData}
               margin={{
