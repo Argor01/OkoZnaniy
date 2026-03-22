@@ -107,9 +107,40 @@ export const PartnerChatsSection: React.FC = () => {
       
       // Убедимся, что это массив
       const roomsArray = Array.isArray(rooms) ? rooms : [];
-      console.log('Final rooms array:', roomsArray);
+      
+      // Добавляем чат с персональным менеджером в начало списка
+      const managerChat: ChatRoom = {
+        id: -1, // Специальный ID для чата с менеджером
+        name: 'Персональный менеджер',
+        description: 'Чат с вашим персональным менеджером',
+        type: 'private',
+        unread_count: 0,
+        is_muted: false,
+        participants: [
+          {
+            id: 1,
+            first_name: 'Иван',
+            last_name: 'Петров',
+            role: 'manager',
+            online: true,
+          }
+        ],
+        last_message: {
+          id: 1,
+          text: 'Здравствуйте! Я ваш персональный менеджер. Чем могу помочь?',
+          sender: {
+            first_name: 'Иван',
+            last_name: 'Петров',
+          },
+          sent_at: new Date().toISOString(),
+        }
+      };
+      
+      const allRooms = [managerChat, ...roomsArray];
+      
+      console.log('Final rooms array:', allRooms);
       console.log('Setting chat rooms...');
-      setChatRooms(roomsArray);
+      setChatRooms(allRooms);
       console.log('Chat rooms set successfully');
     } catch (error) {
       console.error('Error loading partner chat rooms:', error);

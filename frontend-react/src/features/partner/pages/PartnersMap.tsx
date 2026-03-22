@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal, Row, Col } from 'antd';
+import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal } from 'antd';
 import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { partnersApi, MapPartner } from '../api/partners';
@@ -479,57 +479,32 @@ const PartnersMap: React.FC = () => {
       >
         {selectedPartner && (
           <div className={styles.partnerDetails}>
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Space direction="vertical" size="middle">
-                  <div>
-                    <Text strong>Город:</Text>
-                    <br />
-                    <Text>{selectedPartner.city}</Text>
-                  </div>
-                  <div>
-                    <Text strong>Email:</Text>
-                    <br />
-                    <Text>{selectedPartner.email}</Text>
-                  </div>
-                  {selectedPartner.phone && (
-                    <div>
-                      <Text strong>Телефон:</Text>
-                      <br />
-                      <Text>
-                        <PhoneOutlined /> {selectedPartner.phone}
-                      </Text>
-                    </div>
-                  )}
-                </Space>
-              </Col>
-              <Col span={12}>
-                <Space direction="vertical" size="middle">
-                  <div>
-                    <Text strong>Всего рефералов:</Text>
-                    <br />
-                    <Text>{selectedPartner.total_referrals}</Text>
-                  </div>
-                  <div>
-                    <Text strong>Активных рефералов:</Text>
-                    <br />
-                    <Text>{selectedPartner.active_referrals}</Text>
-                  </div>
-                  <div>
-                    <Text strong>Общий доход:</Text>
-                    <br />
-                    <Text type="success">
-                      {selectedPartner.total_earnings.toLocaleString('ru-RU')} ₽
-                    </Text>
-                  </div>
-                </Space>
-              </Col>
-            </Row>
-            <div className={styles.partnerStats}>
-              <Text strong>Дата регистрации:</Text>
-              <br />
-              <Text>{new Date(selectedPartner.date_joined).toLocaleDateString('ru-RU')}</Text>
-            </div>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              <div>
+                <Text strong>Город:</Text>
+                <br />
+                <Text>{selectedPartner.city}</Text>
+              </div>
+              <div>
+                <Text strong>Email:</Text>
+                <br />
+                <Text>{selectedPartner.email}</Text>
+              </div>
+              {selectedPartner.phone && (
+                <div>
+                  <Text strong>Телефон:</Text>
+                  <br />
+                  <Text>
+                    <PhoneOutlined /> {selectedPartner.phone}
+                  </Text>
+                </div>
+              )}
+              <div>
+                <Text strong>Дата регистрации:</Text>
+                <br />
+                <Text>{new Date(selectedPartner.date_joined).toLocaleDateString('ru-RU')}</Text>
+              </div>
+            </Space>
           </div>
         )}
       </Modal>

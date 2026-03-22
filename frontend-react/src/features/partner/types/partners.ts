@@ -7,7 +7,9 @@ export interface PartnerEarning {
   earning_type: PartnerEarningType;
   created_at: string;
   is_paid: boolean;
-  partner?: string; 
+  partner?: string;
+  order_id?: number;
+  is_cancelled?: boolean;
 }
 
 export interface Referral {

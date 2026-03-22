@@ -346,6 +346,141 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   );
 };
 
+// Новый компонент для детальной статистики по заказам
+const OrdersStatisticsTable: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
+  // Фильтруем только заказы (не регистрации и бонусы)
+  const orderEarnings = data.recent_earnings.filter(earning => earning.earning_type === 'order');
+
+  const columns = [
+    {
+      title: '№ Заказа',
+      dataIndex: 'order_id',
+      key: 'order_id',
+      render: (orderId: number | undefined) => orderId ? `#${orderId}` : '-',
+    },
+    {
+      title: 'От реферала',
+      dataIndex: 'referral',
+      key: 'referral',
+    },
+    {
+      title: 'Тип операции',
+      dataIndex: 'is_cancelled',
+      key: 'is_cancelled',
+      render: (isCancelled: boolean | undefined) => (
+        <Tag color={isCancelled ? 'red' : 'green'}>
+          {isCancelled ? 'Расход (отмена)' : 'Доход'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Сумма',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amount: number, record: PartnerEarning) => {
+        const displayAmount = record.is_cancelled ? -amount : amount;
+        const color = record.is_cancelled ? '#ff4d4f' : '#52c41a';
+        return (
+          <span style={{ color, fontWeight: 'bold' }}>
+            {displayAmount > 0 ? '+' : ''}{displayAmount.toLocaleString('ru-RU')} ₽
+          </span>
+        );
+      },
+      sorter: (a: PartnerEarning, b: PartnerEarning) => {
+        const amountA = a.is_cancelled ? -a.amount : a.amount;
+        const amountB = b.is_cancelled ? -b.amount : b.amount;
+        return amountA - amountB;
+      },
+    },
+    {
+      title: 'Статус выплаты',
+      dataIndex: 'is_paid',
+      key: 'is_paid',
+      render: (isPaid: boolean, record: PartnerEarning) => {
+        if (record.is_cancelled) {
+          return <Tag color="default">Не применимо</Tag>;
+        }
+        return (
+          <Tag color={isPaid ? 'green' : 'orange'}>
+            {isPaid ? 'Выплачено' : 'Ожидает'}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Дата',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => dayjs(date).format('DD.MM.YYYY HH:mm'),
+      sorter: (a: PartnerEarning, b: PartnerEarning) => 
+        dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf(),
+      defaultSortOrder: 'descend' as const,
+    },
+  ];
+
+  // Подсчет итогов
+  const totalIncome = orderEarnings
+    .filter(e => !e.is_cancelled)
+    .reduce((sum, e) => sum + e.amount, 0);
+  
+  const totalExpense = orderEarnings
+    .filter(e => e.is_cancelled)
+    .reduce((sum, e) => sum + e.amount, 0);
+  
+  const netTotal = totalIncome - totalExpense;
+
+  return (
+    <Card title="Детальная статистика по заказам">
+      <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <Row gutter={16}>
+          <Col xs={24} sm={8}>
+            <Card size="small">
+              <Statistic
+                title="Доходы"
+                value={totalIncome}
+                suffix="₽"
+                valueStyle={{ color: '#52c41a' }}
+                prefix="+"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card size="small">
+              <Statistic
+                title="Расходы (отмены)"
+                value={totalExpense}
+                suffix="₽"
+                valueStyle={{ color: '#ff4d4f' }}
+                prefix="-"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card size="small">
+              <Statistic
+                title="Итого"
+                value={netTotal}
+                suffix="₽"
+                valueStyle={{ color: netTotal >= 0 ? '#52c41a' : '#ff4d4f' }}
+                prefix={netTotal >= 0 ? '+' : ''}
+              />
+            </Card>
+          </Col>
+        </Row>
+        
+        <Table
+          columns={columns}
+          dataSource={orderEarnings}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          locale={{ emptyText: 'Пока нет операций по заказам' }}
+          className="partnerDashboardLargeTable"
+        />
+      </Space>
+    </Card>
+  );
+};
+
 type MenuItem = {
   key: string;
   icon: React.ReactNode;
@@ -417,6 +552,7 @@ const PartnerDashboard: React.FC = () => {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
+          <OrdersStatisticsTable data={data} />
           <ReferralProgram data={data} />
         </div>
       ),
