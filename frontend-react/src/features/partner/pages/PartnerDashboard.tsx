@@ -15,6 +15,7 @@ import {
   MessageOutlined,
   FileImageOutlined,
   EnvironmentOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs, { Dayjs } from 'dayjs';
@@ -26,6 +27,7 @@ import { PartnerProgram } from './PartnerProgram';
 import { PartnerChatsSection } from '../components/InternalCommunication/PartnerChatsSection';
 import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
 import PartnersMap from './PartnersMap';
+import PartnerFaqModal from '../modals/PartnerFaqModal';
 import { AppFooter } from '@/components/layout/AppFooter';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
@@ -358,6 +360,7 @@ const PartnerDashboard: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState<string>('program');
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
 
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
@@ -382,8 +385,6 @@ const PartnerDashboard: React.FC = () => {
       component: (
         <PartnerProgram 
           referralLink={`https://okoznaniy.ru/ref/${data.partner_info.referral_code}`}
-          currentEarnings={data.partner_info.total_earnings}
-          nextBonusThreshold={10000}
         />
       ),
     },
@@ -432,6 +433,12 @@ const PartnerDashboard: React.FC = () => {
       label: 'История начислений',
       component: <EarningsHistory data={data} />,
     },
+    {
+      key: 'faq',
+      icon: <QuestionCircleOutlined />,
+      label: 'FAQ',
+      component: null, // FAQ открывается в модальном окне
+    },
   ] : [];
 
   const handleLogout = () => {
@@ -457,6 +464,10 @@ const PartnerDashboard: React.FC = () => {
   const currentMenuItem = menuItems.find((item) => item.key === selectedMenu);
 
   const handleMenuClick = (key: string) => {
+    if (key === 'faq') {
+      setFaqModalVisible(true);
+      return;
+    }
     setSelectedMenu(key);
     if (isMobile) {
       setDrawerVisible(false);
@@ -571,6 +582,13 @@ const PartnerDashboard: React.FC = () => {
         </Content>
         <AppFooter userRole="partner" />
       </Layout>
+      
+      {/* FAQ Modal */}
+      <PartnerFaqModal
+        visible={faqModalVisible}
+        onClose={() => setFaqModalVisible(false)}
+        isMobile={isMobile}
+      />
     </Layout>
   );
 };

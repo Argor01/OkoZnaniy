@@ -10,6 +10,7 @@ import {
   MessageOutlined,
   MenuOutlined,
   StopOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
@@ -19,6 +20,7 @@ import PartnerPanel from '../components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics';
 import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
+import DirectorFaqModal from '../modals/DirectorFaqModal';
 import '@/styles/modals.css';
 import '@/styles/director.css';
 
@@ -38,6 +40,7 @@ const DirectorDashboard: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
 
   const isMobile = window.innerWidth <= 840;
   const isTablet = window.innerWidth > 840 && window.innerWidth <= 1024;
@@ -155,6 +158,10 @@ const DirectorDashboard: React.FC = () => {
     },
   ];
 
+  const handleFaqClick = () => {
+    setFaqModalVisible(true);
+  };
+
   const handleLogout = () => {
     Modal.confirm({
       title: 'Выход из системы',
@@ -178,6 +185,13 @@ const DirectorDashboard: React.FC = () => {
   const currentMenuItem = menuItems.find((item) => item.key === selectedMenu);
 
   const handleMenuClick = (key: string) => {
+    if (key === 'faq') {
+      handleFaqClick();
+      if (isMobile) {
+        setDrawerVisible(false);
+      }
+      return;
+    }
     setSelectedMenu(key);
     if (isMobile) {
       setDrawerVisible(false);
@@ -193,16 +207,29 @@ const DirectorDashboard: React.FC = () => {
         'directorDashboardMenu',
         isMobile ? 'directorDashboardMenuMobile' : 'directorDashboardMenuDesktop',
       ].join(' ')}
-      items={menuItems.map((item) => ({
-        key: item.key,
-        icon: item.icon,
-        label: item.label,
-      }))}
+      items={[
+        ...menuItems.map((item) => ({
+          key: item.key,
+          icon: item.icon,
+          label: item.label,
+        })),
+        {
+          key: 'faq',
+          icon: <QuestionCircleOutlined />,
+          label: 'FAQ',
+        },
+      ]}
     />
   );
 
   return (
     <Layout className="directorDashboardLayout">
+      <DirectorFaqModal
+        visible={faqModalVisible}
+        onClose={() => setFaqModalVisible(false)}
+        isMobile={isMobile}
+      />
+      
       {!isMobile && (
         <Sider
           width={isTablet ? 200 : 250}
