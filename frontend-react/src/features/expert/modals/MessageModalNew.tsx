@@ -13,6 +13,10 @@ import {
   SendOutlined,
   PaperClipOutlined,
   FileOutlined,
+  FilePdfOutlined,
+  FileWordOutlined,
+  FileImageOutlined,
+  FileZipOutlined,
   FileTextOutlined,
   CloseCircleOutlined,
   UploadOutlined,
@@ -136,6 +140,16 @@ const truncateFileName = (name: string, maxLength: number = 20) => {
   if (availableLength <= 0) return name.substring(0, maxLength) + '...';
   
   return nameWithoutExt.substring(0, availableLength) + '...' + ext;
+};
+
+const getFileIconByName = (fileName?: string | null) => {
+  const value = String(fileName || '').toLowerCase();
+  if (!value) return <FileOutlined />;
+  if (value.endsWith('.pdf')) return <FilePdfOutlined />;
+  if (value.endsWith('.doc') || value.endsWith('.docx')) return <FileWordOutlined />;
+  if (value.endsWith('.jpg') || value.endsWith('.jpeg') || value.endsWith('.png') || value.endsWith('.webp') || value.endsWith('.gif')) return <FileImageOutlined />;
+  if (value.endsWith('.zip') || value.endsWith('.rar') || value.endsWith('.7z')) return <FileZipOutlined />;
+  return <FileOutlined />;
 };
 
 const normalizeMessageText = (value: string): string => value.normalize('NFC');
@@ -263,6 +277,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [reviewRating, setReviewRating] = useState<number>(5);
   const [reviewComment, setReviewComment] = useState<string>('');
   const [reviewOrderId, setReviewOrderId] = useState<number | null>(null);
+  const [revisionModalOpen, setRevisionModalOpen] = useState(false);
+  const [revisionComment, setRevisionComment] = useState('');
+  const [revisionSubmitting, setRevisionSubmitting] = useState(false);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [claimText, setClaimText] = useState<string>('');
   const [claimSubmitting, setClaimSubmitting] = useState(false);
@@ -1405,8 +1422,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const handleUploadWork = async (file: File) => {
+  const handleUploadWork = async (files: File[]) => {
     if (!selectedChat || !effectiveOrderId) return;
+    if (!Array.isArray(files) || files.length === 0) return;
     if (isDeadlineExpired(order?.deadline)) {
       antMessage.error('Срок сдачи истёк');
       if (workFileInputRef.current) workFileInputRef.current.value = '';
@@ -1414,17 +1432,42 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
     setWorkUploading(true);
     try {
-      await chatApi.sendMessage(selectedChat.id, 'Работа загружена', file);
-      const chatOrderId = Number(selectedChat.order_id ?? 0);
-      if (!chatOrderId || chatOrderId !== Number(effectiveOrderId)) {
-        await ordersApi.uploadOrderFile(effectiveOrderId, file, {
+      const deliveryBatchId = `chat_delivery_batch_id:${Date.now()}`;
+      const previouslyDeliveredFiles = Array.isArray(order?.files)
+        ? order.files.filter((file: any) => {
+            const fileType = String(file?.file_type || '').toLowerCase();
+            return fileType === 'solution' || fileType === 'revision';
+          })
+        : [];
+      if (previouslyDeliveredFiles.length > 0) {
+        await Promise.all(
+          previouslyDeliveredFiles
+            .map((file: any) => Number(file?.id))
+            .filter((fileId: number) => Number.isFinite(fileId) && fileId > 0)
+            .map((fileId: number) => ordersApi.deleteOrderFile(effectiveOrderId, fileId))
+        );
+      }
+      const uploadedFiles = [];
+      for (const file of files) {
+        const uploaded = await ordersApi.uploadOrderFile(effectiveOrderId, file, {
           file_type: 'solution',
-          description: `chat_upload_order_id:${effectiveOrderId}`,
+          description: `chat_upload_order_id:${effectiveOrderId};${deliveryBatchId}`,
+        });
+        uploadedFiles.push({
+          name: uploaded?.filename || uploaded?.file_name || file.name,
+          url: uploaded?.file_url || uploaded?.file || '',
         });
       }
+      await chatApi.sendMessage(
+        selectedChat.id,
+        'Работа отправлена на проверку',
+        undefined,
+        'work_delivery',
+        { files: uploadedFiles.filter((f) => !!f.url) }
+      );
       await ordersApi.submitOrder(effectiveOrderId);
       await Promise.all([loadChatDetail(selectedChat.id), loadChats(), refreshOrder()]);
-      antMessage.success('Работа отправлена на проверку');
+      antMessage.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Не удалось отправить работу');
     } finally {
@@ -1459,14 +1502,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const handleRequestRevision = async () => {
-    if (!effectiveOrderId) return;
+  const handleRequestRevision = () => {
+    setRevisionModalOpen(true);
+  };
+
+  const handleConfirmRevision = async () => {
+    if (!effectiveOrderId || !selectedChat) return;
+    const comment = revisionComment.trim();
+    if (!comment) {
+      antMessage.warning('Добавьте комментарий для доработки');
+      return;
+    }
     try {
-      await ordersApi.requestRevision(effectiveOrderId);
-      await Promise.all([refreshOrder(), loadChats()]);
+      setRevisionSubmitting(true);
+      await ordersApi.requestRevision(effectiveOrderId, comment);
+      await Promise.all([refreshOrder(), loadChats(), loadChatDetail(selectedChat.id)]);
+      setRevisionModalOpen(false);
+      setRevisionComment('');
       antMessage.success('Отправлено на доработку');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Не удалось отправить на доработку');
+    } finally {
+      setRevisionSubmitting(false);
     }
   };
 
@@ -2429,10 +2486,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
               <input
                 ref={workFileInputRef}
                 type="file"
+                multiple
                 className={styles.hiddenInput}
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleUploadWork(f);
+                  const selectedFiles = Array.from(e.target.files || []);
+                  if (selectedFiles.length > 0) handleUploadWork(selectedFiles);
                 }}
               />
               <div className={`${styles.orderTabsHeader} ${isMobile ? styles.orderTabsHeaderMobile : ''}`}>
@@ -2625,15 +2683,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     {groupedMessages.map((msg: any, idx: number) => {
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
+                  const workDeliveryFiles = Array.isArray(msg.offer_data?.files) ? msg.offer_data.files : [];
+                  const isWorkDelivery = msg.message_type === 'work_delivery' && (!!msg.file_url || workDeliveryFiles.length > 0);
                   const isSystemMessage = msg.message_type === 'system';
+                  const revisionSystemPrefix = 'Клиент вернул работу на доработку';
+                  const isRevisionSystemMessage = String(msg.text || '').startsWith(revisionSystemPrefix);
+                  const revisionCommentText = isRevisionSystemMessage
+                    ? (() => {
+                        const structuredComment = String(msg.offer_data?.revision_comment || '').trim();
+                        if (structuredComment) return structuredComment;
+                        const rawText = String(msg.text || '').replace(/\r\n/g, '\n').trim();
+                        const explicitCommentMatch = rawText.match(/Комментарий:\s*([\s\S]*)$/);
+                        if (explicitCommentMatch?.[1]) return explicitCommentMatch[1].trim();
+                        const withoutPrefix = rawText.replace(revisionSystemPrefix, '').replace(/^[:\s\n-]+/, '').trim();
+                        return withoutPrefix;
+                      })()
+                    : '';
                   const canReviewOrder = isOrderClient;
                   const showWorkActions =
+                    isWorkDelivery &&
                     canReviewOrder &&
                     !!effectiveOrderId &&
                     order?.status === 'review' &&
                     !msg.is_mine &&
-                    !!msg.file_url;
-                  const isCardMessage = isOffer || isWorkOffer || showWorkActions;
+                    (!!msg.file_url || workDeliveryFiles.length > 0);
+                  const isCardMessage = isOffer || isWorkOffer || isWorkDelivery || showWorkActions;
                   const offerExpired = isOffer
                     ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
                     : false;
@@ -2659,7 +2733,41 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     workDeliveryStatus === 'awaiting_upload';
                   
                   // System message styling
-                  if (isSystemMessage) {
+                  if (isSystemMessage || isRevisionSystemMessage) {
+                    if (isRevisionSystemMessage) {
+                      const revisionRowClass = `${styles.messageRow} ${msg.is_mine ? styles.messageRowMine : styles.messageRowOther}`;
+                      const revisionBubbleClass = `${styles.messageBubble} ${styles.messageBubbleCard} ${msg.is_mine ? styles.messageBubbleMine : styles.messageBubbleOther}`;
+                      return (
+                        <div
+                          key={msg.id}
+                          className={revisionRowClass}
+                        >
+                          <div className={revisionBubbleClass}>
+                            <Card
+                              size="small"
+                              className={`${styles.messageCard} ${isMobile ? styles.messageCardMobile : styles.messageCardDesktop} ${styles.offerCard}`}
+                            >
+                              <div className={styles.offerCardHeader}>
+                                <div className={styles.offerCardHeaderIcon}>
+                                  <ExclamationCircleOutlined />
+                                </div>
+                                <div className={styles.offerCardTitle}>Доработка по заказу</div>
+                              </div>
+                              <div className={styles.offerCardBody}>
+                                <div className={styles.offerDescription}>
+                                  {revisionCommentText || 'Комментарий не указан'}
+                                </div>
+                                <div className={styles.messageCardTime}>
+                                  <Text type="secondary" className={styles.messageCardTimeText}>
+                                    {formatMessageTime(msg.created_at)}
+                                  </Text>
+                                </div>
+                              </div>
+                            </Card>
+                          </div>
+                        </div>
+                      );
+                    }
                     return (
                       <div
                         key={msg.id}
@@ -2700,7 +2808,62 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       <div
                         className={messageBubbleClass}
                       >
-                        {showWorkActions ? (
+                        {isWorkDelivery ? (
+                          <Card size="small" className={messageCardClass}>
+                            <div className={styles.messageCardTitle}>Готовая работа</div>
+                            <div className={styles.messageCardSection}>
+                              <Text type="secondary">Файлы</Text>
+                              <div className={styles.attachedFilesGrid}>
+                                {(workDeliveryFiles.length > 0
+                                  ? workDeliveryFiles
+                                  : [{ name: msg.file_name || 'Скачать файл', url: msg.file_url }])
+                                  .filter((file: any) => !!file?.url)
+                                  .map((file: any, fileIdx: number) => (
+                                    <a
+                                      key={`${msg.id}-work-file-${fileIdx}`}
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`${styles.messageFileBlock} ${!msg.is_mine ? styles.messageFileBlockOther : ''}`}
+                                      title={file.name}
+                                    >
+                                      <div className={`${styles.messageFileIconBox} ${!msg.is_mine ? styles.messageFileIconBoxOther : ''}`}>
+                                        {getFileIconByName(file.name)}
+                                      </div>
+                                      <div className={`${styles.messageFileName} ${msg.is_mine ? styles.messageFileNameMine : styles.messageFileNameOther}`}>
+                                        {truncateFileName(file.name || 'Скачать файл')}
+                                      </div>
+                                    </a>
+                                  ))}
+                              </div>
+                            </div>
+                            <div className={styles.messageCardInfo}>
+                              {msg.is_mine
+                                ? 'Вы отправили работу на проверку'
+                                : 'Эксперт отправил работу на проверку'}
+                            </div>
+                            {showWorkActions ? (
+                              <div className={styles.messageCardActions}>
+                                <Button
+                                  type="primary"
+                                  className={styles.buttonSuccess}
+                                  onClick={handleApproveOrder}
+                                  block
+                                >
+                                  Принять
+                                </Button>
+                                <Button danger onClick={handleRequestRevision} block>
+                                  На доработку
+                                </Button>
+                              </div>
+                            ) : null}
+                            <div className={styles.messageCardTime}>
+                              <Text type="secondary" className={styles.messageCardTimeText}>
+                                {formatMessageTime(msg.created_at)}
+                              </Text>
+                            </div>
+                          </Card>
+                        ) : showWorkActions ? (
                           <Card size="small" className={messageCardClass}>
                             <div className={styles.messageCardTitle}>Работа по заказу</div>
                             <div className={styles.messageCardSection}>
@@ -3407,6 +3570,31 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         </div>
       </Modal>
       
+      <Modal
+        open={revisionModalOpen}
+        centered
+        onCancel={() => {
+          setRevisionModalOpen(false);
+          setRevisionComment('');
+        }}
+        onOk={handleConfirmRevision}
+        okButtonProps={{ loading: revisionSubmitting }}
+        okText="Отправить"
+        cancelText="Отмена"
+        title="Комментарий для доработки"
+        destroyOnHidden
+      >
+        <div className={styles.revisionModalSpacing}>
+          <Input.TextArea
+            value={revisionComment}
+            onChange={(e) => setRevisionComment(e.target.value)}
+            placeholder="Опишите, что нужно исправить"
+            autoSize={{ minRows: 4, maxRows: 8 }}
+            maxLength={1500}
+            showCount
+          />
+        </div>
+      </Modal>
       <Modal
         open={reviewModalOpen}
         centered

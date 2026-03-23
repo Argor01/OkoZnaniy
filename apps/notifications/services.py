@@ -7,6 +7,10 @@ User = get_user_model()
 
 class NotificationService:
     @staticmethod
+    def _order_ref(order):
+        return f"№{order.id}"
+
+    @staticmethod
     def create_notification(recipient, type, title, message, related_object_id=None, related_object_type=None, expires_in=None, data=None):
         notification = Notification.objects.create(
             recipient=recipient,
@@ -37,7 +41,7 @@ class NotificationService:
             NotificationService.create_notification(
                 recipient=expert,
                 type=NotificationType.NEW_ORDER,
-                title=f"Новый заказ: {order.title or 'Без названия'}",
+                title=f"Новый заказ: {NotificationService._order_ref(order)}",
                 message=f"Появился новый заказ по предмету {order.subject}. Бюджет: {order.budget}",
                 related_object_id=order.id,
                 related_object_type='order',
@@ -50,9 +54,9 @@ class NotificationService:
             recipient=order.client,
             type=NotificationType.NEW_BID,
             title=(
-                f"Отклик обновлён: {order.title or 'Без названия'}"
+                f"Отклик обновлён: {NotificationService._order_ref(order)}"
                 if is_updated
-                else f"Новый отклик на заказ: {order.title or 'Без названия'}"
+                else f"Новый отклик на заказ: {NotificationService._order_ref(order)}"
             ),
             message=(
                 f"Эксперт {expert.get_full_name() or expert.username} "
@@ -70,7 +74,7 @@ class NotificationService:
             recipient=order.client,
             type=NotificationType.ORDER_TAKEN,
             title="Заказ принят в работу",
-            message=f"Ваш заказ '{order.title or 'Без названия'}' принят в работу экспертом {order.expert}",
+            message=f"Ваш заказ {NotificationService._order_ref(order)} принят в работу экспертом {order.expert}",
             related_object_id=order.id,
             related_object_type='order'
         )
@@ -82,7 +86,7 @@ class NotificationService:
             recipient=order.client,
             type=NotificationType.ORDER_ASSIGNED,
             title="Эксперт назначен на заказ",
-            message=f"Эксперт {order.expert.username} взял ваш заказ '{order.title or 'Без названия'}' в работу",
+            message=f"Эксперт {order.expert.username} взял ваш заказ {NotificationService._order_ref(order)} в работу",
             related_object_id=order.id,
             related_object_type='order',
             data={'expert_id': order.expert.id, 'order_id': order.id}
@@ -98,7 +102,7 @@ class NotificationService:
                     recipient=recipient,
                     type=NotificationType.FILE_UPLOADED,
                     title="Загружен новый файл",
-                    message=f"К заказу '{order_file.order.title or 'Без названия'}' добавлен новый файл",
+                    message=f"К заказу {NotificationService._order_ref(order_file.order)} прикреплен файл",
                     related_object_id=order_file.order.id,
                     related_object_type='order'
                 )
@@ -114,7 +118,7 @@ class NotificationService:
                     recipient=recipient,
                     type=NotificationType.NEW_COMMENT,
                     title="Новый комментарий",
-                    message=f"Новый комментарий к заказу '{order.title or 'Без названия'}'",
+                    message=f"Новый комментарий к заказу {NotificationService._order_ref(order)}",
                     related_object_id=order.id,
                     related_object_type='order'
                 )
@@ -128,7 +132,7 @@ class NotificationService:
                 recipient=recipient,
                 type=NotificationType.STATUS_CHANGED,
                 title="Изменен статус заказа",
-                message=f"Статус заказа '{order.title or 'Без названия'}' изменен с '{old_status}' на '{order.get_status_display()}'",
+                message=f"Статус заказа {NotificationService._order_ref(order)} изменен с '{old_status}' на '{order.get_status_display()}'",
                 related_object_id=order.id,
                 related_object_type='order'
             )
@@ -142,7 +146,7 @@ class NotificationService:
                 recipient=recipient,
                 type=NotificationType.DEADLINE_SOON,
                 title="Приближается срок сдачи",
-                message=f"До срока сдачи заказа '{order.title or 'Без названия'}' осталось {hours_left} часов",
+                message=f"До срока сдачи заказа {NotificationService._order_ref(order)} осталось {hours_left} часов",
                 related_object_id=order.id,
                 related_object_type='order',
                 expires_in=timedelta(hours=hours_left)
@@ -188,7 +192,7 @@ class NotificationService:
                 recipient=order.expert,
                 type=NotificationType.PAYMENT_RECEIVED,
                 title="Получена оплата",
-                message=f"Получена оплата за заказ '{order.title or 'Без названия'}'",
+                message=f"Получена оплата за заказ {NotificationService._order_ref(order)}",
                 related_object_id=order.id,
                 related_object_type='order'
             )
@@ -201,7 +205,7 @@ class NotificationService:
                 recipient=recipient,
                 type=NotificationType.ORDER_COMPLETED,
                 title="Заказ завершен",
-                message=f"Заказ '{order.title or 'Без названия'}' успешно завершен",
+                message=f"Заказ {NotificationService._order_ref(order)} успешно завершен",
                 related_object_id=order.id,
                 related_object_type='order'
             )
@@ -252,7 +256,7 @@ class NotificationService:
             recipient=expert,
             type=NotificationType.EXPERT_INVITATION,
             title="Приглашение выполнить заказ",
-            message=f"Вас приглашают выполнить заказ '{order.title or 'Без названия'}'. "
+            message=f"Вас приглашают выполнить заказ {NotificationService._order_ref(order)}. "
                    f"Бюджет: {order.budget}₽, срок: {order.deadline.strftime('%d.%m.%Y')}",
             related_object_id=order.id,
             related_object_type='order',
@@ -268,7 +272,7 @@ class NotificationService:
             type=NotificationType.EXPERT_RESPONSE,
             title=f"Ответ на приглашение",
             message=f"Эксперт {expert.username} {status} ваше приглашение "
-                   f"по заказу '{order.title or 'Без названия'}'",
+                   f"по заказу {NotificationService._order_ref(order)}",
             related_object_id=order.id,
             related_object_type='order'
         )
@@ -282,7 +286,7 @@ class NotificationService:
                 recipient=admin,
                 type=NotificationType.NEW_CONTACT,  # Используем существующий тип
                 title="Создан новый спор",
-                message=f"Клиент {dispute.order.client.username} создал спор по заказу '{dispute.order.title or 'Без названия'}'. Причина: {dispute.reason[:100]}...",
+                message=f"Клиент {dispute.order.client.username} создал спор по заказу {NotificationService._order_ref(dispute.order)}. Причина: {dispute.reason[:100]}...",
                 related_object_id=dispute.id,
                 related_object_type='dispute',
                 expires_in=timedelta(days=7)
@@ -296,7 +300,7 @@ class NotificationService:
                 recipient=dispute.arbitrator,
                 type=NotificationType.NEW_ORDER,  # Используем существующий тип
                 title="Назначен на рассмотрение спора",
-                message=f"Вам назначен спор по заказу '{dispute.order.title or 'Без названия'}'. Причина спора: {dispute.reason[:100]}...",
+                message=f"Вам назначен спор по заказу {NotificationService._order_ref(dispute.order)}. Причина спора: {dispute.reason[:100]}...",
                 related_object_id=dispute.id,
                 related_object_type='dispute',
                 expires_in=timedelta(days=3)
@@ -311,7 +315,7 @@ class NotificationService:
                 recipient=recipient,
                 type=NotificationType.ORDER_COMPLETED,  # Используем существующий тип
                 title="Спор решен",
-                message=f"Спор по заказу '{dispute.order.title or 'Без названия'}' решен арбитром. Решение: {dispute.result[:100]}...",
+                message=f"Спор по заказу {NotificationService._order_ref(dispute.order)} решен арбитром. Решение: {dispute.result[:100]}...",
                 related_object_id=dispute.id,
                 related_object_type='dispute'
             )

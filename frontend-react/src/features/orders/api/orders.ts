@@ -88,8 +88,10 @@ export const ordersApi = {
   },
 
   
-  requestRevision: async (id: number) => {
-    const response = await apiClient.post(API_ENDPOINTS.orders.revision(id));
+  requestRevision: async (id: number, comment?: string) => {
+    const normalizedComment = comment?.trim() || '';
+    const payload = normalizedComment ? { comment: normalizedComment } : {};
+    const response = await apiClient.post(API_ENDPOINTS.orders.revision(id), payload);
     return response.data;
   },
 
@@ -191,6 +193,11 @@ export const ordersApi = {
     const response = await apiClient.get(API_ENDPOINTS.orders.downloadFile(orderId, fileId), {
       responseType: 'blob',
     });
+    return response.data;
+  },
+
+  deleteOrderFile: async (orderId: number, fileId: number) => {
+    const response = await apiClient.delete(`${API_ENDPOINTS.orders.uploadFile(orderId)}${fileId}/`);
     return response.data;
   },
 };

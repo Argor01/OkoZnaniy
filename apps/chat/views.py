@@ -295,7 +295,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     offer_title = (offer_payload.get('title') or '').strip()
                     offer_cost = offer_payload.get('cost')
                     cost_suffix = f" Сумма: {offer_cost} ₽." if offer_cost not in [None, ''] else ''
-                    target_label = f"по заказу '{chat.order.title}'" if getattr(chat, 'order', None) else "в чате"
+                    target_label = f"по заказу №{chat.order.id}" if getattr(chat, 'order', None) else "в чате"
                     NotificationService.create_notification(
                         recipient=recipient,
                         type=NotificationType.NEW_BID,
@@ -770,7 +770,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     recipient=expert_user,
                     type=NotificationType.ORDER_ASSIGNED,
                     title="Индивидуальное предложение принято",
-                    message=f"Клиент принял ваше индивидуальное предложение. Можно начинать работу по заказу '{order.title or f'#{order.id}'}'.",
+                    message=f"Клиент принял ваше индивидуальное предложение. Можно начинать работу по заказу №{order.id}.",
                     related_object_id=order.id,
                     related_object_type='order',
                     data={

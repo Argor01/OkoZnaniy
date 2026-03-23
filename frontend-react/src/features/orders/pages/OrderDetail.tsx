@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown } from 'antd';
+import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
@@ -26,6 +26,9 @@ const OrderDetail: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [reviewActionLoading, setReviewActionLoading] = useState<'approve' | 'revision' | 'reject' | null>(null);
+  const [revisionModalOpen, setRevisionModalOpen] = useState(false);
+  const [revisionComment, setRevisionComment] = useState('');
+  const [revisionSubmitting, setRevisionSubmitting] = useState(false);
 
   const removeOrderFromCaches = React.useCallback((id: number) => {
     const filterOut = (data: any) => {
@@ -135,23 +138,63 @@ const OrderDetail: React.FC = () => {
 
   const deliveredWorkFiles = React.useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
-    return order.files.filter((file: any) => {
+    const deliveredCandidates = order.files.filter((file: any) => {
       const fileType = String(file?.file_type || '').toLowerCase();
       const description = String(file?.description || '');
       if (fileType === 'solution' || fileType === 'revision') return true;
       if (description.includes('chat_delivery_message_id:')) return true;
       return false;
-    }).sort((a: any, b: any) => {
+    });
+
+    const extractDeliveryBatchId = (descriptionRaw: unknown): string => {
+      const description = String(descriptionRaw || '');
+      const match = description.match(/chat_delivery_batch_id:([^\s;]+)/);
+      return match?.[1] || '';
+    };
+
+    const deliveredWithMeta = deliveredCandidates.map((file: any) => ({
+      file,
+      batchId: extractDeliveryBatchId(file?.description),
+      createdAt: new Date(file?.created_at || 0).getTime(),
+    }));
+
+    const latestBatched = deliveredWithMeta
+      .filter((item) => !!item.batchId)
+      .sort((a, b) => b.createdAt - a.createdAt)[0];
+
+    if (latestBatched?.batchId) {
+      return deliveredWithMeta
+        .filter((item) => item.batchId === latestBatched.batchId)
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .map((item) => item.file);
+    }
+
+    const sortedByDate = deliveredCandidates.sort((a: any, b: any) => {
       const left = new Date(a?.created_at || 0).getTime();
       const right = new Date(b?.created_at || 0).getTime();
       return right - left;
     });
+    const latestTime = new Date(sortedByDate[0]?.created_at || 0).getTime();
+    const fallbackBatchWindowMs = 2 * 60 * 1000;
+    return sortedByDate.filter((file: any) => {
+      const createdAt = new Date(file?.created_at || 0).getTime();
+      return latestTime - createdAt <= fallbackBatchWindowMs;
+    });
   }, [order?.files]);
-  const latestDeliveredWork = deliveredWorkFiles[0] || null;
   const attachedOrderFiles = React.useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
     const deliveredIds = new Set(deliveredWorkFiles.map((file: any) => Number(file?.id)));
-    return order.files.filter((file: any) => !deliveredIds.has(Number(file?.id)));
+    const orderClientIdFromOrder = Number(order?.client?.id ?? (order as any)?.client_id ?? 0);
+    return order.files.filter((file: any) => {
+      if (deliveredIds.has(Number(file?.id))) return false;
+      const fileType = String(file?.file_type || '').toLowerCase();
+      if (fileType !== 'task') return false;
+      const description = String(file?.description || '').trim().toLowerCase();
+      const isInitialTaskFile = description === 'файл задания' || description === '';
+      if (!isInitialTaskFile) return false;
+      const uploadedById = Number(file?.uploaded_by?.id ?? 0);
+      return orderClientIdFromOrder > 0 ? uploadedById === orderClientIdFromOrder : true;
+    });
   }, [order?.files, deliveredWorkFiles]);
 
   const refreshOrderWithLists = React.useCallback(async () => {
@@ -179,18 +222,31 @@ const OrderDetail: React.FC = () => {
   }, [orderId, refreshOrderWithLists]);
 
   const handleRevisionFromCard = React.useCallback(async () => {
+    setRevisionModalOpen(true);
+  }, []);
+
+  const handleConfirmRevisionFromCard = React.useCallback(async () => {
     if (!orderId) return;
+    const comment = revisionComment.trim();
+    if (!comment) {
+      message.warning('Добавьте комментарий для доработки');
+      return;
+    }
     try {
+      setRevisionSubmitting(true);
       setReviewActionLoading('revision');
-      await ordersApi.requestRevision(Number(orderId));
+      await ordersApi.requestRevision(Number(orderId), comment);
       await refreshOrderWithLists();
+      setRevisionModalOpen(false);
+      setRevisionComment('');
       message.success('Работа отправлена на доработку');
     } catch (e: any) {
       message.error(e?.response?.data?.detail || 'Не удалось отправить на доработку');
     } finally {
+      setRevisionSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [orderId, refreshOrderWithLists]);
+  }, [orderId, refreshOrderWithLists, revisionComment]);
 
   const handleRejectFromCard = React.useCallback(async () => {
     if (!orderId) return;
@@ -347,13 +403,11 @@ const OrderDetail: React.FC = () => {
           <Space direction="vertical" size={0} className={`${styles.fullWidth} ${styles.orderContent}`}>
             <div className={styles.sectionBlock}>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
-                <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
-                <Space>
-                  {!isOrderOwner && (
-                    <Tag color={getStatusColor(order.status)} className={styles.statusTag}>
-                      {getStatusText(order.status)}
-                    </Tag>
-                  )}
+                <div className={styles.orderHeaderInfo}>
+                  <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
+                </div>
+                <Space className={styles.headerRightControls}>
+                  <Text className={styles.orderNumberTopRight}>Заказ №{order.id}</Text>
                   {canSubmitComplaint && (
                     <Dropdown
                       trigger={['click']}
@@ -443,28 +497,31 @@ const OrderDetail: React.FC = () => {
             {canSeeDeliveredWorkBlock ? (
               <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
                 <Title level={4} className={styles.sectionTitle}>Готовая работа</Title>
-                {latestDeliveredWork ? (
+                {deliveredWorkFiles.length > 0 ? (
                   <>
                     <div className={styles.orderFilesGrid}>
-                      <button
-                        type="button"
-                        className={styles.orderFileTile}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownloadFile(latestDeliveredWork);
-                        }}
-                      >
-                        <div className={styles.orderFileIconBox}>
-                          {getOrderFileIcon(latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`)}
-                        </div>
-                        <div className={styles.orderFileName}>
-                          {formatOrderFileTileName(latestDeliveredWork.filename || `Файл #${latestDeliveredWork.id}`)}
-                        </div>
-                        <DownloadOutlined className={styles.orderFileDownloadIcon} />
-                      </button>
+                      {deliveredWorkFiles.map((file: any, index: number) => (
+                        <button
+                          type="button"
+                          className={styles.orderFileTile}
+                          key={file.id ?? `delivered-${index}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadFile(file);
+                          }}
+                        >
+                          <div className={styles.orderFileIconBox}>
+                            {getOrderFileIcon(file.filename || file.file_name || `Файл #${file.id || index + 1}`)}
+                          </div>
+                          <div className={`${styles.orderFileName} ${styles.deliveredFileName}`}>
+                            {formatOrderFileTileName(file.filename || file.file_name || `Файл #${file.id || index + 1}`)}
+                          </div>
+                          <DownloadOutlined className={styles.orderFileDownloadIcon} />
+                        </button>
+                      ))}
                     </div>
                     <Text type="secondary" className={styles.deliveredWorkMeta}>
-                      Загружено: {new Date(latestDeliveredWork.created_at).toLocaleString('ru-RU')}
+                      Файлов выгружено: {deliveredWorkFiles.length}
                     </Text>
                   </>
                 ) : (
@@ -727,6 +784,31 @@ const OrderDetail: React.FC = () => {
          orderTitle={order.title}
          orderBudget={order.budget ? Number(order.budget) : undefined}
        />
+      <Modal
+        open={revisionModalOpen}
+        centered
+        onCancel={() => {
+          setRevisionModalOpen(false);
+          setRevisionComment('');
+        }}
+        onOk={handleConfirmRevisionFromCard}
+        okButtonProps={{ loading: revisionSubmitting || reviewActionLoading === 'revision' }}
+        okText="Отправить"
+        cancelText="Отмена"
+        title="Комментарий для доработки"
+        destroyOnHidden
+      >
+        <div className={styles.revisionModalSpacing}>
+          <Input.TextArea
+            value={revisionComment}
+            onChange={(e) => setRevisionComment(e.target.value)}
+            placeholder="Опишите, что нужно исправить"
+            autoSize={{ minRows: 4, maxRows: 8 }}
+            maxLength={1500}
+            showCount
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

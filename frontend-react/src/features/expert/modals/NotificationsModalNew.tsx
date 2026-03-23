@@ -210,8 +210,12 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     return category === notificationTab;
   });
 
-  const formatNotificationMessage = (message: string) => {
-    return message
+  const formatNotificationMessage = (notification: Notification) => {
+    if (notification.type === 'file_uploaded') {
+      const orderId = extractOrderId(notification);
+      return orderId ? `К заказу №${orderId} прикреплен файл` : 'К заказу прикреплен файл';
+    }
+    return notification.message
       .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
       .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
       .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная');
@@ -302,7 +306,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                     )}
                   </div>
                   <Text className={`${styles.notificationsModalItemText} ${isMobile ? styles.notificationsModalItemTextMobile : styles.notificationsModalItemTextDesktop}`}>
-                    {formatNotificationMessage(notification.message)}
+                    {formatNotificationMessage(notification)}
                   </Text>
                   <Text type="secondary" className={`${styles.notificationsModalItemTime} ${isMobile ? styles.notificationsModalItemTimeMobile : styles.notificationsModalItemTimeDesktop}`}>
                     <ClockCircleOutlined className={styles.notificationsModalItemTimeIcon} />

@@ -15,6 +15,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse
 import mimetypes
 import logging
+import json
 
 # Create your views here.
 logger = logging.getLogger(__name__)
@@ -217,7 +218,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 recipient=order.expert,
                 type='status_changed',
                 title='Дедлайн продлён',
-                message=f"Клиент продлил дедлайн по заказу '{order.title or f'#{order.id}'}' до {timezone.localtime(order.deadline).strftime('%d.%m.%Y %H:%M')}",
+                message=f"Клиент продлил дедлайн по заказу №{order.id} до {timezone.localtime(order.deadline).strftime('%d.%m.%Y %H:%M')}",
                 related_object_id=order.id,
                 related_object_type='order',
                 data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
@@ -247,7 +248,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 recipient=order.expert,
                 type='status_changed',
                 title='Заказ отменён',
-                message=f"Клиент отменил заказ '{order.title or f'#{order.id}'}' из‑за просрочки.",
+                message=f"Клиент отменил заказ №{order.id} из‑за просрочки.",
                 related_object_id=order.id,
                 related_object_type='order',
                 data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
@@ -345,10 +346,24 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Клиент отправляет на доработку: review -> revision."""
         order = self.get_object()
         user = request.user
+        revision_comment = str(request.data.get('comment') or '').strip()
+        if not revision_comment:
+            revision_comment = str(request.query_params.get('comment') or '').strip()
+        if not revision_comment:
+            revision_comment = str(request.headers.get('X-Revision-Comment') or '').strip()
+        if not revision_comment:
+            try:
+                raw_body = request.body.decode('utf-8') if getattr(request, 'body', None) else ''
+                parsed = json.loads(raw_body) if raw_body else {}
+                revision_comment = str((parsed or {}).get('comment') or '').strip()
+            except Exception:
+                revision_comment = ''
         if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'На доработку можно отправить только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not revision_comment:
+            return Response({'detail': 'Комментарий для доработки обязателен.'}, status=status.HTTP_400_BAD_REQUEST)
         order.status = 'revision'
         order.save(update_fields=['status', 'updated_at'])
         if order.expert_id and order.client_id:
@@ -361,10 +376,13 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             if created:
                 chat.participants.add(order.client, order.expert)
+            message_text = f'Клиент вернул работу на доработку\nКомментарий: {revision_comment}'
             message = Message(
                 chat=chat,
                 sender=order.client,
-                text='Клиент вернул работу на доработку',
+                text=message_text,
+                message_type='system',
+                offer_data={'revision_comment': revision_comment},
             )
             message.full_clean()
             message.save()

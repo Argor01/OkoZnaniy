@@ -122,6 +122,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     >
       <div className={styles.orderCardHeader}>
         <div className={styles.orderCardHeaderInfo}>
+          <Text className={styles.orderNumber}>Заказ №{order.id}</Text>
           <Text strong className={styles.orderTitle}>
             {order.title}
           </Text>

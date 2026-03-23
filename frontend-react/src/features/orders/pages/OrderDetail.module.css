@@ -71,9 +71,20 @@
   margin: 0;
 }
 
-.statusTag {
-  font-size: 14px;
-  padding: 4px 12px;
+.orderHeaderInfo {
+  min-width: 0;
+}
+
+.headerRightControls {
+  align-items: center;
+  gap: 10px;
+}
+
+.orderNumberTopRight {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
 }
 
 .sectionStack {
@@ -116,7 +127,6 @@
   height: auto;
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-grey-900);
   text-align: left;
   margin: 0 !important;
   justify-content: flex-start;
@@ -149,9 +159,7 @@
   padding: 3px 10px;
   font-size: 12px;
   font-weight: 700;
-  color: #0f766e;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.24);
+
 }
 
 .clientRatingIcon {
@@ -191,7 +199,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 20px;
   flex-shrink: 0;
   border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 72%, var(--bg-primary) 28%);
 }
@@ -215,7 +223,7 @@
 }
 
 .expertOfferLabel {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-tertiary);
   margin-bottom: 2px;
   text-transform: uppercase;
@@ -224,7 +232,7 @@
 }
 
 .expertOfferValue {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.3;
@@ -286,6 +294,10 @@
   line-height: 1.2;
   word-break: break-word;
   max-width: 100%;
+}
+
+.deliveredFileName {
+  color: #000000;
 }
 
 .orderFileDownloadIcon {
@@ -679,6 +691,10 @@
 
 .reviewActionsRow {
   margin-top: 0;
+}
+
+.revisionModalSpacing {
+  margin-bottom: 24px;
 }
 
 @media (max-width: 768px) {

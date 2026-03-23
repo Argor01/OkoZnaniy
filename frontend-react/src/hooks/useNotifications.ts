@@ -22,22 +22,37 @@ export const useNotifications = () => {
     return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
   }, []);
 
+  const getOrderIdFromNotification = useCallback((apiNotif: ApiNotification): number | null => {
+    if (apiNotif.related_object_type === 'order' && apiNotif.related_object_id) {
+      return apiNotif.related_object_id;
+    }
+    const source = `${apiNotif.title || ''} ${apiNotif.message || ''}`;
+    const match = source.match(/(?:№|#)(\d+)/);
+    if (!match) return null;
+    const value = Number(match[1]);
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }, []);
+
   const formatNotification = useCallback((apiNotif: ApiNotification): Notification => {
+    const orderId = getOrderIdFromNotification(apiNotif);
+    const normalizedMessage = apiNotif.type === 'file_uploaded'
+      ? (orderId ? `К заказу №${orderId} прикреплен файл` : 'К заказу прикреплен файл')
+      : apiNotif.message
+          .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
+          .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
+          .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная');
     return {
       id: apiNotif.id,
       type: apiNotif.type as any,
       title: apiNotif.title,
-      message: apiNotif.message
-        .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
-        .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
-        .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная'),
+      message: normalizedMessage,
       timestamp: formatTimestamp(apiNotif.created_at),
       isRead: apiNotif.is_read,
       actionUrl: apiNotif.related_object_id 
         ? `/${apiNotif.related_object_type}/${apiNotif.related_object_id}`
         : undefined,
     };
-  }, [formatTimestamp]);
+  }, [formatTimestamp, getOrderIdFromNotification]);
 
   const loadNotifications = useCallback(async () => {
     setLoading(true);

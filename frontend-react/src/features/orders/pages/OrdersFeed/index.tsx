@@ -56,6 +56,7 @@ const OrdersFeed: React.FC = () => {
     typeof window !== 'undefined' &&
     window.localStorage?.getItem('debug_api') === '1';
   const [searchText, setSearchText] = useState('');
+  const [orderIdSearch, setOrderIdSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
   const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
   const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 30000]);
@@ -194,6 +195,11 @@ const OrdersFeed: React.FC = () => {
     const matchesSearch = !searchText || 
       order.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       order.description?.toLowerCase().includes(searchText.toLowerCase());
+
+    const normalizedOrderIdSearch = orderIdSearch.trim();
+    const matchesOrderId =
+      !normalizedOrderIdSearch ||
+      String(order.id).includes(normalizedOrderIdSearch);
     
     const matchesSubject = !selectedSubject || order.subject_id === selectedSubject;
     const matchesWorkType = !selectedWorkType || order.work_type_id === selectedWorkType;
@@ -208,7 +214,7 @@ const OrdersFeed: React.FC = () => {
       (responsesFilter === 'few' && order.responses_count > 0 && order.responses_count <= 5) ||
       (responsesFilter === 'many' && order.responses_count > 5);
 
-    return matchesSearch && matchesSubject && matchesWorkType && matchesBudget && matchesResponses;
+    return matchesSearch && matchesOrderId && matchesSubject && matchesWorkType && matchesBudget && matchesResponses;
   });
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
@@ -294,7 +300,7 @@ const OrdersFeed: React.FC = () => {
         className={styles.filterCard}
       >
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={24} md={12} lg={8}>
+          <Col xs={24} sm={24} md={12} lg={6}>
             <AppInput
               size="large"
               placeholder="Поиск по названию или описанию..."
@@ -304,7 +310,17 @@ const OrdersFeed: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={6} lg={8}>
+          <Col xs={24} sm={12} md={6} lg={6}>
+            <AppInput
+              size="large"
+              placeholder="Номер заказа"
+              prefix="№"
+              value={orderIdSearch}
+              onChange={(e) => setOrderIdSearch(e.target.value.replace(/[^\d]/g, ''))}
+              allowClear
+            />
+          </Col>
+          <Col xs={24} sm={12} md={6} lg={6}>
             <AppSelect
               size="large"
               placeholder="Предмет"
@@ -321,7 +337,7 @@ const OrdersFeed: React.FC = () => {
               ))}
             </AppSelect>
           </Col>
-          <Col xs={24} sm={12} md={6} lg={8}>
+          <Col xs={24} sm={12} md={6} lg={6}>
             <AppSelect
               size="large"
               placeholder="Тип работы"
@@ -434,7 +450,7 @@ const OrdersFeed: React.FC = () => {
           description={
             <div>
               <Text className={styles.emptyText}>
-                {searchText || selectedSubject || selectedWorkType 
+                {searchText || orderIdSearch || selectedSubject || selectedWorkType 
                   ? 'Заказы не найдены. Попробуйте изменить фильтры.'
                   : userProfile?.role === 'client' 
                     ? 'В ленте пока нет заказов от других клиентов'

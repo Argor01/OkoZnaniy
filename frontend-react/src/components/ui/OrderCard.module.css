@@ -26,6 +26,14 @@
   flex: 1;
 }
 
+.orderNumber {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
 .orderTitle {
   font-family: 'Jost-SemiBold', sans-serif;
   font-size: 18px !important;
