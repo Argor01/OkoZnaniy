@@ -52,16 +52,21 @@ export const getPersonnel = async (): Promise<Employee[]> => {
 
 export const registerEmployee = async (data: RegisterEmployeeRequest): Promise<Employee> => {
   try {
-    
-    const requestData = {
+    const requestData: any = {
       email: data.email,
       first_name: data.first_name,
       last_name: data.last_name,
       phone: data.phone || '',
       role: data.role,
       password: data.password,
-      username: data.username || data.email, 
+      username: data.username || data.email,
     };
+    
+    // Добавляем город если он указан
+    if (data.city) {
+      requestData.city = data.city;
+    }
+    
     const response = await apiClient.post('/director/personnel/register/', requestData);
     return response.data;
   } catch (error) {

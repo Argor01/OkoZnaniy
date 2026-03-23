@@ -66,6 +66,21 @@ const Login: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  
+  // Реферальный код из URL
+  const [referralCode, setReferralCode] = useState<string>('');
+
+  // Проверяем URL на наличие реферального кода
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const refCode = params.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      registerForm.setFieldsValue({ referral_code: refCode });
+      // Переключаемся на вкладку регистрации
+      setActiveTab('register');
+    }
+  }, [location.search, registerForm]);
 
   
   const loginUsernamePh = 'Email';
@@ -110,7 +125,15 @@ const Login: React.FC = () => {
   const bubbleAnswer = useTypewriter(bubbleAnswerText, answerSpeed, answerStartDelay);
   const isAnswerLoading = bubbleAnswer.length === 0;
   
+  // Проверка авторизации - если пользователь уже авторизован, редиректим на dashboard
+  React.useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
   
+  // Загрузка сохраненного реферального кода
   React.useEffect(() => {
     const savedReferralCode = localStorage.getItem('referral_code');
     if (savedReferralCode) {
@@ -208,6 +231,7 @@ const Login: React.FC = () => {
         password: values.password,
         password2: values.password2,
         role: values.role || 'client',
+        referral_code: values.referral_code || referralCode || undefined,
       } as RegisterRequest;
       
       await authApi.register(cleanValues);
@@ -484,7 +508,24 @@ const Login: React.FC = () => {
   );
 
   const registerFormComponent = (
-    <Form form={registerForm} onFinish={onRegister} layout="vertical">
+    <>
+      {referralCode && (
+        <div style={{ 
+          marginBottom: 16, 
+          padding: 12, 
+          background: '#f6ffed', 
+          border: '1px solid #b7eb8f',
+          borderRadius: 4 
+        }}>
+          <p style={{ margin: 0, color: '#52c41a', fontWeight: 500 }}>
+            ✓ Реферальный код: <strong>{referralCode}</strong>
+          </p>
+          <p style={{ margin: '4px 0 0 0', fontSize: 12, color: '#389e0d' }}>
+            Вы регистрируетесь по приглашению партнера
+          </p>
+        </div>
+      )}
+      <Form form={registerForm} onFinish={onRegister} layout="vertical">
       <Form.Item 
         label="Email"
         name="email" 
@@ -612,6 +653,7 @@ const Login: React.FC = () => {
         />
       </Form.Item>
     </Form>
+    </>
   );
 
   return (

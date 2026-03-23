@@ -591,10 +591,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Получаем всех партнеров с указанным городом
+        # Получаем всех активных партнеров с указанным городом
         partners = User.objects.filter(
             role='partner',
-            city__isnull=False
+            city__isnull=False,
+            is_active=True  # Только активные партнеры
         ).exclude(city='').order_by('city', 'username')
         
         partners_data = []

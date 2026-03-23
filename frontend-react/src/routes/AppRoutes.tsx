@@ -28,6 +28,8 @@ const MyWorks = lazy(() => import('@/features/orders/pages/MyWorks'));
 const PurchasedWorks = lazy(() => import('@/features/shop/pages/PurchasedWorks'));
 const OrdersFeed = lazy(() => import('@/features/orders/pages/OrdersFeed'));
 const SupportChat = lazy(() => import('@/features/support/pages/SupportChat'));
+const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
+const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
 
 export const AppRoutes: React.FC = () => {
@@ -35,8 +37,10 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       <Route path={ROUTES.home} element={<Home />} />
       <Route path={ROUTES.login} element={<Login />} />
+      <Route path="/register" element={<RegisterWithEmailVerification />} />
       <Route path={ROUTES.auth.googleCallback} element={<GoogleCallback />} />
       <Route path={ROUTES.auth.googleCallbackLegacy} element={<GoogleCallback />} />
+      <Route path="/ref/:code" element={<ReferralRedirect />} />
       
       {/* Protected Routes */}
       <Route 

@@ -439,3 +439,9 @@ if SUPPORT_USER_ID:
         SUPPORT_USER_ID = int(SUPPORT_USER_ID)
     except (ValueError, TypeError):
         SUPPORT_USER_ID = None
+
+
+# Настройки dj-rest-auth (временно отключено)
+# REST_AUTH = {
+#     'REGISTER_SERIALIZER': 'apps.users.serializers.CustomRegisterSerializer',
+# }

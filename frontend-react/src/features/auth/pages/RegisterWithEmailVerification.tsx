@@ -17,6 +17,7 @@ const RegisterWithEmailVerification: React.FC = () => {
     password: '',
     password2: '',
     role: 'client',
+    referral_code: '',
   });
   const [agreement, setAgreement] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
@@ -25,10 +26,19 @@ const RegisterWithEmailVerification: React.FC = () => {
   const [error, setError] = useState('');
   const [fromGoogle, setFromGoogle] = useState(false);
 
+  // Проверка авторизации - если пользователь уже авторизован, редиректим на главную
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
   
+  // Обработка параметров URL
   useEffect(() => {
     const emailParam = searchParams.get('email');
     const fromParam = searchParams.get('from');
+    const refParam = searchParams.get('ref');
     
     if (emailParam && fromParam === 'google') {
       setFormData(prev => ({
@@ -36,6 +46,14 @@ const RegisterWithEmailVerification: React.FC = () => {
         email: emailParam
       }));
       setFromGoogle(true);
+    }
+    
+    // Если есть реферальный код в URL
+    if (refParam) {
+      setFormData(prev => ({
+        ...prev,
+        referral_code: refParam
+      }));
     }
   }, [searchParams]);
 
@@ -145,6 +163,16 @@ const RegisterWithEmailVerification: React.FC = () => {
               </p>
               <p className="text-xs text-blue-600 mt-1">
                 Создайте пароль для завершения регистрации
+              </p>
+            </div>
+          )}
+          {formData.referral_code && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-700">
+                ✓ Реферальный код: <strong>{formData.referral_code}</strong>
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                Вы регистрируетесь по приглашению партнера
               </p>
             </div>
           )}

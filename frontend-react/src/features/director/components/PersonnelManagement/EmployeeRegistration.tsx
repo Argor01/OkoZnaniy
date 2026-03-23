@@ -72,9 +72,10 @@ const EmployeeRegistration: React.FC = () => {
       phone: values.phone ? values.phone.replace(/[^\d+]/g, '') : undefined,
       role: values.role,
       password: autoGeneratePassword ? undefined : values.password,
-      city: values.role === 'partner' ? values.city : undefined, // Добавляем город только для партнеров
+      ...(values.role === 'partner' && values.city ? { city: values.city } : {}), // Добавляем город только если роль партнер и город указан
     };
 
+    console.log('Отправляемые данные:', data); // Для отладки
     registerMutation.mutate(data);
   };
 

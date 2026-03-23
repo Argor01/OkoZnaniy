@@ -553,7 +553,6 @@ const PartnerDashboard: React.FC = () => {
             onDateRangeChange={setDateRange}
           />
           <OrdersStatisticsTable data={data} />
-          <ReferralProgram data={data} />
         </div>
       ),
     },

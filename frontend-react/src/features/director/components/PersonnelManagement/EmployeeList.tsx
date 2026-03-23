@@ -42,7 +42,7 @@ const EmployeeList: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('active'); // По умолчанию показываем только активных
   const queryClient = useQueryClient();
 
   const { data: employees, isLoading } = useQuery({

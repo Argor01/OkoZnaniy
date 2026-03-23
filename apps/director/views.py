@@ -9,6 +9,9 @@ from django.db.models import Sum, Count, Q, Avg
 from django.db.models.functions import TruncMonth
 from datetime import datetime, timedelta
 from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
 
 from apps.experts.models import ExpertApplication
 from apps.experts.serializers import ExpertApplicationSerializer
@@ -270,8 +273,11 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         """Деактивация эксперта - убирает роль expert, но не деактивирует аккаунт"""
         user = self.get_object()
         
+        logger.info(f"[DEACTIVATE] Деактивация пользователя ID={user.id}, role={user.role}, username={user.username}")
+        
         # Если это эксперт, меняем роль на client и деактивируем анкету
         if user.role == 'expert':
+            logger.info(f"[DEACTIVATE] Пользователь является экспертом, меняем роль на client")
             user.role = 'client'
             user.application_approved = False
             user.has_submitted_application = True
@@ -305,8 +311,11 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
                 NotificationService.notify_application_rejected(application, 'Ваш статус эксперта был деактивирован администратором')
         else:
             # Для других ролей просто деактивируем аккаунт
+            logger.info(f"[DEACTIVATE] Пользователь не эксперт (role={user.role}), деактивируем аккаунт")
             user.is_active = False
             user.save(update_fields=['is_active'])
+        
+        logger.info(f"[DEACTIVATE] Деактивация завершена. is_active={user.is_active}, role={user.role}")
         
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
