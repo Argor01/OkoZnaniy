@@ -311,3 +311,102 @@ class DirectorChatMessage(models.Model):
     
     def __str__(self):
         return f"{self.sender.username}: {self.message[:50]}"
+
+
+class ManualIncome(models.Model):
+    """Ручное добавление дохода директором"""
+    
+    date = models.DateField(
+        verbose_name='Дата'
+    )
+    description = models.CharField(
+        max_length=500,
+        verbose_name='Описание'
+    )
+    amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Сумма'
+    )
+    source = models.CharField(
+        max_length=100,
+        default='manual',
+        verbose_name='Источник'
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='manual_incomes',
+        verbose_name='Создано пользователем'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    
+    class Meta:
+        verbose_name = 'Ручной доход'
+        verbose_name_plural = 'Ручные доходы'
+        ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['date', '-created_at']),
+            models.Index(fields=['created_by', '-date']),
+        ]
+    
+    def __str__(self):
+        return f"{self.date}: {self.description} - {self.amount}"
+
+
+class ManualExpense(models.Model):
+    """Ручное добавление расхода директором"""
+    
+    CATEGORY_CHOICES = [
+        ('expert_payments', 'Выплаты экспертам'),
+        ('partner_payments', 'Партнерские выплаты'),
+        ('marketing', 'Маркетинг'),
+        ('infrastructure', 'Инфраструктура'),
+        ('salaries', 'Зарплаты'),
+        ('other', 'Прочее'),
+    ]
+    
+    date = models.DateField(
+        verbose_name='Дата'
+    )
+    description = models.CharField(
+        max_length=500,
+        verbose_name='Описание'
+    )
+    amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Сумма'
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='other',
+        verbose_name='Категория'
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='manual_expenses',
+        verbose_name='Создано пользователем'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    
+    class Meta:
+        verbose_name = 'Ручной расход'
+        verbose_name_plural = 'Ручные расходы'
+        ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['date', '-created_at']),
+            models.Index(fields=['category', '-date']),
+            models.Index(fields=['created_by', '-date']),
+        ]
+    
+    def __str__(self):
+        return f"{self.date}: {self.description} - {self.amount}"

@@ -15,7 +15,15 @@ from apps.experts.serializers import ExpertApplicationSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.users.models import User, PartnerEarning
-from .models import InternalMessage, MeetingRequest, MessageAttachment, DirectorChatRoom, DirectorChatMessage
+from .models import (
+    InternalMessage, 
+    MeetingRequest, 
+    MessageAttachment, 
+    DirectorChatRoom, 
+    DirectorChatMessage,
+    ManualIncome,
+    ManualExpense,
+)
 from .serializers import (
     InternalMessageSerializer,
     InternalMessageCreateSerializer,
@@ -656,9 +664,61 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
             'profit_margin': float((net_profit / total_income * 100) if total_income > 0 else 0)
         })
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'post'])
     def income(self, request):
         """Детализация доходов"""
+        if request.method == 'POST':
+            # Добавление нового дохода
+            date = request.data.get('date')
+            description = request.data.get('description')
+            amount = request.data.get('amount')
+            
+            if not all([date, description, amount]):
+                return Response(
+                    {'error': 'Укажите date, description и amount'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                amount = Decimal(str(amount))
+                if amount <= 0:
+                    return Response(
+                        {'error': 'Сумма должна быть больше 0'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except (ValueError, TypeError):
+                return Response(
+                    {'error': 'Неверный формат суммы'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Сохраняем доход в базу
+            income = ManualIncome.objects.create(
+                date=date_obj,
+                description=description,
+                amount=amount,
+                source='manual',
+                created_by=request.user
+            )
+            
+            # Возвращаем созданный доход
+            return Response({
+                'id': income.id,
+                'date': str(income.date),
+                'description': income.description,
+                'amount': float(income.amount),
+                'source': income.source
+            }, status=status.HTTP_201_CREATED)
+        
+        # GET метод
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -673,32 +733,83 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
-        # Группируем доходы по дням
-        daily_income = Order.objects.filter(
-            status='completed',
-            updated_at__gte=start_dt,
-            updated_at__lte=end_dt
-        ).extra(
-            select={'day': 'DATE(updated_at)'}
-        ).values('day').annotate(
-            amount=Sum('budget'),
-            count=Count('id')
-        ).order_by('day')
-
         income_details = []
-        for item in daily_income:
+        
+        # Только ручные доходы
+        manual_incomes = ManualIncome.objects.filter(
+            date__gte=start_dt.date(),
+            date__lte=end_dt.date()
+        ).order_by('-created_at')
+        
+        for income in manual_incomes:
             income_details.append({
-                'date': item['day'],
-                'amount': float(item['amount']),
-                'orders_count': item['count'],
-                'source': 'orders'
+                'id': income.id,
+                'date': str(income.date),
+                'amount': float(income.amount),
+                'source': income.source,
+                'description': income.description,
+                'created_at': income.created_at.isoformat(),
+                'can_delete': True
             })
 
         return Response(income_details)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'post'])
     def expense(self, request):
         """Детализация расходов"""
+        if request.method == 'POST':
+            # Добавление нового расхода
+            date = request.data.get('date')
+            description = request.data.get('description')
+            amount = request.data.get('amount')
+            category = request.data.get('category', 'other')
+            
+            if not all([date, description, amount]):
+                return Response(
+                    {'error': 'Укажите date, description и amount'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                amount = Decimal(str(amount))
+                if amount <= 0:
+                    return Response(
+                        {'error': 'Сумма должна быть больше 0'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except (ValueError, TypeError):
+                return Response(
+                    {'error': 'Неверный формат суммы'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Сохраняем расход в базу
+            expense = ManualExpense.objects.create(
+                date=date_obj,
+                description=description,
+                amount=amount,
+                category=category,
+                created_by=request.user
+            )
+            
+            # Возвращаем созданный расход
+            return Response({
+                'id': expense.id,
+                'date': str(expense.date),
+                'description': expense.description,
+                'amount': float(expense.amount),
+                'category': expense.category
+            }, status=status.HTTP_201_CREATED)
+        
+        # GET метод
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -714,56 +825,45 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
 
         expense_details = []
-
-        # Партнерские выплаты
-        partner_expenses = []
-        try:
-            partner_expenses = PartnerEarning.objects.filter(
-                created_at__gte=start_dt,
-                created_at__lte=end_dt,
-                is_paid=True
-            ).extra(
-                select={'day': 'DATE(created_at)'}
-            ).values('day').annotate(
-                amount=Sum('amount'),
-                count=Count('id')
-            ).order_by('day')
-        except Exception:
-            # Таблица может не существовать
-            pass
-
-        for item in partner_expenses:
+        
+        # Только ручные расходы
+        manual_expenses = ManualExpense.objects.filter(
+            date__gte=start_dt.date(),
+            date__lte=end_dt.date()
+        ).order_by('-created_at')
+        
+        for expense in manual_expenses:
             expense_details.append({
-                'date': item['day'],
-                'amount': float(item['amount']),
-                'count': item['count'],
-                'category': 'partner_payments',
-                'description': 'Партнерские выплаты'
-            })
-
-        # Выплаты экспертам (расчетные)
-        expert_payments = Order.objects.filter(
-            status='completed',
-            updated_at__gte=start_dt,
-            updated_at__lte=end_dt
-        ).extra(
-            select={'day': 'DATE(updated_at)'}
-        ).values('day').annotate(
-            total_amount=Sum('budget'),
-            count=Count('id')
-        ).order_by('day')
-
-        for item in expert_payments:
-            expert_payment_amount = float(item['total_amount']) * 0.7  # 70% экспертам
-            expense_details.append({
-                'date': item['day'],
-                'amount': expert_payment_amount,
-                'count': item['count'],
-                'category': 'expert_payments',
-                'description': 'Выплаты экспертам'
+                'id': expense.id,
+                'date': str(expense.date),
+                'amount': float(expense.amount),
+                'category': expense.category,
+                'description': expense.description,
+                'created_at': expense.created_at.isoformat(),
+                'can_delete': True
             })
 
         return Response(expense_details)
+    
+    @action(detail=False, methods=['delete'], url_path='income/(?P<income_id>[^/.]+)')
+    def delete_income(self, request, income_id=None):
+        """Удаление ручного дохода"""
+        try:
+            income = ManualIncome.objects.get(id=income_id, created_by=request.user)
+            income.delete()
+            return Response({'message': 'Доход успешно удален'}, status=status.HTTP_200_OK)
+        except ManualIncome.DoesNotExist:
+            return Response({'error': 'Доход не найден'}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=False, methods=['delete'], url_path='expense/(?P<expense_id>[^/.]+)')
+    def delete_expense(self, request, expense_id=None):
+        """Удаление ручного расхода"""
+        try:
+            expense = ManualExpense.objects.get(id=expense_id, created_by=request.user)
+            expense.delete()
+            return Response({'message': 'Расход успешно удален'}, status=status.HTTP_200_OK)
+        except ManualExpense.DoesNotExist:
+            return Response({'error': 'Расход не найден'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class DirectorPartnersViewSet(viewsets.ViewSet):

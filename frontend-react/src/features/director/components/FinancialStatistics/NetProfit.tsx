@@ -244,42 +244,49 @@ const NetProfit: React.FC = () => {
           isMobile ? 'netProfitChartCardMobile' : '',
         ].filter(Boolean).join(' ')}
       >
-        <div
-          className={[
-            'netProfitChartContainer',
-            isMobile ? 'netProfitChartContainerMobile' : '',
-          ].filter(Boolean).join(' ')}
-          style={{ minHeight: 300 }}
-        >
-          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-            <AreaChart 
-              data={chartData}
-              margin={{
-                top: 20,
-                right: isMobile ? 10 : 30,
-                left: isMobile ? 10 : 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                fontSize={isMobile ? 10 : 12}
-                interval={isMobile ? 1 : 0}
-              />
-              <YAxis 
-                fontSize={isMobile ? 10 : 12}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-              />
-              <Tooltip 
-                formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
-              />
-              <Legend />
-              <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Прибыль" />
-              <Area type="monotone" dataKey="expense" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        {chartData.length > 0 ? (
+          <div
+            className={[
+              'netProfitChartContainer',
+              isMobile ? 'netProfitChartContainerMobile' : '',
+            ].filter(Boolean).join(' ')}
+            style={{ minHeight: 300 }}
+          >
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+              <AreaChart 
+                data={chartData}
+                margin={{
+                  top: 20,
+                  right: isMobile ? 10 : 30,
+                  left: isMobile ? 10 : 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="date" 
+                  fontSize={isMobile ? 10 : 12}
+                  interval={isMobile ? 1 : 0}
+                />
+                <YAxis 
+                  fontSize={isMobile ? 10 : 12}
+                  tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                />
+                <Tooltip 
+                  formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
+                />
+                <Legend />
+                <Area type="monotone" dataKey="profit" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Прибыль" />
+                <Area type="monotone" dataKey="expense" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Расходы" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#999' }}>
+            <p style={{ fontSize: 16, marginBottom: 8 }}>📊 Нет данных за выбранный период</p>
+            <p style={{ fontSize: 14 }}>Добавьте доходы и расходы для отображения графика</p>
+          </div>
+        )}
       </Card>
     </div>
   );

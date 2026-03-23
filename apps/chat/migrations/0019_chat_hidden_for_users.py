@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0018_remove_contactviolationlog_chat_contac_user_id_f5486d_idx_and_more'),
+        ('chat', '0018_merge_20260311_1336'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

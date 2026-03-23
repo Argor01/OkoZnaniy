@@ -1,22 +1,11 @@
 import React from 'react';
 import { Card, Tabs } from 'antd';
-import { DollarOutlined, LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
-import MonthlyTurnover from './MonthlyTurnover';
+import { LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
 import NetProfit from './NetProfit';
 import IncomeExpenseDetail from './IncomeExpenseDetail';
 
 const FinancialStatistics: React.FC = () => {
   const items = [
-    {
-      key: 'turnover',
-      label: (
-        <span>
-          <DollarOutlined className="financialStatisticsTabIcon" />
-          Общий оборот
-        </span>
-      ),
-      children: <MonthlyTurnover />,
-    },
     {
       key: 'profit',
       label: (
@@ -42,7 +31,7 @@ const FinancialStatistics: React.FC = () => {
   return (
     <div>
       <Card>
-        <Tabs defaultActiveKey="turnover" items={items} />
+        <Tabs defaultActiveKey="profit" items={items} />
       </Card>
     </div>
   );

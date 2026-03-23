@@ -1,5 +1,5 @@
-aiogram==3.9.0
-aiohappyeyeballs==2.4.0
+# aiogram==3.13.1  # Временно отключено для dev
+# aiohappyeyeballs>=2.3.0  # Removed due to PyPI connection issues
 aiohttp==3.9.5
 aiosignal==1.3.2
 amqp==5.3.1

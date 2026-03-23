@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin, Table, Tag, Modal, Form, Input, InputNumber, Select, message } from 'antd';
+import { Card, Row, Col, Statistic, DatePicker, Space, Button, Spin, Table, Tag, Modal, Form, Input, InputNumber, Select, message, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import {
   BarChart,
@@ -14,10 +14,12 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getIncomeDetail, getExpenseDetail, addIncome, addExpense } from '@/features/director/api/directorApi';
+import apiClient from '@/api/client';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+const { Text } = Typography;
 
 const IncomeExpenseDetail: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
@@ -25,6 +27,8 @@ const IncomeExpenseDetail: React.FC = () => {
     dayjs().endOf('month'),
   ]);
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
   const [addType, setAddType] = useState<'income' | 'expense'>('income');
   const [tableFilter, setTableFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [form] = Form.useForm();
@@ -148,6 +152,34 @@ const IncomeExpenseDetail: React.FC = () => {
       date: dayjs(),
     });
     setAddModalVisible(true);
+  };
+
+  const handleRowClick = (record: any) => {
+    setSelectedRecord(record);
+    setDetailModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedRecord || !selectedRecord.can_delete) return;
+    
+    try {
+      const endpoint = selectedRecord.type === 'income' 
+        ? `/director/finance/income/${selectedRecord.id}/`
+        : `/director/finance/expense/${selectedRecord.id}/`;
+      
+      await apiClient.delete(endpoint);
+      message.success('Запись успешно удалена');
+      
+      // Обновляем данные
+      queryClient.invalidateQueries({ queryKey: ['income-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['expense-detail'] });
+      
+      setDetailModalVisible(false);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      message.error('Ошибка при удалении записи');
+    }
   };
 
   return (
@@ -385,9 +417,24 @@ const IncomeExpenseDetail: React.FC = () => {
         <Table
           dataSource={(() => {
             const allTransactions = [
-              ...(incomeData || []).map(item => ({ ...item, type: 'income' as const })),
-              ...(expenseData || []).map(item => ({ ...item, type: 'expense' as const }))
+              ...(incomeData || []).map(item => ({ 
+                ...item, 
+                type: 'income' as const,
+                created_at: (item as any).created_at || item.date 
+              })),
+              ...(expenseData || []).map(item => ({ 
+                ...item, 
+                type: 'expense' as const,
+                created_at: (item as any).created_at || item.date 
+              }))
             ];
+            
+            // Сортируем по created_at (новые сверху)
+            allTransactions.sort((a, b) => {
+              const dateA = new Date(a.created_at || a.date).getTime();
+              const dateB = new Date(b.created_at || b.date).getTime();
+              return dateB - dateA;
+            });
             
             if (tableFilter === 'income') {
               return allTransactions.filter(item => item.type === 'income');
@@ -397,9 +444,13 @@ const IncomeExpenseDetail: React.FC = () => {
             }
             return allTransactions;
           })()}
-          rowKey={(record) => `${record.type}-${record.id}`}
+          rowKey={(record, index) => `${record.type}-${record.id || record.date}-${index}`}
           pagination={{ pageSize: 15 }}
           scroll={{ x: isMobile ? 800 : undefined }}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+            style: { cursor: record.can_delete ? 'pointer' : 'default' }
+          })}
           columns={[
             {
               title: 'Дата',
@@ -505,6 +556,85 @@ const IncomeExpenseDetail: React.FC = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Модальное окно деталей */}
+      <Modal
+        title="Детали операции"
+        open={detailModalVisible}
+        onCancel={() => {
+          setDetailModalVisible(false);
+          setSelectedRecord(null);
+        }}
+        footer={[
+          <Button key="close" onClick={() => {
+            setDetailModalVisible(false);
+            setSelectedRecord(null);
+          }}>
+            Закрыть
+          </Button>,
+          selectedRecord?.can_delete && (
+            <Button 
+              key="delete" 
+              danger 
+              onClick={handleDelete}
+            >
+              Удалить
+            </Button>
+          ),
+        ]}
+      >
+        {selectedRecord && (
+          <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            <div>
+              <Text strong>Тип:</Text>
+              <br />
+              <Tag color={selectedRecord.type === 'income' ? 'green' : 'red'}>
+                {selectedRecord.type === 'income' ? 'Доход' : 'Расход'}
+              </Tag>
+            </div>
+            <div>
+              <Text strong>Дата:</Text>
+              <br />
+              <Text>{dayjs(selectedRecord.date).format('DD.MM.YYYY')}</Text>
+            </div>
+            <div>
+              <Text strong>Описание:</Text>
+              <br />
+              <Text>{selectedRecord.description}</Text>
+            </div>
+            <div>
+              <Text strong>Сумма:</Text>
+              <br />
+              <Text 
+                style={{ 
+                  color: selectedRecord.type === 'income' ? '#52c41a' : '#ff4d4f',
+                  fontSize: 18,
+                  fontWeight: 'bold'
+                }}
+              >
+                {selectedRecord.type === 'income' ? '+' : '-'}
+                {selectedRecord.amount.toLocaleString('ru-RU')} ₽
+              </Text>
+            </div>
+            {selectedRecord.created_at && (
+              <div>
+                <Text strong>Создано:</Text>
+                <br />
+                <Text type="secondary">
+                  {dayjs(selectedRecord.created_at).format('DD.MM.YYYY HH:mm')}
+                </Text>
+              </div>
+            )}
+            {!selectedRecord.can_delete && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  * Автоматически созданные записи нельзя удалить
+                </Text>
+              </div>
+            )}
+          </Space>
+        )}
       </Modal>
     </div>
   );
