@@ -347,7 +347,7 @@ const OrderDetail: React.FC = () => {
       `Статус: ${getStatusText(String(order.status || ''))}`,
       `Заказчик: ${clientName}`,
       `Исполнитель: ${expertName}`,
-      `Дедлайн: ${deadlineText}`,
+      `Срок сдачи: ${deadlineText}`,
       '',
       'Описание жалобы:',
       ''
@@ -473,7 +473,7 @@ const OrderDetail: React.FC = () => {
                 <div className={styles.expertOfferGridItem}>
                   <div className={styles.expertOfferGridIcon}><ClockCircleOutlined /></div>
                   <div>
-                    <div className={styles.expertOfferLabel}>Дедлайн</div>
+                    <div className={styles.expertOfferLabel}>Срок сдачи</div>
                     <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
                   </div>
                 </div>

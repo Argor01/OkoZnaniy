@@ -11,6 +11,7 @@ import './styles/globals.css';
 import { SupportButton } from '@/features/support';
 import { AppRoutes } from '@/routes/AppRoutes';
 import { CookieConsent } from '@/components/ui';
+import { ScrollToTop } from '@/features/common';
 
 dayjs.locale('ru');
 
@@ -42,6 +43,7 @@ const App: React.FC = () => {
       >
         <AntApp>
           <Router>
+            <ScrollToTop />
             <Suspense fallback={
               <div className="fullScreenCenter">
                 <Spin size="large" />

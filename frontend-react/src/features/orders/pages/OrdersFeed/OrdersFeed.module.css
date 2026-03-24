@@ -131,6 +131,12 @@
   gap: 24px;
 }
 
+.ordersPagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
 .orderCard {
   height: 100%;
   display: flex;

@@ -17,9 +17,30 @@ export const ordersApi = {
   },
 
   
-  getAvailableOrders: async (params?: { ordering?: string }) => {
-    const response = await apiClient.get(API_ENDPOINTS.orders.available, { params });
-    return response.data.results || response.data;
+  getAvailableOrders: async (params?: { ordering?: string; page?: number }) => {
+    const firstResponse = await apiClient.get(API_ENDPOINTS.orders.available, { params });
+    const firstData = firstResponse.data;
+    if (!firstData || !Array.isArray(firstData.results)) {
+      return firstData?.results || firstData;
+    }
+
+    const all: Order[] = [...firstData.results];
+    let nextUrl: string | null = String(firstData.next || '') || null;
+    let guard = 0;
+
+    while (nextUrl && guard < 100) {
+      const response = await apiClient.get(nextUrl);
+      const data = response.data;
+      if (Array.isArray(data?.results)) {
+        all.push(...data.results);
+        nextUrl = String(data.next || '') || null;
+      } else {
+        nextUrl = null;
+      }
+      guard += 1;
+    }
+
+    return all;
   },
 
   

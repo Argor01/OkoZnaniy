@@ -146,7 +146,7 @@ const WorkDetail: React.FC = () => {
                 >
                   <Space direction="vertical" size={2} className={styles.fullWidth}>
                     <Text type="secondary" className={styles.infoLabel}>
-                      Дедлайн
+                      Срок сдачи
                     </Text>
                     <Space align="center">
                       <CalendarOutlined className={styles.deadlineIcon} />

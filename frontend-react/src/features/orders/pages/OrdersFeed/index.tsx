@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Tag, Space, Empty, Spin, Select, Row, Col, InputNumber, message, Avatar, Tooltip } from 'antd';
+import { Typography, Tag, Space, Empty, Spin, Select, Row, Col, InputNumber, message, Avatar, Tooltip, Pagination } from 'antd';
 import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -50,6 +50,7 @@ type OrdersFeedOrder = Order & {
 };
 
 const OrdersFeed: React.FC = () => {
+  const ORDERS_PER_PAGE = 10;
   const navigate = useNavigate();
   const debugEnabled =
     import.meta.env.DEV &&
@@ -66,6 +67,9 @@ const OrdersFeed: React.FC = () => {
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [selectedOrderForBid, setSelectedOrderForBid] = useState<OrdersFeedOrder | null>(null);
   const [myBidsByOrderId, setMyBidsByOrderId] = useState<Record<number, boolean | 'loading'>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersTopRef = React.useRef<HTMLDivElement | null>(null);
+  const shouldScrollAfterPageChangeRef = React.useRef(false);
 
   
   const { data: userProfile } = useQuery({
@@ -88,23 +92,61 @@ const OrdersFeed: React.FC = () => {
 
   
   const { data: ordersData, isLoading: ordersLoading } = useQuery<OrdersFeedOrder[]>({
-    queryKey: ['orders-feed'],
+    queryKey: ['orders-feed', userProfile?.id, userProfile?.role],
     queryFn: async () => {
       if (debugEnabled) {
         console.log('🔄 Загрузка заказов из API...');
         console.log('👤 Текущий пользователь:', userProfile);
         console.log('🎭 Роль пользователя:', userProfile?.role);
       }
-      const data = await ordersApi.getAvailableOrders();
+      const normalizeOrders = (raw: unknown): OrdersFeedOrder[] => {
+        if (Array.isArray(raw)) return raw as OrdersFeedOrder[];
+        if (raw && typeof raw === 'object' && Array.isArray((raw as { results?: unknown[] }).results)) {
+          return (raw as { results: OrdersFeedOrder[] }).results;
+        }
+        return [];
+      };
+      const fetchAllClientOrders = async (): Promise<OrdersFeedOrder[]> => {
+        const first = await ordersApi.getClientOrders({ ordering: '-created_at' } as any);
+        if (Array.isArray(first)) return first as OrdersFeedOrder[];
+        const firstResults = normalizeOrders(first);
+        const all = [...firstResults];
+        const firstNext = String((first as { next?: string | null })?.next || '');
+        if (!firstNext) return all;
+
+        let page = 2;
+        let hasNext = true;
+        let guard = 0;
+        while (hasNext && guard < 100) {
+          const raw = await ordersApi.getClientOrders({ ordering: '-created_at', page } as any);
+          all.push(...normalizeOrders(raw));
+          hasNext = Boolean((raw as { next?: string | null })?.next);
+          page += 1;
+          guard += 1;
+        }
+        return all;
+      };
+      const [available, own] = await Promise.all([
+        ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
+        userProfile?.role === 'client'
+          ? fetchAllClientOrders().catch(() => [])
+          : Promise.resolve([] as OrdersFeedOrder[]),
+      ]);
+      const merged = [...(Array.isArray(available) ? available : []), ...own];
+      const byId = new Map<number, OrdersFeedOrder>();
+      merged.forEach((item: OrdersFeedOrder) => {
+        if (typeof item?.id === 'number') byId.set(item.id, item);
+      });
+      const data = Array.from(byId.values());
       if (debugEnabled) {
         console.log('📦 Получены заказы:', data);
-        console.log('📊 Количество заказов:', data?.results?.length || data?.length || 0);
+        console.log('📊 Количество заказов:', data.length);
       }
-      if ((data?.results?.length || data?.length || 0) === 0) {
+      if (data.length === 0) {
         if (debugEnabled) console.warn('⚠️ Заказов нет! Возможные причины:');
         if (userProfile?.role === 'client') {
           if (debugEnabled) {
-            console.warn('   Вы вошли как КЛИЕНТ - клиенты не видят свои заказы в ленте');
+            console.warn('   У клиента не вернулись заказы из API');
 
           }
         } else {
@@ -216,6 +258,52 @@ const OrdersFeed: React.FC = () => {
 
     return matchesSearch && matchesOrderId && matchesSubject && matchesWorkType && matchesBudget && matchesResponses;
   });
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, orderIdSearch, selectedSubject, selectedWorkType, budgetRange, responsesFilter]);
+
+  const paginatedOrders = React.useMemo(() => {
+    const start = (currentPage - 1) * ORDERS_PER_PAGE;
+    return filteredOrders.slice(start, start + ORDERS_PER_PAGE);
+  }, [filteredOrders, currentPage, ORDERS_PER_PAGE]);
+
+  const handlePaginationChange = React.useCallback((page: number) => {
+    if (page === currentPage) return;
+    shouldScrollAfterPageChangeRef.current = true;
+    setCurrentPage(page);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [currentPage]);
+
+  React.useEffect(() => {
+    if (!shouldScrollAfterPageChangeRef.current) return;
+    shouldScrollAfterPageChangeRef.current = false;
+
+    window.setTimeout(() => {
+      const target = ordersTopRef.current;
+      if (!target) return;
+
+      const scrollingElement = document.scrollingElement as HTMLElement | null;
+      if (scrollingElement) {
+        scrollingElement.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      let parent = target.parentElement;
+      while (parent) {
+        const style = window.getComputedStyle(parent);
+        const canScroll =
+          (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+          parent.scrollHeight > parent.clientHeight;
+        if (canScroll) {
+          parent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        parent = parent.parentElement;
+      }
+    }, 40);
+  }, [currentPage]);
 
   const getStatusColor = (status: string) => ORDER_STATUS_COLORS[status] || 'default';
   const getStatusText = (status: string) => ORDER_STATUS_LABELS[status] || status;
@@ -440,7 +528,8 @@ const OrdersFeed: React.FC = () => {
         )}
       </AppCard>
 
-      
+      <div ref={ordersTopRef} />
+
       {ordersLoading ? (
         <div className={styles.loadingBlock}>
           <AppSpinner size="large" />
@@ -472,7 +561,7 @@ const OrdersFeed: React.FC = () => {
         </AppEmpty>
       ) : (
         <div className={styles.ordersGrid}>
-          {filteredOrders.map((order: OrdersFeedOrder) => {
+          {paginatedOrders.map((order: OrdersFeedOrder) => {
 
             if (order.files) {
               if (debugEnabled) {
@@ -514,6 +603,23 @@ const OrdersFeed: React.FC = () => {
               />
             );
           })}
+        </div>
+      )}
+      {!ordersLoading && filteredOrders.length > 0 && (
+        <div className={styles.ordersPagination}>
+          <Pagination
+            current={currentPage}
+            pageSize={ORDERS_PER_PAGE}
+            total={filteredOrders.length}
+            onChange={handlePaginationChange}
+            showSizeChanger={false}
+            hideOnSinglePage={false}
+            itemRender={(page, type, originalElement) => {
+              if (type === 'prev') return <span>←</span>;
+              if (type === 'next') return <span>→</span>;
+              return originalElement;
+            }}
+          />
         </div>
       )}
 

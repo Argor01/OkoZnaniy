@@ -113,6 +113,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
     return <FileOutlined className={styles.fileIconDefault} />;
   };
+  const isOwner = isOrderOwner(order);
 
   return (
     <AppCard
@@ -138,11 +139,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
               <Tag className={styles.workTypeTag}>
                 {workTypeText}
-              </Tag>
-            )}
-            {order.topic?.name && (
-              <Tag className={styles.topicTag}>
-                Тема: {order.topic.name}
               </Tag>
             )}
           </Space>
@@ -243,7 +239,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </Space>
         </Space>
         
-        {isOrderOwner(order) ? (
+        {isOwner ? (
           <AppButton 
             variant="danger"
             icon={<DeleteOutlined />}

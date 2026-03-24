@@ -675,7 +675,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             `Предмет: ${subjectName || '—'}`,
             `Тип работы: ${workTypeName || '—'}`,
             `Бюджет: ${budgetText}`,
-            `Дедлайн: ${deadlineText}`,
+            `Срок сдачи: ${deadlineText}`,
           ].join('\n');
 
           setOrderIntroByChatId((prev) => ({ ...prev, [chatId]: infoText }));
@@ -763,7 +763,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             `Предмет: ${subjectName || '—'}`,
             `Тип работы: ${workTypeName || '—'}`,
             `Бюджет: ${budgetText}`,
-            `Дедлайн: ${deadlineText}`,
+            `Срок сдачи: ${deadlineText}`,
           ].join('\n');
 
           setOrderIntroByChatId((prev) => ({ ...prev, [chatData.id]: infoText }));
@@ -2002,11 +2002,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const handleConfirmOverdueExtend = async () => {
     if (!effectiveOrderId) return;
     if (!overdueDeadlineValue) {
-      antMessage.error('Выберите новый дедлайн');
+      antMessage.error('Выберите новый срок сдачи');
       return;
     }
     if (overdueDeadlineValue.valueOf() <= dayjs().valueOf()) {
-      antMessage.error('Дедлайн не может быть в прошлом');
+      antMessage.error('Срок сдачи не может быть в прошлом');
       return;
     }
 
@@ -2015,9 +2015,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       await ordersApi.extendDeadline(effectiveOrderId, overdueDeadlineValue.toISOString());
       setOverdueExtendModalOpen(false);
       await Promise.all([refreshOrder(), loadChats()]);
-      antMessage.success('Дедлайн продлён');
+      antMessage.success('Срок сдачи продлён');
     } catch (error: unknown) {
-      antMessage.error(getErrorDetail(error) || 'Не удалось продлить дедлайн');
+      antMessage.error(getErrorDetail(error) || 'Не удалось продлить срок сдачи');
     } finally {
       setOverdueExtending(false);
     }
@@ -2062,7 +2062,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       `Хочу подать претензию по заказу #${effectiveOrderId}.`,
       `Заказ: ${title}`,
       `Эксперт: ${expertName}`,
-      `Дедлайн: ${deadlineText}`,
+      `Срок сдачи: ${deadlineText}`,
       'Причина: заказ не выполнен в срок.',
       '',
       'Описание ситуации:',
@@ -2568,7 +2568,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                             <div className={styles.orderGridItem}>
                               <div className={styles.gridIcon}><ClockCircleOutlined /></div>
                               <div>
-                                <div className={styles.gridLabel}>Дедлайн</div>
+                                <div className={styles.gridLabel}>Срок сдачи</div>
                                 <div className={styles.gridValue}>
                                   {order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'не указан'}
                                 </div>
@@ -2612,7 +2612,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                                       openOverdueExtendModal();
                                     }}
                                   >
-                                    Продлить дедлайн
+                                    Продлить срок сдачи
                                   </Button>
                                   <Button
                                     danger
@@ -3355,12 +3355,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         okButtonProps={{ loading: overdueExtending }}
         okText="Продлить"
         cancelText="Отмена"
-        title="Продлить дедлайн"
+        title="Продлить срок сдачи"
         destroyOnHidden
         width={isMobile ? '90%' : 520}
       >
         <div className={styles.simpleModalContent}>
-          <Text type="secondary">Выберите новый дедлайн</Text>
+          <Text type="secondary">Выберите новый срок сдачи</Text>
           <DatePicker
             showTime
             className={styles.fullWidth}
