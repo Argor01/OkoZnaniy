@@ -395,6 +395,8 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
                   `${range[0]}-${range[1]} из ${total} пользователей`
               }}
               locale={{ emptyText: 'Пользователи не найдены' }}
+              scroll={{ x: 1000 }}
+              className="userRolesUsersTable"
             />
           </TabPane>
 
@@ -417,6 +419,8 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               loading={loading}
               pagination={false}
               locale={{ emptyText: 'Роли не найдены' }}
+              scroll={{ x: 800 }}
+              className="userRolesRolesTable"
             />
           </TabPane>
         </Tabs>
