@@ -8,11 +8,15 @@ const ReferralRedirect: React.FC = () => {
 
   useEffect(() => {
     if (code) {
-      // Перенаправляем на страницу логина/регистрации с реферальным кодом
-      navigate(`/login?ref=${code}`);
+      // Сохраняем реферальный код в localStorage
+      localStorage.setItem('referral_code', code);
+      
+      // Перенаправляем на главную страницу с параметром ref
+      // Это гарантирует, что код будет сохранен даже если localStorage не сработает
+      navigate(`/?ref=${code}`, { replace: true });
     } else {
-      // Если кода нет, просто на логин
-      navigate('/login');
+      // Если кода нет, просто на главную
+      navigate('/', { replace: true });
     }
   }, [code, navigate]);
 
@@ -21,9 +25,14 @@ const ReferralRedirect: React.FC = () => {
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center', 
-      height: '100vh' 
+      height: '100vh',
+      flexDirection: 'column',
+      gap: '20px'
     }}>
       <Spin size="large" />
+      <p style={{ color: '#666', fontSize: '16px' }}>
+        Переход по реферальной ссылке...
+      </p>
     </div>
   );
 };

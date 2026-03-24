@@ -40,7 +40,10 @@ export const AppRoutes: React.FC = () => {
       <Route path="/register" element={<RegisterWithEmailVerification />} />
       <Route path={ROUTES.auth.googleCallback} element={<GoogleCallback />} />
       <Route path={ROUTES.auth.googleCallbackLegacy} element={<GoogleCallback />} />
+      {/* Реферальные ссылки - перенаправляют на главную с параметром ref */}
       <Route path="/ref/:code" element={<ReferralRedirect />} />
+      <Route path="/referral/:code" element={<ReferralRedirect />} />
+      <Route path="/r/:code" element={<ReferralRedirect />} />
       
       {/* Protected Routes */}
       <Route 

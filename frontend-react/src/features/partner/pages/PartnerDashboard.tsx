@@ -97,40 +97,64 @@ const StatisticsPanel: React.FC<{
 
       <Row gutter={[16, 16]} className="partnerDashboardStatsRow">
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card 
+            style={{ 
+              borderLeft: '4px solid #1890ff',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)'
+            }}
+          >
             <Statistic
               title="Всего рефералов"
               value={partnerInfo.total_referrals}
-              prefix={<TeamOutlined />}
+              prefix={<TeamOutlined style={{ color: '#1890ff' }} />}
+              valueStyle={{ color: '#1890ff' }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card 
+            style={{ 
+              borderLeft: '4px solid #52c41a',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)'
+            }}
+          >
             <Statistic
               title="Активных рефералов"
               value={partnerInfo.active_referrals}
-              prefix={<UserAddOutlined />}
+              prefix={<UserAddOutlined style={{ color: '#52c41a' }} />}
+              valueStyle={{ color: '#52c41a' }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card 
+            style={{ 
+              borderLeft: '4px solid #faad14',
+              background: 'linear-gradient(135deg, #ffffff 0%, #fffbe6 100%)'
+            }}
+          >
             <Statistic
               title={dateRange ? "Доход за период" : "Общий доход"}
               value={dateRange ? filteredTotalEarnings : partnerInfo.total_earnings}
               suffix="₽"
-              prefix={<DollarOutlined />}
+              prefix={<DollarOutlined style={{ color: '#faad14' }} />}
+              valueStyle={{ color: '#faad14' }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card>
+          <Card 
+            style={{ 
+              borderLeft: '4px solid #722ed1',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f9f0ff 100%)'
+            }}
+          >
             <Statistic
               title="Процент комиссии"
               value={partnerInfo.commission_rate}
               suffix="%"
-              prefix={<TrophyOutlined />}
+              prefix={<TrophyOutlined style={{ color: '#722ed1' }} />}
+              valueStyle={{ color: '#722ed1' }}
             />
           </Card>
         </Col>
@@ -275,7 +299,8 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет рефералов' }}
-        className="partnerDashboardLargeTable"
+        className="partnerDashboardReferralsTable"
+        scroll={{ x: 700 }}
       />
     </Card>
   );
@@ -340,7 +365,8 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
         rowKey="id"
         pagination={{ pageSize: 10 }}
         locale={{ emptyText: 'Пока нет начислений' }}
-        className="partnerDashboardLargeTable"
+        className="partnerDashboardEarningsTable"
+        scroll={{ x: 800 }}
       />
     </Card>
   );
@@ -431,37 +457,37 @@ const OrdersStatisticsTable: React.FC<{ data: PartnerDashboardData }> = ({ data 
 
   return (
     <Card title="Детальная статистика по заказам">
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Row gutter={16}>
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <Row gutter={[8, 8]} className="partnerDashboardOrdersStatsRow">
           <Col xs={24} sm={8}>
-            <Card size="small">
+            <Card size="small" className="partnerDashboardCompactCard">
               <Statistic
                 title="Доходы"
                 value={totalIncome}
                 suffix="₽"
-                valueStyle={{ color: '#52c41a' }}
+                valueStyle={{ color: '#52c41a', fontSize: '18px' }}
                 prefix="+"
               />
             </Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small">
+            <Card size="small" className="partnerDashboardCompactCard">
               <Statistic
                 title="Расходы (отмены)"
                 value={totalExpense}
                 suffix="₽"
-                valueStyle={{ color: '#ff4d4f' }}
+                valueStyle={{ color: '#ff4d4f', fontSize: '18px' }}
                 prefix="-"
               />
             </Card>
           </Col>
           <Col xs={24} sm={8}>
-            <Card size="small">
+            <Card size="small" className="partnerDashboardCompactCard">
               <Statistic
                 title="Итого"
                 value={netTotal}
                 suffix="₽"
-                valueStyle={{ color: netTotal >= 0 ? '#52c41a' : '#ff4d4f' }}
+                valueStyle={{ color: netTotal >= 0 ? '#52c41a' : '#ff4d4f', fontSize: '18px' }}
                 prefix={netTotal >= 0 ? '+' : ''}
               />
             </Card>
@@ -474,7 +500,8 @@ const OrdersStatisticsTable: React.FC<{ data: PartnerDashboardData }> = ({ data 
           rowKey="id"
           pagination={{ pageSize: 10 }}
           locale={{ emptyText: 'Пока нет операций по заказам' }}
-          className="partnerDashboardLargeTable"
+          className="partnerDashboardOrdersTable"
+          scroll={{ x: 800 }}
         />
       </Space>
     </Card>

@@ -4,12 +4,23 @@
   background-color: rgba(0, 0, 0, 0.3);
 }
 
+.faqModalWrap :global(.ant-modal-wrap) {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.faqModalWrapMobile :global(.ant-modal-wrap) {
+  overflow-y: hidden;
+}
+
 .faqModalWrap :global(.ant-modal-content) {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   padding: 32px;
-  height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
 }
 
 .faqModalWrapMobile :global(.ant-modal-content) {
@@ -19,20 +30,38 @@
   max-width: 100vw;
   width: 100vw;
   height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .faqModalWrapDesktop :global(.ant-modal-content) {
   border-radius: 24px;
 }
 
+.faqModalWrap :global(.ant-modal-header) {
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 0;
+}
+
 .faqModalWrap :global(.ant-modal-body) {
-  max-height: 80vh;
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .faqModalWrapMobile :global(.ant-modal-body) {
-  max-height: calc(100vh - 100px);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .faqModalTitle {
@@ -48,6 +77,15 @@
 
 .faqModalContent {
   padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* Мобильная версия контента */
+@media (max-width: 768px) {
+  .faqModalContent {
+    padding-top: 12px;
+    padding-bottom: 20px;
+  }
 }
 
 .faqModalIntro {
@@ -100,4 +138,51 @@
   font-size: 14px;
   color: var(--color-grey-600);
   line-height: 1.6;
+}
+
+/* Дополнительные стили для мобильной прокрутки */
+.faqModalWrapMobile :global(.ant-modal-close) {
+  top: 12px;
+  right: 12px;
+}
+
+/* Улучшение прокрутки для iOS */
+@supports (-webkit-touch-callout: none) {
+  .faqModalWrapMobile :global(.ant-modal-body) {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* Стили для коллапса в мобильной версии */
+@media (max-width: 768px) {
+  .faqModalTitle {
+    font-size: 20px;
+  }
+  
+  .faqModalIntro {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .faqModalSectionTitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .faqModalItemTitle {
+    font-size: 14px;
+  }
+  
+  .faqModalItemText {
+    font-size: 13px;
+  }
+  
+  .faqModalSection {
+    margin-bottom: 12px;
+  }
+  
+  .faqModalItem {
+    margin-bottom: 6px;
+  }
 }

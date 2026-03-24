@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 import { SEO } from '@/features/common';
 import { 
   Header,
@@ -19,14 +20,31 @@ import '@/styles/page-transitions.css';
 
 const Home: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   
   useEffect(() => {
-    
     const refCode = searchParams.get('ref');
     if (refCode) {
+      // Сохраняем реферальный код в localStorage
       localStorage.setItem('referral_code', refCode);
+      setReferralCode(refCode);
+      
+      // Показываем уведомление
+      message.success({
+        content: `Реферальный код ${refCode} сохранен! Зарегистрируйтесь, чтобы получить бонусы.`,
+        duration: 5,
+        onClick: () => navigate('/login?ref=' + refCode)
+      });
+      
+      // Автоматически перенаправляем на страницу регистрации через 2 секунды
+      const timer = setTimeout(() => {
+        navigate('/login?ref=' + refCode);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
   return (
     <div className="page-wrapper landing-page">
       <SEO 

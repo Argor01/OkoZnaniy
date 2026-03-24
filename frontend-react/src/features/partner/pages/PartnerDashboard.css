@@ -6,6 +6,86 @@
   margin-top: 24px;
 }
 
+/* Компактные карточки статистики */
+.partnerDashboardStatsRow .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.partnerDashboardStatsRow .ant-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.partnerDashboardStatsRow .ant-card-body {
+  padding: 16px !important;
+}
+
+.partnerDashboardStatsRow .ant-statistic {
+  margin: 0;
+}
+
+.partnerDashboardStatsRow .ant-statistic-title {
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+  color: #666 !important;
+  font-weight: 500;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content {
+  font-size: 22px !important;
+  font-weight: 600;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content-prefix {
+  font-size: 18px !important;
+  margin-right: 6px;
+}
+
+.partnerDashboardStatsRow .ant-statistic-content-suffix {
+  font-size: 18px !important;
+  margin-left: 4px;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .partnerDashboardStatsRow {
+    margin-top: 16px;
+  }
+  
+  .partnerDashboardStatsRow .ant-card-body {
+    padding: 12px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-title {
+    font-size: 12px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content {
+    font-size: 20px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content-prefix {
+    font-size: 16px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content-suffix {
+    font-size: 16px !important;
+  }
+}
+
+/* Адаптив для планшетов */
+@media (min-width: 769px) and (max-width: 992px) {
+  .partnerDashboardStatsRow .ant-card-body {
+    padding: 14px !important;
+  }
+  
+  .partnerDashboardStatsRow .ant-statistic-content {
+    font-size: 20px !important;
+  }
+}
+
 .partnerDashboardHeaderRow {
   display: flex;
   justify-content: space-between;
@@ -281,4 +361,199 @@
 
 .partnerDashboardDrawerTitle {
   margin: 0 !important;
+}
+
+/* Компактные карточки для детальной статистики заказов */
+.partnerDashboardOrdersStatsRow .partnerDashboardCompactCard {
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.partnerDashboardOrdersStatsRow .partnerDashboardCompactCard .ant-card-body {
+  padding: 12px !important;
+}
+
+.partnerDashboardOrdersStatsRow .ant-statistic-title {
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+  color: #666 !important;
+}
+
+.partnerDashboardOrdersStatsRow .ant-statistic-content {
+  font-size: 18px !important;
+  font-weight: 600;
+}
+
+.partnerDashboardOrdersStatsRow .ant-statistic-content-prefix,
+.partnerDashboardOrdersStatsRow .ant-statistic-content-suffix {
+  font-size: 14px !important;
+}
+
+/* Адаптивная таблица заказов */
+.partnerDashboardOrdersTable {
+  overflow-x: auto;
+}
+
+.partnerDashboardOrdersTable .ant-table {
+  font-size: 13px;
+}
+
+.partnerDashboardOrdersTable .ant-table-thead > tr > th {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr > td {
+  padding: 10px 8px !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .partnerDashboardOrdersStatsRow .partnerDashboardCompactCard .ant-card-body {
+    padding: 10px !important;
+  }
+  
+  .partnerDashboardOrdersStatsRow .ant-statistic-title {
+    font-size: 11px !important;
+  }
+  
+  .partnerDashboardOrdersStatsRow .ant-statistic-content {
+    font-size: 16px !important;
+  }
+  
+  .partnerDashboardOrdersStatsRow .ant-statistic-content-prefix,
+  .partnerDashboardOrdersStatsRow .ant-statistic-content-suffix {
+    font-size: 13px !important;
+  }
+  
+  .partnerDashboardOrdersTable .ant-table {
+    font-size: 12px;
+  }
+  
+  .partnerDashboardOrdersTable .ant-table-thead > tr > th,
+  .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
+    padding: 8px 6px !important;
+  }
+}
+
+/* Адаптивная таблица рефералов */
+.partnerDashboardReferralsTable {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.partnerDashboardReferralsTable .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.partnerDashboardReferralsTable .ant-table {
+  font-size: 13px;
+  min-width: 700px;
+}
+
+.partnerDashboardReferralsTable .ant-table-thead > tr > th {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.partnerDashboardReferralsTable .ant-table-tbody > tr > td {
+  padding: 10px 8px !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .partnerDashboardReferralsTable .ant-table {
+    font-size: 12px;
+    min-width: 600px;
+  }
+  
+  .partnerDashboardReferralsTable .ant-table-thead > tr > th,
+  .partnerDashboardReferralsTable .ant-table-tbody > tr > td {
+    padding: 8px 6px !important;
+  }
+}
+
+/* Адаптивная таблица истории начислений */
+.partnerDashboardEarningsTable {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.partnerDashboardEarningsTable .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.partnerDashboardEarningsTable .ant-table {
+  font-size: 13px;
+  min-width: 800px;
+}
+
+.partnerDashboardEarningsTable .ant-table-thead > tr > th {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.partnerDashboardEarningsTable .ant-table-tbody > tr > td {
+  padding: 10px 8px !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .partnerDashboardEarningsTable .ant-table {
+    font-size: 12px;
+    min-width: 700px;
+  }
+  
+  .partnerDashboardEarningsTable .ant-table-thead > tr > th,
+  .partnerDashboardEarningsTable .ant-table-tbody > tr > td {
+    padding: 8px 6px !important;
+  }
+}
+
+/* Адаптивная таблица заказов */
+.partnerDashboardOrdersTable {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.partnerDashboardOrdersTable .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.partnerDashboardOrdersTable .ant-table {
+  font-size: 13px;
+  min-width: 800px;
+}
+
+.partnerDashboardOrdersTable .ant-table-thead > tr > th {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr > td {
+  padding: 10px 8px !important;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .partnerDashboardOrdersTable .ant-table {
+    font-size: 12px;
+    min-width: 700px;
+  }
+  
+  .partnerDashboardOrdersTable .ant-table-thead > tr > th,
+  .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
+    padding: 8px 6px !important;
+  }
 }
