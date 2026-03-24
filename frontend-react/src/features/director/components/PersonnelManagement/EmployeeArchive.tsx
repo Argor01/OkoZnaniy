@@ -221,6 +221,8 @@ const EmployeeArchive: React.FC = () => {
               showSizeChanger: true,
               showTotal: (total) => `Всего: ${total}`,
             }}
+            scroll={{ x: 800 }}
+            className="employeeArchiveTable"
           />
         </Spin>
       </Card>

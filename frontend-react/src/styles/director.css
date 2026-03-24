@@ -588,35 +588,67 @@
 }
 
 .incomeExpenseStatsRow {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  margin-top: 16px;
 }
 
 .incomeExpenseStatCard {
-  border-radius: 12px;
+  border-radius: 8px;
   text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.incomeExpenseStatCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.incomeExpenseStatCard :global(.ant-card-body) {
+  padding: 16px !important;
 }
 
 .incomeExpenseStatCardMobile {
-  border-radius: 8px;
+  border-radius: 6px;
+}
+
+.incomeExpenseStatCardMobile :global(.ant-card-body) {
+  padding: 12px !important;
+}
+
+.incomeExpenseHighlightCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border: 2px solid #1890ff;
 }
 
 .incomeExpenseHighlightCardMobile {
-  background: #f0f9ff;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
   border: 2px solid #1890ff;
 }
 
 .incomeExpenseIncomeStatistic {
-  padding: 12px 0;
+  padding: 0;
+}
+
+.incomeExpenseIncomeStatistic :global(.ant-statistic-title) {
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+  color: #666 !important;
+  font-weight: 500;
 }
 
 .incomeExpenseIncomeStatistic :global(.ant-statistic-content-value) {
   color: #52c41a;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
 }
 
 .incomeExpenseIncomeStatisticMobile {
-  padding: 8px 0;
+  padding: 0;
+}
+
+.incomeExpenseIncomeStatisticMobile :global(.ant-statistic-title) {
+  font-size: 12px !important;
 }
 
 .incomeExpenseIncomeStatisticMobile :global(.ant-statistic-content-value) {
@@ -624,17 +656,28 @@
 }
 
 .incomeExpenseExpenseStatistic {
-  padding: 12px 0;
+  padding: 0;
+}
+
+.incomeExpenseExpenseStatistic :global(.ant-statistic-title) {
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+  color: #666 !important;
+  font-weight: 500;
 }
 
 .incomeExpenseExpenseStatistic :global(.ant-statistic-content-value) {
   color: #ff4d4f;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
 }
 
 .incomeExpenseExpenseStatisticMobile {
-  padding: 8px 0;
+  padding: 0;
+}
+
+.incomeExpenseExpenseStatisticMobile :global(.ant-statistic-title) {
+  font-size: 12px !important;
 }
 
 .incomeExpenseExpenseStatisticMobile :global(.ant-statistic-content-value) {
@@ -642,7 +685,14 @@
 }
 
 .incomeExpenseNetStatistic {
-  padding: 12px 0;
+  padding: 0;
+}
+
+.incomeExpenseNetStatistic :global(.ant-statistic-title) {
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+  color: #1890ff !important;
+  font-weight: 600;
 }
 
 .incomeExpenseNetStatistic :global(.ant-statistic-content-value) {
@@ -651,53 +701,57 @@
   font-weight: 700;
 }
 
+.incomeExpenseNetStatisticMobile :global(.ant-statistic-title) {
+  font-size: 12px !important;
+}
+
 .incomeExpenseNetStatisticMobile :global(.ant-statistic-content-value) {
   font-size: 22px;
 }
 
 .incomeExpenseChartCard {
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .incomeExpenseChartCard :global(.ant-card-head-title) {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .incomeExpenseChartCardMobile {
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .incomeExpenseChartCardMobile :global(.ant-card-head-title) {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .incomeExpenseChartContainer {
   width: 100%;
-  height: 400px;
-  min-height: 400px;
+  height: 350px;
+  min-height: 350px;
   min-width: 300px;
   overflow-x: visible;
 }
 
 .incomeExpenseChartContainerMobile {
-  height: 300px;
-  min-height: 300px;
+  height: 280px;
+  min-height: 280px;
   min-width: 250px;
   overflow-x: auto;
 }
 
 .incomeExpenseChartContainer :global(.recharts-default-tooltip) {
-  font-size: 14px;
-  border-radius: 8px;
+  font-size: 13px;
+  border-radius: 6px;
 }
 
 .incomeExpenseChartContainerMobile :global(.recharts-default-tooltip) {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .incomeExpenseChartContainer :global(.recharts-legend-wrapper) {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .incomeExpenseChartContainerMobile :global(.recharts-legend-wrapper) {
@@ -877,4 +931,71 @@
 
 .directorCommReplyAlert {
   margin-bottom: 16px;
+}
+
+/* Адаптивная таблица архива сотрудников */
+.employeeArchiveTable {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.employeeArchiveTable .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.employeeArchiveTable .ant-table {
+  font-size: 13px;
+  min-width: 800px;
+}
+
+.employeeArchiveTable .ant-table-thead > tr > th {
+  padding: 10px 8px !important;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.employeeArchiveTable .ant-table-tbody > tr > td {
+  padding: 10px 8px !important;
+}
+
+.employeeArchiveFilters {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.employeeArchiveSearch {
+  max-width: 400px;
+}
+
+.employeeArchiveRestoreButton {
+  color: #52c41a;
+}
+
+.employeeArchiveRestoreButton:hover {
+  color: #73d13d;
+}
+
+.employeeArchiveDeleteWarning {
+  color: #ff4d4f;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .employeeArchiveTable .ant-table {
+    font-size: 12px;
+    min-width: 700px;
+  }
+  
+  .employeeArchiveTable .ant-table-thead > tr > th,
+  .employeeArchiveTable .ant-table-tbody > tr > td {
+    padding: 8px 6px !important;
+  }
+  
+  .employeeArchiveSearch {
+    max-width: 100%;
+  }
 }
