@@ -466,6 +466,181 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         room.members.remove(request.user)
         return Response({'message': 'Вы покинули чат'})
 
+    @action(detail=True, methods=['get', 'post'])
+    def messages(self, request, pk=None):
+        """Получить или отправить сообщения в чат"""
+        room = self.get_object()
+        if request.method == 'GET':
+            msgs = room.messages.select_related('sender').order_by('created_at')
+            data = [
+                {
+                    'id': m.id,
+                    'sender': {
+                        'id': m.sender.id,
+                        'first_name': m.sender.first_name,
+                        'last_name': m.sender.last_name,
+                        'role': getattr(m.sender, 'role', ''),
+                    },
+                    'message': m.message,
+                    'created_at': m.created_at.isoformat(),
+                    'is_mine': m.sender_id == request.user.id,
+                }
+                for m in msgs
+            ]
+            return Response(data)
+        # POST
+        msg_text = request.data.get('message', '').strip()
+        if not msg_text:
+            return Response({'error': 'Сообщение не может быть пустым'}, status=400)
+        # Автоматически добавляем отправителя в участники
+        room.members.add(request.user)
+        msg = AdminChatMessage.objects.create(room=room, sender=request.user, message=msg_text)
+        return Response({
+            'id': msg.id,
+            'sender': {
+                'id': request.user.id,
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'role': getattr(request.user, 'role', ''),
+            },
+            'message': msg.message,
+            'created_at': msg.created_at.isoformat(),
+            'is_mine': True,
+        }, status=201)
+
+    @action(detail=True, methods=['post'])
+    def invite(self, request, pk=None):
+        """Пригласить пользователя в чат"""
+        room = self.get_object()
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({'error': 'user_id обязателен'}, status=400)
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Пользователь не найден'}, status=404)
+        room.members.add(user)
+        return Response({'message': f'{user.first_name} {user.last_name} добавлен в чат'})
+
+
+# ============= ПРЯМЫЕ ЧАТЫ (личные сообщения между сотрудниками) =============
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_direct_chats(request):
+    """Получить все прямые чаты текущего пользователя"""
+    from apps.chat.models import Chat, Message
+    chats = Chat.objects.filter(
+        participants=request.user,
+        order__isnull=True,
+    ).prefetch_related('participants', 'messages__sender').order_by('-id')
+
+    result = []
+    for chat in chats:
+        other = chat.participants.exclude(id=request.user.id).first()
+        if not other:
+            continue
+        last_msg = chat.messages.last()
+        unread = chat.messages.filter(is_read=False).exclude(sender=request.user).count()
+        result.append({
+            'id': chat.id,
+            'other_user': {
+                'id': other.id,
+                'first_name': other.first_name,
+                'last_name': other.last_name,
+                'role': getattr(other, 'role', ''),
+                'email': other.email,
+            },
+            'last_message': {'text': last_msg.text, 'created_at': last_msg.created_at.isoformat()} if last_msg else None,
+            'unread_count': unread,
+        })
+    return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def get_or_create_direct_chat(request):
+    """Получить или создать прямой чат с пользователем"""
+    from apps.chat.models import Chat
+    user_id = request.data.get('user_id')
+    if not user_id:
+        return Response({'error': 'user_id обязателен'}, status=400)
+    try:
+        other = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'Пользователь не найден'}, status=404)
+
+    # Ищем существующий прямой чат между двумя пользователями
+    chat = Chat.objects.filter(
+        participants=request.user, order__isnull=True
+    ).filter(participants=other).first()
+
+    if not chat:
+        chat = Chat.objects.create()
+        chat.participants.add(request.user, other)
+
+    return Response({'chat_id': chat.id})
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_direct_chat_messages(request, chat_id):
+    """Получить сообщения прямого чата"""
+    from apps.chat.models import Chat, Message
+    try:
+        chat = Chat.objects.get(id=chat_id, participants=request.user)
+    except Chat.DoesNotExist:
+        return Response({'error': 'Чат не найден'}, status=404)
+
+    # Помечаем как прочитанные
+    Message.objects.filter(chat=chat, is_read=False).exclude(sender=request.user).update(is_read=True)
+
+    msgs = chat.messages.select_related('sender').order_by('created_at')
+    return Response([
+        {
+            'id': m.id,
+            'text': m.text,
+            'sender': {
+                'id': m.sender.id,
+                'first_name': m.sender.first_name,
+                'last_name': m.sender.last_name,
+                'role': getattr(m.sender, 'role', ''),
+            },
+            'created_at': m.created_at.isoformat(),
+            'is_mine': m.sender_id == request.user.id,
+        }
+        for m in msgs
+    ])
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def send_direct_message(request, chat_id):
+    """Отправить сообщение в прямой чат"""
+    from apps.chat.models import Chat, Message
+    try:
+        chat = Chat.objects.get(id=chat_id, participants=request.user)
+    except Chat.DoesNotExist:
+        return Response({'error': 'Чат не найден'}, status=404)
+
+    text = request.data.get('message', '').strip()
+    if not text:
+        return Response({'error': 'Сообщение не может быть пустым'}, status=400)
+
+    msg = Message.objects.create(chat=chat, sender=request.user, text=text, message_type='text')
+    return Response({
+        'id': msg.id,
+        'text': msg.text,
+        'sender': {
+            'id': request.user.id,
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'role': getattr(request.user, 'role', ''),
+        },
+        'created_at': msg.created_at.isoformat(),
+        'is_mine': True,
+    }, status=201)
+
 
 # ============= СТАТИСТИКА =============
 

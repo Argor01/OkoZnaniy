@@ -39,4 +39,10 @@ urlpatterns = [
 
     # Лента активности тикета
     path('<str:ticket_type>/<int:pk>/activity/', views.get_ticket_activity, name='ticket-activity'),
+
+    # Прямые чаты между сотрудниками
+    path('direct-chats/', views.get_direct_chats, name='direct-chats'),
+    path('direct-chats/get-or-create/', views.get_or_create_direct_chat, name='direct-chat-create'),
+    path('direct-chats/<int:chat_id>/messages/', views.get_direct_chat_messages, name='direct-chat-messages'),
+    path('direct-chats/<int:chat_id>/send/', views.send_direct_message, name='direct-chat-send'),
 ]
