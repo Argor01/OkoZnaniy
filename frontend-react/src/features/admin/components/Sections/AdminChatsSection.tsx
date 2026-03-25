@@ -37,6 +37,7 @@ const api = {
   getRoomMsgs: (id: number) => apiClient.get(`/admin-panel/chat-rooms/${id}/messages/`).then(r => r.data),
   sendRoomMsg: (id: number, msg: string) => apiClient.post(`/admin-panel/chat-rooms/${id}/messages/`, { message: msg }).then(r => r.data),
   joinRoom: (id: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/join_room/`).then(r => r.data),
+  addAllStaff: (id: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/add_all_staff/`).then(r => r.data),
   inviteRoom: (id: number, uid: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/invite/`, { user_id: uid }).then(r => r.data),
   getDirectChats: () => apiClient.get("/admin-panel/direct-chats/").then(r => r.data),
   getOrCreateDirect: (uid: number) => apiClient.post("/admin-panel/direct-chats/get-or-create/", { user_id: uid }).then(r => r.data),
@@ -278,7 +279,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
                 subtitle={lastMsg ? String(lastMsg.message ?? "") : `${r.members?.length ?? 0} участников`}
                 time={lastMsg ? fmt(String(lastMsg.created_at ?? "")) : undefined}
                 active={selId === r.id}
-                onClick={() => { setSelId(r.id); api.joinRoom(r.id).catch(() => {}); }} />;
+                onClick={() => { setSelId(r.id); api.joinRoom(r.id).catch(() => {}); api.addAllStaff(r.id).catch(() => {}); }} />;
             })
           }
         </div>
@@ -361,3 +362,5 @@ export const AdminChatsSection: React.FC = () => {
     </div>
   );
 };
+
+

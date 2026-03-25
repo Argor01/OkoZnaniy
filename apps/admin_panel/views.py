@@ -439,6 +439,12 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
     queryset = AdminChatRoom.objects.all()
     serializer_class = AdminChatRoomSerializer
     permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        """При создании комнаты автоматически добавляем всех admin и director"""
+        room = serializer.save(created_by=self.request.user)
+        staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
+        room.members.set(staff)
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -458,6 +464,14 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         room = self.get_object()
         room.members.add(request.user)
         return Response({'message': 'Вы присоединились к чату'})
+
+    @action(detail=True, methods=['post'])
+    def add_all_staff(self, request, pk=None):
+        """Добавить всех admin и director в комнату"""
+        room = self.get_object()
+        staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
+        room.members.add(*staff)
+        return Response({'message': f'Добавлено {staff.count()} сотрудников'})
     
     @action(detail=True, methods=['post'])
     def leave_room(self, request, pk=None):
