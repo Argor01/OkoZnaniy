@@ -213,6 +213,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <TicketSystemSection />
         );
 
+      case 'communication':
       case 'admin_chats':
         return (
           <AdminChatsSection />
