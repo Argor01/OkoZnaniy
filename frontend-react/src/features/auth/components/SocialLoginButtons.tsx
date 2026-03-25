@@ -10,7 +10,6 @@ interface SocialLoginButtonsProps {
 }
 
 const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
-  const googleHref = `${API_URL}${API_ENDPOINTS.auth.googleLogin}`;
   const vkHref = `${API_URL}${API_ENDPOINTS.auth.vkLogin}`;
   const debugEnabled =
     import.meta.env.DEV &&
@@ -98,10 +97,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
         <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
           <img src="/assets/telegram.png" alt="telegram-login" className="socialLoginIcon" />
         </a>
-        <a href={googleHref} aria-label="Google">
-          <img src="/assets/google.png" alt="google-login" className="socialLoginIcon" />
-        </a>
-        <a href={vkHref} aria-label="VK">
+        <a href={vkHref} aria-label="VK ID">
           <img src="/assets/vk.png" alt="vk-login" className="socialLoginIcon" />
         </a>
       </div>

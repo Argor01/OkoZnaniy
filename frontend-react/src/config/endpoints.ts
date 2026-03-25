@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
     telegramAuth: '/users/telegram_auth/', 
     telegramAuthStatus: (authId: string) => `/users/telegram_auth_status/${authId}/`,
     googleLogin: '/accounts/google/login/?process=login',
-    vkLogin: '/accounts/vk/login/',
+    vkLogin: '/accounts/vk/login/?process=login',
     resetPasswordWithCode: '/users/reset_password_with_code/',
     resetPasswordConfirm: '/users/reset_password_confirm/',
   },

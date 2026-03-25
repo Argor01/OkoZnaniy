@@ -28,6 +28,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
     path('google/callback/', views.google_callback, name='google_callback'),
+    path('vk/callback/', views.vk_callback, name='vk_callback'),
     
     # Специфичные маршруты должны идти перед общими router.urls
     path('partners_list/', views.UserViewSet.as_view({'get': 'partners_list'}), name='partners_list'),

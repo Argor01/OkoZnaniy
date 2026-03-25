@@ -142,6 +142,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': [
             'email',
         ],
+        'LOGIN_REDIRECT_URL': '/api/users/vk/callback/',
     }
 }
 

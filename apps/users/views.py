@@ -1129,3 +1129,34 @@ def google_callback(request):
     logger.info(f"🔀 Redirecting to: {redirect_url}")
     return redirect(redirect_url)
 
+
+def vk_callback(request):
+    """
+    Обработка callback после авторизации через VK ID (MAX).
+    Генерируем JWT токены и перенаправляем на фронт с токенами.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    user = request.user
+    logger.info(f"🔍 vk_callback: user authenticated: {user.is_authenticated}")
+
+    if not user.is_authenticated:
+        logger.warning("❌ VK: User not authenticated, redirecting to login")
+        return redirect(f"{settings.FRONTEND_URL}/login?error=vk_auth_failed")
+
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    refresh_token = str(refresh)
+
+    logger.info(f"✅ VK tokens generated for user: {user.username}, role: {user.role}")
+
+    redirect_url = (
+        f"{settings.FRONTEND_URL}/google-callback?"
+        f"access={access_token}&refresh={refresh_token}&"
+        f"user_id={user.id}&username={user.username}&role={user.role}"
+    )
+
+    logger.info(f"🔀 VK Redirecting to: {redirect_url}")
+    return redirect(redirect_url)
+
