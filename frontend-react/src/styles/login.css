@@ -50,6 +50,10 @@
   width: 32px;
   height: 32px;
 }
+.socialLoginIconVk {
+  width: 38px;
+  height: 38px;
+}
 .verificationModalBody {
   display: flex;
   flex-direction: column;
