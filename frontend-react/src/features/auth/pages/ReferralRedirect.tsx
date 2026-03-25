@@ -11,12 +11,12 @@ const ReferralRedirect: React.FC = () => {
       // Сохраняем реферальный код в localStorage
       localStorage.setItem('referral_code', code);
       
-      // Перенаправляем на главную страницу с параметром ref
+      // Перенаправляем на страницу входа/регистрации с параметром ref
       // Это гарантирует, что код будет сохранен даже если localStorage не сработает
-      navigate(`/?ref=${code}`, { replace: true });
+      navigate(`/login?ref=${code}`, { replace: true });
     } else {
-      // Если кода нет, просто на главную
-      navigate('/', { replace: true });
+      // Если кода нет, просто на страницу входа
+      navigate('/login', { replace: true });
     }
   }, [code, navigate]);
 

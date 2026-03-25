@@ -24,6 +24,14 @@ export interface User {
   application_approved?: boolean;
   application_submitted_at?: string;
   application_reviewed_at?: string;
+  // Партнерские поля
+  referral_code?: string;
+  partner_commission_rate?: number;
+  total_referrals?: number;
+  active_referrals?: number;
+  total_earnings?: number;
+  city?: string;
+  email_verified?: boolean;
 }
 
 export interface UserSummary {
@@ -42,6 +50,7 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
+  username?: string;
   email?: string;
   phone?: string;
   password: string;

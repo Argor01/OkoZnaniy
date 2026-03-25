@@ -83,7 +83,10 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    return matchesSearch && matchesRole;
+    // Фильтруем только активных пользователей
+    const isActive = user.is_active !== false;
+    
+    return matchesSearch && matchesRole && isActive;
   });
 
   const handleChangeUserRole = (user: AdminUser) => {

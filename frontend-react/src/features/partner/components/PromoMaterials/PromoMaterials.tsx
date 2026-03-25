@@ -10,12 +10,16 @@ import {
   Tabs, 
   message,
   Tooltip,
-  Tag
+  Tag,
+  Input
 } from 'antd';
 import { 
   DownloadOutlined, 
-  FileImageOutlined
+  FileImageOutlined,
+  CopyOutlined,
+  LinkOutlined
 } from '@ant-design/icons';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import styles from './PromoMaterials.module.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -39,6 +43,7 @@ const bannerConfigs: BannerConfig[] = [
 ];
 
 export const PromoMaterials: React.FC = () => {
+  const { user } = useAuth();
   const [selectedBannerType] = useState('static'); // Только статичные баннеры
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedSize, setSelectedSize] = useState('970x250');
@@ -46,6 +51,19 @@ export const PromoMaterials: React.FC = () => {
   const [selectedFormat, setSelectedFormat] = useState('png');
 
   const currentConfig = bannerConfigs.find(config => config.id === selectedBannerType);
+  
+  // Генерируем партнерскую ссылку
+  const referralLink = user?.referral_code 
+    ? `${window.location.origin}/login?ref=${user.referral_code}`
+    : '';
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      message.success('Скопировано в буфер обмена');
+    }).catch(() => {
+      message.error('Не удалось скопировать');
+    });
+  };
 
   const generateBannerUrl = () => {
     // Заглушка - в реальности здесь будет генерация URL баннера
@@ -92,6 +110,112 @@ export const PromoMaterials: React.FC = () => {
   };
 
   const tabItems = [
+    {
+      key: 'referral-link',
+      label: 'Партнерская ссылка',
+      children: (
+        <div>
+          <Card className={styles.referralCard}>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <div>
+                <Title level={4}>
+                  <LinkOutlined /> Ваша партнерская ссылка
+                </Title>
+                <Paragraph type="secondary">
+                  Делитесь этой ссылкой с потенциальными клиентами и исполнителями. 
+                  При регистрации по вашей ссылке реферальный код будет автоматически применен.
+                </Paragraph>
+              </div>
+
+              <div>
+                <Text strong>Реферальный код:</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Input
+                    value={user?.referral_code || ''}
+                    readOnly
+                    size="large"
+                    addonAfter={
+                      <Button
+                        type="text"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(user?.referral_code || '')}
+                      >
+                        Копировать
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Text strong>Партнерская ссылка:</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Input
+                    value={referralLink}
+                    readOnly
+                    size="large"
+                    addonAfter={
+                      <Button
+                        type="text"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(referralLink)}
+                      >
+                        Копировать
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.infoBox}>
+                <Title level={5}>Как это работает?</Title>
+                <ul>
+                  <li>Поделитесь ссылкой с друзьями, коллегами или в социальных сетях</li>
+                  <li>Когда кто-то перейдет по вашей ссылке, реферальный код автоматически сохранится</li>
+                  <li>При регистрации код будет автоматически применен</li>
+                  <li>Вы получите комиссию с каждого заказа вашего реферала</li>
+                </ul>
+              </div>
+
+              <div className={styles.statsBox}>
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.total_referrals || 0}
+                        </Title>
+                        <Text type="secondary">Всего рефералов</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.active_referrals || 0}
+                        </Title>
+                        <Text type="secondary">Активных</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.partner_commission_rate || 0}%
+                        </Title>
+                        <Text type="secondary">Ваша комиссия</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
+            </Space>
+          </Card>
+        </div>
+      )
+    },
     {
       key: 'banners',
       label: 'Баннеры',

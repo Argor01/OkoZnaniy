@@ -110,6 +110,12 @@ class UserViewSet(viewsets.ModelViewSet):
                 pass  # Пользователь не существует, продолжаем регистрацию
         
         serializer = self.get_serializer(data=request.data)
+        
+        # Логируем входящие данные для отладки
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"[Registration] Incoming data: {request.data}")
+        
         if serializer.is_valid():
             user = serializer.save()
             
@@ -125,6 +131,7 @@ class UserViewSet(viewsets.ModelViewSet):
             
             return Response(response_data, status=status.HTTP_201_CREATED)
         # Логируем ошибки валидации для дебага 400 ошибок
+        logger.error(f"[Registration] Validation errors: {serializer.errors}")
         try:
             print("[User Registration] validation errors:", serializer.errors)
         except Exception:

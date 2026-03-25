@@ -567,3 +567,59 @@
   border-color: var(--primary-blue, #3b82f6);
   box-shadow: var(--shadow-focus, 0 0 0 3px rgba(59, 130, 246, 0.1));
 }
+/* 
+Стили для реферальной карточки */
+.referralCard {
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--gradient-card, linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%));
+  box-shadow: var(--shadow-card, 0 8px 19px 0 rgba(0, 0, 0, 0.1));
+}
+
+.referralCard .ant-card-body {
+  padding: var(--spacing-xl, 32px) !important;
+}
+
+.infoBox {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-md, 10px);
+  padding: var(--spacing-lg, 24px);
+}
+
+.infoBox h5 {
+  color: var(--primary-blue, #3b82f6);
+  font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.infoBox ul {
+  margin: 0;
+  padding-left: var(--spacing-lg, 24px);
+  color: var(--text-secondary, #6b7280);
+}
+
+.infoBox li {
+  margin-bottom: var(--spacing-sm, 8px);
+  line-height: 1.6;
+}
+
+.statsBox {
+  margin-top: var(--spacing-lg, 24px);
+}
+
+.statsBox .ant-card {
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  transition: all 0.3s ease;
+}
+
+.statsBox .ant-card:hover {
+  border-color: var(--primary-blue, #3b82f6);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(59, 130, 246, 0.15));
+  transform: translateY(-2px);
+}
+
+.statsBox .ant-card-body {
+  padding: var(--spacing-lg, 24px) !important;
+}

@@ -7,18 +7,67 @@ from .models import User
 class CustomRegisterSerializer(serializers.ModelSerializer):
     """Кастомный serializer для регистрации с поддержкой реферального кода"""
     referral_code = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    role = serializers.ChoiceField(choices=['client', 'expert'], required=False, default='client')
-    password = serializers.CharField(write_only=True, required=True)
+    role = serializers.ChoiceField(choices=['client', 'expert', 'partner'], required=False, default='client')
+    password = serializers.CharField(write_only=True, required=True, min_length=6)
+    password2 = serializers.CharField(write_only=True, required=True, min_length=6)
+    username = serializers.CharField(required=False, allow_blank=True)
+    email = serializers.EmailField(required=True)
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role', 'referral_code']
+        fields = ['username', 'email', 'password', 'password2', 'role', 'referral_code']
+    
+    def validate(self, attrs):
+        """Проверяем, что пароли совпадают"""
+        if attrs.get('password') != attrs.get('password2'):
+            raise serializers.ValidationError({"password2": "Пароли не совпадают"})
+        return attrs
     
     def create(self, validated_data):
         referral_code = validated_data.pop('referral_code', None)
         password = validated_data.pop('password')
+        validated_data.pop('password2', None)  # Удаляем password2, он нам больше не нужен
+        role = validated_data.pop('role', 'client')
+        
+        # Если username не указан, генерируем из email
+        if not validated_data.get('username'):
+            email = validated_data.get('email', '')
+            if email:
+                # Берем часть до @ и добавляем случайные цифры если нужно
+                base_username = email.split('@')[0]
+                username = base_username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                validated_data['username'] = username
+            else:
+                # Если нет email, генерируем случайный username
+                import uuid
+                validated_data['username'] = f"user_{uuid.uuid4().hex[:8]}"
+        
+        # Создаем пользователя
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
+        user.role = role
+        
+        # Если указан реферальный код, находим партнера
+        if referral_code:
+            try:
+                partner = User.objects.get(
+                    referral_code=referral_code,
+                    role='partner'
+                )
+                user.partner = partner
+                
+                # Увеличиваем счетчик рефералов у партнера
+                partner.total_referrals += 1
+                partner.save(update_fields=['total_referrals'])
+                
+            except User.DoesNotExist:
+                # Если код не найден, просто игнорируем
+                pass
+        
         user.save()
         return user
     
