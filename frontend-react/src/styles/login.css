@@ -44,11 +44,13 @@
 .socialLoginRow {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 15px;
 }
 .socialLoginIcon {
   width: 32px;
   height: 32px;
+  display: block;
 }
 .verificationModalBody {
   display: flex;
