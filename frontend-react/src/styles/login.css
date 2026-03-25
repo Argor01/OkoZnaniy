@@ -397,12 +397,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 32px 24px;
   position: relative;
   z-index: 3;
-  overflow-y: auto;
-  max-height: calc(100vh - 48px);
+  min-height: calc(100vh - 48px);
 }
 
 .role-switch {
@@ -457,6 +456,8 @@
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(80, 100, 140, 0.18);
   padding: 16px 16px 0;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
 }
 .panel-header {
   display: flex;
