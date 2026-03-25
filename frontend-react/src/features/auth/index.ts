@@ -2,4 +2,5 @@
 // ProtectedRoute is a component, exported for App.tsx usage (static import is OK as it is a layout component)
 export { default as ProtectedRoute } from './components/ProtectedRoute';
 export * from './api/auth';
+export { useAuth } from './hooks/useAuth';
 // Auth related types can be exported if any

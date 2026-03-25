@@ -8,28 +8,21 @@ import {
   Radio, 
   Space, 
   Tabs, 
-  Image, 
   message,
   Tooltip,
   Tag,
-  Input,
-  Segmented
+  Input
 } from 'antd';
 import { 
   DownloadOutlined, 
-  CopyOutlined, 
   FileImageOutlined,
-  LinkOutlined,
-  CodeOutlined,
-  UserOutlined,
-  BookOutlined
+  CopyOutlined,
+  LinkOutlined
 } from '@ant-design/icons';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import styles from './PromoMaterials.module.css';
 
 const { Title, Text, Paragraph } = Typography;
-const { TextArea } = Input;
-
-type TargetAudience = 'authors' | 'students';
 
 interface BannerConfig {
   id: string;
@@ -37,7 +30,6 @@ interface BannerConfig {
   sizes: string[];
   orientations: ('horizontal' | 'vertical')[];
   designs: number[];
-  audiences: TargetAudience[];
 }
 
 const bannerConfigs: BannerConfig[] = [
@@ -46,79 +38,47 @@ const bannerConfigs: BannerConfig[] = [
     name: 'Статичный баннер',
     sizes: ['300x250', '320x50', '336x280', '468x60', '728x90', '970x90', '970x250'],
     orientations: ['horizontal', 'vertical'],
-    designs: [1, 2, 3],
-    audiences: ['authors', 'students']
+    designs: [1, 2, 3]
   }
 ];
 
 export const PromoMaterials: React.FC = () => {
-  const [targetAudience, setTargetAudience] = useState<TargetAudience>('authors');
-  const [selectedBannerType] = useState('static');
+  const { user } = useAuth();
+  const [selectedBannerType] = useState('static'); // Только статичные баннеры
   const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedSize, setSelectedSize] = useState('970x250');
   const [selectedDesign, setSelectedDesign] = useState(1);
   const [selectedFormat, setSelectedFormat] = useState('png');
-  const [referralLink] = useState('https://studwork.org/ref/ABC123');
 
   const currentConfig = bannerConfigs.find(config => config.id === selectedBannerType);
+  
+  // Генерируем партнерскую ссылку
+  const referralLink = user?.referral_code 
+    ? `${window.location.origin}/login?ref=${user.referral_code}`
+    : '';
 
-  const generateBannerUrl = () => {
-    return `https://cdn.studwork.org/banners/${selectedBannerType}/${targetAudience}/${selectedSize}/${selectedDesign}.${selectedFormat}`;
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      message.success('Скопировано в буфер обмена');
+    }).catch(() => {
+      message.error('Не удалось скопировать');
+    });
   };
 
-  const generateEmbedCode = () => {
-    const bannerUrl = generateBannerUrl();
-    const targetUrl = targetAudience === 'authors' 
-      ? `${referralLink}/authors` 
-      : `${referralLink}/orders`;
-    
-    return `<a href="${targetUrl}"><img src="${bannerUrl}" alt="Студворк - ${targetAudience === 'authors' ? 'работа для авторов' : 'помощь студентам'}" /></a>`;
+  const generateBannerUrl = () => {
+    // Заглушка - в реальности здесь будет генерация URL баннера
+    return `https://cdn.studwork.org/banners/${selectedBannerType}/${selectedSize}/${selectedDesign}.${selectedFormat}`;
   };
 
   const handleDownload = () => {
-    message.success(`Баннер для ${targetAudience === 'authors' ? 'авторов' : 'студентов'} скачан`);
-  };
-
-  const handleCopyCode = () => {
-    const code = generateEmbedCode();
-    navigator.clipboard.writeText(code);
-    message.success('HTML код скопирован в буфер обмена');
-  };
-
-  const handleCopyLink = (linkType: 'main' | 'authors' | 'students') => {
-    let link = referralLink;
-    if (linkType === 'authors') {
-      link = `${referralLink}/authors`;
-    } else if (linkType === 'students') {
-      link = `${referralLink}/orders`;
-    }
-    
-    navigator.clipboard.writeText(link);
-    message.success('Ссылка скопирована');
-  };
-
-  const getBannerContent = () => {
-    if (targetAudience === 'authors') {
-      return {
-        logo: '🚀 СТУДВОРК',
-        text: 'Ищешь работу на дому?',
-        button: 'Стать автором',
-        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      };
-    } else {
-      return {
-        logo: '📚 СТУДВОРК',
-        text: 'Нужна помощь с учебой?',
-        button: 'Заказать работу',
-        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-      };
-    }
+    // Заглушка - в реальности здесь будет скачивание файла
+    message.success('Баннер скачан');
   };
 
   const renderBannerPreview = () => {
+    // Заглушка баннера
     const [width, height] = selectedSize.split('x').map(Number);
     const aspectRatio = width / height;
-    const content = getBannerContent();
     
     return (
       <div className={styles.bannerPreview}>
@@ -127,19 +87,18 @@ export const PromoMaterials: React.FC = () => {
           style={{
             aspectRatio: aspectRatio,
             maxWidth: Math.min(width, 400),
-            maxHeight: Math.min(height, 300),
-            background: content.gradient
+            maxHeight: Math.min(height, 300)
           }}
         >
           <div className={styles.bannerContent}>
             <div className={styles.bannerLogo}>
-              {content.logo}
+              🚀 ОКОЗНАНИЙ
             </div>
             <div className={styles.bannerText}>
-              {content.text}
+              Ищешь работу на дому?
             </div>
             <div className={styles.bannerButton}>
-              {content.button}
+              Стать автором
             </div>
             <div className={styles.bannerSize}>
               {selectedSize}
@@ -152,49 +111,116 @@ export const PromoMaterials: React.FC = () => {
 
   const tabItems = [
     {
+      key: 'referral-link',
+      label: 'Партнерская ссылка',
+      children: (
+        <div>
+          <Card className={styles.referralCard}>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <div>
+                <Title level={4}>
+                  <LinkOutlined /> Ваша партнерская ссылка
+                </Title>
+                <Paragraph type="secondary">
+                  Делитесь этой ссылкой с потенциальными клиентами и исполнителями. 
+                  При регистрации по вашей ссылке реферальный код будет автоматически применен.
+                </Paragraph>
+              </div>
+
+              <div>
+                <Text strong>Реферальный код:</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Input
+                    value={user?.referral_code || ''}
+                    readOnly
+                    size="large"
+                    addonAfter={
+                      <Button
+                        type="text"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(user?.referral_code || '')}
+                      >
+                        Копировать
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Text strong>Партнерская ссылка:</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Input
+                    value={referralLink}
+                    readOnly
+                    size="large"
+                    addonAfter={
+                      <Button
+                        type="text"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(referralLink)}
+                      >
+                        Копировать
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.infoBox}>
+                <Title level={5}>Как это работает?</Title>
+                <ul>
+                  <li>Поделитесь ссылкой с друзьями, коллегами или в социальных сетях</li>
+                  <li>Когда кто-то перейдет по вашей ссылке, реферальный код автоматически сохранится</li>
+                  <li>При регистрации код будет автоматически применен</li>
+                  <li>Вы получите комиссию с каждого заказа вашего реферала</li>
+                </ul>
+              </div>
+
+              <div className={styles.statsBox}>
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.total_referrals || 0}
+                        </Title>
+                        <Text type="secondary">Всего рефералов</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.active_referrals || 0}
+                        </Title>
+                        <Text type="secondary">Активных</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col span={8}>
+                    <Card>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={3} style={{ margin: 0 }}>
+                          {user?.partner_commission_rate || 0}%
+                        </Title>
+                        <Text type="secondary">Ваша комиссия</Text>
+                      </div>
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
+            </Space>
+          </Card>
+        </div>
+      )
+    },
+    {
       key: 'banners',
       label: 'Баннеры',
       children: (
         <div>
-          {/* Выбор целевой аудитории */}
-          <Card className={styles.audienceCard} style={{ marginBottom: 24 }}>
-            <div className={styles.audienceSection}>
-              <Title level={4}>Целевая аудитория</Title>
-              <Segmented
-                value={targetAudience}
-                onChange={(value) => setTargetAudience(value as TargetAudience)}
-                options={[
-                  {
-                    label: (
-                      <div className={styles.segmentOption}>
-                        <UserOutlined />
-                        <span>Для авторов</span>
-                      </div>
-                    ),
-                    value: 'authors'
-                  },
-                  {
-                    label: (
-                      <div className={styles.segmentOption}>
-                        <BookOutlined />
-                        <span>Для студентов</span>
-                      </div>
-                    ),
-                    value: 'students'
-                  }
-                ]}
-                size="large"
-                className={styles.audienceSegmented}
-              />
-              <Paragraph type="secondary" style={{ marginTop: 12 }}>
-                {targetAudience === 'authors' 
-                  ? 'Баннеры для привлечения авторов - людей, которые хотят зарабатывать, выполняя учебные работы'
-                  : 'Баннеры для привлечения студентов - людей, которым нужна помощь с учебными работами'
-                }
-              </Paragraph>
-            </div>
-          </Card>
-
           <Row gutter={[24, 24]}>
             <Col xs={24} lg={12}>
               <Card title="Настройки баннера" className={styles.configCard}>
@@ -206,7 +232,6 @@ export const PromoMaterials: React.FC = () => {
                       <Radio.Group 
                         value={selectedOrientation} 
                         onChange={(e) => setSelectedOrientation(e.target.value)}
-                        style={{ marginTop: 12 }}
                       >
                         <Radio value="horizontal">Горизонтальная</Radio>
                         <Radio value="vertical">Вертикальная</Radio>
@@ -215,7 +240,7 @@ export const PromoMaterials: React.FC = () => {
                   )}
 
                   {/* Размер */}
-                  <div>
+                  <div className={styles.configSection}>
                     <Text strong>Размер:</Text>
                     <div style={{ marginTop: 8 }}>
                       {currentConfig?.sizes.map(size => (
@@ -238,7 +263,6 @@ export const PromoMaterials: React.FC = () => {
                     <Radio.Group 
                       value={selectedDesign} 
                       onChange={(e) => setSelectedDesign(e.target.value)}
-                      style={{ marginTop: 12 }}
                     >
                       {currentConfig?.designs.map(design => (
                         <Radio key={design} value={design}>
@@ -254,7 +278,6 @@ export const PromoMaterials: React.FC = () => {
                     <Radio.Group 
                       value={selectedFormat} 
                       onChange={(e) => setSelectedFormat(e.target.value)}
-                      style={{ marginTop: 12 }}
                     >
                       <Radio value="png">PNG</Radio>
                       <Radio value="jpg">JPG</Radio>
@@ -269,148 +292,17 @@ export const PromoMaterials: React.FC = () => {
                 {renderBannerPreview()}
                 
                 <div style={{ marginTop: 16 }}>
-                  <Space>
-                    <Button 
-                      type="primary" 
-                      icon={<DownloadOutlined />}
-                      onClick={handleDownload}
-                    >
-                      Скачать
-                    </Button>
-                    <Button 
-                      icon={<CopyOutlined />}
-                      onClick={handleCopyCode}
-                    >
-                      Скопировать код
-                    </Button>
-                  </Space>
+                  <Button 
+                    type="primary" 
+                    icon={<DownloadOutlined />}
+                    onClick={handleDownload}
+                  >
+                    Скачать
+                  </Button>
                 </div>
               </Card>
             </Col>
           </Row>
-
-          {/* HTML код */}
-          <Card title="HTML код для вставки" style={{ marginTop: 24 }}>
-            <TextArea
-              value={generateEmbedCode()}
-              readOnly
-              autoSize={{ minRows: 3, maxRows: 6 }}
-              style={{ fontFamily: 'monospace' }}
-            />
-            <div style={{ marginTop: 12 }}>
-              <Button 
-                icon={<CopyOutlined />}
-                onClick={handleCopyCode}
-              >
-                Скопировать код
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )
-    },
-    {
-      key: 'links',
-      label: 'Ссылки',
-      children: (
-        <div>
-          <Card title="Основная реферальная ссылка">
-            <div className={styles.linkSection}>
-              <div className={styles.linkBox}>
-                {referralLink}
-              </div>
-              <Button 
-                type="primary" 
-                icon={<CopyOutlined />}
-                onClick={() => handleCopyLink('main')}
-              >
-                Скопировать
-              </Button>
-            </div>
-            <Paragraph type="secondary" style={{ marginTop: 16 }}>
-              Универсальная ссылка для привлечения пользователей. 
-              Все регистрации по этой ссылке будут засчитаны как ваши рефералы.
-            </Paragraph>
-          </Card>
-
-          <Card title="Специализированные ссылки" style={{ marginTop: 24 }}>
-            <Space direction="vertical" style={{ width: '100%' }} size="large">
-              <div className={styles.specializedLink}>
-                <div className={styles.linkHeader}>
-                  <UserOutlined className={styles.linkIcon} />
-                  <div>
-                    <Text strong>Для авторов</Text>
-                    <div className={styles.linkDescription}>
-                      Ссылка ведет на страницу регистрации авторов
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.linkSection}>
-                  <div className={styles.linkBox}>
-                    {referralLink}/authors
-                  </div>
-                  <Button 
-                    icon={<CopyOutlined />} 
-                    onClick={() => handleCopyLink('authors')}
-                  >
-                    Копировать
-                  </Button>
-                </div>
-              </div>
-              
-              <div className={styles.specializedLink}>
-                <div className={styles.linkHeader}>
-                  <BookOutlined className={styles.linkIcon} />
-                  <div>
-                    <Text strong>Для студентов</Text>
-                    <div className={styles.linkDescription}>
-                      Ссылка ведет на страницу размещения заказов
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.linkSection}>
-                  <div className={styles.linkBox}>
-                    {referralLink}/orders
-                  </div>
-                  <Button 
-                    icon={<CopyOutlined />} 
-                    onClick={() => handleCopyLink('students')}
-                  >
-                    Копировать
-                  </Button>
-                </div>
-              </div>
-            </Space>
-          </Card>
-
-          <Card title="Рекомендации по использованию" style={{ marginTop: 24 }}>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <div className={styles.recommendationCard}>
-                  <UserOutlined className={styles.recommendationIcon} />
-                  <Title level={5}>Для авторов</Title>
-                  <ul className={styles.recommendationList}>
-                    <li>Размещайте на форумах фрилансеров</li>
-                    <li>Используйте в социальных сетях</li>
-                    <li>Отправляйте знакомым, ищущим подработку</li>
-                    <li>Размещайте на сайтах о заработке</li>
-                  </ul>
-                </div>
-              </Col>
-              <Col xs={24} md={12}>
-                <div className={styles.recommendationCard}>
-                  <BookOutlined className={styles.recommendationIcon} />
-                  <Title level={5}>Для студентов</Title>
-                  <ul className={styles.recommendationList}>
-                    <li>Размещайте в студенческих группах</li>
-                    <li>Делитесь в университетских чатах</li>
-                    <li>Рекомендуйте одногруппникам</li>
-                    <li>Используйте на образовательных форумах</li>
-                  </ul>
-                </div>
-              </Col>
-            </Row>
-          </Card>
         </div>
       )
     }
@@ -423,8 +315,8 @@ export const PromoMaterials: React.FC = () => {
           <FileImageOutlined /> Промоматериалы
         </Title>
         <Paragraph>
-          Используйте готовые баннеры и ссылки для продвижения Студворк 
-          среди авторов и студентов
+          Используйте готовые баннеры для продвижения ОкоЗнаний 
+          и увеличения количества рефералов
         </Paragraph>
       </div>
 

@@ -234,6 +234,10 @@ const Login: React.FC = () => {
         referral_code: values.referral_code || referralCode || undefined,
       } as RegisterRequest;
       
+      if (debugEnabled) {
+        console.log('[Registration] Sending data:', cleanValues);
+      }
+      
       await authApi.register(cleanValues);
       
       

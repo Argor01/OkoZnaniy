@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '../api/auth';
+import { authApi, User } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
 
@@ -9,7 +9,7 @@ export const useAuth = () => {
   const token = localStorage.getItem('access_token');
   const hasToken = !!token;
 
-  const { data: user, isLoading, isError } = useQuery({
+  const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ['user-profile'],
     queryFn: authApi.getCurrentUser,
     enabled: hasToken,
