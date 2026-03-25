@@ -1,4 +1,4 @@
-import apiClient from '@/api/client';
+﻿import apiClient from '@/api/client';
 import { Complexity, Skill, Subject, Topic, WorkType } from '@/features/common/types/catalog';
 
 export type { Complexity, Skill, Subject, Topic, WorkType };
@@ -16,10 +16,8 @@ export const catalogApi = {
 
   
   getSubjects: async (): Promise<Subject[]> => {
-    console.log('🔍 Запрос предметов...');
     try {
       const response = await apiClient.get('/catalog/subjects/');
-      console.log('✅ Предметы получены:', response.data.results?.length || response.data.length);
       return response.data.results || response.data;
     } catch (error) {
       console.error('❌ Ошибка получения предметов:', error);
@@ -36,10 +34,8 @@ export const catalogApi = {
 
   
   getWorkTypes: async (): Promise<WorkType[]> => {
-    console.log('🔍 Запрос типов работ...');
     try {
       const response = await apiClient.get('/catalog/work-types/');
-      console.log('✅ Типы работ получены:', response.data.results?.length || response.data.length);
       return response.data.results || response.data;
     } catch (error) {
       console.error('❌ Ошибка получения типов работ:', error);
@@ -50,12 +46,10 @@ export const catalogApi = {
   
   createSubject: async (name: string): Promise<Subject> => {
     const normalizedName = name.trim();
-    console.log('🆕 Создание нового предмета:', normalizedName);
     try {
       const response = await apiClient.post('/catalog/subjects/', {
         name: normalizedName
       });
-      console.log('✅ Предмет создан:', response.data);
       return response.data;
     } catch (error: unknown) {
       const status = (error as { response?: { status?: number } })?.response?.status;
@@ -89,7 +83,6 @@ export const catalogApi = {
 
   
   createWorkType: async (name: string): Promise<WorkType> => {
-    console.log('🆕 Создание нового типа работы:', name);
     try {
       const response = await apiClient.post('/catalog/work-types/', {
         name: name.trim(),
@@ -98,7 +91,6 @@ export const catalogApi = {
         base_price: 1000,
         estimated_time: 7
       });
-      console.log('✅ Тип работы создан:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Ошибка создания типа работы:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   List, 
@@ -100,17 +100,10 @@ export const DirectorChatsSection: React.FC = () => {
     try {
       const { getChatRooms } = await import('@/features/director/api/directorApi');
       const rooms = await getChatRooms();
-      console.log('=== CHAT ROOMS DEBUG ===');
-      console.log('Raw response:', rooms);
-      console.log('Is array:', Array.isArray(rooms));
-      console.log('Length:', rooms?.length);
       
       // Убедимся, что это массив
       const roomsArray = Array.isArray(rooms) ? rooms : [];
-      console.log('Final rooms array:', roomsArray);
-      console.log('Setting chat rooms...');
       setChatRooms(roomsArray);
-      console.log('Chat rooms set successfully');
     } catch (error) {
       console.error('Error loading chat rooms:', error);
       message.error('Ошибка загрузки чатов');
@@ -132,11 +125,6 @@ export const DirectorChatsSection: React.FC = () => {
     (room.name || '').toLowerCase().includes(searchText.toLowerCase()) ||
     room.description?.toLowerCase().includes(searchText.toLowerCase())
   );
-  
-  console.log('=== RENDER DEBUG ===');
-  console.log('chatRooms:', chatRooms);
-  console.log('filteredRooms:', filteredRooms);
-  console.log('loading:', loading);
 
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedRoom) return;
@@ -153,14 +141,12 @@ export const DirectorChatsSection: React.FC = () => {
   const handleCreateRoom = async () => {
     try {
       const values = await createRoomForm.validateFields();
-      console.log('Creating room with values:', values);
       const { createChatRoom } = await import('@/features/director/api/directorApi');
       const newRoom = await createChatRoom({
         name: values.name,
         description: values.description,
         type: values.type,
       });
-      console.log('Room created:', newRoom);
       message.success('Чат создан');
       setCreateRoomModalVisible(false);
       createRoomForm.resetFields();

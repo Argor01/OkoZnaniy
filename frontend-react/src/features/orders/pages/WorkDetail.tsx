@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin } from 'antd';
@@ -120,7 +120,6 @@ const WorkDetail: React.FC = () => {
                       <AppButton 
                         variant="link" 
                         onClick={() => {
-                          console.log('Navigating to user profile:', work.client?.id);
                           if (work.client?.id) {
                             navigate(`/user/${work.client.id}`);
                           } else {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
 import {
   UserOutlined,
@@ -125,23 +125,18 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
     
     if (key === 'works') {
-      console.log('Works navigation disabled');
       return;
     }
     if (key === 'shop-ready-works') {
-      console.log('Shop ready works navigation disabled');
       return;
     }
     if (key === 'shop-add-work') {
-      console.log('Shop add work navigation disabled');
       return;
     }
     if (key === 'shop-purchased') {
-      console.log('Shop purchased navigation disabled');
       return;
     }
     if (key === 'orders-feed') {
-      console.log('Orders feed navigation disabled');
       return;
     }
     if (key.startsWith('orders-') || key === 'orders') {

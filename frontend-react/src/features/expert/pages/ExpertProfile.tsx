@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Tag, Spin, Alert, Rate, Divider, Avatar } from 'antd';
@@ -50,7 +50,6 @@ const ExpertProfile: React.FC = () => {
   });
 
   React.useEffect(() => {
-    console.log('ExpertProfile: Fetched reviews:', reviews);
   }, [reviews]);
 
   React.useEffect(() => {
