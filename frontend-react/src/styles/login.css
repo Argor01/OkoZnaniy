@@ -6,7 +6,6 @@
   justify-content: center;
   background: linear-gradient(135deg, #ffffff 50%, #107afc 100%);
   padding: 24px;
-  overflow: hidden;
 }
 
 
@@ -16,9 +15,8 @@
   display: flex;
   background: rgba(255, 255, 255, 0.90);
   border-radius: 24px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
-  max-height: calc(100vh - 48px);
 }
 .loginPageCenter {
   display: flex;
@@ -399,10 +397,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 32px 24px;
   position: relative;
   z-index: 3;
+  overflow-y: auto;
+  max-height: calc(100vh - 48px);
 }
 
 .role-switch {
@@ -453,7 +453,6 @@
 .auth-panel {
   width: 100%;
   max-width: 800px;
-  max-height: 820px;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 12px 40px rgba(80, 100, 140, 0.18);
