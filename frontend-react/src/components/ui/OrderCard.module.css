@@ -32,6 +32,7 @@
   font-size: 14px;
   color: var(--text-tertiary);
   font-weight: 600;
+  
 }
 
 .orderTitle {
@@ -324,6 +325,23 @@
 
 .actionButton:hover {
   opacity: 1;
+}
+
+.orderBidButtonActive {
+  background: var(--color-brand-orange-500) !important;
+  border-color: var(--color-brand-orange-500) !important;
+  color: #ffffff !important;
+}
+
+.orderBidButtonActive:hover,
+.orderBidButtonActive:focus {
+  background: var(--color-brand-orange-500) !important;
+  border-color: var(--color-brand-orange-500) !important;
+  color: #ffffff !important;
+}
+
+.orderBidButtonDisabled {
+  cursor: not-allowed;
 }
 
 @media (max-width: 600px) {

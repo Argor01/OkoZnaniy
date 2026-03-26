@@ -28,6 +28,7 @@ const MyWorks = lazy(() => import('@/features/orders/pages/MyWorks'));
 const PurchasedWorks = lazy(() => import('@/features/shop/pages/PurchasedWorks'));
 const OrdersFeed = lazy(() => import('@/features/orders/pages/OrdersFeed'));
 const SupportChat = lazy(() => import('@/features/support/pages/SupportChat'));
+const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
@@ -211,6 +212,16 @@ export const AppRoutes: React.FC = () => {
             </DashboardLayout>
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path={ROUTES.improvements.survey}
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ImprovementsSurveyPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
       />
       <Route 
         path={ROUTES.shop.purchased}

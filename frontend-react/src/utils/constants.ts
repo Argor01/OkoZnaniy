@@ -125,6 +125,9 @@ export const ROUTES = {
     detail: '/orders/:orderId',
     feed: '/orders-feed',
   },
+  improvements: {
+    survey: '/improvements',
+  },
   supportChat: {
     detail: '/support-chat/:chatId',
   },

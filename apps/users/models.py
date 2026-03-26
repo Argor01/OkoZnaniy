@@ -120,3 +120,26 @@ class EmailVerificationCode(models.Model):
         return not self.is_used and self.expires_at > timezone.now() and self.attempts < 3
 
 
+class ImprovementSuggestion(models.Model):
+    class ImprovementArea(models.TextChoices):
+        UI_UX = 'ui_ux', 'Интерфейс и удобство'
+        FUNCTIONALITY = 'functionality', 'Функциональность'
+        PERFORMANCE = 'performance', 'Производительность'
+        CONTENT = 'content', 'Контент'
+        SUPPORT = 'support', 'Поддержка'
+        OTHER = 'other', 'Другое'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='improvement_suggestions', verbose_name='Пользователь')
+    area = models.CharField(max_length=32, choices=ImprovementArea.choices, verbose_name='Область улучшения')
+    comment = models.TextField(verbose_name='Комментарий')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    class Meta:
+        verbose_name = 'Рекомендация по улучшению'
+        verbose_name_plural = 'Рекомендации по улучшению'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.username} | {self.get_area_display()}'
+
+

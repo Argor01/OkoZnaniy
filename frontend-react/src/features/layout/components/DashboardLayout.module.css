@@ -156,8 +156,12 @@
   transition: all 0.2s;
 }
 
-.dashboardLayoutDesktop {
-  margin-left: 250px;
+.dashboardLayoutDesktopExpanded {
+  margin-left: 266px;
+}
+
+.dashboardLayoutDesktopCollapsed {
+  margin-left: 0;
 }
 
 .dashboardLayoutMobile {

@@ -24,10 +24,22 @@ interface PublicStats {
 
 export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
   const currentYear = new Date().getFullYear();
-  
   const agreementLink = userRole === 'expert' || userRole === 'partner'
     ? '/docs/user_agreement_expert.pdf'
     : '/docs/user_agreement_client.pdf';
+  const services = [
+    'Дипломная работа',
+    'Курсовая работа',
+    'Контрольная работа',
+    'Отчет по практике',
+    'Реферат',
+    'Сочинение',
+    'Онлайн-помощь',
+    'Чертежи',
+    'Эссе',
+    'Бизнес-план',
+    'Все услуги',
+  ];
 
   const { data: stats } = useQuery({
     queryKey: ['public-stats'],
@@ -41,87 +53,50 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
   return (
     <Footer className={styles.footer}>
       <div className={styles.container}>
-        <div className={styles.grid}>
-          {/* Column 1: Support + About Project */}
-          <div className={styles.column}>
-            <div className={styles.section}>
-              <h3 className={styles.heading}>Служба поддержки</h3>
-              <div>
-                <a href="tel:88005007857" className={styles.contactPhone}>8 (800) 500-78-57</a>
-                <a href="mailto:support@okoznaniy.ru" className={styles.contactEmail}>support@okoznaniy.ru</a>
-              </div>
-              <div>
-                <span className={styles.workHoursLabel}>График работы</span>
-                <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
-              </div>
-              <a href="/support" className={styles.contactButton}>
-                Написать нам
-              </a>
-            </div>
+        <div className={styles.columnsGrid}>
+          <div className={styles.columnItem}>
+            <h3 className={styles.heading}>Служба поддержки</h3>
+            <a href="tel:88005007857" className={styles.contactPhone}>8 (800) 500-78-57</a>
+            <a href="mailto:support@okoznaniy.ru" className={styles.contactEmail}>support@okoznaniy.ru</a>
+            <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
+            <a href="/support" className={styles.contactButton}>Написать нам</a>
+          </div>
 
-            <div className={styles.section} style={{ marginTop: '24px' }}>
-              <h3 className={styles.heading}>О проекте</h3>
-              <ul className={styles.list}>
-                <li><a href="/about" className={styles.link}>О компании</a></li>
-                <li><a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a></li>
-                <li><a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a></li>
-              </ul>
+          <div className={styles.columnItem}>
+            <h3 className={styles.heading}>О проекте</h3>
+            <div className={styles.linksInline}>
+              <a href="/about" className={styles.link}>О компании</a>
+              <a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a>
+              <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a>
             </div>
           </div>
 
-          {/* Column 2: Vacancies + Statistics */}
-          <div className={styles.column}>
-            <div className={styles.section}>
-              <h3 className={styles.heading}>Вакансии</h3>
-              <ul className={styles.list}>
-                <li><a href="/become-author" className={styles.link}>Стать автором</a></li>
-              </ul>
-            </div>
-
-            <div className={styles.section} style={{ marginTop: '24px' }}>
-              <h3 className={styles.heading}>Статистика</h3>
-              <ul className={styles.statsList}>
-                <li className={styles.statRow}>
-                  <span className={styles.statValue}>{stats?.total_users?.toLocaleString() || 0}</span>
-                  <span className={styles.statLabel}> пользователей</span>
-                </li>
-                <li className={styles.statRow}>
-                  <span className={styles.statValueGreen}>+{stats?.new_users_today?.toLocaleString() || 0}</span>
-                  <span className={styles.statLabelGreen}> новых пользователя</span>
-                </li>
-                <li className={styles.statRow}>
-                  <span className={styles.statValue}>{stats?.online_users?.toLocaleString() || 0}</span>
-                  <span className={styles.statLabel}> сейчас на сайте</span>
-                </li>
-                <li className={styles.statRow}>
-                  <span className={styles.statValue}>{stats?.orders_today?.toLocaleString() || 0}</span>
-                  <span className={styles.statLabel}> заказ в сутки</span>
-                </li>
-              </ul>
+          <div className={styles.columnItem}>
+            <h3 className={styles.heading}>Статистика</h3>
+            <div className={styles.statsInline}>
+              <span className={styles.statChip}><strong>{stats?.total_users?.toLocaleString() || 0}</strong> пользователей</span>
+              <span className={styles.statChipGreen}><strong>+{stats?.new_users_today?.toLocaleString() || 0}</strong> новых</span>
+              <span className={styles.statChip}><strong>{stats?.online_users?.toLocaleString() || 0}</strong> онлайн</span>
+              <span className={styles.statChip}><strong>{stats?.orders_today?.toLocaleString() || 0}</strong> заказов/сутки</span>
             </div>
           </div>
 
-          {/* Column 3: Services + Extra Links */}
-          <div className={styles.column}>
-            <div className={styles.section}>
-              <h3 className={styles.heading}>Услуги</h3>
-              <ul className={styles.list}>
-                <li><p className={styles.link}>Дипломная работа</p></li>
-                <li><p className={styles.link}>Курсовая работа</p></li>
-                <li><p className={styles.link}>Контрольная работа</p></li>
-                <li><p className={styles.link}>Отчет по практике</p></li>
-                <li><p className={styles.link}>Реферат</p></li>
-                <li><p className={styles.link}>Сочинение</p></li>
-                <li><p className={styles.link}>Онлайн-помощь</p></li>
-                <li><p className={styles.link}>Чертежи</p></li>
-                <li><p className={styles.link}>Эссе</p></li>
-                <li><p className={styles.link}>Бизнес-план</p></li>
-                <li><p className={styles.link}>Все услуги</p></li>
-              </ul>
+          <div className={styles.columnItem}>
+            <h3 className={styles.heading}>Услуги</h3>
+            <div className={styles.servicesInline}>
+            {services.map((service) => (
+              <span key={service} className={styles.serviceChip}>{service}</span>
+            ))}
+            </div>
+          </div>
+
+          <div className={styles.columnItem}>
+            <h3 className={styles.heading}>Вакансии</h3>
+            <div className={styles.linksInline}>
+              <a href="/become-author" className={styles.link}>Стать автором</a>
             </div>
           </div>
         </div>
-
 
         <div className={styles.copyright}>
           <div className={styles.copyrightText}>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
+import { Layout, Menu, Avatar, Typography, Badge, theme } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
   FileDoneOutlined,
   MessageOutlined,
   BellOutlined,
-  WalletOutlined,
   LogoutOutlined,
   TeamOutlined,
   QuestionCircleOutlined,
@@ -14,6 +13,7 @@ import {
   ShopOutlined,
   MenuOutlined,
   UnorderedListOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
@@ -72,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   collapsed = false,
   orderCounts,
 }) => {
+  const { token } = theme.useToken();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
@@ -107,16 +108,16 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       onArbitrationClick?.();
       return;
     }
-    if (key === 'balance' || key.startsWith('balance-')) {
-      onFinanceClick?.();
-      return;
-    }
     if (key === 'friends') {
       onFriendsClick?.();
       return;
     }
     if (key === 'faq') {
       onFaqClick?.();
+      return;
+    }
+    if (key === 'improvements') {
+      navigate('/improvements');
       return;
     }
     if (key === 'logout') {
@@ -176,7 +177,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     onMessagesClick,
     onNotificationsClick,
     onArbitrationClick,
-    onFinanceClick,
     onFriendsClick,
     onFaqClick,
     onLogout,
@@ -184,6 +184,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ]);
 
   const isExpert = userProfile?.role === 'expert';
+  const isCollapsedDesktop = !isMobile && collapsed;
+  const sidebarThemeVars = useMemo(
+    () => ({ '--sidebar-accent': token.colorPrimary } as React.CSSProperties),
+    [token.colorPrimary]
+  );
 
   const menuItems = useMemo(() => [
     {
@@ -218,11 +223,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <TrophyOutlined />,
       label: 'Арбитраж',
     },
-    {
-      key: 'balance',
-      icon: <WalletOutlined />,
-      label: 'Счет: 0.00 ₽',
-    },
     (!isExpert && !isMobile) ? {
       key: 'orders',
       icon: <ShoppingOutlined />,
@@ -256,6 +256,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       label: 'FAQ',
     },
     {
+      key: 'improvements',
+      icon: <BulbOutlined />,
+      label: 'Что можно улучшить?',
+    },
+    {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Выйти',
@@ -265,15 +270,15 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ].filter(Boolean), [isExpert, isMobile, unreadMessages, unreadNotifications, orderCounts]);
 
   const profileSection = useMemo(() => (
-    <div className={styles.sidebarProfile}>
+    <div className={`${styles.sidebarProfile} ${isCollapsedDesktop ? styles.sidebarProfileCollapsed : ''}`}>
       <div className={styles.sidebarProfileInner}>
         <Avatar
-          size={48}
+          size={isCollapsedDesktop ? 40 : 44}
           src={userProfile?.avatar || undefined}
           icon={<UserOutlined />}
           className={styles.sidebarAvatar}
         />
-        <div className={styles.sidebarProfileInfo}>
+        <div className={`${styles.sidebarProfileInfo} ${isCollapsedDesktop ? styles.sidebarProfileInfoHidden : ''}`}>
           <Title level={5} className={styles.sidebarProfileName}>
             {userProfile?.username || 'Пользователь'}
           </Title>
@@ -291,7 +296,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         )}
       </div>
     </div>
-  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange]);
+  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange, isCollapsedDesktop]);
 
   const sidebarContent = useMemo(() => (
     <>
@@ -303,10 +308,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         onOpenChange={setOpenKeys}
         onClick={handleMenuClick}
         className={styles.sidebarMenu}
+        inlineCollapsed={isCollapsedDesktop}
         items={menuItems}
       />
     </>
-  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
+  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems, isCollapsedDesktop]);
 
   return (
     <>
@@ -318,6 +324,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
           />
           <div
             className={`${styles.mobileMenu} ${mobileDrawerOpen ? styles.mobileMenuOpen : ''}`}
+            style={sidebarThemeVars}
           >
             {sidebarContent}
           </div>
@@ -326,12 +333,13 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
       {!isMobile && (
         <Sider
-          width={250}
+          width={268}
           className={styles.sidebar}
           trigger={null}
           collapsible
           collapsed={collapsed}
           collapsedWidth={0}
+          style={sidebarThemeVars}
         >
           {sidebarContent}
         </Sider>

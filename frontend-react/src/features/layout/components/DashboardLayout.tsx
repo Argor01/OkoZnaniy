@@ -328,6 +328,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (path === '/expert') return 'dashboard';
     if (path === '/create-order') return 'create-order';
     if (path === '/orders-feed') return 'orders-feed';
+    if (path.startsWith('/improvements')) return 'improvements';
     if (path.startsWith('/shop/ready-works')) return 'shop-ready-works';
     if (path.startsWith('/shop/add-work')) return 'shop-add-work';
     if (path.startsWith('/works')) {
@@ -379,7 +380,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const dashboardLayoutClassName = [
     styles.dashboardLayout,
-    isMobile ? styles.dashboardLayoutMobile : (desktopSidebarOpen ? styles.dashboardLayoutDesktop : ''),
+    isMobile ? styles.dashboardLayoutMobile : (desktopSidebarOpen ? styles.dashboardLayoutDesktopExpanded : styles.dashboardLayoutDesktopCollapsed),
     shouldShowHeader ? styles.dashboardLayoutHeader : styles.dashboardLayoutNoHeader,
   ].join(' ');
 
