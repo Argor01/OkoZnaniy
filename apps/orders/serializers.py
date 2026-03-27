@@ -134,6 +134,9 @@ class OrderSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     user_has_bid = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
+    
+    # Явно указываем budget как FloatField для корректной сериализации
+    budget = serializers.FloatField()
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
