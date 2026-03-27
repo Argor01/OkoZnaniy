@@ -10,6 +10,8 @@ class Roles(models.TextChoices):
     PARTNER = 'partner'
 
 class User(AbstractUser):
+    # Переопределяем username чтобы сделать необязательным
+    username = models.CharField(max_length=150, blank=True, null=True, unique=True, verbose_name="Имя пользователя")
     # Переопределяем email чтобы сделать необязательным
     email = models.EmailField(blank=True, null=True, verbose_name="Email")
     
