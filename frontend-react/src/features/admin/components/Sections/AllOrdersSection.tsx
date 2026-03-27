@@ -24,6 +24,7 @@ import {
   EditOutlined,
   MessageOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { AdminOrder as Order } from '@/features/orders/types/orders';
 import { useAllOrders, useOrderActions } from '@/features/admin/hooks/useAdminOrders';
@@ -525,38 +526,31 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 export const AllOrdersSection: React.FC = () => {
   const { orders, loading } = useAllOrders();
   const { changeOrderStatus } = useOrderActions();
-  const [contactModalVisible, setContactModalVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const navigate = useNavigate();
 
   const handleEditOrder = (orderId: number) => {
-    message.info(`Редактирование заказа #${orderId} (В разработке)`);
+    // Функционал редактирования будет добавлен позже
+    message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
   };
 
-  const handleContactClient = (orderId: number) => {
+  const handleContactClient = async (orderId: number) => {
     const order = orders.find(o => o.id === orderId);
-    if (order) {
-      setSelectedOrder(order);
-      setContactModalVisible(true);
-    }
-  };
-
-  const handleOpenChat = async () => {
-    if (!selectedOrder?.client?.id) {
+    if (!order?.client?.id) {
       message.error('Не удалось определить клиента');
       return;
     }
 
     try {
       const response = await apiClient.post('/admin-panel/direct-chats/get-or-create/', {
-        user_id: selectedOrder.client.id
+        user_id: order.client.id
       });
 
       const chatId = response.data.chat_id;
       
-      // Перенаправляем на страницу чатов с открытым чатом
-      window.location.href = `/admin/dashboard?section=chats&chat_id=${chatId}`;
+      // Переходим на секцию чатов
+      navigate(`/admin/dashboard?section=admin_chats&chat_id=${chatId}`);
       
-      setContactModalVisible(false);
+      message.success('Чат с клиентом открыт');
     } catch (error) {
       console.error('Error creating chat:', error);
       message.error('Ошибка при создании чата');
@@ -568,37 +562,13 @@ export const AllOrdersSection: React.FC = () => {
   };
 
   return (
-    <>
-      <AllOrdersTable
-        orders={orders as Order[]}
-        loading={loading}
-        onChangeOrderStatus={changeOrderStatus}
-        onEditOrder={handleEditOrder}
-        onContactClient={handleContactClient}
-        onAssignExpert={handleAssignExpert}
-      />
-      
-      <Modal
-        title="Связь с клиентом"
-        open={contactModalVisible}
-        onOk={handleOpenChat}
-        onCancel={() => {
-          setContactModalVisible(false);
-          setSelectedOrder(null);
-        }}
-        okText="Открыть чат"
-        cancelText="Отмена"
-      >
-        {selectedOrder && (
-          <div>
-            <p><strong>Заказ:</strong> #{selectedOrder.id} - {selectedOrder.title}</p>
-            <p><strong>Клиент:</strong> {selectedOrder.client?.first_name} {selectedOrder.client?.last_name} ({selectedOrder.client?.username})</p>
-            <p><strong>Email:</strong> {selectedOrder.client?.email}</p>
-            <Divider />
-            <p>Будет открыт прямой чат с клиентом. Сообщения будут отправлены от имени администрации.</p>
-          </div>
-        )}
-      </Modal>
-    </>
+    <AllOrdersTable
+      orders={orders as Order[]}
+      loading={loading}
+      onChangeOrderStatus={changeOrderStatus}
+      onEditOrder={handleEditOrder}
+      onContactClient={handleContactClient}
+      onAssignExpert={handleAssignExpert}
+    />
   );
 };
