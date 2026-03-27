@@ -16,6 +16,9 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'password2', 'role', 'referral_code']
+        extra_kwargs = {
+            'username': {'required': False, 'allow_blank': True, 'allow_null': True}
+        }
     
     def validate_username(self, value):
         """Разрешаем пустой username - он будет сгенерирован автоматически"""
