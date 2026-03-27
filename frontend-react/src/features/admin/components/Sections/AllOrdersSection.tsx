@@ -24,7 +24,6 @@ import {
   EditOutlined,
   MessageOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { AdminOrder as Order } from '@/features/orders/types/orders';
 import { useAllOrders, useOrderActions } from '@/features/admin/hooks/useAdminOrders';
@@ -526,11 +525,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 export const AllOrdersSection: React.FC = () => {
   const { orders, loading } = useAllOrders();
   const { changeOrderStatus } = useOrderActions();
-  const navigate = useNavigate();
 
   const handleEditOrder = (orderId: number) => {
     // Функционал редактирования будет добавлен позже
-    message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
+    // message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
   };
 
   const handleContactClient = async (orderId: number) => {
@@ -541,14 +539,14 @@ export const AllOrdersSection: React.FC = () => {
     }
 
     try {
+      // Создаем или получаем существующий чат
       const response = await apiClient.post('/admin-panel/direct-chats/get-or-create/', {
         user_id: order.client.id
       });
 
-      const chatId = response.data.chat_id;
-      
-      // Переходим на секцию чатов
-      navigate(`/admin/dashboard?section=admin_chats&chat_id=${chatId}`);
+      // Открываем чат в новой вкладке или текущей
+      const chatUrl = `/admin/chats?chat_id=${response.data.chat_id}&user_id=${order.client.id}`;
+      window.open(chatUrl, '_blank');
       
       message.success('Чат с клиентом открыт');
     } catch (error) {
