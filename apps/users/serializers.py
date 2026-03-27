@@ -10,7 +10,6 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=['client', 'expert', 'partner'], required=False, default='client')
     password = serializers.CharField(write_only=True, required=True, min_length=6)
     password2 = serializers.CharField(write_only=True, required=True, min_length=6)
-    username = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     email = serializers.EmailField(required=True)
     
     class Meta:
@@ -19,6 +18,13 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'username': {'required': False, 'allow_blank': True, 'allow_null': True}
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Принудительно делаем username необязательным
+        self.fields['username'].required = False
+        self.fields['username'].allow_blank = True
+        self.fields['username'].allow_null = True
     
     def to_internal_value(self, data):
         """Переопределяем для обработки отсутствующего username"""
