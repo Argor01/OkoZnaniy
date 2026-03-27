@@ -91,6 +91,7 @@ export const ROUTES = {
   becomePartner: '/become-partner',
   expert: {
     root: '/expert',
+    clientOrders: '/expert/client-orders',
     application: '/expert-application',
     profile: '/expert/:userId',
   },
@@ -124,6 +125,9 @@ export const ROUTES = {
   orders: {
     detail: '/orders/:orderId',
     feed: '/orders-feed',
+  },
+  improvements: {
+    survey: '/improvements',
   },
   supportChat: {
     detail: '/support-chat/:chatId',

@@ -11,6 +11,7 @@ import {
   MenuOutlined,
   StopOutlined,
   QuestionCircleOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
@@ -20,6 +21,7 @@ import PartnerPanel from '../components/PartnerPanel/PartnerPanel';
 import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics';
 import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
+import ImprovementRecommendations from '../components/ImprovementRecommendations/ImprovementRecommendations';
 import DirectorFaqModal from '../modals/DirectorFaqModal';
 import '@/styles/modals.css';
 import '@/styles/director.css';
@@ -155,6 +157,12 @@ const DirectorDashboard: React.FC = () => {
       icon: <StopOutlined />,
       label: 'Баны за обмен контактами',
       component: <ContactBannedUsers />,
+    },
+    {
+      key: 'improvement-recommendations',
+      icon: <BulbOutlined />,
+      label: 'Рекомендации по улучшению',
+      component: <ImprovementRecommendations />,
     },
   ];
 

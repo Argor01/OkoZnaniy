@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
     supportUser: '/users/support_user/',
     updateProfile: '/users/update_me/',
     submitExpertApplication: '/users/submit_expert_application/',
+    submitImprovementSuggestion: '/users/submit_improvement_suggestion/',
+    improvementSuggestions: '/users/improvement_suggestions/',
   },
   orders: {
     list: '/orders/orders/',

@@ -16,13 +16,14 @@ from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from apps.orders.models import Order, Transaction
-from .models import PartnerEarning
+from .models import PartnerEarning, ImprovementSuggestion
 from apps.orders.serializers import OrderSerializer, TransactionSerializer
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     PasswordResetSerializer, PasswordResetConfirmSerializer,
     CustomTokenObtainPairSerializer, ExpertApplicationSerializer,
-    SimpleUserSerializer, PublicUserProfileSerializer
+    SimpleUserSerializer, PublicUserProfileSerializer,
+    ImprovementSuggestionCreateSerializer, ImprovementSuggestionListSerializer
 )
 from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
 from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
@@ -164,6 +165,28 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def submit_improvement_suggestion(self, request):
+        serializer = ImprovementSuggestionCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        suggestion = serializer.save(user=request.user)
+        return Response(ImprovementSuggestionListSerializer(suggestion, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def improvement_suggestions(self, request):
+        user = request.user
+        if user.role != 'director':
+            return Response({'detail': 'Доступно только для директора'}, status=status.HTTP_403_FORBIDDEN)
+
+        suggestions = ImprovementSuggestion.objects.select_related('user').all()
+        page = self.paginate_queryset(suggestions)
+        if page is not None:
+            serializer = ImprovementSuggestionListSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ImprovementSuggestionListSerializer(suggestions, many=True, context={'request': request})
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def client_dashboard(self, request):

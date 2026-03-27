@@ -1,17 +1,36 @@
-.sidebar {
-  background: #fff;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+ .sidebar {
+  --sidebar-accent: #1890ff;
+  --sidebar-content-bg: #ffffff;
+  background: linear-gradient(180deg, var(--sidebar-accent) 0%, #0f7eea 100%);
+  box-shadow: none;
   position: fixed;
-  top: 64px; 
+  top: 64px;
   left: 0;
-  height: calc(100vh - 64px); 
-  width: 250px;
-  border-right: 1px solid #f0f0f0;
+  height: calc(100vh - 64px);
+  width: 268px;
+  border-radius: 0 22px 0 0;
+  border: none;
+  border-right: none !important;
   overflow-y: auto;
   z-index: 999;
-  
+  padding: 10px 0 16px 10px;
+  transition: width 0.26s ease;
   scrollbar-width: none; 
   -ms-overflow-style: none; 
+}
+
+.sidebar:global(.ant-layout-sider-collapsed) {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  flex: 0 0 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.sidebar:global(.ant-layout-sider-collapsed)::after {
+  display: none !important;
 }
 
 
@@ -21,12 +40,16 @@
 
 .sidebarProfile {
   display: flex;
-  align-items: center;
-  padding: 20px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  background: #1890ff;
-  color: white;
+  align-items: flex-start;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: transparent;
+  color: #ffffff;
+  border-radius: 16px;
 
+}
+.sidebarProfileCollapsed {
+  justify-content: center;
 }
 .sidebarProfileInner {
   position: relative;
@@ -35,21 +58,26 @@
   width: 100%;
 }
 .sidebarAvatar {
-  background-color: #1890ff;
+  background: #ffffff;
+  color: var(--sidebar-accent);
+  box-shadow: 0 8px 16px rgba(13, 49, 95, 0.28);
 }
 .sidebarProfileInfo {
-  margin-left: 12px;
+  margin-left: 10px;
   flex: 1;
 }
+.sidebarProfileInfoHidden {
+  display: none;
+}
 .sidebarProfileName {
-  font-size: 24px;
-  color: white !important; 
+  font-size: 18px;
+  color: #ffffff !important; 
   font-family: 'Jost-SemiBold', sans-serif;
   margin-bottom: 0 !important;
 }
 .sidebarProfileRole {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
   font-family: 'Jost-Regular', sans-serif;
 }
 .mobileProfileClose {
@@ -71,6 +99,18 @@
 
 .sidebarMenu {
   border-right: none;
+  background: transparent !important;
+  margin-top: 4px;
+}
+
+.sidebarMenu :global(.ant-menu-inline) {
+  border-inline-end: none !important;
+}
+
+.sidebarMenu :global(.ant-menu-item::after),
+.sidebarMenu :global(.ant-menu-submenu-title::after) {
+  display: none !important;
+  border: none !important;
 }
 
 .sidebarMenu :global(.ant-menu-item),
@@ -79,13 +119,69 @@
 .sidebarMenu :global(.ant-menu-submenu-title) :global(.ant-menu-title-content),
 .sidebarMenu :global(.ant-badge) {
   font-family: 'Jost-SemiBold', sans-serif !important;
-  font-size: 18px !important;
+  font-size: 16px !important;
   cursor: pointer;
 }
 
 .sidebarMenu :global(.ant-menu-item) .anticon,
 .sidebarMenu :global(.ant-menu-submenu-title) .anticon {
-  font-size: 22px !important;
+  font-size: 18px !important;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebarMenu :global(.ant-menu-item),
+.sidebarMenu :global(.ant-menu-submenu-title) {
+  margin: 6px 0 6px 6px !important;
+  width: calc(100% - 6px) !important;
+  border-radius: 999px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  padding-inline: 14px !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.sidebarMenu :global(.ant-menu-item:hover),
+.sidebarMenu :global(.ant-menu-submenu-title:hover) {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected),
+.sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title),
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
+  background: var(--sidebar-content-bg) !important;
+  color: #1f2a44 !important;
+  border-radius: 999px 0 0 999px !important;
+  margin-right: -8px !important;
+  width: calc(100% + 2px) !important;
+  box-shadow: none !important;
+  position: relative !important;
+  z-index: 2;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected::before),
+.sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title::before),
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -10px;
+  width: 12px;
+  height: 100%;
+  background: var(--sidebar-content-bg);
+  pointer-events: none;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected:hover),
+.sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title:hover),
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title:hover) {
+  background: var(--sidebar-content-bg) !important;
+  color: #1f2a44 !important;
+}
+
+.sidebarMenu :global(.ant-menu-item-selected .anticon),
+.sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title .anticon),
+.sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title .anticon) {
+  color: var(--sidebar-accent) !important;
 }
 
 .sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item),
@@ -93,11 +189,38 @@
   font-family: 'Jost-Regular', sans-serif !important;
   font-size: 14px !important;
   font-weight: normal !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ДОБАВИТЬ: Иконки подпунктов в открытом аккордеоне тоже черные */
+.sidebarMenu :global(.ant-menu-submenu-open) 
+  :global(.ant-menu-sub) 
+  :global(.ant-menu-item) 
+  .anticon {
+  color: #000000 !important;
+}
+
+/* ДОБАВИТЬ: Для выбранного подпункта можно сделать акцентный цвет */
+.sidebarMenu :global(.ant-menu-sub) 
+  :global(.ant-menu-item-selected) 
+  :global(.ant-menu-title-content) {
+  color: var(--sidebar-accent) !important;
+  font-weight: 600 !important;
 }
 
 .logoutMenuItem {
   margin-top: auto;
-  border-top: 1px solid #f0f0f0;
+  border-top: none;
+}
+
+.sidebarCollapsed .sidebarMenu :global(.ant-menu-item),
+.sidebarCollapsed .sidebarMenu :global(.ant-menu-submenu-title) {
+  padding-inline: 0 !important;
+  justify-content: center !important;
+}
+
+.sidebarCollapsed .sidebarMenu :global(.ant-menu-title-content) {
+  display: none !important;
 }
 
 
@@ -183,9 +306,9 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--sidebar-accent) 0%, #53acff 100%);
   border: none;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--sidebar-accent) 35%, transparent);
   color: white;
   display: flex;
   align-items: center;
@@ -195,13 +318,19 @@
 }
 .mobileMenuButton:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--sidebar-accent) 45%, transparent);
 }
 .mobileMenuIcon {
   font-size: 20px;
 }
 .notificationDotIcon {
   color: #ff4d4f;
+}
+
+.sidebarCollapsed {
+  width: 92px !important;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 

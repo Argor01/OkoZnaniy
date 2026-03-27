@@ -1,0 +1,102 @@
+.wrapper {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+  gap: 16px;
+}
+
+.mainColumn {
+  min-width: 0;
+}
+
+.pageTitle {
+  margin-top: 16px !important;
+  margin-bottom: 12px !important;
+  font-family: var(--font-display);
+  font-size: 36px !important;
+  line-height: 1.2;
+}
+
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 84px;
+}
+
+.sideColumn :global(.ant-card) {
+  border-color: var(--color-brand-purple-500);
+}
+
+.introCard {
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border-color: var(--color-brand-orange-600);
+}
+
+.formCard {
+  border-radius: 14px;
+  border-color: var(--color-brand-blue-600);
+}
+
+.introTitle {
+  margin-bottom: 8px !important;
+}
+
+.introText {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.submitRow {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sideTitle {
+  margin-bottom: 8px !important;
+  text-align: center;
+}
+
+.sideList {
+  margin: 0;
+  padding-left: 8px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.sideList li {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metaText {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 15px;
+  text-align: center;
+}
+
+.sideIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sideColumn {
+    margin-top: 0;
+  }
+}

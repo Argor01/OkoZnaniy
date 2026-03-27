@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from dj_rest_auth.registration.serializers import RegisterSerializer
-from .models import User
+from .models import User, ImprovementSuggestion
 
 
 class CustomRegisterSerializer(serializers.ModelSerializer):
@@ -216,4 +216,34 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             'id', 'username', 'first_name', 'last_name', 'role',
             'avatar', 'bio', 'experience_years', 'hourly_rate',
             'education', 'skills', 'portfolio_url', 'is_verified', 'city'
+        ]
+
+
+class ImprovementSuggestionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImprovementSuggestion
+        fields = ['area', 'comment']
+
+
+class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    area_display = serializers.CharField(source='get_area_display', read_only=True)
+
+    class Meta:
+        model = ImprovementSuggestion
+        fields = [
+            'id',
+            'user_id',
+            'username',
+            'role',
+            'avatar',
+            'email',
+            'area',
+            'area_display',
+            'comment',
+            'created_at',
         ]

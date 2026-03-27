@@ -4,7 +4,6 @@ import {
   UserOutlined,
   MessageOutlined,
   BellOutlined,
-  WalletOutlined,
   LogoutOutlined,
   MenuOutlined,
   ShopOutlined,
@@ -21,7 +20,6 @@ import {
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './DashboardHeader.module.css';
-import { formatCurrency } from '@/utils/formatters';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -70,8 +68,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const rawBalance = userProfile?.balance;
-  const balance = rawBalance ? Number(rawBalance) : 0;
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
 
@@ -87,7 +83,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     if (isExpert) {
       items.push({
         key: '/works',
-        label: 'Мои заказы',
+        label: 'Заказы в работе',
         icon: <FileDoneOutlined />,
       });
       items.push({
@@ -296,19 +292,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 
       <div className={styles.headerRight}>
         <Space size={isMobile ? 8 : 16}>
-          <Button
-            type="text"
-            icon={<WalletOutlined className={styles.balanceIcon} />}
-            onClick={onBalanceClick}
-            className={`${styles.balanceButton} balanceButton`}
-          >
-            {!isMobile && (
-              <Text className={`${styles.balanceText} balanceText`}>
-                {formatCurrency(balance)}
-              </Text>
-            )}
-          </Button>
-
           <Badge count={unreadMessages} offset={[-5, 5]}>
             <Button
               type="text"

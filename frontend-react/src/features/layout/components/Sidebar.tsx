@@ -6,7 +6,6 @@ import {
   FileDoneOutlined,
   MessageOutlined,
   BellOutlined,
-  WalletOutlined,
   LogoutOutlined,
   TeamOutlined,
   QuestionCircleOutlined,
@@ -16,6 +15,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/utils/constants';
 import styles from './Sidebar.module.css';
 
 const { Sider } = Layout;
@@ -107,10 +107,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       onArbitrationClick?.();
       return;
     }
-    if (key === 'balance' || key.startsWith('balance-')) {
-      onFinanceClick?.();
-      return;
-    }
     if (key === 'friends') {
       onFriendsClick?.();
       return;
@@ -163,6 +159,30 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       return;
     }
 
+    if (key.startsWith('expert-client-orders-') || key === 'expert-client-orders') {
+      const tabMap: Record<string, string> = {
+        'expert-client-orders-all': 'all',
+        'expert-client-orders-open': 'new',
+        'expert-client-orders-confirming': 'confirming',
+        'expert-client-orders-progress': 'in_progress',
+        'expert-client-orders-payment': 'waiting_payment',
+        'expert-client-orders-review': 'review',
+        'expert-client-orders-completed': 'completed',
+        'expert-client-orders-revision': 'revision',
+        'expert-client-orders-download': 'download',
+        'expert-client-orders-closed': 'closed',
+        'expert-client-orders-inactive': 'inactive',
+      };
+      const tab = tabMap[key];
+      if (tab) {
+        navigate(`${ROUTES.expert.clientOrders}?tab=${tab}`);
+      } else {
+        navigate(ROUTES.expert.clientOrders);
+      }
+      onMenuSelect(key);
+      return;
+    }
+
     onMenuSelect(key);
   }, [
     isMobile,
@@ -171,7 +191,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     onMessagesClick,
     onNotificationsClick,
     onArbitrationClick,
-    onFinanceClick,
     onFriendsClick,
     onFaqClick,
     onLogout,
@@ -213,11 +232,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <TrophyOutlined />,
       label: 'Арбитраж',
     },
-    {
-      key: 'balance',
-      icon: <WalletOutlined />,
-      label: 'Счет: 0.00 ₽',
-    },
     (!isExpert && !isMobile) ? {
       key: 'orders',
       icon: <ShoppingOutlined />,
@@ -239,6 +253,27 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       key: 'orders',
       icon: <ShoppingOutlined />,
       label: 'Заказы',
+    } : (isExpert && !isMobile) ? {
+      key: 'expert-client-orders',
+      icon: <ShoppingOutlined />,
+      label: 'Мои заказы',
+      children: [
+        { key: 'expert-client-orders-all', label: `Все (${orderCounts?.all ?? 0})` },
+        { key: 'expert-client-orders-open', label: `Открыт (${orderCounts?.new ?? 0})` },
+        { key: 'expert-client-orders-confirming', label: `На подтверждении (${orderCounts?.confirming ?? 0})` },
+        { key: 'expert-client-orders-progress', label: `В работе у эксперта (${orderCounts?.in_progress ?? 0})` },
+        { key: 'expert-client-orders-payment', label: `Ожидает оплаты (${orderCounts?.waiting_payment ?? 0})` },
+        { key: 'expert-client-orders-review', label: `На проверке (${orderCounts?.review ?? 0})` },
+        { key: 'expert-client-orders-completed', label: `Выполнен (${orderCounts?.completed ?? 0})` },
+        { key: 'expert-client-orders-revision', label: `На доработке (${orderCounts?.revision ?? 0})` },
+        { key: 'expert-client-orders-download', label: `Ожидает скачивания (${orderCounts?.download ?? 0})` },
+        { key: 'expert-client-orders-closed', label: `Закрыт (${orderCounts?.closed ?? 0})` },
+        { key: 'expert-client-orders-inactive', label: `Неактивные (${orderCounts?.inactive ?? 0})` },
+      ],
+    } : (isExpert && isMobile) ? {
+      key: 'expert-client-orders',
+      icon: <ShoppingOutlined />,
+      label: 'Мои заказы',
     } : null,
     {
       key: 'friends',

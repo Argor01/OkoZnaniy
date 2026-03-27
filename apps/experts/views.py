@@ -280,7 +280,7 @@ class ExpertStatisticsViewSet(viewsets.ReadOnlyModelViewSet):
         if self.request.user.is_staff:
             return queryset
         if self.request.user.role == 'expert':
-            return queryset.filter(expert=self.request.user)
+            return queryset
         
         # Для обычных пользователей показываем только статистику, если она есть
         return queryset

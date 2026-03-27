@@ -25,9 +25,11 @@ const ArbitratorDashboard = lazy(() => import('@/features/arbitrator/pages/Arbit
 const ShopReadyWorks = lazy(() => import('@/features/shop/pages/ShopReadyWorks'));
 const AddWorkToShop = lazy(() => import('@/features/shop/pages/AddWorkToShop'));
 const MyWorks = lazy(() => import('@/features/orders/pages/MyWorks'));
+const ExpertClientOrders = lazy(() => import('@/features/orders/pages/ExpertClientOrders'));
 const PurchasedWorks = lazy(() => import('@/features/shop/pages/PurchasedWorks'));
 const OrdersFeed = lazy(() => import('@/features/orders/pages/OrdersFeed'));
 const SupportChat = lazy(() => import('@/features/support/pages/SupportChat'));
+const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
@@ -40,12 +42,10 @@ export const AppRoutes: React.FC = () => {
       <Route path="/register" element={<RegisterWithEmailVerification />} />
       <Route path={ROUTES.auth.googleCallback} element={<GoogleCallback />} />
       <Route path={ROUTES.auth.googleCallbackLegacy} element={<GoogleCallback />} />
-      {/* Реферальные ссылки - перенаправляют на главную с параметром ref */}
       <Route path="/ref/:code" element={<ReferralRedirect />} />
       <Route path="/referral/:code" element={<ReferralRedirect />} />
       <Route path="/r/:code" element={<ReferralRedirect />} />
       
-      {/* Protected Routes */}
       <Route 
         path={ROUTES.createOrder} 
         element={
@@ -202,6 +202,16 @@ export const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
+      <Route
+        path={ROUTES.expert.clientOrders}
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ExpertClientOrders />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route 
         path={ROUTES.orders.feed}
         element={
@@ -211,6 +221,16 @@ export const AppRoutes: React.FC = () => {
             </DashboardLayout>
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path={ROUTES.improvements.survey}
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ImprovementsSurveyPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
       />
       <Route 
         path={ROUTES.shop.purchased}

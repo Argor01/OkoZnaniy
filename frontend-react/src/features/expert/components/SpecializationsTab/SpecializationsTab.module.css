@@ -87,27 +87,40 @@
 }
 
 .specTags {
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-.largeTag {
-  font-size: 16px;
+.metaTag {
+  margin-right: 0;
+  border-radius: 999px;
   padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  color: #ffffff;
 }
 
-.subjectTag {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
-  border-radius: 6px;
-  font-size: 14px;
+.metaTagIcon {
+  margin-right: 6px;
+  font-size: 12px;
 }
 
-.verifiedTag {
-  border-radius: 6px;
-  font-size: 14px;
+.metaTagExperience {
+  background: var(--color-brand-blue-600);
+  border-color: var(--color-brand-blue-600);
+}
+
+.metaTagRate {
+  background: var(--color-brand-orange-600);
+  border-color: var(--color-brand-orange-600);
+}
+
+.metaTagVerified {
+  background: #16a34a;
+  border-color: #16a34a;
 }
 
 .specCardActions {
@@ -142,10 +155,21 @@
   border-top: 1px solid #f3f4f6;
 }
 
-.skillTag {
-  border-radius: 6px;
-  margin-right: 8px;
-  font-size: 14px;
+.skillsBlock :global(.ant-tag).skillTag {
+  margin-right: 0;
+  border-radius: 999px;
+  border: 1px solid #9b4aff !important;
+  background: linear-gradient(147deg, #9b4aff 0%, #431b73 100%) !important;
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.skillsBlock :global(.ant-tag).skillTag :global(*) {
+  color: #ffffff !important;
 }
 
 .specMetaRow {

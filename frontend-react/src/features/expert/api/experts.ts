@@ -22,6 +22,12 @@ export type {
 };
 
 export const expertsApi = {
+  async getExpertsStatistics() {
+    const { data } = await apiClient.get('/experts/statistics/');
+    if (Array.isArray(data?.results)) return data.results;
+    return Array.isArray(data) ? data : [];
+  },
+
   async getReviews(expertId?: number): Promise<ExpertReview[]> {
     const params = expertId ? { expert: expertId } : {};
     const { data } = await apiClient.get('/experts/ratings/', { params });
