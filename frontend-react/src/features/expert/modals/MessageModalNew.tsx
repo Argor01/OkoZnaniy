@@ -859,6 +859,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const customEvent = event as CustomEvent;
       let userId = customEvent.detail?.supportUserId;
       
+      console.log('🔧 handleLoadSupportChatInModal triggered, visible:', visible, 'userId:', userId);
+      
       // Если userId не передан в событии, пытаемся получить из других источников
       if (!userId) {
         userId = (() => {
@@ -898,6 +900,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         await loadOrCreateSupportChat(userId);
       } else {
         console.log('🔧 No support user ID available');
+        antMessage.error('ID пользователя поддержки не найден. Обратитесь к администратору.');
       }
     };
 
@@ -905,7 +908,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return () => {
       window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
     };
-  }, [loadOrCreateSupportChat, supportUserIdProp]);
+  }, [loadOrCreateSupportChat, supportUserIdProp, visible]);
 
   useEffect(() => {
     if (!visible) return;

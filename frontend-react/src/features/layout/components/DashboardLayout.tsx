@@ -195,11 +195,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       closeAllModals();
       setMessageModalVisible(true);
       // Отправляем событие для загрузки чата поддержки в MessageModalNew
+      // Увеличиваем задержку, чтобы модальное окно успело открыться
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('loadSupportChatInModal', {
           detail: { supportUserId }
         }));
-      }, 100);
+      }, 300);
     };
 
     window.addEventListener('openSupportChat', handleOpenSupportChat);
