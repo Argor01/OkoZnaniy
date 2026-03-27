@@ -41,6 +41,8 @@ export const useRoles = () => {
   const { data: roles = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_ROLES,
     queryFn: adminPanelApi.getRoles,
+    retry: false,
+    enabled: false, // Disabled until backend implements this endpoint
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
@@ -56,6 +58,8 @@ export const usePermissions = () => {
   const { data: permissions = [], isLoading: loading, error } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_PERMISSIONS,
     queryFn: adminPanelApi.getPermissions,
+    retry: false,
+    enabled: false, // Disabled until backend implements this endpoint
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
@@ -75,7 +79,7 @@ export const useUserActions = () => {
       adminPanelApi.changeUserRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_USERS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROLES }); // Roles count might change
+      // queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROLES }); // Disabled - endpoint not implemented
       message.success('Роль пользователя изменена');
     },
     onError: () => message.error('Ошибка при изменении роли'),
