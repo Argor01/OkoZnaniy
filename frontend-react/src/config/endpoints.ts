@@ -49,7 +49,7 @@ export const API_ENDPOINTS = {
       blocked: '/admin-panel/users/blocked/',
       block: (id: number) => `/admin-panel/users/${id}/block/`,
       unblock: (id: number) => `/admin-panel/users/${id}/unblock/`,
-      changeRole: (id: number) => `/admin-panel/users/${id}/change_role/`,
+      changeRole: (id: number) => `/admin-panel/users/${id}/change-role/`,
       arbitrators: '/users/admin_arbitrators/',
       history: (id: number) => `/admin-panel/users/${id}/history/`,
     },
