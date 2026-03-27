@@ -3,10 +3,11 @@ import {
   Card, Button, Input, Avatar, Space, Typography, Badge, Spin, Empty,
   Modal, Form, Select, Tabs, message as antMessage,
 } from 'antd';
-import { SendOutlined, PlusOutlined, UserOutlined, TeamOutlined, MessageOutlined } from '@ant-design/icons';
+import { SendOutlined, PlusOutlined, UserOutlined, TeamOutlined, MessageOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -24,6 +25,7 @@ const api = {
   sendRoomMsg: (id: number, msg: string) => apiClient.post(`/admin-panel/chat-rooms/${id}/messages/`, { message: msg }).then(r => r.data),
   joinRoom: (id: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/join_room/`).then(r => r.data),
   inviteRoom: (id: number, uid: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/invite/`, { user_id: uid }).then(r => r.data),
+  addAllStaff: (id: number) => apiClient.post(`/admin-panel/chat-rooms/${id}/add_all_staff/`).then(r => r.data),
   getDirectChats: () => apiClient.get('/admin-panel/direct-chats/').then(r => r.data),
   getOrCreateDirect: (uid: number) => apiClient.post('/admin-panel/direct-chats/get-or-create/', { user_id: uid }).then(r => r.data),
   getDirectMsgs: (cid: number) => apiClient.get(`/admin-panel/direct-chats/${cid}/messages/`).then(r => r.data),
@@ -70,81 +72,6 @@ const Composer: React.FC<{ onSend: (t: string) => Promise<void> }> = ({ onSend }
       <TextArea value={text} onChange={e => setText(e.target.value)} placeholder="Написать... (Enter)" autoSize={{ minRows: 1, maxRows: 4 }} style={{ flex: 1 }}
         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
       <Button type="primary" icon={<SendOutlined />} onClick={send} loading={busy} disabled={!text.trim()} />
-    </div>
-  );
-};
-
-const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
-  const qc = useQueryClient();
-  const [selId, setSelId] = useState<number | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [form] = Form.useForm();
-  const [invForm] = Form.useForm();
-
-  const { data: rooms = [], isLoading: rLoad } = useQuery({ queryKey: ['adm-rooms'], queryFn: api.getRooms, refetchInterval: 8000 });
-  const { data: msgs = [], isLoading: mLoad } = useQuery({ queryKey: ['adm-room-msgs', selId], queryFn: () => api.getRoomMsgs(selId!), enabled: !!selId, refetchInterval: 3000 });
-  const { data: users = [] } = useQuery({ queryKey: ['adm-users'], queryFn: api.getUsers });
-
-  const sendMut = useMutation({ mutationFn: (t: string) => api.sendRoomMsg(selId!, t), onSuccess: () => qc.invalidateQueries({ queryKey: ['adm-room-msgs', selId] }), onError: () => antMessage.error('Ошибка') });
-  const createMut = useMutation({ mutationFn: api.createRoom, onSuccess: () => { qc.invalidateQueries({ queryKey: ['adm-rooms'] }); setCreateOpen(false); form.resetFields(); antMessage.success('Чат создан'); }, onError: () => antMessage.error('Ошибка') });
-  const invMut = useMutation({ mutationFn: (uid2: number) => api.inviteRoom(selId!, uid2), onSuccess: () => { setInviteOpen(false); invForm.resetFields(); antMessage.success('Добавлен'); }, onError: () => antMessage.error('Ошибка') });
-
-  const sel = (rooms as any[]).find((r: any) => r.id === selId);
-
-  if (selId && sel) return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Space>
-          <Button size="small" onClick={() => setSelId(null)}>←</Button>
-          <div>
-            <div style={{ fontWeight: 600 }}>{sel.name}</div>
-            <div style={{ fontSize: 12, color: '#8c8c8c' }}>{sel.members?.length ?? 0} участников</div>
-          </div>
-        </Space>
-        <Button size="small" icon={<UserOutlined />} onClick={() => setInviteOpen(true)}>Добавить</Button>
-      </div>
-      {mLoad ? <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div> : <MsgList msgs={msgs as any[]} uid={uid} />}
-      <Composer onSend={t => sendMut.mutateAsync(t)} />
-      <Modal title="Добавить участника" open={inviteOpen} onCancel={() => setInviteOpen(false)} onOk={() => invForm.validateFields().then(v => invMut.mutate(v.uid))} okText="Добавить" cancelText="Отмена">
-        <Form form={invForm} layout="vertical">
-          <Form.Item name="uid" label="Пользователь" rules={[{ required: true }]}>
-            <Select showSearch optionFilterProp="children" placeholder="Выберите">
-              {(users as any[]).map((u: any) => <Option key={u.id} value={u.id}>{u.first_name} {u.last_name} ({u.email})</Option>)}
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-  );
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text strong>Групповые чаты</Text>
-        <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>Создать</Button>
-      </div>
-      {rLoad ? <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div> : (
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {!(rooms as any[]).length ? <Empty description="Нет чатов" style={{ padding: 32 }} /> : (rooms as any[]).map((r: any) => (
-            <div key={r.id} onClick={() => { setSelId(r.id); api.joinRoom(r.id).catch(() => {}); }}
-              style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', display: 'flex', alignItems: 'center', gap: 12 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')} onMouseLeave={e => (e.currentTarget.style.background = '')}>
-              <Avatar icon={<TeamOutlined />} style={{ background: '#1890ff', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontWeight: 600 }}>{r.name}</div>
-                <div style={{ fontSize: 12, color: '#8c8c8c' }}>{r.members?.length ?? 0} участников</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <Modal title="Создать чат" open={createOpen} onCancel={() => { setCreateOpen(false); form.resetFields(); }} onOk={() => form.validateFields().then(v => createMut.mutate(v))} okText="Создать" cancelText="Отмена">
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Название" rules={[{ required: true, message: 'Введите название' }]}><Input /></Form.Item>
-          <Form.Item name="description" label="Описание"><Input.TextArea /></Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 };
@@ -227,22 +154,32 @@ const DirectTab: React.FC<{ uid: number }> = ({ uid }) => {
   );
 };
 
-export const AdminChatsSection: React.FC = () => {
-  const { user } = useAdminAuth();
-  const uid = (user as any)?.id ?? 0;
-  return (
-    <Card style={{ height: 'calc(100vh - 160px)', display: 'flex', flexDirection: 'column' }}
-      bodyStyle={{ flex: 1, padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <Tabs defaultActiveKey="direct" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-        tabBarStyle={{ padding: '0 16px', marginBottom: 0 }}
-        items={[
-          { key: 'direct', label: <span><MessageOutlined style={{ marginRight: 4 }} />Личные</span>, children: <div style={{ height: 'calc(100vh - 260px)', display: 'flex', flexDirection: 'column' }}><DirectTab uid={uid} /></div> },
-          { key: 'rooms', label: <span><TeamOutlined style={{ marginRight: 4 }} />Групповые</span>, children: <div style={{ height: 'calc(100vh - 260px)', display: 'flex', flexDirection: 'column' }}><RoomsTab uid={uid} /></div> },
-        ]}
-      />
-    </Card>
-  );
-};
+const ChatListItem: React.FC<{ id: number; name: string; subtitle: string; time?: string; active: boolean; onClick: () => void }> = ({ name, subtitle, time, active, onClick }) => (
+  <div onClick={onClick}
+    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', display: 'flex', alignItems: 'center', gap: 12, background: active ? '#e6f7ff' : '' }}
+    onMouseEnter={e => !active && (e.currentTarget.style.background = '#f5f5f5')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
+    <Avatar icon={<TeamOutlined />} style={{ background: '#1890ff', flexShrink: 0 }} />
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ fontWeight: 600 }}>{name}</div>
+      <div style={{ fontSize: 12, color: '#8c8c8c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
+    </div>
+    {time && <div style={{ fontSize: 11, color: '#bfbfbf', flexShrink: 0 }}>{time}</div>}
+  </div>
+);
+
+const ChatHeader: React.FC<{ name: string; sub: string; icon: React.ReactNode; onBack?: () => void; extra?: React.ReactNode }> = ({ name, sub, icon, onBack, extra }) => (
+  <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Space>
+      {onBack && <Button size="small" onClick={onBack}>←</Button>}
+      <Avatar icon={icon} style={{ background: '#1890ff' }} />
+      <div>
+        <div style={{ fontWeight: 600 }}>{name}</div>
+        <div style={{ fontSize: 12, color: '#8c8c8c' }}>{sub}</div>
+      </div>
+    </Space>
+    {extra}
+  </div>
+);
 
 const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
   const qc = useQueryClient();
