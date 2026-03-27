@@ -35,6 +35,7 @@ import {
   ORDER_PRIORITY_COLORS,
   ORDER_PRIORITIES
 } from '@/utils/constants';
+import apiClient from '@/api/client';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -524,13 +525,42 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 export const AllOrdersSection: React.FC = () => {
   const { orders, loading } = useAllOrders();
   const { changeOrderStatus } = useOrderActions();
+  const [contactModalVisible, setContactModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const handleEditOrder = (orderId: number) => {
     message.info(`Редактирование заказа #${orderId} (В разработке)`);
   };
 
   const handleContactClient = (orderId: number) => {
-    message.info(`Связь с клиентом по заказу #${orderId} (В разработке)`);
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setContactModalVisible(true);
+    }
+  };
+
+  const handleOpenChat = async () => {
+    if (!selectedOrder?.client?.id) {
+      message.error('Не удалось определить клиента');
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/admin-panel/direct-chats/get-or-create/', {
+        user_id: selectedOrder.client.id
+      });
+
+      const chatId = response.data.chat_id;
+      
+      // Перенаправляем на страницу чатов с открытым чатом
+      window.location.href = `/admin/dashboard?section=chats&chat_id=${chatId}`;
+      
+      setContactModalVisible(false);
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      message.error('Ошибка при создании чата');
+    }
   };
 
   const handleAssignExpert = (orderId: number, expertId: number) => {
@@ -538,13 +568,37 @@ export const AllOrdersSection: React.FC = () => {
   };
 
   return (
-    <AllOrdersTable
-      orders={orders as Order[]}
-      loading={loading}
-      onChangeOrderStatus={changeOrderStatus}
-      onEditOrder={handleEditOrder}
-      onContactClient={handleContactClient}
-      onAssignExpert={handleAssignExpert}
-    />
+    <>
+      <AllOrdersTable
+        orders={orders as Order[]}
+        loading={loading}
+        onChangeOrderStatus={changeOrderStatus}
+        onEditOrder={handleEditOrder}
+        onContactClient={handleContactClient}
+        onAssignExpert={handleAssignExpert}
+      />
+      
+      <Modal
+        title="Связь с клиентом"
+        open={contactModalVisible}
+        onOk={handleOpenChat}
+        onCancel={() => {
+          setContactModalVisible(false);
+          setSelectedOrder(null);
+        }}
+        okText="Открыть чат"
+        cancelText="Отмена"
+      >
+        {selectedOrder && (
+          <div>
+            <p><strong>Заказ:</strong> #{selectedOrder.id} - {selectedOrder.title}</p>
+            <p><strong>Клиент:</strong> {selectedOrder.client?.first_name} {selectedOrder.client?.last_name} ({selectedOrder.client?.username})</p>
+            <p><strong>Email:</strong> {selectedOrder.client?.email}</p>
+            <Divider />
+            <p>Будет открыт прямой чат с клиентом. Сообщения будут отправлены от имени администрации.</p>
+          </div>
+        )}
+      </Modal>
+    </>
   );
 };
