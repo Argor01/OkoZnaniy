@@ -855,38 +855,49 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   // Обработчик события для загрузки чата поддержки
   useEffect(() => {
-    const handleLoadSupportChatInModal = async () => {
-      if (visible) {
-        let userId = (() => {
+    const handleLoadSupportChatInModal = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      let userId = customEvent.detail?.supportUserId;
+      
+      // Если userId не передан в событии, пытаемся получить из других источников
+      if (!userId) {
+        userId = (() => {
           if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
           const raw = localStorage.getItem('support_user_id');
           if (!raw) return null;
           const parsed = Number(raw);
           return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
         })();
+      }
 
-        // Если support user ID не найден, попробуем получить его из API
-        if (!userId) {
-          try {
-            const response = await fetch('/api/users/support_user/', {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                'Content-Type': 'application/json',
-              },
-            });
-            if (response.ok) {
-              const data = await response.json();
-              if (data?.id) {
-                localStorage.setItem('support_user_id', String(data.id));
-                userId = data.id;
-              }
+      // Если support user ID не найден, попробуем получить его из API
+      if (!userId) {
+        try {
+          const response = await fetch('/api/users/support_user/', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data?.id) {
+              localStorage.setItem('support_user_id', String(data.id));
+              userId = data.id;
             }
-          } catch (error) {
-            console.error('Ошибка получения support user ID:', error);
+          } else {
+            console.log('🔧 API response not ok:', response.status);
           }
+        } catch (error) {
+          console.error('Ошибка получения support user ID:', error);
         }
+      }
 
-        await loadOrCreateSupportChat(userId || undefined);
+      if (userId) {
+        console.log('🔧 Loading support chat with userId:', userId);
+        await loadOrCreateSupportChat(userId);
+      } else {
+        console.log('🔧 No support user ID available');
       }
     };
 
@@ -894,7 +905,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return () => {
       window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
     };
-  }, [visible, loadOrCreateSupportChat, supportUserIdProp]);
+  }, [loadOrCreateSupportChat, supportUserIdProp]);
 
   useEffect(() => {
     if (!visible) return;

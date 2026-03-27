@@ -188,12 +188,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Обработчик события для открытия чата с поддержкой
   React.useEffect(() => {
-    const handleOpenSupportChat = () => {
+    const handleOpenSupportChat = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const supportUserId = customEvent.detail?.supportUserId;
+      
       closeAllModals();
       setMessageModalVisible(true);
       // Отправляем событие для загрузки чата поддержки в MessageModalNew
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('loadSupportChatInModal'));
+        window.dispatchEvent(new CustomEvent('loadSupportChatInModal', {
+          detail: { supportUserId }
+        }));
       }, 100);
     };
 
