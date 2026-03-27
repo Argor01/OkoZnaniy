@@ -29,8 +29,9 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2', None)  # Удаляем password2, он нам больше не нужен
         role = validated_data.pop('role', 'client')
         
-        # Если username не указан, генерируем из email
-        if not validated_data.get('username'):
+        # Если username не указан или пустая строка, генерируем из email
+        username = validated_data.get('username', '').strip()
+        if not username:
             email = validated_data.get('email', '')
             if email:
                 # Берем часть до @ и добавляем случайные цифры если нужно
@@ -45,6 +46,8 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 # Если нет email, генерируем случайный username
                 import uuid
                 validated_data['username'] = f"user_{uuid.uuid4().hex[:8]}"
+        else:
+            validated_data['username'] = username
         
         # Создаем пользователя
         user = User.objects.create_user(**validated_data)
