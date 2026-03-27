@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0014_user_banned_by_user_contact_ban_date_and_more'),
+        ('users', '0014_improvementsuggestion'),
     ]
 
     operations = [
