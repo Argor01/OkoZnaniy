@@ -15,6 +15,12 @@ interface SupportButtonProps {
 const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const navigate = useNavigate();
 
+  // Проверяем авторизацию - показываем кнопку только для авторизованных пользователей
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    return null;
+  }
+
   const handleSupportClick = () => {
     // Отправляем событие для открытия чата с поддержкой
     window.dispatchEvent(new CustomEvent('openSupportChat'));
