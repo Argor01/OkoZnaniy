@@ -71,7 +71,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { data: clientOrdersData } = useQuery({
     queryKey: ['sidebar-client-orders'],
     queryFn: () => ordersApi.getClientOrders({ ordering: '-created_at' }),
-    enabled: userProfile?.role === 'client',
+    enabled: userProfile?.role === 'client' || userProfile?.role === 'expert',
     staleTime: 5000,
     refetchInterval: 15000,
   });
@@ -79,7 +79,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { data: inactiveClientOrdersData } = useQuery({
     queryKey: ['sidebar-client-orders-inactive'],
     queryFn: () => ordersApi.getClientOrders({ inactive: true, ordering: '-created_at' }),
-    enabled: userProfile?.role === 'client',
+    enabled: userProfile?.role === 'client' || userProfile?.role === 'expert',
     staleTime: 5000,
     refetchInterval: 15000,
   });
@@ -321,6 +321,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       else navigate('/works');
       return;
     }
+
+    if (key.startsWith('expert-client-orders-') || key === 'expert-client-orders') {
+      const tabMap: Record<string, string> = {
+        'expert-client-orders-all': 'all',
+        'expert-client-orders-open': 'new',
+        'expert-client-orders-confirming': 'confirming',
+        'expert-client-orders-progress': 'in_progress',
+        'expert-client-orders-payment': 'waiting_payment',
+        'expert-client-orders-review': 'review',
+        'expert-client-orders-completed': 'completed',
+        'expert-client-orders-revision': 'revision',
+        'expert-client-orders-download': 'download',
+        'expert-client-orders-closed': 'closed',
+        'expert-client-orders-inactive': 'inactive',
+      };
+      const tab = tabMap[key];
+      if (tab) navigate(`/expert/client-orders?tab=${tab}`);
+      else navigate('/expert/client-orders');
+      return;
+    }
   }, [navigate]);
 
   const getSelectedKey = () => {
@@ -347,6 +367,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         inactive: 'orders-inactive',
       };
       return tab && tabKeyMap[tab] ? tabKeyMap[tab] : 'orders';
+    }
+    if (path.startsWith('/expert/client-orders')) {
+      const tab = new URLSearchParams(location.search).get('tab');
+      const tabKeyMap: Record<string, string> = {
+        all: 'expert-client-orders-all',
+        new: 'expert-client-orders-open',
+        confirming: 'expert-client-orders-confirming',
+        in_progress: 'expert-client-orders-progress',
+        waiting_payment: 'expert-client-orders-payment',
+        review: 'expert-client-orders-review',
+        completed: 'expert-client-orders-completed',
+        revision: 'expert-client-orders-revision',
+        download: 'expert-client-orders-download',
+        closed: 'expert-client-orders-closed',
+        inactive: 'expert-client-orders-inactive',
+      };
+      return tab && tabKeyMap[tab] ? tabKeyMap[tab] : 'expert-client-orders';
     }
     if (path.startsWith('/shop/purchased')) return 'shop-purchased';
     return '';
@@ -428,6 +465,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           userProfile={sidebarUserProfile}
           orderCounts={sidebarOrderCounts}
         />
+
+        {!isMobile && desktopSidebarOpen && (
+          <div
+            className={styles.desktopSidebarOverlay}
+            onClick={() => setDesktopSidebarOpen(false)}
+          />
+        )}
         
         <Layout className={dashboardLayoutClassName}>
           <Content className={contentClassName}>

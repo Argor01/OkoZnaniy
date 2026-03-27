@@ -57,15 +57,18 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                       <CheckCircleOutlined className={styles.verifiedIcon} />
                     )}
                   </Title>
-                  <Space size={8} wrap className={styles.specTags}>
-                    <Tag className={styles.largeTag} color="blue">
-                      Опыт: {spec.experience_years} {spec.experience_years === 1 ? 'год' : [2, 3, 4].includes(spec.experience_years % 10) && ![12, 13, 14].includes(spec.experience_years % 100) ? 'года' : 'лет'}
+                  <Space size={10} wrap className={styles.specTags}>
+                    <Tag className={`${styles.metaTag} ${styles.metaTagExperience}`}>
+                      <ClockCircleOutlined className={styles.metaTagIcon} />
+                      Опыт {spec.experience_years} {spec.experience_years === 1 ? 'год' : [2, 3, 4].includes(spec.experience_years % 10) && ![12, 13, 14].includes(spec.experience_years % 100) ? 'года' : 'лет'}
                     </Tag>
-                    <Tag className={styles.largeTag} color="green">
+                    <Tag className={`${styles.metaTag} ${styles.metaTagRate}`}>
+                      <DollarOutlined className={styles.metaTagIcon} />
                       {spec.hourly_rate} ₽/час
                     </Tag>
                     {spec.is_verified && (
-                      <Tag color="success" className={styles.verifiedTag}>
+                      <Tag className={`${styles.metaTag} ${styles.metaTagVerified}`}>
+                        <CheckCircleOutlined className={styles.metaTagIcon} />
                         Проверено
                       </Tag>
                     )}
@@ -114,7 +117,15 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                     {spec.skills.split(',').map((skill: string, index: number) => {
                       const trimmedSkill = skill.trim();
                       return trimmedSkill ? (
-                        <Tag key={index} color="default" className={styles.skillTag}>
+                        <Tag
+                          key={index}
+                          className={styles.skillTag}
+                          style={{
+                            background: 'linear-gradient(147deg, #9b4aff 0%, #431b73 100%)',
+                            borderColor: '#9b4aff',
+                            color: '#ffffff',
+                          }}
+                        >
                           {trimmedSkill}
                         </Tag>
                       ) : null;

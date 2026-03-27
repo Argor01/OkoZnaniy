@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Layout, Menu, Avatar, Typography, Badge, theme } from 'antd';
+import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -13,9 +13,9 @@ import {
   ShopOutlined,
   MenuOutlined,
   UnorderedListOutlined,
-  BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/utils/constants';
 import styles from './Sidebar.module.css';
 
 const { Sider } = Layout;
@@ -72,7 +72,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   collapsed = false,
   orderCounts,
 }) => {
-  const { token } = theme.useToken();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
@@ -116,33 +115,24 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       onFaqClick?.();
       return;
     }
-    if (key === 'improvements') {
-      navigate('/improvements');
-      return;
-    }
     if (key === 'logout') {
       onLogout();
       return;
     }
     
     if (key === 'works') {
-      console.log('Works navigation disabled');
       return;
     }
     if (key === 'shop-ready-works') {
-      console.log('Shop ready works navigation disabled');
       return;
     }
     if (key === 'shop-add-work') {
-      console.log('Shop add work navigation disabled');
       return;
     }
     if (key === 'shop-purchased') {
-      console.log('Shop purchased navigation disabled');
       return;
     }
     if (key === 'orders-feed') {
-      console.log('Orders feed navigation disabled');
       return;
     }
     if (key.startsWith('orders-') || key === 'orders') {
@@ -169,6 +159,30 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       return;
     }
 
+    if (key.startsWith('expert-client-orders-') || key === 'expert-client-orders') {
+      const tabMap: Record<string, string> = {
+        'expert-client-orders-all': 'all',
+        'expert-client-orders-open': 'new',
+        'expert-client-orders-confirming': 'confirming',
+        'expert-client-orders-progress': 'in_progress',
+        'expert-client-orders-payment': 'waiting_payment',
+        'expert-client-orders-review': 'review',
+        'expert-client-orders-completed': 'completed',
+        'expert-client-orders-revision': 'revision',
+        'expert-client-orders-download': 'download',
+        'expert-client-orders-closed': 'closed',
+        'expert-client-orders-inactive': 'inactive',
+      };
+      const tab = tabMap[key];
+      if (tab) {
+        navigate(`${ROUTES.expert.clientOrders}?tab=${tab}`);
+      } else {
+        navigate(ROUTES.expert.clientOrders);
+      }
+      onMenuSelect(key);
+      return;
+    }
+
     onMenuSelect(key);
   }, [
     isMobile,
@@ -184,11 +198,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ]);
 
   const isExpert = userProfile?.role === 'expert';
-  const isCollapsedDesktop = !isMobile && collapsed;
-  const sidebarThemeVars = useMemo(
-    () => ({ '--sidebar-accent': token.colorPrimary } as React.CSSProperties),
-    [token.colorPrimary]
-  );
 
   const menuItems = useMemo(() => [
     {
@@ -244,6 +253,27 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       key: 'orders',
       icon: <ShoppingOutlined />,
       label: 'Заказы',
+    } : (isExpert && !isMobile) ? {
+      key: 'expert-client-orders',
+      icon: <ShoppingOutlined />,
+      label: 'Мои заказы',
+      children: [
+        { key: 'expert-client-orders-all', label: `Все (${orderCounts?.all ?? 0})` },
+        { key: 'expert-client-orders-open', label: `Открыт (${orderCounts?.new ?? 0})` },
+        { key: 'expert-client-orders-confirming', label: `На подтверждении (${orderCounts?.confirming ?? 0})` },
+        { key: 'expert-client-orders-progress', label: `В работе у эксперта (${orderCounts?.in_progress ?? 0})` },
+        { key: 'expert-client-orders-payment', label: `Ожидает оплаты (${orderCounts?.waiting_payment ?? 0})` },
+        { key: 'expert-client-orders-review', label: `На проверке (${orderCounts?.review ?? 0})` },
+        { key: 'expert-client-orders-completed', label: `Выполнен (${orderCounts?.completed ?? 0})` },
+        { key: 'expert-client-orders-revision', label: `На доработке (${orderCounts?.revision ?? 0})` },
+        { key: 'expert-client-orders-download', label: `Ожидает скачивания (${orderCounts?.download ?? 0})` },
+        { key: 'expert-client-orders-closed', label: `Закрыт (${orderCounts?.closed ?? 0})` },
+        { key: 'expert-client-orders-inactive', label: `Неактивные (${orderCounts?.inactive ?? 0})` },
+      ],
+    } : (isExpert && isMobile) ? {
+      key: 'expert-client-orders',
+      icon: <ShoppingOutlined />,
+      label: 'Мои заказы',
     } : null,
     {
       key: 'friends',
@@ -256,11 +286,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       label: 'FAQ',
     },
     {
-      key: 'improvements',
-      icon: <BulbOutlined />,
-      label: 'Что можно улучшить?',
-    },
-    {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Выйти',
@@ -270,15 +295,15 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ].filter(Boolean), [isExpert, isMobile, unreadMessages, unreadNotifications, orderCounts]);
 
   const profileSection = useMemo(() => (
-    <div className={`${styles.sidebarProfile} ${isCollapsedDesktop ? styles.sidebarProfileCollapsed : ''}`}>
+    <div className={styles.sidebarProfile}>
       <div className={styles.sidebarProfileInner}>
         <Avatar
-          size={isCollapsedDesktop ? 40 : 44}
+          size={48}
           src={userProfile?.avatar || undefined}
           icon={<UserOutlined />}
           className={styles.sidebarAvatar}
         />
-        <div className={`${styles.sidebarProfileInfo} ${isCollapsedDesktop ? styles.sidebarProfileInfoHidden : ''}`}>
+        <div className={styles.sidebarProfileInfo}>
           <Title level={5} className={styles.sidebarProfileName}>
             {userProfile?.username || 'Пользователь'}
           </Title>
@@ -296,7 +321,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         )}
       </div>
     </div>
-  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange, isCollapsedDesktop]);
+  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange]);
 
   const sidebarContent = useMemo(() => (
     <>
@@ -308,11 +333,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         onOpenChange={setOpenKeys}
         onClick={handleMenuClick}
         className={styles.sidebarMenu}
-        inlineCollapsed={isCollapsedDesktop}
         items={menuItems}
       />
     </>
-  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems, isCollapsedDesktop]);
+  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
 
   return (
     <>
@@ -324,7 +348,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
           />
           <div
             className={`${styles.mobileMenu} ${mobileDrawerOpen ? styles.mobileMenuOpen : ''}`}
-            style={sidebarThemeVars}
           >
             {sidebarContent}
           </div>
@@ -333,13 +356,12 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
       {!isMobile && (
         <Sider
-          width={268}
+          width={250}
           className={styles.sidebar}
           trigger={null}
           collapsible
           collapsed={collapsed}
           collapsedWidth={0}
-          style={sidebarThemeVars}
         >
           {sidebarContent}
         </Sider>

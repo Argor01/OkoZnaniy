@@ -16,6 +16,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 24px;
 }
 
 .aboutHighlightIcon {
@@ -30,7 +31,7 @@
 
 
 .aboutSectionTitle {
-  margin-bottom: 20px;
+  margin-bottom: 32px;
   margin-top:10px;
   font-family: 'Jost-SemiBold', sans-serif;
   font-size: 26px !important;
@@ -40,6 +41,7 @@
   font-size: 18px;
   line-height: 1.8;
   color: black;
+  margin-bottom: 32px;
 }
 
 .aboutSkillsList {
@@ -47,6 +49,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
+  margin-bottom: 32px;
 }
 
 .aboutSkillTag {

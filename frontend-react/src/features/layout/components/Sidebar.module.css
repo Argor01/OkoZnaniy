@@ -192,6 +192,22 @@
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
+/* ДОБАВИТЬ: Иконки подпунктов в открытом аккордеоне тоже черные */
+.sidebarMenu :global(.ant-menu-submenu-open) 
+  :global(.ant-menu-sub) 
+  :global(.ant-menu-item) 
+  .anticon {
+  color: #000000 !important;
+}
+
+/* ДОБАВИТЬ: Для выбранного подпункта можно сделать акцентный цвет */
+.sidebarMenu :global(.ant-menu-sub) 
+  :global(.ant-menu-item-selected) 
+  :global(.ant-menu-title-content) {
+  color: var(--sidebar-accent) !important;
+  font-weight: 600 !important;
+}
+
 .logoutMenuItem {
   margin-top: auto;
   border-top: none;

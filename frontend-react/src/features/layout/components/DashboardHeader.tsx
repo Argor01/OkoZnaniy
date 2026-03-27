@@ -83,7 +83,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     if (isExpert) {
       items.push({
         key: '/works',
-        label: 'Мои заказы',
+        label: 'Заказы в работе',
         icon: <FileDoneOutlined />,
       });
       items.push({

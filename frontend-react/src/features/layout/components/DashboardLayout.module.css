@@ -149,15 +149,16 @@
 
 .layoutRoot {
   min-height: 100vh;
+  background: #ffffff;
 }
 
 .dashboardLayout {
-  background: #f5f5f5;
+  background: #ffffff;
   transition: all 0.2s;
 }
 
 .dashboardLayoutDesktopExpanded {
-  margin-left: 266px;
+  margin-left: 268px;
 }
 
 .dashboardLayoutDesktopCollapsed {
@@ -174,6 +175,15 @@
 
 .dashboardLayoutNoHeader {
   margin-top: 0;
+}
+
+.desktopSidebarOverlay {
+  position: fixed;
+  top: 64px;
+  left: 268px;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
 }
 
 .contentBase {
@@ -199,6 +209,10 @@
 }
 
 @media (max-width: 840px) {
+  .desktopSidebarOverlay {
+    display: none;
+  }
+
   .sidebar {
     width: 100%;
     height: auto;

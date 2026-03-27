@@ -241,7 +241,7 @@ const OrdersFeed: React.FC = () => {
     const normalizedOrderIdSearch = orderIdSearch.trim();
     const matchesOrderId =
       !normalizedOrderIdSearch ||
-      String(order.id).includes(normalizedOrderIdSearch);
+      String(order.id) === normalizedOrderIdSearch;
     
     const matchesSubject = !selectedSubject || order.subject_id === selectedSubject;
     const matchesWorkType = !selectedWorkType || order.work_type_id === selectedWorkType;

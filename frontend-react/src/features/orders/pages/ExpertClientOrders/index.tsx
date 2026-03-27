@@ -1,17 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Typography, Table, Tag, Avatar, Space } from 'antd';
-import { SearchOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
+import { SearchOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppInput } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
-import { authApi } from '@/features/auth/api/auth';
-import { expertsApi } from '@/features/expert/api/experts';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
-import styles from './MyWorks.module.css';
+import styles from '../MyWorks/MyWorks.module.css';
 
 const { Title } = Typography;
 
@@ -70,10 +68,7 @@ const isValidTab = (value: string | null): value is WorksTab => {
   ].includes(value);
 };
 
-const isExpertHiddenTab = (tab: WorksTab) =>
-  tab === 'new' || tab === 'download' || tab === 'inactive' || tab === 'closed';
-
-const MyWorks: React.FC = () => {
+const ExpertClientOrders: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
@@ -81,43 +76,23 @@ const MyWorks: React.FC = () => {
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
-
-  const { data: expertStats } = useQuery({
-    queryKey: ['expert-statistics', userProfile?.id],
-    queryFn: () => expertsApi.getExpertStatistics(userProfile!.id),
-    enabled: userProfile?.role === 'expert' && typeof userProfile?.id === 'number' && userProfile.id > 0,
-  });
-
-  const { data: myOrdersData, isLoading: myOrdersLoading } = useQuery({
-    queryKey: ['my-orders'],
-    queryFn: () => ordersApi.getMyOrders({ ordering: '-created_at' }),
-    enabled: userProfile?.role === 'expert',
-  });
-
   const { data: clientOrdersData, isLoading: clientOrdersLoading } = useQuery({
-    queryKey: ['client-orders-overview'],
+    queryKey: ['expert-client-orders-overview'],
     queryFn: () => ordersApi.getClientOrders({ ordering: '-created_at' }),
-    enabled: userProfile?.role === 'client',
   });
 
   const { data: inactiveClientOrdersData, isLoading: inactiveOrdersLoading } = useQuery({
-    queryKey: ['client-orders-overview-inactive'],
+    queryKey: ['expert-client-orders-overview-inactive'],
     queryFn: () => ordersApi.getClientOrders({ inactive: true, ordering: '-created_at' }),
-    enabled: userProfile?.role === 'client',
   });
 
   const orders: Order[] = useMemo(() => {
-    const source = userProfile?.role === 'client' ? clientOrdersData : myOrdersData;
     const raw =
-      source && typeof source === 'object' && 'results' in source
-        ? (source as { results?: unknown }).results
-        : source;
+      clientOrdersData && typeof clientOrdersData === 'object' && 'results' in clientOrdersData
+        ? (clientOrdersData as { results?: unknown }).results
+        : clientOrdersData;
     return Array.isArray(raw) ? (raw as Order[]) : [];
-  }, [clientOrdersData, myOrdersData, userProfile?.role]);
+  }, [clientOrdersData]);
 
   const inactiveOrders: Order[] = useMemo(() => {
     const raw =
@@ -127,26 +102,12 @@ const MyWorks: React.FC = () => {
     return Array.isArray(raw) ? (raw as Order[]) : [];
   }, [inactiveClientOrdersData]);
 
-  const isLoading = userProfile?.role === 'client'
-    ? (clientOrdersLoading || inactiveOrdersLoading)
-    : myOrdersLoading;
-
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (isValidTab(tab) && tab !== activeTab) {
       setActiveTab(tab);
     }
   }, [searchParams, activeTab]);
-
-  useEffect(() => {
-    if (userProfile?.role !== 'expert') return;
-    if (!isExpertHiddenTab(activeTab)) return;
-    const fallbackTab: WorksTab = 'in_progress';
-    setActiveTab(fallbackTab);
-    const params = new URLSearchParams(searchParams);
-    params.set('tab', fallbackTab);
-    setSearchParams(params, { replace: true });
-  }, [activeTab, searchParams, setSearchParams, userProfile?.role]);
 
   const handleTabChange = (tab: WorksTab) => {
     setActiveTab(tab);
@@ -216,15 +177,10 @@ const MyWorks: React.FC = () => {
       if (!query) return true;
       const title = String(order?.title ?? '').toLowerCase();
       const description = String(order?.description ?? '').toLowerCase();
-      const buyer = String(order?.client?.username ?? order?.client_name ?? '').toLowerCase();
-      return title.includes(query) || description.includes(query) || buyer.includes(query);
+      const expert = String(order?.expert?.username ?? '').toLowerCase();
+      return title.includes(query) || description.includes(query) || expert.includes(query);
     });
   }, [orders, inactiveOrders, activeTab, searchText]);
-
-  const averageRatingText =
-    typeof expertStats?.average_rating === 'number' && Number.isFinite(expertStats.average_rating)
-      ? expertStats.average_rating.toFixed(1)
-      : '0.0';
 
   const getStatusLabel = (status: string) => {
     if (status === 'in_progress') return 'В работе';
@@ -279,14 +235,11 @@ const MyWorks: React.FC = () => {
       sorter: (a: Order, b: Order) => String(a?.title ?? '').localeCompare(String(b?.title ?? '')),
     },
     {
-      title: userProfile?.role === 'client' ? 'Эксперт' : 'Покупатель',
-      key: 'buyer',
+      title: 'Эксперт',
+      key: 'expert',
       render: (_: unknown, record: Order) => {
-      const isClient = userProfile?.role === 'client';
-      const username = isClient
-        ? (record?.expert?.username ?? 'Не назначен')
-        : (record?.client?.username ?? record?.client_name ?? '—');
-      const avatarSrc = isClient ? record?.expert?.avatar : record?.client?.avatar;
+        const username = record?.expert?.username ?? 'Не назначен';
+        const avatarSrc = record?.expert?.avatar;
         return (
           <Space size={8}>
             <Avatar size={24} src={avatarSrc} icon={<UserOutlined />} />
@@ -355,26 +308,17 @@ const MyWorks: React.FC = () => {
         <Title level={2} className={styles.pageTitle}>
           Мои заказы
         </Title>
-        {userProfile?.role === 'expert' && (
-          <div className={styles.pageHeaderRight}>
-            <span className={styles.rating}>
-              <StarFilled className={styles.ratingStar} /> {averageRatingText}
-            </span>
-          </div>
-        )}
       </div>
 
       <div className={styles.controlsRow}>
         <div className={styles.tabsRow}>
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'new' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('new')}
-            >
-              Открытые <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.new}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className={`${styles.tabButton} ${activeTab === 'new' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('new')}
+          >
+            Открытые <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.new}</span>
+          </button>
           <button
             type="button"
             className={`${styles.tabButton} ${activeTab === 'confirming' ? styles.tabActive : ''}`}
@@ -387,7 +331,7 @@ const MyWorks: React.FC = () => {
             className={`${styles.tabButton} ${activeTab === 'in_progress' ? styles.tabActive : ''}`}
             onClick={() => handleTabChange('in_progress')}
           >
-            В работе <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.in_progress}</span>
+            В работе у эксперта <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.in_progress}</span>
           </button>
           <button
             type="button"
@@ -417,33 +361,27 @@ const MyWorks: React.FC = () => {
           >
             Выполнено <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.completed}</span>
           </button>
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'download' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('download')}
-            >
-              Ожидает скачивания <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.download}</span>
-            </button>
-          )}
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'closed' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('closed')}
-            >
-              Закрыт <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.closed}</span>
-            </button>
-          )}
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'inactive' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('inactive')}
-            >
-              Неактивные <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.inactive}</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className={`${styles.tabButton} ${activeTab === 'download' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('download')}
+          >
+            Ожидает скачивания <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.download}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabButton} ${activeTab === 'closed' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('closed')}
+          >
+            Закрыт <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.closed}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabButton} ${activeTab === 'inactive' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('inactive')}
+          >
+            Неактивные <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.inactive}</span>
+          </button>
           <button
             type="button"
             className={`${styles.tabButton} ${activeTab === 'all' ? styles.tabActive : ''}`}
@@ -468,7 +406,7 @@ const MyWorks: React.FC = () => {
         columns={columns}
         dataSource={filteredOrders}
         rowKey={(record) => record.id}
-        loading={isLoading}
+        loading={clientOrdersLoading || inactiveOrdersLoading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
         onRow={(record) => ({
           onClick: () => navigate(`/orders/${record.id}`),
@@ -479,4 +417,4 @@ const MyWorks: React.FC = () => {
   );
 };
 
-export default MyWorks;
+export default ExpertClientOrders;
