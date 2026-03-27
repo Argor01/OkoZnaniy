@@ -20,6 +20,14 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
             'username': {'required': False, 'allow_blank': True, 'allow_null': True}
         }
     
+    def to_internal_value(self, data):
+        """Переопределяем для обработки отсутствующего username"""
+        # Если username не передан или пустой, добавляем временное значение
+        if 'username' not in data or not data.get('username', '').strip():
+            data = data.copy() if hasattr(data, 'copy') else dict(data)
+            data['username'] = ''  # Временное значение, будет заменено в create
+        return super().to_internal_value(data)
+    
     def validate_username(self, value):
         """Разрешаем пустой username - он будет сгенерирован автоматически"""
         return value
