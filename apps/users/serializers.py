@@ -10,17 +10,28 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=['client', 'expert', 'partner'], required=False, default='client')
     password = serializers.CharField(write_only=True, required=True, min_length=6)
     password2 = serializers.CharField(write_only=True, required=True, min_length=6)
-    username = serializers.CharField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     email = serializers.EmailField(required=True)
     
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'password2', 'role', 'referral_code']
     
+    def validate_username(self, value):
+        """Разрешаем пустой username - он будет сгенерирован автоматически"""
+        return value
+    
     def validate(self, attrs):
         """Проверяем, что пароли совпадают"""
         if attrs.get('password') != attrs.get('password2'):
             raise serializers.ValidationError({"password2": "Пароли не совпадают"})
+        
+        # Если username пустой или None, удаляем его из attrs
+        # Он будет сгенерирован в методе create
+        username = attrs.get('username', '').strip() if attrs.get('username') else ''
+        if not username:
+            attrs.pop('username', None)
+        
         return attrs
     
     def create(self, validated_data):
@@ -29,9 +40,8 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2', None)  # Удаляем password2, он нам больше не нужен
         role = validated_data.pop('role', 'client')
         
-        # Если username не указан или пустая строка, генерируем из email
-        username = validated_data.get('username', '').strip()
-        if not username:
+        # Генерируем username если его нет
+        if 'username' not in validated_data or not validated_data.get('username'):
             email = validated_data.get('email', '')
             if email:
                 # Берем часть до @ и добавляем случайные цифры если нужно
@@ -46,8 +56,6 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 # Если нет email, генерируем случайный username
                 import uuid
                 validated_data['username'] = f"user_{uuid.uuid4().hex[:8]}"
-        else:
-            validated_data['username'] = username
         
         # Создаем пользователя
         user = User.objects.create_user(**validated_data)
