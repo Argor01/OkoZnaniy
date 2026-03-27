@@ -11,10 +11,16 @@ export const useOrders = (enabled: boolean = true) => {
     enabled,
     initialData: [],
     select: (data: any) => {
-      if (Array.isArray(data)) return data;
-      if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
-      if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
-      return [];
+      let ordersArray: any[] = [];
+      if (Array.isArray(data)) ordersArray = data;
+      else if (data && typeof data === 'object' && Array.isArray(data.results)) ordersArray = data.results;
+      else if (data && typeof data === 'object' && Array.isArray(data.data)) ordersArray = data.data;
+      
+      // Нормализуем данные заказов, особенно budget
+      return ordersArray.map((order: any) => ({
+        ...order,
+        budget: Number(order.budget) || 0,
+      }));
     }
   });
 

@@ -148,9 +148,22 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     cancelled: filteredData.filter(o => o.status === ORDER_STATUSES.CANCELLED).length,
     totalBudget: filteredData.reduce((sum, o) => {
       const budget = Number(o.budget) || 0;
+      if (isNaN(budget)) {
+        console.warn('Invalid budget value:', o.budget, 'for order:', o.id);
+        return sum;
+      }
       return sum + budget;
     }, 0),
   };
+
+  // Отладка для проверки данных
+  if (filteredData.length > 0 && stats.totalBudget === 0) {
+    console.log('Budget calculation debug:', {
+      ordersCount: filteredData.length,
+      sampleBudgets: filteredData.slice(0, 3).map(o => ({ id: o.id, budget: o.budget, type: typeof o.budget })),
+      totalBudget: stats.totalBudget
+    });
+  }
 
   const columns = [
     {
