@@ -146,7 +146,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     inProgress: filteredData.filter(o => o.status === ORDER_STATUSES.IN_PROGRESS).length,
     completed: filteredData.filter(o => o.status === ORDER_STATUSES.COMPLETED).length,
     cancelled: filteredData.filter(o => o.status === ORDER_STATUSES.CANCELLED).length,
-    totalBudget: filteredData.reduce((sum, o) => sum + o.budget, 0),
+    totalBudget: filteredData.reduce((sum, o) => {
+      const budget = Number(o.budget) || 0;
+      return sum + budget;
+    }, 0),
   };
 
   const columns = [
@@ -220,9 +223,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       dataIndex: 'budget',
       key: 'budget',
       width: 100,
-      render: (budget: number) => (
-        <Text strong>{budget.toLocaleString()} ₽</Text>
-      ),
+      render: (budget: number) => {
+        const budgetNum = Number(budget) || 0;
+        return <Text strong>{budgetNum.toLocaleString()} ₽</Text>;
+      },
     },
     {
       title: 'Дедлайн',
@@ -447,7 +451,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Бюджет">
-                <strong>{selectedOrder.budget.toLocaleString()} ₽</strong>
+                <strong>{(Number(selectedOrder.budget) || 0).toLocaleString()} ₽</strong>
               </Descriptions.Item>
               <Descriptions.Item label="Дедлайн">
                 {dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}
@@ -528,7 +532,7 @@ export const AllOrdersSection: React.FC = () => {
 
   const handleEditOrder = (orderId: number) => {
     // Функционал редактирования будет добавлен позже
-    // message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
+    message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
   };
 
   const handleContactClient = async (orderId: number) => {
@@ -544,11 +548,14 @@ export const AllOrdersSection: React.FC = () => {
         user_id: order.client.id
       });
 
-      // Открываем чат в новой вкладке или текущей
-      const chatUrl = `/admin/chats?chat_id=${response.data.chat_id}&user_id=${order.client.id}`;
-      window.open(chatUrl, '_blank');
+      // Сохраняем ID чата в localStorage для открытия в админ-панели
+      localStorage.setItem('adminDashboard_selectedMenu', 'admin_chats');
+      localStorage.setItem('adminDashboard_openChatId', response.data.chat_id.toString());
       
-      message.success('Чат с клиентом открыт');
+      // Переходим на страницу админ-панели с чатами
+      window.location.href = '/admin/dashboard';
+      
+      message.success('Открываем чат с клиентом...');
     } catch (error) {
       console.error('Error creating chat:', error);
       message.error('Ошибка при создании чата');

@@ -87,6 +87,22 @@ const DirectTab: React.FC<{ uid: number }> = ({ uid }) => {
   const { data: msgs = [], isLoading: mLoad } = useQuery({ queryKey: ['adm-direct-msgs', selChatId], queryFn: () => api.getDirectMsgs(selChatId!), enabled: !!selChatId, refetchInterval: 3000 });
   const { data: users = [] } = useQuery({ queryKey: ['adm-users'], queryFn: api.getUsers });
 
+  // Check localStorage for chat to open on mount
+  useEffect(() => {
+    const chatIdToOpen = localStorage.getItem('adminDashboard_openChatId');
+    if (chatIdToOpen && chats.length > 0) {
+      const chatId = parseInt(chatIdToOpen, 10);
+      const chat = (chats as any[]).find((c: any) => c.id === chatId);
+      if (chat) {
+        const o = chat.other_user;
+        const name = `${o.first_name} ${o.last_name}`.trim();
+        setSelChatId(chatId);
+        setSelName(name);
+        localStorage.removeItem('adminDashboard_openChatId'); // Clear after opening
+      }
+    }
+  }, [chats]);
+
   const sendMut = useMutation({ mutationFn: (t: string) => api.sendDirectMsg(selChatId!, t), onSuccess: () => qc.invalidateQueries({ queryKey: ['adm-direct-msgs', selChatId] }), onError: () => antMessage.error('Ошибка') });
   const createMut = useMutation({
     mutationFn: (userId: number) => api.getOrCreateDirect(userId),
