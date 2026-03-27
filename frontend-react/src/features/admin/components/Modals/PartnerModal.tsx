@@ -172,7 +172,15 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
                   label="Процент комиссии (%)"
                   rules={[
                     { required: true, message: 'Укажите процент комиссии' },
-                    { type: 'number', min: 0, max: 100, message: 'Процент должен быть от 0 до 100' },
+                    {
+                      validator: (_, value) => {
+                        const num = Number(value);
+                        if (!Number.isFinite(num) || num < 0 || num > 100) {
+                          return Promise.reject(new Error('Процент должен быть от 0 до 100'));
+                        }
+                        return Promise.resolve();
+                      },
+                    },
                   ]}
                 >
                   <InputNumber
