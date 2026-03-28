@@ -329,7 +329,7 @@ export const AdminChatsSection: React.FC = () => {
   const { user } = useAdminAuth();
   const uid = (user as any)?.id ?? 0;
   const isMobile = useIsMobile();
-  const h = isMobile ? "calc(100vh - 120px)" : "calc(100vh - 200px)";
+  const h = isMobile ? "calc(100vh - 120px)" : "600px";
 
   return (
     <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: h, display: "flex", flexDirection: "column" }}>

@@ -22,6 +22,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
     return null;
   }
 
+  // Получаем роль пользователя из localStorage
+  const userRole = localStorage.getItem('user_role');
+  
+  // Скрываем кнопку для админов и директоров
+  if (userRole === 'admin' || userRole === 'director') {
+    return null;
+  }
+
   // Скрываем кнопку на главной странице (лендинге)
   if (location.pathname === '/' || location.pathname === '/home') {
     return null;
