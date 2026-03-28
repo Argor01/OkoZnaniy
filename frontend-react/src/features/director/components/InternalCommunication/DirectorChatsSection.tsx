@@ -126,14 +126,37 @@ export const DirectorChatsSection: React.FC = () => {
     room.description?.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // Загрузка сообщений при выборе комнаты
+  useEffect(() => {
+    if (selectedRoom) {
+      loadMessages(selectedRoom.id);
+    }
+  }, [selectedRoom]);
+
+  const loadMessages = async (roomId: number) => {
+    try {
+      const { getChatRoomMessages } = await import('@/features/director/api/directorApi');
+      const msgs = await getChatRoomMessages(roomId);
+      setMessages(Array.isArray(msgs) ? msgs : []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      message.error('Ошибка загрузки сообщений');
+      setMessages([]);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedRoom) return;
     
     try {
-      // TODO: Implement API call
+      const { sendChatRoomMessage } = await import('@/features/director/api/directorApi');
+      await sendChatRoomMessage(selectedRoom.id, messageText.trim());
       message.success('Сообщение отправлено');
       setMessageText('');
+      // Перезагружаем сообщения
+      await loadMessages(selectedRoom.id);
     } catch (error) {
+      console.error('Error sending message:', error);
       message.error('Ошибка отправки сообщения');
     }
   };
