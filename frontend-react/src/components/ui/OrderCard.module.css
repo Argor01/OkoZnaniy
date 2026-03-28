@@ -37,7 +37,7 @@
 
 .orderTitle {
   font-family: 'Jost-SemiBold', sans-serif;
-  font-size: 18px !important;
+  font-size:20px !important;
   margin-bottom: 8px !important;
   display: block;
   color: var(--text-primary);
@@ -65,7 +65,7 @@
 
 .orderDescription {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   margin-bottom: 16px !important;
 }

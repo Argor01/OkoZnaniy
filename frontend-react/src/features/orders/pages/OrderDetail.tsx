@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined, NumberOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { chatApi } from '@/features/support/api/chat';
@@ -407,7 +407,6 @@ const OrderDetail: React.FC = () => {
                   <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
                 </div>
                 <Space className={styles.headerRightControls}>
-                  <Text className={styles.orderNumberTopRight}>Заказ №{order.id}</Text>
                   {canSubmitComplaint && (
                     <Dropdown
                       trigger={['click']}
@@ -457,6 +456,17 @@ const OrderDetail: React.FC = () => {
 
               <div className={styles.expertOfferGrid}>
                 <div className={styles.expertOfferGridItem}>
+                  <div className={styles.expertOfferGridIcon}><NumberOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Номер заказа</div>
+                    <div className={styles.expertOfferValue}>
+                      <Text copyable={{ text: `${window.location.origin}/orders/${order.id}` }}>
+                        {order.id}
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+                <div className={styles.expertOfferGridItem}>
                   <div className={styles.expertOfferGridIcon}><BookOutlined /></div>
                   <div>
                     <div className={styles.expertOfferLabel}>Предмет</div>
@@ -482,6 +492,17 @@ const OrderDetail: React.FC = () => {
                   <div>
                     <div className={styles.expertOfferLabel}>Цена</div>
                     <div className={styles.expertOfferValue}>{formatCurrency(order.budget)}</div>
+                  </div>
+                </div>
+                  <div className={styles.expertOfferGridItem}>
+                  <div className={styles.expertOfferGridIcon}><DatabaseOutlined /></div>
+                  <div>
+                    <div className={styles.expertOfferLabel}>Дата публикации</div>
+                    <div className={styles.expertOfferValue}>
+                      <Text>
+                        {order.created_at ? new Date(order.created_at).toLocaleDateString('ru-RU') : 'Не указана'}
+                      </Text>
+                    </div>
                   </div>
                 </div>
               </div>

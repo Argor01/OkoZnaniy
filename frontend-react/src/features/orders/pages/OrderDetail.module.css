@@ -78,12 +78,7 @@
   gap: 10px;
 }
 
-.orderNumberTopRight {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text-primary);
-}
+
 
 .sectionStack {
   display: flex;

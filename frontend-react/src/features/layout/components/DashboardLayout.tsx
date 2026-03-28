@@ -10,6 +10,7 @@ import Sidebar from './Sidebar';
 import { useNotifications } from '@/hooks/useNotifications';
 import { DashboardContext } from '@/contexts/DashboardContext';
 import { AppFooter } from '@/components/layout/AppFooter';
+import RightSidebar from './RightSidebar';
 import styles from './DashboardLayout.module.css';
 import '@/styles/modals.css';
 
@@ -423,7 +424,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const dashboardLayoutClassName = [
     styles.dashboardLayout,
-    isMobile ? styles.dashboardLayoutMobile : (desktopSidebarOpen ? styles.dashboardLayoutDesktopExpanded : styles.dashboardLayoutDesktopCollapsed),
+    isMobile ? styles.dashboardLayoutMobile : styles.dashboardLayoutDesktopExpanded,
     shouldShowHeader ? styles.dashboardLayoutHeader : styles.dashboardLayoutNoHeader,
   ].join(' ');
 
@@ -454,37 +455,44 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           />
         )}
         
-        <Sidebar
-          selectedKey={getSelectedKey()}
-          onMenuSelect={handleMenuSelect}
-          onLogout={handleLogout}
-          onMessagesClick={handleMessagesClick}
-          onNotificationsClick={handleNotificationsClick}
-          onArbitrationClick={handleArbitrationClick}
-          onFinanceClick={handleFinanceClick}
-          onFriendsClick={handleFriendsClick}
-          onFaqClick={handleFaqClick}
-          mobileDrawerOpen={mobileMenuVisible}
-          onMobileDrawerChange={setMobileMenuVisible}
-          collapsed={!isMobile && !desktopSidebarOpen}
-          unreadNotifications={unreadNotifications}
-          userProfile={sidebarUserProfile}
-          orderCounts={sidebarOrderCounts}
-        />
-
-        {!isMobile && desktopSidebarOpen && (
-          <div
-            className={styles.desktopSidebarOverlay}
-            onClick={() => setDesktopSidebarOpen(false)}
+        <div className={dashboardLayoutClassName}>
+          <Sidebar
+            selectedKey={getSelectedKey()}
+            onMenuSelect={handleMenuSelect}
+            onLogout={handleLogout}
+            onMessagesClick={handleMessagesClick}
+            onNotificationsClick={handleNotificationsClick}
+            onArbitrationClick={handleArbitrationClick}
+            onFinanceClick={handleFinanceClick}
+            onFriendsClick={handleFriendsClick}
+            onFaqClick={handleFaqClick}
+            mobileDrawerOpen={mobileMenuVisible}
+            onMobileDrawerChange={setMobileMenuVisible}
+            collapsed={false}
+            unreadNotifications={unreadNotifications}
+            userProfile={sidebarUserProfile}
+            orderCounts={sidebarOrderCounts}
           />
-        )}
+
+          {!isMobile && desktopSidebarOpen && (
+            <div
+              className={styles.desktopSidebarOverlay}
+              onClick={() => setDesktopSidebarOpen(false)}
+            />
+          )}
+          
+          <Layout className={styles.mainLayoutContent}>
+            <Content className={contentClassName}>
+              {children}
+            </Content>
+          </Layout>
+          
+          {!isMobile && (
+            <RightSidebar />
+          )}
+        </div>
         
-        <Layout className={dashboardLayoutClassName}>
-          <Content className={contentClassName}>
-            {children}
-          </Content>
-          <AppFooter userRole={userProfile?.role} />
-        </Layout>
+        <AppFooter userRole={userProfile?.role} />
       </Layout>
 
       

@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Layout, Menu, Avatar, Typography, Badge } from 'antd';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Layout, Menu, Avatar, Typography, Badge, Button } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [openKeys, setOpenKeys] = useState<string[]>(['orders', 'expert-client-orders']);
 
   useEffect(() => {
     const handleResize = () => {
@@ -294,49 +294,40 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     },
   ].filter(Boolean), [isExpert, isMobile, unreadMessages, unreadNotifications, orderCounts]);
 
-  const profileSection = useMemo(() => (
-    <div className={styles.sidebarProfile}>
-      <div className={styles.sidebarProfileInner}>
-        <Avatar
-          size={48}
-          src={userProfile?.avatar || undefined}
-          icon={<UserOutlined />}
-          className={styles.sidebarAvatar}
-        />
-        <div className={styles.sidebarProfileInfo}>
-          <Title level={5} className={styles.sidebarProfileName}>
-            {userProfile?.username || 'Пользователь'}
-          </Title>
-          <Text className={styles.sidebarProfileRole}>
-            {userProfile?.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-          </Text>
-        </div>
-        {isMobile && (
-          <button
-            onClick={() => onMobileDrawerChange?.(false)}
-            className={styles.mobileProfileClose}
-          >
-            ✕
-          </button>
-        )}
-      </div>
+  const actionSection = useMemo(() => (
+    <div className={styles.sidebarActionBlock}>
+      <Button 
+        type="primary" 
+        className={styles.createOrderButton}
+        onClick={() => {
+          if (isMobile && onMobileDrawerChange) {
+            onMobileDrawerChange(false);
+          }
+          navigate('/create-order');
+        }}
+      >
+        Разместить заказ
+      </Button>
     </div>
-  ), [userProfile?.avatar, userProfile?.username, userProfile?.role, isMobile, onMobileDrawerChange]);
+  ), [navigate, isMobile, onMobileDrawerChange]);
 
   const sidebarContent = useMemo(() => (
     <>
-      {profileSection}
+      {actionSection}
       <Menu
         mode="inline"
         selectedKeys={[selectedKey]}
-        openKeys={isMobile ? [] : openKeys}
-        onOpenChange={setOpenKeys}
+        openKeys={isMobile ? ['orders', 'expert-client-orders'] : openKeys}
+        onOpenChange={(keys) => {
+          const newKeys = new Set([...keys, 'orders', 'expert-client-orders']);
+          setOpenKeys(Array.from(newKeys));
+        }}
         onClick={handleMenuClick}
         className={styles.sidebarMenu}
         items={menuItems}
       />
     </>
-  ), [profileSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
+  ), [actionSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
 
   return (
     <>
@@ -356,7 +347,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
       {!isMobile && (
         <Sider
-          width={250}
+          width="auto"
           className={styles.sidebar}
           trigger={null}
           collapsible

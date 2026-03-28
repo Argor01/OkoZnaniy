@@ -373,14 +373,6 @@ const OrdersFeed: React.FC = () => {
               Найдите подходящий заказ или создайте свой
             </Text>
           </div>
-          <AppButton 
-            variant="primary" 
-            size="large"
-            onClick={() => navigate('/create-order')}
-            className={styles.primaryButton}
-          >
-            Создать заказ
-          </AppButton>
         </div>
       )}
 

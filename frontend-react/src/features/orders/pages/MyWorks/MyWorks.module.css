@@ -1,24 +1,4 @@
-﻿﻿
-
-
-:global(.ant-layout-content) {
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  max-width: 100%;
-}
-
-
-.myWorksPage :global(.ant-layout-content) {
-  padding: 0;
-  margin: 0;
-  width: calc(100% - 250px); 
-  max-width: calc(100% - 250px);
-  box-sizing: border-box;
-  margin-left: 250px; 
-  margin-top: 0; 
-  min-height: 100vh;
-}
+﻿
 
 
 .contentContainer {
@@ -29,6 +9,83 @@
   box-sizing: border-box;
 }
 
+.pageLayout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sidePanel {
+  width: 240px;
+  flex: 0 0 240px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 12px;
+  position: sticky;
+  top: calc(64px + 24px);
+}
+
+.createOrderButton {
+  width: 100%;
+  appearance: none;
+  border: none;
+  background: var(--color-brand-orange-500);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.createOrderButton:hover {
+  background: var(--color-brand-orange-600);
+}
+
+.sideMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sideItem {
+  width: 100%;
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.sideItem:hover {
+  background: var(--bg-tertiary);
+}
+
+.sideItemActive {
+  background: rgba(255, 179, 74, 0.18);
+  border-color: var(--color-brand-orange-500);
+}
+
+.sideItemLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mainBlock {
+  flex: 1;
+  min-width: 0;
+}
+
 @media (max-width: 768px) {
   .contentContainer {
     width: 100%;
@@ -37,65 +94,6 @@
   }
 }
 
-
-.myWorksPage :global(.ant-layout-header) {
-  margin: 0;
-  padding-left: 24px;
-  padding-right: 24px;
-  width: calc(100% - 250px); 
-  max-width: calc(100% - 250px);
-  position: fixed;
-  top: 0;
-  left: 250px; 
-  z-index: 998; 
-  box-sizing: border-box;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-
-.myWorksPage :global(.ant-layout) {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-
-.myWorksPage :global(.ant-layout-sider) {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  z-index: 1001; 
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  .myWorksPage :global(.ant-layout-header) {
-    padding-left: 16px;
-    padding-right: 16px;
-    width: 100%; 
-    max-width: 100%;
-    left: 0; 
-  }
-  
-  
-  .myWorksPage :global(.ant-layout-sider) {
-    position: relative;
-    height: auto;
-    z-index: auto;
-  }
-  
-  
-  .myWorksPage :global(.ant-layout-content) {
-    margin-left: 0;
-    width: 100%;
-    max-width: 100%;
-  }
-}
 
 .worksHeader {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

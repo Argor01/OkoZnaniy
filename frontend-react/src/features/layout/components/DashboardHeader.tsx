@@ -330,9 +330,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
             <div className={styles.profileSection}>
               {!isMobile && (
-                <Text className={styles.username}>
-                  {userProfile?.username || 'Пользователь'}
-                </Text>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '8px' }}>
+                  <Text className={styles.username}>
+                    {userProfile?.username || 'Пользователь'}
+                  </Text>
+                  {userProfile?.role === 'expert' && (
+                    <Text style={{ fontSize: '12px', color: '#8c8c8c' }}>
+                      Очки: 120
+                    </Text>
+                  )}
+                </div>
               )}
             </div>
           </Dropdown>
