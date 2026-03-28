@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Card, Button, Input, Avatar, Space, Typography, Badge, Spin, Empty,
-  Modal, Form, Select, Tabs, message as antMessage,
+  Modal, Form, Select, Tabs, message as antMessage, List,
 } from 'antd';
-import { SendOutlined, PlusOutlined, UserOutlined, TeamOutlined, MessageOutlined, SearchOutlined } from '@ant-design/icons';
+import { SendOutlined, PlusOutlined, UserOutlined, TeamOutlined, MessageOutlined, SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
@@ -204,6 +204,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const [form] = Form.useForm();
   const [invForm] = Form.useForm();
 
@@ -261,7 +262,12 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
       <ChatHeader name={String(selRoom.name ?? "")} sub={`${selRoom.members?.length ?? 0} участников`}
         icon={<TeamOutlined />} onBack={isMobile ? () => setSelId(null) : undefined}
-        extra={<Button size="small" icon={<PlusOutlined />} onClick={() => setInviteOpen(true)}>Добавить</Button>} />
+        extra={
+          <Space>
+            <Button size="small" icon={<UsergroupAddOutlined />} onClick={() => setMembersOpen(true)}>Участники</Button>
+            <Button size="small" icon={<PlusOutlined />} onClick={() => setInviteOpen(true)}>Добавить</Button>
+          </Space>
+        } />
       {mLoad ? <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}><Spin /></div> : <MsgList msgs={msgs as any[]} uid={uid} />}
       <Composer onSend={t => sendMut.mutateAsync(t)} />
     </div>
@@ -293,6 +299,27 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
             </Select>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal title="Участники чата" open={membersOpen} onCancel={() => setMembersOpen(false)} footer={[<Button key="close" onClick={() => setMembersOpen(false)}>Закрыть</Button>]}>
+        <List
+          dataSource={selRoom?.members ?? []}
+          renderItem={(member: any) => (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<Avatar icon={<UserOutlined />} style={{ background: member.role === 'admin' ? '#1890ff' : member.role === 'director' ? '#722ed1' : '#52c41a' }} />}
+                title={`${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || member.username}
+                description={
+                  <Space direction="vertical" size={0}>
+                    <span>{member.email}</span>
+                    <span style={{ fontSize: 12, color: '#8c8c8c' }}>
+                      {member.role === 'admin' ? 'Администратор' : member.role === 'director' ? 'Директор' : member.role === 'expert' ? 'Эксперт' : member.role === 'partner' ? 'Партнер' : 'Клиент'}
+                    </span>
+                  </Space>
+                }
+              />
+            </List.Item>
+          )}
+        />
       </Modal>
     </div>
   );
