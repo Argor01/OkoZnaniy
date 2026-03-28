@@ -329,15 +329,14 @@ export const AdminChatsSection: React.FC = () => {
   const { user } = useAdminAuth();
   const uid = (user as any)?.id ?? 0;
   const isMobile = useIsMobile();
-  const h = isMobile ? "calc(100vh - 120px)" : "calc(100vh - 180px)";
 
   return (
-    <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: h, display: "flex", flexDirection: "column" }}>
+    <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: isMobile ? "calc(100vh - 120px)" : "calc(100vh - 180px)", display: "flex", flexDirection: "column" }}>
       <Tabs defaultActiveKey="rooms" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
         tabBarStyle={{ padding: "0 16px", marginBottom: 0, borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}
         items={[
-          { key: "direct", label: <span><MessageOutlined style={{ marginRight: 4 }} />{isMobile ? "Личные" : "Личные сообщения"}</span>, children: <div style={{ height: `calc(${h} - 46px)`, overflow: "hidden" }}><DirectTab uid={uid} /></div> },
-          { key: "rooms", label: <span><TeamOutlined style={{ marginRight: 4 }} />{isMobile ? "Группы" : "Групповые чаты"}</span>, children: <div style={{ height: `calc(${h} - 46px)`, overflow: "hidden" }}><RoomsTab uid={uid} /></div> },
+          { key: "direct", label: <span><MessageOutlined style={{ marginRight: 4 }} />{isMobile ? "Личные" : "Личные сообщения"}</span>, children: <div style={{ height: "100%", overflow: "hidden" }}><DirectTab uid={uid} /></div> },
+          { key: "rooms", label: <span><TeamOutlined style={{ marginRight: 4 }} />{isMobile ? "Группы" : "Групповые чаты"}</span>, children: <div style={{ height: "100%", overflow: "hidden" }}><RoomsTab uid={uid} /></div> },
         ]}
       />
     </div>
