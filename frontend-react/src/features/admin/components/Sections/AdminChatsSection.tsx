@@ -211,6 +211,18 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
   const { data: msgs = [], isLoading: mLoad } = useQuery({ queryKey: ["adm-room-msgs", selId], queryFn: () => api.getRoomMsgs(selId!), enabled: !!selId, refetchInterval: 3000 });
   const { data: users = [] } = useQuery({ queryKey: ["adm-users"], queryFn: api.getUsers });
 
+  // Автоматически выбираем первую комнату при загрузке
+  useEffect(() => {
+    if (!selId && rooms.length > 0 && !rLoad) {
+      const firstRoom = (rooms as any[])[0];
+      if (firstRoom) {
+        setSelId(firstRoom.id);
+        api.joinRoom(firstRoom.id).catch(() => {});
+        api.addAllStaff(firstRoom.id).catch(() => {});
+      }
+    }
+  }, [rooms, rLoad, selId]);
+
   const sendMut = useMutation({ mutationFn: (t: string) => api.sendRoomMsg(selId!, t), onSuccess: () => qc.invalidateQueries({ queryKey: ["adm-room-msgs", selId] }), onError: () => antMessage.error("Ошибка") });
   const createMut = useMutation({ mutationFn: api.createRoom, onSuccess: () => { qc.invalidateQueries({ queryKey: ["adm-rooms"] }); setCreateOpen(false); form.resetFields(); antMessage.success("Чат создан"); }, onError: () => antMessage.error("Ошибка") });
   const invMut = useMutation({ mutationFn: (u2: number) => api.inviteRoom(selId!, u2), onSuccess: () => { setInviteOpen(false); invForm.resetFields(); antMessage.success("Добавлен"); }, onError: () => antMessage.error("Ошибка") });
@@ -294,7 +306,7 @@ export const AdminChatsSection: React.FC = () => {
 
   return (
     <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: h, display: "flex", flexDirection: "column" }}>
-      <Tabs defaultActiveKey="direct" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
+      <Tabs defaultActiveKey="rooms" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
         tabBarStyle={{ padding: "0 16px", marginBottom: 0, borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}
         items={[
           { key: "direct", label: <span><MessageOutlined style={{ marginRight: 4 }} />{isMobile ? "Личные" : "Личные сообщения"}</span>, children: <div style={{ height: `calc(${h} - 46px)`, overflow: "hidden" }}><DirectTab uid={uid} /></div> },
