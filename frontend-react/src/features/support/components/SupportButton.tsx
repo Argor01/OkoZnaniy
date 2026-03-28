@@ -15,6 +15,7 @@ interface SupportButtonProps {
 const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [shouldShow, setShouldShow] = React.useState(true);
 
   // Проверяем авторизацию - показываем кнопку только для авторизованных пользователей
   const token = localStorage.getItem('access_token');
@@ -22,16 +23,48 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
     return null;
   }
 
-  // Получаем роль пользователя из localStorage
-  const userRole = localStorage.getItem('user_role');
-  
-  // Скрываем кнопку для админов и директоров
-  if (userRole === 'admin' || userRole === 'director') {
-    return null;
-  }
+  // Проверяем роль пользователя
+  React.useEffect(() => {
+    const checkUserRole = async () => {
+      // Сначала проверяем localStorage
+      const userRole = localStorage.getItem('user_role');
+      if (userRole === 'admin' || userRole === 'director') {
+        setShouldShow(false);
+        return;
+      }
+
+      // Если роли нет в localStorage, получаем из API
+      try {
+        const response = await fetch('/api/users/me/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.role) {
+            localStorage.setItem('user_role', data.role);
+            if (data.role === 'admin' || data.role === 'director') {
+              setShouldShow(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка получения роли пользователя:', error);
+      }
+    };
+
+    checkUserRole();
+  }, [token]);
 
   // Скрываем кнопку на главной странице (лендинге)
   if (location.pathname === '/' || location.pathname === '/home') {
+    return null;
+  }
+
+  // Не показываем кнопку для админов и директоров
+  if (!shouldShow) {
     return null;
   }
 
