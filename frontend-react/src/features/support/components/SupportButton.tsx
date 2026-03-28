@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Input, Button, message, Select } from 'antd';
 import { CustomerServiceOutlined } from '@ant-design/icons';
 import { supportApi } from '@/features/support/api/support';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '@/styles/support.css';
 
 const { TextArea } = Input;
@@ -14,10 +14,16 @@ interface SupportButtonProps {
 
 const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Проверяем авторизацию - показываем кнопку только для авторизованных пользователей
   const token = localStorage.getItem('access_token');
   if (!token) {
+    return null;
+  }
+
+  // Скрываем кнопку на главной странице (лендинге)
+  if (location.pathname === '/' || location.pathname === '/home') {
     return null;
   }
 
