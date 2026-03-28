@@ -454,14 +454,6 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         room = serializer.save(created_by=self.request.user)
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.set(staff)
-        
-        # Создаем системное сообщение о создании чата
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=self.request.user,
-            message=f'Чат "{room.name}" создан',
-            is_system=True
-        )
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -485,15 +477,6 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         """Присоединиться к чату"""
         room = self.get_object()
         room.members.add(request.user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} присоединился к чату',
-            is_system=True
-        )
-        
         return Response({'message': 'Вы присоединились к чату'})
 
     @action(detail=True, methods=['post'])
@@ -509,15 +492,6 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         """Покинуть чат"""
         room = self.get_object()
         room.members.remove(request.user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} покинул чат',
-            is_system=True
-        )
-        
         return Response({'message': 'Вы покинули чат'})
 
     @action(detail=True, methods=['get', 'post'])
@@ -553,15 +527,6 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Пользователь не найден'}, status=404)
         
         room.members.add(user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{user.get_full_name() or user.username} был приглашен в чат',
-            is_system=True
-        )
-        
         return Response({'message': f'{user.first_name} {user.last_name} добавлен в чат'})
 
 

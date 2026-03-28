@@ -1739,14 +1739,6 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
         room = serializer.save(created_by=self.request.user)
         # Автоматически добавляем создателя в участники
         room.members.add(self.request.user)
-        
-        # Создаем системное сообщение о создании чата
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=self.request.user,
-            message=f'Чат "{room.name}" создан',
-            is_system=True
-        )
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -1774,15 +1766,6 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
         """Присоединиться к чату"""
         room = self.get_object()
         room.members.add(request.user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} присоединился к чату',
-            is_system=True
-        )
-        
         return Response({'message': 'Вы присоединились к чату'})
     
     @action(detail=True, methods=['post'])
@@ -1790,15 +1773,6 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
         """Покинуть чат"""
         room = self.get_object()
         room.members.remove(request.user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} покинул чат',
-            is_system=True
-        )
-        
         return Response({'message': 'Вы покинули чат'})
     
     @action(detail=True, methods=['get'])
@@ -1830,14 +1804,6 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
             )
         
         room.members.add(user)
-        
-        # Системное сообщение
-        DirectorChatMessage.objects.create(
-            room=room,
-            sender=request.user,
-            message=f'{user.get_full_name() or user.username} был приглашен в чат',
-            is_system=True
-        )
         
         # Уведомляем пользователя
         from apps.notifications.services import NotificationService
