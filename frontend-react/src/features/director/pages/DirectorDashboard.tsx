@@ -43,20 +43,20 @@ const DirectorDashboard: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
 
-  const isMobile = window.innerWidth <= 840;
-  const isTablet = window.innerWidth > 840 && window.innerWidth <= 1024;
-
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   React.useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 840;
-      if (mobile !== isMobile) {
-        window.location.reload(); 
-      }
+      const tablet = window.innerWidth > 840 && window.innerWidth <= 1024;
+      setIsMobile(mobile);
+      setIsTablet(tablet);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [isMobile]);
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -83,6 +83,7 @@ const DirectorDashboard: React.FC = () => {
     };
   }, []);
 
+  // NOW SAFE TO HAVE CONDITIONAL RETURNS
   if (authLoading) {
     return (
       <div className="directorDashboardLoading">
