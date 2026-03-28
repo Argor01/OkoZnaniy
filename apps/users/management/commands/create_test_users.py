@@ -1,75 +1,92 @@
 from django.core.management.base import BaseCommand
-from apps.users.models import User, Roles
+from apps.users.models import User
+
 
 class Command(BaseCommand):
-    help = 'Creates test users for each role'
-
-    def add_arguments(self, parser):
-        parser.add_argument('--per-role', type=int, default=1)
-        parser.add_argument('--password', type=str, default='testpass123')
-        parser.add_argument('--domain', type=str, default='test.com')
-        parser.add_argument('--prefix', type=str, default='test')
+    help = 'Создает тестовых пользователей для разработки'
 
     def handle(self, *args, **options):
-        per_role_opt = options.get('per_role')
-        per_role = int(per_role_opt) if per_role_opt is not None else 1
-        password = str(options.get('password') or 'testpass123')
-        domain = str(options.get('domain') or 'test.com')
-        prefix = str(options.get('prefix') or 'test')
-        
-        self.stdout.write("Test Users Credentials (Email/Password):")
-        self.stdout.write("-" * 40)
+        test_users = [
+            {
+                'email': 'client@test.com',
+                'password': 'test123',
+                'role': 'client',
+                'first_name': 'Тестовый',
+                'last_name': 'Клиент',
+            },
+            {
+                'email': 'expert@test.com',
+                'password': 'test123',
+                'role': 'expert',
+                'first_name': 'Тестовый',
+                'last_name': 'Эксперт',
+            },
+            {
+                'email': 'partner@test.com',
+                'password': 'test123',
+                'role': 'partner',
+                'first_name': 'Тестовый',
+                'last_name': 'Партнер',
+            },
+            {
+                'email': 'administrator@test.com',
+                'password': 'test123',
+                'role': 'admin',
+                'first_name': 'Тестовый',
+                'last_name': 'Администратор',
+                'is_staff': True,
+                'is_superuser': True,
+            },
+            {
+                'email': 'director@test.com',
+                'password': 'test123',
+                'role': 'director',
+                'first_name': 'Тестовый',
+                'last_name': 'Директор',
+                'is_staff': True,
+            },
+            {
+                'email': 'arbitrator@test.com',
+                'password': 'test123',
+                'role': 'arbitrator',
+                'first_name': 'Тестовый',
+                'last_name': 'Арбитр',
+                'is_staff': True,
+            },
+        ]
 
-        partners = []
-        created_or_updated = []
-        for role_choice in Roles.choices:
-            role_value = role_choice[0]
-            users_to_create = []
-            for i in range(1, per_role + 1):
-                if per_role == 1:
-                    username = f"{role_value}_{prefix}"
-                    email = f"{role_value}@{domain}"
-                else:
-                    username = f"{role_value}_{prefix}{i}"
-                    email = f"{role_value}{i}@{domain}"
-                users_to_create.append((username, email))
+        created_count = 0
+        updated_count = 0
 
-            for username, email in users_to_create:
-                defaults = {
-                    'email': email,
-                    'role': role_value,
-                    'email_verified': True,
-                    'is_active': True
-                }
-                if role_value in (Roles.ADMIN, Roles.DIRECTOR):
-                    defaults['is_staff'] = True
-                if role_value == Roles.ADMIN:
-                    defaults['is_superuser'] = True
-
-                user, created = User.objects.get_or_create(username=username, defaults=defaults)
+        for user_data in test_users:
+            email = user_data.pop('email')
+            password = user_data.pop('password')
+            
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults=user_data
+            )
+            
+            if created:
                 user.set_password(password)
-                user.email = email
-                user.role = role_value
-                user.email_verified = True
-                user.is_active = True
-                user.is_staff = role_value in (Roles.ADMIN, Roles.DIRECTOR)
-                user.is_superuser = role_value == Roles.ADMIN
                 user.save()
+                created_count += 1
+                self.stdout.write(
+                    self.style.SUCCESS(f'✓ Создан пользователь: {email} ({user_data["role"]})')
+                )
+            else:
+                # Обновляем существующего пользователя
+                for key, value in user_data.items():
+                    setattr(user, key, value)
+                user.set_password(password)
+                user.save()
+                updated_count += 1
+                self.stdout.write(
+                    self.style.WARNING(f'↻ Обновлен пользователь: {email} ({user_data["role"]})')
+                )
 
-                created_or_updated.append(user)
-                if role_value == Roles.PARTNER:
-                    partners.append(user)
-
-            if users_to_create:
-                self.stdout.write(f"{role_value.ljust(12)}: {users_to_create[0][1]}/{password}")
-
-        if partners:
-            referral_candidates = [
-                u for u in created_or_updated
-                if u.role in (Roles.CLIENT, Roles.EXPERT) and u.partner_id is None
-            ]
-            for idx, u in enumerate(referral_candidates):
-                u.partner = partners[idx % len(partners)]
-                u.save(update_fields=['partner'])
-        
-        self.stdout.write("-" * 40)
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'\n✓ Готово! Создано: {created_count}, Обновлено: {updated_count}'
+            )
+        )
