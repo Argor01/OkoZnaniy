@@ -7,9 +7,10 @@ class Command(BaseCommand):
     help = 'Создает общий чат для администраторов и директоров'
 
     def handle(self, *args, **options):
-        # Проверяем, существует ли уже чат
+        # Проверяем, существует ли уже чат с любым из возможных названий
         existing_chat = DirectorChatRoom.objects.filter(
-            name='Общий чат администрации'
+            name__in=['Общий чат администрации', 'Админ'],
+            is_active=True
         ).first()
 
         if existing_chat:
@@ -34,7 +35,7 @@ class Command(BaseCommand):
 
         # Создаем новый чат
         chat = DirectorChatRoom.objects.create(
-            name='Общий чат администрации',
+            name='Админ',
             description='Канал связи для администраторов и директоров компании',
             room_type='general',
             created_by=first_admin,
@@ -49,7 +50,7 @@ class Command(BaseCommand):
         DirectorChatMessage.objects.create(
             room=chat,
             sender=first_admin,
-            message='Добро пожаловать в общий чат администрации!',
+            message='Добро пожаловать в чат администрации!',
             is_system=True
         )
 

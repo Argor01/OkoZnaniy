@@ -3,6 +3,7 @@
 """
 import random
 import string
+import logging
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
@@ -10,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from .models import EmailVerificationCode
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -148,17 +150,22 @@ def send_verification_code(email, code):
     """
     
     try:
+        from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+        logger.info(f"[EMAIL] Отправка кода подтверждения на {email}")
+        logger.info(f"[EMAIL] Subject: {subject}")
+        
         send_mail(
             subject=subject,
             message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
+            from_email=from_email,
             recipient_list=[email],
             html_message=html_message,
             fail_silently=False,
         )
+        logger.info(f"[EMAIL] Успешно отправлено на {email}")
         return True
     except Exception as e:
-        print(f"Ошибка отправки email: {e}")
+        logger.error(f"[EMAIL ERROR] Ошибка отправки на {email}: {str(e)}", exc_info=True)
         return False
 
 
@@ -227,13 +234,17 @@ def resend_verification_code(email):
         tuple: (success: bool, message: str)
     """
     try:
+        logger.info(f"[RESEND] Request to resend code to {email}")
+        
         # Ищем пользователя по email
         user = User.objects.filter(email=email).first()
         
         if not user:
+            logger.warning(f"[RESEND] User not found for {email}")
             return False, "Пользователь не найден"
         
         if user.email_verified:
+            logger.warning(f"[RESEND] Email already verified for {email}")
             return False, "Email уже подтвержден"
         
         # Проверяем, не отправляли ли код недавно (защита от спама)
@@ -243,19 +254,24 @@ def resend_verification_code(email):
         ).first()
         
         if recent_code:
+            logger.info(f"[RESEND] Code sent recently, waiting for {email}")
             return False, "Код уже был отправлен. Подождите 1 минуту перед повторной отправкой"
         
         # Создаем новый код
         verification_code = create_verification_code(user, email)
+        logger.info(f"[RESEND] Created new code for {email}")
         
         # Отправляем код
-        if send_verification_code(email, verification_code.code):
+        send_result = send_verification_code(email, verification_code.code)
+        logger.info(f"[RESEND] Email send result: {send_result}")
+        
+        if send_result:
             return True, "Код отправлен на ваш email"
         else:
             return False, "Ошибка отправки email"
             
     except Exception as e:
-        print(f"Ошибка повторной отправки кода: {e}")
+        logger.error(f"[RESEND ERROR] Ошибка повторной отправки кода: {e}", exc_info=True)
         return False, "Ошибка отправки кода"
 
 

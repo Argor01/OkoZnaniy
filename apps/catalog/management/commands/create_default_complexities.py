@@ -1,75 +1,73 @@
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 from apps.catalog.models import Complexity
 
+
 class Command(BaseCommand):
-    help = 'Создает базовые уровни сложности'
+    help = 'Создает уровни сложности'
 
     def handle(self, *args, **options):
-        # Сначала удаляем все существующие уровни сложности
-        Complexity.objects.all().delete()
+        self.stdout.write('Добавляем уровни сложности...')
         
         complexities = [
             {
-                'name': 'Базовый',
-                'slug': 'basic',
-                'description': 'Задания школьного уровня или начальных курсов',
+                'name': 'Легко',
+                'slug': 'legko',
+                'description': 'Базовый уровень сложности',
                 'multiplier': 1.0,
-                'icon': 'fa-star'
+                'icon': 'fa-feather',
             },
             {
-                'name': 'Средний',
-                'slug': 'intermediate',
-                'description': 'Задания среднего уровня сложности, требующие углубленных знаний',
+                'name': 'Средне',
+                'slug': 'sredne',
+                'description': 'Средний уровень сложности',
                 'multiplier': 1.5,
-                'icon': 'fa-star-half-stroke'
+                'icon': 'fa-scale-balanced',
             },
             {
-                'name': 'Продвинутый',
-                'slug': 'advanced',
-                'description': 'Сложные задания, требующие специализированных знаний',
+                'name': 'Сложно',
+                'slug': 'slozhno',
+                'description': 'Высокий уровень сложности',
                 'multiplier': 2.0,
-                'icon': 'fa-stars'
+                'icon': 'fa-dumbbell',
             },
             {
-                'name': 'Экспертный',
-                'slug': 'expert',
-                'description': 'Задания повышенной сложности для специалистов',
+                'name': 'Очень сложно',
+                'slug': 'ochen-slozhno',
+                'description': 'Максимальный уровень сложности',
                 'multiplier': 2.5,
-                'icon': 'fa-award'
+                'icon': 'fa-triangle-exclamation',
             },
-            {
-                'name': 'Научный',
-                'slug': 'scientific',
-                'description': 'Задания научно-исследовательского уровня',
-                'multiplier': 3.0,
-                'icon': 'fa-microscope'
-            }
         ]
-
+        
         created_count = 0
+        updated_count = 0
+        
         for complexity_data in complexities:
             try:
-                # Создаем уровень сложности с уникальным slug'ом
-                complexity = Complexity.objects.create(
-                    name=complexity_data['name'],
+                complexity, created = Complexity.objects.update_or_create(
                     slug=complexity_data['slug'],
-                    description=complexity_data['description'],
-                    multiplier=complexity_data['multiplier'],
-                    icon=complexity_data['icon'],
-                    is_active=True
+                    defaults={
+                        'name': complexity_data['name'],
+                        'description': complexity_data['description'],
+                        'multiplier': complexity_data['multiplier'],
+                        'icon': complexity_data['icon'],
+                        'is_active': True,
+                    }
                 )
-                created_count += 1
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f'Создан уровень сложности "{complexity.name}" (slug: {complexity.slug}, множитель: x{complexity.multiplier})'
+                if created:
+                    created_count += 1
+                    self.stdout.write(
+                        self.style.SUCCESS(f'✓ Создан уровень сложности: {complexity.name}')
                     )
-                )
+                else:
+                    updated_count += 1
+                    self.stdout.write(f'  Обновлён уровень сложности: {complexity.name}')
             except Exception as e:
                 self.stdout.write(
                     self.style.ERROR(f'Ошибка при создании уровня сложности "{complexity_data["name"]}": {str(e)}')
                 )
-
+        
         self.stdout.write(
-            self.style.SUCCESS(f'Создано {created_count} новых уровней сложности')
-        ) 
+            self.style.SUCCESS(f'\nСоздано: {created_count}, Обновлено: {updated_count}')
+        )
+        self.stdout.write(f'Всего уровней сложности: {Complexity.objects.count()}')

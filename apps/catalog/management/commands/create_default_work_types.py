@@ -3,11 +3,10 @@ from django.utils.text import slugify
 from apps.catalog.models import WorkType
 
 class Command(BaseCommand):
-    help = 'Создает базовые типы работ'
+    help = 'Создает базовые типы работ (не удаляя существующие)'
 
     def handle(self, *args, **options):
-        # Сначала удаляем все существующие типы работ
-        WorkType.objects.all().delete()
+        self.stdout.write('Добавляем типы работ (существующие не удаляются)...')
         
         work_types = [
             {
@@ -197,29 +196,39 @@ class Command(BaseCommand):
         ]
 
         created_count = 0
+        updated_count = 0
         for work_type_data in work_types:
             try:
-                # Создаем тип работы с уникальным slug'ом
-                work_type = WorkType.objects.create(
-                    name=work_type_data['name'],
+                # Создаем или обновляем тип работы
+                work_type, created = WorkType.objects.update_or_create(
                     slug=work_type_data['slug'],
-                    description=work_type_data['description'],
-                    base_price=work_type_data['base_price'],
-                    estimated_time=work_type_data['estimated_time'],
-                    icon=work_type_data['icon'],
-                    is_active=True
+                    defaults={
+                        'name': work_type_data['name'],
+                        'description': work_type_data['description'],
+                        'base_price': work_type_data['base_price'],
+                        'estimated_time': work_type_data['estimated_time'],
+                        'icon': work_type_data['icon'],
+                        'is_active': True
+                    }
                 )
-                created_count += 1
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f'Создан тип работы "{work_type.name}" (slug: {work_type.slug}, базовая цена: {work_type.base_price})'
+                if created:
+                    created_count += 1
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f'✓ Создан тип работы: {work_type.name}'
+                        )
                     )
-                )
+                else:
+                    updated_count += 1
+                    self.stdout.write(
+                        f'  Обновлён тип работы: {work_type.name}'
+                    )
             except Exception as e:
                 self.stdout.write(
                     self.style.ERROR(f'Ошибка при создании типа работы "{work_type_data["name"]}": {str(e)}')
                 )
 
         self.stdout.write(
-            self.style.SUCCESS(f'Создано {created_count} новых типов работ')
-        ) 
+            self.style.SUCCESS(f'\nСоздано: {created_count}, Обновлено: {updated_count}')
+        )
+        self.stdout.write(f'Всего типов работ: {WorkType.objects.count()}')

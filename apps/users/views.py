@@ -1,20 +1,26 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+import logging
+
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
+logger = logging.getLogger(__name__)
 from apps.orders.models import Order, Transaction
 from .models import PartnerEarning, ImprovementSuggestion
 from apps.orders.serializers import OrderSerializer, TransactionSerializer
@@ -120,11 +126,23 @@ class UserViewSet(viewsets.ModelViewSet):
         
         if serializer.is_valid():
             user = serializer.save()
+            logger.info(f"[Registration] User created: {user.id}, email: {user.email}")
             
             # Если указан email, отправляем код подтверждения
             if user.email:
+                logger.info(f"[Registration] Sending verification code to {user.email}")
                 verification_code = create_verification_code(user)
-                send_verification_code(user.email, verification_code.code)
+                send_result = send_verification_code(user.email, verification_code.code)
+                logger.info(f"[Registration] Email send result: {send_result}")
+                
+                if not send_result:
+                    logger.error(f"[Registration] Failed to send verification code to {user.email}")
+                    response_data = UserSerializer(user).data
+                    response_data['message'] = 'Регистрация успешна, но не удалось отправить код подтверждения. Попробуйте позже или обратитесь в поддержку.'
+                    response_data['email_verification_required'] = True
+                    return Response(response_data, status=status.HTTP_201_CREATED)
+            else:
+                logger.warning(f"[Registration] User created without email: {user.id}")
             
             # Возвращаем сведения о пользователе после регистрации
             response_data = UserSerializer(user).data

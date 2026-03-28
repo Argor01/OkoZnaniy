@@ -451,6 +451,22 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """При создании комнаты автоматически добавляем всех admin и director"""
+        # Проверяем, существует ли уже чат с таким названием
+        name = serializer.validated_data.get('name')
+        if name:
+            existing_room = DirectorChatRoom.objects.filter(
+                name=name,
+                is_active=True
+            ).first()
+            if existing_room:
+                # Возвращаем существующий чат вместо создания нового
+                staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
+                existing_room.members.add(*staff)
+                existing_room.save()
+                # Вызываем исключение, чтобы остановить создание нового чата
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({'name': 'Чат с таким названием уже существует'})
+        
         room = serializer.save(created_by=self.request.user)
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.set(staff)
