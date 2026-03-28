@@ -19,18 +19,15 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
 
   // Проверяем авторизацию - показываем кнопку только для авторизованных пользователей
   const token = localStorage.getItem('access_token');
-  
-  // Скрываем кнопку на главной странице (лендинге)
-  if (location.pathname === '/' || location.pathname === '/home') {
-    return null;
-  }
 
-  if (!token) {
-    return null;
-  }
-
-  // Проверяем роль пользователя
+  // Проверяем роль пользователя - ВСЕГДА вызываем useEffect, даже если потом вернем null
   React.useEffect(() => {
+    // Если нет токена или на главной странице, не проверяем роль
+    if (!token || location.pathname === '/' || location.pathname === '/home') {
+      setShouldShow(false);
+      return;
+    }
+
     const checkUserRole = async () => {
       // Сначала проверяем localStorage
       const userRole = localStorage.getItem('user_role');
@@ -68,15 +65,10 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
     };
 
     checkUserRole();
-  }, [token]);
+  }, [token, location.pathname]);
 
-  // Пока проверяем роль, не показываем кнопку
-  if (shouldShow === null) {
-    return null;
-  }
-
-  // Не показываем кнопку для админов и директоров
-  if (!shouldShow) {
+  // Пока проверяем роль или если не нужно показывать, возвращаем null
+  if (shouldShow === null || !shouldShow) {
     return null;
   }
 
