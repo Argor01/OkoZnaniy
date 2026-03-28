@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from apps.admin_panel.models import AdminChatRoom
+from apps.director.models import DirectorChatRoom, DirectorChatMessage
 from apps.users.models import User
 
 
@@ -8,7 +8,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Проверяем, существует ли уже чат
-        existing_chat = AdminChatRoom.objects.filter(
+        existing_chat = DirectorChatRoom.objects.filter(
             name='Общий чат администрации'
         ).first()
 
@@ -33,15 +33,25 @@ class Command(BaseCommand):
             return
 
         # Создаем новый чат
-        chat = AdminChatRoom.objects.create(
+        chat = DirectorChatRoom.objects.create(
             name='Общий чат администрации',
             description='Канал связи для администраторов и директоров компании',
-            created_by=first_admin
+            room_type='general',
+            created_by=first_admin,
+            is_active=True
         )
 
         # Добавляем всех админов и директоров
         admins = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         chat.members.set(admins)
+        
+        # Создаем приветственное сообщение
+        DirectorChatMessage.objects.create(
+            room=chat,
+            sender=first_admin,
+            message='Добро пожаловать в общий чат администрации!',
+            is_system=True
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -55,3 +65,4 @@ class Command(BaseCommand):
             self.stdout.write(
                 f'  - {user.first_name} {user.last_name} ({user.email}) - {user.role}'
             )
+

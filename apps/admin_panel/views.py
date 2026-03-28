@@ -11,6 +11,8 @@ from .serializers import (
     SupportRequestSerializer, SupportMessageSerializer,
     ClaimSerializer, ClaimMessageSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer
 )
+from apps.director.models import DirectorChatRoom, DirectorChatMessage
+from apps.director.serializers import DirectorChatRoomSerializer, DirectorChatMessageSerializer
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.orders.serializers import OrderSerializer
@@ -432,30 +434,50 @@ class ClaimViewSet(viewsets.ModelViewSet):
         return response
 
 
-# ============= ЧАТЫ АДМИНИСТРАТОРОВ =============
+# ============= ЧАТЫ АДМИНИСТРАТОРОВ И ДИРЕКТОРА =============
 
 class AdminChatRoomViewSet(viewsets.ModelViewSet):
-    """ViewSet для чатов администраторов"""
-    queryset = AdminChatRoom.objects.all()
-    serializer_class = AdminChatRoomSerializer
+    """ViewSet для чатов администраторов и директора (использует DirectorChatRoom)"""
+    queryset = DirectorChatRoom.objects.all()
+    serializer_class = DirectorChatRoomSerializer
     permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        """Показываем только чаты, где пользователь - участник"""
+        return DirectorChatRoom.objects.filter(
+            members=self.request.user,
+            is_active=True
+        ).prefetch_related('members', 'messages__sender').order_by('-updated_at')
 
     def perform_create(self, serializer):
         """При создании комнаты автоматически добавляем всех admin и director"""
         room = serializer.save(created_by=self.request.user)
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.set(staff)
+        
+        # Создаем системное сообщение о создании чата
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=self.request.user,
+            message=f'Чат "{room.name}" создан',
+            is_system=True
+        )
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         """Отправить сообщение в чат"""
         room = self.get_object()
-        message = AdminChatMessage.objects.create(
+        message_text = request.data.get('message')
+        
+        if not message_text:
+            return Response({'error': 'message обязателен'}, status=400)
+        
+        message = DirectorChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=request.data.get('message')
+            message=message_text
         )
-        serializer = AdminChatMessageSerializer(message)
+        serializer = DirectorChatMessageSerializer(message)
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
@@ -463,6 +485,15 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         """Присоединиться к чату"""
         room = self.get_object()
         room.members.add(request.user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{request.user.get_full_name() or request.user.username} присоединился к чату',
+            is_system=True
+        )
+        
         return Response({'message': 'Вы присоединились к чату'})
 
     @action(detail=True, methods=['post'])
@@ -478,6 +509,15 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         """Покинуть чат"""
         room = self.get_object()
         room.members.remove(request.user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{request.user.get_full_name() or request.user.username} покинул чат',
+            is_system=True
+        )
+        
         return Response({'message': 'Вы покинули чат'})
 
     @action(detail=True, methods=['get', 'post'])
@@ -486,41 +526,19 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         room = self.get_object()
         if request.method == 'GET':
             msgs = room.messages.select_related('sender').order_by('created_at')
-            data = [
-                {
-                    'id': m.id,
-                    'sender': {
-                        'id': m.sender.id,
-                        'first_name': m.sender.first_name,
-                        'last_name': m.sender.last_name,
-                        'role': getattr(m.sender, 'role', ''),
-                    },
-                    'message': m.message,
-                    'created_at': m.created_at.isoformat(),
-                    'is_mine': m.sender_id == request.user.id,
-                }
-                for m in msgs
-            ]
-            return Response(data)
+            serializer = DirectorChatMessageSerializer(msgs, many=True)
+            return Response(serializer.data)
+        
         # POST
         msg_text = request.data.get('message', '').strip()
         if not msg_text:
             return Response({'error': 'Сообщение не может быть пустым'}, status=400)
+        
         # Автоматически добавляем отправителя в участники
         room.members.add(request.user)
-        msg = AdminChatMessage.objects.create(room=room, sender=request.user, message=msg_text)
-        return Response({
-            'id': msg.id,
-            'sender': {
-                'id': request.user.id,
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-                'role': getattr(request.user, 'role', ''),
-            },
-            'message': msg.message,
-            'created_at': msg.created_at.isoformat(),
-            'is_mine': True,
-        }, status=201)
+        msg = DirectorChatMessage.objects.create(room=room, sender=request.user, message=msg_text)
+        serializer = DirectorChatMessageSerializer(msg)
+        return Response(serializer.data, status=201)
 
     @action(detail=True, methods=['post'])
     def invite(self, request, pk=None):
@@ -533,7 +551,17 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({'error': 'Пользователь не найден'}, status=404)
+        
         room.members.add(user)
+        
+        # Системное сообщение
+        DirectorChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=f'{user.get_full_name() or user.username} был приглашен в чат',
+            is_system=True
+        )
+        
         return Response({'message': f'{user.first_name} {user.last_name} добавлен в чат'})
 
 
