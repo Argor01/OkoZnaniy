@@ -8,11 +8,16 @@ export const authApi = {
   
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post(API_ENDPOINTS.auth.login, data);
-    const { access, refresh } = response.data;
+    const { access, refresh, user } = response.data;
     
     
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
+    
+    // Сохраняем роль пользователя
+    if (user?.role) {
+      localStorage.setItem('user_role', user.role);
+    }
     
     return response.data;
   },
@@ -27,6 +32,7 @@ export const authApi = {
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_role');
   },
 
   
@@ -78,12 +84,17 @@ export const authApi = {
   
   verifyEmailCode: async (email: string, code: string): Promise<AuthResponse> => {
     const response = await apiClient.post(API_ENDPOINTS.auth.verifyEmailCode, { email, code });
-    const { access, refresh } = response.data;
+    const { access, refresh, user } = response.data;
     
     
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
     localStorage.setItem('user', JSON.stringify(response.data.user));
+    
+    // Сохраняем роль пользователя
+    if (user?.role) {
+      localStorage.setItem('user_role', user.role);
+    }
     
     return response.data;
   },
