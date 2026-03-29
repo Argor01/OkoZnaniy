@@ -69,27 +69,19 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
           <ShareAltOutlined /> Как продвигать
         </Title>
         <Row gutter={[16, 16]}>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={12}>
             <div className={styles.promotionMethod}>
-              <GlobalOutlined className={`${styles.promotionIcon} ${styles.promotionIconBlue}`} />
+              <TeamOutlined className={`${styles.promotionIcon} ${styles.promotionIconBlue}`} />
               <Paragraph className={styles.promotionText}>
-                <strong>Рекомендуйте ОкоЗнаний</strong> в соцсетях, личном блоге или на сайте
+                <strong>Работайте вместе</strong> с вашим персональным менеджером
               </Paragraph>
             </div>
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={12}>
             <div className={styles.promotionMethod}>
-              <FileImageOutlined className={`${styles.promotionIcon} ${styles.promotionIconGreen}`} />
+              <GlobalOutlined className={`${styles.promotionIcon} ${styles.promotionIconGreen}`} />
               <Paragraph className={styles.promotionText}>
-                <strong>Используйте конверсионные</strong> баннеры, лендинги, виджеты
-              </Paragraph>
-            </div>
-          </Col>
-          <Col xs={24} md={8}>
-            <div className={styles.promotionMethod}>
-              <TeamOutlined className={`${styles.promotionIcon} ${styles.promotionIconOrange}`} />
-              <Paragraph className={styles.promotionText}>
-                <strong>Привлекайте клиентов</strong> на наш ресурс через свою партнёрскую ссылку
+                <strong>Размещайтесь</strong> на платных и бесплатных досках объявлений и в социальных сетях
               </Paragraph>
             </div>
           </Col>
@@ -97,7 +89,43 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
         <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
           <Col xs={24} md={12}>
             <div className={styles.promotionMethod}>
-              <TrophyOutlined className={`${styles.promotionIcon} ${styles.promotionIconPink}`} />
+              <FileImageOutlined className={`${styles.promotionIcon} ${styles.promotionIconOrange}`} />
+              <Paragraph className={styles.promotionText}>
+                <strong>Используйте конверсионные</strong> баннеры, лендинги, виджеты
+              </Paragraph>
+            </div>
+          </Col>
+          <Col xs={24} md={12}>
+            <div className={styles.promotionMethod}>
+              <TrophyOutlined className={`${styles.promotionIcon} ${styles.promotionIconPurple}`} />
+              <Paragraph className={styles.promotionText}>
+                <strong>Привлекайте заказчиков</strong> через площадки Авито, Яндекс Услуги
+              </Paragraph>
+            </div>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} md={12}>
+            <div className={styles.promotionMethod}>
+              <GlobalOutlined className={`${styles.promotionIcon} ${styles.promotionIconPink}`} />
+              <Paragraph className={styles.promotionText}>
+                <strong>Берите контроль</strong> над учебными заведениями в вашем городе и размещайте объявления (группы студентов, подслушано, признавашки)
+              </Paragraph>
+            </div>
+          </Col>
+          <Col xs={24} md={12}>
+            <div className={styles.promotionMethod}>
+              <TeamOutlined className={`${styles.promotionIcon} ${styles.promotionIconBlue}`} />
+              <Paragraph className={styles.promotionText}>
+                <strong>Привлекайте заказчиков</strong> на наш ресурс через свою партнёрскую ссылку
+              </Paragraph>
+            </div>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+          <Col xs={24} md={12}>
+            <div className={styles.promotionMethod}>
+              <TrophyOutlined className={`${styles.promotionIcon} ${styles.promotionIconGreen}`} />
               <Paragraph className={styles.promotionText}>
                 <strong>Увеличивайте базу партнёров</strong> и получайте дополнительные бонусы
               </Paragraph>
@@ -105,9 +133,9 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
           </Col>
           <Col xs={24} md={12}>
             <div className={styles.promotionMethod}>
-              <DollarOutlined className={`${styles.promotionIcon} ${styles.promotionIconPurple}`} />
+              <DollarOutlined className={`${styles.promotionIcon} ${styles.promotionIconOrange}`} />
               <Paragraph className={styles.promotionText}>
-                <strong>Зарабатывайте с каждого заказа</strong> ваших исполнителей и заказчиков
+                <strong>Зарабатывайте с каждого заказа</strong> ваших заказчиков
               </Paragraph>
             </div>
           </Col>
