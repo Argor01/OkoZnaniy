@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Input, 
@@ -184,7 +184,7 @@ export const TicketSystemSection: React.FC = () => {
     }
 
     if (!selectedTicket) {
-      antMessage.error('Тикет не выбран');
+      antMessage.error('Обращение не выбрано');
       return;
     }
 
@@ -327,163 +327,184 @@ export const TicketSystemSection: React.FC = () => {
     completed: tickets.filter(t => t.status === 'completed').length,
   };
 
-  // Компонент деталей тикета
-  const TicketDetails: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
-    <div>
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <Select
-          value={ticket.status}
-          onChange={(value) => handleUpdateStatus(ticket.id, value)}
-          size="small"
-          style={{ minWidth: '120px' }}
-        >
-          <Option value="new">Новый</Option>
-          <Option value="open">Открыт</Option>
-          <Option value="in_progress">В работе</Option>
-          <Option value="completed">Завершен</Option>
-        </Select>
-        <Select
-          value={ticket.priority}
-          onChange={(value) => handleUpdatePriority(ticket.id, value)}
-          size="small"
-          style={{ minWidth: '120px' }}
-        >
-          <Option value="low">Низкий</Option>
-          <Option value="medium">Средний</Option>
-          <Option value="high">Высокий</Option>
-          <Option value="urgent">Срочный</Option>
-        </Select>
-        <Button 
-          size="small" 
-          icon={<TagOutlined />}
-          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=tags`)}
-        >
-          Теги
-        </Button>
-        <Button 
-          size="small" 
-          icon={<MessageOutlined />}
-          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=client-chat`)}
-        >
-          Чат с клиентом
-        </Button>
-        <Button 
-          size="small" 
-          icon={<TeamOutlined />}
-          onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=team-chat`)}
-        >
-          Чат команды
-        </Button>
-      </div>
-
-      <Card size="small" title="Информация о тикете" style={{ marginBottom: '16px' }}>
-        <Descriptions size="small" column={1}>
-          <Descriptions.Item label="Тема">{ticket.subject}</Descriptions.Item>
-          <Descriptions.Item label="Клиент">
-            <Space>
-              <Avatar size={20} icon={<UserOutlined />} />
-              <span>{ticket.user.first_name} {ticket.user.last_name}</span>
-            </Space>
-          </Descriptions.Item>
-          <Descriptions.Item label="Email">{ticket.user.email}</Descriptions.Item>
-          <Descriptions.Item label="Создан">
-            {new Date(ticket.created_at).toLocaleString('ru-RU')}
-          </Descriptions.Item>
-          <Descriptions.Item label="Статус">
-            <Tag color={getStatusColor(ticket.status)}>
-              {getStatusText(ticket.status)}
-            </Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="Приоритет">
-            <Tag color={getPriorityColor(ticket.priority)}>
-              {getPriorityText(ticket.priority)}
-            </Tag>
-          </Descriptions.Item>
-          {ticket.tags_list && ticket.tags_list.length > 0 && (
-            <Descriptions.Item label="Теги">
-              <Space wrap size="small">
-                {ticket.tags_list.map(tag => (
-                  <Tag 
-                    key={tag} 
-                    color={tag.includes('нарушение') ? 'red' : 'blue'}
-                  >
-                    {tag}
-                  </Tag>
-                ))}
-              </Space>
-            </Descriptions.Item>
-          )}
-        </Descriptions>
-      </Card>
-
-      <Card size="small" title="Описание" style={{ marginBottom: '16px' }}>
-        <Text>{ticket.description}</Text>
-      </Card>
-
-      <Card size="small" title="Переписка" style={{ marginBottom: '16px' }}>
-        <div style={{ maxHeight: '400px', overflow: 'auto' }}>
-          {ticket.messages && ticket.messages.length > 0 ? (
-            <Timeline>
-              {ticket.messages.map((msg) => (
-                <Timeline.Item
-                  key={msg.id}
-                  color={msg.is_admin ? '#1890ff' : '#52c41a'}
-                  dot={msg.is_admin ? <MessageOutlined /> : <UserOutlined />}
-                >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <Text strong style={{ fontSize: '12px' }}>
-                        {msg.sender.first_name} {msg.sender.last_name}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: '11px' }}>
-                        {formatMessageTime(msg.created_at)}
-                      </Text>
-                      {msg.is_admin && (
-                        <Tag color="blue">Поддержка</Tag>
-                      )}
-                    </div>
-                    <Text style={{ fontSize: '13px' }}>{msg.message}</Text>
-                  </div>
-                </Timeline.Item>
-              ))}
-            </Timeline>
-          ) : (
-            <Empty description="Нет сообщений" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </Card>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <TextArea
-          value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
-          placeholder="Введите ответ..."
-          rows={3}
-          onPressEnter={(e) => {
-            if (e.ctrlKey) {
-              sendMessage();
-            }
-          }}
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            💡 Ctrl+Enter для отправки
-          </Text>
-          <Button 
-            type="primary" 
-            icon={<SendOutlined />}
-            onClick={sendMessage}
-            loading={sending}
-            disabled={!messageText.trim()}
+  // Компонент деталей тикета - вынесен отдельно для избежания перерисовки при вводе текста
+  const TicketDetails: React.FC<{
+    ticket: Ticket;
+    messageText: string;
+    setMessageText: (text: string) => void;
+    sendMessage: () => void;
+    sending: boolean;
+    handleUpdateStatus: (ticketId: number, status: string) => Promise<void>;
+    handleUpdatePriority: (ticketId: number, priority: string) => Promise<void>;
+    navigate: (path: string) => void;
+  }> = useMemo(() => {
+    const TicketDetailsComponent: React.FC<{
+      ticket: Ticket;
+      messageText: string;
+      setMessageText: (text: string) => void;
+      sendMessage: () => void;
+      sending: boolean;
+      handleUpdateStatus: (ticketId: number, status: string) => Promise<void>;
+      handleUpdatePriority: (ticketId: number, priority: string) => Promise<void>;
+      navigate: (path: string) => void;
+    }> = ({ ticket, messageText, setMessageText, sendMessage, sending, handleUpdateStatus, handleUpdatePriority, navigate }) => (
+      <div>
+        <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <Select
+            value={ticket.status}
+            onChange={(value) => handleUpdateStatus(ticket.id, value)}
             size="small"
+            style={{ minWidth: '120px' }}
           >
-            Отправить
+            <Option value="new">Новый</Option>
+            <Option value="open">Открыт</Option>
+            <Option value="in_progress">В работе</Option>
+            <Option value="completed">Завершен</Option>
+          </Select>
+          <Select
+            value={ticket.priority}
+            onChange={(value) => handleUpdatePriority(ticket.id, value)}
+            size="small"
+            style={{ minWidth: '120px' }}
+          >
+            <Option value="low">Низкий</Option>
+            <Option value="medium">Средний</Option>
+            <Option value="high">Высокий</Option>
+            <Option value="urgent">Срочный</Option>
+          </Select>
+          <Button
+            size="small"
+            icon={<TagOutlined />}
+            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=tags`)}
+          >
+            Теги
+          </Button>
+          <Button
+            size="small"
+            icon={<MessageOutlined />}
+            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=client-chat`)}
+          >
+            Чат с клиентом
+          </Button>
+          <Button
+            size="small"
+            icon={<TeamOutlined />}
+            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=team-chat`)}
+          >
+            Чат команды
           </Button>
         </div>
+
+        <Card size="small" title="Информация об обращении" style={{ marginBottom: '16px' }}>
+          <Descriptions size="small" column={1}>
+            <Descriptions.Item label="Тема">{ticket.subject}</Descriptions.Item>
+            <Descriptions.Item label="Клиент">
+              <Space>
+                <Avatar size={20} icon={<UserOutlined />} />
+                <span>{ticket.user.first_name} {ticket.user.last_name}</span>
+              </Space>
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">{ticket.user.email}</Descriptions.Item>
+            <Descriptions.Item label="Создан">
+              {new Date(ticket.created_at).toLocaleString('ru-RU')}
+            </Descriptions.Item>
+            <Descriptions.Item label="Статус">
+              <Tag color={getStatusColor(ticket.status)}>
+                {getStatusText(ticket.status)}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Приоритет">
+              <Tag color={getPriorityColor(ticket.priority)}>
+                {getPriorityText(ticket.priority)}
+              </Tag>
+            </Descriptions.Item>
+            {ticket.tags_list && ticket.tags_list.length > 0 && (
+              <Descriptions.Item label="Теги">
+                <Space wrap size="small">
+                  {ticket.tags_list.map(tag => (
+                    <Tag
+                      key={tag}
+                      color={tag.includes('нарушение') ? 'red' : 'blue'}
+                    >
+                      {tag}
+                    </Tag>
+                  ))}
+                </Space>
+              </Descriptions.Item>
+            )}
+          </Descriptions>
+        </Card>
+
+        <Card size="small" title="Описание" style={{ marginBottom: '16px' }}>
+          <Text>{ticket.description}</Text>
+        </Card>
+
+        <Card size="small" title="Переписка" style={{ marginBottom: '16px' }}>
+          <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+            {ticket.messages && ticket.messages.length > 0 ? (
+              <Timeline>
+                {ticket.messages.map((msg) => (
+                  <Timeline.Item
+                    key={msg.id}
+                    color={msg.is_admin ? '#1890ff' : '#52c41a'}
+                    dot={msg.is_admin ? <MessageOutlined /> : <UserOutlined />}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <Text strong style={{ fontSize: '12px' }}>
+                          {msg.sender.first_name} {msg.sender.last_name}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: '11px' }}>
+                          {formatMessageTime(msg.created_at)}
+                        </Text>
+                        {msg.is_admin && (
+                          <Tag color="blue">Поддержка</Tag>
+                        )}
+                      </div>
+                      <Text style={{ fontSize: '13px' }}>{msg.message}</Text>
+                    </div>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            ) : (
+              <Empty description="Нет сообщений" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </Card>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <TextArea
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            placeholder="Введите ответ..."
+            rows={3}
+            onPressEnter={(e) => {
+              if (e.ctrlKey) {
+                sendMessage();
+              }
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+              💡 Ctrl+Enter для отправки
+            </Text>
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={sendMessage}
+              loading={sending}
+              disabled={!messageText.trim()}
+              size="small"
+            >
+              Отправить
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+    return TicketDetailsComponent;
+  }, [handleUpdateStatus, handleUpdatePriority, navigate, messagesEndRef]);
 
   return (
     <div className={styles.ticketSystemWrapper}>
@@ -498,7 +519,7 @@ export const TicketSystemSection: React.FC = () => {
           title={
             <div className={styles.ticketSystemTitleRow}>
               <FileTextOutlined className={styles.ticketSystemTitleIcon} />
-              <span>Тикеты поддержки</span>
+              <span>Обращения</span>
             </div>
           }
           extra={
@@ -571,7 +592,7 @@ export const TicketSystemSection: React.FC = () => {
               <List
                 loading={loading}
                 dataSource={filteredTickets}
-                locale={{ emptyText: 'Нет тикетов' }}
+                locale={{ emptyText: 'Нет обращений' }}
                 renderItem={(ticket) => (
                   <Card
                     size="small"
@@ -581,7 +602,7 @@ export const TicketSystemSection: React.FC = () => {
                   >
                     <div className={styles.ticketSystemTicketHeader}>
                       <Text strong className={styles.ticketSystemTicketNumber}>
-                        Тикет {ticket.ticket_number}
+                        Обращение {ticket.ticket_number}
                       </Text>
                       <div className={styles.ticketSystemTicketTags}>
                         <Tag 
@@ -670,7 +691,7 @@ export const TicketSystemSection: React.FC = () => {
               selectedTicket ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <FileTextOutlined />
-                  <span>Тикет #{selectedTicket.ticket_number}</span>
+                  <span>Обращение #{selectedTicket.ticket_number}</span>
                 </div>
               ) : 'Детали тикета'
             }
@@ -690,7 +711,18 @@ export const TicketSystemSection: React.FC = () => {
               )
             }
           >
-            {selectedTicket && <TicketDetails ticket={selectedTicket} />}
+            {selectedTicket && (
+              <TicketDetails
+                ticket={selectedTicket}
+                messageText={messageText}
+                setMessageText={setMessageText}
+                sendMessage={sendMessage}
+                sending={sending}
+                handleUpdateStatus={handleUpdateStatus}
+                handleUpdatePriority={handleUpdatePriority}
+                navigate={navigate}
+              />
+            )}
           </Drawer>
         ) : (
           <>
@@ -715,7 +747,7 @@ export const TicketSystemSection: React.FC = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <FileTextOutlined />
-                      <Text strong>Тикет #{selectedTicket.ticket_number}</Text>
+                      <Text strong>Обращение #{selectedTicket.ticket_number}</Text>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <Button 
@@ -732,7 +764,16 @@ export const TicketSystemSection: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <TicketDetails ticket={selectedTicket} />
+                  <TicketDetails
+                    ticket={selectedTicket}
+                    messageText={messageText}
+                    setMessageText={setMessageText}
+                    sendMessage={sendMessage}
+                    sending={sending}
+                    handleUpdateStatus={handleUpdateStatus}
+                    handleUpdatePriority={handleUpdatePriority}
+                    navigate={navigate}
+                  />
                 </div>
               )}
             </div>

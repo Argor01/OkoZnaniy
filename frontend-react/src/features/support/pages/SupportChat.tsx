@@ -82,9 +82,9 @@ const SupportChat: React.FC = () => {
       const result = await supportApi.createTicket(parseInt(chatId));
       
       if (result.created) {
-        message.success(`Тикет #${result.ticket_id} успешно создан`);
+        message.success(`Обращение #${result.ticket_id} успешно создано`);
       } else {
-        message.info(`Тикет #${result.ticket_id} уже существует`);
+        message.info(`Обращение #${result.ticket_id} уже существует`);
       }
       
       // Можно добавить навигацию к тикету

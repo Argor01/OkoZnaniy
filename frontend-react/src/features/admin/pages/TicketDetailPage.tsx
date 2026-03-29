@@ -159,9 +159,9 @@ export const TicketDetailPage: React.FC = () => {
     return (
       <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
         <Card>
-          <Empty description="Тикет не найден" />
+          <Empty description="Обращение не найдено" />
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к тикетам</Button>
+            <Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к обращениям</Button>
           </div>
         </Card>
       </AdminLayout>
@@ -222,8 +222,8 @@ export const TicketDetailPage: React.FC = () => {
               <ArrowLeftOutlined /><span>Админ панель</span>
             </a>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Тикеты</Breadcrumb.Item>
-          <Breadcrumb.Item>Тикет {ticket.ticket_number}</Breadcrumb.Item>
+          <Breadcrumb.Item>Обращения</Breadcrumb.Item>
+          <Breadcrumb.Item>Обращение {ticket.ticket_number}</Breadcrumb.Item>
         </Breadcrumb>
 
         <Row gutter={[24, 24]}>
@@ -233,7 +233,7 @@ export const TicketDetailPage: React.FC = () => {
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FileTextOutlined />
-                  <span>Тикет {ticket.ticket_number}: {ticket.subject}</span>
+                  <span>Обращение {ticket.ticket_number}: {ticket.subject}</span>
                   {ticket.auto_created && <Tag color="blue">Из чата</Tag>}
                 </div>
               }
@@ -291,7 +291,7 @@ export const TicketDetailPage: React.FC = () => {
                       disabled={ticket.status === 'completed'}
                       style={{ borderColor: '#52c41a', color: '#52c41a' }}
                     >
-                      Закрыть тикет
+                      Закрыть обращение
                     </Button>
                   </Space>
                 </div>
@@ -306,7 +306,7 @@ export const TicketDetailPage: React.FC = () => {
 
           {/* Боковая панель */}
           <Col xs={24} lg={8}>
-            <Card title="Информация о тикете" size="small" style={{ marginBottom: 16 }}>
+            <Card title="Информация об обращении" size="small" style={{ marginBottom: 16 }}>
               <Descriptions column={1} size="small">
                 <Descriptions.Item label="Статус"><Tag color={getStatusColor(ticket.status)}>{getStatusText(ticket.status)}</Tag></Descriptions.Item>
                 <Descriptions.Item label="Приоритет"><Tag color={getPriorityColor(ticket.priority)}>{getPriorityText(ticket.priority)}</Tag></Descriptions.Item>
@@ -393,7 +393,7 @@ export const TicketDetailPage: React.FC = () => {
 
         {/* Модал: финальный ответ */}
         <Modal
-          title="Финальный ответ и закрытие тикета"
+          title="Финальный ответ и закрытие обращения"
           open={finalModalVisible}
           onOk={sendFinalReply}
           onCancel={() => { setFinalModalVisible(false); setFinalText(''); }}
@@ -413,7 +413,7 @@ export const TicketDetailPage: React.FC = () => {
           />
         </Modal>
 
-        {/* Модал: назначить сотрудников */}
+        {/* Модал: назначить наблюдателей */}
         <Modal title="Назначить сотрудников" open={assignModalVisible} onOk={handleAssignUsers} onCancel={() => { setAssignModalVisible(false); setSelectedUserIds([]); }} okText="Назначить" cancelText="Отмена">
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {adminUsers.map((u: any) => (

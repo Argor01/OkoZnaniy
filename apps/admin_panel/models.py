@@ -96,7 +96,7 @@ class SupportMessage(models.Model):
 
 
 class Claim(models.Model):
-    """Обращения пользователей"""
+    """Обращения пользователей (Арбитраж)"""
     STATUS_CHOICES = [
         ('new', 'Новое'),
         ('in_progress', 'В работе'),
@@ -118,6 +118,10 @@ class Claim(models.Model):
         ('urgent', 'Срочный'),
     ]
     
+    # Стороны арбитража
+    plaintiff = models.ForeignKey(User, on_delete=models.CASCADE, related_name='plaintiff_claims', verbose_name='Истец', null=True, blank=True)
+    defendant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='defendant_claims', verbose_name='Ответчик', null=True, blank=True)
+    
     ticket_number = models.CharField(max_length=16, unique=True, default=generate_ticket_number, verbose_name='Номер тикета')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='claims')
     admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_claims')
@@ -126,6 +130,25 @@ class Claim(models.Model):
     claim_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     subject = models.CharField(max_length=255)
     description = models.TextField()
+    
+    # Поля для арбитража
+    reason = models.CharField(max_length=50, choices=[
+        ('order_not_completed', 'Заказ не выполнен'),
+        ('poor_quality', 'Низкое качество'),
+        ('deadline_violation', 'Нарушение сроков'),
+        ('contact_violation', 'Нарушение контактов'),
+        ('other', 'Другое'),
+    ], verbose_name='Причина претензии', default='other')
+    
+    # Финансовые требования
+    refund_type = models.CharField(max_length=20, choices=[
+        ('full', 'Полный возврат'),
+        ('partial', 'Частичный возврат'),
+        ('none', 'Без возврата'),
+    ], verbose_name='Тип возврата', default='none')
+    refund_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name='Процент возврата')
+    refund_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, verbose_name='Сумма возврата')
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     tags = models.TextField(blank=True, verbose_name='Теги', help_text='Теги через запятую, например: #негатив, #срочно, #баг')

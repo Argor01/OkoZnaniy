@@ -60,8 +60,8 @@ class ClaimSerializer(serializers.ModelSerializer):
     admin = UserSerializer(read_only=True)
     assigned_users = UserSerializer(many=True, read_only=True)
     assigned_user_ids = serializers.ListField(
-        child=serializers.IntegerField(), 
-        write_only=True, 
+        child=serializers.IntegerField(),
+        write_only=True,
         required=False,
         help_text="Список ID пользователей для назначения"
     )
@@ -70,12 +70,20 @@ class ClaimSerializer(serializers.ModelSerializer):
     messages = ClaimMessageSerializer(many=True, read_only=True)
     tags_list = serializers.ListField(source='get_tags_list', read_only=True)
     
+    # Поля для арбитража
+    plaintiff = UserSerializer(read_only=True)
+    defendant = UserSerializer(read_only=True)
+    plaintiff_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    defendant_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
     class Meta:
         model = Claim
         fields = ['id', 'ticket_number', 'user', 'admin', 'assigned_users', 'assigned_user_ids',
-                  'order', 'order_id', 'claim_type', 'subject', 'description', 'status', 'priority', 
-                  'tags', 'tags_list', 'resolution', 'created_at', 'updated_at', 'completed_at', 'messages']
-        read_only_fields = ['status', 'resolution', 'created_at', 'updated_at', 'completed_at']
+                  'order', 'order_id', 'claim_type', 'subject', 'description', 'status', 'priority',
+                  'tags', 'tags_list', 'resolution', 'created_at', 'updated_at', 'completed_at', 'messages',
+                  'plaintiff', 'defendant', 'plaintiff_id', 'defendant_id', 'reason', 'refund_type',
+                  'refund_percentage', 'refund_amount']
+        read_only_fields = ['created_at', 'updated_at', 'completed_at']
     
     def update(self, instance, validated_data):
         assigned_user_ids = validated_data.pop('assigned_user_ids', None)
