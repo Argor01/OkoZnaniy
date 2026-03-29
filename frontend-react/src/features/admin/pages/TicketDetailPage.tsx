@@ -264,8 +264,29 @@ export const TicketDetailPage: React.FC = () => {
         </Breadcrumb>
 
         <Row gutter={[24, 24]}>
-          {/* Основная колонка */}
-          <Col xs={24} lg={16}>
+          {/* Основная колонка - для арбитража показываем кнопку открытия чата */}
+          <Col xs={24} lg={ticket.type === 'claim' ? 24 : 16}>
+            {ticket.type === 'claim' && ticket.support_chat_id && (
+              <Card size="small" style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <Text strong>История переписки между сторонами</Text>
+                    <br />
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Изучите все сообщения для понимания сути конфликта
+                    </Text>
+                  </div>
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<MessageOutlined />}
+                    onClick={() => window.open(`/support-chat/${ticket.support_chat_id}`, '_blank')}
+                  >
+                    Открыть чат между сторонами
+                  </Button>
+                </div>
+              </Card>
+            )}
             <Card
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
