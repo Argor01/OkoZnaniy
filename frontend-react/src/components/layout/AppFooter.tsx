@@ -1,8 +1,9 @@
 import React from 'react';
-import { Layout } from 'antd';
+import { Layout, message } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
+import { authApi } from '@/features/auth/api/auth';
 import styles from './AppFooter.module.css';
 
 const { Footer } = Layout;
@@ -27,6 +28,33 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
   const agreementLink = userRole === 'expert' || userRole === 'partner'
     ? '/docs/user_agreement_expert.pdf'
     : '/docs/user_agreement_client.pdf';
+
+  const handleSupportClick = React.useCallback(async () => {
+    // Если пользователь авторизован, открываем чат с поддержкой через DashboardContext
+    const supportUserRaw = localStorage.getItem('support_user_id');
+    let supportUserId = supportUserRaw ? Number(supportUserRaw) : null;
+    
+    if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
+      try {
+        const supportUser = await authApi.getSupportUser();
+        if (supportUser?.id) {
+          localStorage.setItem('support_user_id', String(supportUser.id));
+          supportUserId = supportUser.id;
+        }
+      } catch (error) {
+        console.error('Ошибка получения support user ID:', error);
+      }
+    }
+
+    if (supportUserId && Number.isFinite(supportUserId) && supportUserId > 0) {
+      // Отправляем событие для открытия чата поддержки
+      window.dispatchEvent(new CustomEvent('openSupportChat', {
+        detail: { supportUserId }
+      }));
+    } else {
+      message.error('Поддержка не настроена');
+    }
+  }, []);
   const services = [
     'Дипломная работа',
     'Курсовая работа',
@@ -41,13 +69,14 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
     'Все услуги',
   ];
 
-  const { data: stats } = useQuery({
+      const { data: stats } = useQuery({
     queryKey: ['public-stats'],
     queryFn: async () => {
       const response = await apiClient.get<PublicStats>(API_ENDPOINTS.users.publicStats);
       return response.data;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 10, // 10 seconds
+    refetchInterval: 30000, // refetch every 30 seconds
   });
 
   return (

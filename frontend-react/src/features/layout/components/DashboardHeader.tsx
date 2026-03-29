@@ -274,19 +274,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   return (
     <Header className={styles.dashboardHeader}>
       <div className={styles.headerLeft}>
-        <div className={styles.menuIconWrapper}>
-          <Button
-            type="text"
-            icon={<MenuOutlined />}
-            onClick={onMenuClick}
-            className={styles.menuButton}
-          />
-        </div>
         {!isMobile && renderNavItems()}
       </div>
 
       <div className={styles.headerLogo}>
-        <img src="/assets/logo.png" alt="Око Знаний" className={styles.logoImage} />
+        <div className={styles.logoImageWrapper}>
+          <img src="/assets/logo.png" alt="Око Знаний" className={styles.logoImage} />
+        </div>
         <span className={styles.logoText}>Око Знаний</span>
       </div>
 
@@ -330,16 +324,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
             <div className={styles.profileSection}>
               {!isMobile && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '8px' }}>
-                  <Text className={styles.username}>
-                    {userProfile?.username || 'Пользователь'}
-                  </Text>
-                  {userProfile?.role === 'expert' && (
-                    <Text style={{ fontSize: '12px', color: '#8c8c8c' }}>
-                      Очки: 120
-                    </Text>
-                  )}
-                </div>
+                <Text className={styles.username}>
+                  {userProfile?.username || 'Пользователь'}
+                </Text>
               )}
             </div>
           </Dropdown>

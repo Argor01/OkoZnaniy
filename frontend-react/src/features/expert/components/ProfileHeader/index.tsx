@@ -149,28 +149,34 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
         </div>
         <div className={styles.profileRight}>
           <div className={styles.profileStats}>
-            <Text type="secondary" className={styles.profileStatsMeta}>
-              На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
-            </Text>
-            <div>
-              <Text className={styles.profileStatsLine}>
-                Статистика работ:{' '}
-                <Tooltip
-                  title="Процент заказов со статусом «Завершено» среди завершенных и просроченных заказов"
-                  placement="top"
-                >
-                  <span className={styles.statsNumberSuccess}>
-                    {Number(displayedSuccessRate).toFixed(0)}%
-                  </span>
-                </Tooltip>
-                {' | '}
-                <Tooltip title="Сумма ваших выплат (заработано) по завершенным заказам" placement="top">
-                  <span className={styles.statsNumberEarnings}>
-                    {formatCurrency(expertStats?.total_earnings || 0)}
-                  </span>
-                </Tooltip>
-              </Text>
-            </div>
+                        <Text type="secondary" className={styles.profileStatsMeta}>
+                          На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней
+                        </Text>
+                        <div className={styles.profileStatsBlock}>
+                          <Text className={styles.profileStatsLine}>
+                            Статистика работ:{' '}
+                            <Tooltip
+                              title="Процент заказов со статусом «Завершено» среди завершенных и просроченных заказов"
+                              placement="top"
+                            >
+                              <span className={styles.statsNumberSuccess}>
+                                {Number(displayedSuccessRate).toFixed(0)}%
+                              </span>
+                            </Tooltip>
+                            {' | '}
+                            <Tooltip title="Сумма ваших выплат (заработано) по завершенным заказам" placement="top">
+                              <span className={styles.statsNumberEarnings}>
+                                {formatCurrency(expertStats?.total_earnings || 0)}
+                              </span>
+                            </Tooltip>
+                          </Text>
+                          <Text className={styles.profileStatsLine}>
+                            Очки Знаний:{' '}
+                            <span className={styles.statsNumberPoints}>
+                              {expertStats?.points || 0}
+                            </span>
+                          </Text>
+                        </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 .dashboardHeader {
-  background: #fff;
+  background: var(--color-brand-blue-500);
   padding: 0 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -45,7 +45,7 @@
   padding: 0 12px !important;
   height: 40px !important;
   line-height: 40px !important;
-  color: #333 !important;
+  color: white !important;
   border-radius: 6px;
   background: transparent !important;
   display: flex;
@@ -53,11 +53,6 @@
   gap: 8px;
   border: none !important;
   box-shadow: none !important;
-}
-
-.navItem:hover {
-  color: #1890ff !important;
-  background-color: rgba(0, 0, 0, 0.04) !important;
 }
 
 .navItemActive {
@@ -81,13 +76,25 @@
   width: auto;
 }
 
+.logoImageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: white;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
 .logoText {
   display: flex;
   align-items: center;
   font-family: 'Jost-SemiBold', sans-serif;
   font-weight: 700;
   font-size: 20px;
-  color: #333;
+  color: white;
   text-transform: uppercase;
 }
 
@@ -147,11 +154,23 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  color: white !important;
 }
 
 .iconButton:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(255, 255, 255, 0.15);
+  color: white !important;
+  transform: scale(1.1);
+}
+
+/* Yellow bell icon for notifications */
+.iconButton:has(.anticon-bell) {
+  background: var(--color-brand-yellow-500) !important;
+  color: white !important;
+}
+
+.iconButton:has(.anticon-bell):hover {
+  background: var(--color-brand-yellow-600) !important;
   transform: scale(1.1);
 }
 
@@ -173,7 +192,7 @@
 .username {
   font-weight: 600;
   font-size: 16px;
-  color: #333;
+  color: white;
 }
 
 .balanceIcon {
@@ -183,6 +202,7 @@
 .supportDropdown {
   padding: 8px 4px;
   min-width: 280px;
+  color: white;
 }
 
 .supportSection {
@@ -230,7 +250,7 @@
 
 .supportCopyIcon {
   font-size: 12px;
-  color: #9ca3af;
+  color: white;
 }
 
 .supportSchedule {

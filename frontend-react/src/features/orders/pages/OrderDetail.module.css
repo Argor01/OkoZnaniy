@@ -592,18 +592,26 @@
 
 .expertRow {
   width: 100%;
+  display: flex;
   align-items: flex-start;
+  gap: 12px;
+}
+
+.expertAvatar {
+  flex-shrink: 0;
 }
 
 .expertMeta {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap:-10px;
+  gap: -10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .expertWriteButton {
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .expertReviewBlock {

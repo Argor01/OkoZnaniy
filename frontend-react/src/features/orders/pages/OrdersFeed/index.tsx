@@ -249,9 +249,10 @@ const OrdersFeed: React.FC = () => {
     const matchesSubject = !selectedSubject || order.subject_id === selectedSubject;
     const matchesWorkType = !selectedWorkType || order.work_type_id === selectedWorkType;
     
-    const orderBudget = Number(order.budget);
+        const orderBudget = Number(order.budget);
     const matchesBudget =
-      Number.isFinite(orderBudget) && orderBudget >= budgetRange[0] && orderBudget <= budgetRange[1];
+      !Number.isFinite(orderBudget) || orderBudget === 0 || 
+      (orderBudget >= budgetRange[0] && orderBudget <= budgetRange[1]);
     
     const matchesResponses = 
       responsesFilter === 'all' ||

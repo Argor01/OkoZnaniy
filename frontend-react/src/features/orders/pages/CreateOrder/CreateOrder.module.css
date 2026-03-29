@@ -69,8 +69,43 @@
   flex: 1;
 }
 
+.dateInputItem {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
 .dateInput {
   width: 100%;
+}
+
+.timeSelectors {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.timeFieldWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeLabel {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+}
+
+.timeSelect {
+  width: 100%;
+}
+
+.timeSeparator {
+  font-size: 24px;
+  color: var(--text-secondary);
+  padding-bottom: 4px;
+  font-weight: 300;
+  align-self: flex-end;
 }
 
 .priceSection {
@@ -88,33 +123,51 @@
 
 .uploadArea {
   border-radius: var(--radius-md);
-  border: 2px dashed var(--border-color);
   transition: all 0.3s ease;
   background: var(--bg-secondary);
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
 }
 
 .uploadArea:hover {
-  border-color: var(--primary-blue);
   background: var(--bg-tertiary);
+}
+
+.uploadArea :global(.ant-upload) {
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.uploadArea :global(.ant-upload-drag) {
+  padding: var(--spacing-md) !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 2px dashed var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.uploadArea :global(.ant-upload-drag:hover) {
+  border-color: var(--primary-blue) !important;
 }
 
 .uploadArea :global(.ant-upload-drag-icon) {
   color: var(--text-secondary);
-  font-size: 48px;
-  margin-bottom: var(--spacing-md);
+  font-size: 40px;
+  margin-bottom: var(--spacing-sm) !important;
 }
 
 .uploadArea :global(.ant-upload-text) {
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
+  margin-bottom: 4px !important;
 }
 
 .uploadArea :global(.ant-upload-hint) {
   color: var(--text-tertiary);
-  font-size: 18px;
-  padding: 0 var(--spacing-md);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .orderFilesGrid {

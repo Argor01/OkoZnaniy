@@ -1046,6 +1046,34 @@ def public_stats_view(request):
     """
     from django.utils import timezone
     from datetime import timedelta
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Логирование для отладки
+    auth_header = request.headers.get('Authorization', 'нет заголовка')
+    logger.info(f"[PublicStats] Request headers - Authorization: {auth_header[:50] if auth_header and len(auth_header) > 50 else auth_header}")
+    
+    # Пытаемся аутентифицировать пользователя по токену вручную
+    user = None
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header[7:]  # Убираем 'Bearer '
+        try:
+            from rest_framework_simplejwt.tokens import AccessToken
+            access_token = AccessToken(token)
+            user_id = access_token.payload.get('user_id')
+            if user_id:
+                user = User.objects.get(id=user_id)
+                logger.info(f"[PublicStats] Token validated for user {user.id} ({user.username})")
+        except Exception as e:
+            logger.warning(f"[PublicStats] Token validation failed: {e}")
+    
+    # Обновляем last_login для текущего пользователя (если удалось аутентифицировать)
+    if user and user.is_active:
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+        logger.info(f"[PublicStats] Updated last_login for user {user.id} ({user.username})")
+    else:
+        logger.info("[PublicStats] No authenticated user - NOT updating last_login")
     
     # Общее количество пользователей (только эксперты и клиенты)
     total_experts = User.objects.filter(role='expert').count()
@@ -1069,6 +1097,16 @@ def public_stats_view(request):
     # Активные пользователи (за последние 15 минут)
     fifteen_minutes_ago = timezone.now() - timedelta(minutes=15)
     online_users = User.objects.filter(last_login__gte=fifteen_minutes_ago).count()
+    
+    # Логирование для отладки
+    logger.info(f"[PublicStats] Query: last_login >= {fifteen_minutes_ago}")
+    logger.info(f"[PublicStats] online_users={online_users}, total_users={total_users}")
+    
+    # Отладка: покажем последних 5 заходов
+    recent_logins = User.objects.filter(last_login__isnull=False).order_by('-last_login')[:5]
+    for u in recent_logins:
+        minutes_ago = (timezone.now() - u.last_login).total_seconds() / 60
+        logger.info(f"[PublicStats] Recent login: user {u.id} ({u.username}) - {minutes_ago:.1f} min ago")
     
     return Response({
         'total_experts': total_experts,

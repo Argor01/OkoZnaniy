@@ -124,6 +124,12 @@
   gap: 8px;
 }
 
+.profileStatsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .profileStatsMeta {
   display: block;
   margin-bottom: 12px;
@@ -166,6 +172,15 @@
   text-decoration-style: dashed;
   text-decoration-color: #ef4444;
   text-underline-offset: 3px;
+}
+
+.statsNumberPoints {
+  color: #1f2937;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: #1890ff;
+  text-underline-offset: 3px;
+  font-weight: 600;
 }
 
 @media (max-width: 840px) {

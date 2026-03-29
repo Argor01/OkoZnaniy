@@ -30,18 +30,24 @@ interface CreateOrderFormValues {
   budget: number;
 }
 
+interface DeadlineTimeValues {
+  hours: number;
+  minutes: number;
+}
+
 const ALLOWED_FILE_EXTENSIONS = [
   'doc', 'docx', 'pdf', 'rtf', 'txt',
   'ppt', 'pptx',
   'xls', 'xlsx', 'csv',
   'dwg', 'dxf', 'cdr', 'cdw', 'bak',
   'jpg', 'jpeg', 'png', 'bmp', 'svg',
+  'zip', 'rar', '7z',
 ];
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form] = Form.useForm<CreateOrderFormValues>();
+    const [form] = Form.useForm<CreateOrderFormValues>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [submitLocked, setSubmitLocked] = useState(false);
@@ -49,6 +55,7 @@ const CreateOrder: React.FC = () => {
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
+  const [deadlineTime, setDeadlineTime] = useState<DeadlineTimeValues>({ hours: 12, minutes: 0 });
   const submitGuardRef = useRef(false);
 
   const lockSubmit = () => {
@@ -120,34 +127,60 @@ const CreateOrder: React.FC = () => {
     },
   });
 
-  const getDisabledTime = (current: dayjs.Dayjs | null) => {
-    if (!current) return {};
-    const now = dayjs();
-    if (!current.isSame(now, 'day')) return {};
-
-    const currentHour = now.hour();
-    const currentMinute = now.minute();
-    return {
-      disabledHours: () => Array.from({ length: currentHour }, (_, i) => i),
-      disabledMinutes: (selectedHour: number) =>
-        selectedHour === currentHour ? Array.from({ length: currentMinute + 1 }, (_, i) => i) : [],
-    };
+    const handleDeadlineChange = (date: dayjs.Dayjs | null) => {
+    if (date) {
+      const now = dayjs();
+      if (date.isSame(now, 'day')) {
+        // Если сегодня, проверяем время
+        if (deadlineTime.hours < now.hour() || 
+            (deadlineTime.hours === now.hour() && deadlineTime.minutes <= now.minute())) {
+          // Время в прошлом, устанавливаем текущее + 1 час
+          setDeadlineTime({
+            hours: Math.min(now.hour() + 1, 23),
+            minutes: 0
+          });
+        }
+      }
+    }
   };
 
-  const onFinish = async (values: CreateOrderFormValues) => {
-    if (submitGuardRef.current) return;
-    lockSubmit();
-    try {
-      setIsUploading(true);
-      const orderData: CreateOrderRequest = {
-        title: values.title,
-        description: values.description,
-        deadline: values.deadline.second(0).millisecond(0).toISOString(),
-        subject_id: values.subject,
-        work_type_id: values.work_type,
-        budget: values.budget,
-        custom_topic: values.title,
-      };
+  const handleTimeChange = (field: 'hours' | 'minutes', value: number) => {
+    const newTime = { ...deadlineTime, [field]: value };
+    setDeadlineTime(newTime);
+    
+    // Проверяем, не в прошлом ли время (если дата сегодня)
+    const deadlineDate = form.getFieldValue('deadline');
+    if (deadlineDate && deadlineDate.isSame(dayjs(), 'day')) {
+      const now = dayjs();
+      if (newTime.hours < now.hour() || 
+          (newTime.hours === now.hour() && newTime.minutes <= now.minute())) {
+        message.warning('Выбранное время уже прошло');
+      }
+    }
+  };
+
+    const onFinish = async (values: CreateOrderFormValues) => {
+      if (submitGuardRef.current) return;
+      lockSubmit();
+      try {
+        setIsUploading(true);
+      
+        // Объединяем дату и время
+        const deadlineWithTime = values.deadline
+          .hour(deadlineTime.hours)
+          .minute(deadlineTime.minutes)
+          .second(0)
+          .millisecond(0);
+      
+        const orderData: CreateOrderRequest = {
+          title: values.title,
+          description: values.description,
+          deadline: deadlineWithTime.toISOString(),
+          subject_id: values.subject,
+          work_type_id: values.work_type,
+          budget: values.budget || null,
+          custom_topic: values.title,
+        };
 
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
       const filesToUpload = [...fileList];
@@ -269,7 +302,7 @@ const CreateOrder: React.FC = () => {
             </Form.Item>
 
             
-            <div className={styles.typeSubjectDateRow}>
+                        <div className={styles.typeSubjectDateRow}>
               <Form.Item
                 name="work_type"
                 label="Тип работы"
@@ -346,30 +379,67 @@ const CreateOrder: React.FC = () => {
                 </AppSelect>
               </Form.Item>
 
-              <Form.Item
-                name="deadline"
-                label="Дата сдачи"
-                rules={[
-                  { required: true, message: 'Выберите дату и время сдачи' },
-                  {
-                    validator: (_, value: dayjs.Dayjs | null) => {
-                      if (!value) return Promise.resolve();
-                      if (value.isAfter(dayjs())) return Promise.resolve();
-                      return Promise.reject(new Error('Выберите время позже текущего'));
+              <div className={styles.dateField}>
+                <Form.Item
+                  name="deadline"
+                  label="Дата сдачи"
+                  rules={[
+                    { required: true, message: 'Выберите дату сдачи' },
+                    {
+                      validator: (_, value: dayjs.Dayjs | null) => {
+                        if (!value) return Promise.resolve();
+                        const now = dayjs();
+                        const selectedDateTime = value.hour(deadlineTime.hours).minute(deadlineTime.minutes);
+                        if (selectedDateTime.isAfter(now)) return Promise.resolve();
+                        return Promise.reject(new Error('Выберите дату и время позже текущего'));
+                      },
                     },
-                  },
-                ]}
-                className={styles.dateField}
-              >
-                <AppDatePicker
-                  placeholder="Дата и время сдачи"
-                  format="DD.MM.YYYY HH:mm"
-                  showTime={{ format: 'HH:mm' }}
-                  disabledDate={(current) => current && current < dayjs().startOf('day')}
-                  disabledTime={getDisabledTime}
-                  className={styles.dateInput}
-                />
-              </Form.Item>
+                  ]}
+                  className={styles.dateInputItem}
+                >
+                  <AppDatePicker
+                    placeholder="Дата сдачи"
+                    format="DD.MM.YYYY"
+                    disabledDate={(current) => current && current < dayjs().startOf('day')}
+                    onChange={handleDeadlineChange}
+                    className={styles.dateInput}
+                  />
+                </Form.Item>
+
+                <div className={styles.timeSelectors}>
+                  <div className={styles.timeFieldWrapper}>
+                    <label className={styles.timeLabel}>Часы</label>
+                    <AppSelect
+                      value={deadlineTime.hours}
+                      onChange={(value) => handleTimeChange('hours', value)}
+                      className={styles.timeSelect}
+                    >
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <AppSelect.Option key={i} value={i}>
+                          {String(i).padStart(2, '0')}
+                        </AppSelect.Option>
+                      ))}
+                    </AppSelect>
+                  </div>
+
+                  <span className={styles.timeSeparator}>:</span>
+
+                  <div className={styles.timeFieldWrapper}>
+                    <label className={styles.timeLabel}>Минуты</label>
+                    <AppSelect
+                      value={deadlineTime.minutes}
+                      onChange={(value) => handleTimeChange('minutes', value)}
+                      className={styles.timeSelect}
+                    >
+                      {Array.from({ length: 60 }, (_, i) => (
+                        <AppSelect.Option key={i} value={i}>
+                          {String(i).padStart(2, '0')}
+                        </AppSelect.Option>
+                      ))}
+                    </AppSelect>
+                  </div>
+                </div>
+              </div>
             </div>
 
             
@@ -387,11 +457,10 @@ const CreateOrder: React.FC = () => {
 
 
             
-            <Form.Item
+                        <Form.Item
               name="budget"
               label="Стоимость (₽)"
               rules={[
-                { required: true, message: 'Укажите стоимость' },
                 { 
                   validator: (_, value) => {
                     if (value !== undefined && value !== null && Number(value) <= 0) {
@@ -403,7 +472,7 @@ const CreateOrder: React.FC = () => {
               ]}
             >
               <AppInput.Number
-                placeholder="Стоимость"
+                placeholder="Стоимость (необязательно)"
                 min={1}
                 className={`${styles.priceInput} ${styles.fullWidth}`}
               />
@@ -444,8 +513,8 @@ const CreateOrder: React.FC = () => {
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
-                <p className="ant-upload-hint">
-                  Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg
+                                <p className="ant-upload-hint">
+                  Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg, .zip, .rar, .7z
                 </p>
               </AppUpload.Dragger>
               {fileList.length > 0 && (

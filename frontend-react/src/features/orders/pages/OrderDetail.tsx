@@ -296,7 +296,7 @@ const OrderDetail: React.FC = () => {
       }
     }, [orderId, refreshOrderWithLists, dashboard]);
 
-  const handleFileUpload = React.useCallback(async (files: File[]) => {
+    const handleFileUpload = React.useCallback(async (files: File[]) => {
     if (!orderId || files.length === 0) return;
     
     try {
@@ -309,8 +309,12 @@ const OrderDetail: React.FC = () => {
       );
       
       await Promise.all(uploadPromises);
+      
+      // После загрузки файлов меняем статус заказа на "review"
+      await ordersApi.submitOrder(Number(orderId));
+      
       await refreshOrderWithLists();
-      message.success(`Загружено файлов: ${files.length}`);
+      message.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
     } catch (e: any) {
       message.error(e?.response?.data?.detail || 'Ошибка при загрузке файлов');
     } finally {
@@ -571,11 +575,13 @@ const OrderDetail: React.FC = () => {
                     <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
                   </div>
                 </div>
-                <div className={styles.expertOfferGridItem}>
+                                <div className={styles.expertOfferGridItem}>
                   <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconGreen}`}><DollarOutlined /></div>
                   <div>
                     <div className={styles.expertOfferLabel}>Цена</div>
-                    <div className={styles.expertOfferValue}>{formatCurrency(order.budget)}</div>
+                    <div className={styles.expertOfferValue}>
+                      {order.budget ? formatCurrency(Number(order.budget)) : 'Договорная'}
+                    </div>
                   </div>
                 </div>
                   <div className={styles.expertOfferGridItem}>
@@ -893,15 +899,16 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
-            {order.expert && (
+                        {order.expert && (
               <div className={styles.sectionBlock}>
                 <Divider />
                 <Title level={4}>Исполнитель</Title>
-                <Space align="start" size={6} className={styles.expertRow}>
+                <div className={styles.expertRow}>
                   <Avatar 
                     size={isMobile ? 48 : 64} 
                     src={order.expert.avatar} 
                     icon={<UserOutlined />}
+                    className={styles.expertAvatar}
                   />
                   <div className={styles.expertMeta}>
                     <AppButton 
@@ -937,7 +944,7 @@ const OrderDetail: React.FC = () => {
                       Написать
                     </AppButton>
                   )}
-                </Space>
+                </div>
               </div>
             )}
           </Space>

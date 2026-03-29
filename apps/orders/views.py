@@ -348,9 +348,17 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.error(f"Ошибка при создании сообщения: {str(e)}")
             # Продолжаем даже если сообщение не создалось - чат уже есть
         
-        # Уведомляем эксперта
+                # Уведомляем эксперта о назначении на заказ
         try:
-            NotificationService.notify_status_changed(order, old_status)
+            NotificationService.create_notification(
+                recipient=bid.expert,
+                type='new_bid',  # Используем существующий тип
+                title=f'Вас назначили исполнителем по заказу {order.id}',
+                message=f'Вы назначены исполнителем заказа №{order.id}. Подробности в деталях заказа.',
+                related_object_id=order.id,
+                related_object_type='order'
+            )
+            # Уведомляем клиента о том, что эксперт назначен
             NotificationService.notify_new_bid(order, bid, bid.expert, is_updated=False)
         except Exception as e:
             logger.error(f"Ошибка при отправке уведомлений: {str(e)}")

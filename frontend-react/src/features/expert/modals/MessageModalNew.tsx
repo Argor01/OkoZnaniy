@@ -832,16 +832,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
 
+    // Initial load of chat detail
   useEffect(() => {
     if (!visible || !selectedChat?.id) return;
     loadChatDetail(selectedChat.id);
   }, [visible, selectedChat?.id, loadChatDetail]);
 
+    // Polling for new messages every 1 second
   useEffect(() => {
     if (!visible || !selectedChat?.id) return;
     const id = window.setInterval(() => {
       void loadChatDetail(selectedChat.id);
-    }, 3000);
+    }, 1000);
     return () => window.clearInterval(id);
   }, [visible, selectedChat?.id, loadChatDetail]);
 

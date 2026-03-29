@@ -1,5 +1,5 @@
 .footer {
-  background: linear-gradient(180deg, #1890ff 0%, #0f7eea 100%);
+  background: var(--color-brand-blue-500);
   padding: 12px 0 8px;
   color: #ffffff;
   font-family: var(--font-body);

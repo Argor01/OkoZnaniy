@@ -29,9 +29,19 @@ apiClient.interceptors.request.use((config) => {
     }
   }
 
-  const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('access_token');
   const url = config.url || '';
   const method = (config.method || 'get').toLowerCase();
+
+  // Логирование для public/stats
+  if (url.includes('/public/stats/')) {
+    console.log('[API Client] public/stats request:', {
+      url,
+      method,
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'нет токена',
+    });
+  }
 
   
   const normalizedUrl = url.toString();
