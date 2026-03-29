@@ -37,7 +37,8 @@ import {
   TeamOutlined,
   CloseOutlined,
   ExpandOutlined,
-  TagOutlined
+  TagOutlined,
+  DollarOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -599,11 +600,39 @@ export const TicketSystemSection: React.FC = () => {
                     onClick={() => handleTicketClick(ticket)}
                     className={`${styles.ticketSystemTicketCard} ${selectedTicket?.id === ticket.id ? styles.ticketSystemTicketCardSelected : ''}`}
                     hoverable
+                    style={{
+                      border: ticket.type === 'claim' ? '2px solid #ff4d4f' : undefined,
+                      background: ticket.type === 'claim' ? 'linear-gradient(135deg, #fff1f0 0%, #fff 100%)' : undefined
+                    }}
                   >
                     <div className={styles.ticketSystemTicketHeader}>
-                      <Text strong className={styles.ticketSystemTicketNumber}>
-                        Обращение {ticket.ticket_number}
-                      </Text>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 8 }}>
+                        <div>
+                          <Text strong className={styles.ticketSystemTicketNumber}>
+                            {ticket.type === 'claim' ? '🔴 Арбитраж' : 'Обращение'} {ticket.ticket_number}
+                          </Text>
+                          {ticket.type === 'claim' && (
+                            <Tag color="red" style={{ marginLeft: 8 }}>Требует внимания</Tag>
+                          )}
+                        </div>
+                        {ticket.type === 'claim' && (
+                          <Button
+                            size="small"
+                            type="primary"
+                            icon={<DollarOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/arbitration/${ticket.ticket_number}`);
+                            }}
+                            style={{
+                              background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
+                              border: 'none'
+                            }}
+                          >
+                            Открыть арбитраж
+                          </Button>
+                        )}
+                      </div>
                       <div className={styles.ticketSystemTicketTags}>
                         <Tag 
                           color={getStatusColor(ticket.status)} 
