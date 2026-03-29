@@ -85,13 +85,7 @@ const Header: React.FC = () => {
                   <a className="header__nav-menu-item-link" href={isHomePage ? "#experts" : "/#experts"}>Эксперты</a>
                 </li>
                 <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#shop" : "/#shop"}>Магазин</a>
-                </li>
-                <li className="header__nav-menu-item">
                   <a className="header__nav-menu-item-link" href={isHomePage ? "#faq" : "/#faq"}>FAQ</a>
-                </li>
-                <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#support" : "/#support"}>Поддержка</a>
                 </li>
                 <li className="header__nav-menu-item">
                   <Link className="header__nav-menu-item-link" to="/become-expert">Стать экспертом</Link>

@@ -10,7 +10,7 @@ const PlaceTaskInfo: React.FC = () => {
         <div className="place-task-info__wrapper">
           <div className="place-task-info__client">
             <div className="place-task-info__client-title">Для заказчика</div>
-            <button className="place-task-info__client-button button" onClick={() => navigate('/client/orders')}>Разместить задание</button>
+            <button className="place-task-info__client-button button" onClick={() => navigate('/create-order')}>Разместить задание</button>
           </div>
 
           <div className="place-task-info__expert">

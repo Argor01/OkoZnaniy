@@ -4,6 +4,20 @@ import { useNavigate } from 'react-router-dom';
 
 const LeaveOrder: React.FC = () => {
   const navigate = useNavigate();
+  
+  const handleOrderClick = () => {
+    // Проверяем, авторизован ли пользователь
+    const token = localStorage.getItem('access_token');
+    
+    if (token) {
+      // Если авторизован, переходим на страницу создания заказа
+      navigate('/create-order');
+    } else {
+      // Если не авторизован, переходим на страницу регистрации/входа
+      navigate('/login');
+    }
+  };
+  
   return (
     <section className="leave-order" id="orders">
       <div className="mcontainer">
@@ -62,7 +76,7 @@ const LeaveOrder: React.FC = () => {
         </div>
 
         <div className="leave-order__order">
-          <button className="leave-order__order-button button" onClick={() => navigate('/client/orders')}>Разместить заказ</button>
+          <button className="leave-order__order-button button" onClick={handleOrderClick}>Разместить заказ</button>
         </div>
       </div>
     </section>
