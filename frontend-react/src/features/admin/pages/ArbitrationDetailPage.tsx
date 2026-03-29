@@ -16,7 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
-import './arbitration-detail.css';
+import '../../../styles/arbitration-detail.css';
 
 const { Text, Title, Paragraph } = Typography;
 const { TextArea } = Input;
