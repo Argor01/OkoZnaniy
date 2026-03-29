@@ -3,7 +3,7 @@ import React, { createContext, useContext } from 'react';
 interface DashboardContextType {
   openProfileModal: () => void;
   openMessageModal: (userId?: number) => void;
-  openOrderChat: (orderId: number, userId: number) => void;
+  openOrderChat: (orderId: number, userId: number, chatId?: number) => void;
   openContextChat: (userId: number, title: string, workId?: number) => void;
   openNotificationsModal: () => void;
   openArbitrationModal: () => void;

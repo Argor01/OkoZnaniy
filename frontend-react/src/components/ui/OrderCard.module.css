@@ -328,20 +328,33 @@
 }
 
 .orderBidButtonActive {
-  background: var(--color-brand-orange-500) !important;
-  border-color: var(--color-brand-orange-500) !important;
-  color: #ffffff !important;
+  background: var(--color-brand-orange-500);
+  border-color: var(--color-brand-orange-500);
+  color: #ffffff;
 }
 
 .orderBidButtonActive:hover,
 .orderBidButtonActive:focus {
-  background: var(--color-brand-orange-500) !important;
-  border-color: var(--color-brand-orange-500) !important;
-  color: #ffffff !important;
+  background: var(--color-brand-orange-500);
+  border-color: var(--color-brand-orange-500) ;
+  color: #ffffff;
 }
 
 .orderBidButtonDisabled {
   cursor: not-allowed;
+}
+
+.orderViewButton {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.orderViewButton:hover,
+.orderViewButton:focus {
+  background: var(--bg-primary);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
 }
 
 @media (max-width: 600px) {

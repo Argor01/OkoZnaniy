@@ -58,7 +58,7 @@ export const useTicket = (ticketId: number) => {
             type: 'claim' as const
           };
         } catch (claimError) {
-          throw new Error('Тикет не найден');
+          throw new Error('Обращение не найдено');
         }
       }
     },
@@ -77,7 +77,7 @@ export const useTicketByNumber = (ticketNumber: string) => {
     queryKey: ['admin_ticket_by_number', ticketNumber],
     queryFn: async () => {
       if (!ticket) {
-        throw new Error('Тикет не найден');
+        throw new Error('Обращение не найдено');
       }
       
       // Получаем полную информацию о тикете по ID
@@ -96,7 +96,7 @@ export const useTicketByNumber = (ticketNumber: string) => {
             type: 'claim' as const
           };
         } catch (claimError) {
-          throw new Error('Тикет не найден');
+          throw new Error('Обращение не найдено');
         }
       }
     },

@@ -172,6 +172,27 @@ class OrderSerializer(serializers.ModelSerializer):
             'updated_at'
         ]
 
+    def to_representation(self, instance):
+        """Скрываем чувствительные данные от клиентов, не являющихся владельцами заказа"""
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        
+        if user and getattr(user, 'role', None) == 'client':
+            # Клиент, не являющийся владельцем заказа, не видит:
+            # - ставки (bids)
+            # - комментарии (comments)
+            # - файлы (files)
+            # - additional_requirements
+            is_owner = instance.client_id == user.id
+            if not is_owner:
+                data['bids'] = []
+                data['comments'] = []
+                data['files'] = []
+                data['additional_requirements'] = None
+        
+        return data
+
     def validate(self, data):
         # Логируем входящие данные для отладки
         import logging

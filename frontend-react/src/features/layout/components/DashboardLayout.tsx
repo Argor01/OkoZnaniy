@@ -277,12 +277,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         setSelectedChatContextTitle(undefined);
         setMessageModalVisible(true); 
     },
-    openOrderChat: (orderId: number, userId: number) => {
+    openOrderChat: (orderId: number, userId: number, chatId?: number) => {
         closeAllModals();
         setSelectedOrderIdForChat(orderId);
         setSelectedUserIdForChat(userId);
         setSelectedChatContextTitle(`Заказ #${orderId}`);
-        setMessageModalVisible(true);
+        // Если передан chatId, отправляем событие для открытия конкретного чата
+        if (chatId) {
+          setMessageModalVisible(true);
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('openChatById', {
+              detail: { chatId }
+            }));
+          }, 300);
+        } else {
+          setMessageModalVisible(true);
+        }
     },
     openContextChat: (userId: number, title: string, workId?: number) => {
         closeAllModals();

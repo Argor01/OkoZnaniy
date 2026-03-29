@@ -106,7 +106,7 @@ const OrdersFeed: React.FC = () => {
         }
         return [];
       };
-      const fetchAllClientOrders = async (): Promise<OrdersFeedOrder[]> => {
+            const fetchAllClientOrders = async (): Promise<OrdersFeedOrder[]> => {
         const first = await ordersApi.getClientOrders({ ordering: '-created_at' } as any);
         if (Array.isArray(first)) return first as OrdersFeedOrder[];
         const firstResults = normalizeOrders(first);
@@ -127,7 +127,10 @@ const OrdersFeed: React.FC = () => {
         return all;
       };
       const [available, own] = await Promise.all([
-        ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
+        // Клиенты видят все заказы, эксперты - только доступные для отклика
+        userProfile?.role === 'client'
+          ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
+          : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
         userProfile?.role === 'client'
           ? fetchAllClientOrders().catch(() => [])
           : Promise.resolve([] as OrdersFeedOrder[]),

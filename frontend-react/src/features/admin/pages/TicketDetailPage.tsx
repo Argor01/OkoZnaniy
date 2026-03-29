@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Button, Typography, Descriptions, Input, Select, Tag, Avatar,
-  Space, message, Spin, Empty, Breadcrumb, Row, Col, Modal, Checkbox,
+  Space, message, Spin, Empty, Breadcrumb, Row, Col, Modal, Checkbox, InputNumber,
 } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
   LinkOutlined, TagOutlined, PlusOutlined, SwapOutlined, StarOutlined,
   EyeOutlined, MessageOutlined, HistoryOutlined, CheckCircleOutlined,
-  CloseCircleOutlined,
+  CloseCircleOutlined, DollarOutlined,
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -40,6 +40,14 @@ interface TicketDetail {
   created_at: string;
   updated_at: string;
   completed_at?: string;
+  // Поля для арбитража
+  plaintiff?: { id: number; first_name: string; last_name: string; email: string };
+  defendant?: { id: number; first_name: string; last_name: string; email: string };
+  reason?: string;
+  refund_type?: 'full' | 'partial' | 'none';
+  refund_percentage?: number;
+  refund_amount?: number;
+  claim_type?: string;
 }
 
 const ACTIVITY_ICON: Record<string, React.ReactNode> = {
@@ -72,8 +80,10 @@ export const TicketDetailPage: React.FC = () => {
   const [finalModalVisible, setFinalModalVisible] = useState(false);
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [refundModalVisible, setRefundModalVisible] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [refundPercentage, setRefundPercentage] = useState(0);
   const feedEndRef = useRef<HTMLDivElement>(null);
 
   const { ticket: rawTicket, loading, refetch } = useTicketByNumber(ticketId || '');
@@ -94,6 +104,33 @@ export const TicketDetailPage: React.FC = () => {
   }, [feed]);
 
   const doRefetch = () => { refetch(); refetchFeed(); };
+
+  const handleProcessRefund = async () => {
+    if (!ticket) return;
+    setSending(true);
+    try {
+      const endpoint = ticket.type === 'claim'
+        ? `/api/admin-panel/claims/${ticket.id}/process_refund/`
+        : `/api/admin-panel/support-requests/${ticket.id}/process_refund/`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ refund_percentage: refundPercentage }),
+      });
+      if (response.ok) {
+        message.success(`Возврат ${refundPercentage}% оформлен`);
+        setRefundModalVisible(false);
+        doRefetch();
+      } else {
+        message.error('Ошибка при оформлении возврата');
+      }
+    } catch {
+      message.error('Ошибка при оформлении возврата');
+    } finally {
+      setSending(false);
+    }
+  };
 
   const sendReply = async () => {
     if (!replyText.trim() || !ticket) return;
@@ -159,9 +196,9 @@ export const TicketDetailPage: React.FC = () => {
     return (
       <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
         <Card>
-          <Empty description="Тикет не найден" />
+          <Empty description="Обращение не найдено" />
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к тикетам</Button>
+            <Button type="primary" onClick={() => navigate('/admin/dashboard')}>Вернуться к обращениям</Button>
           </div>
         </Card>
       </AdminLayout>
@@ -222,8 +259,8 @@ export const TicketDetailPage: React.FC = () => {
               <ArrowLeftOutlined /><span>Админ панель</span>
             </a>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Тикеты</Breadcrumb.Item>
-          <Breadcrumb.Item>Тикет {ticket.ticket_number}</Breadcrumb.Item>
+          <Breadcrumb.Item>Обращения</Breadcrumb.Item>
+          <Breadcrumb.Item>Обращение {ticket.ticket_number}</Breadcrumb.Item>
         </Breadcrumb>
 
         <Row gutter={[24, 24]}>
@@ -233,7 +270,7 @@ export const TicketDetailPage: React.FC = () => {
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FileTextOutlined />
-                  <span>Тикет {ticket.ticket_number}: {ticket.subject}</span>
+                  <span>Обращение {ticket.ticket_number}: {ticket.subject}</span>
                   {ticket.auto_created && <Tag color="blue">Из чата</Tag>}
                 </div>
               }
@@ -291,7 +328,7 @@ export const TicketDetailPage: React.FC = () => {
                       disabled={ticket.status === 'completed'}
                       style={{ borderColor: '#52c41a', color: '#52c41a' }}
                     >
-                      Закрыть тикет
+                      Закрыть обращение
                     </Button>
                   </Space>
                 </div>
@@ -306,7 +343,7 @@ export const TicketDetailPage: React.FC = () => {
 
           {/* Боковая панель */}
           <Col xs={24} lg={8}>
-            <Card title="Информация о тикете" size="small" style={{ marginBottom: 16 }}>
+            <Card title="Информация об обращении" size="small" style={{ marginBottom: 16 }}>
               <Descriptions column={1} size="small">
                 <Descriptions.Item label="Статус"><Tag color={getStatusColor(ticket.status)}>{getStatusText(ticket.status)}</Tag></Descriptions.Item>
                 <Descriptions.Item label="Приоритет"><Tag color={getPriorityColor(ticket.priority)}>{getPriorityText(ticket.priority)}</Tag></Descriptions.Item>
@@ -382,10 +419,64 @@ export const TicketDetailPage: React.FC = () => {
               </Space>
             </Card>
 
+            {/* Секция арбитража для претензий */}
+            {ticket.type === 'claim' && (
+              <Card title="Детали арбитража" size="small" style={{ marginBottom: 16 }}>
+                <Descriptions column={1} size="small">
+                  {ticket.plaintiff && (
+                    <Descriptions.Item label="Истец">
+                      <Space>
+                        <Avatar size={24} icon={<UserOutlined />} />
+                        <span>{ticket.plaintiff.first_name} {ticket.plaintiff.last_name}</span>
+                      </Space>
+                    </Descriptions.Item>
+                  )}
+                  {ticket.defendant && (
+                    <Descriptions.Item label="Ответчик">
+                      <Space>
+                        <Avatar size={24} icon={<UserOutlined />} />
+                        <span>{ticket.defendant.first_name} {ticket.defendant.last_name}</span>
+                      </Space>
+                    </Descriptions.Item>
+                  )}
+                  {ticket.reason && (
+                    <Descriptions.Item label="Причина">
+                      {{
+                        order_not_completed: 'Заказ не выполнен',
+                        poor_quality: 'Низкое качество',
+                        deadline_violation: 'Нарушение сроков',
+                        contact_violation: 'Нарушение контактов',
+                        other: 'Другое',
+                      }[ticket.reason]}
+                    </Descriptions.Item>
+                  )}
+                  {ticket.refund_type && (
+                    <Descriptions.Item label="Возврат">
+                      {{
+                        full: 'Полный возврат',
+                        partial: `Частичный (${ticket.refund_percentage}%)`,
+                        none: 'Без возврата',
+                      }[ticket.refund_type]}
+                    </Descriptions.Item>
+                  )}
+                </Descriptions>
+              </Card>
+            )}
+
             <Card title="Быстрые действия" size="small">
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Button block onClick={() => handleUpdateStatus('in_progress')} disabled={ticket.status === 'in_progress'}>Взять в работу</Button>
                 <Button block onClick={() => handleUpdatePriority('high')} disabled={ticket.priority === 'high' || ticket.priority === 'urgent'}>Повысить приоритет</Button>
+                {ticket.type === 'claim' && (
+                  <Button
+                    block
+                    icon={<DollarOutlined />}
+                    onClick={() => setRefundModalVisible(true)}
+                    disabled={ticket.status === 'completed'}
+                  >
+                    Возврат средств
+                  </Button>
+                )}
               </Space>
             </Card>
           </Col>
@@ -393,7 +484,7 @@ export const TicketDetailPage: React.FC = () => {
 
         {/* Модал: финальный ответ */}
         <Modal
-          title="Финальный ответ и закрытие тикета"
+          title="Финальный ответ и закрытие обращения"
           open={finalModalVisible}
           onOk={sendFinalReply}
           onCancel={() => { setFinalModalVisible(false); setFinalText(''); }}
@@ -413,7 +504,7 @@ export const TicketDetailPage: React.FC = () => {
           />
         </Modal>
 
-        {/* Модал: назначить сотрудников */}
+        {/* Модал: назначить наблюдателей */}
         <Modal title="Назначить сотрудников" open={assignModalVisible} onOk={handleAssignUsers} onCancel={() => { setAssignModalVisible(false); setSelectedUserIds([]); }} okText="Назначить" cancelText="Отмена">
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {adminUsers.map((u: any) => (
@@ -423,6 +514,36 @@ export const TicketDetailPage: React.FC = () => {
                 </Checkbox>
               </div>
             ))}
+          </div>
+        </Modal>
+
+        {/* Модал: возврат средств */}
+        <Modal
+          title="Возврат средств по претензии"
+          open={refundModalVisible}
+          onOk={handleProcessRefund}
+          onCancel={() => { setRefundModalVisible(false); setRefundPercentage(0); }}
+          okText="Оформить возврат"
+          cancelText="Отмена"
+          okButtonProps={{ loading: sending }}
+        >
+          <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+            Укажите процент возврата средств клиенту:
+          </Text>
+          <InputNumber
+            value={refundPercentage}
+            onChange={(value) => setRefundPercentage(value || 0)}
+            min={0}
+            max={100}
+            style={{ width: '100%' }}
+            formatter={(value) => `${value}%`}
+            parser={(value) => Number(value?.replace('%', ''))}
+            size="large"
+          />
+          <div style={{ marginTop: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+            <Text type="secondary">
+              При указании 100% будет оформлен полный возврат суммы заказа.
+            </Text>
           </div>
         </Modal>
 

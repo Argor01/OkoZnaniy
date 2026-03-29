@@ -853,7 +853,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return () => window.clearInterval(id);
   }, [visible, loadChats]);
 
-  // Обработчик события для загрузки чата поддержки
+    // Обработчик события для загрузки чата поддержки
   useEffect(() => {
     const handleLoadSupportChatInModal = async (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -909,6 +909,77 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
     };
   }, [loadOrCreateSupportChat, supportUserIdProp, visible]);
+
+    // Обработчик события для открытия чата по userId (после назначения исполнителя)
+  useEffect(() => {
+    const handleOpenChatById = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const chatId = customEvent.detail?.chatId;
+      const userId = customEvent.detail?.userId;
+    
+      console.log('🔧 handleOpenChatById triggered, visible:', visible, 'chatId:', chatId, 'userId:', userId);
+    
+      // Если передан chatId, используем его
+      if (chatId) {
+        try {
+          setLoading(true);
+          const chatData = await chatApi.getById(chatId);
+          await hydrateClosedOrdersForChat(chatData);
+          setSelectedChat(chatData);
+          console.log('🔧 Chat loaded by ID:', chatData);
+          await loadChats();
+          
+          // Извлекаем order_id из сообщений с принятым оффером и открываем панель заказа
+          const orderIdFromAcceptedOffer = (() => {
+            const messages = chatData?.messages;
+            if (!Array.isArray(messages) || messages.length === 0) return null;
+            for (let i = messages.length - 1; i >= 0; i--) {
+              const m = messages[i];
+              if (m?.message_type === 'offer' && m.offer_data?.status === 'accepted') {
+                const id = toPositiveNumber(m.offer_data?.order_id);
+                if (id) return id;
+              }
+            }
+            return null;
+          })();
+          
+          if (orderIdFromAcceptedOffer) {
+            console.log('🔧 Found order_id from accepted offer:', orderIdFromAcceptedOffer);
+            setActiveOrderId(orderIdFromAcceptedOffer);
+            setOrderPanelOpen(true);
+          }
+        } catch (error: unknown) {
+          console.error('🔧 Error in handleOpenChatById (by chatId):', error);
+          antMessage.error('Не удалось открыть чат');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+    
+      // Если передан userId, создаем/открываем чат с этим пользователем
+      if (userId) {
+        try {
+          setLoading(true);
+          await loadOrCreateChatWithUser(userId);
+          console.log('🔧 Chat opened with userId:', userId);
+        } catch (error: unknown) {
+          console.error('🔧 Error in handleOpenChatById (by userId):', error);
+          antMessage.error('Не удалось открыть чат');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+    
+      console.error('🔧 No chatId or userId provided to handleOpenChatById');
+    };
+
+    window.addEventListener('openChatById', handleOpenChatById);
+    return () => {
+      window.removeEventListener('openChatById', handleOpenChatById);
+    };
+  }, [visible, hydrateClosedOrdersForChat, loadChats, loadOrCreateChatWithUser, toPositiveNumber]);
 
   useEffect(() => {
     if (!visible) return;

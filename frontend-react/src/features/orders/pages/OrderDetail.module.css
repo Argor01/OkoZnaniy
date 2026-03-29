@@ -690,6 +690,91 @@
   margin-bottom: 24px;
 }
 
+.bidsNotice {
+  display: block;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+/* Кнопка назначения исполнителя */
+.assignButton {
+  background: #faad14 !important;
+  border-color: #faad14 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.assignButton:hover,
+.assignButton:focus {
+  background: #ffc53d !important;
+  border-color: #ffc53d !important;
+  color: #ffffff !important;
+}
+
+/* Dropzone для загрузки файлов */
+.uploadDropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.uploadDropzoneActive {
+  border-color: var(--primary-blue);
+  background: color-mix(in srgb, var(--primary-blue) 5%, var(--bg-secondary) 95%);
+  transform: scale(1.01);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.uploadIcon {
+  font-size: 48px;
+  color: var(--primary-blue);
+}
+
+.uploadTitle {
+  font-size: 16px !important;
+  color: var(--text-primary);
+}
+
+.uploadSubtitle {
+  font-size: 13px !important;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .uploadDropzone {
+    padding: 24px 16px;
+  }
+  
+  .uploadIcon {
+    font-size: 36px;
+  }
+}
+
 @media (max-width: 768px) {
   .expertOfferGrid {
     grid-template-columns: 1fr;

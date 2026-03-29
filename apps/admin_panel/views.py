@@ -330,6 +330,30 @@ class ClaimViewSet(viewsets.ModelViewSet):
         return Response({'message': 'Обращение завершено'})
     
     @action(detail=True, methods=['post'])
+    def process_refund(self, request, pk=None):
+        """Обработка возврата средств по претензии"""
+        claim = self.get_object()
+        refund_percentage = request.data.get('refund_percentage', 0)
+        refund_amount = request.data.get('refund_amount')
+        
+        # Сохраняем информацию о возврате
+        claim.refund_percentage = refund_percentage
+        if refund_amount:
+            claim.refund_amount = refund_amount
+        claim.status = 'completed'
+        claim.completed_at = timezone.now()
+        claim.save()
+        
+        log_activity(
+            request.user,
+            'completed',
+            f'Оформлен возврат: {refund_percentage}%',
+            meta={'refund_percentage': refund_percentage, 'refund_amount': refund_amount},
+            claim=claim
+        )
+        return Response({'message': f'Возврат {refund_percentage}% оформлен'})
+    
+    @action(detail=True, methods=['post'])
     def reject_claim(self, request, pk=None):
         """Отклонить обращение"""
         claim = self.get_object()

@@ -260,7 +260,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_bid(self, request, pk=None):
-        """Клиент принимает ставку: назначает эксперта и фиксирует бюджет."""
+        """Клиент принимает ставку: назначает эксперта, фиксирует бюджет и создает чат с данными заказа."""
         order = self.get_object()
         user = request.user
         if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
@@ -272,20 +272,94 @@ class OrderViewSet(viewsets.ModelViewSet):
             bid = Bid.objects.select_related('expert', 'order').get(id=bid_id, order=order)
         except Bid.DoesNotExist:
             return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        
         # Назначаем эксперта и согласованную цену
         order.expert = bid.expert
         order.budget = bid.amount
+        
         # Переводим заказ в in_progress, если он был в одном из допустимых статусов
-        # Добавили поддержку перехода из waiting_payment, чтобы после принятия ставки
-        # заказ гарантированно переходил в работу в типичных сценариях оплаты/подтверждения
+        old_status = order.status
         if order.status in ['new', 'revision', 'review', 'waiting_payment']:
-            old_status = order.status
             order.status = 'in_progress'
-            order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
-            NotificationService.notify_status_changed(order, old_status)
+        
+        order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
+        
+        # Ищем существующий чат между клиентом и экспертом или создаем новый
+        from apps.chat.models import Chat, Message
+        
+        # Ищем любой существующий чат между этими пользователями
+        # (даже если в нем уже есть другие заказы)
+        chat = Chat.objects.filter(
+            client=order.client,
+            expert=bid.expert,
+        ).first()
+        
+        if chat:
+            # Используем существующий чат
+            # Если чат был без заказа - привязываем текущий
+            if not chat.order:
+                chat.order = order
+                chat.save(update_fields=['order'])
+            logger.info(f"Использован существующий чат {chat.id} для заказа {order.id}")
         else:
-            order.save(update_fields=['expert', 'budget', 'updated_at'])
-        return Response(OrderSerializer(order).data)
+            # Создаем новый чат с заказом
+            chat = Chat.objects.create(
+                order=order,
+                client=order.client,
+                expert=bid.expert,
+            )
+            logger.info(f"Создан новый чат {chat.id} для заказа {order.id}")
+        
+        # Добавляем участников в любом случае
+        chat.participants.add(order.client, bid.expert)
+        
+        # Созддаем сообщение с данными заказа для отображения карточки в чате
+        # Это аналогично индивидуальному предложению, но сразу с принятым статусом
+        offer_data = {
+            'status': 'accepted',
+            'order_id': order.id,
+            'title': order.title or f'Заказ №{order.id}',
+            'description': order.description or '',
+            'cost': str(order.budget),
+            'deadline': order.deadline.isoformat() if order.deadline else None,
+            'subject_id': order.subject_id,
+            'subject': order.custom_subject or (order.subject.name if order.subject else None),
+            'work_type_id': order.work_type_id,
+            'work_type': order.custom_work_type or (order.work_type.name if order.work_type else None),
+            'expert_id': order.expert_id,
+            'expert_username': order.expert.username if order.expert else None,
+            'client_id': order.client_id,
+            'accepted_at': timezone.now().isoformat(),
+        }
+        
+        message_text = f'Вас назначили исполнителем по заказу {order.id}'
+        message = Message(
+            chat=chat,
+            sender=order.client,
+            text=message_text,
+            message_type='offer',
+            offer_data=offer_data,
+        )
+        try:
+            message.full_clean()
+            message.save()
+            logger.info(f"Сообщение-оффер создано для чата {chat.id} по заказу {order.id}")
+        except Exception as e:
+            logger.error(f"Ошибка при создании сообщения: {str(e)}")
+            # Продолжаем даже если сообщение не создалось - чат уже есть
+        
+        # Уведомляем эксперта
+        try:
+            NotificationService.notify_status_changed(order, old_status)
+            NotificationService.notify_new_bid(order, bid, bid.expert, is_updated=False)
+        except Exception as e:
+            logger.error(f"Ошибка при отправке уведомлений: {str(e)}")
+        
+        # Возвращаем ID чата, чтобы фронтенд мог сразу открыть его
+        response_data = OrderSerializer(order).data
+        response_data['chat_id'] = chat.id
+        logger.info(f"accept_bid: заказ {order.id}, чат {chat.id}, эксперт {bid.expert.id}")
+        return Response(response_data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def reject_bid(self, request, pk=None):
