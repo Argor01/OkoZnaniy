@@ -88,26 +88,34 @@ const CreateOrder: React.FC = () => {
   );
 
   
-  const createWorkTypeMutation = useMutation({
+    const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['workTypes'] });
       setNewWorkTypeModalVisible(false);
       setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
+      // Автоматически выбираем созданный тип работы
+      if (data?.id) {
+        form.setFieldValue('work_type', data.id);
+      }
     },
     onError: () => {
       message.error('Ошибка при добавлении типа работы');
     },
   });
 
-  const createSubjectMutation = useMutation({
+    const createSubjectMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createSubject(name),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setNewSubjectModalVisible(false);
       setNewSubjectName('');
       message.success('Новый предмет добавлен');
+      // Автоматически выбираем созданный предмет
+      if (data?.id) {
+        form.setFieldValue('subject', data.id);
+      }
     },
     onError: () => {
       message.error('Ошибка при добавлении предмета');
@@ -560,12 +568,16 @@ const CreateOrder: React.FC = () => {
       </AppCard>
 
       
-      <Modal
+            <Modal
         title="Добавить новый тип работы"
         open={newWorkTypeModalVisible}
         onOk={() => {
           if (newWorkTypeName.trim()) {
-            createWorkTypeMutation.mutate(newWorkTypeName.trim());
+            // Приводим к правильному регистру: первая буква заглавная, остальные строчные
+            const normalizedName = newWorkTypeName.trim().split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+            createWorkTypeMutation.mutate(normalizedName);
           } else {
             message.error('Введите название типа работы');
           }
@@ -582,19 +594,26 @@ const CreateOrder: React.FC = () => {
           onChange={(e) => setNewWorkTypeName(e.target.value)}
           onPressEnter={() => {
             if (newWorkTypeName.trim()) {
-              createWorkTypeMutation.mutate(newWorkTypeName.trim());
+              const normalizedName = newWorkTypeName.trim().split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+              createWorkTypeMutation.mutate(normalizedName);
             }
           }}
         />
       </Modal>
 
       
-      <Modal
+            <Modal
         title="Добавить новый предмет"
         open={newSubjectModalVisible}
         onOk={() => {
           if (newSubjectName.trim()) {
-            createSubjectMutation.mutate(newSubjectName.trim());
+            // Приводим к правильному регистру: первая буква заглавная, остальные строчные
+            const normalizedName = newSubjectName.trim().split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+            createSubjectMutation.mutate(normalizedName);
           } else {
             message.error('Введите название предмета');
           }
@@ -611,7 +630,10 @@ const CreateOrder: React.FC = () => {
           onChange={(e) => setNewSubjectName(e.target.value)}
           onPressEnter={() => {
             if (newSubjectName.trim()) {
-              createSubjectMutation.mutate(newSubjectName.trim());
+              const normalizedName = newSubjectName.trim().split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+              createSubjectMutation.mutate(normalizedName);
             }
           }}
         />
