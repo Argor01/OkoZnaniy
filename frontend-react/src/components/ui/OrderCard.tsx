@@ -239,7 +239,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </Space>
         </Space>
         
-        {isOwner ? (
+                {isOwner ? (
           <AppButton 
             variant="danger"
             icon={<DeleteOutlined />}
@@ -264,6 +264,19 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             }}
           >
             {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
+          </AppButton>
+        ) : userProfile?.role === 'client' ? (
+          <AppButton 
+            variant="secondary"
+            icon={<ReadOutlined />}
+            size={isMobile ? 'middle' : 'large'}
+            className={styles.orderViewButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick?.(order.id);
+            }}
+          >
+            Просмотреть
           </AppButton>
         ) : null}
       </div>

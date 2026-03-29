@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined, NumberOutlined, DatabaseOutlined } from '@ant-design/icons';
-import { ordersApi, Bid, Order } from '@/features/orders/api/orders';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
+import { ordersApi, Bid, Order, OrderFile } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { chatApi } from '@/features/support/api/chat';
 import BidModal from '../components/BidModal';
@@ -26,9 +26,13 @@ const OrderDetail: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [reviewActionLoading, setReviewActionLoading] = useState<'approve' | 'revision' | 'reject' | null>(null);
-  const [revisionModalOpen, setRevisionModalOpen] = useState(false);
+    const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const [revisionComment, setRevisionComment] = useState('');
   const [revisionSubmitting, setRevisionSubmitting] = useState(false);
+    const [assigningExpertId, setAssigningExpertId] = useState<number | null>(null);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [openingBidModal, setOpeningBidModal] = useState(false);
 
   const removeOrderFromCaches = React.useCallback((id: number) => {
     const filterOut = (data: any) => {
@@ -248,7 +252,7 @@ const OrderDetail: React.FC = () => {
     }
   }, [orderId, refreshOrderWithLists, revisionComment]);
 
-  const handleRejectFromCard = React.useCallback(async () => {
+    const handleRejectFromCard = React.useCallback(async () => {
     if (!orderId) return;
     try {
       setReviewActionLoading('reject');
@@ -261,6 +265,86 @@ const OrderDetail: React.FC = () => {
       setReviewActionLoading(null);
     }
   }, [orderId, refreshOrderWithLists]);
+
+    const handleAssignExpert = React.useCallback(async (bidId: number, expertId: number, expertUsername: string) => {
+      if (!orderId) return;
+      try {
+        setAssigningExpertId(expertId);
+        // Принимаем ставку - это назначит эксперта, создаст чат и вернет chat_id
+        const response = await ordersApi.acceptBid(Number(orderId), bidId);
+        await refreshOrderWithLists();
+        message.success(`Эксперт ${expertUsername} назначен исполнителем`);
+    
+        // Открываем чат напрямую через DashboardContext с переданным chat_id
+        const chatId = response?.chat_id;
+        if (chatId) {
+          setTimeout(() => {
+            dashboard.openOrderChat(Number(orderId), expertId, chatId);
+          }, 300);
+        } else {
+          // Фолбэк: если chat_id не вернулся, используем старую логику с событием
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('openChatById', {
+              detail: { userId: expertId }
+            }));
+          }, 500);
+        }
+      } catch (e: any) {
+        message.error(e?.response?.data?.detail || 'Не удалось назначить исполнителя');
+      } finally {
+        setAssigningExpertId(null);
+      }
+    }, [orderId, refreshOrderWithLists, dashboard]);
+
+  const handleFileUpload = React.useCallback(async (files: File[]) => {
+    if (!orderId || files.length === 0) return;
+    
+    try {
+      setUploadingFiles(true);
+      const uploadPromises = files.map(file => 
+        ordersApi.uploadOrderFile(Number(orderId), file, {
+          file_type: 'solution',
+          description: 'Готовая работа загружена экспертом'
+        })
+      );
+      
+      await Promise.all(uploadPromises);
+      await refreshOrderWithLists();
+      message.success(`Загружено файлов: ${files.length}`);
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Ошибка при загрузке файлов');
+    } finally {
+      setUploadingFiles(false);
+    }
+  }, [orderId, refreshOrderWithLists]);
+
+  const handleDrag = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      handleFileUpload(files);
+    }
+  }, [handleFileUpload]);
+
+  const handleFileInput = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      handleFileUpload(files);
+    }
+  }, [handleFileUpload]);
 
   if (isLoading) {
     return (
@@ -515,9 +599,48 @@ const OrderDetail: React.FC = () => {
               </Paragraph>
             </div>
 
-            {canSeeDeliveredWorkBlock ? (
+                        {canSeeDeliveredWorkBlock ? (
               <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
                 <Title level={4} className={styles.sectionTitle}>Готовая работа</Title>
+                
+                {/* Блок загрузки файлов для эксперта */}
+                {isOrderExpert && order.status === 'in_progress' && (
+                  <div
+                    className={`${styles.uploadDropzone} ${dragActive ? styles.uploadDropzoneActive : ''}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      id="file-upload"
+                      multiple
+                      className={styles.fileInput}
+                      onChange={handleFileInput}
+                      disabled={uploadingFiles}
+                      accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak"
+                    />
+                    <label htmlFor="file-upload" className={styles.uploadLabel}>
+                      <div className={styles.uploadContent}>
+                        {uploadingFiles ? (
+                          <Spin size="large" />
+                        ) : (
+                          <>
+                            <InboxOutlined className={styles.uploadIcon} />
+                            <Text strong className={styles.uploadTitle}>
+                              Перетащите файлы сюда или нажмите для загрузки
+                            </Text>
+                            <Text type="secondary" className={styles.uploadSubtitle}>
+                              Поддерживаются: PDF, DOC, DOCX, изображения, архивы и другие форматы
+                            </Text>
+                          </>
+                        )}
+                      </div>
+                    </label>
+                  </div>
+                )}
+                
                 {deliveredWorkFiles.length > 0 ? (
                   <>
                     <div className={styles.orderFilesGrid}>
@@ -547,7 +670,7 @@ const OrderDetail: React.FC = () => {
                   </>
                 ) : (
                   <Text type="secondary" className={styles.readyWorkEmptyText}>
-                    Работа еще не выгружена.
+                    {isOrderExpert ? 'Загрузите готовую работу' : 'Работа еще не выгружена.'}
                   </Text>
                 )}
               </div>
@@ -607,7 +730,7 @@ const OrderDetail: React.FC = () => {
             ) : null}
 
             
-            {userProfile?.role === 'expert' && 
+                        {userProfile?.role === 'expert' && 
              !order.expert && 
              !userHasBid && 
              order.client?.id !== userProfile?.id && (
@@ -615,8 +738,13 @@ const OrderDetail: React.FC = () => {
                     <AppButton 
                         variant="primary" 
                         size="large" 
-                        onClick={() => setBidModalVisible(true)}
+                        onClick={() => {
+                          setOpeningBidModal(true);
+                          setBidModalVisible(true);
+                        }}
                         className={styles.bidButton}
+                        loading={openingBidModal}
+                        disabled={openingBidModal}
                     >
                         Откликнуться на заказ
                     </AppButton>
@@ -633,7 +761,7 @@ const OrderDetail: React.FC = () => {
             )}
 
             
-            {isOrderOwner && !openedFromChat && Array.isArray(bids) && (
+                        {!openedFromChat && Array.isArray(bids) && bids.length > 0 && (
               <div className={styles.sectionBlock}>
                 <Divider />
                 <Title level={4} className={`${styles.sectionTitle} ${styles.bidsTitle}`}>
@@ -651,6 +779,11 @@ const OrderDetail: React.FC = () => {
                   <Empty description="Пока нет откликов" />
                 ) : (
                   <>
+                    {!isOrderOwner && (
+                      <Text type="secondary" className={styles.bidsNotice}>
+                        Вы просматриваете заказы других клиентов. Отклики доступны только владельцу заказа.
+                      </Text>
+                    )}
                     <List
                       className={styles.bidsList}
                       dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
@@ -661,7 +794,7 @@ const OrderDetail: React.FC = () => {
                           ? Math.max(0, (bidAmount * prepaymentPercent) / 100)
                           : 0;
 
-                        return <List.Item
+                                                                                                return <List.Item
                           key={bid.id}
                           className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
                           actions={
@@ -677,10 +810,23 @@ const OrderDetail: React.FC = () => {
                                       }}
                                     >
                                       Написать
+                                    </AppButton>,
+                                    <AppButton
+                                      key="assign"
+                                      size={isMobile ? 'small' : 'middle'}
+                                      type="primary"
+                                      className={styles.assignButton}
+                                      loading={assigningExpertId === bid.expert.id}
+                                      onClick={async () => {
+                                        handleAssignExpert(bid.id, bid.expert.id, bid.expert.username);
+                                      }}
+                                    >
+                                      Назначить исполнителем
                                     </AppButton>
                                   ]
                                 : []
                           }
+                          // Клиенты, не являющиеся владельцами, не видят кнопки действий
                         >
                           <List.Item.Meta
                             avatar={
@@ -798,9 +944,15 @@ const OrderDetail: React.FC = () => {
         </AppCard>
       </div>
 
-      <BidModal
+            <BidModal
          visible={bidModalVisible}
-         onClose={() => setBidModalVisible(false)}
+         onClose={() => {
+           setBidModalVisible(false);
+           setOpeningBidModal(false);
+         }}
+         onBidSubmitted={() => {
+           setOpeningBidModal(false);
+         }}
          orderId={order.id}
          orderTitle={order.title}
          orderBudget={order.budget ? Number(order.budget) : undefined}
