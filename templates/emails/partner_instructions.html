@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Партнерская программа OkoZnaniy</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .benefits {
+            list-style: none;
+            padding: 0;
+        }
+        .benefits li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Станьте партнером OkoZnaniy! 🤝</h1>
+        
+        <p>Спасибо за интерес к нашей партнерской программе! Мы рады предложить вам выгодные условия сотрудничества.</p>
+        
+        <a href="{{ frontend_url }}/partner-program" class="button">Узнать подробнее о программе</a>
+        
+        <div class="highlight">
+            <h2 style="margin-top: 0;">💰 Зарабатывайте до 30% с каждого заказа!</h2>
+            <p style="margin-bottom: 0;">Привлекайте клиентов и экспертов — получайте стабильный доход от их активности на платформе.</p>
+        </div>
+        
+        <div class="steps">
+            <h2>📋 Как стать партнером:</h2>
+            <ol>
+                <li>Зарегистрируйтесь на платформе</li>
+                <li>Перейдите в раздел "Партнерская программа"</li>
+                <li>Получите уникальную реферальную ссылку</li>
+                <li>Делитесь ссылкой с вашей аудиторией</li>
+                <li>Получайте вознаграждение за каждого привлеченного пользователя</li>
+            </ol>
+        </div>
+        
+        <h2>🎯 Преимущества партнерской программы:</h2>
+        <ul class="benefits">
+            <li>Высокие комиссии — до 30% от заказов</li>
+            <li>Пожизненные отчисления от привлеченных пользователей</li>
+            <li>Прозрачная статистика в личном кабинете</li>
+            <li>Быстрый вывод средств</li>
+            <li>Маркетинговые материалы для продвижения</li>
+            <li>Персональный менеджер для крупных партнеров</li>
+            <li>Бонусы за достижение целей</li>
+        </ul>
+        
+        <h2>💼 Кому подходит:</h2>
+        <ul>
+            <li>Блогерам и инфлюенсерам</li>
+            <li>Владельцам образовательных сайтов</li>
+            <li>Студенческим сообществам</li>
+            <li>Преподавателям и репетиторам</li>
+            <li>Всем, кто хочет дополнительный доход</li>
+        </ul>
+        
+        <h2>📊 Примеры заработка:</h2>
+        <ul>
+            <li><strong>10 привлеченных клиентов</strong> → ~5,000 ₽/месяц</li>
+            <li><strong>50 привлеченных клиентов</strong> → ~25,000 ₽/месяц</li>
+            <li><strong>100+ привлеченных клиентов</strong> → 50,000+ ₽/месяц</li>
+        </ul>
+        
+        <div class="highlight">
+            <p style="margin: 0;"><strong>🎁 Специальное предложение:</strong> Первые 100 партнеров получают повышенную комиссию 35% на первый месяц!</p>
+        </div>
+        
+        <div class="footer">
+            <p>Готовы начать? Зарегистрируйтесь прямо сейчас и начните зарабатывать уже сегодня!</p>
+            <p>Если у вас есть вопросы, напишите нам на {{ support_email }}</p>
+            <p>С уважением,<br>Команда OkoZnaniy<br><a href="{{ frontend_url }}">{{ frontend_url }}</a></p>
+        </div>
+    </div>
+</body>
+</html>

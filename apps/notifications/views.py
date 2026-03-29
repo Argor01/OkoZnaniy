@@ -1,9 +1,10 @@
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
 from .models import Notification
 from .serializers import NotificationSerializer
+from .services import EmailService
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -46,4 +47,72 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(
             {"detail": "Можно обновлять только поле is_read"},
             status=status.HTTP_400_BAD_REQUEST
-        ) 
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def send_registration_email(request):
+    """Отправляет инструкцию по регистрации на указанный email"""
+    email = request.data.get('email')
+    
+    if not email:
+        return Response(
+            {"error": "Email обязателен"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Простая валидация email
+    if '@' not in email or '.' not in email:
+        return Response(
+            {"error": "Некорректный email"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Отправляем email
+    success = EmailService.send_registration_instructions(email)
+    
+    if success:
+        return Response(
+            {"message": "Инструкция отправлена на ваш email"},
+            status=status.HTTP_200_OK
+        )
+    else:
+        return Response(
+            {"error": "Ошибка отправки email. Попробуйте позже"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def send_partner_email(request):
+    """Отправляет информацию о партнерской программе на указанный email"""
+    email = request.data.get('email')
+    
+    if not email:
+        return Response(
+            {"error": "Email обязателен"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Простая валидация email
+    if '@' not in email or '.' not in email:
+        return Response(
+            {"error": "Некорректный email"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Отправляем email
+    success = EmailService.send_partner_instructions(email)
+    
+    if success:
+        return Response(
+            {"message": "Информация о партнерской программе отправлена на ваш email"},
+            status=status.HTTP_200_OK
+        )
+    else:
+        return Response(
+            {"error": "Ошибка отправки email. Попробуйте позже"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 from datetime import timedelta
 from .models import Notification, NotificationType
 
@@ -403,3 +405,190 @@ class NotificationService:
         # Массовое создание для оптимизации
         Notification.objects.bulk_create(notifications)
         return len(notifications)
+
+class EmailService:
+    """Сервис для отправки email"""
+    
+    @staticmethod
+    def send_registration_instructions(email):
+        """Отправляет инструкцию по регистрации и доступные заказы"""
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        
+        subject = "Инструкция по регистрации на OkoZnaniy"
+        
+        # Текстовая версия письма
+        text_content = f"""
+Здравствуйте!
+
+Спасибо за интерес к нашей платформе OkoZnaniy!
+
+📋 Инструкция по регистрации:
+
+1. Перейдите на сайт {settings.FRONTEND_URL}/register
+2. Заполните форму регистрации (email, пароль, имя)
+3. Подтвердите email (письмо придет на указанный адрес)
+4. Выберите роль: Эксперт или Клиент
+5. Заполните профиль
+
+Для экспертов:
+- Укажите специализацию и предметы
+- Загрузите документы об образовании
+- Дождитесь проверки анкеты (обычно 1-2 дня)
+- После одобрения начинайте брать заказы!
+
+💼 Первые доступные заказы:
+
+На платформе уже есть заказы по различным предметам:
+- Математика, физика, химия
+- Программирование и IT
+- Экономика и бизнес
+- Гуманитарные науки
+- И многое другое!
+
+Средняя стоимость заказа: от 500 до 5000 рублей
+Срок выполнения: от 1 дня до 2 недель
+
+🎯 Преимущества работы с нами:
+
+✓ Прозрачная система оплаты
+✓ Защита от мошенничества
+✓ Удобный интерфейс
+✓ Поддержка 24/7
+✓ Быстрый вывод средств
+
+Если у вас есть вопросы, напишите нам в поддержку через сайт или на {settings.DEFAULT_FROM_EMAIL}
+
+С уважением,
+Команда OkoZnaniy
+{settings.FRONTEND_URL}
+        """
+        
+        try:
+            # HTML версия письма
+            html_content = render_to_string('emails/registration_instructions.html', {
+                'frontend_url': settings.FRONTEND_URL,
+                'support_email': settings.DEFAULT_FROM_EMAIL,
+            })
+            
+            # Создаем письмо с HTML и текстовой версией
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            
+            return True
+        except Exception as e:
+            print(f"Ошибка отправки email: {e}")
+            # Fallback на простую отправку
+            try:
+                send_mail(
+                    subject=subject,
+                    message=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+                return True
+            except Exception as e2:
+                print(f"Ошибка fallback отправки email: {e2}")
+                return False
+
+    @staticmethod
+    def send_partner_instructions(email):
+        """Отправляет информацию о партнерской программе"""
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        
+        subject = "Партнерская программа OkoZnaniy — зарабатывайте до 30%"
+        
+        # Текстовая версия письма
+        text_content = f"""
+Здравствуйте!
+
+Спасибо за интерес к партнерской программе OkoZnaniy!
+
+💰 ЗАРАБАТЫВАЙТЕ ДО 30% С КАЖДОГО ЗАКАЗА!
+
+📋 Как стать партнером:
+
+1. Зарегистрируйтесь на платформе {settings.FRONTEND_URL}/register
+2. Перейдите в раздел "Партнерская программа"
+3. Получите уникальную реферальную ссылку
+4. Делитесь ссылкой с вашей аудиторией
+5. Получайте вознаграждение за каждого привлеченного пользователя
+
+🎯 Преимущества:
+
+✓ Высокие комиссии — до 30% от заказов
+✓ Пожизненные отчисления от привлеченных пользователей
+✓ Прозрачная статистика в личном кабинете
+✓ Быстрый вывод средств
+✓ Маркетинговые материалы для продвижения
+✓ Персональный менеджер для крупных партнеров
+✓ Бонусы за достижение целей
+
+💼 Кому подходит:
+
+- Блогерам и инфлюенсерам
+- Владельцам образовательных сайтов
+- Студенческим сообществам
+- Преподавателям и репетиторам
+- Всем, кто хочет дополнительный доход
+
+📊 Примеры заработка:
+
+• 10 привлеченных клиентов → ~5,000 ₽/месяц
+• 50 привлеченных клиентов → ~25,000 ₽/месяц
+• 100+ привлеченных клиентов → 50,000+ ₽/месяц
+
+🎁 СПЕЦИАЛЬНОЕ ПРЕДЛОЖЕНИЕ:
+Первые 100 партнеров получают повышенную комиссию 35% на первый месяц!
+
+Готовы начать? Зарегистрируйтесь прямо сейчас:
+{settings.FRONTEND_URL}/partner-program
+
+Если у вас есть вопросы, напишите нам на {settings.DEFAULT_FROM_EMAIL}
+
+С уважением,
+Команда OkoZnaniy
+{settings.FRONTEND_URL}
+        """
+        
+        try:
+            # HTML версия письма
+            html_content = render_to_string('emails/partner_instructions.html', {
+                'frontend_url': settings.FRONTEND_URL,
+                'support_email': settings.DEFAULT_FROM_EMAIL,
+            })
+            
+            # Создаем письмо с HTML и текстовой версией
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            
+            return True
+        except Exception as e:
+            print(f"Ошибка отправки партнерского email: {e}")
+            # Fallback на простую отправку
+            try:
+                send_mail(
+                    subject=subject,
+                    message=text_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+                return True
+            except Exception as e2:
+                print(f"Ошибка fallback отправки партнерского email: {e2}")
+                return False

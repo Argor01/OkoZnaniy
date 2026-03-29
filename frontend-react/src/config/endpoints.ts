@@ -147,4 +147,8 @@ export const API_ENDPOINTS = {
     generateLink: '/users/generate_referral_link/',
     list: '/users/partners_list/',
   },
+  notifications: {
+    sendRegistrationEmail: '/notifications/send-registration-email/',
+    sendPartnerEmail: '/notifications/send-partner-email/',
+  },
 } as const;
