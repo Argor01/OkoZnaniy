@@ -7,4 +7,6 @@ router.register('notifications', views.NotificationViewSet, basename='notificati
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('send-registration-email/', views.send_registration_email, name='send-registration-email'),
+    path('send-partner-email/', views.send_partner_email, name='send-partner-email'),
 ] 

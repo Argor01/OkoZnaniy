@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Email API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тест отправки email</h1>
+    <form id="emailForm">
+        <input type="email" id="email" placeholder="Введите email" required>
+        <button type="submit" id="submitBtn">Отправить</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('emailForm');
+        const emailInput = document.getElementById('email');
+        const submitBtn = document.getElementById('submitBtn');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+            result.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/notifications/send-registration-email/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.innerHTML = `<div class="message success">${data.message}</div>`;
+                    emailInput.value = '';
+                } else {
+                    result.innerHTML = `<div class="message error">${data.error || 'Ошибка отправки'}</div>`;
+                }
+            } catch (err) {
+                result.innerHTML = `<div class="message error">Ошибка соединения: ${err.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить';
+            }
+        });
+    </script>
+</body>
+</html>
