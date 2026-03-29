@@ -29,6 +29,7 @@ const ExpertClientOrders = lazy(() => import('@/features/orders/pages/ExpertClie
 const PurchasedWorks = lazy(() => import('@/features/shop/pages/PurchasedWorks'));
 const OrdersFeed = lazy(() => import('@/features/orders/pages/OrdersFeed'));
 const SupportChat = lazy(() => import('@/features/support/pages/SupportChat'));
+const ClaimForm = lazy(() => import('@/features/support/pages/ClaimForm'));
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
@@ -244,13 +245,21 @@ export const AppRoutes: React.FC = () => {
       />
       
       {/* Support Routes */}
-      <Route 
+      <Route
         path={ROUTES.supportChat.detail}
         element={
           <ProtectedRoute>
             <SupportChat />
           </ProtectedRoute>
-        } 
+        }
+      />
+      <Route
+        path="/support/claim-form"
+        element={
+          <ProtectedRoute>
+            <ClaimForm />
+          </ProtectedRoute>
+        }
       />
       
       {/* 404 */}
