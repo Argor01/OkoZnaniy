@@ -240,29 +240,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             )}
           </Upload>
         </Form.Item>
-        <Form.Item 
+                <Form.Item 
           label="Никнейм" 
           name="username"
           rules={[
             { required: true, message: 'Введите никнейм' },
             { min: 3, message: 'Минимум 3 символа' },
-            { max: 30, message: 'Максимум 30 символов' },
-            { 
-              pattern: /^[a-zA-Z0-9а-яА-ЯёЁ@.+\-_]+$/, 
-              message: 'Никнейм может содержать только буквы, цифры и символы @.+-_' 
-            }
+            { max: 150, message: 'Максимум 150 символов' }
           ]}
-          extra="Используйте подчеркивание вместо пробела"
+          extra="Можно использовать пробелы и специальные символы"
         >
           <Input 
             className={styles.inputField} 
             size="large" 
-            placeholder="Ваш_никнейм"
-            onChange={(e) => {
-
-              const value = e.target.value.replace(/\s+/g, '_');
-              form.setFieldValue('username', value);
-            }}
+            placeholder="Ваш никнейм"
           />
         </Form.Item>
         <Form.Item label="О себе" name="bio">

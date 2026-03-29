@@ -14,17 +14,21 @@
   background: var(--bg-secondary);
 }
 
-/* Override Ant Design styles for Dragger to match our theme */
+/* Override Ant Design styles for Dragger to match our theme - ОТКЛЮЧЕНО для создания заказа */
+/*
 .upload :global(.ant-upload.ant-upload-drag) {
-  background: var(--bg-secondary);
-  border: 2px dashed var(--border-color);
+  background: transparent !important;
+  border: none !important;
   border-radius: var(--radius-lg);
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .upload :global(.ant-upload.ant-upload-drag:hover) {
   border-color: var(--primary-blue);
   background: var(--bg-tertiary);
 }
+*/
 
 .upload :global(.ant-upload-drag-icon .anticon) {
   color: var(--primary-purple);

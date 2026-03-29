@@ -125,7 +125,7 @@
   border-radius: var(--radius-md);
   transition: all 0.3s ease;
   background: var(--bg-secondary);
-  padding: var(--spacing-lg);
+  padding: 0 !important;
   margin-top: var(--spacing-sm);
 }
 
@@ -133,16 +133,50 @@
   background: var(--bg-tertiary);
 }
 
-.uploadArea :global(.ant-upload) {
-  width: 100%;
+/* Сброс у родительских элементов */
+.uploadArea :global(.ant-form-item),
+.uploadArea :global(.ant-form-item-control),
+.uploadArea :global(.ant-form-item-control-input),
+.uploadArea :global(.ant-form-item-control-input-content) {
   padding: 0 !important;
   margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
 }
 
+/* Сброс у wrapper элемента */
+.uploadArea :global(span.ant-upload-wrapper) {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+
+
+/* Полный сброс всех стилей Ant Design и wrapper элементов */
+.uploadArea :global(.ant-upload),
+.uploadArea :global(.ant-upload-drag),
+.uploadArea :global(.ant-upload-drag > div),
+.uploadArea :global(.ant-upload > div),
+.uploadArea :global(div.ant-upload-drag-icon),
+.uploadArea :global(div.ant-upload-text),
+.uploadArea :global(div.ant-upload-hint),
+.uploadArea :global(span.ant-upload-drag-icon),
+.uploadArea :global(span.ant-upload-text),
+.uploadArea :global(span.ant-upload-hint) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Пунктирная рамка только у ant-upload-drag */
 .uploadArea :global(.ant-upload-drag) {
   padding: var(--spacing-md) !important;
-  margin: 0 !important;
-  background: transparent !important;
   border: 2px dashed var(--border-color) !important;
   border-radius: var(--radius-md) !important;
 }
@@ -151,23 +185,30 @@
   border-color: var(--primary-blue) !important;
 }
 
-.uploadArea :global(.ant-upload-drag-icon) {
+/* Стили контента */
+.uploadArea :global(div.ant-upload-drag-icon),
+.uploadArea :global(span.ant-upload-drag-icon) {
   color: var(--text-secondary);
   font-size: 40px;
   margin-bottom: var(--spacing-sm) !important;
+  display: block;
 }
 
-.uploadArea :global(.ant-upload-text) {
+.uploadArea :global(div.ant-upload-text),
+.uploadArea :global(span.ant-upload-text) {
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 4px !important;
+  display: block;
 }
 
-.uploadArea :global(.ant-upload-hint) {
+.uploadArea :global(div.ant-upload-hint),
+.uploadArea :global(span.ant-upload-hint) {
   color: var(--text-tertiary);
   font-size: 13px;
   line-height: 1.4;
+  display: block;
 }
 
 .orderFilesGrid {

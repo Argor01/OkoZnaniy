@@ -166,14 +166,34 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """Serializer для обновления пользователя"""
+    username = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=150,
+        trim_whitespace=False  # Не обрезаем пробелы по краям
+    )
     
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'phone', 'avatar', 'bio',
+            'username', 'first_name', 'last_name', 'phone', 'avatar', 'bio',
             'experience_years', 'hourly_rate', 'education', 'skills',
             'portfolio_url', 'city'
         ]
+    
+    def validate_username(self, value):
+        """Разрешаем пробелы в никнейме"""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("Никнейм не может состоять только из пробелов")
+        # Проверяем на уникальность, исключая текущего пользователя
+        if value and value.strip():
+            user = self.context.get('request').user if self.context.get('request') else None
+            if user:
+                existing = User.objects.filter(username=value).exclude(id=user.id).first()
+                if existing:
+                    raise serializers.ValidationError("Этот никнейм уже занят")
+        return value
 
 
 class PasswordResetSerializer(serializers.Serializer):

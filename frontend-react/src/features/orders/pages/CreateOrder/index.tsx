@@ -483,7 +483,7 @@ const CreateOrder: React.FC = () => {
               name="files"
               label="Прикрепить файлы (необязательно)"
             >
-              <AppUpload.Dragger
+                            <AppUpload.Dragger
                 name="files"
                 multiple
                 fileList={fileList}
@@ -509,13 +509,13 @@ const CreateOrder: React.FC = () => {
                 }}
                 className={styles.uploadArea}
               >
-                <p className="ant-upload-drag-icon">
+                <div className="ant-upload-drag-icon">
                   <InboxOutlined />
-                </p>
-                <p className="ant-upload-text">Нажмите или перетащите файлы сюда</p>
-                                <p className="ant-upload-hint">
+                </div>
+                <div className="ant-upload-text">Нажмите или перетащите файлы сюда</div>
+                <div className="ant-upload-hint">
                   Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg, .zip, .rar, .7z
-                </p>
+                </div>
               </AppUpload.Dragger>
               {fileList.length > 0 && (
                 <div className={styles.orderFilesGrid}>
