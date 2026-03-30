@@ -187,28 +187,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setMessageModalVisible(true);
   }, [closeAllModals]);
 
-  // Обработчик события для открытия чата с поддержкой
+  // Обработчик события для открытия формы подачи жалобы
   React.useEffect(() => {
-    const handleOpenSupportChat = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const supportUserId = customEvent.detail?.supportUserId;
-      
-      closeAllModals();
-      setMessageModalVisible(true);
-      // Отправляем событие для загрузки чата поддержки в MessageModalNew
-      // Увеличиваем задержку, чтобы модальное окно успело открыться
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('loadSupportChatInModal', {
-          detail: { supportUserId }
-        }));
-      }, 300);
+    const handleOpenSupportChat = () => {
+      // Перенаправляем на форму подачи жалобы вместо открытия чата
+      navigate('/support/claim-form');
     };
 
     window.addEventListener('openSupportChat', handleOpenSupportChat);
     return () => {
       window.removeEventListener('openSupportChat', handleOpenSupportChat);
     };
-  }, [closeAllModals]);
+  }, [closeAllModals, navigate]);
 
   // Обработчик события для открытия чата по userId или chatId
   React.useEffect(() => {
@@ -270,18 +260,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [closeAllModals]);
 
   const handleSupportClick = useCallback(() => {
-    void (async () => {
-      const id = await ensureSupportUserId();
-      if (!id) {
-        message.error('Поддержка не настроена');
-        return;
-      }
-      closeAllModals();
-      setSelectedUserIdForChat(id);
-      setSelectedChatContextTitle(undefined);
-      setMessageModalVisible(true);
-    })();
-  }, [closeAllModals, ensureSupportUserId]);
+    // Перенаправляем на форму подачи жалобы
+    navigate('/support/claim-form');
+  }, [navigate]);
 
   const handleHeaderMenuClick = useCallback(() => {
     if (isMobile) {

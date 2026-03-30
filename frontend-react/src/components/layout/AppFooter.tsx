@@ -1,9 +1,8 @@
 import React from 'react';
-import { Layout, message } from 'antd';
+import { Layout } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
-import { authApi } from '@/features/auth/api/auth';
 import styles from './AppFooter.module.css';
 
 const { Footer } = Layout;
@@ -29,31 +28,9 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
     ? '/docs/user_agreement_expert.pdf'
     : '/docs/user_agreement_client.pdf';
 
-  const handleSupportClick = React.useCallback(async () => {
-    // Если пользователь авторизован, открываем чат с поддержкой через DashboardContext
-    const supportUserRaw = localStorage.getItem('support_user_id');
-    let supportUserId = supportUserRaw ? Number(supportUserRaw) : null;
-    
-    if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
-      try {
-        const supportUser = await authApi.getSupportUser();
-        if (supportUser?.id) {
-          localStorage.setItem('support_user_id', String(supportUser.id));
-          supportUserId = supportUser.id;
-        }
-      } catch (error) {
-        console.error('Ошибка получения support user ID:', error);
-      }
-    }
-
-    if (supportUserId && Number.isFinite(supportUserId) && supportUserId > 0) {
-      // Отправляем событие для открытия чата поддержки
-      window.dispatchEvent(new CustomEvent('openSupportChat', {
-        detail: { supportUserId }
-      }));
-    } else {
-      message.error('Поддержка не настроена');
-    }
+  const handleSupportClick = React.useCallback(() => {
+    // Перенаправляем на форму подачи жалобы
+    window.location.href = '/support/claim-form';
   }, []);
   const services = [
     'Дипломная работа',
