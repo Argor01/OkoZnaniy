@@ -210,6 +210,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     };
   }, [closeAllModals]);
 
+  // Обработчик события для открытия чата по userId или chatId
+  React.useEffect(() => {
+    const handleOpenChatById = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const chatId = customEvent.detail?.chatId;
+      const userId = customEvent.detail?.userId;
+      
+      closeAllModals();
+      
+      if (userId) {
+        setSelectedUserIdForChat(userId);
+      }
+      
+      setMessageModalVisible(true);
+      
+      // Отправляем событие для загрузки чата в MessageModalNew
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('openChatById', {
+          detail: { chatId, userId }
+        }));
+      }, 300);
+    };
+
+    window.addEventListener('openChatById', handleOpenChatById);
+    return () => {
+      window.removeEventListener('openChatById', handleOpenChatById);
+    };
+  }, [closeAllModals]);
+
   const handleNotificationsClick = useCallback(() => {
     closeAllModals();
     setNotificationsModalVisible(true);

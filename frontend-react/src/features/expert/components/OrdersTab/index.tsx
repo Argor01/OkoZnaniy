@@ -361,9 +361,15 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                           Активировать
                         </AppButton>
                       )}
-                    </div>
+                                        </div>
                     <div className={styles.orderBudget}>
-                      {order.budget ? `${order.budget} ₽` : 'Договорная'}
+                      {(() => {
+                        const budgetNum = Number(order.budget);
+                        if (!Number.isFinite(budgetNum) || budgetNum === 0) {
+                          return 'Договорная';
+                        }
+                        return `${budgetNum.toLocaleString('ru-RU')} ₽`;
+                      })()}
                     </div>
                   </div>
                 </div>

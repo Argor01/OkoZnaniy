@@ -1,10 +1,11 @@
 import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, message as antMessage } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
+import { chatApi } from '@/features/support/api/chat';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
@@ -80,10 +81,33 @@ const UserProfile: FC = () => {
     refetchInterval: 15000,
   });
 
-  const profileSpecializations =
+    const profileSpecializations =
     liveSpecializations.length > 0
       ? liveSpecializations
       : (Array.isArray(userData?.specializations) ? userData.specializations : []);
+
+  const handleWriteMessage = async () => {
+    if (!userId) {
+      antMessage.error('ID пользователя не найден');
+      return;
+    }
+
+    try {
+      // Создаем или получаем чат с этим пользователем
+      const chatData = await chatApi.getOrCreateByUser(Number(userId));
+      
+      // Открываем модальное окно чата с этим чатом
+      const event = new CustomEvent('openChatById', {
+        detail: { chatId: chatData.id, userId: Number(userId) }
+      });
+      window.dispatchEvent(event);
+      
+      antMessage.success('Чат открыт');
+    } catch (error: any) {
+      console.error('Ошибка создания чата:', error);
+      antMessage.error(error.response?.data?.detail || 'Не удалось создать чат');
+    }
+  };
 
   if (userLoading) {
     return (
@@ -130,7 +154,7 @@ const UserProfile: FC = () => {
             
             <div className={styles.profileStack}>
               
-              <Card className={styles.headerCard}>
+                            <Card className={styles.headerCard}>
                 <Space direction="vertical" size={12} className={styles.fullWidth}>
                   <div className={styles.headerRow}>
                     <Text type="secondary" className={styles.profileLabel}>
@@ -160,6 +184,15 @@ const UserProfile: FC = () => {
                         </Text>
                       ) : null}
                     </div>
+                    <Button
+                      type="primary"
+                      icon={<MessageOutlined />}
+                      onClick={handleWriteMessage}
+                      className={styles.writeMessageButton}
+                      size="large"
+                    >
+                      Написать
+                    </Button>
                   </div>
                 </Space>
               </Card>

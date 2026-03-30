@@ -84,6 +84,7 @@ export interface Order {
     id: number;
     resolved: boolean;
   };
+  client_note?: string;
 }
 
 export interface CreateOrderRequest {
@@ -95,6 +96,7 @@ export interface CreateOrderRequest {
   work_type_id: number;
   budget: number | null;
   additional_requirements?: any;
+  client_note?: string;
 }
 
 export interface OrderComment {

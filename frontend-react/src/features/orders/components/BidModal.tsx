@@ -91,11 +91,11 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
         />
       ) : (
         <>
-          <div className={styles.bidHeader}>
+                    <div className={styles.bidHeader}>
             <strong>{orderTitle}</strong>
-            {orderBudget && (
+            {orderBudget !== undefined && orderBudget !== null && orderBudget !== 0 && (
               <div className={styles.bidBudget}>
-                Бюджет заказчика: {orderBudget} ₽
+                Бюджет заказчика: {orderBudget.toLocaleString('ru-RU')} ₽
               </div>
             )}
           </div>

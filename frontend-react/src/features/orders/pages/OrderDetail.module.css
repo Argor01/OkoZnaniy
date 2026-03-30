@@ -557,6 +557,25 @@
   min-width: 220px;
 }
 
+/* Заметка клиента */
+.clientNoteSection {
+  margin-top: 8px;
+}
+
+.clientNoteBox {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 60%, var(--border-color) 40%);
+  background: color-mix(in srgb, var(--color-brand-blue-50) 50%, var(--bg-primary) 50%);
+  padding: 14px 16px;
+}
+
+.clientNoteText {
+  margin-bottom: 0 !important;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
 .statusTagLarge {
   padding: 6px 12px;
   border-radius: 999px;

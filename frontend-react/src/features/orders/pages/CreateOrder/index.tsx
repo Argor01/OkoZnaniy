@@ -28,6 +28,7 @@ interface CreateOrderFormValues {
   subject: number;
   work_type: number;
   budget: number;
+  client_note?: string;
 }
 
 interface DeadlineTimeValues {
@@ -183,17 +184,16 @@ const CreateOrder: React.FC = () => {
           .second(0)
           .millisecond(0);
       
-        const orderData: CreateOrderRequest = {
-          title: values.title,
-          description: values.description,
-          deadline: deadlineWithTime.toISOString(),
-          subject_id: values.subject,
-          work_type_id: values.work_type,
-          budget: values.budget || null,
-          custom_topic: values.title,
-        };
-
-        console.log('📤 Данные после преобразования:', orderData);
+                const orderData: CreateOrderRequest = {
+                  title: values.title,
+                  description: values.description,
+                  deadline: deadlineWithTime.toISOString(),
+                  subject_id: values.subject,
+                  work_type_id: values.work_type,
+                  budget: values.budget || null,
+                  custom_topic: values.title,
+                  client_note: values.client_note || undefined,
+                };
 
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
       const filesToUpload = [...fileList];
@@ -493,11 +493,11 @@ const CreateOrder: React.FC = () => {
             </Form.Item>
 
             
-            <Form.Item
+                        <Form.Item
               name="files"
               label="Прикрепить файлы (необязательно)"
             >
-                            <AppUpload.Dragger
+              <AppUpload.Dragger
                 name="files"
                 multiple
                 fileList={fileList}
@@ -530,7 +530,7 @@ const CreateOrder: React.FC = () => {
                 <div className="ant-upload-hint">
                   Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg, .zip, .rar, .7z
                 </div>
-              </AppUpload.Dragger>
+                            </AppUpload.Dragger>
               {fileList.length > 0 && (
                 <div className={styles.orderFilesGrid}>
                   {fileList.map((file) => (
@@ -554,6 +554,19 @@ const CreateOrder: React.FC = () => {
                   ))}
                 </div>
               )}
+            </Form.Item>
+
+            
+            <Form.Item
+              name="client_note"
+              label="Поле, видимое только для вас"
+              tooltip="Эта заметка будет видна только вам при просмотре заказа"
+            >
+              <AppInput.TextArea
+                placeholder="Добавьте заметку к заказу (видна только вам)"
+                rows={3}
+                className={styles.descriptionTextarea}
+              />
             </Form.Item>
           </div>
 

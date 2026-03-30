@@ -496,53 +496,77 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const headerContextWorkId = useMemo(() => headerContextMeta.workId, [headerContextMeta.workId]);
 
-  const loadChats = useCallback(async (silent: boolean = false) => {
-    if (!silent) setLoading(true);
-    try {
-      const data = await chatApi.getAll();
-      setChatList((prev) => {
-        if (!Array.isArray(prev) || prev.length !== data.length) return data;
+    const loadChats = useCallback(async (silent: boolean = false) => {
+      if (!silent) setLoading(true);
+      try {
+        const data = await chatApi.getAll();
+        // Удаляем дубликаты чатов по other_user.id, оставляя самый последний
+        const uniqueChatsMap = new Map<number, ChatListItem>();
+        data.forEach((chat) => {
+          const otherUserId = chat.other_user?.id;
+          if (!otherUserId) {
+            // Если other_user.id отсутствует, используем chat.id как ключ
+            uniqueChatsMap.set(chat.id, chat);
+            return;
+          }
+          const existing = uniqueChatsMap.get(otherUserId);
+          if (!existing) {
+            uniqueChatsMap.set(otherUserId, chat);
+          } else {
+            // Оставляем чат с более поздним last_message_time
+            const existingTime = new Date(existing.last_message_time || 0).getTime();
+            const newTime = new Date(chat.last_message_time || 0).getTime();
+            if (newTime > existingTime) {
+              uniqueChatsMap.set(otherUserId, chat);
+            }
+          }
+        });
+        const deduplicatedData = Array.from(uniqueChatsMap.values());
+      
+        setChatList((prev) => {
+          if (!Array.isArray(prev) || prev.length !== deduplicatedData.length) return deduplicatedData;
 
-        const prevById = new Map(prev.map((chat) => [chat.id, chat]));
-        let changed = false;
-        const merged = data.map((nextChat) => {
-          const prevChat = prevById.get(nextChat.id);
-          if (!prevChat) {
+          const prevById = new Map(prev.map((chat) => [chat.id, chat]));
+          let changed = false;
+          const merged = deduplicatedData.map((nextChat) => {
+            const prevChat = prevById.get(nextChat.id);
+            if (!prevChat) {
+              changed = true;
+              return nextChat;
+            }
+
+            const prevLast = prevChat.last_message;
+            const nextLast = nextChat.last_message;
+            const isSameLastMessage =
+              prevLast?.created_at === nextLast?.created_at &&
+              prevLast?.text === nextLast?.text &&
+              prevLast?.sender_id === nextLast?.sender_id &&
+              prevLast?.file_name === nextLast?.file_name &&
+              prevLast?.file_url === nextLast?.file_url;
+
+            const isSameChat =
+              prevChat.unread_count === nextChat.unread_count &&
+              prevChat.last_message_time === nextChat.last_message_time &&
+              prevChat.order_id === nextChat.order_id &&
+              prevChat.order === nextChat.order &&
+              prevChat.is_frozen === nextChat.is_frozen &&
+              prevChat.frozen_reason === nextChat.frozen_reason &&
+              prevChat.is_pinned === nextChat.is_pinned &&
+              isSameLastMessage;
+
+            if (isSameChat) return prevChat;
             changed = true;
             return nextChat;
-          }
+          });
 
-          const prevLast = prevChat.last_message;
-          const nextLast = nextChat.last_message;
-          const isSameLastMessage =
-            prevLast?.created_at === nextLast?.created_at &&
-            prevLast?.text === nextLast?.text &&
-            prevLast?.sender_id === nextLast?.sender_id &&
-            prevLast?.file_name === nextLast?.file_name &&
-            prevLast?.file_url === nextLast?.file_url;
-
-          const isSameChat =
-            prevChat.unread_count === nextChat.unread_count &&
-            prevChat.last_message_time === nextChat.last_message_time &&
-            prevChat.order_id === nextChat.order_id &&
-            prevChat.order === nextChat.order &&
-            prevChat.is_frozen === nextChat.is_frozen &&
-            prevChat.frozen_reason === nextChat.frozen_reason &&
-            isSameLastMessage;
-
-          if (isSameChat) return prevChat;
-          changed = true;
-          return nextChat;
+          return changed ? merged : prev;
         });
-
-        return changed ? merged : prev;
-      });
-    } catch (error: unknown) {
-      if (!silent) antMessage.error('Не удалось загрузить чаты');
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  }, []);
+      } catch (error: unknown) {
+        if (!silent) antMessage.error('Не удалось загрузить чаты');
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    }, []);
 
   const syncChatListItemFromDetail = useCallback((detail: ChatDetail) => {
     const lastMessage = Array.isArray(detail.messages) && detail.messages.length > 0
@@ -842,21 +866,33 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     loadChatDetail(selectedChat.id);
   }, [visible, selectedChat?.id, loadChatDetail]);
 
-    // Polling for new messages every 1 second
+        // Polling for new messages every 1 second
   useEffect(() => {
     if (!visible || !selectedChat?.id) return;
-    const id = window.setInterval(() => {
-      void loadChatDetail(selectedChat.id);
-    }, 1000);
-    return () => window.clearInterval(id);
+    let cancelled = false;
+    const poll = async () => {
+      if (cancelled) return;
+      await loadChatDetail(selectedChat.id);
+    };
+    const id = window.setInterval(poll, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, [visible, selectedChat?.id, loadChatDetail]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!visible) return;
-    const id = window.setInterval(() => {
-      void loadChats(true);
-    }, 10000);
-    return () => window.clearInterval(id);
+    let cancelled = false;
+    const poll = async () => {
+      if (cancelled) return;
+      await loadChats(true);
+    };
+    const id = window.setInterval(poll, 10000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, [visible, loadChats]);
 
     // Обработчик события для загрузки чата поддержки
@@ -1185,7 +1221,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [selectedChat?.messages]);
 
-  const currentUserId = (() => {
+    const currentUserId = useMemo(() => {
     const profileId = Number((userProfile as { id?: unknown } | undefined)?.id);
     if (Number.isFinite(profileId) && profileId > 0) return profileId;
     const rawId = localStorage.getItem('user_id');
@@ -1199,8 +1235,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch {
       return 0;
     }
-  })();
-  const isChatInitiator = (() => {
+  }, [userProfile]);
+  
+  const isChatInitiator = useMemo(() => {
     if (!selectedChat) return false;
     const chatClientId =
       (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
@@ -1211,8 +1248,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       (selectedChat as { expert_id?: unknown } | null)?.expert_id;
     if (chatExpertId && currentUserId > 0) return Number(chatExpertId) !== currentUserId;
     return false;
-  })();
-  const isChatExpert = (() => {
+  }, [selectedChat, currentUserId]);
+  
+  const isChatExpert = useMemo(() => {
     if (!selectedChat) return false;
     const chatExpertId =
       (selectedChat as { expert?: { id?: unknown } | null; expert_id?: unknown } | null)?.expert?.id ??
@@ -1224,8 +1262,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (chatClientId && currentUserId > 0) return Number(chatClientId) !== currentUserId;
     const otherRole = String(selectedChat.other_user?.role ?? '').trim().toLowerCase();
     return otherRole === 'client';
-  })();
-  const currentUserRole = (() => {
+  }, [selectedChat, currentUserId]);
+  
+  const currentUserRole = useMemo(() => {
     const roleFromProfile = String(userProfile?.role ?? '').trim().toLowerCase();
     if (roleFromProfile) return roleFromProfile;
     try {
@@ -1236,10 +1275,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     } catch {
       return '';
     }
-  })();
-  const isGlobalExpert = currentUserRole === 'expert';
+  }, [userProfile]);
+    const isGlobalExpert = currentUserRole === 'expert';
   const canUseExpertOfferButtons = isGlobalExpert && isChatExpert && !isChatInitiator;
-  const isOrderClient = (() => {
+  
+  const isOrderClient = useMemo(() => {
     // Если заказ загружен, проверяем по ID клиента заказа
     const clientId = order?.client?.id ?? order?.client_id;
     if (clientId) return Number(clientId) === currentUserId;
@@ -1249,9 +1289,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (selectedChat) return isChatInitiator;
     
     return false;
-  })();
+  }, [order?.client?.id, order?.client_id, currentUserId, selectedChat, isChatInitiator]);
 
-  const isOrderExpert = (() => {
+  const isOrderExpert = useMemo(() => {
     // Если заказ загружен, проверяем, назначен ли этот пользователь исполнителем
     // (Поле expert в заказе может называться expert или expert_id)
     const expertId = (order as any)?.expert?.id ?? (order as any)?.expert_id;
@@ -1259,7 +1299,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     if (selectedChat) return isChatExpert;
     return false;
-  })();
+  }, [order, currentUserId, selectedChat, isChatExpert]);
 
   const canOverdueClientActions = useMemo(() => {
     if (isClosedOrder || !order) return false;
@@ -1994,8 +2034,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const safeChatList = Array.isArray(chatList) ? chatList : [];
-  const supportUserId = (() => {
+    const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
+  
+    const supportUserId = useMemo(() => {
     const fromProp = typeof supportUserIdProp === 'number' && supportUserIdProp > 0 ? supportUserIdProp : null;
     const raw = localStorage.getItem('support_user_id');
     const fromStorage = raw ? Number(raw) : null;
@@ -2010,11 +2051,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
     
     return finalId;
-  })();
+  }, [supportUserIdProp]);
+  
   const supportAvatarSrc = '/assets/icons/support.png';
-  const supportChat =
-    supportUserId ? (safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null) : null;
-  const isSupportChatSelected = !!supportUserId && selectedChat?.other_user?.id === supportUserId;
+  
+  const supportChat = useMemo(() => (
+    supportUserId ? (safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null) : null
+  ), [supportUserId, safeChatList]);
+  
+  const isSupportChatSelected = useMemo(() => (
+    !!supportUserId && selectedChat?.other_user?.id === supportUserId
+  ), [supportUserId, selectedChat?.other_user?.id]);
 
   useEffect(() => {
     if (!visible || !supportUserId) return;
@@ -2085,7 +2132,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
   }, [deletingChat, hasActiveOffersInSelectedChat, loadChats, selectedChat]);
 
-  const handleTogglePin = useCallback(async (chatId: number) => {
+    const handleTogglePin = useCallback(async (chatId: number) => {
     try {
       // Сначала обновляем состояние локально для мгновенного отклика
       setChatList((prev) =>
@@ -2098,8 +2145,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       
       // Затем отправляем запрос на сервер
       await chatApi.togglePin(chatId);
-      // Перезагружаем список для синхронизации с сервером
-      await loadChats();
+      // Перезагружаем список для синхронизации с сервером (silent mode)
+      await loadChats(true);
     } catch (error) {
       console.error('Ошибка закрепления чата:', error);
       // Откатываем изменение при ошибке
@@ -2115,9 +2162,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     const handleMarkAsUnread = useCallback(async (chatId: number) => {
       try {
-        // Сначала получаем текущее состояние чата
-        const chat = chatList.find(c => c.id === chatId);
-        const currentUnread = chat?.unread_count || 0;
+        // Сначала получаем текущее состояние чата из локального состояния
+        const currentChat = chatList.find(c => c.id === chatId);
+        const currentUnread = currentChat?.unread_count ?? 0;
         const willMarkAsUnread = currentUnread === 0;
       
         // Обновляем состояние локально для мгновенного отклика
@@ -2141,7 +2188,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         }
       
         // Перезагружаем список для синхронизации с сервером
-        await loadChats();
+        await loadChats(true);
       } catch (error) {
         console.error('Ошибка изменения статуса прочтения:', error);
         antMessage.error('Не удалось изменить статус чата');
@@ -2260,26 +2307,30 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     await loadOrCreateSupportChat(supportUserId);
   }, [loadOrCreateSupportChat, supportUserId]);
 
-  const filteredChats = safeChatList.filter(chat => {
-
+    const filteredChats = useMemo(() => safeChatList.filter(chat => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const userName = chat.other_user?.username?.toLowerCase() || '';
       const lastMessage = chat.last_message?.text?.toLowerCase() || '';
       return userName.includes(query) || lastMessage.includes(query);
     }
-    
     return true;
-  });
-  const filteredChatsWithoutSupport = supportUserId
-    ? filteredChats.filter((chat) => chat.other_user?.id !== supportUserId)
-    : filteredChats;
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-  const showPinnedSupport =
+  }), [safeChatList, searchQuery]);
+  
+    const filteredChatsWithoutSupport = useMemo(() => (
+    supportUserId
+      ? filteredChats.filter((chat) => chat.other_user?.id !== supportUserId)
+      : filteredChats
+  ), [filteredChats, supportUserId]);
+  
+  const normalizedSearchQuery = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
+  
+  const showPinnedSupport = useMemo(() => (
     !normalizedSearchQuery ||
       'техническая поддержка'.includes(normalizedSearchQuery) ||
       'поддержка'.includes(normalizedSearchQuery) ||
-      'support'.includes(normalizedSearchQuery);
+      'support'.includes(normalizedSearchQuery)
+  ), [normalizedSearchQuery]);
 
   const groupedMessages = useMemo(() => {
     if (!selectedChat?.messages) return [];

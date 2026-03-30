@@ -187,6 +187,12 @@ class Order(models.Model):
         blank=True,
         verbose_name="Дата заморозки"
     )
+    client_note = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Заметка клиента",
+        help_text="Приватная заметка заказчика, видимая только ему"
+    )
 
     class Meta:
         verbose_name = "Заказ"

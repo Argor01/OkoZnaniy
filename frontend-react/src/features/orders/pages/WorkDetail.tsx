@@ -170,7 +170,7 @@ const WorkDetail: React.FC = () => {
                   </Space>
                 </AppCard>
 
-                <AppCard 
+                                <AppCard 
                   size="small" 
                   className={styles.infoCard}
                 >
@@ -181,7 +181,13 @@ const WorkDetail: React.FC = () => {
                     <Space align="center">
                       <DollarOutlined className={styles.priceIcon} />
                       <Text className={styles.priceValue}>
-                        {work.budget} ₽
+                        {(() => {
+                          const budgetNum = Number(work.budget);
+                          if (!Number.isFinite(budgetNum) || budgetNum === 0) {
+                            return 'Договорная';
+                          }
+                          return `${budgetNum.toLocaleString('ru-RU')} ₽`;
+                        })()}
                       </Text>
                     </Space>
                   </Space>

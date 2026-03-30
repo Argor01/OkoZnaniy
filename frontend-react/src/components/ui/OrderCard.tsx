@@ -155,7 +155,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             </Tooltip>
           </div>
           <div className={styles.orderBudget}>
-            {Number.isFinite(Number(order.budget)) ? formatCurrency(Number(order.budget)) : 'Договорная'}
+            {(() => {
+              const budgetNum = Number(order.budget);
+              if (!Number.isFinite(budgetNum) || budgetNum === 0) {
+                return 'Договорная';
+              }
+              return formatCurrency(budgetNum);
+            })()}
           </div>
         </div>
       </div>

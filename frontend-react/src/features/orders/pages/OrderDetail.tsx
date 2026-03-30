@@ -416,12 +416,12 @@ const OrderDetail: React.FC = () => {
     return texts[status] || status;
   };
 
-  const currentUserId = Number(userProfile?.id ?? 0);
-  const orderClientId = Number(order.client?.id ?? (order as any)?.client_id ?? 0);
-  const orderExpertId = Number(order.expert?.id ?? (order as any)?.expert_id ?? 0);
-  const isOrderOwner = currentUserId > 0 && currentUserId === orderClientId;
-  const isOrderExpert = currentUserId > 0 && currentUserId === orderExpertId;
-  const canSubmitComplaint = isOrderOwner || isOrderExpert;
+      const currentUserId = Number(userProfile?.id ?? 0);
+      const orderClientId = Number(order.client?.id ?? (order as any)?.client_id ?? 0);
+      const orderExpertId = Number(order.expert?.id ?? (order as any)?.expert_id ?? 0);
+      const isOrderOwner = currentUserId > 0 && currentUserId === orderClientId;
+      const isOrderExpert = currentUserId > 0 && currentUserId === orderExpertId;
+      const canSubmitComplaint = isOrderOwner || isOrderExpert;
   const openedFromChat = (location.state as any)?.source === 'order-chat';
   const canSeeDeliveredWorkBlock =
     currentUserId > 0 && (isOrderOwner || currentUserId === orderExpertId);
@@ -598,12 +598,18 @@ const OrderDetail: React.FC = () => {
                     <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
                   </div>
                 </div>
-                                <div className={styles.expertOfferGridItem}>
+                                                                <div className={styles.expertOfferGridItem}>
                   <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconGreen}`}><DollarOutlined /></div>
                   <div>
                     <div className={styles.expertOfferLabel}>Цена</div>
                     <div className={styles.expertOfferValue}>
-                      {order.budget ? formatCurrency(Number(order.budget)) : 'Договорная'}
+                      {(() => {
+                        const budgetNum = Number(order.budget);
+                        if (!Number.isFinite(budgetNum) || budgetNum === 0) {
+                          return 'Договорная';
+                        }
+                        return formatCurrency(budgetNum);
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -621,12 +627,27 @@ const OrderDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className={styles.sectionBlock}>
+                        <div className={styles.sectionBlock}>
               <Title level={4} className={styles.sectionTitle}>Описание заказа</Title>
               <Paragraph className={styles.description}>
                 {order.description || 'Описание отсутствует'}
               </Paragraph>
             </div>
+
+                        {isOrderOwner && order.client_note && order.client_note.trim() && (
+                          <div className={`${styles.clientNoteSection} ${styles.sectionBlock}`}>
+                            <Title level={4} className={styles.sectionTitle}>
+                              <Space>
+                                <span>Поле, которое видите только Вы</span>
+                              </Space>
+                            </Title>
+                            <div className={styles.clientNoteBox}>
+                              <Paragraph className={styles.clientNoteText}>
+                                {order.client_note}
+                              </Paragraph>
+                            </div>
+                          </div>
+                        )}
 
                         {canSeeDeliveredWorkBlock ? (
               <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
@@ -813,23 +834,33 @@ const OrderDetail: React.FC = () => {
                         Вы просматриваете заказы других клиентов. Отклики доступны только владельцу заказа.
                       </Text>
                     )}
-                    <List
-                      className={styles.bidsList}
-                      dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
-                      renderItem={(bid: Bid) => {
-                        const bidAmount = Number(bid.amount ?? 0);
-                        const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
-                        const prepaymentAmount = Number.isFinite(bidAmount) && Number.isFinite(prepaymentPercent)
-                          ? Math.max(0, (bidAmount * prepaymentPercent) / 100)
-                          : 0;
+                                                                                <List
+                                          className={styles.bidsList}
+                                          dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
+                                          renderItem={(bid: Bid) => {
+                                            const bidAmount = Number(bid.amount ?? 0);
+                                            const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
+                        
+                                            // Отображение цены: если 0, то "Договорная"
+                                            const bidAmountText = !Number.isFinite(bidAmount) || bidAmount === 0
+                                              ? 'Договорная'
+                                              : formatCurrency(bidAmount);
 
-                                                                                                return <List.Item
+                                            // Предоплата: если цена договорная, показываем процент, иначе сумму
+                                            const prepaymentText = !Number.isFinite(bidAmount) || bidAmount === 0
+                                              ? `${prepaymentPercent}%`
+                                              : formatCurrency((bidAmount * prepaymentPercent) / 100);
+
+                                            // Проверка: если цена договорная, нельзя назначить исполнителем
+                                            const hasValidPrice = Number.isFinite(bidAmount) && bidAmount > 0;
+
+                        return <List.Item
                           key={bid.id}
                           className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
                           actions={
                             order.expert?.id === bid.expert.id
                               ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
-                              : isOrderOwner
+                              : isOrderOwner && hasValidPrice
                                 ? [
                                     <AppButton
                                       size={isMobile ? 'small' : 'middle'}
@@ -853,7 +884,19 @@ const OrderDetail: React.FC = () => {
                                       Назначить исполнителем
                                     </AppButton>
                                   ]
-                                : []
+                                : isOrderOwner && !hasValidPrice
+                                  ? [
+                                      <AppButton
+                                        size={isMobile ? 'small' : 'middle'}
+                                        icon={<MessageOutlined />}
+                                        onClick={async () => {
+                                          dashboard.openOrderChat(order.id, bid.expert.id);
+                                        }}
+                                      >
+                                        Написать
+                                      </AppButton>
+                                    ]
+                                  : []
                           }
                           // Клиенты, не являющиеся владельцами, не видят кнопки действий
                         >
@@ -891,13 +934,13 @@ const OrderDetail: React.FC = () => {
                             }
                             description={
                               <Space direction="vertical" size={8} className={styles.bidMeta}>
-                                <div className={styles.bidChipsRow}>
-                                  <Tag color="blue" className={styles.bidAmountTag}>
-                                    <DollarOutlined /> {formatCurrency(bid.amount)}
-                                  </Tag>
-                                  <Tag color="gold" className={styles.bidPrepaymentTag}>
-                                    Предоплата: {formatCurrency(prepaymentAmount)}
-                                  </Tag>
+                                                                <div className={styles.bidChipsRow}>
+                                                                  <Tag color="blue" className={styles.bidAmountTag}>
+                                                                    <DollarOutlined /> {bidAmountText}
+                                                                  </Tag>
+                                                                  <Tag color="gold" className={styles.bidPrepaymentTag}>
+                                                                    Предоплата: {prepaymentText}
+                                                                  </Tag>
                                   <span className={styles.bidTimeWrap}>
                                     <Text type="secondary" className={styles.bidMetaText}>
                                       {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true, locale: ru })}
@@ -912,6 +955,7 @@ const OrderDetail: React.FC = () => {
                                   </Paragraph>
                                 )}
                               </Space>
+                              
                             }
                           />
                         </List.Item>;

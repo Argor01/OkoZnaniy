@@ -516,10 +516,10 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
           </TabPane>
 
           <TabPane tab="Предметы" key="subjects">
-            <div className="categoriesSubjectsFiltersRow">
+                        <div className="categoriesSubjectsFiltersRow">
               <Button 
                 type="primary" 
-                icon={<PlusOutlined />}
+                icon={<PlusOutlined style={{ color: '#52c41a' }}/>}
                 onClick={handleCreateSubject}
               >
                 Добавить предмет
@@ -550,10 +550,10 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
           </TabPane>
 
           <TabPane tab="Типы работ" key="workTypes">
-            <div className="categoriesSubjectsActionsRow">
+                        <div className="categoriesSubjectsActionsRow">
               <Button 
                 type="primary" 
-                icon={<PlusOutlined />}
+                icon={<PlusOutlined style={{ color: '#52c41a' }}/>}
                 onClick={handleCreateWorkType}
               >
                 Добавить тип работы
