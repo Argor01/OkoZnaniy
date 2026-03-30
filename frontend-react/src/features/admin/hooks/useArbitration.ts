@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
+import { apiClient } from '@/utils/api';
 
 interface ArbitrationCase {
   id: number;
@@ -58,16 +59,8 @@ export const useArbitration = (autoFetch = true) => {
   const fetchCases = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/arbitration/cases/', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setCases(data.results || data);
-      } else {
-        message.error('Ошибка при загрузке дел');
-      }
+      const response = await apiClient.get('/arbitration/cases/');
+      setCases(response.data.results || response.data);
     } catch (error) {
       console.error('Error fetching arbitration cases:', error);
       message.error('Ошибка при загрузке дел');
@@ -78,14 +71,8 @@ export const useArbitration = (autoFetch = true) => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/arbitration/stats/', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
+      const response = await apiClient.get('/arbitration/stats/');
+      setStats(response.data);
     } catch (error) {
       console.error('Error fetching arbitration stats:', error);
     }
