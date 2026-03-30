@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
-import { apiClient } from '@/utils/api';
+import { apiClient } from '@/api/client';
 
 interface ArbitrationCase {
   id: number;
