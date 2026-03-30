@@ -1,92 +1,36 @@
 from django.core.management.base import BaseCommand
-from apps.users.models import User
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class Command(BaseCommand):
     help = 'Создает тестовых пользователей для разработки'
 
-    def handle(self, *args, **options):
-        test_users = [
-            {
-                'email': 'client@test.com',
-                'password': 'test123',
-                'role': 'client',
-                'first_name': 'Тестовый',
-                'last_name': 'Клиент',
-            },
-            {
-                'email': 'expert@test.com',
-                'password': 'test123',
-                'role': 'expert',
-                'first_name': 'Тестовый',
-                'last_name': 'Эксперт',
-            },
-            {
-                'email': 'partner@test.com',
-                'password': 'test123',
-                'role': 'partner',
-                'first_name': 'Тестовый',
-                'last_name': 'Партнер',
-            },
-            {
-                'email': 'administrator@test.com',
-                'password': 'test123',
-                'role': 'admin',
-                'first_name': 'Тестовый',
-                'last_name': 'Администратор',
-                'is_staff': True,
-                'is_superuser': True,
-            },
-            {
-                'email': 'director@test.com',
-                'password': 'test123',
-                'role': 'director',
-                'first_name': 'Тестовый',
-                'last_name': 'Директор',
-                'is_staff': True,
-            },
-            {
-                'email': 'arbitrator@test.com',
-                'password': 'test123',
-                'role': 'arbitrator',
-                'first_name': 'Тестовый',
-                'last_name': 'Арбитр',
-                'is_staff': True,
-            },
+    def handle(self, *args, **kwargs):
+        self.stdout.write('Создание тестовых пользователей...')
+        
+        users_data = [
+            {'username': 'client@test.com', 'email': 'client@test.com', 'password': 'test123', 'role': 'client'},
+            {'username': 'expert@test.com', 'email': 'expert@test.com', 'password': 'test123', 'role': 'expert'},
+            {'username': 'partner@test.com', 'email': 'partner@test.com', 'password': 'test123', 'role': 'partner'},
+            {'username': 'administrator@test.com', 'email': 'administrator@test.com', 'password': 'test123', 'role': 'admin'},
+            {'username': 'director@test.com', 'email': 'director@test.com', 'password': 'test123', 'role': 'director'},
+            {'username': 'arbitrator@test.com', 'email': 'arbitrator@test.com', 'password': 'test123', 'role': 'arbitrator'},
         ]
-
-        created_count = 0
-        updated_count = 0
-
-        for user_data in test_users:
-            email = user_data.pop('email')
-            password = user_data.pop('password')
-            
+        
+        for user_data in users_data:
             user, created = User.objects.get_or_create(
-                email=email,
-                defaults=user_data
+                username=user_data['username'],
+                defaults={
+                    'email': user_data['email'],
+                    'role': user_data['role'],
+                }
             )
+            user.set_password(user_data['password'])
+            user.role = user_data['role']
+            user.save()
             
-            if created:
-                user.set_password(password)
-                user.save()
-                created_count += 1
-                self.stdout.write(
-                    self.style.SUCCESS(f'✓ Создан пользователь: {email} ({user_data["role"]})')
-                )
-            else:
-                # Обновляем существующего пользователя
-                for key, value in user_data.items():
-                    setattr(user, key, value)
-                user.set_password(password)
-                user.save()
-                updated_count += 1
-                self.stdout.write(
-                    self.style.WARNING(f'↻ Обновлен пользователь: {email} ({user_data["role"]})')
-                )
-
-        self.stdout.write(
-            self.style.SUCCESS(
-                f'\n✓ Готово! Создано: {created_count}, Обновлено: {updated_count}'
-            )
-        )
+            status = 'Создан' if created else 'Обновлен'
+            self.stdout.write(f'{status}: {user_data["username"]} (роль: {user_data["role"]})')
+        
+        self.stdout.write(self.style.SUCCESS(f'Всего пользователей: {User.objects.count()}'))

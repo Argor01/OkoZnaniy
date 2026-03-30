@@ -1,0 +1,88 @@
+.arbitration-detail-page {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.info-card {
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.info-card .ant-card-head {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.party-info {
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.messages-card {
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  min-height: 800px;
+}
+
+.problem-description {
+  margin-bottom: 16px;
+}
+
+.feed-container {
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.feed-message {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.feed-activity {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.message-input-container {
+  margin-top: 16px;
+}
+
+.message-input-container textarea {
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.message-input-container textarea:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .arbitration-detail-page {
+    padding: 16px;
+  }
+}
