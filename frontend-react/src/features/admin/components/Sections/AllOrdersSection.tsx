@@ -4,7 +4,6 @@ import {
   Table, 
   Button, 
   Tag, 
-  Space,
   Typography, 
   Input,
   Select,
@@ -21,8 +20,6 @@ import {
 import { 
   EyeOutlined,
   SearchOutlined,
-  EditOutlined,
-  MessageOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { AdminOrder as Order } from '@/features/orders/types/orders';
@@ -35,9 +32,8 @@ import {
   ORDER_PRIORITY_COLORS,
   ORDER_PRIORITIES
 } from '@/utils/constants';
-import apiClient from '@/api/client';
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -57,20 +53,12 @@ interface AllOrdersTableProps {
   orders?: Order[];
   loading?: boolean;
   onViewOrder?: (orderId: number) => void;
-  onEditOrder?: (orderId: number) => void;
-  onChangeOrderStatus?: (orderId: number, newStatus: string) => void;
-  onAssignExpert?: (orderId: number, expertId: number) => void;
-  onContactClient?: (orderId: number) => void;
 }
 
 const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   orders = [],
   loading = false,
   onViewOrder,
-  onEditOrder,
-  onChangeOrderStatus,
-  onAssignExpert,
-  onContactClient,
 }) => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -110,19 +98,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     setOrderModalVisible(true);
   };
 
-  const handleChangeStatus = (order: Order, newStatus: string) => {
-    Modal.confirm({
-      title: 'Изменить статус заказа?',
-      content: `Вы уверены, что хотите изменить статус заказа "${order.title}" на "${getStatusLabel(newStatus)}"?`,
-      okText: 'Изменить',
-      cancelText: 'Отмена',
-      onOk: () => {
-        onChangeOrderStatus?.(order.id, newStatus);
-        message.success(`Статус заказа изменен на "${getStatusLabel(newStatus)}"`);
-      },
-    });
-  };
-
   const getStatusLabel = (status: string) => {
     return ORDER_STATUS_LABELS[status] || status;
   };
@@ -155,15 +130,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       return sum + budget;
     }, 0),
   };
-
-  // Отладка для проверки данных
-  if (filteredData.length > 0 && stats.totalBudget === 0) {
-    console.log('Budget calculation debug:', {
-      ordersCount: filteredData.length,
-      sampleBudgets: filteredData.slice(0, 3).map(o => ({ id: o.id, budget: o.budget, type: typeof o.budget })),
-      totalBudget: stats.totalBudget
-    });
-  }
 
   const columns = [
     {
@@ -268,31 +234,15 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     {
       title: 'Действия',
       key: 'actions',
-      width: 120,
+      width: 80,
       render: (record: Order) => (
-        <Space>
-          <Tooltip title="Подробно">
-            <Button 
-              size="small" 
-              icon={<EyeOutlined />}
-              onClick={() => handleViewOrder(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Редактировать">
-            <Button 
-              size="small" 
-              icon={<EditOutlined />}
-              onClick={() => onEditOrder?.(record.id)}
-            />
-          </Tooltip>
-          <Tooltip title="Связаться с клиентом">
-            <Button 
-              size="small" 
-              icon={<MessageOutlined />}
-              onClick={() => onContactClient?.(record.id)}
-            />
-          </Tooltip>
-        </Space>
+        <Tooltip title="Подробно">
+          <Button 
+            size="small" 
+            icon={<EyeOutlined />}
+            onClick={() => handleViewOrder(record)}
+          />
+        </Tooltip>
       ),
     },
   ];
@@ -300,28 +250,21 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   return (
     <div>
       <Card>
-        <div className="allOrdersSectionHeader">
-          <Title level={4}>Все заказы</Title>
-          <Text type="secondary">
-            Управление всеми заказами в системе
-          </Text>
-        </div>
-
-        <Row gutter={16} className="allOrdersStatsRow">
+        <Row gutter={16} style={{ marginBottom: 16 }}>
           <Col span={4}>
             <Statistic title="Всего заказов" value={stats.total} />
           </Col>
           <Col span={4}>
-            <Statistic title="Новые" value={stats.new} className="allOrdersStatNew" />
+            <Statistic title="Новые" value={stats.new} />
           </Col>
           <Col span={4}>
-            <Statistic title="В работе" value={stats.inProgress} className="allOrdersStatInProgress" />
+            <Statistic title="В работе" value={stats.inProgress} />
           </Col>
           <Col span={4}>
-            <Statistic title="Завершены" value={stats.completed} className="allOrdersStatCompleted" />
+            <Statistic title="Завершены" value={stats.completed} />
           </Col>
           <Col span={4}>
-            <Statistic title="Отменены" value={stats.cancelled} className="allOrdersStatCancelled" />
+            <Statistic title="Отменены" value={stats.cancelled} />
           </Col>
           <Col span={4}>
             <Statistic 
@@ -423,18 +366,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
           <Button key="close" onClick={() => setOrderModalVisible(false)}>
             Закрыть
           </Button>,
-          <Button 
-            key="edit" 
-            type="primary"
-            onClick={() => {
-              if (selectedOrder) {
-                onEditOrder?.(selectedOrder.id);
-                setOrderModalVisible(false);
-              }
-            }}
-          >
-            Редактировать
-          </Button>,
         ]}
         width={800}
       >
@@ -505,32 +436,8 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
             <Divider />
 
-            <div className="allOrdersModalActions">
-              <Button 
-                type="primary" 
-                onClick={() => handleChangeStatus(selectedOrder, ORDER_STATUSES.IN_PROGRESS)}
-                disabled={selectedOrder.status === ORDER_STATUSES.IN_PROGRESS}
-              >
-                В работу
-              </Button>
-              <Button 
-                onClick={() => handleChangeStatus(selectedOrder, ORDER_STATUSES.COMPLETED)}
-                disabled={selectedOrder.status === ORDER_STATUSES.COMPLETED}
-              >
-                Завершить
-              </Button>
-              <Button 
-                danger
-                onClick={() => handleChangeStatus(selectedOrder, ORDER_STATUSES.CANCELLED)}
-                disabled={selectedOrder.status === ORDER_STATUSES.CANCELLED}
-              >
-                Отменить
-              </Button>
-              <Button 
-                onClick={() => onContactClient?.(selectedOrder.id)}
-              >
-                Связаться с клиентом
-              </Button>
+            <div style={{ textAlign: 'center', color: '#999', fontSize: '14px' }}>
+              Режим просмотра - действия недоступны
             </div>
           </div>
         )}
@@ -541,52 +448,11 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
 export const AllOrdersSection: React.FC = () => {
   const { orders, loading } = useAllOrders();
-  const { changeOrderStatus } = useOrderActions();
-
-  const handleEditOrder = (orderId: number) => {
-    // Функционал редактирования будет добавлен позже
-    message.info(`Редактирование заказа #${orderId} будет доступно в следующей версии`);
-  };
-
-  const handleContactClient = async (orderId: number) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order?.client?.id) {
-      message.error('Не удалось определить клиента');
-      return;
-    }
-
-    try {
-      // Создаем или получаем существующий чат
-      const response = await apiClient.post('/admin-panel/direct-chats/get-or-create/', {
-        user_id: order.client.id
-      });
-
-      // Сохраняем ID чата в localStorage для открытия в админ-панели
-      localStorage.setItem('adminDashboard_selectedMenu', 'admin_chats');
-      localStorage.setItem('adminDashboard_openChatId', response.data.chat_id.toString());
-      
-      // Переходим на страницу админ-панели с чатами
-      window.location.href = '/admin/dashboard';
-      
-      message.success('Открываем чат с клиентом...');
-    } catch (error) {
-      console.error('Error creating chat:', error);
-      message.error('Ошибка при создании чата');
-    }
-  };
-
-  const handleAssignExpert = (orderId: number, expertId: number) => {
-    message.info(`Назначение эксперта ${expertId} на заказ #${orderId} (В разработке)`);
-  };
 
   return (
     <AllOrdersTable
       orders={orders as Order[]}
       loading={loading}
-      onChangeOrderStatus={changeOrderStatus}
-      onEditOrder={handleEditOrder}
-      onContactClient={handleContactClient}
-      onAssignExpert={handleAssignExpert}
     />
   );
 };

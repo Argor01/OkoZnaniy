@@ -44,6 +44,7 @@ export interface AdminUser {
   last_name: string;
   role: string;
   is_active: boolean;
+  is_blocked: boolean;
   date_joined: string;
   last_login: string | null;
   permissions?: string[];

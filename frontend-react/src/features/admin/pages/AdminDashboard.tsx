@@ -26,10 +26,8 @@ const EarningsSection = lazy(() => import('@/features/admin/components/Sections/
 const TicketSystemSection = lazy(() => import('@/features/admin/components/Sections/TicketSystemSection').then(m => ({ default: m.TicketSystemSection })));
 const ArbitrationSection = lazy(() => import('@/features/admin/components/Sections/ArbitrationSection').then(m => ({ default: m.ArbitrationSection })));
 const UsersManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.UsersManagementSection })));
-const BlockedUsersSection = lazy(() => import('@/features/admin/components/Sections/BlockedUsersSection').then(m => ({ default: m.BlockedUsersSection })));
 const RolesManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.RolesManagementSection })));
 const AllOrdersSection = lazy(() => import('@/features/admin/components/Sections/AllOrdersSection').then(m => ({ default: m.AllOrdersSection })));
-const ProblemOrdersSection = lazy(() => import('@/features/admin/components/Sections/ProblemOrdersSection').then(m => ({ default: m.ProblemOrdersSection })));
 const NewClaimsSection = lazy(() => import('@/features/admin/components/Sections/NewClaimsSection').then(m => ({ default: m.NewClaimsSection })));
 const InProgressClaimsSection = lazy(() => import('@/features/admin/components/Sections/InProgressClaimsSection').then(m => ({ default: m.InProgressClaimsSection })));
 const CompletedClaimsSection = lazy(() => import('@/features/admin/components/Sections/CompletedClaimsSection').then(m => ({ default: m.CompletedClaimsSection })));
@@ -37,6 +35,7 @@ const PendingApprovalSection = lazy(() => import('@/features/admin/components/Se
 const AdminChatsSection = lazy(() => import('@/features/admin/components/Sections/AdminChatsSection').then(m => ({ default: m.AdminChatsSection })));
 const UserConversationsSection = lazy(() => import('@/features/admin/components/Sections/UserConversationsSection').then(m => ({ default: m.UserConversationsSection })));
 const TariffsSettingsSection = lazy(() => import('@/features/admin/components/Sections/TariffsSettingsSection').then(m => ({ default: m.TariffsSettingsSection })));
+const BlockingSection = lazy(() => import('@/features/admin/components/Sections/BlockingSection').then(m => ({ default: m.BlockingSection })));
 
 const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
 const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
@@ -162,7 +161,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <PartnersSection
             partners={adminData.partners}
             loading={adminData.partnersLoading}
-            onEdit={handleEditPartner}
             onView={handleViewPartner}
           />
         );
@@ -185,7 +183,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       
       case 'blocking':
         return (
-          <BlockedUsersSection />
+          <BlockingSection />
         );
 
       case 'user_roles':

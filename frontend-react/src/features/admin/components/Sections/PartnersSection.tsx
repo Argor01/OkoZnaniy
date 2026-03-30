@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Table, Button, Space, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Tag, Tooltip } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { Partner } from '@/features/admin/types';
 import { TABLE_CONSTANTS } from '@/features/admin/constants';
@@ -9,7 +9,6 @@ import styles from './PartnersSection.module.css';
 interface PartnersSectionProps {
   partners: Partner[];
   loading: boolean;
-  onEdit: (partner: Partner) => void;
   onView: (partner: Partner) => void;
 }
 
@@ -17,7 +16,6 @@ interface PartnersSectionProps {
 export const PartnersSection: React.FC<PartnersSectionProps> = ({
   partners,
   loading,
-  onEdit,
   onView,
 }) => {
   const columns = [
@@ -107,26 +105,16 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({
     {
       title: 'Действия',
       key: 'actions',
-      width: 120,
+      width: 100,
       render: (record: Partner) => (
-        <Space size="small">
-          <Tooltip title="Редактировать">
-            <Button 
-              size="small" 
-              icon={<EditOutlined />}
-              onClick={() => onEdit(record)}
-              className={styles.actionButton}
-            />
-          </Tooltip>
-          <Tooltip title="Подробно">
-            <Button 
-              size="small" 
-              icon={<EyeOutlined />}
-              onClick={() => onView(record)}
-              className={styles.actionButton}
-            />
-          </Tooltip>
-        </Space>
+        <Tooltip title="Подробно">
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => onView(record)}
+            className={styles.actionButton}
+          />
+        </Tooltip>
       ),
     },
   ];
