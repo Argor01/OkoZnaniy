@@ -16,6 +16,7 @@ import {
   SafetyOutlined,      
   UnorderedListOutlined, 
   ExclamationCircleOutlined,
+  ScaleOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -89,6 +90,11 @@ export const menuItems: MenuItem[] = [
     label: 'Обращения',
   },
   {
+    key: 'arbitration',
+    icon: ScaleOutlined,
+    label: 'Арбитраж',
+  },
+  {
     key: 'communication',
     icon: MessageOutlined,
     label: 'Коммуникация',
@@ -117,6 +123,7 @@ export const titleMap: Record<MenuKey, string> = {
   support_completed: 'Завершенные запросы поддержки',
 
   tickets: 'Обращения',
+  arbitration: 'Арбитраж',
   communication: 'Коммуникация',
   internal_communication: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',

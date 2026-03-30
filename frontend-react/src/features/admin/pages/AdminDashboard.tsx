@@ -9,7 +9,8 @@ import {
   useClaims,
   useClaimActions,
   useAdminChatRooms,
-  useChatRoomActions
+  useChatRoomActions,
+  useArbitration
 } from '@/features/admin/hooks';
 import { User } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
@@ -23,6 +24,7 @@ const PartnersSection = lazy(() => import('@/features/admin/components/Sections/
 const EarningsSection = lazy(() => import('@/features/admin/components/Sections/EarningsSection').then(m => ({ default: m.EarningsSection })));
 
 const TicketSystemSection = lazy(() => import('@/features/admin/components/Sections/TicketSystemSection').then(m => ({ default: m.TicketSystemSection })));
+const ArbitrationSection = lazy(() => import('@/features/admin/components/Sections/ArbitrationSection').then(m => ({ default: m.ArbitrationSection })));
 const UsersManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.UsersManagementSection })));
 const BlockedUsersSection = lazy(() => import('@/features/admin/components/Sections/BlockedUsersSection').then(m => ({ default: m.BlockedUsersSection })));
 const RolesManagementSection = lazy(() => import('@/features/admin/components/Sections/UserRolesSection').then(m => ({ default: m.RolesManagementSection })));
@@ -129,6 +131,8 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   const { chatRooms, loading: chatRoomsLoading } = useAdminChatRooms(true);
   const { sendMessage: sendChatMessage, joinRoom, leaveRoom } = useChatRoomActions();
 
+  const { cases: arbitrationCases, stats: arbitrationStats, loading: arbitrationLoading, refetch: refetchArbitration } = useArbitration(selectedMenu === 'arbitration');
+
   
   const handleUpdatePartner = (partnerId: number, data: any) => {
     updatePartner({ partnerId, data });
@@ -211,6 +215,16 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'tickets':
         return (
           <TicketSystemSection />
+        );
+
+      case 'arbitration':
+        return (
+          <ArbitrationSection
+            cases={arbitrationCases}
+            loading={arbitrationLoading}
+            onRefresh={refetchArbitration}
+            stats={arbitrationStats}
+          />
         );
 
       case 'communication':

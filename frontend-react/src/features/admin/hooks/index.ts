@@ -61,5 +61,7 @@ export {
 
 export { useAdminStats } from './useAdminStats';
 
+export { useArbitration } from './useArbitration';
+
 // Re-export specific legacy hooks if needed for backward compatibility until full migration
 // export * from './useAdminPanelData';

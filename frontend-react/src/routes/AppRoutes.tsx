@@ -21,6 +21,7 @@ const AdminDashboard = lazy(() => import('@/features/admin/pages/AdminDashboard'
 const AdminLogin = lazy(() => import('@/features/admin/pages/AdminLogin'));
 const TicketDetailPage = lazy(() => import('@/features/admin/pages/TicketDetailPage'));
 const ArbitrationDetailPage = lazy(() => import('@/features/admin/pages/ArbitrationDetailPage'));
+const ArbitrationCaseDetailPage = lazy(() => import('@/features/admin/pages/ArbitrationCaseDetailPage'));
 const DirectorDashboard = lazy(() => import('@/features/director/pages/DirectorDashboard'));
 const ArbitratorDashboard = lazy(() => import('@/features/arbitrator/pages/ArbitratorDashboard'));
 const ShopReadyWorks = lazy(() => import('@/features/shop/pages/ShopReadyWorks'));
@@ -167,6 +168,10 @@ export const AppRoutes: React.FC = () => {
       <Route
         path="/admin/arbitration/:ticketId"
         element={<ArbitrationDetailPage />}
+      />
+      <Route
+        path="/admin/arbitration/case/:caseNumber"
+        element={<ArbitrationCaseDetailPage />}
       />
       <Route 
         path={ROUTES.admin.directorDashboard}

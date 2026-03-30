@@ -131,7 +131,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       render: (text, record) => (
         <Space direction="vertical" size={0}>
           <Text strong style={{ color: '#1890ff', cursor: 'pointer' }}
-                onClick={() => navigate(`/admin/arbitration/${record.case_number}`)}>
+                onClick={() => navigate(`/admin/arbitration/case/${record.case_number}`)}>
             {text}
           </Text>
           {record.unread_count > 0 && (
@@ -271,7 +271,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
         <Button
           type="primary"
           icon={<EyeOutlined />}
-          onClick={() => navigate(`/admin/arbitration/${record.case_number}`)}
+          onClick={() => navigate(`/admin/arbitration/case/${record.case_number}`)}
         >
           Открыть
         </Button>
