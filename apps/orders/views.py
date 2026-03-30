@@ -25,6 +25,34 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_destroy(self, instance):
+        """Запрещаем удаление заказов, которые уже в работе"""
+        user = self.request.user
+        
+        # Проверяем, что пользователь имеет право удалять (только клиент)
+        if instance.client_id != user.id:
+            raise PermissionDenied('Только клиент может удалять свой заказ')
+        
+        # Можно удалять только заказы в статусе 'new' или 'completed'
+        # Все остальные статусы означают, что заказ в работе
+        if instance.status not in ['new', 'completed']:
+            raise PermissionDenied(
+                f'Нельзя удалить заказ в статусе "{instance.status}". '
+                'Удаление возможно только для заказов в статусе "new" или "completed"'
+            )
+        
+        # Для заказов в статусе 'new' дополнительно проверяем:
+        if instance.status == 'new':
+            # Нет ли назначенного эксперта
+            if instance.expert_id:
+                raise PermissionDenied('Нельзя удалить заказ с назначенным экспертом')
+            
+            # Нет ли принятых ставок
+            if instance.bids.filter(status='accepted').exists():
+                raise PermissionDenied('Нельзя удалить заказ с принятой ставкой')
+        
+        instance.delete()
+
     @staticmethod
     def _inactive_unassigned_filter():
         return models.Q(
@@ -345,10 +373,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             message.save()
             logger.info(f"Сообщение-оффер создано для чата {chat.id} по заказу {order.id}")
         except Exception as e:
-            logger.error(f"Ошибка при создании сообщения: {str(e)}")
+                        logger.error(f"Ошибка при создании сообщения: {str(e)}")
             # Продолжаем даже если сообщение не создалось - чат уже есть
         
-                # Уведомляем эксперта о назначении на заказ
+        # Уведомляем эксперта о назначении на заказ
         try:
             NotificationService.create_notification(
                 recipient=bid.expert,
@@ -584,6 +612,78 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         serializer = DisputeSerializer(dispute)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def create_review(self, request, pk=None):
+        """Создание отзыва о работе эксперта"""
+        order = self.get_object()
+        user = request.user
+        
+        # Проверяем права - только клиент может оставить отзыв
+        if user.role != 'client' or order.client_id != user.id:
+            return Response(
+                {'error': 'Только клиент может оставить отзыв'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Проверяем, что заказ завершен
+        if order.status != 'completed':
+            return Response(
+                {'error': 'Отзыв можно оставить только после завершения заказа'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Проверяем, что есть эксперт
+        if not order.expert_id:
+            return Response(
+                {'error': 'У заказа нет исполнителя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        rating = request.data.get('rating')
+        comment = request.data.get('comment', '').strip()
+        
+        if not rating:
+            return Response(
+                {'error': 'Оценка обязательна'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError()
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Оценка должна быть числом от 1 до 5'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Создаем или обновляем отзыв (используем ExpertRating)
+        from apps.experts.models import ExpertRating
+        
+        review, created = ExpertRating.objects.update_or_create(
+            order=order,
+            defaults={
+                'expert': order.expert,
+                'client': user,
+                'rating': rating,
+                'comment': comment,
+            }
+        )
+        
+        # Обновляем статистику эксперта
+        from apps.experts.models import ExpertStatistics
+        stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
+        stats.update_statistics()
+        
+        # Возвращаем данные отзыва
+        return Response({
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'created_at': review.created_at.isoformat(),
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()

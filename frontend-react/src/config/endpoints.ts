@@ -37,13 +37,14 @@ export const API_ENDPOINTS = {
     reject: (id: number) => `/orders/orders/${id}/reject/`,
     extendDeadline: (id: number) => `/orders/orders/${id}/extend_deadline/`,
     cancelOverdue: (id: number) => `/orders/orders/${id}/cancel_overdue/`,
-    uploadFile: (id: number) => `/orders/orders/${id}/files/`,
+        uploadFile: (id: number) => `/orders/orders/${id}/files/`,
     bids: (id: number) => `/orders/orders/${id}/bids/`,
     acceptBid: (id: number) => `/orders/orders/${id}/accept_bid/`,
     rejectBid: (id: number) => `/orders/orders/${id}/reject_bid/`,
     cancelBid: (id: number) => `/orders/orders/${id}/cancel_bid/`,
     comments: (id: number) => `/orders/orders/${id}/comments/`,
     downloadFile: (id: number, fileId: number) => `/orders/orders/${id}/files/${fileId}/download/`,
+    createReview: (id: number) => `/orders/orders/${id}/create_review/`,
   },
   admin: {
     users: {

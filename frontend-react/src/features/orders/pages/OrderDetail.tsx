@@ -27,8 +27,12 @@ const OrderDetail: React.FC = () => {
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [reviewActionLoading, setReviewActionLoading] = useState<'approve' | 'revision' | 'reject' | null>(null);
     const [revisionModalOpen, setRevisionModalOpen] = useState(false);
-  const [revisionComment, setRevisionComment] = useState('');
-  const [revisionSubmitting, setRevisionSubmitting] = useState(false);
+    const [revisionComment, setRevisionComment] = useState('');
+    const [revisionSubmitting, setRevisionSubmitting] = useState(false);
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewSubmitting, setReviewSubmitting] = useState(false);
     const [assigningExpertId, setAssigningExpertId] = useState<number | null>(null);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -211,19 +215,38 @@ const OrderDetail: React.FC = () => {
     ]);
   }, [orderId, queryClient, refetchOrder]);
 
-  const handleApproveFromCard = React.useCallback(async () => {
+    const handleApproveFromCard = React.useCallback(async () => {
+    if (!orderId) return;
+    // Открываем модалку с отзывом вместо немедленного принятия
+    setReviewModalOpen(true);
+  }, [orderId]);
+
+  const handleConfirmReviewAndApprove = React.useCallback(async () => {
     if (!orderId) return;
     try {
+      setReviewSubmitting(true);
       setReviewActionLoading('approve');
+      
+      // Сначала принимаем работу
       await ordersApi.approveOrder(Number(orderId));
+      
+      // Затем оставляем отзыв (если есть комментарий)
+      if (reviewComment.trim() || reviewRating > 0) {
+        await ordersApi.createReview(Number(orderId), reviewRating, reviewComment.trim());
+      }
+      
       await refreshOrderWithLists();
-      message.success('Работа принята');
+      setReviewModalOpen(false);
+      setReviewRating(5);
+      setReviewComment('');
+      message.success('Работа принята, отзыв оставлен');
     } catch (e: any) {
       message.error(e?.response?.data?.detail || 'Не удалось принять работу');
     } finally {
+      setReviewSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [orderId, refreshOrderWithLists]);
+  }, [orderId, refreshOrderWithLists, reviewRating, reviewComment]);
 
   const handleRevisionFromCard = React.useCallback(async () => {
     setRevisionModalOpen(true);
@@ -964,7 +987,7 @@ const OrderDetail: React.FC = () => {
          orderTitle={order.title}
          orderBudget={order.budget ? Number(order.budget) : undefined}
        />
-      <Modal
+            <Modal
         open={revisionModalOpen}
         centered
         onCancel={() => {
@@ -987,6 +1010,51 @@ const OrderDetail: React.FC = () => {
             maxLength={1500}
             showCount
           />
+        </div>
+      </Modal>
+
+      <Modal
+        open={reviewModalOpen}
+        centered
+        onCancel={() => {
+          setReviewModalOpen(false);
+          setReviewRating(5);
+          setReviewComment('');
+        }}
+        onOk={handleConfirmReviewAndApprove}
+        okButtonProps={{ loading: reviewSubmitting }}
+        okText="Принять и оставить отзыв"
+        cancelText="Отмена"
+        title="Оставьте отзыв о работе эксперта"
+        destroyOnHidden
+      >
+        <div className={styles.revisionModalSpacing}>
+          <div className={styles.reviewModalContent}>
+            <div className={styles.reviewRatingSection}>
+              <Text strong className={styles.reviewRatingLabel}>Оценка работы:</Text>
+              <div className={styles.reviewStars}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <StarFilled
+                    key={star}
+                    className={star <= reviewRating ? styles.reviewStarFilled : styles.reviewStarEmpty}
+                    onClick={() => setReviewRating(star)}
+                    style={{ fontSize: '32px', cursor: 'pointer' }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className={styles.reviewCommentSection}>
+              <Text strong>Комментарий (необязательно):</Text>
+              <Input.TextArea
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="Поделитесь впечатлениями о работе эксперта"
+                autoSize={{ minRows: 4, maxRows: 6 }}
+                maxLength={1000}
+                showCount
+              />
+            </div>
+          </div>
         </div>
       </Modal>
     </div>

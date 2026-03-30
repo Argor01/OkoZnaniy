@@ -698,6 +698,55 @@
   margin-bottom: 24px;
 }
 
+/* Стили для модалки отзыва */
+.reviewModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reviewRatingSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reviewRatingLabel {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.reviewStars {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.reviewStarFilled {
+  color: #f59e0b;
+  transition: transform 0.2s ease;
+}
+
+.reviewStarFilled:hover {
+  transform: scale(1.1);
+}
+
+.reviewStarEmpty {
+  color: #d1d5db;
+  transition: transform 0.2s ease;
+}
+
+.reviewStarEmpty:hover {
+  transform: scale(1.1);
+  color: #f59e0b;
+}
+
+.reviewCommentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .bidsNotice {
   display: block;
   margin-bottom: 16px;

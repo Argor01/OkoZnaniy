@@ -167,11 +167,14 @@ const CreateOrder: React.FC = () => {
     }
   };
 
-    const onFinish = async (values: CreateOrderFormValues) => {
+        const onFinish = async (values: CreateOrderFormValues) => {
       if (submitGuardRef.current) return;
       lockSubmit();
       try {
         setIsUploading(true);
+      
+        // Логируем данные для отладки
+        console.log('📦 Отправляемые данные заказа:', values);
       
         // Объединяем дату и время
         const deadlineWithTime = values.deadline
@@ -189,6 +192,8 @@ const CreateOrder: React.FC = () => {
           budget: values.budget || null,
           custom_topic: values.title,
         };
+
+        console.log('📤 Данные после преобразования:', orderData);
 
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
       const filesToUpload = [...fileList];
@@ -237,8 +242,9 @@ const CreateOrder: React.FC = () => {
           await queryClient.invalidateQueries({ queryKey: ['order', String(createdOrder.id)] });
         })();
       }
-    } catch (error) {
-      console.error('Ошибка при создании заказа:', error);
+        } catch (error) {
+      console.error('❌ Ошибка при создании заказа:', error);
+      console.error('📄 Response data:', (error as any)?.response?.data);
       const errMsg =
         (error as any)?.response?.data?.detail ||
         (error as any)?.response?.data?.deadline?.[0] ||

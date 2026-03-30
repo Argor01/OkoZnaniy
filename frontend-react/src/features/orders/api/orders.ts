@@ -116,8 +116,13 @@ export const ordersApi = {
     return response.data;
   },
 
-  rejectOrder: async (id: number) => {
+    rejectOrder: async (id: number) => {
     const response = await apiClient.post(API_ENDPOINTS.orders.reject(id));
+    return response.data;
+  },
+
+  createReview: async (orderId: number, rating: number, comment: string) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.createReview(orderId), { rating, comment });
     return response.data;
   },
 

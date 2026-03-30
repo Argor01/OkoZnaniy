@@ -136,7 +136,7 @@ class OrderSerializer(serializers.ModelSerializer):
     is_overdue = serializers.SerializerMethodField()
     
     # Явно указываем budget как FloatField для корректной сериализации
-    budget = serializers.FloatField()
+    budget = serializers.FloatField(required=False, allow_null=True)
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
@@ -234,12 +234,15 @@ class OrderSerializer(serializers.ModelSerializer):
                     'deadline': 'Дедлайн не может быть в прошлом'
                 })
         
-        # Проверяем цену
-        if data.get('budget'):
-            if data['budget'] <= 0:
-                raise serializers.ValidationError({
-                    'budget': 'Цена должна быть больше 0'
-                })
+        # Проверяем цену - бюджет может быть пустым (None, пустая строка, 0), это допустимо
+        budget = data.get('budget')
+        # Конвертируем пустую строку в None
+        if budget == '' or budget is None:
+            data['budget'] = None
+        elif budget is not None and budget <= 0:
+            raise serializers.ValidationError({
+                'budget': 'Цена должна быть больше 0'
+            })
         
         return data
 
@@ -305,14 +308,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 'deadline': 'Дедлайн не может быть в прошлом'
             })
         
-        # Используем цену, указанную клиентом
-        if 'budget' not in validated_data or not validated_data['budget']:
-            raise serializers.ValidationError({
-                'budget': 'Укажите желаемую цену за работу'
-            })
-        
-        # Проверяем, что цена больше 0
-        if validated_data['budget'] <= 0:
+        # Проверяем, что цена больше 0 (если указана)
+        budget = validated_data.get('budget')
+        if budget is not None and budget <= 0:
             raise serializers.ValidationError({
                 'budget': 'Цена должна быть больше 0'
             })

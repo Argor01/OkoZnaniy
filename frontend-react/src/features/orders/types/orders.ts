@@ -93,7 +93,7 @@ export interface CreateOrderRequest {
   subject_id: number;
   custom_topic: string;
   work_type_id: number;
-  budget: number;
+  budget: number | null;
   additional_requirements?: any;
 }
 
