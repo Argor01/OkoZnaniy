@@ -134,6 +134,23 @@ export const API_ENDPOINTS = {
         messages: (id: number) => `/admin-panel/support-chats/${id}/messages/`,
       },
     },
+    arbitration: {
+      cases: {
+        list: '/arbitration/cases/',
+        detail: (caseNumber: string) => `/arbitration/cases/${caseNumber}/`,
+        submit: '/arbitration/cases/submit-claim/',
+        myCases: '/arbitration/cases/my-cases/',
+        takeInWork: (id: number) => `/arbitration/cases/${id}/take-in-work/`,
+        sendMessage: (id: number) => `/arbitration/cases/${id}/send-message/`,
+        updateStatus: (id: number) => `/arbitration/cases/${id}/update-status/`,
+        makeDecision: (id: number) => `/arbitration/cases/${id}/make-decision/`,
+        processRefund: (id: number) => `/arbitration/cases/${id}/process-refund/`,
+        closeCase: (id: number) => `/arbitration/cases/${id}/close-case/`,
+        assignUsers: (id: number) => `/arbitration/cases/${id}/assign-users/`,
+        activityFeed: (id: number) => `/arbitration/cases/${id}/activity-feed/`,
+      },
+      stats: '/arbitration/stats/',
+    },
   },
   support: {
     chats: '/chat/support/',

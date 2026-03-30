@@ -4,6 +4,7 @@ import { financeApi } from './finance';
 import { supportApi } from './support';
 import { communicationApi } from './communication';
 import { contentApi } from './content';
+import { arbitrationApi } from './arbitration';
 
 export * from '@/features/admin/types/admin';
 
@@ -14,4 +15,5 @@ export const adminPanelApi = {
   ...supportApi,
   ...communicationApi,
   ...contentApi,
+  ...arbitrationApi,
 };

@@ -1,48 +1,6 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
-import { apiClient } from '@/api/client';
-
-interface ArbitrationCase {
-  id: number;
-  case_number: string;
-  plaintiff: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  defendant?: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  subject: string;
-  status: string;
-  status_display: string;
-  priority: string;
-  priority_display: string;
-  reason: string;
-  reason_display: string;
-  assigned_admin?: {
-    id: number;
-    first_name: string;
-    last_name: string;
-  };
-  created_at: string;
-  updated_at: string;
-  messages_count: number;
-  unread_count: number;
-}
-
-interface ArbitrationStats {
-  total_cases: number;
-  new_cases: number;
-  in_progress: number;
-  awaiting_decision: number;
-  closed_cases: number;
-  urgent_cases: number;
-}
+import { arbitrationApi, ArbitrationCase, ArbitrationStats } from '@/features/admin/api/arbitration';
 
 export const useArbitration = (autoFetch = true) => {
   const [cases, setCases] = useState<ArbitrationCase[]>([]);
@@ -59,8 +17,8 @@ export const useArbitration = (autoFetch = true) => {
   const fetchCases = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/arbitration/cases/');
-      setCases(response.data.results || response.data);
+      const data = await arbitrationApi.getCases();
+      setCases(data);
     } catch (error) {
       console.error('Error fetching arbitration cases:', error);
       message.error('Ошибка при загрузке дел');
@@ -71,8 +29,8 @@ export const useArbitration = (autoFetch = true) => {
 
   const fetchStats = async () => {
     try {
-      const response = await apiClient.get('/arbitration/stats/');
-      setStats(response.data);
+      const data = await arbitrationApi.getStats();
+      setStats(data);
     } catch (error) {
       console.error('Error fetching arbitration stats:', error);
     }
