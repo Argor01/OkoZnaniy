@@ -16,7 +16,7 @@ import {
   SafetyOutlined,      
   UnorderedListOutlined, 
   ExclamationCircleOutlined,
-  ScaleOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -91,7 +91,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     key: 'arbitration',
-    icon: ScaleOutlined,
+    icon: AuditOutlined,
     label: 'Арбитраж',
   },
   {
