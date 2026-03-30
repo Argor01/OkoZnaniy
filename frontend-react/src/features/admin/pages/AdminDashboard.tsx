@@ -183,12 +183,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         );
 
       
-      case 'all_users':
-        return (
-          <UsersManagementSection />
-        );
-      
-      case 'blocked_users':
+      case 'blocking':
         return (
           <BlockedUsersSection />
         );
@@ -199,14 +194,9 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         );
 
       
-      case 'all_orders':
+      case 'orders_management':
         return (
           <AllOrdersSection />
-        );
-      
-      case 'problem_orders':
-        return (
-          <ProblemOrdersSection />
         );
 
 

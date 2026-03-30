@@ -47,40 +47,15 @@ export const menuItems: MenuItem[] = [
   },
   
   {
-    key: 'users_management' as MenuKey,
-    icon: UserOutlined,
-    label: 'Управление пользователями',
-    children: [
-      {
-        key: 'all_users',
-        icon: TeamOutlined,
-        label: 'Все пользователи',
-      },
-      {
-        key: 'blocked_users',
-        icon: StopOutlined,
-        label: 'Заблокированные',
-      },
-
-    ],
+    key: 'blocking' as MenuKey,
+    icon: StopOutlined,
+    label: 'Блокировка',
   },
   
   {
     key: 'orders_management' as MenuKey,
     icon: ShoppingOutlined,
     label: 'Управление заказами',
-    children: [
-      {
-        key: 'all_orders',
-        icon: UnorderedListOutlined,
-        label: 'Все заказы',
-      },
-      {
-        key: 'problem_orders',
-        icon: ExclamationCircleOutlined,
-        label: 'Проблемные заказы',
-      },
-    ],
   },
 
 
@@ -109,14 +84,10 @@ export const titleMap: Record<MenuKey, string> = {
   earnings: 'Начисления',
   tariffs_settings: 'Тарифы и комиссии',
   
-  users_management: 'Управление пользователями',
-  all_users: 'Все пользователи',
-  blocked_users: 'Заблокированные пользователи',
-
+  blocking: 'Блокировка',
+  user_roles: 'Роли пользователей',
   
   orders_management: 'Управление заказами',
-  all_orders: 'Все заказы',
-  problem_orders: 'Проблемные заказы',
   
   support_open: 'Открытые запросы поддержки',
   support_in_progress: 'Запросы поддержки в работе',
@@ -128,23 +99,17 @@ export const titleMap: Record<MenuKey, string> = {
   internal_communication: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
   
+  new_claims: 'Новые заявки',
+  in_progress_claims: 'Заявки в работе',
+  completed_claims: 'Завершенные заявки',
+  pending_approval: 'Ожидают подтверждения',
+  user_conversations: 'Диалоги пользователей',
 
 };
 
 
 export const getParentMenuKey = (menuKey: MenuKey): MenuKey | null => {
-  const childToParent: Partial<Record<MenuKey, MenuKey>> = {
-    
-    all_users: 'users_management' as MenuKey,
-    blocked_users: 'users_management' as MenuKey,
-
-    
-    all_orders: 'orders_management' as MenuKey,
-    problem_orders: 'orders_management' as MenuKey,
-
-  };
-  
-  return childToParent[menuKey] || null;
+  return null;
 };
 
 

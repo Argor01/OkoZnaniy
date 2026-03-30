@@ -172,7 +172,6 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
         extra={
           <Space>
             <Button size="small" icon={<UsergroupAddOutlined />} onClick={() => setMembersOpen(true)}>Участники</Button>
-            <Button size="small" icon={<PlusOutlined />} onClick={() => setInviteOpen(true)}>Добавить</Button>
           </Space>
         } /></div>
       {mLoad ? <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}><Spin /></div> : <MsgList msgs={msgs as any[]} uid={uid} />}
@@ -195,6 +194,13 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="Название" rules={[{ required: true, message: "Введите название" }]}><Input placeholder="Например: Отдел поддержки" /></Form.Item>
           <Form.Item name="description" label="Описание"><Input.TextArea placeholder="О чём этот чат?" /></Form.Item>
+          <Form.Item name="user_ids" label="Участники" rules={[{ required: true, message: "Выберите участников" }]}>
+            <Select mode="multiple" placeholder="Выберите участников" style={{ width: '100%' }}>
+              {(users as any[]).filter((u: any) => u.role === 'admin' || u.role === 'director').map((u: any) => (
+                <Option key={u.id} value={u.id}>{String(u.first_name ?? "")} {String(u.last_name ?? "")} ({String(u.email ?? "")}) - {u.role === 'admin' ? 'Администратор' : 'Директор'}</Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
       <Modal title="Добавить участника" open={inviteOpen} onCancel={() => setInviteOpen(false)}

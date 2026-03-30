@@ -65,28 +65,31 @@ export interface AdminStats {
   pendingDisputes: number;
 }
 
-export type MenuKey = 
+export type MenuKey =
   | 'overview'
-  | 'partners' 
+  | 'partners'
   | 'earnings'
-  | 'internal_communication'       
-  | 'support_open'                 
-  | 'support_in_progress'          
-  | 'support_completed'            
+  | 'internal_communication'
+  | 'support_open'
+  | 'support_in_progress'
+  | 'support_completed'
 
   | 'tickets'
   | 'arbitration'
   | 'communication'
-  | 'admin_group_chats'            
+  | 'admin_group_chats'
  
-  | 'users_management'            
-  | 'all_users'
-  | 'blocked_users'
+  | 'blocking'
+  | 'user_roles'
 
-  | 'orders_management'           
-  | 'all_orders'
-  | 'problem_orders'
-  | 'tariffs_settings';
+  | 'orders_management'
+  | 'tariffs_settings'
+
+  | 'new_claims'
+  | 'in_progress_claims'
+  | 'completed_claims'
+  | 'pending_approval'
+  | 'user_conversations';
 
 
 export interface TableColumn {
