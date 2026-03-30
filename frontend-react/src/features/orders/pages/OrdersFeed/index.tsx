@@ -94,47 +94,28 @@ const OrdersFeed: React.FC = () => {
   const { data: ordersData, isLoading: ordersLoading } = useQuery<OrdersFeedOrder[]>({
     queryKey: ['orders-feed', userProfile?.id, userProfile?.role],
     queryFn: async () => {
-      if (debugEnabled) {
-        console.log('🔄 Загрузка заказов из API...');
-        console.log('👤 Текущий пользователь:', userProfile);
-        console.log('🎭 Роль пользователя:', userProfile?.role);
-      }
-      const normalizeOrders = (raw: unknown): OrdersFeedOrder[] => {
-        if (Array.isArray(raw)) return raw as OrdersFeedOrder[];
-        if (raw && typeof raw === 'object' && Array.isArray((raw as { results?: unknown[] }).results)) {
-          return (raw as { results: OrdersFeedOrder[] }).results;
-        }
-        return [];
-      };
-            const fetchAllClientOrders = async (): Promise<OrdersFeedOrder[]> => {
-        const first = await ordersApi.getClientOrders({ ordering: '-created_at' } as any);
-        if (Array.isArray(first)) return first as OrdersFeedOrder[];
-        const firstResults = normalizeOrders(first);
-        const all = [...firstResults];
-        const firstNext = String((first as { next?: string | null })?.next || '');
-        if (!firstNext) return all;
-
-        let page = 2;
-        let hasNext = true;
-        let guard = 0;
-        while (hasNext && guard < 100) {
-          const raw = await ordersApi.getClientOrders({ ordering: '-created_at', page } as any);
-          all.push(...normalizeOrders(raw));
-          hasNext = Boolean((raw as { next?: string | null })?.next);
-          page += 1;
-          guard += 1;
-        }
-        return all;
-      };
-      const [available, own] = await Promise.all([
-        // Клиенты видят все заказы, эксперты - только доступные для отклика
-        userProfile?.role === 'client'
-          ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
-          : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
-        userProfile?.role === 'client'
-          ? fetchAllClientOrders().catch(() => [])
-          : Promise.resolve([] as OrdersFeedOrder[]),
-      ]);
+  if (debugEnabled) {
+    console.log('🔄 Загрузка заказов из API...');
+    console.log('👤 Текущий пользователь:', userProfile);
+    console.log('🎭 Роль пользователя:', userProfile?.role);
+  }
+  const normalizeOrders = (raw: unknown): OrdersFeedOrder[] => {
+    if (Array.isArray(raw)) return raw as OrdersFeedOrder[];
+    if (raw && typeof raw === 'object' && Array.isArray((raw as { results?: unknown[] }).results)) {
+      return (raw as { results: OrdersFeedOrder[] }).results;
+    }
+    return [];
+  };
+  const [available, own] = await Promise.all([
+    // Клиенты видят все заказы, эксперты - только доступные для отклика
+    userProfile?.role === 'client'
+      ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
+      : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
+    // Для клиентов также загружаем их собственные заказы (для корректного отображения)
+    userProfile?.role === 'client'
+      ? ordersApi.getClientOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
+      : Promise.resolve([] as OrdersFeedOrder[]),
+  ]);
       const merged = [...(Array.isArray(available) ? available : []), ...own];
       const byId = new Map<number, OrdersFeedOrder>();
       merged.forEach((item: OrdersFeedOrder) => {
@@ -373,8 +354,10 @@ const OrdersFeed: React.FC = () => {
             <Title level={2} className={styles.pageTitle}>
               Лента заказов
             </Title>
-            <Text type="secondary" className={styles.pageSubtitle}>
-              Найдите подходящий заказ или создайте свой
+                        <Text type="secondary" className={styles.pageSubtitle}>
+              {userProfile?.role === 'client' 
+                ? 'Изучайте заказы других клиентов и создавайте свои'
+                : 'Найдите подходящий заказ для работы'}
             </Text>
           </div>
         </div>
@@ -535,10 +518,10 @@ const OrdersFeed: React.FC = () => {
           description={
             <div>
               <Text className={styles.emptyText}>
-                {searchText || orderIdSearch || selectedSubject || selectedWorkType 
+                                {searchText || orderIdSearch || selectedSubject || selectedWorkType 
                   ? 'Заказы не найдены. Попробуйте изменить фильтры.'
                   : userProfile?.role === 'client' 
-                    ? 'В ленте пока нет заказов от других клиентов'
+                    ? 'В ленте пока нет заказов'
                     : 'Пока нет доступных заказов'}
               </Text>
             </div>

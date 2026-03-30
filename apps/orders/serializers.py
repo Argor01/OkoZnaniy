@@ -295,25 +295,14 @@ class OrderSerializer(serializers.ModelSerializer):
                 'budget': 'Цена должна быть больше 0'
             })
         
-                # Создаем заказ
+                                        
+        # Создаем заказ
         order = super().create(validated_data)
         
         return order
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        
-        # Скрываем чувствительные данные от клиентов, не являющихся владельцами заказа
-        request = self.context.get('request')
-        user = getattr(request, 'user', None) if request else None
-        
-        if user and getattr(user, 'role', None) == 'client':
-            is_owner = instance.client_id == user.id
-            if not is_owner:
-                data['bids'] = []
-                data['comments'] = []
-                data['files'] = []
-                data['additional_requirements'] = None
         
         # Добавляем информацию о споре, если он существует
         if hasattr(instance, 'dispute') and instance.dispute:

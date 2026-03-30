@@ -1,0 +1,271 @@
+.modalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Увеличиваем шрифт для всех элементов формы */
+.editOrderModalWrap :global(.ant-form-item-label > label),
+.editOrderModalWrap :global(.ant-input),
+.editOrderModalWrap :global(.ant-input-affix-wrapper),
+.editOrderModalWrap :global(.ant-input-number),
+.editOrderModalWrap :global(.ant-select),
+.editOrderModalWrap :global(.ant-select-selector),
+.editOrderModalWrap :global(.ant-picker),
+.editOrderModalWrap :global(.ant-picker-input > input),
+.editOrderModalWrap :global(.ant-form-item-explain),
+.editOrderModalWrap :global(.ant-form-item-extra) {
+  font-size: 16px !important;
+}
+
+.editOrderModalWrap :global(.ant-select-selection-item) {
+  font-size: 16px !important;
+}
+
+/* Убираем скроллбар */
+.editOrderModalWrap :global(.ant-modal-body) {
+  max-height: none !important;
+  overflow-y: visible !important;
+  padding: 24px;
+}
+
+.editDisabledWarning {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--color-brand-orange-100) 60%, #ffffff 40%);
+  border: 1px solid var(--color-brand-orange-300);
+  border-radius: 12px;
+}
+
+.orderSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.titleInput {
+  width: 100%;
+}
+
+.typeSubjectDateRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.typeField,
+.subjectField {
+  flex: 1;
+}
+
+.selectField {
+  width: 100%;
+}
+
+.selectDropdownFooter {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+}
+
+.selectDropdownButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.dateField {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dateInputItem {
+  flex: 1;
+  margin-bottom: 0 !important;
+}
+
+.dateInputItem :global(.ant-form-item-control-input-content) {
+  display: flex;
+  align-items: center;
+}
+
+.dateInput {
+  width: 100%;
+  min-width: 200px;
+}
+
+.timeSelectors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.timeFieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.timeSelect {
+  width: 70px;
+}
+
+.timeSeparator {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 20px;
+}
+
+.descriptionTextarea {
+  width: 100%;
+}
+
+.priceInput {
+  width: 100%;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.uploadArea {
+  width: 100%;
+}
+
+.existingFilesTitle,
+.newFilesTitle {
+  margin-top: 16px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.orderFilesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orderFileTile {
+  width: 120px;
+  min-height: 114px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.orderFileTile:hover {
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.orderFileTile.fileMarkedForDeletion {
+  border-color: #ff4d4f;
+  background: color-mix(in srgb, #ff4d4f 10%, var(--bg-primary) 90%);
+  opacity: 0.7;
+}
+
+.orderFileIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-blue) 11%, var(--bg-primary) 89%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.orderFileName {
+  font-size: 12px;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.orderFileDeleteIcon {
+  color: #ff4d4f;
+  font-size: 14px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.orderFileRestoreIcon {
+  color: #52c41a;
+  font-size: 14px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.fileIconPdf {
+  color: #dc2626;
+}
+
+.fileIconDoc {
+  color: var(--primary-blue-hover);
+}
+
+.fileIconImage {
+  color: #16a34a;
+}
+
+.fileIconArchive {
+  color: var(--color-brand-purple-700);
+}
+
+.fileIconDefault {
+  color: var(--text-secondary);
+}
+
+.editOrderModalWrap :global(.ant-modal-body) {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .typeSubjectDateRow {
+    grid-template-columns: 1fr;
+  }
+
+  .dateField {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .timeSelectors {
+    justify-content: flex-start;
+  }
+
+  .orderFilesGrid {
+    justify-content: center;
+  }
+
+  .orderFileTile {
+    width: 100px;
+    min-height: 100px;
+  }
+}

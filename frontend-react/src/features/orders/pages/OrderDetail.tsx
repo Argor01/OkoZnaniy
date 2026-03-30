@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, EllipsisOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined, EditOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order, OrderFile } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { chatApi } from '@/features/support/api/chat';
 import BidModal from '../components/BidModal';
+import EditOrderModal from '../components/Modals/EditOrderModal';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useDashboard } from '@/contexts/DashboardContext';
@@ -34,9 +35,10 @@ const OrderDetail: React.FC = () => {
     const [reviewComment, setReviewComment] = useState('');
     const [reviewSubmitting, setReviewSubmitting] = useState(false);
     const [assigningExpertId, setAssigningExpertId] = useState<number | null>(null);
-  const [uploadingFiles, setUploadingFiles] = useState(false);
+    const [uploadingFiles, setUploadingFiles] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [openingBidModal, setOpeningBidModal] = useState(false);
+  const [editOrderModalVisible, setEditOrderModalVisible] = useState(false);
 
   const removeOrderFromCaches = React.useCallback((id: number) => {
     const filterOut = (data: any) => {
@@ -512,28 +514,11 @@ const OrderDetail: React.FC = () => {
 
         <AppCard className={styles.mainCard}>
           <Space direction="vertical" size={0} className={`${styles.fullWidth} ${styles.orderContent}`}>
-            <div className={styles.sectionBlock}>
+                        <div className={styles.sectionBlock}>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
                 <div className={styles.orderHeaderInfo}>
                   <Title level={isMobile ? 3 : 2} className={styles.orderTitle}>{order.title}</Title>
                 </div>
-                <Space className={styles.headerRightControls}>
-                  {canSubmitComplaint && (
-                    <Dropdown
-                      trigger={['click']}
-                      menu={{
-                        items: [{ key: 'complaint', label: 'Жалоба администрации' }],
-                        onClick: ({ key }) => {
-                          if (key === 'complaint') void handleOpenComplaintInSupport();
-                        },
-                      }}
-                    >
-                      <button type="button" className={styles.orderActionsButton}>
-                        <EllipsisOutlined />
-                      </button>
-                    </Dropdown>
-                  )}
-                </Space>
               </Space>
             </div>
 
@@ -624,10 +609,73 @@ const OrderDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+                            </div>
             </div>
 
-                        <div className={styles.sectionBlock}>
+                        {/* Кнопки действий для владельца заказа */}
+            {isOrderOwner && (
+              <div className={`${styles.orderActionsSection} ${styles.sectionBlock}`}>
+                <Space wrap size={isMobile ? 8 : 16} className={styles.orderActionsRow}>
+                  <AppButton
+                    icon={<EditOutlined />}
+                    size={isMobile ? 'middle' : 'large'}
+                    onClick={() => setEditOrderModalVisible(true)}
+                    disabled={!!order.expert && order.status !== 'new'}
+                  >
+                    Редактировать заказ
+                  </AppButton>
+                                    <AppButton
+                    variant="secondary"
+                    icon={<CloseOutlined />}
+                    size={isMobile ? 'middle' : 'large'}
+                    danger
+                    disabled={order.status !== 'new'}
+                    onClick={() => {
+                      Modal.confirm({
+                        title: 'Отмена заказа',
+                        content: 'Вы уверены, что хотите отменить этот заказ?',
+                        okText: 'Отменить',
+                        cancelText: 'Назад',
+                        okType: 'danger',
+                        onOk: async () => {
+                          try {
+                            await ordersApi.deleteOrder(Number(orderId));
+                            message.success('Заказ отменен');
+                            navigate('/orders-feed');
+                          } catch (e: any) {
+                            message.error(e?.response?.data?.detail || 'Не удалось отменить заказ');
+                          }
+                        },
+                      });
+                    }}
+                  >
+                    Отменить заказ
+                  </AppButton>
+                  <Dropdown
+                    menu={{
+                      items: [
+                        {
+                          key: 'complaint',
+                          label: 'Подать жалобу',
+                          icon: <MessageOutlined />,
+                          onClick: () => void handleOpenComplaintInSupport(),
+                        },
+                      ],
+                    }}
+                    trigger={['click']}
+                  >
+                    <AppButton
+                      variant="secondary"
+                      size={isMobile ? 'middle' : 'large'}
+                    >
+                      Ещё <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+                    </AppButton>
+                  </Dropdown>
+                </Space>
+              </div>
+            )}
+
+            <div className={styles.sectionBlock}>
               <Title level={4} className={styles.sectionTitle}>Описание заказа</Title>
               <Paragraph className={styles.description}>
                 {order.description || 'Описание отсутствует'}
@@ -1056,6 +1104,17 @@ const OrderDetail: React.FC = () => {
           />
         </div>
       </Modal>
+
+            {/* Модалка редактирования заказа */}
+      <EditOrderModal
+        visible={editOrderModalVisible}
+        onClose={() => setEditOrderModalVisible(false)}
+        order={order}
+        onSuccess={() => {
+          refetchOrder();
+          message.success('Заказ обновлен');
+        }}
+      />
 
       <Modal
         open={reviewModalOpen}

@@ -6,6 +6,7 @@ import { authApi } from '@/features/auth/api/auth';
 import apiClient from '@/api/client';
 import { UserProfile } from '../types';
 import SkillsSelect from '../components/inputs/SkillsSelect';
+import { useUserUpdate } from '@/hooks/useUserUpdate';
 import styles from './ProfileModal.module.css';
 
 interface ProfileModalProps {
@@ -18,6 +19,7 @@ interface ProfileModalProps {
 const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, userProfile }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const { updateUserInCache } = useUserUpdate();
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const isExpert = userProfile?.role === 'expert';
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
@@ -148,12 +150,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               }
             }
 
-            const result = await authApi.updateProfile(profileData);
+                        const result = await authApi.updateProfile(profileData);
             message.success('Профиль обновлен');
             onClose();
-            queryClient.setQueryData(['user-profile'], result);
-            await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-            await queryClient.refetchQueries({ queryKey: ['user-profile'] });
+            // Обновляем данные пользователя во всём приложении
+            updateUserInCache(result);
           } catch (e: unknown) {
             const errorData = (e as { response?: { data?: unknown } })?.response?.data;
             if (errorData && typeof errorData === 'object' && !Array.isArray(errorData)) {
@@ -213,9 +214,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   onSuccess?.(result);
                   message.success('Аватар обновлен!');
 
-                  queryClient.setQueryData(['user-profile'], result);
-                  await queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-                  await queryClient.refetchQueries({ queryKey: ['user-profile'] });
+                                    // Обновляем данные пользователя во всём приложении
+                  updateUserInCache(result);
                 } else {
                   throw new Error('Ошибка загрузки');
                 }

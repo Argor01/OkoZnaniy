@@ -64,12 +64,22 @@ class OrderViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         order = get_object_or_404(self.serializer_class.Meta.model, pk=kwargs.get('pk'))
         user = request.user
+        
+        # Staff, клиент заказа или эксперт заказа - полный доступ
         if user.is_staff or order.client_id == user.id or order.expert_id == user.id:
             serializer = self.get_serializer(order)
             return Response(serializer.data)
+        
+        # Клиенты могут просматривать любые заказы (для ознакомления)
+        if getattr(user, 'role', None) == 'client':
+            serializer = self.get_serializer(order)
+            return Response(serializer.data)
+        
+        # Эксперты могут просматривать только доступные заказы
         if getattr(user, 'role', None) == 'expert' and order.status == 'new' and order.expert_id is None:
             serializer = self.get_serializer(order)
             return Response(serializer.data)
+        
         return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
 
     def get_queryset(self):
@@ -78,8 +88,17 @@ class OrderViewSet(viewsets.ModelViewSet):
             'bids__expert', 'files', 'comments', 'subject', 'topic', 'work_type', 'complexity'
         ).select_related('client', 'expert', 'expert_rating')
         
+        # Staff видят все заказы
         if user.is_staff:
             base_queryset = queryset
+        # Клиенты видят все заказы (для ознакомления в ленте)
+        elif getattr(user, 'role', None) == 'client':
+            base_queryset = queryset
+        # Эксперты видят только свои заказы (как клиент или как исполнитель)
+        elif getattr(user, 'role', None) == 'expert':
+            base_filter = models.Q(client=user) | models.Q(expert=user)
+            base_queryset = queryset.filter(base_filter)
+        # Остальные пользователи видят только свои заказы
         else:
             base_filter = models.Q(client=user) | models.Q(expert=user)
             base_queryset = queryset.filter(base_filter)
@@ -807,13 +826,16 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         order_pk = self.kwargs.get('order_pk')
         user = self.request.user
-        # Только клиент или эксперт заказа (или staff) могут видеть/скачивать файлы
+        # Клиент или эксперт заказа, staff - полный доступ
         order = get_object_or_404(Order, pk=order_pk)
         is_participant = user.is_staff or order.client_id == user.id or order.expert_id == user.id
+        # Клиенты могут просматривать файлы любых заказов (для ознакомления)
+        is_client_viewing = getattr(user, 'role', None) == 'client'
+        # Эксперты могут просматривать файлы доступных заказов
         is_public_expert = (
             getattr(user, 'role', None) == 'expert' and order.status == 'new' and order.expert_id is None
         )
-        if not (is_participant or is_public_expert):
+        if not (is_participant or is_client_viewing or is_public_expert):
             return OrderFile.objects.none()
         return OrderFile.objects.filter(
             order_id=order_pk

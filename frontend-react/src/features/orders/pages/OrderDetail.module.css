@@ -48,21 +48,29 @@
   flex-wrap: wrap;
 }
 
-.orderActionsButton {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--text-secondary);
+/* Секция с кнопками действий */
+.orderActionsSection {
+  margin-top: 8px;
 }
 
-.orderActionsButton:hover {
-  color: var(--text-primary);
+.orderActionsRow {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .orderActionsRow {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .orderActionsRow > button,
+  .orderActionsRow > div > button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .orderTitle {
@@ -104,7 +112,6 @@
 }
 
 .clientAvatar {
-  border: 2px solid color-mix(in srgb, var(--color-brand-blue-500) 55%, #ffffff 45%);
   box-shadow: 0 4px 14px rgba(35, 140, 226, 0.24);
 }
 
@@ -113,6 +120,7 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  color: black;
 }
 
 .clientNameLink {
@@ -374,6 +382,7 @@
 
 .description {
   margin-bottom: 0 !important;
+  font-size: 16px;
 }
 
 .bidsBadgeText {
@@ -564,14 +573,11 @@
 
 .clientNoteBox {
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 60%, var(--border-color) 40%);
-  background: color-mix(in srgb, var(--color-brand-blue-50) 50%, var(--bg-primary) 50%);
-  padding: 14px 16px;
 }
 
 .clientNoteText {
   margin-bottom: 0 !important;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--text-primary);
 }
@@ -854,6 +860,10 @@
 @media (max-width: 768px) {
   .expertOfferGrid {
     grid-template-columns: 1fr;
+  }
+  
+  .orderActionsSection {
+    margin-top: 12px;
   }
 
   .bidItem,
