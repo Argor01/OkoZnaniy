@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Typography, Empty } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Typography, Empty, Dropdown, MenuProps, message } from 'antd';
 import {
   UserOutlined,
   SendOutlined,
   SearchOutlined,
   CloseOutlined,
+  PushpinOutlined,
+  PushpinFilled,
+  EyeInvisibleOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import styles from '@/components/chat/ChatSystem.module.css';
 
@@ -32,6 +36,7 @@ export interface Chat {
   messages: ChatMessage[];
   is_frozen?: boolean;
   frozen_reason?: string;
+  isPinned?: boolean;
 }
 
 interface ChatSystemProps {
@@ -39,6 +44,8 @@ interface ChatSystemProps {
   onClose: () => void;
   chats: Chat[];
   onSendMessage: (chatId: number, message: string) => void;
+  onTogglePin?: (chatId: number) => void;
+  onMarkAsUnread?: (chatId: number) => void;
   isMobile?: boolean;
 }
 
@@ -47,6 +54,8 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
   onClose,
   chats,
   onSendMessage,
+  onTogglePin,
+  onMarkAsUnread,
   isMobile = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,9 +73,34 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
     }
   }, [selectedChat]);
 
-  const filteredChats = chats.filter(chat =>
+    const filteredChats = chats.filter(chat =>
     chat.userName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Сортируем чаты: закреплённые сверху, затем по времени
+  const sortedChats = [...filteredChats].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return 0;
+  });
+
+  const handleContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+  };
+
+  const handleTogglePin = (chat: Chat) => {
+    if (onTogglePin) {
+      onTogglePin(chat.chatId);
+      message.success(chat.isPinned ? 'Чат откреплён' : 'Чат закреплён');
+    }
+  };
+
+  const handleMarkAsUnread = (chat: Chat) => {
+    if (onMarkAsUnread) {
+      onMarkAsUnread(chat.chatId);
+      message.success('Чат помечен как непрочитанный');
+    }
+  };
 
   const handleSendMessage = () => {
     if (messageText.trim() && selectedChat) {
@@ -101,13 +135,38 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
             {filteredChats.length === 0 ? (
               <Empty description="Нет сообщений" />
             ) : (
-              filteredChats.map((chat) => (
-                <div
-                  key={chat.id}
-                  className={`${styles.chatItem} ${selectedChat?.id === chat.id ? styles.active : ''}`}
-                  onClick={() => setSelectedChat(chat)}
-                >
-                  <Badge dot={chat.isOnline} offset={[-5, 35]}>
+                            sortedChats.map((chat) => {
+                const menuItems: MenuProps['items'] = [
+                  {
+                    key: 'pin',
+                    icon: chat.isPinned ? <PushpinFilled /> : <PushpinOutlined />,
+                    label: chat.isPinned ? 'Открепить' : 'Закрепить',
+                    onClick: () => handleTogglePin(chat),
+                  },
+                  {
+                    key: 'unread',
+                    icon: chat.isRead ? <EyeInvisibleOutlined /> : <EyeOutlined />,
+                    label: chat.isRead ? 'Пометить непрочитанным' : 'Пометить прочитанным',
+                    onClick: () => handleMarkAsUnread(chat),
+                    disabled: chat.isRead === false && chat.unreadCount === 0,
+                  },
+                ];
+
+                return (
+                  <Dropdown
+                    key={chat.id}
+                    menu={{ items: menuItems }}
+                    trigger={['contextMenu']}
+                  >
+                    <div
+                      className={`${styles.chatItem} ${selectedChat?.id === chat.id ? styles.active : ''} ${chat.isPinned ? styles.pinned : ''}`}
+                      onClick={() => setSelectedChat(chat)}
+                      onContextMenu={handleContextMenu}
+                    >
+                      {chat.isPinned && (
+                        <PushpinFilled className={styles.pinIcon} />
+                      )}
+                      <Badge dot={chat.isOnline} offset={[-5, 35]}>
                     <Avatar
                       size={48}
                       src={chat.userAvatar}
@@ -134,10 +193,11 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                       {chat.unreadCount > 0 && (
                         <Badge dot className={styles.unreadDot} />
                       )}
-                    </div>
+                                        </div>
                   </div>
-                </div>
-              ))
+                </Dropdown>
+                );
+              })
             )}
           </div>
         </div>

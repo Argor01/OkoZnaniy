@@ -179,6 +179,25 @@
   border-bottom: 1px solid #f3f4f6;
   background: #ffffff;
   transition: background 0.2s;
+  position: relative;
+}
+
+.chatListItemPinned {
+  background: #fefce8;
+  border-left: 3px solid #fbbf24;
+  padding-left: 12px;
+}
+
+.chatListItemPinIcon {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: #fbbf24;
+  font-size: 14px;
+}
+
+.chatListItemPinned .chatListContent {
+  padding-left: 16px;
 }
 
 .chatListItemMobile {

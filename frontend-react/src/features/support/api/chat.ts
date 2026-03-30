@@ -160,8 +160,16 @@ export const chatApi = {
     await apiClient.post(`/chat/chats/${chatId}/mark_read/`);
   },
 
-  deleteChat: async (chatId: number): Promise<void> => {
+    deleteChat: async (chatId: number): Promise<void> => {
     await apiClient.delete(`/chat/chats/${chatId}/`);
+  },
+
+  togglePin: async (chatId: number): Promise<void> => {
+    await apiClient.post(`/chat/chats/${chatId}/toggle_pin/`);
+  },
+
+  markAsUnread: async (chatId: number): Promise<void> => {
+    await apiClient.post(`/chat/chats/${chatId}/mark_as_unread/`);
   },
 
   

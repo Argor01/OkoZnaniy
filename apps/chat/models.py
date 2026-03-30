@@ -62,6 +62,39 @@ class Chat(models.Model):
         self.frozen_at = None
         self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
 
+
+class ChatPin(models.Model):
+    """Закреплённые чаты пользователей"""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='pinned_chats',
+        verbose_name='Пользователь'
+    )
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name='pins',
+        verbose_name='Чат'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата закрепления'
+    )
+
+    class Meta:
+        verbose_name = 'Закреплённый чат'
+        verbose_name_plural = 'Закреплённые чаты'
+        unique_together = ['user', 'chat']
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} закрепил чат #{self.chat.id}"
+
 class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

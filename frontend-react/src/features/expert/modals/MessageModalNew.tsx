@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Popover } from 'antd';
+import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Popover, MenuProps } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/features/common';
 import {
@@ -29,7 +29,11 @@ import {
   UpOutlined,
   MenuOutlined,
   DollarOutlined,
-  PercentageOutlined
+  PercentageOutlined,
+  PushpinOutlined,
+  PushpinFilled,
+  EyeInvisibleOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { SmileOutlined } from '@ant-design/icons';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
@@ -2054,7 +2058,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
   }, [selectedChat?.messages]);
 
-  const handleDeleteSelectedChat = useCallback(() => {
+    const handleDeleteSelectedChat = useCallback(() => {
     if (!selectedChat) return;
     Modal.confirm({
       title: 'Удалить чат?',
@@ -2080,6 +2084,77 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       },
     });
   }, [deletingChat, hasActiveOffersInSelectedChat, loadChats, selectedChat]);
+
+  const handleTogglePin = useCallback(async (chatId: number) => {
+    try {
+      // Сначала обновляем состояние локально для мгновенного отклика
+      setChatList((prev) =>
+        prev.map((chat) =>
+          chat.id === chatId
+            ? { ...chat, is_pinned: !chat.is_pinned }
+            : chat
+        )
+      );
+      
+      // Затем отправляем запрос на сервер
+      await chatApi.togglePin(chatId);
+      // Перезагружаем список для синхронизации с сервером
+      await loadChats();
+    } catch (error) {
+      console.error('Ошибка закрепления чата:', error);
+      // Откатываем изменение при ошибке
+      setChatList((prev) =>
+        prev.map((chat) =>
+          chat.id === chatId
+            ? { ...chat, is_pinned: !chat.is_pinned }
+            : chat
+        )
+      );
+    }
+  }, [loadChats]);
+
+    const handleMarkAsUnread = useCallback(async (chatId: number) => {
+      try {
+        // Сначала получаем текущее состояние чата
+        const chat = chatList.find(c => c.id === chatId);
+        const currentUnread = chat?.unread_count || 0;
+        const willMarkAsUnread = currentUnread === 0;
+      
+        // Обновляем состояние локально для мгновенного отклика
+        setChatList((prev) =>
+          prev.map((c) =>
+            c.id === chatId
+              ? { ...c, unread_count: willMarkAsUnread ? 1 : 0 }
+              : c
+          )
+        );
+      
+        // Затем отправляем запрос на сервер
+        if (currentUnread > 0) {
+          // Помечаем как прочитанный
+          await chatApi.markAsRead(chatId);
+          antMessage.success('Чат помечен как прочитанный');
+        } else {
+          // Помечаем как непрочитанный
+          await chatApi.markAsUnread(chatId);
+          antMessage.success('Чат помечен как непрочитанный');
+        }
+      
+        // Перезагружаем список для синхронизации с сервером
+        await loadChats();
+      } catch (error) {
+        console.error('Ошибка изменения статуса прочтения:', error);
+        antMessage.error('Не удалось изменить статус чата');
+        // Откатываем изменение при ошибке
+        setChatList((prev) =>
+          prev.map((chat) =>
+            chat.id === chatId
+              ? { ...chat, unread_count: chat.unread_count > 0 ? 0 : 1 }
+              : chat
+          )
+        );
+      }
+    }, [chatList, loadChats]);
 
   const openOverdueExtendModal = () => {
     setOverdueDeadlineValue(dayjs().add(1, 'day'));
@@ -2402,49 +2477,80 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                 <MessageOutlined className={`${styles.chatListEmptyIcon} ${isMobile ? styles.chatListEmptyIconMobile : ''}`} />
                 {searchQuery ? 'Ничего не найдено' : 'Нет чатов'}
               </div>
-            ) : (
-              filteredChatsWithoutSupport.map((chat) => (
-                <div 
-                  key={chat.id}
-                  onClick={() => loadChatDetail(chat.id)}
-                  className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${selectedChat?.id === chat.id ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''}`}
-                >
-                  <Avatar
-                    size={isMobile ? 36 : 40}
-                    icon={<UserOutlined />}
-                    src={getMediaUrl(chat.other_user?.avatar)}
-                    className={styles.chatAvatar}
-                  />
-                  <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
-                    <div className={styles.chatListHeaderRow}>
-                      <Text
-                        strong
-                        ellipsis
-                        className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
-                      >
-                        {chat.other_user?.username || 'Пользователь'}
-                      </Text>
-                      <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
-                        {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}
-                      </Text>
-                    </div>
-                    <div className={styles.chatListMetaRow}>
-                      <Text 
-                        ellipsis 
-                        className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${chat.unread_count > 0 ? styles.chatListPreviewUnread : ''}`}
-                      >
-                        {chat.last_message?.text || 'Нет сообщений'}
-                      </Text>
-                      {chat.unread_count > 0 && (
-                        <Badge 
-                          dot
-                          className={styles.chatBadge}
-                        />
+                        ) : (
+              filteredChatsWithoutSupport.map((chat) => {
+                const menuItems: MenuProps['items'] = [
+                  {
+                    key: 'pin',
+                    icon: chat.is_pinned ? <PushpinFilled /> : <PushpinOutlined />,
+                    label: chat.is_pinned ? 'Открепить' : 'Закрепить',
+                    onClick: () => handleTogglePin(chat.id),
+                  },
+                  {
+                    key: 'unread',
+                    icon: chat.unread_count > 0 ? <EyeOutlined /> : <EyeInvisibleOutlined />,
+                    label: chat.unread_count > 0 ? 'Пометить прочитанным' : 'Пометить непрочитанным',
+                    onClick: () => handleMarkAsUnread(chat.id),
+                  },
+                ];
+
+                const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                };
+
+                return (
+                  <Dropdown
+                    key={chat.id}
+                    menu={{ items: menuItems }}
+                    trigger={['contextMenu']}
+                  >
+                    <div
+                      onClick={() => loadChatDetail(chat.id)}
+                      onContextMenu={handleContextMenu}
+                      className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${selectedChat?.id === chat.id ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
+                    >
+                      {chat.is_pinned && (
+                        <PushpinFilled className={styles.chatListItemPinIcon} />
                       )}
+                      <Avatar
+                        size={isMobile ? 36 : 40}
+                        icon={<UserOutlined />}
+                        src={getMediaUrl(chat.other_user?.avatar)}
+                        className={styles.chatAvatar}
+                      />
+                      <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
+                        <div className={styles.chatListHeaderRow}>
+                          <Text
+                            strong
+                            ellipsis
+                            className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
+                          >
+                            {chat.other_user?.username || 'Пользователь'}
+                          </Text>
+                          <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
+                            {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}
+                          </Text>
+                        </div>
+                        <div className={styles.chatListMetaRow}>
+                          <Text
+                            ellipsis
+                            className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${chat.unread_count > 0 ? styles.chatListPreviewUnread : ''}`}
+                          >
+                            {chat.last_message?.text || 'Нет сообщений'}
+                          </Text>
+                          {chat.unread_count > 0 && (
+                            <Badge
+                              dot
+                              className={styles.chatBadge}
+                            />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))
+                  </Dropdown>
+                );
+              })
             )}
           </div>
         </div>

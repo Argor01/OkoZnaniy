@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Chat, Message, SupportChat, SupportMessage, ContactViolationLog
+from .models import Chat, Message, SupportChat, SupportMessage, ContactViolationLog, ChatPin
 from apps.users.serializers import UserSerializer
 
 
@@ -29,11 +29,12 @@ class ChatListSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
     is_frozen = serializers.SerializerMethodField()
     frozen_reason = serializers.SerializerMethodField()
+    is_pinned = serializers.SerializerMethodField()
     
     class Meta:
         model = Chat
         fields = ['id', 'order', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
-                  'frozen_reason', 'last_message', 'unread_count', 'other_user']
+                  'frozen_reason', 'last_message', 'unread_count', 'other_user', 'is_pinned']
     
     def get_other_user(self, obj):
         request = self.context.get('request')
@@ -80,6 +81,12 @@ class ChatListSerializer(serializers.ModelSerializer):
         if request and request.user:
             return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
         return 0
+    
+    def get_is_pinned(self, obj):
+        request = self.context.get('request')
+        if request and request.user:
+            return ChatPin.objects.filter(user=request.user, chat=obj).exists()
+        return False
 
 
 class ChatDetailSerializer(serializers.ModelSerializer):

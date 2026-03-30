@@ -48,6 +48,8 @@ export interface ChatListItem {
   unread_count: number;
   is_frozen?: boolean;
   frozen_reason?: string;
+  is_pinned?: boolean;
+  is_read?: boolean;
 }
 
 export interface ChatDetail {

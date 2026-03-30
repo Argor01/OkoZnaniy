@@ -50,6 +50,24 @@
   cursor: pointer;
   transition: all 0.3s ease;
   border-bottom: 1px solid #f3f4f6;
+  position: relative;
+}
+
+.chatItem.pinned {
+  background: #fefce8;
+  border-left: 3px solid #fbbf24;
+}
+
+.pinIcon {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: #fbbf24;
+  font-size: 14px;
+}
+
+.chatItem.pinned .chatItemContent {
+  padding-left: 16px;
 }
 
 .chatItem:hover {

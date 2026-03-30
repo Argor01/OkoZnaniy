@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Max, Count, Prefetch
 from django.db import transaction, IntegrityError
-from .models import Chat, Message, SupportChat, SupportMessage
+from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
@@ -75,35 +75,45 @@ class ChatViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        self.perform_destroy(chat)
+                self.perform_destroy(chat)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         user = self.request.user
-        # Исключаем чаты с технической поддержкой из списка обычных чатов
-        # Чаты поддержки отображаются только в разделе "Чаты поддержки" в админ-панели
-        queryset = Chat.objects.filter(
-            participants=user
-        ).prefetch_related(
-            'participants',
-            'messages__sender'
-        ).annotate(
-            last_message_time=Max('messages__created_at')
-        ).order_by('-last_message_time')
+        from django.db.models import Exists, OuterRef
         
-        # Получаем ID пользователя поддержки из настроек или переменной окружения
+            # Подзапрос для проверки закреплённых чатов
+        pinned_subquery = ChatPin.objects.filter(
+                user=OuterRef('participants'),
+                chat=OuterRef('pk')
+            )
+        
+            # Исключаем чаты с технической поддержкой из списка обычных чатов
+            # Чаты поддержки отображаются только в разделе "Чаты поддержки" в админ-панели
+        queryset = Chat.objects.filter(
+                participants=user
+            ).prefetch_related(
+                'participants',
+                'messages__sender',
+                'pins__user'
+            ).annotate(
+                last_message_time=Max('messages__created_at'),
+                is_pinned=Exists(pinned_subquery)
+            ).order_by('-is_pinned', '-last_message_time')
+        
+            # Получаем ID пользователя поддержки из настроек или переменной окружения
         from django.conf import settings
         support_user_id = getattr(settings, 'SUPPORT_USER_ID', None)
         
-        # Если ID поддержки задан, исключаем чаты с этим пользователем
+            # Если ID поддержки задан, исключаем чаты с этим пользователем
         if support_user_id:
-            queryset = queryset.exclude(participants__id=support_user_id)
+                queryset = queryset.exclude(participants__id=support_user_id)
         
-        # Также исключаем чаты, где context_title содержит маркеры поддержки
+            # Также исключаем чаты, где context_title содержит маркеры поддержки
         queryset = queryset.exclude(
-            Q(context_title__icontains='поддержка') |
-            Q(context_title__icontains='support') |
-            Q(context_title__icontains='техподдержка')
+                Q(context_title__icontains='поддержка') |
+                Q(context_title__icontains='support') |
+                Q(context_title__icontains='техподдержка')
         )
         
         return queryset
@@ -822,6 +832,43 @@ class ChatViewSet(viewsets.ModelViewSet):
         chat.messages.exclude(sender=request.user).update(is_read=True)
         
         return Response({'status': 'success'})
+
+    @action(detail=True, methods=['post'])
+    def mark_as_unread(self, request, pk=None):
+        """Пометить чат как непрочитанный"""
+        chat = self.get_object()
+        if request.user not in chat.participants.all():
+            return Response(
+                {'detail': 'Вы не являетесь участником этого чата'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Отмечаем все сообщения как непрочитанные
+        chat.messages.exclude(sender=request.user).update(is_read=False)
+        
+        return Response({'status': 'success'})
+
+    @action(detail=True, methods=['post'])
+    def toggle_pin(self, request, pk=None):
+        """Закрепить/открепить чат"""
+        chat = self.get_object()
+        if request.user not in chat.participants.all():
+            return Response(
+                {'detail': 'Вы не являетесь участником этого чата'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Проверяем, закреплён ли уже чат
+        pin = ChatPin.objects.filter(user=request.user, chat=chat).first()
+        
+        if pin:
+            # Открепляем чат
+            pin.delete()
+            return Response({'status': 'unpinned', 'message': 'Чат откреплён'})
+        else:
+            # Закрепляем чат
+            ChatPin.objects.create(user=request.user, chat=chat)
+            return Response({'status': 'pinned', 'message': 'Чат закреплён'})
 
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
