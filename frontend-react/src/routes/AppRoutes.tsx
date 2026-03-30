@@ -166,12 +166,12 @@ export const AppRoutes: React.FC = () => {
         element={<TicketDetailPage />}
       />
       <Route
-        path="/admin/arbitration/:ticketId"
-        element={<ArbitrationDetailPage />}
-      />
-      <Route
         path="/admin/arbitration/case/:caseNumber"
         element={<ArbitrationCaseDetailPage />}
+      />
+      <Route
+        path="/admin/arbitration/:ticketId"
+        element={<ArbitrationDetailPage />}
       />
       <Route 
         path={ROUTES.admin.directorDashboard}
