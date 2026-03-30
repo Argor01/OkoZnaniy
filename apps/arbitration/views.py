@@ -22,7 +22,9 @@ User = get_user_model()
 class IsAdminUser(IsAuthenticated):
     """Проверка прав администратора"""
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role == 'admin'
+        if not super().has_permission(request, view):
+            return False
+        return hasattr(request.user, 'role') and request.user.role == 'admin'
 
 
 def log_activity(case, actor, activity_type, description, metadata=None):
@@ -446,9 +448,16 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def arbitration_stats(request):
     """Статистика по арбитражу для админ-панели"""
+    # Проверяем, что пользователь - админ
+    if not hasattr(request.user, 'role') or request.user.role != 'admin':
+        return Response(
+            {'detail': 'У вас нет прав для просмотра статистики'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
     stats = {
         'total_cases': ArbitrationCase.objects.count(),
         'new_cases': ArbitrationCase.objects.filter(status='submitted').count(),
