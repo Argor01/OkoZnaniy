@@ -37,18 +37,16 @@ const bannerConfigs: BannerConfig[] = [
     id: 'static',
     name: 'Статичный баннер',
     sizes: ['300x250', '320x50', '336x280', '468x60', '728x90', '970x90', '970x250'],
-    orientations: ['horizontal', 'vertical'],
-    designs: [1, 2, 3]
+    orientations: ['horizontal'],
+    designs: [1, 2]
   }
 ];
 
 export const PromoMaterials: React.FC = () => {
   const { user } = useAuth();
   const [selectedBannerType] = useState('static'); // Только статичные баннеры
-  const [selectedOrientation, setSelectedOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
   const [selectedSize, setSelectedSize] = useState('970x250');
   const [selectedDesign, setSelectedDesign] = useState(1);
-  const [selectedFormat, setSelectedFormat] = useState('png');
 
   const currentConfig = bannerConfigs.find(config => config.id === selectedBannerType);
   
@@ -66,45 +64,38 @@ export const PromoMaterials: React.FC = () => {
   };
 
   const generateBannerUrl = () => {
-    // Заглушка - в реальности здесь будет генерация URL баннера
-    return `https://cdn.studwork.org/banners/${selectedBannerType}/${selectedSize}/${selectedDesign}.${selectedFormat}`;
+    // Используем реальные баннеры из assets
+    const bannerName = selectedDesign === 1 ? 'клиент.jpg' : 'эксперт.jpg';
+    return `/assets/${bannerName}`;
   };
 
   const handleDownload = () => {
-    // Заглушка - в реальности здесь будет скачивание файла
+    const url = generateBannerUrl();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = selectedDesign === 1 ? 'клиент.jpg' : 'эксперт.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     message.success('Баннер скачан');
   };
 
   const renderBannerPreview = () => {
-    // Заглушка баннера
-    const [width, height] = selectedSize.split('x').map(Number);
-    const aspectRatio = width / height;
+    const bannerUrl = generateBannerUrl();
     
     return (
       <div className={styles.bannerPreview}>
-        <div 
-          className={styles.bannerPlaceholder}
-          style={{
-            aspectRatio: aspectRatio,
-            maxWidth: Math.min(width, 400),
-            maxHeight: Math.min(height, 300)
+        <img 
+          src={bannerUrl} 
+          alt={`Баннер дизайн ${selectedDesign}`}
+          className={styles.bannerImage}
+          style={{ 
+            width: '100%', 
+            height: 'auto',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}
-        >
-          <div className={styles.bannerContent}>
-            <div className={styles.bannerLogo}>
-              🚀 ОКОЗНАНИЙ
-            </div>
-            <div className={styles.bannerText}>
-              Ищешь работу на дому?
-            </div>
-            <div className={styles.bannerButton}>
-              Стать автором
-            </div>
-            <div className={styles.bannerSize}>
-              {selectedSize}
-            </div>
-          </div>
-        </div>
+        />
       </div>
     );
   };
@@ -225,38 +216,6 @@ export const PromoMaterials: React.FC = () => {
             <Col xs={24} lg={12}>
               <Card title="Настройки баннера" className={styles.configCard}>
                 <Space direction="vertical" style={{ width: '100%' }} size="large">
-                  {/* Ориентация */}
-                  {currentConfig && currentConfig.orientations.length > 1 && (
-                    <div className={styles.configSection}>
-                      <Text strong>Ориентация:</Text>
-                      <Radio.Group 
-                        value={selectedOrientation} 
-                        onChange={(e) => setSelectedOrientation(e.target.value)}
-                      >
-                        <Radio value="horizontal">Горизонтальная</Radio>
-                        <Radio value="vertical">Вертикальная</Radio>
-                      </Radio.Group>
-                    </div>
-                  )}
-
-                  {/* Размер */}
-                  <div className={styles.configSection}>
-                    <Text strong>Размер:</Text>
-                    <div style={{ marginTop: 8 }}>
-                      {currentConfig?.sizes.map(size => (
-                        <Button
-                          key={size}
-                          type={selectedSize === size ? 'primary' : 'default'}
-                          size="small"
-                          onClick={() => setSelectedSize(size)}
-                          style={{ margin: '2px' }}
-                        >
-                          {size}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Дизайн */}
                   <div className={styles.configSection}>
                     <Text strong>Дизайн:</Text>
@@ -264,23 +223,8 @@ export const PromoMaterials: React.FC = () => {
                       value={selectedDesign} 
                       onChange={(e) => setSelectedDesign(e.target.value)}
                     >
-                      {currentConfig?.designs.map(design => (
-                        <Radio key={design} value={design}>
-                          {design}
-                        </Radio>
-                      ))}
-                    </Radio.Group>
-                  </div>
-
-                  {/* Формат */}
-                  <div className={styles.configSection}>
-                    <Text strong>Формат:</Text>
-                    <Radio.Group 
-                      value={selectedFormat} 
-                      onChange={(e) => setSelectedFormat(e.target.value)}
-                    >
-                      <Radio value="png">PNG</Radio>
-                      <Radio value="jpg">JPG</Radio>
+                      <Radio value={1}>Дизайн 1 (Клиент)</Radio>
+                      <Radio value={2}>Дизайн 2 (Эксперт)</Radio>
                     </Radio.Group>
                   </div>
                 </Space>

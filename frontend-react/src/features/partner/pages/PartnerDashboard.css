@@ -389,39 +389,7 @@
   font-size: 14px !important;
 }
 
-/* Адаптивная таблица заказов */
-.partnerDashboardOrdersTable {
-  overflow-x: auto;
-}
-
-.partnerDashboardOrdersTable .ant-table {
-  font-size: 13px;
-}
-
-.partnerDashboardOrdersTable .ant-table-thead > tr > th {
-  padding: 10px 8px !important;
-  font-size: 12px;
-  font-weight: 600;
-  background: #fafafa;
-  border-right: 2px solid #e5e7eb;
-}
-
-.partnerDashboardOrdersTable .ant-table-thead > tr > th:last-child {
-  border-right: none;
-}
-
-.partnerDashboardOrdersTable .ant-table-tbody > tr > td {
-  padding: 10px 8px !important;
-  border-right: 2px solid #f0f0f0;
-}
-
-.partnerDashboardOrdersTable .ant-table-tbody > tr > td:last-child {
-  border-right: none;
-}
-
-.partnerDashboardOrdersTable .ant-table-tbody > tr:hover > td {
-  border-right-color: #e5e7eb;
-}
+/* Адаптивная таблица заказов - удалено дублирование, см. ниже */
 
 /* Мобильная адаптация */
 @media (max-width: 768px) {
@@ -562,7 +530,6 @@
 
 /* Адаптивная таблица заказов */
 .partnerDashboardOrdersTable {
-  overflow-x: auto;
   width: 100%;
 }
 
