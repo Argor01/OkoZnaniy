@@ -89,7 +89,10 @@ export const useAdminAuth = () => {
       maskStyle: {
         backdropFilter: 'blur(4px)',
       },
-      onOk: () => logoutMutation.mutateAsync(),
+      onOk: async () => {
+        await logoutMutation.mutateAsync();
+        navigate('/');
+      },
     });
   };
 

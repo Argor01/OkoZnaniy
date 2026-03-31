@@ -420,12 +420,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
                   <Text type="secondary">Не назначен</Text>
                 )}
               </Descriptions.Item>
-              <Descriptions.Item label="Прогресс">
-                {selectedOrder.completion_percentage}%
-              </Descriptions.Item>
-              <Descriptions.Item label="Файлы">
-                {selectedOrder.files_count} файлов
-              </Descriptions.Item>
               <Descriptions.Item label="Создан">
                 {dayjs(selectedOrder.created_at).format('DD.MM.YYYY HH:mm')}
               </Descriptions.Item>
@@ -433,12 +427,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
                 {dayjs(selectedOrder.updated_at).format('DD.MM.YYYY HH:mm')}
               </Descriptions.Item>
             </Descriptions>
-
-            <Divider />
-
-            <div style={{ textAlign: 'center', color: '#999', fontSize: '14px' }}>
-              Режим просмотра - действия недоступны
-            </div>
           </div>
         )}
       </Modal>
