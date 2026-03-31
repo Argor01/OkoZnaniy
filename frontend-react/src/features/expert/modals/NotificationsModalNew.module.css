@@ -251,6 +251,58 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+.notificationsModalItem:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notificationsModalItemUnread {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.notificationsModalItemUnread:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.notificationsModalItemRead {
+  background: #ffffff;
+}
+
+.notificationsModalItemIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.notificationsModalItemIconUnread {
+  background: #dbeafe;
+}
+
+.notificationsModalItemIconRead {
+  background: #f3f4f6;
+}
+
+.notificationsModalItemIconMobile {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+.notificationsModalItemIconDesktop {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+}
+
 .notificationsModalItemMobile {
   padding: 16px;
   margin-bottom: 12px;
@@ -283,10 +335,25 @@
   font-size: 18px;
   color: #1f2937;
   line-height: 1.3;
+  flex: 1;
+}
+
+.notificationsModalItemTitleUnread {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.notificationsModalItemTitleRead {
+  font-weight: 500;
+  color: #4b5563;
 }
 
 .notificationsModalItemTitleMobile {
   font-size: 16px;
+}
+
+.notificationsModalItemTitleDesktop {
+  font-size: 18px;
 }
 
 .notificationsModalItemText {
@@ -308,8 +375,16 @@
   gap: 6px;
 }
 
+.notificationsModalItemTimeIcon {
+  font-size: 12px;
+}
+
 .notificationsModalItemTimeMobile {
   font-size: 13px;
+}
+
+.notificationsModalItemTimeDesktop {
+  font-size: 14px;
 }
 
 .notificationsModalUnreadDot {
@@ -319,6 +394,18 @@
   background-color: #3b82f6;
   margin-top: 6px;
   flex-shrink: 0;
+}
+
+.notificationsModalUnreadDotMobile {
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+}
+
+.notificationsModalUnreadDotDesktop {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
 }
 
 /* Notification Type Icons */
@@ -348,4 +435,172 @@
 
 .notificationsIconMuted {
   color: #6b7280;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 840px) {
+  .notificationsModalWrap :global(.ant-modal-content) {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    max-width: 100vw !important;
+  }
+  
+  .notificationsModalContent {
+    padding: 16px !important;
+  }
+  
+  .notificationsModalHeader {
+    margin-bottom: 16px !important;
+  }
+  
+  .notificationsModalTitle {
+    font-size: 20px !important;
+  }
+  
+  .notificationsModalMarkAll {
+    font-size: 13px !important;
+  }
+  
+  .notificationsModalTabs {
+    margin-bottom: 16px !important;
+    border-radius: 8px !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .notificationsModalTabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .notificationsModalTab {
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
+    white-space: nowrap;
+  }
+  
+  .notificationsModalTabIcon {
+    font-size: 16px !important;
+  }
+  
+  .notificationsModalTabLabel {
+    font-size: 13px !important;
+  }
+  
+  .notificationsModalList {
+    padding: 0 !important;
+    min-height: 300px !important;
+  }
+  
+  .notificationsModalItem {
+    padding: 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 12px !important;
+    gap: 12px !important;
+  }
+  
+  .notificationsModalItemIcon {
+    font-size: 20px !important;
+  }
+  
+  .notificationsModalItemTitle {
+    font-size: 15px !important;
+  }
+  
+  .notificationsModalItemText {
+    font-size: 14px !important;
+  }
+  
+  .notificationsModalItemTime {
+    font-size: 12px !important;
+  }
+  
+  .notificationsModalUnreadDot {
+    width: 7px !important;
+    height: 7px !important;
+    margin-top: 4px !important;
+  }
+  
+  .notificationsModalEmptyIcon {
+    font-size: 40px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .notificationsModalEmptyText {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .notificationsModalContent {
+    padding: 12px !important;
+  }
+  
+  .notificationsModalHeader {
+    margin-bottom: 12px !important;
+  }
+  
+  .notificationsModalTitle {
+    font-size: 18px !important;
+  }
+  
+  .notificationsModalMarkAll {
+    font-size: 12px !important;
+  }
+  
+  .notificationsModalTabs {
+    margin-bottom: 12px !important;
+    padding: 3px !important;
+  }
+  
+  .notificationsModalTab {
+    padding: 8px 10px !important;
+    gap: 5px !important;
+  }
+  
+  .notificationsModalTabIcon {
+    font-size: 14px !important;
+  }
+  
+  .notificationsModalTabLabel {
+    font-size: 12px !important;
+  }
+  
+  .notificationsModalItem {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
+    gap: 10px !important;
+  }
+  
+  .notificationsModalItemIcon {
+    font-size: 18px !important;
+  }
+  
+  .notificationsModalItemTitle {
+    font-size: 14px !important;
+  }
+  
+  .notificationsModalItemText {
+    font-size: 13px !important;
+  }
+  
+  .notificationsModalItemTime {
+    font-size: 11px !important;
+  }
+  
+  .notificationsModalUnreadDot {
+    width: 6px !important;
+    height: 6px !important;
+  }
+  
+  .notificationsModalEmptyIcon {
+    font-size: 36px !important;
+  }
+  
+  .notificationsModalEmptyText {
+    font-size: 12px !important;
+  }
 }
