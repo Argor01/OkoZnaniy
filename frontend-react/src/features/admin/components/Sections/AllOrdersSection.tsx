@@ -63,7 +63,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderModalVisible, setOrderModalVisible] = useState(false);
@@ -73,7 +72,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   
   const filteredData = dataSource.filter(order => {
     const searchLower = searchText.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       (order.title || '').toLowerCase().includes(searchLower) ||
       (order.description || '').toLowerCase().includes(searchLower) ||
       (order.client?.username || '').toLowerCase().includes(searchLower) ||
@@ -82,7 +81,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const matchesSubject = subjectFilter === 'all' || getEntityLabel(order.subject) === subjectFilter;
-    const matchesPriority = priorityFilter === 'all' || order.priority === priorityFilter;
     
     let matchesDate = true;
     if (dateRange) {
@@ -90,7 +88,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       matchesDate = orderDate.isAfter(dateRange[0]) && orderDate.isBefore(dateRange[1]);
     }
     
-    return matchesSearch && matchesStatus && matchesSubject && matchesPriority && matchesDate;
+    return matchesSearch && matchesStatus && matchesSubject && matchesDate;
   });
 
   const handleViewOrder = (order: Order) => {
@@ -315,19 +313,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             <Option value="Химия">Химия</Option>
           </Select>
 
-          <Select
-            placeholder="Приоритет"
-            className="allOrdersSelectPriority"
-            value={priorityFilter}
-            onChange={setPriorityFilter}
-          >
-            <Option value="all">Все</Option>
-            <Option value={ORDER_PRIORITIES.LOW}>{ORDER_PRIORITY_LABELS[ORDER_PRIORITIES.LOW]}</Option>
-            <Option value={ORDER_PRIORITIES.MEDIUM}>{ORDER_PRIORITY_LABELS[ORDER_PRIORITIES.MEDIUM]}</Option>
-            <Option value={ORDER_PRIORITIES.HIGH}>{ORDER_PRIORITY_LABELS[ORDER_PRIORITIES.HIGH]}</Option>
-            <Option value={ORDER_PRIORITIES.URGENT}>{ORDER_PRIORITY_LABELS[ORDER_PRIORITIES.URGENT]}</Option>
-          </Select>
-
           <RangePicker
             placeholder={['Дата от', 'Дата до']}
             className="allOrdersRangePicker"
@@ -387,11 +372,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
               <Descriptions.Item label="Статус">
                 <Tag color={getStatusColor(selectedOrder.status)}>
                   {getStatusLabel(selectedOrder.status)}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Приоритет">
-                <Tag color={getPriorityColor(selectedOrder.priority)}>
-                  {getPriorityLabel(selectedOrder.priority)}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Бюджет">
