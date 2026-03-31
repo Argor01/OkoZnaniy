@@ -234,13 +234,6 @@ const ContactBannedUsers: React.FC = () => {
   return (
     <div>
       <Card>
-        <div className={styles.headerBlock}>
-          <Title level={4}>Баны за обмен контактами</Title>
-          <Text type="secondary">
-            Пользователи, забаненные за попытку обмена контактными данными в переписках
-          </Text>
-        </div>
-
         <div className={styles.filtersRow}>
           <Search
             placeholder="Поиск по имени, email или username"

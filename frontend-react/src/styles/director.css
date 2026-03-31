@@ -166,10 +166,7 @@
 }
 
 .directorDashboardContent {
-  margin: 24px;
-  padding: 24px;
   background: #fff;
-  border-radius: 8px;
   min-height: calc(100vh - 112px);
 }
 
@@ -954,10 +951,24 @@
   font-weight: 600;
   background: #fafafa;
   white-space: nowrap;
+  border-right: 2px solid #e5e7eb;
+}
+
+.employeeArchiveTable .ant-table-thead > tr > th:last-child {
+  border-right: none;
 }
 
 .employeeArchiveTable .ant-table-tbody > tr > td {
   padding: 10px 8px !important;
+  border-right: 2px solid #f0f0f0;
+}
+
+.employeeArchiveTable .ant-table-tbody > tr > td:last-child {
+  border-right: none;
+}
+
+.employeeArchiveTable .ant-table-tbody > tr:hover > td {
+  border-right-color: #e5e7eb;
 }
 
 .employeeArchiveFilters {

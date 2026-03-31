@@ -177,6 +177,27 @@
   border-radius: 12px;
 }
 
+.employeeTable :global(.ant-table-thead > tr > th) {
+  border-right: 2px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.employeeTable :global(.ant-table-thead > tr > th:last-child) {
+  border-right: none;
+}
+
+.employeeTable :global(.ant-table-tbody > tr > td) {
+  border-right: 2px solid #f0f0f0;
+}
+
+.employeeTable :global(.ant-table-tbody > tr > td:last-child) {
+  border-right: none;
+}
+
+.employeeTable :global(.ant-table-tbody > tr:hover > td) {
+  border-right-color: #e5e7eb;
+}
+
 .tablePagination {
   padding: 16px;
 }

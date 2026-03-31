@@ -80,7 +80,36 @@ const Login: React.FC = () => {
       // Переключаемся на вкладку регистрации
       setActiveTab('register');
     }
-  }, [location.search, registerForm]);
+    
+    // Проверяем, есть ли валидный токен
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // Проверяем валидность токена
+      fetch('/api/users/me/', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => {
+          if (response.ok) {
+            // Токен валидный, перенаправляем на дашборд
+            navigate('/dashboard');
+          } else {
+            // Токен невалидный, очищаем
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_role');
+          }
+        })
+        .catch(() => {
+          // Ошибка сети, очищаем токен
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('user_role');
+        });
+    }
+  }, [location.search, registerForm, navigate]);
 
   
   const loginUsernamePh = 'Email';

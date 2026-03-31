@@ -403,10 +403,24 @@
   font-size: 12px;
   font-weight: 600;
   background: #fafafa;
+  border-right: 2px solid #e5e7eb;
+}
+
+.partnerDashboardOrdersTable .ant-table-thead > tr > th:last-child {
+  border-right: none;
 }
 
 .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
   padding: 10px 8px !important;
+  border-right: 2px solid #f0f0f0;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr > td:last-child {
+  border-right: none;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr:hover > td {
+  border-right-color: #e5e7eb;
 }
 
 /* Мобильная адаптация */
@@ -459,10 +473,24 @@
   font-weight: 600;
   background: #fafafa;
   white-space: nowrap;
+  border-right: 2px solid #e5e7eb;
+}
+
+.partnerDashboardReferralsTable .ant-table-thead > tr > th:last-child {
+  border-right: none;
 }
 
 .partnerDashboardReferralsTable .ant-table-tbody > tr > td {
   padding: 10px 8px !important;
+  border-right: 2px solid #f0f0f0;
+}
+
+.partnerDashboardReferralsTable .ant-table-tbody > tr > td:last-child {
+  border-right: none;
+}
+
+.partnerDashboardReferralsTable .ant-table-tbody > tr:hover > td {
+  border-right-color: #e5e7eb;
 }
 
 /* Мобильная адаптация */
@@ -499,10 +527,24 @@
   font-weight: 600;
   background: #fafafa;
   white-space: nowrap;
+  border-right: 2px solid #e5e7eb;
+}
+
+.partnerDashboardEarningsTable .ant-table-thead > tr > th:last-child {
+  border-right: none;
 }
 
 .partnerDashboardEarningsTable .ant-table-tbody > tr > td {
   padding: 10px 8px !important;
+  border-right: 2px solid #f0f0f0;
+}
+
+.partnerDashboardEarningsTable .ant-table-tbody > tr > td:last-child {
+  border-right: none;
+}
+
+.partnerDashboardEarningsTable .ant-table-tbody > tr:hover > td {
+  border-right-color: #e5e7eb;
 }
 
 /* Мобильная адаптация */
@@ -539,10 +581,24 @@
   font-weight: 600;
   background: #fafafa;
   white-space: nowrap;
+  border-right: 2px solid #e5e7eb;
+}
+
+.partnerDashboardOrdersTable .ant-table-thead > tr > th:last-child {
+  border-right: none;
 }
 
 .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
   padding: 10px 8px !important;
+  border-right: 2px solid #f0f0f0;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr > td:last-child {
+  border-right: none;
+}
+
+.partnerDashboardOrdersTable .ant-table-tbody > tr:hover > td {
+  border-right-color: #e5e7eb;
 }
 
 /* Мобильная адаптация */
