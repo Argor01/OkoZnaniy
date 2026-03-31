@@ -551,10 +551,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             isMobile={window.innerWidth <= 768}
           />
         )}
-        <ArbitrationModal 
+                <ArbitrationModal 
           visible={arbitrationModalVisible} 
           onClose={() => setArbitrationModalVisible(false)}
-          cases={[]} 
           isMobile={isMobile}
         />
         <FinanceModal 

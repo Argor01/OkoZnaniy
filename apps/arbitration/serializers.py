@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity
+from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Complaint
 from apps.users.serializers import UserSerializer
 from apps.orders.serializers import OrderSerializer
+from apps.orders.models import Order, OrderFile
 
 
 class ArbitrationMessageSerializer(serializers.ModelSerializer):
@@ -209,3 +210,94 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
         )
         
         return case
+
+
+class ComplaintFileSerializer(serializers.ModelSerializer):
+    """Сериализатор для файлов претензии"""
+    class Meta:
+        model = OrderFile
+        fields = ['id', 'file_name', 'file_url', 'file_type']
+        read_only_fields = ['id']
+
+
+class ComplaintSerializer(serializers.ModelSerializer):
+    """Сериализатор для претензии (Complaint)"""
+    plaintiff = UserSerializer(read_only=True)
+    defendant = UserSerializer(read_only=True)
+    order = OrderSerializer(read_only=True)
+    files = serializers.SerializerMethodField()
+    
+    # Write-only поля
+    order_id = serializers.IntegerField(write_only=True)
+    
+    class Meta:
+        model = Complaint
+        fields = [
+            'id', 'order', 'order_id', 'plaintiff', 'defendant',
+            'complaint_type',
+            'is_order_relevant', 'relevant_until',
+            'financial_requirement',
+            'refund_percent', 'description', 'files',
+            'status',
+            'created_at', 'updated_at', 'resolved_at', 'resolution',
+            'chat_id',
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'resolved_at', 'status']
+    
+    def get_files(self, obj):
+        """Получаем файлы из связанных OrderFile"""
+        if not obj.order:
+            return []
+        files = OrderFile.objects.filter(order=obj.order)
+        return [
+            {
+                'id': f.id,
+                'file_name': f.filename(),
+                'file_url': f.file.url if f.file else None,
+                'file_type': f.file_type,
+            }
+                        for f in files
+        ]
+    
+    def validate_order_id(self, value):
+        """Проверяем, что для заказа нет открытых претензий"""
+        existing_complaint = Complaint.objects.filter(
+            order_id=value,
+            status__in=['open', 'in_progress']
+        ).first()
+        
+        if existing_complaint:
+            raise serializers.ValidationError(
+                f'По этому заказу уже есть открытая претензия №{existing_complaint.id}'
+            )
+        
+        return value
+    
+    def create(self, validated_data):
+        """При создании претензии автоматически замораживаем заказ"""
+        request = self.context.get('request')
+        order_id = validated_data.pop('order_id')
+        
+        # Получаем заказ и замораживаем его
+        order = None
+        try:
+            order = Order.objects.get(id=order_id)
+            order.freeze(f'Открыта претензия #pending')
+        except Order.DoesNotExist:
+            pass
+        
+        # Получаем ответчика из заказа
+        defendant = order.expert if order and order.expert else None
+        
+        # Удаляем plaintiff из validated_data, если там есть (чтобы не дублировалось)
+        validated_data.pop('plaintiff', None)
+        
+        # Создаем претензию
+        complaint = Complaint.objects.create(
+            plaintiff=request.user if request else None,
+            defendant=defendant,
+            order_id=order_id,
+            **validated_data
+        )
+        
+        return complaint

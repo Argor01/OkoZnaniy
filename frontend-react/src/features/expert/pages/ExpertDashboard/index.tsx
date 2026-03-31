@@ -10,7 +10,6 @@ import { useNotifications } from '@/hooks/useNotifications';
 import ProfileHeader from '../../components/ProfileHeader/index';
 import ApplicationStatus from '../../components/ApplicationStatus/index';
 import { UserProfile } from '../../types';
-import { useExpertDisputes } from '../../hooks/useExpertDisputes';
 import styles from './ExpertDashboard.module.css';
 
 
@@ -104,12 +103,10 @@ const ExpertDashboard: FC = () => {
     refetchOnWindowFocus: true,
   });
 
-  const { data: specializationsData, isLoading: specializationsLoading } = useQuery({
+    const { data: specializationsData, isLoading: specializationsLoading } = useQuery({
     queryKey: ['expert-specializations'],
     queryFn: () => expertsApi.getSpecializations(),
   });
-
-  const { arbitrationCases } = useExpertDisputes();
 
   const deleteSpecializationMutation = useMutation({
     mutationFn: (id: number) => expertsApi.deleteSpecialization(id),
@@ -352,11 +349,10 @@ const ExpertDashboard: FC = () => {
           />
         )}
         
-        {arbitrationModalVisible && (
+                {arbitrationModalVisible && (
           <ArbitrationModal
             visible={arbitrationModalVisible}
             onClose={() => setArbitrationModalVisible(false)}
-            cases={arbitrationCases}
             isMobile={isMobile}
           />
         )}

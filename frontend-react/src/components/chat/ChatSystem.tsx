@@ -67,13 +67,13 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
+    useEffect(() => {
     if (selectedChat) {
       scrollToBottom();
     }
   }, [selectedChat]);
 
-    const filteredChats = chats.filter(chat =>
+  const filteredChats = chats.filter(chat =>
     chat.userName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -134,8 +134,8 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
           <div className={styles.chatListContent}>
             {filteredChats.length === 0 ? (
               <Empty description="Нет сообщений" />
-            ) : (
-                            sortedChats.map((chat) => {
+                        ) : (
+              sortedChats.map((chat) => {
                 const menuItems: MenuProps['items'] = [
                   {
                     key: 'pin',
@@ -167,42 +167,42 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
                         <PushpinFilled className={styles.pinIcon} />
                       )}
                       <Badge dot={chat.isOnline} offset={[-5, 35]}>
-                    <Avatar
-                      size={48}
-                      src={chat.userAvatar}
-                      icon={<UserOutlined />}
-                    />
-                  </Badge>
-                  <div className={styles.chatItemContent}>
-                    <div className={styles.chatItemHeader}>
-                      <Text strong className={styles.chatItemName}>
-                        {chat.userName}
-                      </Text>
-                      <Text type="secondary" className={styles.chatItemTime}>
-                        {chat.timestamp}
-                      </Text>
+                        <Avatar
+                          size={48}
+                          src={chat.userAvatar}
+                          icon={<UserOutlined />}
+                        />
+                      </Badge>
+                      <div className={styles.chatItemContent}>
+                        <div className={styles.chatItemHeader}>
+                          <Text strong className={styles.chatItemName}>
+                            {chat.userName}
+                          </Text>
+                          <Text type="secondary" className={styles.chatItemTime}>
+                            {chat.timestamp}
+                          </Text>
+                        </div>
+                        <div className={styles.chatItemMessage}>
+                          <Text
+                            type="secondary"
+                            ellipsis
+                            className={!chat.isRead ? styles.unread : ''}
+                          >
+                            {chat.lastMessage}
+                          </Text>
+                          {chat.unreadCount > 0 && (
+                            <Badge dot className={styles.unreadDot} />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className={styles.chatItemMessage}>
-                      <Text
-                        type="secondary"
-                        ellipsis
-                        className={!chat.isRead ? styles.unread : ''}
-                      >
-                        {chat.lastMessage}
-                      </Text>
-                      {chat.unreadCount > 0 && (
-                        <Badge dot className={styles.unreadDot} />
-                      )}
-                                        </div>
-                  </div>
-                </Dropdown>
+                  </Dropdown>
                 );
               })
             )}
-          </div>
+                    </div>
         </div>
 
-        
         <div className={`${styles.chatWindow} ${!selectedChat && isMobile ? styles.hidden : ''}`}>
           {selectedChat ? (
             <>

@@ -4,6 +4,7 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'cases', views.ArbitrationCaseViewSet, basename='arbitration-case')
+router.register(r'complaints', views.ComplaintViewSet, basename='complaint')
 
 urlpatterns = [
     path('', include(router.urls)),

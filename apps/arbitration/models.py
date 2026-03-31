@@ -345,3 +345,141 @@ class ArbitrationActivity(models.Model):
     
     def __str__(self):
         return f"{self.get_activity_type_display()} - {self.case.case_number}"
+
+
+class Complaint(models.Model):
+    """Претензия по заказу - упрощенная модель для арбитража"""
+    
+    STATUS_CHOICES = [
+        ('open', 'Открыт'),
+        ('in_progress', 'В работе'),
+        ('resolved', 'Решён'),
+        ('closed', 'Закрыт'),
+    ]
+    
+    COMPLAINT_TYPE_CHOICES = [
+        ('not_completed', 'Заказ не выполнен'),
+        ('poor_quality', 'Заказ выполнен некачественно'),
+        ('not_paid', 'Заказ не оплачен'),
+        ('unjustified_review', 'Необоснованный отзыв'),
+        ('ready_works_shop', 'Магазин готовых работ'),
+        ('other', 'Другое'),
+    ]
+    
+    FINANCIAL_REQUIREMENT_CHOICES = [
+        ('prepayment_refund', 'Возврат предоплаты'),
+        ('prepayment_refund_plus_penalty', 'Возврат предоплаты и неустойка'),
+        ('no_refund', 'Возврат не требуется'),
+    ]
+    
+    # Связанный заказ
+    order = models.ForeignKey(
+        'orders.Order',
+        on_delete=models.CASCADE,
+        related_name='complaints',
+        verbose_name='Заказ'
+    )
+    
+    # Стороны
+    plaintiff = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='plaintiff_complaints',
+        verbose_name='Истец'
+    )
+    defendant = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='defendant_complaints',
+        verbose_name='Ответчик'
+    )
+    
+    # Детали претензии
+    complaint_type = models.CharField(
+        max_length=50,
+        choices=COMPLAINT_TYPE_CHOICES,
+        verbose_name='Тип претензии'
+    )
+    is_order_relevant = models.BooleanField(
+        default=True,
+        verbose_name='Заказ актуален'
+    )
+    relevant_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Актуален до'
+    )
+    financial_requirement = models.CharField(
+        max_length=50,
+        choices=FINANCIAL_REQUIREMENT_CHOICES,
+        verbose_name='Финансовые требования'
+    )
+    refund_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Процент возврата'
+    )
+    description = models.TextField(
+        verbose_name='Описание'
+    )
+    
+    # Статус
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='open',
+        verbose_name='Статус'
+    )
+    
+    # Решение
+    resolution = models.TextField(
+        blank=True,
+        verbose_name='Резолюция'
+    )
+    
+    # Временные метки
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
+    resolved_at = models.DateTimeField(null=True, blank=True, verbose_name='Разрешено')
+    
+    # Чат арбитража
+    chat_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name='ID чата'
+    )
+    
+    class Meta:
+        db_table = 'arbitration_complaints'
+        ordering = ['-created_at']
+        verbose_name = 'Претензия'
+        verbose_name_plural = 'Претензии'
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['order', 'status']),
+            models.Index(fields=['plaintiff', '-created_at']),
+            models.Index(fields=['defendant', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"Претензия #{self.id} по заказу #{self.order_id}"
+    
+    def close(self, resolution: str):
+        """Закрыть претензию"""
+        if self.status in ['closed', 'resolved']:
+            return
+        self.status = 'closed'
+        self.resolution = resolution
+        self.resolved_at = timezone.now()
+        self.save(update_fields=['status', 'resolution', 'resolved_at', 'updated_at'])
+    
+    def resolve(self, resolution: str):
+        """Разрешить претензию"""
+        if self.status in ['closed', 'resolved']:
+            return
+        self.status = 'resolved'
+        self.resolution = resolution
+        self.resolved_at = timezone.now()
+        self.save(update_fields=['status', 'resolution', 'resolved_at', 'updated_at'])

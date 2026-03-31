@@ -1,0 +1,282 @@
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 840px) {
+  .page {
+    margin: -16px;
+    padding: 16px;
+  }
+}
+
+.pageInner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: 24px;
+}
+
+.mainCard :global(.ant-card-body) {
+  padding: 32px;
+}
+
+.pageTitle {
+  margin-bottom: 32px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.orderInfoSection {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.partiesGridWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.partyGlassCard {
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.partyGlassCard :global(.ant-card-body) {
+  padding: 16px 20px;
+}
+
+.partyGlassInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.partyAvatar {
+  border: 2px solid color-mix(in srgb, var(--color-brand-blue-500) 55%, #ffffff 45%);
+  box-shadow: 0 4px 14px rgba(35, 140, 226, 0.24);
+  flex-shrink: 0;
+}
+
+.partyMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.partyNameLink {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.partySubline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.partyRolePill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-brand-blue-700);
+  background: color-mix(in srgb, var(--color-brand-blue-100) 70%, #ffffff 30%);
+  border: 1px solid var(--color-brand-blue-200);
+}
+
+.partyLabelPill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #dc2626;
+  background: color-mix(in srgb, #fee2e2 70%, #ffffff 30%);
+  border: 1px solid #fecaca;
+}
+
+/* Сетка характеристик в стиле OrderDetails */
+.expertOfferGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.expertOfferGridItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.expertOfferGridIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-brand-blue-100) 78%, var(--bg-primary) 22%);
+  color: var(--color-brand-blue-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 72%, var(--bg-primary) 28%);
+}
+
+.expertOfferGridIconBlue {
+  background: color-mix(in srgb, var(--color-brand-blue-100) 78%, var(--bg-primary) 22%) !important;
+  color: var(--color-brand-blue-700) !important;
+  border-color: color-mix(in srgb, var(--color-brand-blue-200) 72%, var(--bg-primary) 28%) !important;
+}
+
+.expertOfferGridIconPurple {
+  background: color-mix(in srgb, var(--color-brand-purple-100) 78%, var(--bg-primary) 22%) !important;
+  color: var(--color-brand-purple-700) !important;
+  border-color: color-mix(in srgb, var(--color-brand-purple-200) 72%, var(--bg-primary) 28%) !important;
+}
+
+.expertOfferGridIconOrange {
+  background: color-mix(in srgb, var(--color-brand-orange-100) 78%, var(--bg-primary) 22%) !important;
+  color: var(--color-brand-orange-700) !important;
+  border-color: color-mix(in srgb, var(--color-brand-orange-200) 72%, var(--bg-primary) 28%) !important;
+}
+
+.expertOfferGridIconGreen {
+  background: color-mix(in srgb, #bbf7d0 68%, var(--bg-primary) 32%) !important;
+  color: #15803d !important;
+  border-color: color-mix(in srgb, #86efac 72%, var(--bg-primary) 28%) !important;
+}
+
+.expertOfferGridIconDefault {
+  background: color-mix(in srgb, var(--color-grey-100) 78%, var(--bg-primary) 22%) !important;
+  color: var(--color-grey-700) !important;
+  border-color: color-mix(in srgb, var(--color-grey-200) 72%, var(--bg-primary) 28%) !important;
+}
+
+.expertOfferLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.expertOfferValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.complaintForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.selectField,
+.datePickerField,
+.numberField,
+.textareaField,
+.linkField {
+  width: 100%;
+}
+
+.textareaField {
+  resize: vertical;
+}
+
+.linkField :global(.ant-input) {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.uploadArea {
+  width: 100%;
+}
+
+.submitButtonWrapper {
+  margin-top: 24px;
+  margin-bottom: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.submitButton {
+  min-width: 200px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.spinner {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .partiesGridWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .expertOfferGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .mainCard :global(.ant-card-body) {
+    padding: 20px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .submitButtonWrapper {
+    flex-direction: column;
+  }
+
+  .submitButton,
+  .submitButton + button {
+    width: 100%;
+  }
+}

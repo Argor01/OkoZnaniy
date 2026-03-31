@@ -222,8 +222,18 @@ export const ordersApi = {
     return response.data;
   },
 
-  deleteOrderFile: async (orderId: number, fileId: number) => {
+    deleteOrderFile: async (orderId: number, fileId: number) => {
     const response = await apiClient.delete(`${API_ENDPOINTS.orders.uploadFile(orderId)}${fileId}/`);
+    return response.data;
+  },
+
+  freezeOrder: async (id: number, reason?: string) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.freeze(id), { reason });
+    return response.data;
+  },
+
+  unfreezeOrder: async (id: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.unfreeze(id));
     return response.data;
   },
 };

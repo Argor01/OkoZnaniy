@@ -6,6 +6,8 @@ import { DashboardRedirect } from '@/features/auth/components/DashboardRedirect'
 import { ROUTES } from '@/utils/constants';
 
 const OrderDetail = lazy(() => import('@/features/orders/pages/OrderDetail'));
+const ComplaintForm = lazy(() => import('@/features/orders/pages/ComplaintForm'));
+const ComplaintDetails = lazy(() => import('@/features/arbitration/pages/ComplaintDetails'));
 const ShopWorkDetail = lazy(() => import('@/features/shop/pages/ShopWorkDetail'));
 const UserProfile = lazy(() => import('@/features/user/pages/UserProfile'));
 const Home = lazy(() => import('@/features/home/pages/Home'));
@@ -59,12 +61,32 @@ export const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } 
       />
-      <Route 
+            <Route 
         path={ROUTES.orders.detail} 
         element={
           <ProtectedRoute>
             <DashboardLayout>
               <OrderDetail />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+            <Route 
+        path="/orders/:orderId/complaint" 
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ComplaintForm />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/arbitration/complaint/:complaintId" 
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <ComplaintDetails />
             </DashboardLayout>
           </ProtectedRoute>
         } 

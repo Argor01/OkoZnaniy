@@ -392,7 +392,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             message.save()
             logger.info(f"Сообщение-оффер создано для чата {chat.id} по заказу {order.id}")
         except Exception as e:
-                        logger.error(f"Ошибка при создании сообщения: {str(e)}")
+            logger.error(f"Ошибка при создании сообщения: {str(e)}")
             # Продолжаем даже если сообщение не создалось - чат уже есть
         
         # Уведомляем эксперта о назначении на заказ
@@ -703,6 +703,49 @@ class OrderViewSet(viewsets.ModelViewSet):
             'comment': review.comment,
             'created_at': review.created_at.isoformat(),
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def freeze(self, request, pk=None):
+        """Заморозить заказ"""
+        order = self.get_object()
+        user = request.user
+        
+        # Проверяем права: админ или участник заказа
+        is_admin = user.role == 'admin'
+        is_client = order.client_id == user.id
+        is_expert = order.expert_id == user.id
+        
+        if not (is_admin or is_client or is_expert):
+            return Response(
+                {'detail': 'Недостаточно прав для заморозки заказа'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        reason = request.data.get('reason', 'Заморожено пользователем').strip()
+        order.freeze(reason)
+        
+        return Response(OrderSerializer(order).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unfreeze(self, request, pk=None):
+        """Разморозить заказ"""
+        order = self.get_object()
+        user = request.user
+        
+        # Проверяем права: админ или участник заказа
+        is_admin = user.role == 'admin'
+        is_client = order.client_id == user.id
+        is_expert = order.expert_id == user.id
+        
+        if not (is_admin or is_client or is_expert):
+            return Response(
+                {'detail': 'Недостаточно прав для разморозки заказа'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        order.unfreeze()
+        
+        return Response(OrderSerializer(order).data)
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()

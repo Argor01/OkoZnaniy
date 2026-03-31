@@ -467,30 +467,9 @@ const OrderDetail: React.FC = () => {
     ].join('\n');
   };
 
-  const handleOpenComplaintInSupport = async () => {
-    try {
-      const rawSupportId = localStorage.getItem('support_user_id');
-      let supportUserId = rawSupportId ? Number(rawSupportId) : null;
-      if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
-        const supportUser = await authApi.getSupportUser();
-        supportUserId = Number(supportUser?.id ?? 0);
-        if (supportUserId > 0) {
-          localStorage.setItem('support_user_id', String(supportUserId));
-        }
-      }
-      if (!supportUserId || !Number.isFinite(supportUserId) || supportUserId <= 0) {
-        message.error('Поддержка не настроена');
-        return;
-      }
-      const draft = {
-        category: 'Другое',
-        text: makePrefilledComplaintText(),
-      };
-      localStorage.setItem('support_claim_draft', JSON.stringify(draft));
-      dashboard.openOrderChat(order.id, supportUserId);
-    } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось открыть чат поддержки');
-    }
+    const handleOpenComplaintInSupport = async () => {
+    // Перенаправляем на страницу подачи претензии
+    navigate(`/orders/${orderId}/complaint`);
   };
 
   return (
@@ -651,26 +630,27 @@ const OrderDetail: React.FC = () => {
                   >
                     Отменить заказ
                   </AppButton>
-                  <Dropdown
-                    menu={{
-                      items: [
-                        {
-                          key: 'complaint',
-                          label: 'Подать жалобу',
-                          icon: <MessageOutlined />,
-                          onClick: () => void handleOpenComplaintInSupport(),
-                        },
-                      ],
-                    }}
-                    trigger={['click']}
-                  >
-                    <AppButton
-                      variant="secondary"
-                      size={isMobile ? 'middle' : 'large'}
-                    >
-                      Ещё <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
-                    </AppButton>
-                  </Dropdown>
+                                    <Dropdown
+                                      menu={{
+                                        items: [
+                                          {
+                                            key: 'complaint',
+                                            label: 'Подать жалобу',
+                                            icon: <MessageOutlined />,
+                                            onClick: () => navigate(`/orders/${orderId}/complaint`),
+                                          },
+                                        ],
+                                      }}
+                                      trigger={['click']}
+                                    >
+                                      <AppButton
+                                        variant="secondary"
+                                        size={isMobile ? 'middle' : 'large'}
+                                        disabled={!order.expert}
+                                      >
+                                        Ещё <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+                                      </AppButton>
+                                    </Dropdown>
                 </Space>
               </div>
             )}

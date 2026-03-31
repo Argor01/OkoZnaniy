@@ -372,30 +372,92 @@
   color: #6b7280;
 }
 
-.arbitrationModalReason {
-  padding: 12px;
-  background: #fef3c7;
+/* Сетка характеристик в стиле OrderDetail */
+.arbitrationModalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalGridItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.arbitrationModalGridIcon {
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
+  background: color-mix(in srgb, var(--color-brand-blue-100) 78%, var(--bg-primary) 22%);
+  color: var(--color-brand-blue-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200) 72%, var(--bg-primary) 28%);
+}
+
+.arbitrationModalGridIconPurple {
+  background: color-mix(in srgb, #f3e8ff 78%, var(--bg-primary) 22%) !important;
+  color: #7c3aed !important;
+  border-color: color-mix(in srgb, #e9d5ff 72%, var(--bg-primary) 28%) !important;
+}
+
+.arbitrationModalGridIconOrange {
+  background: color-mix(in srgb, #ffedd5 78%, var(--bg-primary) 22%) !important;
+  color: #ea580c !important;
+  border-color: color-mix(in srgb, #fed7aa 72%, var(--bg-primary) 28%) !important;
+}
+
+.arbitrationModalGridIconDefault {
+  background: color-mix(in srgb, var(--color-grey-100) 78%, var(--bg-primary) 22%) !important;
+  color: var(--color-grey-700) !important;
+  border-color: color-mix(in srgb, var(--color-grey-200) 72%, var(--bg-primary) 28%) !important;
+}
+
+.arbitrationModalGridLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.arbitrationModalGridValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arbitrationModalDescriptionWrapper {
   margin-bottom: 12px;
-  border-left: 3px solid #f59e0b;
 }
 
-.arbitrationModalReasonTitle {
+.arbitrationModalDescriptionTitle {
   font-size: 13px;
-  color: #92400e;
+  color: var(--text-primary);
   display: block;
-  margin-bottom: 4px;
-}
-
-.arbitrationModalReasonText {
-  font-size: 13px;
-  color: #78350f;
+  margin-bottom: 8px;
 }
 
 .arbitrationModalDescription {
   font-size: 14px;
   color: #4b5563;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .arbitrationModalDecision {
@@ -555,4 +617,57 @@
 .arbitrationModalEmptyText {
   font-size: 14px;
   color: #6b7280;
+}
+
+.arbitrationModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arbitrationModalTitleIcon {
+  font-size: 24px;
+  color: #3b82f6;
+}
+
+.arbitrationModalNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-left: 3px solid #f59e0b;
+}
+
+.arbitrationModalNoticeIcon {
+  font-size: 18px;
+  color: #f59e0b;
+}
+
+.arbitrationModalFinancial {
+  padding: 12px;
+  background: #dbeafe;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 3px solid #3b82f6;
+}
+
+.arbitrationModalFinancialTitle {
+  font-size: 13px;
+  color: #1e40af;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arbitrationModalFinancialText {
+  font-size: 13px;
+  color: #1e3a8a;
+}
+
+@media (max-width: 768px) {
+  .arbitrationModalGrid {
+    grid-template-columns: 1fr;
+  }
 }

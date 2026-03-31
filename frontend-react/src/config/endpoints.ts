@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
     comments: (id: number) => `/orders/orders/${id}/comments/`,
     downloadFile: (id: number, fileId: number) => `/orders/orders/${id}/files/${fileId}/download/`,
     createReview: (id: number) => `/orders/orders/${id}/create_review/`,
+    freeze: (id: number) => `/orders/orders/${id}/freeze/`,
+    unfreeze: (id: number) => `/orders/orders/${id}/unfreeze/`,
   },
   admin: {
     users: {

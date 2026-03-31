@@ -3,18 +3,21 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
-from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity
+from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Complaint
 from .serializers import (
     ArbitrationCaseSerializer,
     ArbitrationCaseListSerializer,
     ArbitrationMessageSerializer,
     ArbitrationActivitySerializer,
-    ArbitrationSubmissionSerializer
+    ArbitrationSubmissionSerializer,
+    ComplaintSerializer
 )
+from apps.orders.models import Order
 
 User = get_user_model()
 
@@ -474,3 +477,116 @@ def arbitration_stats(request):
         ).count(),
     }
     return Response(stats)
+
+
+class ComplaintViewSet(viewsets.ModelViewSet):
+    """ViewSet для претензий по заказам"""
+    queryset = Complaint.objects.all()
+    serializer_class = ComplaintSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Пользователи видят только свои претензии (как истец или ответчик)"""
+        user = self.request.user
+        queryset = Complaint.objects.select_related('order', 'plaintiff', 'defendant')
+        
+        # Админы видят все претензии
+        if user.role == 'admin':
+            # Фильтр по статусу для админов
+            status_filter = self.request.query_params.get('status')
+            if status_filter:
+                queryset = queryset.filter(status=status_filter)
+            return queryset
+        
+        # Обычные пользователи видят только свои претензии
+        queryset = queryset.filter(
+            models.Q(plaintiff=user) | models.Q(defendant=user)
+        )
+        
+        # Фильтр по статусу
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        """При создании претензии автоматически замораживаем заказ"""
+        complaint = serializer.save()
+        
+        # Замораживаем заказ
+        if complaint.order:
+            complaint.order.freeze(f'Открыта претензия #{complaint.id}')
+    
+    @action(detail=True, methods=['patch'], url_path='close')
+    def close_complaint(self, request, pk=None):
+        """Закрыть претензию (доступно истцу, ответчику или админу)"""
+        complaint = self.get_object()
+        user = request.user
+        
+        # Проверяем права
+        is_plaintiff = complaint.plaintiff_id == user.id
+        is_defendant = complaint.defendant_id == user.id
+        is_admin = user.role == 'admin'
+        
+        if not (is_plaintiff or is_defendant or is_admin):
+            return Response(
+                {'detail': 'Недостаточно прав для закрытия претензии'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Можно закрыть только открытую претензию
+        if complaint.status not in ['open', 'in_progress']:
+            return Response(
+                {'detail': 'Можно закрыть только открытую претензию'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        resolution = request.data.get('resolution', '').strip()
+        
+        # Закрываем претензию
+        complaint.close(resolution)
+        
+        # Размораживаем заказ
+        if complaint.order:
+            complaint.order.unfreeze()
+        
+        return Response(ComplaintSerializer(complaint).data)
+    
+    @action(detail=True, methods=['patch'], url_path='resolve')
+    def resolve_complaint(self, request, pk=None):
+        """Разрешить претензию (только для админов)"""
+        complaint = self.get_object()
+        user = request.user
+        
+        if user.role != 'admin':
+            return Response(
+                {'detail': 'Только администратор может разрешить претензию'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        resolution = request.data.get('resolution', '').strip()
+        if not resolution:
+            return Response(
+                {'detail': 'Резолюция обязательна'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Разрешаем претензию
+        complaint.resolve(resolution)
+        
+        # Размораживаем заказ
+        if complaint.order:
+            complaint.order.unfreeze()
+        
+        return Response(ComplaintSerializer(complaint).data)
+    
+    @action(detail=False, methods=['get'], url_path='by-order/(?P<order_id>[^/.]+)')
+    def by_order(self, request, order_id=None):
+        """Получить претензии по заказу"""
+        complaints = Complaint.objects.filter(
+            order_id=order_id
+        ).select_related('plaintiff', 'defendant', 'order')
+        
+        serializer = ComplaintSerializer(complaints, many=True)
+        return Response(serializer.data)
