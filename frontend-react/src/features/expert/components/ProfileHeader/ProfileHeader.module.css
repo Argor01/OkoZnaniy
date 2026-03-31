@@ -183,6 +183,64 @@
   font-weight: 600;
 }
 
+@media (max-width: 1200px) {
+  .profileBlockContent {
+    gap: 24px;
+  }
+  
+  .profileLeft {
+    gap: 20px;
+  }
+  
+  .profileNameTitle {
+    font-size: 24px !important;
+  }
+  
+  .profileStatsMeta,
+  .profileStatsLine {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .profileBlock {
+    padding: 24px 28px;
+    margin-bottom: 18px;
+  }
+  
+  .profileBlockContent {
+    gap: 20px;
+  }
+  
+  .profileLeft {
+    gap: 18px;
+  }
+  
+  .profileNameTitle {
+    font-size: 23px !important;
+  }
+  
+  .profileStatsRow {
+    gap: 20px;
+  }
+  
+  .profileStatColumn {
+    min-width: 140px;
+  }
+  
+  .profileStatLabel {
+    font-size: 14px;
+  }
+  
+  .profileStatRate {
+    font-size: 18px;
+  }
+  
+  .profileStatSubtext {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 840px) {
   .profileBlock {
     padding: 20px 16px;
@@ -214,6 +272,29 @@
     font-size: 22px !important;
   }
   
+  .profileStatsRow {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .profileStatsRowMobile {
+    gap: 16px;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  
+  .profileStatColumn {
+    flex: 1 1 100%;
+    min-width: 100%;
+    text-align: center;
+  }
+  
+  .profileStatColumnMobile {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+  
   .profileRight {
     width: 100%;
     align-items: center;
@@ -232,6 +313,10 @@
 }
 
 @media (max-width: 480px) {
+  .profileBlock {
+    padding: 16px 12px;
+  }
+  
   .profileAvatar {
     width: 80px !important;
     height: 80px !important;
@@ -249,5 +334,13 @@
   
   .profileStatSubtext {
     font-size: 14px;
+  }
+  
+  .profileStatRate {
+    font-size: 16px;
+  }
+  
+  .profileStatsRow {
+    gap: 12px;
   }
 }

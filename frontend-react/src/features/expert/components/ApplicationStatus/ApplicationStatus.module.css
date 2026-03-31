@@ -139,6 +139,40 @@
   box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
 }
 
+@media (max-width: 1024px) {
+  .applicationCard {
+    padding: 24px 20px;
+    margin-top: 20px;
+    margin-bottom: 28px;
+    border-radius: 20px;
+  }
+  
+  .applicationTitle {
+    font-size: 26px;
+  }
+  
+  .applicationSubtitle {
+    font-size: 15px;
+  }
+  
+  .statusBadge {
+    font-size: 15px;
+    padding: 7px 14px;
+  }
+  
+  .statusLabel {
+    font-size: 15px;
+  }
+  
+  .applicationRejectText {
+    font-size: 15px;
+  }
+  
+  .applicationEmptyText {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 840px) {
   .applicationCard {
     padding: 20px 16px;
@@ -149,22 +183,25 @@
   
   .applicationHeader {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     gap: 16px;
   }
   
   .applicationTitle {
     font-size: 24px;
+    text-align: center;
   }
   
   .applicationSubtitle {
     font-size: 14px;
+    text-align: center;
   }
   
   .statusContainer {
     width: 100%;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
   }
   
@@ -175,10 +212,22 @@
   
   .statusLabel {
     font-size: 14px;
+    text-align: center;
+  }
+  
+  .applicationRejectBox {
+    margin-top: 16px;
+    padding: 16px;
+    text-align: center;
   }
   
   .applicationRejectText {
     font-size: 14px;
+    text-align: center;
+  }
+  
+  .applicationActionRow {
+    margin-top: 20px;
   }
   
   .applicationEmptyText {
@@ -198,5 +247,31 @@
   
   .applicationTitle {
     font-size: 20px;
+  }
+  
+  .applicationSubtitle {
+    font-size: 13px;
+  }
+  
+  .statusBadge {
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+  
+  .statusLabel {
+    font-size: 13px;
+  }
+  
+  .applicationRejectText {
+    font-size: 13px;
+  }
+  
+  .applicationEmptyText {
+    font-size: 13px;
+  }
+  
+  .buttonPrimary {
+    height: 44px;
+    font-size: 14px;
   }
 }

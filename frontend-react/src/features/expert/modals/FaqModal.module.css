@@ -10,6 +10,9 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   padding: 32px;
   height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .faqModalWrapMobile :global(.ant-modal-content) {
@@ -25,14 +28,45 @@
   border-radius: 24px;
 }
 
-.faqModalWrap :global(.ant-modal-body) {
-  max-height: 80vh;
-  overflow-y: auto;
+.faqModalWrap :global(.ant-modal-header) {
+  flex-shrink: 0;
   padding: 0;
+  margin-bottom: 16px;
+  border-bottom: none;
+}
+
+.faqModalWrap :global(.ant-modal-body) {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar {
+  width: 6px;
+}
+
+.faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 .faqModalWrapMobile :global(.ant-modal-body) {
-  max-height: calc(100vh - 100px);
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .faqModalTitle {
@@ -100,4 +134,114 @@
   font-size: 14px;
   color: #6b7280;
   line-height: 1.6;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 840px) {
+  .faqModalWrap :global(.ant-modal-content) {
+    padding: 16px !important;
+    height: 100vh !important;
+  }
+  
+  .faqModalTitle {
+    font-size: 20px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .faqModalContent {
+    padding-top: 12px !important;
+  }
+  
+  .faqModalIntro {
+    font-size: 14px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .faqModalSection {
+    margin-bottom: 20px !important;
+  }
+  
+  .faqModalSectionTitle {
+    font-size: 16px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .faqModalItem {
+    border-radius: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .faqModalItemTitle {
+    font-size: 14px !important;
+  }
+  
+  .faqModalItemText {
+    font-size: 13px !important;
+  }
+  
+  .faqModalExpandIcon {
+    font-size: 14px !important;
+  }
+  
+  .faqModalCollapse :global(.ant-collapse-header) {
+    padding: 12px 16px !important;
+  }
+  
+  .faqModalCollapse :global(.ant-collapse-content-box) {
+    padding: 12px 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .faqModalWrap :global(.ant-modal-content) {
+    padding: 12px !important;
+  }
+  
+  .faqModalTitle {
+    font-size: 18px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .faqModalContent {
+    padding-top: 10px !important;
+  }
+  
+  .faqModalIntro {
+    font-size: 13px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .faqModalSection {
+    margin-bottom: 16px !important;
+  }
+  
+  .faqModalSectionTitle {
+    font-size: 15px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .faqModalItem {
+    border-radius: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .faqModalItemTitle {
+    font-size: 13px !important;
+  }
+  
+  .faqModalItemText {
+    font-size: 12px !important;
+  }
+  
+  .faqModalExpandIcon {
+    font-size: 13px !important;
+  }
+  
+  .faqModalCollapse :global(.ant-collapse-header) {
+    padding: 10px 12px !important;
+  }
+  
+  .faqModalCollapse :global(.ant-collapse-content-box) {
+    padding: 10px 12px !important;
+  }
 }

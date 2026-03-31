@@ -194,3 +194,168 @@
   padding: 48px;
   color: #6b7280;
 }
+
+@media (max-width: 1024px) {
+  .sectionCard {
+    padding: 24px 20px !important;
+    margin-bottom: 24px !important;
+    border-radius: 20px !important;
+  }
+  
+  .sectionCardHeader {
+    margin-bottom: 20px !important;
+    padding-bottom: 14px !important;
+  }
+  
+  .sectionTitle {
+    font-size: 24px !important;
+  }
+  
+  .specializationsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  
+  .specCard :global(.ant-card-body) {
+    padding: 18px !important;
+  }
+  
+  .specTitle {
+    font-size: 19px !important;
+  }
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px 16px !important;
+    margin-bottom: 24px !important;
+    border-radius: 16px !important;
+  }
+  
+  .sectionCardHeader {
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .specializationsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 22px !important;
+    text-align: center;
+  }
+  
+  .specializationsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .specCard :global(.ant-card-body) {
+    padding: 16px !important;
+  }
+  
+  .specCardHeader {
+    margin-bottom: 12px !important;
+    gap: 10px !important;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .specCardHeaderInfo {
+    text-align: center;
+  }
+  
+  .specCardActions {
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .specTitle {
+    font-size: 18px !important;
+    margin-bottom: 6px !important;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .verifiedIcon {
+    font-size: 14px !important;
+  }
+  
+  .specTags {
+    justify-content: center;
+  }
+  
+  .metaTag {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+  }
+  
+  .metaTagIcon {
+    font-size: 11px !important;
+  }
+  
+  .specDescription {
+    font-size: 15px !important;
+    margin-bottom: 12px !important;
+    text-align: center;
+  }
+  
+  .skillsBlock {
+    margin-bottom: 12px !important;
+    padding-top: 10px !important;
+    text-align: center;
+  }
+  
+  .skillsBlock :global(.ant-tag).skillTag {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+  }
+  
+  .emptyState {
+    padding: 32px 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 16px 12px !important;
+  }
+  
+  .sectionTitle {
+    font-size: 20px !important;
+  }
+  
+  .specCard :global(.ant-card-body) {
+    padding: 12px !important;
+  }
+  
+  .specTitle {
+    font-size: 16px !important;
+  }
+  
+  .metaTag {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  
+  .specDescription {
+    font-size: 14px !important;
+  }
+  
+  .skillsBlock :global(.ant-tag).skillTag {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+  }
+  
+  .emptyState {
+    padding: 24px 16px !important;
+  }
+}

@@ -195,9 +195,33 @@
   font-family: 'Jost-SemiBold', sans-serif;
 }
 
+@media (max-width: 1200px) {
+  .friendsGridDesktop {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+}
+
 @media (max-width: 1024px) {
   .sectionCard {
     padding: 24px;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+  
+  .friendsGridDesktop {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  
+  .friendCardDesktop {
+    padding: 18px;
+  }
+  
+  .friendNameDesktop {
+    font-size: 19px;
   }
 }
 
@@ -206,18 +230,109 @@
     padding: 20px;
     margin-bottom: 16px;
   }
+  
   .sectionTitle {
-    font-size: 20px;
+    font-size: 22px;
+    text-align: center;
+  }
+  
+  .friendsSubtitle {
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .friendsGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .friendCard {
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
+  
+  .friendCardHeader {
+    margin-bottom: 16px;
+  }
+  
+  .friendAvatar {
+    margin-bottom: 12px !important;
+  }
+  
+  .friendName {
+    font-size: 18px !important;
+    text-align: center;
+  }
+  
+  .friendRole {
+    font-size: 13px !important;
+    text-align: center;
+  }
+  
+  .friendBio {
+    font-size: 12px;
+    text-align: center;
+  }
+  
+  .friendActions {
+    gap: 10px;
+  }
+  
+  .friendMessageButton {
+    height: 38px !important;
+    font-size: 14px !important;
+  }
+  
+  .friendProfileButton {
+    width: 38px !important;
+    height: 38px !important;
   }
 }
 
 @media (max-width: 480px) {
   .sectionCard {
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
   }
+  
   .sectionTitle {
     font-size: 20px;
+  }
+  
+  .friendsGrid {
+    gap: 10px !important;
+  }
+  
+  .friendCard {
+    padding: 14px !important;
+  }
+  
+  .friendAvatar {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 24px !important;
+  }
+  
+  .friendName {
+    font-size: 16px !important;
+  }
+  
+  .friendRole {
+    font-size: 12px !important;
+  }
+  
+  .friendBio {
+    font-size: 11px;
+  }
+  
+  .friendMessageButton {
+    height: 34px !important;
+    font-size: 13px !important;
+  }
+  
+  .friendProfileButton {
+    width: 34px !important;
+    height: 34px !important;
   }
 }

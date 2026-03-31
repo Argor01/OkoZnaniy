@@ -300,9 +300,41 @@
   font-family: 'Jost-SemiBold', sans-serif;
 }
 
+@media (max-width: 1200px) {
+  .ordersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
   .sectionCard {
     padding: 24px;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+  
+  .orderCard :global(.ant-card-body) {
+    padding: 18px;
+  }
+  
+  .orderTitle {
+    font-size: 19px;
+    margin-bottom: 20px;
+  }
+  
+  .orderDescription {
+    font-size: 17px;
+    margin-bottom: 28px;
+  }
+  
+  .orderBudget {
+    font-size: 17px;
+  }
+  
+  .clientName {
+    font-size: 17px;
   }
 }
 
@@ -311,18 +343,173 @@
     padding: 20px;
     margin-bottom: 16px;
   }
+  
   .sectionTitle {
-    font-size: 20px;
+    font-size: 22px;
+    text-align: center;
+  }
+  
+  .ordersHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .ordersFilterRow {
+    margin-bottom: 20px;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) {
+    text-align: center;
+    flex: 1;
+  }
+  
+  .ordersFilterButtonMobile {
+    min-width: auto;
+    flex: 1;
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+  
+  .orderCard {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .orderCard :global(.ant-card-body) {
+    padding: 16px;
+  }
+  
+  .orderCardHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .orderCardHeaderInfo {
+    text-align: center;
+  }
+  
+  .orderCardActions {
+    text-align: center;
+  }
+  
+  .orderCardActionsRow {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  
+  .orderTitle {
+    font-size: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  
+  .orderDescription {
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .orderBudget {
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .orderMetaRow {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .orderMetaText {
+    font-size: 13px;
+    text-align: center;
+  }
+  
+  .clientInfo {
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .clientName {
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .filesBlock {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .filesLabel {
+    text-align: center;
+    font-size: 12px;
+  }
+  
+  .statusTag,
+  .subjectTag,
+  .workTypeTag,
+  .topicTag {
+    font-size: 13px;
+    padding: 3px 10px;
   }
 }
 
 @media (max-width: 480px) {
   .sectionCard {
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
   }
+  
   .sectionTitle {
     font-size: 20px;
+  }
+  
+  .orderCard :global(.ant-card-body) {
+    padding: 14px;
+  }
+  
+  .orderTitle {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  
+  .orderDescription {
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+  
+  .orderBudget {
+    font-size: 15px;
+  }
+  
+  .clientName {
+    font-size: 15px;
+  }
+  
+  .orderMetaText {
+    font-size: 12px;
+  }
+  
+  .ordersFilterButtonMobile {
+    font-size: 12px;
+    padding: 6px 2px;
+  }
+  
+  .statusTag,
+  .subjectTag,
+  .workTypeTag,
+  .topicTag {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+  
+  .fileTag {
+    font-size: 12px;
+    padding: 3px 8px;
   }
 }

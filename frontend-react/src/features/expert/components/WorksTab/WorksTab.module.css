@@ -91,9 +91,33 @@
   font-family: 'Jost-SemiBold', sans-serif;
 }
 
+@media (max-width: 1200px) {
+  .worksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
 @media (max-width: 1024px) {
   .sectionCard {
     padding: 24px;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+  
+  .worksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  
+  .workCardTitle {
+    font-size: 19px;
+  }
+  
+  .workCardPrice {
+    font-size: 17px;
   }
 }
 
@@ -102,18 +126,69 @@
     padding: 20px;
     margin-bottom: 16px;
   }
+  
   .sectionTitle {
-    font-size: 20px;
+    font-size: 22px;
+    text-align: center;
+  }
+  
+  .worksGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .workCard {
+    max-width: none;
+  }
+  
+  .workCardContent {
+    text-align: center;
+  }
+  
+  .workCardTitle {
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .workCardPrice {
+    font-size: 16px;
+    text-align: center;
+  }
+  
+  .workCardMeta {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .workCardActions {
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
   .sectionCard {
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
   }
+  
   .sectionTitle {
     font-size: 20px;
+  }
+  
+  .worksGrid {
+    gap: 14px;
+  }
+  
+  .workCardTitle {
+    font-size: 16px;
+  }
+  
+  .workCardPrice {
+    font-size: 15px;
+  }
+  
+  .workCardImage {
+    height: 160px;
   }
 }

@@ -306,6 +306,30 @@
     padding: 0 12px;
   }
   
+  .headerLeft {
+    gap: 8px;
+  }
+  
+  .customNav {
+    gap: 2px;
+  }
+  
+  /* Скрываем текст в навигации, оставляем только иконки */
+  .navItem {
+    padding: 0 8px !important;
+    min-width: 40px;
+    justify-content: center;
+    gap: 0 !important;
+  }
+  
+  .navItem span:not(.anticon) {
+    display: none !important;
+  }
+  
+  .navItem :global(.anticon) {
+    margin: 0 !important;
+  }
+  
   .menuButton {
     margin-right: 8px;
   }
@@ -319,5 +343,33 @@
   .logoutButton {
     width: 40px !important;
     height: 40px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboardHeader {
+    padding: 0 8px;
+  }
+  
+  .customNav {
+    gap: 1px;
+  }
+  
+  .navItem {
+    padding: 0 6px !important;
+    min-width: 36px;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  
+  .iconButton {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  .logoutButton {
+    width: 36px !important;
+    height: 36px !important;
   }
 }

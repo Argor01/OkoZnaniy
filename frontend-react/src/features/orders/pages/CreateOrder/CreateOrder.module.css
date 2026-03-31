@@ -317,3 +317,194 @@
   text-align: left;
   padding: 4px 8px;
 }
+
+/* Mobile Responsive Improvements */
+@media (max-width: 840px) {
+  .container {
+    padding: 16px 12px !important;
+  }
+  
+  .card :global(.ant-card-body) {
+    padding: 20px 16px !important;
+  }
+  
+  .card :global(.ant-form-item-label) > label {
+    font-size: 16px !important;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px !important;
+  }
+  
+  .title {
+    font-size: 22px !important;
+  }
+  
+  .buttonSecondary {
+    width: 100%;
+    font-size: 16px !important;
+  }
+  
+  .orderSection {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .typeSubjectDateRow {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  
+  .typeField,
+  .subjectField,
+  .dateField {
+    width: 100% !important;
+  }
+  
+  .timeSelectors {
+    gap: 8px !important;
+  }
+  
+  .timeLabel {
+    font-size: 13px !important;
+  }
+  
+  .timeSeparator {
+    font-size: 20px !important;
+    padding-bottom: 8px !important;
+  }
+  
+  .orderFilesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    gap: 8px !important;
+  }
+  
+  .orderFileTile {
+    min-height: 100px !important;
+    padding: 8px 6px !important;
+  }
+  
+  .orderFileIconBox {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 20px !important;
+  }
+  
+  .orderFileName {
+    font-size: 11px !important;
+  }
+  
+  .orderFileDeleteIcon {
+    font-size: 11px !important;
+    right: 6px !important;
+    top: 6px !important;
+  }
+  
+  .submitSection {
+    margin-top: 20px !important;
+  }
+  
+  .submitButton {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-drag-icon),
+  .uploadArea :global(span.ant-upload-drag-icon) {
+    font-size: 36px !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-text),
+  .uploadArea :global(span.ant-upload-text) {
+    font-size: 13px !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-hint),
+  .uploadArea :global(span.ant-upload-hint) {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px 8px !important;
+  }
+  
+  .card :global(.ant-card-body) {
+    padding: 16px 12px !important;
+  }
+  
+  .card :global(.ant-form-item-label) > label {
+    font-size: 15px !important;
+  }
+  
+  .header {
+    margin-bottom: 16px !important;
+    gap: 10px;
+  }
+  
+  .title {
+    font-size: 20px !important;
+  }
+  
+  .buttonSecondary {
+    font-size: 15px !important;
+  }
+  
+  .orderSection {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .timeLabel {
+    font-size: 12px !important;
+  }
+  
+  .timeSeparator {
+    font-size: 18px !important;
+  }
+  
+  .orderFilesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)) !important;
+    gap: 6px !important;
+  }
+  
+  .orderFileTile {
+    min-height: 90px !important;
+    padding: 6px 4px !important;
+  }
+  
+  .orderFileIconBox {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 18px !important;
+  }
+  
+  .orderFileName {
+    font-size: 10px !important;
+  }
+  
+  .orderFileDeleteIcon {
+    font-size: 10px !important;
+    right: 4px !important;
+    top: 4px !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-drag-icon),
+  .uploadArea :global(span.ant-upload-drag-icon) {
+    font-size: 32px !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-text),
+  .uploadArea :global(span.ant-upload-text) {
+    font-size: 12px !important;
+  }
+  
+  .uploadArea :global(div.ant-upload-hint),
+  .uploadArea :global(span.ant-upload-hint) {
+    font-size: 11px !important;
+  }
+}

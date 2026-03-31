@@ -44,6 +44,19 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
   friend,
   onOpenChat,
 }) => {
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 480);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth <= 840 && window.innerWidth > 480);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 480);
+      setIsTablet(window.innerWidth <= 840 && window.innerWidth > 480);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!friend) return null;
 
   const name =
@@ -55,20 +68,26 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
     ? friend.skills.split(',').map((s) => s.trim()).filter(Boolean)
     : [];
 
+  // Адаптивные размеры
+  const modalWidth = isMobile ? '100vw' : isTablet ? '95vw' : 700;
+  const avatarSize = isMobile ? 70 : isTablet ? 80 : 100;
+
   return (
     <Modal
       title={null}
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={700}
+      width={modalWidth}
+      centered={!isMobile}
       wrapClassName={styles.friendProfileModalWrap}
+      destroyOnClose
     >
       <div>
         <div className={styles.friendProfileHeader}>
           <div className={styles.friendProfileHeaderRow}>
             <Avatar 
-              size={100} 
+              size={avatarSize} 
               src={friend.avatar || undefined}
               className={`${styles.friendProfileAvatar} ${avatarColorClasses[friend.id % avatarColorClasses.length]}`}
             >
@@ -96,60 +115,68 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
         
         <div className={styles.friendProfileContent}>
           
-          <div className={styles.friendProfileSection}>
-            <div className={styles.friendProfileSectionHeader}>
-              <UserOutlined className={styles.friendProfileSectionIcon} />
-              <Text strong className={styles.friendProfileSectionTitle}>
-                О себе
+          {friend.bio && (
+            <div className={styles.friendProfileSection}>
+              <div className={styles.friendProfileSectionHeader}>
+                <UserOutlined className={styles.friendProfileSectionIcon} />
+                <Text strong className={styles.friendProfileSectionTitle}>
+                  О себе
+                </Text>
+              </div>
+              <Text className={styles.friendProfileSectionText}>
+                {friend.bio}
               </Text>
             </div>
-            <Text className={styles.friendProfileSectionText}>
-              {friend.bio}
-            </Text>
-          </div>
+          )}
 
-          <div className={styles.friendProfileSection}>
-            <div className={styles.friendProfileSectionHeader}>
-              <TrophyOutlined className={styles.friendProfileSectionIcon} />
-              <Text strong className={styles.friendProfileSectionTitle}>
-                Образование
+          {friend.education && (
+            <div className={styles.friendProfileSection}>
+              <div className={styles.friendProfileSectionHeader}>
+                <TrophyOutlined className={styles.friendProfileSectionIcon} />
+                <Text strong className={styles.friendProfileSectionTitle}>
+                  Образование
+                </Text>
+              </div>
+              <Text className={styles.friendProfileSectionText}>
+                {friend.education}
               </Text>
             </div>
-            <Text className={styles.friendProfileSectionText}>
-              {friend.education}
-            </Text>
-          </div>
+          )}
 
-          <div className={styles.friendProfileSection}>
-            <div className={styles.friendProfileSectionHeader}>
-              <ClockCircleOutlined className={styles.friendProfileSectionIcon} />
-              <Text strong className={styles.friendProfileSectionTitle}>
-                Опыт работы
+          {typeof friend.experience_years === 'number' && friend.experience_years > 0 && (
+            <div className={styles.friendProfileSection}>
+              <div className={styles.friendProfileSectionHeader}>
+                <ClockCircleOutlined className={styles.friendProfileSectionIcon} />
+                <Text strong className={styles.friendProfileSectionTitle}>
+                  Опыт работы
+                </Text>
+              </div>
+              <Text className={styles.friendProfileSectionText}>
+                {`${friend.experience_years} ${friend.experience_years === 1 ? 'год' : friend.experience_years < 5 ? 'года' : 'лет'}`}
               </Text>
             </div>
-            <Text className={styles.friendProfileSectionText}>
-              {typeof friend.experience_years === 'number' ? `${friend.experience_years} лет` : ''}
-            </Text>
-          </div>
+          )}
 
-          <div className={styles.friendProfileSection}>
-            <div className={styles.friendProfileSectionHeader}>
-              <StarFilled className={styles.friendProfileSectionIcon} />
-              <Text strong className={styles.friendProfileSectionTitle}>
-                Навыки
-              </Text>
+          {skills.length > 0 && (
+            <div className={styles.friendProfileSection}>
+              <div className={styles.friendProfileSectionHeader}>
+                <StarFilled className={styles.friendProfileSectionIcon} />
+                <Text strong className={styles.friendProfileSectionTitle}>
+                  Навыки
+                </Text>
+              </div>
+              <div className={styles.friendProfileTags}>
+                {skills.map((skill: string, index: number) => (
+                  <Tag 
+                    key={index}
+                    className={styles.friendProfileTag}
+                  >
+                    {skill}
+                  </Tag>
+                ))}
+              </div>
             </div>
-            <div className={styles.friendProfileTags}>
-              {skills.map((skill: string, index: number) => (
-                <Tag 
-                  key={index}
-                  className={styles.friendProfileTag}
-                >
-                  {skill}
-                </Tag>
-              ))}
-            </div>
-          </div>
+          )}
 
           
           <div className={styles.friendProfileActions}>

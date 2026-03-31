@@ -30,12 +30,134 @@
   grid-template-columns: repeat(2, 1fr);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .reviewGrid {
     grid-template-columns: 1fr;
   }
 }
 
+@media (max-width: 1024px) {
+  .sectionCard {
+    padding: 24px;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+  }
+  
+  .orderCard {
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  
+  .reviewCard {
+    padding: 18px;
+  }
+  
+  .reviewText {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 22px;
+    text-align: center;
+  }
+  
+  .orderCard {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+  
+  .reviewCard {
+    padding: 16px;
+  }
+  
+  .reviewHeaderRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .reviewUser {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .reviewMeta {
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .reviewUserName,
+  .reviewUserNameMobile {
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  .reviewUserMeta {
+    font-size: 12px;
+    text-align: center;
+  }
+  
+  .reviewRate,
+  .reviewRateMobile {
+    font-size: 14px;
+  }
+  
+  .reviewDate {
+    font-size: 12px;
+    text-align: center;
+  }
+  
+  .reviewText {
+    font-size: 15px;
+    text-align: center;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 20px;
+  }
+  
+  .orderCard {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .reviewCard {
+    padding: 14px;
+  }
+  
+  .reviewUserName,
+  .reviewUserNameMobile {
+    font-size: 16px;
+  }
+  
+  .reviewText {
+    font-size: 14px;
+  }
+  
+  .reviewRate,
+  .reviewRateMobile {
+    font-size: 12px;
+  }
+}
 .reviewAvatarIcon {
   font-size: 16px;
 }
@@ -122,36 +244,9 @@
 }
 
 .sectionTitle {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 600;
   margin: 0;
   color: #1f2937;
   font-family: 'Jost-SemiBold', sans-serif;
-}
-
-@media (max-width: 1024px) {
-  .sectionCard {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 840px) {
-  .sectionCard {
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-  .sectionTitle {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .sectionCard {
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 20px;
-  }
-  .sectionTitle {
-    font-size: 20px;
-  }
 }

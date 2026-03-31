@@ -16,6 +16,29 @@
   font-size: 20px;
 }
 
+/* Планшеты в ландшафте */
+@media (max-width: 1200px) {
+  .expertContentContainer {
+    padding: 22px 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .expertContentContainer {
+    padding: 20px 16px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab) {
+    font-size: 18px;
+    padding: 10px 16px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab-btn) {
+    font-size: 18px;
+  }
+}
+
+/* Планшеты в портрете */
 @media (max-width: 840px) {
   .expertContentContainer {
     width: 100%;
@@ -35,8 +58,40 @@
   .expertContentContainer :global(.ant-tabs-nav) {
     margin-bottom: 16px;
   }
+  
+  .expertContentContainer :global(.ant-tabs-nav-wrap) {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-nav-wrap)::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-nav-list) {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
 }
 
+/* Большие телефоны */
+@media (max-width: 600px) {
+  .expertContentContainer {
+    padding: 14px 10px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab) {
+    font-size: 15px;
+    padding: 7px 10px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab-btn) {
+    font-size: 15px;
+  }
+}
+
+/* Маленькие телефоны */
 @media (max-width: 480px) {
   .expertContentContainer {
     padding: 12px 8px;
@@ -45,9 +100,27 @@
   .expertContentContainer :global(.ant-tabs-tab) {
     font-size: 14px;
     padding: 6px 8px;
+    min-width: auto;
+    white-space: nowrap;
   }
   
   .expertContentContainer :global(.ant-tabs-tab-btn) {
     font-size: 14px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .expertContentContainer {
+    padding: 10px 6px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab) {
+    font-size: 13px;
+    padding: 5px 6px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab-btn) {
+    font-size: 13px;
   }
 }

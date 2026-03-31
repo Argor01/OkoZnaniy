@@ -15,7 +15,6 @@ interface FriendsModalProps {
   onOpenProfile: (friend: User) => void;
 }
 
-
 const avatarColorClasses = [
   styles.friendsModalAvatarColor0,
   styles.friendsModalAvatarColor1,
@@ -47,6 +46,18 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   onOpenProfile
 }) => {
   const [searchText, setSearchText] = useState('');
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth <= 840 && window.innerWidth > 480);
+  const [isSmallMobile, setIsSmallMobile] = React.useState(window.innerWidth <= 480);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsTablet(window.innerWidth <= 840 && window.innerWidth > 480);
+      setIsSmallMobile(window.innerWidth <= 480);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const { data: recentUsers, isLoading } = useQuery({
     queryKey: ['recent-users'],
@@ -54,7 +65,6 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
     enabled: visible, 
   });
 
-  
   const filteredUsers = recentUsers?.filter((user: User) => {
     if (!searchText) return true;
     const search = searchText.toLowerCase();
@@ -63,28 +73,34 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
     return fullName.includes(search) || username.includes(search);
   }) || [];
 
+  // Адаптивные размеры
+  const modalWidth = isSmallMobile ? '100vw' : isTablet ? '95vw' : isMobile ? '100%' : 800;
+  const avatarSize = isSmallMobile ? 48 : isTablet ? 52 : 56;
+
   return (
     <Modal
       title={
-        <div className={`${styles.friendsModalTitle} ${isMobile ? styles.friendsModalTitleMobile : styles.friendsModalTitleDesktop}`}>
+        <div className={styles.friendsModalTitle}>
           Последние пользователи
         </div>
       }
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? '100%' : 800}
-      wrapClassName={`${styles.friendsModalWrap} ${isMobile ? styles.friendsModalWrapMobile : styles.friendsModalWrapDesktop}`}
+      width={modalWidth}
+      centered={!isSmallMobile}
+      wrapClassName={styles.friendsModalWrap}
+      destroyOnClose
     >
-      <div className={`${styles.friendsModalContent} ${isMobile ? styles.friendsModalContentMobile : ''}`}>
+      <div className={styles.friendsModalContent}>
         <div className={styles.friendsModalSearchRow}>
           <Input.Search
-            placeholder={isMobile ? "Поиск..." : "Поиск пользователей..."}
+            placeholder={isSmallMobile ? "Поиск..." : "Поиск пользователей..."}
             allowClear
-            size={isMobile ? 'middle' : 'large'}
+            size={isSmallMobile ? 'middle' : 'large'}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className={`${styles.friendsModalSearch} ${isMobile ? styles.friendsModalSearchMobile : styles.friendsModalSearchDesktop}`}
+            className={styles.friendsModalSearch}
           />
         </div>
         
@@ -96,42 +112,42 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
         ) : filteredUsers.length === 0 ? (
           <Empty description={searchText ? "Пользователи не найдены" : "Пока нет активных пользователей"} />
         ) : (
-          <div className={`${styles.friendsModalGrid} ${isMobile ? styles.friendsModalGridMobile : styles.friendsModalGridDesktop}`}>
+          <div className={styles.friendsModalGrid}>
             {filteredUsers.map((user: User) => (
               <div 
                 key={user.id}
-                className={`${styles.friendsModalCard} ${isMobile ? styles.friendsModalCardMobile : styles.friendsModalCardDesktop}`}
+                className={styles.friendsModalCard}
               >
-                <div className={`${styles.friendsModalCardHeader} ${isMobile ? styles.friendsModalCardHeaderMobile : ''}`}>
+                <div className={styles.friendsModalCardHeader}>
                   <Avatar 
-                    size={isMobile ? 48 : 56} 
+                    size={avatarSize} 
                     src={user.avatar}
                     className={`${styles.friendsModalAvatar} ${avatarColorClasses[user.id % avatarColorClasses.length]}`}
                   >
                     {!user.avatar && getInitials(user.first_name, user.last_name, user.username)}
                   </Avatar>
                   <div className={styles.friendsModalCardInfo}>
-                    <Text strong className={`${styles.friendsModalName} ${isMobile ? styles.friendsModalNameMobile : styles.friendsModalNameDesktop}`}>
+                    <Text strong className={styles.friendsModalName}>
                       {user.first_name && user.last_name 
                         ? `${user.first_name} ${user.last_name}`
                         : user.username || 'Пользователь'}
                     </Text>
-                    <Text type="secondary" className={`${styles.friendsModalRole} ${isMobile ? styles.friendsModalRoleMobile : styles.friendsModalRoleDesktop}`}>
+                    <Text type="secondary" className={styles.friendsModalRole}>
                       {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
                     </Text>
                     {user.bio && (
-                      <Text type="secondary" className={`${styles.friendsModalBio} ${isMobile ? styles.friendsModalBioMobile : styles.friendsModalBioDesktop}`}>
-                        {user.bio.length > 60 ? `${user.bio.slice(0, 60)}...` : user.bio}
+                      <Text type="secondary" className={styles.friendsModalBio}>
+                        {user.bio.length > (isSmallMobile ? 40 : 60) ? `${user.bio.slice(0, isSmallMobile ? 40 : 60)}...` : user.bio}
                       </Text>
                     )}
                   </div>
                 </div>
-                <div className={`${styles.friendsModalActions} ${isMobile ? styles.friendsModalActionsMobile : styles.friendsModalActionsDesktop}`}>
+                <div className={styles.friendsModalActions}>
                   <Button 
                     type="primary" 
                     size="small" 
                     icon={<MessageOutlined />} 
-                    className={`${styles.friendsModalActionButton} ${isMobile ? styles.friendsModalActionButtonMobile : styles.friendsModalActionButtonDesktop}`}
+                    className={styles.friendsModalActionButton}
                     onClick={() => {
                       onOpenChat(user);
                       onClose();
@@ -142,13 +158,13 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                   <Button 
                     size="small" 
                     icon={<UserOutlined />}
-                    className={`${styles.friendsModalActionButton} ${isMobile ? styles.friendsModalActionButtonMobile : styles.friendsModalActionButtonDesktop}`}
+                    className={styles.friendsModalActionButton}
                     onClick={() => {
                       onOpenProfile(user);
                       onClose();
                     }}
                   >
-                    {!isMobile && 'Профиль'}
+                    {isSmallMobile ? '' : 'Профиль'}
                   </Button>
                 </div>
               </div>

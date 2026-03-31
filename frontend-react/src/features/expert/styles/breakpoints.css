@@ -1,0 +1,178 @@
+/* Адаптивные брейкпоинты для страницы аккаунта эксперта */
+
+:root {
+  /* Брейкпоинты */
+  --breakpoint-xl: 1200px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-md: 840px;
+  --breakpoint-sm: 600px;
+  --breakpoint-xs: 480px;
+  --breakpoint-xxs: 360px;
+  
+  /* Отступы для разных экранов */
+  --padding-xl: 32px;
+  --padding-lg: 24px;
+  --padding-md: 20px;
+  --padding-sm: 16px;
+  --padding-xs: 12px;
+  --padding-xxs: 8px;
+  
+  /* Размеры шрифтов для заголовков */
+  --title-xl: 30px;
+  --title-lg: 26px;
+  --title-md: 22px;
+  --title-sm: 20px;
+  --title-xs: 18px;
+  --title-xxs: 16px;
+  
+  /* Размеры шрифтов для текста */
+  --text-xl: 18px;
+  --text-lg: 17px;
+  --text-md: 16px;
+  --text-sm: 15px;
+  --text-xs: 14px;
+  --text-xxs: 13px;
+  
+  /* Радиусы скругления */
+  --radius-xl: 24px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --radius-sm: 14px;
+  --radius-xs: 12px;
+  --radius-xxs: 10px;
+}
+
+/* Миксины для медиа-запросов */
+@media (max-width: 1200px) {
+  .responsive-container {
+    padding: var(--padding-lg);
+    border-radius: var(--radius-lg);
+  }
+  
+  .responsive-title {
+    font-size: var(--title-lg);
+  }
+  
+  .responsive-text {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (max-width: 1024px) {
+  .responsive-container {
+    padding: var(--padding-md);
+    border-radius: var(--radius-md);
+  }
+  
+  .responsive-title {
+    font-size: var(--title-md);
+  }
+  
+  .responsive-text {
+    font-size: var(--text-md);
+  }
+}
+
+@media (max-width: 840px) {
+  .responsive-container {
+    padding: var(--padding-sm);
+    border-radius: var(--radius-sm);
+  }
+  
+  .responsive-title {
+    font-size: var(--title-sm);
+  }
+  
+  .responsive-text {
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: 600px) {
+  .responsive-container {
+    padding: var(--padding-xs);
+    border-radius: var(--radius-xs);
+  }
+  
+  .responsive-title {
+    font-size: var(--title-xs);
+  }
+  
+  .responsive-text {
+    font-size: var(--text-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: var(--padding-xxs);
+    border-radius: var(--radius-xxs);
+  }
+  
+  .responsive-title {
+    font-size: var(--title-xxs);
+  }
+  
+  .responsive-text {
+    font-size: var(--text-xxs);
+  }
+}
+
+/* Утилиты для центрирования на мобильных */
+@media (max-width: 840px) {
+  .mobile-center {
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .mobile-stack {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+  }
+}
+
+/* Утилиты для скрытия скроллбаров */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Утилиты для адаптивных сеток */
+.responsive-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 840px) {
+  .responsive-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.responsive-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 840px) {
+  .responsive-grid-auto {
+    grid-template-columns: 1fr;
+  }
+}

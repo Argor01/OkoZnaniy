@@ -95,11 +95,13 @@
 
 .chatSearchHeader {
   padding: 12px;
+  padding-right: 48px;
   background: #ffffff;
 }
 
 .chatSearchHeaderMobile {
   padding: 8px;
+  padding-right: 48px;
 }
 
 .chatSearchIcon {
@@ -1962,6 +1964,7 @@
   
   .chatSearchHeader {
     padding: 10px !important;
+    padding-right: 48px !important;
   }
   
   .chatSearchInput {
