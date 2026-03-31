@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Input, 
@@ -9,9 +9,7 @@ import {
   Typography, 
   message as antMessage, 
   Card,
-  List,
-  Row,
-  Col,
+  Table,
   Empty,
   Select,
   Tag,
@@ -27,7 +25,6 @@ import {
   SendOutlined,
   UserOutlined,
   ReloadOutlined,
-  FilterOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
@@ -35,8 +32,6 @@ import {
   MessageOutlined,
   FileTextOutlined,
   TeamOutlined,
-  CloseOutlined,
-  ExpandOutlined,
   TagOutlined,
   DollarOutlined
 } from '@ant-design/icons';
@@ -51,7 +46,7 @@ const { Option } = Select;
 
 interface Ticket {
   id: number;
-  ticket_number: string; // Добавляем номер тикета
+  ticket_number: string;
   type: 'support_request' | 'claim';
   user: {
     id: number;
@@ -101,7 +96,6 @@ export const TicketSystemSection: React.FC = () => {
   const { tickets: rawTickets = [], loading, refetch } = useTickets(true);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
 
-  // Cast rawTickets to Ticket[] because the API response might differ slightly or be inferred as any[]
   const tickets = rawTickets as unknown as Ticket[];
 
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -112,10 +106,6 @@ export const TicketSystemSection: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [detailsVisible, setDetailsVisible] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(50); // Ширина боковой панели в процентах
-  const [isResizing, setIsResizing] = useState(false);
-  const [tagModalVisible, setTagModalVisible] = useState(false);
-  const [newTag, setNewTag] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -135,42 +125,6 @@ export const TicketSystemSection: React.FC = () => {
     setDetailsVisible(false);
     setSelectedTicket(null);
   };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      
-      const container = document.querySelector(`.${styles.ticketSystemWrapper}`) as HTMLElement;
-      if (!container) return;
-      
-      const containerRect = container.getBoundingClientRect();
-      const newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
-      
-      // Ограничиваем ширину от 30% до 70%
-      if (newWidth >= 30 && newWidth <= 70) {
-        setPanelWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -195,7 +149,7 @@ export const TicketSystemSection: React.FC = () => {
       
       setMessageText('');
       antMessage.success('Сообщение отправлено');
-      refetch(); // Refresh tickets to show new message
+      refetch();
     } catch (error) {
       antMessage.error('Не удалось отправить сообщение');
     } finally {
@@ -306,7 +260,8 @@ export const TicketSystemSection: React.FC = () => {
         (ticket.subject || '').toLowerCase().includes(query) ||
         (ticket.user.first_name || '').toLowerCase().includes(query) ||
         (ticket.user.last_name || '').toLowerCase().includes(query) ||
-        ticket.id.toString().includes(query);
+        ticket.id.toString().includes(query) ||
+        ticket.ticket_number.toLowerCase().includes(query);
       if (!matchesSearch) return false;
     }
     
@@ -328,7 +283,6 @@ export const TicketSystemSection: React.FC = () => {
     completed: tickets.filter(t => t.status === 'completed').length,
   };
 
-  // Компонент деталей тикета - вынесен отдельно для избежания перерисовки при вводе текста
   const TicketDetails: React.FC<{
     ticket: Ticket;
     messageText: string;
@@ -507,15 +461,130 @@ export const TicketSystemSection: React.FC = () => {
     return TicketDetailsComponent;
   }, [handleUpdateStatus, handleUpdatePriority, navigate, messagesEndRef]);
 
+  const columns = [
+    {
+      title: 'Номер',
+      dataIndex: 'ticket_number',
+      key: 'ticket_number',
+      width: 120,
+      render: (text: string, record: Ticket) => (
+        <Text strong>#{text}</Text>
+      ),
+    },
+    {
+      title: 'Тип',
+      key: 'type',
+      width: 100,
+      render: (record: Ticket) => (
+        <Tag color={record.type === 'claim' ? 'red' : 'blue'}>
+          {record.type === 'claim' ? 'Арбитраж' : 'Обращение'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Тема',
+      dataIndex: 'subject',
+      key: 'subject',
+      width: 250,
+      render: (text: string, record: Ticket) => (
+        <div>
+          <div>{text}</div>
+          {record.auto_created && (
+            <Tag color="blue" style={{ marginTop: 4 }}>Из чата</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Клиент',
+      key: 'client',
+      width: 150,
+      render: (record: Ticket) => (
+        <Space>
+          <Avatar size={24} icon={<UserOutlined />} />
+          <span>{record.user.first_name} {record.user.last_name}</span>
+        </Space>
+      ),
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)} icon={getStatusIcon(status)}>
+          {getStatusText(status)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Приоритет',
+      dataIndex: 'priority',
+      key: 'priority',
+      width: 100,
+      render: (priority: string) => (
+        <Tag color={getPriorityColor(priority)} icon={priority === 'urgent' || priority === 'high' ? <FlagOutlined /> : undefined}>
+          {getPriorityText(priority)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Теги',
+      dataIndex: 'tags_list',
+      key: 'tags_list',
+      width: 150,
+      render: (tags: string[]) => (
+        tags && tags.length > 0 ? (
+          <Space wrap size="small">
+            {tags.slice(0, 2).map(tag => (
+              <Tag key={tag} color={tag.includes('негатив') ? 'red' : 'blue'}>
+                {tag}
+              </Tag>
+            ))}
+            {tags.length > 2 && (
+              <Tag color="default">+{tags.length - 2}</Tag>
+            )}
+          </Space>
+        ) : '-'
+      ),
+    },
+    {
+      title: 'Дата создания',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 150,
+      render: (date: string) => formatTimestamp(date),
+    },
+    {
+      title: 'Действия',
+      key: 'actions',
+      width: 120,
+      render: (record: Ticket) => (
+        <Space>
+          {record.type === 'claim' && (
+            <Button
+              size="small"
+              type="primary"
+              icon={<DollarOutlined />}
+              onClick={() => navigate(`/admin/arbitration/${record.ticket_number}`)}
+            >
+              Арбитраж
+            </Button>
+          )}
+          <Button
+            size="small"
+            onClick={() => handleTicketClick(record)}
+          >
+            Подробнее
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <div className={styles.ticketSystemWrapper}>
-      <div 
-        className={`${styles.ticketSystemMainContent} ${isResizing ? styles.resizing : ''}`}
-        style={{
-          marginRight: detailsVisible && !isMobile ? `${panelWidth}%` : '0',
-          width: detailsVisible && !isMobile ? `${100 - panelWidth}%` : '100%'
-        }}
-      >
+      <div style={{ width: '100%' }}>
         <Card 
           title={
             <div className={styles.ticketSystemTitleRow}>
@@ -533,377 +602,109 @@ export const TicketSystemSection: React.FC = () => {
             />
           }
         >
-            <div className={styles.ticketSystemStatsGrid}>
-              <div className={styles.ticketSystemStatItem}>
-                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatTotal}`}>{ticketStats.total}</div>
-                <div className={styles.ticketSystemStatLabel}>Всего</div>
-              </div>
-              <div className={styles.ticketSystemStatItem}>
-                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatOpen}`}>{ticketStats.open}</div>
-                <div className={styles.ticketSystemStatLabel}>Открыто</div>
-              </div>
-              <div className={styles.ticketSystemStatItem}>
-                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatInProgress}`}>{ticketStats.inProgress}</div>
-                <div className={styles.ticketSystemStatLabel}>В работе</div>
-              </div>
-              <div className={styles.ticketSystemStatItem}>
-                <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatCompleted}`}>{ticketStats.completed}</div>
-                <div className={styles.ticketSystemStatLabel}>Завершено</div>
-              </div>
+          <div className={styles.ticketSystemStatsGrid}>
+            <div className={styles.ticketSystemStatItem}>
+              <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatTotal}`}>{ticketStats.total}</div>
+              <div className={styles.ticketSystemStatLabel}>Всего</div>
             </div>
-
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="Поиск по номеру, теме, клиенту..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.ticketSystemSearch}
-              allowClear
-            />
-            
-            <div className={styles.ticketSystemFiltersRow}>
-              <Select
-                value={statusFilter}
-                onChange={setStatusFilter}
-                className={styles.ticketSystemFilterSelect}
-                size="small"
-              >
-                <Option value="all">Все статусы</Option>
-                <Option value="open">Открыт</Option>
-                <Option value="new">Новый</Option>
-                <Option value="in_progress">В работе</Option>
-                <Option value="completed">Завершен</Option>
-              </Select>
-              
-              <Select
-                value={priorityFilter}
-                onChange={setPriorityFilter}
-                className={styles.ticketSystemFilterSelect}
-                size="small"
-              >
-                <Option value="all">Все приоритеты</Option>
-                <Option value="urgent">Срочный</Option>
-                <Option value="high">Высокий</Option>
-                <Option value="medium">Средний</Option>
-                <Option value="low">Низкий</Option>
-              </Select>
+            <div className={styles.ticketSystemStatItem}>
+              <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatOpen}`}>{ticketStats.open}</div>
+              <div className={styles.ticketSystemStatLabel}>Открыто</div>
             </div>
-            
-            <div className={styles.ticketSystemListBody}>
-              <List
-                loading={loading}
-                dataSource={filteredTickets}
-                locale={{ emptyText: 'Нет обращений' }}
-                renderItem={(ticket) => (
-                  <Card
-                    size="small"
-                    onClick={() => handleTicketClick(ticket)}
-                    className={`${styles.ticketSystemTicketCard} ${selectedTicket?.id === ticket.id ? styles.ticketSystemTicketCardSelected : ''}`}
-                    hoverable
-                    style={{
-                      border: ticket.type === 'claim' ? '2px solid #ff4d4f' : undefined,
-                      background: ticket.type === 'claim' ? 'linear-gradient(135deg, #fff1f0 0%, #fff 100%)' : undefined
-                    }}
-                  >
-                    <div className={styles.ticketSystemTicketHeader}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 8 }}>
-                        <div>
-                          <Text strong className={styles.ticketSystemTicketNumber}>
-                            {ticket.type === 'claim' ? '🔴 Арбитраж' : 'Обращение'} {ticket.ticket_number}
-                          </Text>
-                          {ticket.type === 'claim' && (
-                            <Tag color="red" style={{ marginLeft: 8 }}>Требует внимания</Tag>
-                          )}
-                        </div>
-                        {ticket.type === 'claim' && (
-                          <Button
-                            size="small"
-                            type="primary"
-                            icon={<DollarOutlined />}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/admin/arbitration/${ticket.ticket_number}`);
-                            }}
-                            style={{
-                              background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
-                              border: 'none'
-                            }}
-                          >
-                            Открыть арбитраж
-                          </Button>
-                        )}
-                      </div>
-                      <div className={styles.ticketSystemTicketTags}>
-                        <Tag 
-                          color={getStatusColor(ticket.status)} 
-                          icon={getStatusIcon(ticket.status)}
-                          className={styles.ticketSystemTag}
-                        >
-                          {getStatusText(ticket.status)}
-                        </Tag>
-                        <Tag 
-                          color={getPriorityColor(ticket.priority)}
-                          icon={ticket.priority === 'urgent' || ticket.priority === 'high' ? <FlagOutlined /> : undefined}
-                          className={styles.ticketSystemTag}
-                        >
-                          {getPriorityText(ticket.priority)}
-                        </Tag>
-                      </div>
-                    </div>
-                    
-                    <Text strong className={styles.ticketSystemTicketSubject}>
-                      {ticket.subject}
-                      {ticket.auto_created && (
-                        <Tag color="blue" style={{ marginLeft: 8 }}>
-                          Из чата
-                        </Tag>
-                      )}
-                    </Text>
-                    
-                    {/* Отображение тегов */}
-                    {ticket.tags_list && ticket.tags_list.length > 0 && (
-                      <div style={{ marginTop: 4 }}>
-                        <Space wrap size="small">
-                          {ticket.tags_list.slice(0, 3).map(tag => (
-                            <Tag 
-                              key={tag} 
-                              color={tag.includes('негатив') ? 'red' : 'blue'}
-                            >
-                              {tag}
-                            </Tag>
-                          ))}
-                          {ticket.tags_list.length > 3 && (
-                            <Tag color="default">
-                              +{ticket.tags_list.length - 3}
-                            </Tag>
-                          )}
-                        </Space>
-                      </div>
-                    )}
-                    
-                    <div className={styles.ticketSystemTicketUser}>
-                      <Avatar size={20} icon={<UserOutlined />} />
-                      <Text type="secondary" className={styles.ticketSystemTicketUserName}>
-                        {ticket.user.first_name} {ticket.user.last_name}
-                      </Text>
-                      {/* Отображение назначенных пользователей */}
-                      {ticket.assigned_users && ticket.assigned_users.length > 0 && (
-                        <Tag icon={<TeamOutlined />} style={{ marginLeft: 8 }}>
-                          {ticket.assigned_users.length}
-                        </Tag>
-                      )}
-                    </div>
-                    
-                    <div className={styles.ticketSystemTicketFooter}>
-                      <Text type="secondary" className={styles.ticketSystemTicketTime}>
-                        {formatTimestamp(ticket.created_at)}
-                      </Text>
-                      {ticket.messages && ticket.messages.length > 0 && (
-                        <Badge 
-                          count={ticket.messages.length} 
-                          className={styles.ticketSystemMessageBadge}
-                          overflowCount={99}
-                        />
-                      )}
-                    </div>
-                  </Card>
-                )}
-              />
+            <div className={styles.ticketSystemStatItem}>
+              <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatInProgress}`}>{ticketStats.inProgress}</div>
+              <div className={styles.ticketSystemStatLabel}>В работе</div>
             </div>
-          </Card>
-        </div>
-
-        {/* Боковая панель с деталями тикета */}
-        {isMobile ? (
-          <Drawer
-            title={
-              selectedTicket ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileTextOutlined />
-                  <span>Обращение #{selectedTicket.ticket_number}</span>
-                </div>
-              ) : 'Детали тикета'
-            }
-            placement="right"
-            onClose={handleCloseDetails}
-            open={detailsVisible}
-            width="100%"
-            extra={
-              selectedTicket && (
-                <Button 
-                  size="small"
-                  icon={<ExpandOutlined />}
-                  onClick={() => navigate(`/admin/tickets/${selectedTicket.ticket_number}`)}
-                >
-                  Открыть отдельно
-                </Button>
-              )
-            }
-          >
-            {selectedTicket && (
-              <TicketDetails
-                ticket={selectedTicket}
-                messageText={messageText}
-                setMessageText={setMessageText}
-                sendMessage={sendMessage}
-                sending={sending}
-                handleUpdateStatus={handleUpdateStatus}
-                handleUpdatePriority={handleUpdatePriority}
-                navigate={navigate}
-              />
-            )}
-          </Drawer>
-        ) : (
-          <>
-            {/* Разделитель для изменения ширины */}
-            {detailsVisible && (
-              <div
-                className={styles.ticketSystemResizer}
-                onMouseDown={handleMouseDown}
-                style={{
-                  left: `${100 - panelWidth}%`,
-                  cursor: isResizing ? 'col-resize' : 'col-resize'
-                }}
-              />
-            )}
-            
-            <div
-              className={`${styles.ticketSystemSidePanel} ${detailsVisible ? styles.open : ''} ${isResizing ? styles.resizing : ''}`}
-              style={{ width: `${panelWidth}%` }}
-            >
-              {selectedTicket && (
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FileTextOutlined />
-                      <Text strong>Обращение #{selectedTicket.ticket_number}</Text>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <Button 
-                        size="small"
-                        icon={<ExpandOutlined />}
-                        onClick={() => navigate(`/admin/tickets/${selectedTicket.ticket_number}`)}
-                      >
-                        Открыть отдельно
-                      </Button>
-                      <Button 
-                        size="small"
-                        icon={<CloseOutlined />}
-                        onClick={handleCloseDetails}
-                      />
-                    </div>
-                  </div>
-                  <TicketDetails
-                    ticket={selectedTicket}
-                    messageText={messageText}
-                    setMessageText={setMessageText}
-                    sendMessage={sendMessage}
-                    sending={sending}
-                    handleUpdateStatus={handleUpdateStatus}
-                    handleUpdatePriority={handleUpdatePriority}
-                    navigate={navigate}
-                  />
-                </div>
-              )}
-            </div>
-          </>
-        )}
-        
-        {/* Модальное окно для управления тегами */}
-        <Modal
-        title="Управление тегами"
-        open={tagModalVisible}
-        onCancel={() => {
-          setTagModalVisible(false);
-          setNewTag('');
-        }}
-        footer={null}
-        width={400}
-      >
-        {selectedTicket && (
-          <div>
-            <div style={{ marginBottom: '16px' }}>
-              <Text strong>Текущие теги:</Text>
-              <div style={{ marginTop: '8px' }}>
-                {selectedTicket.tags_list && selectedTicket.tags_list.length > 0 ? (
-                  <Space wrap size="small">
-                    {selectedTicket.tags_list.map((tag) => (
-                      <Tag 
-                        key={tag}
-                        closable
-                        onClose={(e: any) => {
-                          e.preventDefault();
-                          antMessage.success('Тег ' + tag + ' удален');
-                        }}
-                        color={tag.includes('нарушение') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </Space>
-                ) : (
-                  <Text type="secondary">Нет тегов</Text>
-                )}
-              </div>
-            </div>
-            
-            <Divider />
-            
-            <div>
-              <Text strong>Добавить тег:</Text>
-              <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
-                <Input
-                  placeholder="Введите тег (например: #срочно)"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onPressEnter={() => {
-                    if (newTag.trim()) {
-                      const tag = newTag.startsWith('#') ? newTag : '#' + newTag;
-                      antMessage.success('Тег ' + tag + ' добавлен');
-                      setNewTag('');
-                    }
-                  }}
-                  size="small"
-                />
-                <Button 
-                  type="primary" 
-                  size="small"
-                  onClick={() => {
-                    if (newTag.trim()) {
-                      const tag = newTag.startsWith('#') ? newTag : '#' + newTag;
-                      antMessage.success('Тег ' + tag + ' добавлен');
-                      setNewTag('');
-                    }
-                  }}
-                >
-                  Добавить
-                </Button>
-              </div>
-              
-              <div style={{ marginTop: '12px' }}>
-                <Text type="secondary" style={{ fontSize: '12px' }}>Быстрые теги:</Text>
-                <div style={{ marginTop: '4px' }}>
-                  <Space wrap size="small">
-                    {['#срочно', '#негатив', '#баг', '#нарушение', '#важно'].map((tag) => (
-                      <Tag 
-                        key={tag}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => {
-                          antMessage.success('Тег ' + tag + ' добавлен');
-                        }}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </Space>
-                </div>
-              </div>
+            <div className={styles.ticketSystemStatItem}>
+              <div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatCompleted}`}>{ticketStats.completed}</div>
+              <div className={styles.ticketSystemStatLabel}>Завершено</div>
             </div>
           </div>
+
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Поиск по номеру, теме, клиенту..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.ticketSystemSearch}
+            allowClear
+          />
+          
+          <div className={styles.ticketSystemFiltersRow}>
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              className={styles.ticketSystemFilterSelect}
+              size="small"
+            >
+              <Option value="all">Все статусы</Option>
+              <Option value="open">Открыт</Option>
+              <Option value="new">Новый</Option>
+              <Option value="in_progress">В работе</Option>
+              <Option value="completed">Завершен</Option>
+            </Select>
+            
+            <Select
+              value={priorityFilter}
+              onChange={setPriorityFilter}
+              className={styles.ticketSystemFilterSelect}
+              size="small"
+            >
+              <Option value="all">Все приоритеты</Option>
+              <Option value="urgent">Срочный</Option>
+              <Option value="high">Высокий</Option>
+              <Option value="medium">Средний</Option>
+              <Option value="low">Низкий</Option>
+            </Select>
+          </div>
+          
+          <Table
+            columns={columns}
+            dataSource={filteredTickets}
+            rowKey="id"
+            loading={loading}
+            pagination={{ 
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} из ${total} обращений`
+            }}
+            locale={{ emptyText: 'Нет обращений' }}
+            scroll={{ x: 1200 }}
+            size="small"
+            onRow={(record) => ({
+              onClick: () => handleTicketClick(record),
+              style: { 
+                cursor: 'pointer',
+                background: selectedTicket?.id === record.id ? '#e6f7ff' : undefined
+              }
+            })}
+          />
+        </Card>
+      </div>
+
+      <Drawer
+        title={`Обращение #${selectedTicket?.ticket_number}`}
+        placement="right"
+        width={isMobile ? '100%' : 500}
+        open={detailsVisible}
+        onClose={handleCloseDetails}
+        destroyOnClose
+      >
+        {selectedTicket && (
+          <TicketDetails
+            ticket={selectedTicket}
+            messageText={messageText}
+            setMessageText={setMessageText}
+            sendMessage={sendMessage}
+            sending={sending}
+            handleUpdateStatus={handleUpdateStatus}
+            handleUpdatePriority={handleUpdatePriority}
+            navigate={navigate}
+          />
         )}
-      </Modal>
+      </Drawer>
     </div>
   );
 };
-
-export default TicketSystemSection;
