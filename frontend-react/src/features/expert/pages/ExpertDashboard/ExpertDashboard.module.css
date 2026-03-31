@@ -16,10 +16,38 @@
   font-size: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 840px) {
   .expertContentContainer {
     width: 100%;
     max-width: 100%;
-    padding: 16px; 
+    padding: 16px 12px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab) {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab-btn) {
+    font-size: 16px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-nav) {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expertContentContainer {
+    padding: 12px 8px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab) {
+    font-size: 14px;
+    padding: 6px 8px;
+  }
+  
+  .expertContentContainer :global(.ant-tabs-tab-btn) {
+    font-size: 14px;
   }
 }

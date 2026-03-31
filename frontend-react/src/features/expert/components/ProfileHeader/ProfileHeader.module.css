@@ -184,14 +184,70 @@
 }
 
 @media (max-width: 840px) {
+  .profileBlock {
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+  
+  .profileBlockContent {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .profileLeft {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+  
   .profileInfo {
     align-items: center;
+    width: 100%;
+  }
+  
+  .profileNameRow {
+    justify-content: center;
+  }
+  
+  .profileNameTitle {
+    font-size: 22px !important;
+  }
+  
+  .profileRight {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .profileStats {
+    align-items: center;
+    width: 100%;
+  }
+  
+  .profileStatsMeta,
+  .profileStatsLine {
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
   .profileAvatar {
-    width: 60px;
-    height: 60px;
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .profileNameTitle {
+    font-size: 20px !important;
+  }
+  
+  .profileStatLabel,
+  .profileStatsLine,
+  .profileStatsMeta {
+    font-size: 14px;
+  }
+  
+  .profileStatSubtext {
+    font-size: 14px;
   }
 }

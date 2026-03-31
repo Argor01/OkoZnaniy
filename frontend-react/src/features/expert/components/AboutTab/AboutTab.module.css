@@ -90,3 +90,86 @@
   color: #1f2937;
   font-family: 'Jost-SemiBold', sans-serif;
 }
+
+@media (max-width: 840px) {
+  .sectionCard {
+    padding: 20px 16px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+  }
+  
+  .sectionCardHeader {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 22px;
+  }
+  
+  .aboutBio {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  .aboutHighlights {
+    gap: 16px;
+    margin-top: 16px;
+  }
+  
+  .aboutHighlightItem {
+    margin-bottom: 16px;
+  }
+  
+  .aboutHighlightIcon {
+    font-size: 16px;
+  }
+  
+  .aboutHighlightText {
+    font-size: 14px;
+  }
+  
+  .aboutSectionTitle {
+    font-size: 20px !important;
+    margin-bottom: 16px;
+  }
+  
+  .aboutSectionText {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .aboutSkillsList {
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .aboutSkillTag {
+    font-size: 13px;
+    padding: 3px 10px;
+  }
+  
+  .aboutPortfolioLink {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionCard {
+    padding: 16px 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 20px;
+  }
+  
+  .aboutBio,
+  .aboutSectionText {
+    font-size: 14px;
+  }
+  
+  .aboutSectionTitle {
+    font-size: 18px !important;
+  }
+}

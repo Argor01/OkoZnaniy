@@ -274,6 +274,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   return (
     <Header className={styles.dashboardHeader}>
       <div className={styles.headerLeft}>
+        {isMobile && (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMenuClick}
+            className={styles.menuButton}
+          />
+        )}
         {!isMobile && renderNavItems()}
       </div>
 
@@ -286,50 +294,62 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 
       <div className={styles.headerRight}>
         <Space size={isMobile ? 8 : 16}>
-          <Badge count={unreadMessages} offset={[-5, 5]}>
+          {!isMobile && (
+            <>
+              <Badge count={unreadMessages} offset={[-5, 5]}>
+                <Button
+                  type="text"
+                  icon={<MessageOutlined />}
+                  onClick={onMessagesClick}
+                  className={styles.iconButton}
+                />
+              </Badge>
+
+              
+              <Badge count={unreadNotifications} offset={[-5, 5]}>
+                <Button
+                  type="text"
+                  icon={<BellOutlined />}
+                  onClick={onNotificationsClick}
+                  className={styles.iconButton}
+                />
+              </Badge>
+
+              
+              <Dropdown
+                menu={{
+                  items: supportMenuItems,
+                }}
+                placement="bottomRight"
+                trigger={['click']}
+              >
+                <Button
+                  type="text"
+                  icon={<CustomerServiceOutlined />}
+                  className={styles.iconButton}
+                />
+              </Dropdown>
+
+              
+              <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
+                <div className={styles.profileSection}>
+                  <Text className={styles.username}>
+                    {userProfile?.username || 'Пользователь'}
+                  </Text>
+                </div>
+              </Dropdown>
+            </>
+          )}
+          
+          {isMobile && (
             <Button
               type="text"
-              icon={<MessageOutlined />}
-              onClick={onMessagesClick}
-              className={styles.iconButton}
+              icon={<LogoutOutlined />}
+              onClick={onLogout}
+              className={`${styles.iconButton} ${styles.logoutButton}`}
+              danger
             />
-          </Badge>
-
-          
-          <Badge count={unreadNotifications} offset={[-5, 5]}>
-            <Button
-              type="text"
-              icon={<BellOutlined />}
-              onClick={onNotificationsClick}
-              className={styles.iconButton}
-            />
-          </Badge>
-
-          
-          <Dropdown
-            menu={{
-              items: supportMenuItems,
-            }}
-            placement="bottomRight"
-            trigger={['click']}
-          >
-            <Button
-              type="text"
-              icon={<CustomerServiceOutlined />}
-              className={styles.iconButton}
-            />
-          </Dropdown>
-
-          
-          <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
-            <div className={styles.profileSection}>
-              {!isMobile && (
-                <Text className={styles.username}>
-                  {userProfile?.username || 'Пользователь'}
-                </Text>
-              )}
-            </div>
-          </Dropdown>
+          )}
         </Space>
       </div>
     </Header>

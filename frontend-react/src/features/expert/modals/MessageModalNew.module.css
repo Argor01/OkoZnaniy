@@ -1,40 +1,3 @@
-@media (max-width: 840px) {
-  .chatContainer {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  
-  .chatMessagesArea {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-  }
-  
-  .chatInputArea {
-    flex-shrink: 0;
-    padding: 8px 12px 12px 12px;
-    background: #ffffff;
-    border-top: 1px solid #e5e7eb;
-  }
-}
-
-@media (max-width: 480px) {
-  .chatInputArea {
-    padding: 6px 8px 10px 8px;
-  }
-  
-  .chatInputArea :global(.ant-input) {
-    font-size: 14px;
-  }
-  
-  .chatInputArea :global(.ant-btn) {
-    width: 32px;
-    height: 32px;
-  }
-}
-
 .chatModalWrap :global(.ant-modal-mask) {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -1864,3 +1827,463 @@
   min-width: 20px;
   line-height: 20px;
 }
+
+/* Mobile Responsive Improvements */
+@media (max-width: 840px) {
+  /* Modal Structure */
+  .chatModalWrap :global(.ant-modal-content) {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    max-width: 100vw !important;
+  }
+  
+  .chatModalContainer {
+    flex-direction: row !important;
+  }
+  
+  /* Sidebar */
+  .chatSidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .chatSidebarMobile {
+    width: 100%;
+  }
+  
+  /* Chat Panel */
+  .chatPanel {
+    width: 100%;
+  }
+  
+  /* Header */
+  .chatHeader {
+    padding: 10px 12px !important;
+  }
+  
+  .chatHeaderTitle {
+    font-size: 16px !important;
+  }
+  
+  .chatHeaderSubtitle {
+    font-size: 13px !important;
+  }
+  
+  .chatClaimButton {
+    right: 36px;
+    top: 6px;
+    font-size: 20px;
+    padding: 4px;
+    height: 32px;
+    width: 32px;
+  }
+  
+  /* Messages */
+  .chatMessages {
+    padding: 12px !important;
+  }
+  
+  .messageBubbleRegularMobile {
+    max-width: 85% !important;
+  }
+  
+  .messageText {
+    font-size: 14px !important;
+  }
+  
+  .messageFileBlock {
+    width: 100px;
+  }
+  
+  .messageFileIconBox {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .messageFileName {
+    font-size: 12px;
+  }
+  
+  /* Input Area */
+  .chatInputContainer {
+    padding: 10px 12px !important;
+  }
+  
+  .chatInput {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+  }
+  
+  .chatEmojiButton,
+  .chatAttachButton {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 16px !important;
+  }
+  
+  .chatSendButton {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 16px !important;
+  }
+  
+  .attachedFiles {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  
+  .attachedFileItem {
+    padding: 6px 10px;
+  }
+  
+  .attachedFileName {
+    font-size: 12px;
+    max-width: 120px;
+  }
+  
+  /* Chat List */
+  .chatListItem {
+    padding: 10px !important;
+  }
+  
+  .chatListName {
+    font-size: 15px !important;
+  }
+  
+  .chatListPreview {
+    font-size: 13px !important;
+  }
+  
+  .chatListTime {
+    font-size: 12px !important;
+  }
+  
+  .chatSearchHeader {
+    padding: 10px !important;
+  }
+  
+  .chatSearchInput {
+    font-size: 13px !important;
+  }
+  
+  /* Order Summary */
+  .orderSummaryHeader {
+    padding: 10px 12px !important;
+  }
+  
+  .orderSummaryId {
+    font-size: 13px !important;
+  }
+  
+  .orderSummaryStatus {
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+  }
+  
+  .orderSummaryPrice {
+    font-size: 14px !important;
+  }
+  
+  .orderSummaryCenter {
+    display: none !important;
+  }
+  
+  .orderSummaryDetails {
+    padding: 16px 12px !important;
+  }
+  
+  .orderGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .orderGridItem {
+    padding: 10px !important;
+  }
+  
+  .gridIcon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
+  }
+  
+  .gridLabel {
+    font-size: 9px !important;
+  }
+  
+  .gridValue {
+    font-size: 13px !important;
+  }
+  
+  .goToOrderButton {
+    width: 100% !important;
+    height: 44px !important;
+  }
+  
+  .actionButtonPrimary {
+    width: 100% !important;
+    height: 44px !important;
+  }
+  
+  .primaryActionsRow {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .secondaryActions {
+    justify-content: center !important;
+  }
+  
+  /* Offer Card */
+  .offerCard {
+    border-radius: 12px !important;
+  }
+  
+  .offerCardHeader {
+    padding: 12px !important;
+  }
+  
+  .offerCardTitle {
+    font-size: 14px !important;
+  }
+  
+  .offerCardBody {
+    padding: 12px !important;
+  }
+  
+  .offerGrid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .offerGridItem {
+    padding: 8px !important;
+  }
+  
+  .offerGridIcon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+  
+  .offerLabel {
+    font-size: 9px !important;
+  }
+  
+  .offerValue {
+    font-size: 12px !important;
+  }
+  
+  .offerDescription {
+    padding: 10px !important;
+    font-size: 12px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .offerPrice {
+    font-size: 20px !important;
+  }
+  
+  /* Message Card */
+  .messageCard {
+    width: 100% !important;
+  }
+  
+  .messageCardTitle {
+    font-size: 14px !important;
+  }
+  
+  .messageCardActions {
+    flex-direction: column !important;
+  }
+  
+  .messageCardActions :global(.ant-btn) {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Header */
+  .chatHeaderTitle {
+    font-size: 15px !important;
+  }
+  
+  .chatHeaderSubtitle {
+    font-size: 12px !important;
+  }
+  
+  /* Messages */
+  .chatMessages {
+    padding: 10px !important;
+  }
+  
+  .messageText {
+    font-size: 13px !important;
+  }
+  
+  .messageFileBlock {
+    width: 90px !important;
+  }
+  
+  .messageFileIconBox {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 18px !important;
+  }
+  
+  .messageFileName {
+    font-size: 11px !important;
+    max-width: 120px !important;
+  }
+  
+  /* Input Area */
+  .chatInputContainer {
+    padding: 8px 10px !important;
+  }
+  
+  .chatInput {
+    font-size: 13px !important;
+    padding: 7px 10px !important;
+  }
+  
+  .chatEmojiButton,
+  .chatAttachButton,
+  .chatSendButton {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 15px !important;
+  }
+  
+  /* Chat List */
+  .chatListItem {
+    padding: 8px !important;
+  }
+  
+  .chatListName {
+    font-size: 14px !important;
+  }
+  
+  .chatListPreview {
+    font-size: 12px !important;
+  }
+  
+  .chatListTime {
+    font-size: 11px !important;
+  }
+  
+  /* Order Summary */
+  .orderSummaryHeader {
+    padding: 8px 10px !important;
+  }
+  
+  .orderSummaryId {
+    font-size: 12px !important;
+  }
+  
+  .orderSummaryStatus {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+  }
+  
+  .orderSummaryPrice {
+    font-size: 13px !important;
+  }
+  
+  .orderSummaryDetails {
+    padding: 12px 10px !important;
+  }
+  
+  .gridIcon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+  
+  .gridLabel {
+    font-size: 8px !important;
+  }
+  
+  .gridValue {
+    font-size: 12px !important;
+  }
+  
+  /* Offer Card */
+  .offerGridIcon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+  }
+  
+  .offerPrice {
+    font-size: 18px !important;
+  }
+}
+  
+  .chatHeaderTitle {
+    font-size: 15px;
+  }
+  
+  .chatHeaderSubtitle {
+    font-size: 12px;
+  }
+  
+  .chatMessages {
+    padding: 10px;
+  }
+  
+  .chatInputContainer {
+    padding: 8px 10px;
+  }
+  
+  .chatInput {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+  
+  .chatEmojiButton,
+  .chatAttachButton,
+  .chatSendButton {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+  
+  .messageText {
+    font-size: 13px;
+  }
+  
+  .messageFileBlock {
+    width: 90px;
+  }
+  
+  .messageFileIconBox {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  .messageFileName {
+    font-size: 11px;
+    max-width: 120px;
+  }
+  
+  .chatListItem {
+    padding: 8px;
+  }
+  
+  .chatListName {
+    font-size: 14px;
+  }
+  
+  .chatListPreview {
+    font-size: 12px;
+  }
+  
+  .chatListTime {
+    font-size: 11px;
+  }
+
