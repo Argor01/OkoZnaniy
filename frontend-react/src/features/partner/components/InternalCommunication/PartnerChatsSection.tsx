@@ -98,45 +98,37 @@ export const PartnerChatsSection: React.FC = () => {
   const loadChatRooms = async () => {
     setLoading(true);
     try {
-      const { getChatRooms } = await import('@/features/partner/api/partnerChats');
-      const rooms = await getChatRooms();
+      // Загружаем список директоров
+      const { default: apiClient } = await import('@/api/client');
+      const response = await apiClient.get('/users/directors/');
+      const directors = response.data;
       
-      // Убедимся, что это массив
-      const roomsArray = Array.isArray(rooms) ? rooms : [];
-      
-      // Добавляем чат с персональным менеджером в начало списка
-      const managerChat: ChatRoom = {
-        id: -1, // Специальный ID для чата с менеджером
-        name: 'Персональный менеджер',
-        description: 'Чат с вашим персональным менеджером',
-        type: 'private',
+      // Создаем чаты с каждым директором
+      const directorChats: ChatRoom[] = directors.map((director: any) => ({
+        id: director.id,
+        name: `${director.first_name} ${director.last_name}`,
+        description: 'Директор',
+        type: 'private' as const,
         unread_count: 0,
         is_muted: false,
         participants: [
           {
-            id: 1,
-            first_name: 'Иван',
-            last_name: 'Петров',
-            role: 'manager',
-            online: true,
+            id: director.id,
+            first_name: director.first_name,
+            last_name: director.last_name,
+            role: 'director',
+            online: director.online || false,
           }
         ],
-        last_message: {
-          id: 1,
-          text: 'Здравствуйте! Я ваш персональный менеджер. Чем могу помочь?',
-          sender: {
-            first_name: 'Иван',
-            last_name: 'Петров',
-          },
-          sent_at: new Date().toISOString(),
-        }
-      };
+      }));
       
-      const allRooms = [managerChat, ...roomsArray];
-      setChatRooms(allRooms);
+      setChatRooms(directorChats);
+      if (directorChats.length > 0 && !selectedRoom) {
+        setSelectedRoom(directorChats[0]);
+      }
     } catch (error) {
-      console.error('Error loading partner chat rooms:', error);
-      message.error('Ошибка загрузки чатов');
+      console.error('Error loading directors:', error);
+      message.error('Ошибка загрузки списка директоров');
       setChatRooms([]);
     } finally {
       setLoading(false);
@@ -156,16 +148,42 @@ export const PartnerChatsSection: React.FC = () => {
     room.description?.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  // Загрузка сообщений при выборе чата
+  useEffect(() => {
+    if (selectedRoom) {
+      loadMessages(selectedRoom.id);
+      // Обновляем сообщения каждые 5 секунд
+      const interval = setInterval(() => {
+        loadMessages(selectedRoom.id);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedRoom]);
+
+  const loadMessages = async (directorId: number) => {
+    try {
+      const { default: apiClient } = await import('@/api/client');
+      const response = await apiClient.get(`/chat/partner-director/${directorId}/`);
+      setMessages(response.data || []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      setMessages([]);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedRoom) return;
     
     try {
-      const { sendChatRoomMessage } = await import('@/features/partner/api/partnerChats');
-      await sendChatRoomMessage(selectedRoom.id, messageText);
+      const { default: apiClient } = await import('@/api/client');
+      await apiClient.post(`/chat/partner-director/${selectedRoom.id}/`, {
+        text: messageText.trim()
+      });
       message.success('Сообщение отправлено');
       setMessageText('');
-      // TODO: Обновить список сообщений
+      await loadMessages(selectedRoom.id);
     } catch (error) {
+      console.error('Error sending message:', error);
       message.error('Ошибка отправки сообщения');
     }
   };

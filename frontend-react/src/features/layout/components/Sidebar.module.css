@@ -3,9 +3,10 @@
   --sidebar-content-bg: #ffffff;
   background: linear-gradient(180deg, var(--color-brand-orange-500) 0%, var(--color-brand-orange-400) 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
   position: sticky;
   top: 88px; /* header + gap */
-  margin-top: 104px; /* match the distance to the filters */
+  /* margin-top: 104px; */
   height: max-content;
   max-height: calc(100vh - 88px - 24px); /* viewport height minus top offset and bottom gap */
   overflow-y: auto;
@@ -14,7 +15,6 @@
   min-width: 300px !important;
   width: 100% !important; /* Перебиваем inline стили antd */
   border-radius: 22px;
-  border: none;
   border-right: none !important;
   z-index: 999;
   padding: 10px 0 16px 10px;
@@ -140,9 +140,9 @@
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
   background: var(--sidebar-content-bg) !important;
   color: #1f2a44 !important;
-  border-radius: 999px 0 0 999px !important;
-  margin-right: -8px !important;
-  width: calc(100% + 2px) !important;
+  border-radius: 999px !important;
+  margin-right: 8px !important;
+  width: calc(100% - 8px) !important;
   box-shadow: none !important;
   position: relative !important;
   z-index: 2;
@@ -151,14 +151,7 @@
 .sidebarMenu :global(.ant-menu-item-selected::before),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title::before),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -10px;
-  width: 12px;
-  height: 100%;
-  background: var(--sidebar-content-bg);
-  pointer-events: none;
+  display: none;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected:hover),

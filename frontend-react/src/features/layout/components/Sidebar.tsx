@@ -13,6 +13,7 @@ import {
   ShopOutlined,
   MenuOutlined,
   UnorderedListOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
@@ -113,6 +114,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
     if (key === 'faq') {
       onFaqClick?.();
+      return;
+    }
+    if (key === 'knowledge') {
+      navigate('/knowledge');
       return;
     }
     if (key === 'logout') {
@@ -281,6 +286,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       label: 'Мои друзья',
     },
     {
+      key: 'knowledge',
+      icon: <BookOutlined />,
+      label: 'Портал Знаний',
+    },
+    {
       key: 'faq',
       icon: <QuestionCircleOutlined />,
       label: 'FAQ',
@@ -319,8 +329,9 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         selectedKeys={[selectedKey]}
         openKeys={isMobile ? ['orders', 'expert-client-orders'] : openKeys}
         onOpenChange={(keys) => {
-          const newKeys = new Set([...keys, 'orders', 'expert-client-orders']);
-          setOpenKeys(Array.from(newKeys));
+          if (!isMobile) {
+            setOpenKeys(keys);
+          }
         }}
         onClick={handleMenuClick}
         className={styles.sidebarMenu}

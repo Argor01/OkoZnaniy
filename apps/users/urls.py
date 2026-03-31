@@ -45,6 +45,8 @@ urlpatterns = [
     path('update_me/', views.UserViewSet.as_view({'put': 'update_me', 'patch': 'update_me'}), name='update_me'),
     path('submit_expert_application/', views.UserViewSet.as_view({'post': 'submit_expert_application'}), name='submit_expert_application'),
     path('admin_arbitrators/', views.UserViewSet.as_view({'get': 'admin_arbitrators'}), name='admin_arbitrators'),
+    path('directors/', views.UserViewSet.as_view({'get': 'directors'}), name='directors'),
+    path('contact_banned_users/', views.UserViewSet.as_view({'get': 'contact_banned_users'}), name='contact_banned_users'),
     path('me/', views.UserViewSet.as_view({'get': 'me'}), name='user_me'),
     
     # Общие маршруты router должны идти в конце

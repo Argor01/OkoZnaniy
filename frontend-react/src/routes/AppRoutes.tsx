@@ -37,6 +37,8 @@ const ClaimForm = lazy(() => import('@/features/support/pages/ClaimForm'));
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
+const KnowledgePortal = lazy(() => import('@/features/knowledge/pages/KnowledgePortal'));
+const QuestionDetail = lazy(() => import('@/features/knowledge/pages/QuestionDetail'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
 
 export const AppRoutes: React.FC = () => {
@@ -290,6 +292,28 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <ClaimForm />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Knowledge Portal */}
+      <Route
+        path="/knowledge"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <KnowledgePortal />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/knowledge/:id"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <QuestionDetail />
+            </DashboardLayout>
           </ProtectedRoute>
         }
       />

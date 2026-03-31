@@ -1,9 +1,10 @@
 .rightSidebar {
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
   position: sticky;
   top: 88px; /* header + gap */
-  margin-top: 104px; /* match the distance to the filters */
+  /* margin-top: 104px; */
   height: max-content;
   max-height: calc(100vh - 88px - 24px);
   overflow-y: auto;
@@ -11,7 +12,6 @@
   max-width: 340px;
   min-width: 290px;
   border-radius: 22px;
-  border: none;
   z-index: 999;
   padding: 16px;
   transition: width 0.26s ease;

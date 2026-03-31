@@ -979,6 +979,23 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(data)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def directors(self, request):
+        """Получить список директоров для коммуникации"""
+        directors = User.objects.filter(role='director', is_active=True)
+        
+        data = []
+        for director in directors:
+            data.append({
+                'id': director.id,
+                'first_name': director.first_name,
+                'last_name': director.last_name,
+                'email': director.email,
+                'online': False,  # TODO: реализовать проверку онлайн статуса
+            })
+        
+        return Response(data)
+
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def ban_for_contacts(self, request, pk=None):
         """Забанить пользователя за обмен контактами"""

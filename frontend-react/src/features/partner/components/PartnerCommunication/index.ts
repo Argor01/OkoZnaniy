@@ -1,0 +1,1 @@
+export { PartnerCommunication } from './PartnerCommunication';
