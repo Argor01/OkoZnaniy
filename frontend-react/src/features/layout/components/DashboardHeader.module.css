@@ -163,6 +163,17 @@
   transform: scale(1.1);
 }
 
+/* Кнопка личного кабинета - желтый фон как у колокольчика */
+.iconButton.profileLinkButton {
+  background: var(--color-brand-yellow-500) !important;
+  color: white !important;
+}
+
+.iconButton.profileLinkButton:hover {
+  background: var(--color-brand-yellow-600) !important;
+  transform: scale(1.1);
+}
+
 /* Yellow bell icon for notifications */
 .iconButton:has(.anticon-bell) {
   background: var(--color-brand-yellow-500) !important;

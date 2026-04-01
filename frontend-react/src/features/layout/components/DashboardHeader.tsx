@@ -16,10 +16,12 @@ import {
   CopyOutlined,
   DownOutlined,
   AppstoreOutlined,
+  ProfileOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './DashboardHeader.module.css';
+import { ROUTES } from '@/utils/constants';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -36,6 +38,7 @@ type HeaderNavItem = {
 
 interface DashboardHeaderProps {
   userProfile?: {
+    id: string | number;
     username: string;
     avatar?: string;
     role: string;
@@ -296,6 +299,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         <Space size={isMobile ? 8 : 16}>
           {!isMobile && (
             <>
+              {/* Кнопка личного кабинета */}
+              <Button
+                type="text"
+                icon={<ProfileOutlined />}
+                onClick={() => navigate(ROUTES.user.profile.replace(':userId', String(userProfile?.id || '')))}
+                className={`${styles.iconButton} ${styles.profileLinkButton}`}
+                title="Личный кабинет"
+              />
+              
               <Badge count={unreadMessages} offset={[-5, 5]}>
                 <Button
                   type="text"

@@ -273,6 +273,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [isMobile]);
 
   const sidebarUserProfile = useMemo(() => userProfile ? {
+    id: userProfile.id,
     username: userProfile.username,
     avatar: userProfile.avatar,
     role: userProfile.role
