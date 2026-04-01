@@ -16,6 +16,7 @@ from .serializers import (
 class QuestionViewSet(viewsets.ModelViewSet):
     """ViewSet для вопросов"""
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Отключаем пагинацию
     
     def get_queryset(self):
         queryset = Question.objects.select_related('author').prefetch_related('tags')
