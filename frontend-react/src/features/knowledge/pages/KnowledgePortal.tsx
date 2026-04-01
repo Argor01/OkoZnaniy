@@ -11,7 +11,8 @@ import {
   Avatar,
   Tooltip,
   Empty,
-  Spin
+  Spin,
+  message
 } from 'antd';
 import { 
   SearchOutlined,
@@ -26,7 +27,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './KnowledgePortal.module.css';
-import { knowledgeApi, Category } from '../api/knowledgeApi';
+import { knowledgeApi, Category, Question } from '../api/knowledgeApi';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
 
 dayjs.extend(relativeTime);
@@ -36,103 +37,43 @@ const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
-interface Question {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  author: {
-    id: number;
-    name: string;
-    avatar?: string;
-  };
-  created_at: string;
-  views_count: number;
-  answers_count: number;
-  status: 'open' | 'answered' | 'closed';
-  tags: string[];
-}
-
 export const KnowledgePortal: React.FC = () => {
   const navigate = useNavigate();
   
-  // Загрузка вопросов из localStorage
-  const getStoredQuestions = () => {
-    const stored = localStorage.getItem('knowledge_questions');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (error) {
-        console.error('Failed to parse stored questions:', error);
-        return [];
-      }
-    }
-    return [];
-  };
-
-  const [questions, setQuestions] = useState<Question[]>(getStoredQuestions);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [viewedQuestions, setViewedQuestions] = useState<Set<number>>(new Set());
-  const questionRefs = React.useRef<Map<number, HTMLDivElement>>(new Map());
 
-  // Сохранение вопросов в localStorage
+  
+  // Загрузка данных с сервера
   useEffect(() => {
-    if (questions.length > 0) {
-      localStorage.setItem('knowledge_questions', JSON.stringify(questions));
-      // Отправляем событие для обновления других компонентов
-      window.dispatchEvent(new Event('knowledgeQuestionsUpdated'));
+    loadData();
+  }, [selectedCategory, selectedStatus, searchText]);
+  
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [categoriesData, questionsData] = await Promise.all([
+        knowledgeApi.getCategories(),
+        knowledgeApi.getQuestions({
+          category: selectedCategory !== 'all' ? selectedCategory : undefined,
+          status: selectedStatus !== 'all' ? selectedStatus : undefined,
+          search: searchText || undefined,
+        })
+      ]);
+      setCategories(categoriesData);
+      setQuestions(questionsData);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      message.error('Не удалось загрузить данные');
+    } finally {
+      setLoading(false);
     }
-  }, [questions]);
-
-  // Слушатель для обновления счетчика ответов
-  useEffect(() => {
-    const handleAnswersUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const questionId = customEvent.detail?.questionId;
-      
-      if (questionId) {
-        // Получаем актуальное количество ответов
-        const answersKey = `knowledge_answers_${questionId}`;
-        const storedAnswers = localStorage.getItem(answersKey);
-        const answersCount = storedAnswers ? JSON.parse(storedAnswers).length : 0;
-        
-        // Обновляем счетчик в списке вопросов
-        setQuestions(prevQuestions => 
-          prevQuestions.map(q => 
-            q.id === Number(questionId)
-              ? { ...q, answers_count: answersCount, status: answersCount > 0 ? 'answered' : 'open' }
-              : q
-          )
-        );
-      }
-    };
-    
-    window.addEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
-    
-    return () => {
-      window.removeEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
-    };
-  }, []);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await knowledgeApi.getCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
+  };
 
   const handleCreateQuestion = () => {
     setIsModalVisible(true);
@@ -144,89 +85,11 @@ export const KnowledgePortal: React.FC = () => {
 
   const handleQuestionCreated = (newQuestion: Question) => {
     setIsModalVisible(false);
-    // Добавляем новый вопрос в начало списка
-    setQuestions(prev => [newQuestion, ...prev]);
+    loadData(); // Перезагружаем список вопросов
+    message.success('Вопрос успешно создан!');
   };
   
-  const filteredQuestions = questions.filter(q => {
-    const matchesSearch = q.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                         q.description.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || q.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || q.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  // Intersection Observer для отслеживания просмотров
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const questionId = Number(entry.target.getAttribute('data-question-id'));
-            
-            // Проверяем, что вопрос еще не был просмотрен
-            if (questionId && !viewedQuestions.has(questionId)) {
-              // Добавляем небольшую задержку, чтобы засчитать просмотр только если пользователь действительно смотрит
-              setTimeout(() => {
-                if (entry.isIntersecting) {
-                  handleQuestionView(questionId);
-                }
-              }, 1000); // 1 секунда задержки
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.5, // Элемент должен быть виден минимум на 50%
-        rootMargin: '0px'
-      }
-    );
-
-    // Наблюдаем за всеми карточками вопросов
-    questionRefs.current.forEach((element) => {
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [filteredQuestions, viewedQuestions]);
-
-  const handleQuestionView = (questionId: number) => {
-    // Проверяем, был ли уже просмотр этого вопроса
-    const viewedKey = `question_${questionId}_viewed`;
-    if (localStorage.getItem(viewedKey)) {
-      return; // Уже просмотрен, не увеличиваем счетчик
-    }
-
-    // Отмечаем вопрос как просмотренный
-    setViewedQuestions(prev => new Set(prev).add(questionId));
-    
-    // Увеличиваем счетчик просмотров
-    setQuestions(prevQuestions => 
-      prevQuestions.map(q => 
-        q.id === questionId 
-          ? { ...q, views_count: q.views_count + 1 }
-          : q
-      )
-    );
-
-    // Сохраняем в localStorage
-    localStorage.setItem(viewedKey, 'true');
-    
-    // TODO: Отправить на сервер
-    console.log(`Question ${questionId} viewed`);
-  };
-
-  const setQuestionRef = (questionId: number, element: HTMLDivElement | null) => {
-    if (element) {
-      questionRefs.current.set(questionId, element);
-    } else {
-      questionRefs.current.delete(questionId);
-    }
-  };
+  const filteredQuestions = questions;
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -324,8 +187,6 @@ export const KnowledgePortal: React.FC = () => {
             renderItem={(question) => (
               <Card 
                 key={question.id}
-                ref={(el) => setQuestionRef(question.id, el)}
-                data-question-id={question.id}
                 className={styles.questionCard}
                 hoverable
                 onClick={() => handleQuestionClick(question.id)}

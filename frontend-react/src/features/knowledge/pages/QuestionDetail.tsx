@@ -12,7 +12,8 @@ import {
   Empty,
   Alert,
   Popconfirm,
-  message
+  message,
+  Spin
 } from 'antd';
 import { 
   UserOutlined,
@@ -29,6 +30,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './QuestionDetail.module.css';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { knowledgeApi, Question, Answer } from '../api/knowledgeApi';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -36,149 +38,39 @@ dayjs.locale('ru');
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-interface Answer {
-  id: number;
-  author: {
-    id: number;
-    name: string;
-    avatar?: string;
-    role?: string;
-  };
-  content: string;
-  created_at: string;
-  likes_count: number;
-  is_best_answer: boolean;
-}
-
-interface Question {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  author: {
-    id: number;
-    name: string;
-    avatar?: string;
-  };
-  created_at: string;
-  views_count: number;
-  answers_count: number;
-  status: 'open' | 'answered' | 'closed';
-  tags: string[];
-}
-
 const QuestionDetail: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   
-  // Загрузка всех вопросов из localStorage
-  const getAllQuestions = (): Question[] => {
-    const stored = localStorage.getItem('knowledge_questions');
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  // Поиск конкретного вопроса по ID
-  const findQuestionById = (questionId: string): Question | null => {
-    const allQuestions = getAllQuestions();
-    return allQuestions.find(q => q.id === Number(questionId)) || null;
-  };
-  
-  // Загрузка данных из localStorage
-  const getStoredAnswers = () => {
-    // Используем общий ключ для всех пользователей
-    const stored = localStorage.getItem(`knowledge_answers_${id}`);
-    return stored ? JSON.parse(stored) : [];
-  };
-
-  const getStoredLikes = () => {
-    // Лайки остаются персональными для каждого пользователя
-    const stored = localStorage.getItem(`user_${user?.id || 'guest'}_question_${id}_likes`);
-    return stored ? new Set(JSON.parse(stored)) : new Set<number>();
-  };
-
-  const initialQuestion = findQuestionById(id || '');
-  const [question, setQuestion] = useState<Question | null>(initialQuestion);
-  const [answers, setAnswers] = useState<Answer[]>(getStoredAnswers);
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [answers, setAnswers] = useState<Answer[]>([]);
   const [newAnswer, setNewAnswer] = useState('');
-  const [likedAnswers, setLikedAnswers] = useState<Set<number>>(getStoredLikes);
+  const [loading, setLoading] = useState(true);
 
   const isExpert = user?.role === 'expert';
   const canAnswer = isExpert; // Только эксперты могут отвечать
 
-  // Обновление вопроса при изменении ID
+  // Загрузка вопроса и ответов
   useEffect(() => {
-    const currentQuestion = findQuestionById(id || '');
-    setQuestion(currentQuestion);
-    
-    // Загружаем ответы для текущего вопроса (общие для всех)
-    const storedAnswers = localStorage.getItem(`knowledge_answers_${id}`);
-    setAnswers(storedAnswers ? JSON.parse(storedAnswers) : []);
-    
-    // Загружаем лайки для текущего пользователя
-    const storedLikes = localStorage.getItem(`user_${user?.id || 'guest'}_question_${id}_likes`);
-    setLikedAnswers(storedLikes ? new Set(JSON.parse(storedLikes)) : new Set());
-    
-    // Слушатель для обновления ответов в реальном времени
-    const handleAnswersUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail?.questionId === id) {
-        const updatedAnswers = localStorage.getItem(`knowledge_answers_${id}`);
-        if (updatedAnswers) {
-          setAnswers(JSON.parse(updatedAnswers));
-        }
-      }
-    };
-    
-    window.addEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
-    
-    return () => {
-      window.removeEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
-    };
-  }, [id, user?.id]);
-
-  // Сохранение в localStorage при изменении
-  useEffect(() => {
-    if (question && answers.length > 0) {
-      // Сохраняем ответы в общее хранилище для всех пользователей
-      localStorage.setItem(`knowledge_answers_${id}`, JSON.stringify(answers));
-      // Отправляем событие для обновления других вкладок
-      window.dispatchEvent(new CustomEvent('knowledgeAnswersUpdated', { detail: { questionId: id } }));
+    if (id) {
+      loadQuestion();
     }
-  }, [answers, id, question]);
-
-  useEffect(() => {
-    if (question) {
-      // Лайки сохраняем персонально для каждого пользователя
-      localStorage.setItem(`user_${user?.id || 'guest'}_question_${id}_likes`, JSON.stringify(Array.from(likedAnswers)));
+  }, [id]);
+  
+  const loadQuestion = async () => {
+    try {
+      setLoading(true);
+      const data = await knowledgeApi.getQuestion(Number(id));
+      setQuestion(data);
+      setAnswers(data.answers || []);
+    } catch (error) {
+      console.error('Failed to load question:', error);
+      message.error('Не удалось загрузить вопрос');
+    } finally {
+      setLoading(false);
     }
-  }, [likedAnswers, id, question, user?.id]);
-
-  React.useEffect(() => {
-    localStorage.setItem(`question_${id}_data`, JSON.stringify(question));
-  }, [question, id]);
-
-  // Увеличиваем счетчик просмотров при открытии страницы
-  useEffect(() => {
-    if (!question) return;
-    
-    const viewedKey = `question_${id}_page_viewed`;
-    const hasViewed = localStorage.getItem(viewedKey);
-    
-    if (!hasViewed) {
-      // Увеличиваем счетчик просмотров
-      setQuestion(prev => prev ? ({
-        ...prev,
-        views_count: prev.views_count + 1
-      }) : null);
-      
-      // Отмечаем, что страница была просмотрена
-      localStorage.setItem(viewedKey, 'true');
-      
-      // TODO: Отправить на сервер
-      console.log(`Question ${id} page viewed`);
-    }
-  }, [id, question?.id]);
+  };
 
   const handleBack = () => {
     navigate('/knowledge');
@@ -193,36 +85,43 @@ const QuestionDetail: React.FC = () => {
     navigate(`/user/${userId}`);
   };
 
-  const handleDeleteQuestion = () => {
+  const handleDeleteQuestion = async () => {
     if (!question) return;
     
-    // Удаляем вопрос из localStorage
-    const stored = localStorage.getItem('knowledge_questions');
-    if (stored) {
-      const allQuestions = JSON.parse(stored);
-      const updatedQuestions = allQuestions.filter((q: Question) => q.id !== question.id);
-      localStorage.setItem('knowledge_questions', JSON.stringify(updatedQuestions));
-      window.dispatchEvent(new Event('knowledgeQuestionsUpdated'));
+    try {
+      await knowledgeApi.deleteQuestion(question.id);
+      message.success('Вопрос успешно удален');
+      navigate('/knowledge');
+    } catch (error) {
+      console.error('Failed to delete question:', error);
+      message.error('Не удалось удалить вопрос');
     }
-    
-    // Удаляем связанные данные (общие ответы)
-    localStorage.removeItem(`knowledge_answers_${id}`);
-    localStorage.removeItem(`question_${id}_page_viewed`);
-    
-    message.success('Вопрос успешно удален');
-    navigate('/knowledge');
   };
 
-  const handleDeleteAnswer = (answerId: number) => {
-    setAnswers(answers.filter(a => a.id !== answerId));
-    if (question) {
-      setQuestion({
-        ...question,
-        answers_count: Math.max(0, question.answers_count - 1)
-      });
+  const handleDeleteAnswer = async (answerId: number) => {
+    try {
+      await knowledgeApi.deleteAnswer(answerId);
+      setAnswers(answers.filter(a => a.id !== answerId));
+      if (question) {
+        setQuestion({
+          ...question,
+          answers_count: Math.max(0, question.answers_count - 1)
+        });
+      }
+      message.success('Ответ успешно удален');
+    } catch (error) {
+      console.error('Failed to delete answer:', error);
+      message.error('Не удалось удалить ответ');
     }
-    message.success('Ответ успешно удален');
   };
+
+  if (loading) {
+    return (
+      <div className={styles.container} style={{ textAlign: 'center', padding: '40px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   if (!question) {
     return (
@@ -239,53 +138,36 @@ const QuestionDetail: React.FC = () => {
     );
   }
 
-  const handleSubmitAnswer = () => {
-    if (newAnswer.trim()) {
-      const answer: Answer = {
-        id: Date.now(), // Используем timestamp для уникальности
-        author: { 
-          id: user?.id || 0, 
-          name: user?.username || 'Аноним',
-          role: user?.role === 'expert' ? 'Эксперт' : undefined
-        },
-        content: newAnswer,
-        created_at: new Date().toISOString(),
-        likes_count: 0,
-        is_best_answer: false
-      };
-      
+  const handleSubmitAnswer = async () => {
+    if (!newAnswer.trim() || !question) return;
+    
+    try {
+      const answer = await knowledgeApi.addAnswer(question.id, newAnswer);
       setAnswers([...answers, answer]);
-      if (question) {
-        setQuestion({
-          ...question,
-          answers_count: question.answers_count + 1
-        });
-      }
+      setQuestion({
+        ...question,
+        answers_count: question.answers_count + 1,
+        status: 'answered'
+      });
       setNewAnswer('');
+      message.success('Ответ успешно добавлен');
+    } catch (error: any) {
+      console.error('Failed to add answer:', error);
+      message.error(error.response?.data?.error || 'Не удалось добавить ответ');
     }
   };
 
-  const handleLikeAnswer = (answerId: number) => {
-    if (likedAnswers.has(answerId)) {
-      // Убрать лайк
-      setLikedAnswers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(answerId);
-        return newSet;
-      });
+  const handleLikeAnswer = async (answerId: number) => {
+    try {
+      const result = await knowledgeApi.toggleLike(answerId);
       setAnswers(answers.map(a => 
         a.id === answerId 
-          ? { ...a, likes_count: a.likes_count - 1 }
+          ? { ...a, likes_count: result.likes_count, is_liked: result.liked }
           : a
       ));
-    } else {
-      // Поставить лайк
-      setLikedAnswers(prev => new Set(prev).add(answerId));
-      setAnswers(answers.map(a => 
-        a.id === answerId 
-          ? { ...a, likes_count: a.likes_count + 1 }
-          : a
-      ));
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      message.error('Не удалось поставить лайк');
     }
   };
 
@@ -436,7 +318,7 @@ const QuestionDetail: React.FC = () => {
 
               <div className={styles.answerFooter}>
                 <Button 
-                  type={likedAnswers.has(answer.id) ? 'primary' : 'text'}
+                  type={answer.is_liked ? 'primary' : 'text'}
                   icon={<LikeOutlined />}
                   size="small"
                   onClick={() => handleLikeAnswer(answer.id)}

@@ -11,9 +11,86 @@ export interface Category {
   active_subjects_count?: number;
 }
 
+export interface Question {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  author: {
+    id: number;
+    name: string;
+    avatar?: string;
+  };
+  created_at: string;
+  views_count: number;
+  answers_count: number;
+  status: 'open' | 'answered' | 'closed';
+  tags: string[];
+}
+
+export interface Answer {
+  id: number;
+  author: {
+    id: number;
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
+  content: string;
+  created_at: string;
+  likes_count: number;
+  is_best_answer: boolean;
+  is_liked?: boolean;
+}
+
 export const knowledgeApi = {
   getCategories: async (): Promise<Category[]> => {
     const response = await axios.get(`${API_URL}/catalog/categories/`);
     return response.data;
+  },
+  
+  getQuestions: async (params?: {
+    category?: string;
+    status?: string;
+    search?: string;
+  }): Promise<Question[]> => {
+    const response = await axios.get(`${API_URL}/knowledge/questions/`, { params });
+    return response.data;
+  },
+  
+  getQuestion: async (id: number): Promise<Question> => {
+    const response = await axios.get(`${API_URL}/knowledge/questions/${id}/`);
+    return response.data;
+  },
+  
+  createQuestion: async (data: {
+    title: string;
+    description: string;
+    category: string;
+    tags: string[];
+  }): Promise<Question> => {
+    const response = await axios.post(`${API_URL}/knowledge/questions/`, data);
+    return response.data;
+  },
+  
+  addAnswer: async (questionId: number, content: string): Promise<Answer> => {
+    const response = await axios.post(
+      `${API_URL}/knowledge/questions/${questionId}/add_answer/`,
+      { content }
+    );
+    return response.data;
+  },
+  
+  toggleLike: async (answerId: number): Promise<{ liked: boolean; likes_count: number }> => {
+    const response = await axios.post(`${API_URL}/knowledge/answers/${answerId}/toggle_like/`);
+    return response.data;
+  },
+  
+  deleteAnswer: async (answerId: number): Promise<void> => {
+    await axios.delete(`${API_URL}/knowledge/answers/${answerId}/`);
+  },
+  
+  deleteQuestion: async (questionId: number): Promise<void> => {
+    await axios.delete(`${API_URL}/knowledge/questions/${questionId}/`);
   },
 };

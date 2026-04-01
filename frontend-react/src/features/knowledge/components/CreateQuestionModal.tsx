@@ -148,25 +148,13 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
       const values = await form.validateFields();
       setLoading(true);
 
-      // Создаем новый вопрос
-      const newQuestion: Question = {
-        id: Date.now(), // Временный ID
+      // Создаем новый вопрос через API
+      const newQuestion = await knowledgeApi.createQuestion({
         title: values.title,
         description: values.description,
         category: values.category,
-        author: {
-          id: user?.id || 0,
-          name: user?.username || 'Аноним'
-        },
-        created_at: new Date().toISOString(),
-        views_count: 0,
-        answers_count: 0,
-        status: 'open',
         tags: tags
-      };
-
-      // TODO: Отправка на сервер
-      console.log('Creating question:', newQuestion);
+      });
       
       message.success('Вопрос успешно создан!');
       form.resetFields();
