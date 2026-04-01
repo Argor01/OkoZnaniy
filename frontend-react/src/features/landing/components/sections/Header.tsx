@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { UserOutlined } from '@ant-design/icons';
 import '@/styles/logo.css';
 
 const Header: React.FC = () => {
@@ -111,6 +112,28 @@ const Header: React.FC = () => {
           <div className="header__cabinet">
             {localStorage.getItem('access_token') ? (
               <>
+                <button 
+                  className="header__cabinet-icon-button" 
+                  onClick={goToCabinet}
+                  aria-label="Личный кабинет"
+                  title="Личный кабинет"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    marginRight: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    transition: 'background-color 0.3s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <UserOutlined style={{ fontSize: '24px', color: '#333' }} />
+                </button>
                 <button className="header__cabinet-button button" onClick={goToCabinet}>Создать заказ</button>
                 <button className="header__cabinet-button header__cabinet-button--spaced button" onClick={handleLogout}>Выйти</button>
               </>
