@@ -64,9 +64,14 @@ const QuestionDetail: React.FC = () => {
       const data = await knowledgeApi.getQuestion(Number(id));
       setQuestion(data);
       setAnswers(data.answers || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load question:', error);
-      message.error('Не удалось загрузить вопрос');
+      if (error.response?.status === 404) {
+        message.error('Вопрос не найден');
+        navigate('/knowledge');
+      } else {
+        message.error('Не удалось загрузить вопрос');
+      }
     } finally {
       setLoading(false);
     }
