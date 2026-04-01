@@ -19,6 +19,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = Question.objects.select_related('author').prefetch_related('tags')
+        
+        # Для детального просмотра загружаем ответы
+        if self.action == 'retrieve':
+            queryset = queryset.prefetch_related('answers__author')
+        
         queryset = queryset.annotate(answers_count=Count('answers'))
         
         # Фильтрация по категории
