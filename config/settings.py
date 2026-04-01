@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'apps.shop',
     'apps.admin_panel',
     'apps.arbitration',
+    'apps.knowledge',
 ]
 
 MIDDLEWARE = [
