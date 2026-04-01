@@ -83,7 +83,6 @@ export type MenuKey =
   | 'user_roles'
 
   | 'orders_management'
-  | 'tariffs_settings'
 
   | 'new_claims'
   | 'in_progress_claims'

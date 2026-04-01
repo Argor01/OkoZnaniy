@@ -40,11 +40,6 @@ export const menuItems: MenuItem[] = [
     icon: DollarOutlined,
     label: 'Начисления',
   },
-  {
-    key: 'tariffs_settings',
-    icon: DollarOutlined,
-    label: 'Тарифы и комиссии',
-  },
   
   {
     key: 'blocking' as MenuKey,
@@ -82,7 +77,6 @@ export const titleMap: Record<MenuKey, string> = {
   overview: 'Обзор',
   partners: 'Партнеры',
   earnings: 'Начисления',
-  tariffs_settings: 'Тарифы и комиссии',
   
   blocking: 'Блокировка',
   user_roles: 'Роли пользователей',

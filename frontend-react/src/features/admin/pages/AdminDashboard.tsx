@@ -34,7 +34,6 @@ const CompletedClaimsSection = lazy(() => import('@/features/admin/components/Se
 const PendingApprovalSection = lazy(() => import('@/features/admin/components/Sections/PendingApprovalSection').then(m => ({ default: m.PendingApprovalSection })));
 const AdminChatsSection = lazy(() => import('@/features/admin/components/Sections/AdminChatsSection').then(m => ({ default: m.AdminChatsSection })));
 const UserConversationsSection = lazy(() => import('@/features/admin/components/Sections/UserConversationsSection').then(m => ({ default: m.UserConversationsSection })));
-const TariffsSettingsSection = lazy(() => import('@/features/admin/components/Sections/TariffsSettingsSection').then(m => ({ default: m.TariffsSettingsSection })));
 const BlockingSection = lazy(() => import('@/features/admin/components/Sections/BlockingSection').then(m => ({ default: m.BlockingSection })));
 
 const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
@@ -173,11 +172,6 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             onMarkAsPaid={markEarningPaid}
             isMarkingPaid={isMarkingEarningPaid}
           />
-        );
-      
-      case 'tariffs_settings':
-        return (
-          <TariffsSettingsSection />
         );
 
       

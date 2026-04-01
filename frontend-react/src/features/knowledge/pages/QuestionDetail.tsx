@@ -86,12 +86,14 @@ const QuestionDetail: React.FC = () => {
   
   // Загрузка данных из localStorage
   const getStoredAnswers = () => {
-    const stored = localStorage.getItem(`question_${id}_answers`);
+    // Используем общий ключ для всех пользователей
+    const stored = localStorage.getItem(`knowledge_answers_${id}`);
     return stored ? JSON.parse(stored) : [];
   };
 
   const getStoredLikes = () => {
-    const stored = localStorage.getItem(`question_${id}_likes`);
+    // Лайки остаются персональными для каждого пользователя
+    const stored = localStorage.getItem(`user_${user?.id || 'guest'}_question_${id}_likes`);
     return stored ? new Set(JSON.parse(stored)) : new Set<number>();
   };
 
@@ -109,27 +111,48 @@ const QuestionDetail: React.FC = () => {
     const currentQuestion = findQuestionById(id || '');
     setQuestion(currentQuestion);
     
-    // Загружаем ответы для текущего вопроса
-    const storedAnswers = localStorage.getItem(`question_${id}_answers`);
+    // Загружаем ответы для текущего вопроса (общие для всех)
+    const storedAnswers = localStorage.getItem(`knowledge_answers_${id}`);
     setAnswers(storedAnswers ? JSON.parse(storedAnswers) : []);
     
-    // Загружаем лайки для текущего вопроса
-    const storedLikes = localStorage.getItem(`question_${id}_likes`);
+    // Загружаем лайки для текущего пользователя
+    const storedLikes = localStorage.getItem(`user_${user?.id || 'guest'}_question_${id}_likes`);
     setLikedAnswers(storedLikes ? new Set(JSON.parse(storedLikes)) : new Set());
-  }, [id]);
+    
+    // Слушатель для обновления ответов в реальном времени
+    const handleAnswersUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.questionId === id) {
+        const updatedAnswers = localStorage.getItem(`knowledge_answers_${id}`);
+        if (updatedAnswers) {
+          setAnswers(JSON.parse(updatedAnswers));
+        }
+      }
+    };
+    
+    window.addEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
+    
+    return () => {
+      window.removeEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
+    };
+  }, [id, user?.id]);
 
   // Сохранение в localStorage при изменении
   useEffect(() => {
-    if (question) {
-      localStorage.setItem(`question_${id}_answers`, JSON.stringify(answers));
+    if (question && answers.length > 0) {
+      // Сохраняем ответы в общее хранилище для всех пользователей
+      localStorage.setItem(`knowledge_answers_${id}`, JSON.stringify(answers));
+      // Отправляем событие для обновления других вкладок
+      window.dispatchEvent(new CustomEvent('knowledgeAnswersUpdated', { detail: { questionId: id } }));
     }
   }, [answers, id, question]);
 
   useEffect(() => {
     if (question) {
-      localStorage.setItem(`question_${id}_likes`, JSON.stringify(Array.from(likedAnswers)));
+      // Лайки сохраняем персонально для каждого пользователя
+      localStorage.setItem(`user_${user?.id || 'guest'}_question_${id}_likes`, JSON.stringify(Array.from(likedAnswers)));
     }
-  }, [likedAnswers, id, question]);
+  }, [likedAnswers, id, question, user?.id]);
 
   React.useEffect(() => {
     localStorage.setItem(`question_${id}_data`, JSON.stringify(question));
@@ -182,9 +205,8 @@ const QuestionDetail: React.FC = () => {
       window.dispatchEvent(new Event('knowledgeQuestionsUpdated'));
     }
     
-    // Удаляем связанные данные
-    localStorage.removeItem(`question_${id}_answers`);
-    localStorage.removeItem(`question_${id}_likes`);
+    // Удаляем связанные данные (общие ответы)
+    localStorage.removeItem(`knowledge_answers_${id}`);
     localStorage.removeItem(`question_${id}_page_viewed`);
     
     message.success('Вопрос успешно удален');

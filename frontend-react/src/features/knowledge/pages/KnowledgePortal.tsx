@@ -89,6 +89,36 @@ export const KnowledgePortal: React.FC = () => {
     }
   }, [questions]);
 
+  // Слушатель для обновления счетчика ответов
+  useEffect(() => {
+    const handleAnswersUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const questionId = customEvent.detail?.questionId;
+      
+      if (questionId) {
+        // Получаем актуальное количество ответов
+        const answersKey = `knowledge_answers_${questionId}`;
+        const storedAnswers = localStorage.getItem(answersKey);
+        const answersCount = storedAnswers ? JSON.parse(storedAnswers).length : 0;
+        
+        // Обновляем счетчик в списке вопросов
+        setQuestions(prevQuestions => 
+          prevQuestions.map(q => 
+            q.id === Number(questionId)
+              ? { ...q, answers_count: answersCount, status: answersCount > 0 ? 'answered' : 'open' }
+              : q
+          )
+        );
+      }
+    };
+    
+    window.addEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
+    
+    return () => {
+      window.removeEventListener('knowledgeAnswersUpdated', handleAnswersUpdate);
+    };
+  }, []);
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
