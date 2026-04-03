@@ -5,18 +5,18 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #ffffff 50%, #107afc 100%);
-  padding: 24px;
+  padding: 20px;
 }
-
 
 .auth-card {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   display: flex;
-  background: rgba(255, 255, 255, 0.90);
-  border-radius: 24px;
-  overflow: visible;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  min-height: 600px;
 }
 .loginPageCenter {
   display: flex;
@@ -399,10 +399,102 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
+  padding: 40px 30px;
   position: relative;
   z-index: 3;
-  min-height: calc(100vh - 48px);
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(80, 100, 140, 0.15);
+  padding: 30px;
+  overflow: visible;
+}
+
+.antd-tabs-clean .ant-tabs-nav {
+  margin-bottom: 20px;
+}
+
+.antd-tabs-clean .ant-tabs-content {
+  padding: 0;
+}
+
+.antd-tabs-clean .ant-tabs-tab {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Улучшенные стили для полей формы */
+.auth-panel :global(.ant-form-item) {
+  margin-bottom: 20px;
+}
+
+.auth-panel :global(.ant-form-item-label > label) {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.auth-panel :global(.ant-input) {
+  height: 50px;
+  font-size: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.auth-panel :global(.ant-input:focus) {
+  border-color: #107afc;
+  box-shadow: 0 0 0 3px rgba(16, 122, 252, 0.1);
+}
+
+.auth-panel :global(.ant-input-password) {
+  height: 50px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+.auth-panel :global(.ant-input-password .ant-input) {
+  height: 48px;
+  font-size: 16px;
+  padding: 12px 16px;
+  border: none;
+}
+
+.auth-panel :global(.ant-btn-primary) {
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: #107afc;
+  border-color: #107afc;
+  transition: all 0.2s;
+}
+
+.auth-panel :global(.ant-btn-primary:hover) {
+  background: #0a5fd0;
+  border-color: #0a5fd0;
+  transform: translateY(-1px);
+}
+
+.auth-panel :global(.ant-checkbox-wrapper) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.auth-panel :global(.ant-checkbox-wrapper a) {
+  color: #107afc;
+  text-decoration: none;
+}
+
+.auth-panel :global(.ant-checkbox-wrapper a:hover) {
+  color: #0a5fd0;
+  text-decoration: underline;
 }
 
 .role-switch {
@@ -559,6 +651,7 @@
 
 
 
+/* Планшеты */
 @media (max-width: 1024px) {
   .login-page {
     padding: 16px;
@@ -566,182 +659,121 @@
   
   .auth-card {
     max-width: 900px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
-  }
-  
-  .auth-left {
-    padding: 20px;
   }
   
   .auth-right {
-    padding: 24px 20px;
+    padding: 30px 25px;
   }
   
   .auth-panel {
     max-width: 380px;
-    padding: 14px 14px 0;
+    padding: 25px;
   }
 }
 
-@media (max-width: 768px) {
-  .telegram-login {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-
-@media (max-width: 960px) {
-  .auth-card { 
-    flex-direction: column-reverse; 
-    max-height: none;
-  }
-  
-
-  .auth-left { 
-    display: none;
-  }
-  
-
-  .bottom-wave {
-    display: none;
-  }
-  
-
-  .hero-image { 
-    display: none;
-  }
-  
-  .logo-circle {
-    width: 50px;
-    height: 50px;
-    top: 12px;
-    left: 12px;
-  }
-  
-
-  .auth-right {
-    padding: 12px 16px 20px;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-  .auth-panel {
-    margin-top: 0;
-    width: 100%;
-    max-width: none;
-  }
-}
-
-
+/* Мобильные устройства */
 @media (max-width: 768px) {
   .login-page {
     padding: 12px;
-    padding-top: 20px;
-    min-height: 100dvh;
-    height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
   }
   
   .auth-card {
-    width: 100%;
+    flex-direction: column;
     max-width: none;
+    width: 100%;
+    min-height: auto;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
-
+  
   .auth-left {
     display: none;
   }
-
-  .bottom-wave {
-    display: none;
-  }
-  
-  .hero {
-    inset: 40px 16px 40px 16px;
-  }
-  
-  .hero-image {
-    width: 60%;
-    margin: 16px auto 0;
-  }
-  
-  .logo-circle {
-    width: 44px;
-    height: 44px;
-    top: 10px;
-    left: 10px;
-  }
   
   .auth-right {
-    padding: 16px 12px;
+    padding: 20px 16px;
+    min-height: auto;
   }
   
   .auth-panel {
     max-width: none;
     width: 100%;
-    border-radius: 16px;
-    padding: 12px 12px 4px;
-    box-shadow: 0 6px 20px rgba(80, 100, 140, 0.12);
+    padding: 24px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(80, 100, 140, 0.12);
   }
   
-  .antd-tabs-clean .ant-tabs-content {
-    padding: 6px 8px 8px;
+  .antd-tabs-clean .ant-tabs-nav {
+    margin-bottom: 16px;
   }
   
-  .right-footer {
-    position: static;
-    transform: none;
-    margin-top: 12px;
-    font-size: 11px;
+  .antd-tabs-clean .ant-tabs-tab {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+  
+  .auth-panel :global(.ant-form-item) {
+    margin-bottom: 18px;
+  }
+  
+  .auth-panel :global(.ant-input),
+  .auth-panel :global(.ant-input-password),
+  .auth-panel :global(.ant-btn-primary) {
+    height: 48px;
+    font-size: 16px;
+  }
+  
+  .role-switch {
+    padding: 4px;
+  }
+  
+  .role-option {
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }
 
-
+/* Маленькие мобильные */
 @media (max-width: 480px) {
   .login-page {
     padding: 8px;
-    padding-top: 16px;
-    min-height: 100dvh;
-    height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .auth-left {
-    min-height: 240px;
-    padding: 12px;
-  }
-  
-  .hero {
-    inset: 32px 12px 32px 12px;
-  }
-  
-  .hero-image {
-    width: 55%;
-    margin: 12px auto 0;
-  }
-  
-  .logo-circle {
-    width: 40px;
-    height: 40px;
-    top: 8px;
-    left: 8px;
-  }
-  
-  .auth-right {
-    padding: 12px 8px;
+    padding-top: 20px;
   }
   
   .auth-panel {
-    border-radius: 12px;
-    padding: 10px 10px 2px;
+    padding: 20px 16px;
+    border-radius: 10px;
   }
   
-  .antd-tabs-clean .ant-tabs-content {
-    padding: 4px 6px 6px;
+  .antd-tabs-clean .ant-tabs-tab {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .auth-panel :global(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+  
+  .auth-panel :global(.ant-input),
+  .auth-panel :global(.ant-input-password),
+  .auth-panel :global(.ant-btn-primary) {
+    height: 46px;
+    font-size: 16px;
+  }
+  
+  .auth-panel :global(.ant-form-item-label > label) {
+    font-size: 13px;
+  }
+  
+  .auth-panel :global(.ant-checkbox-wrapper) {
+    font-size: 13px;
+  }
+  
+  .role-option {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 }
+
+

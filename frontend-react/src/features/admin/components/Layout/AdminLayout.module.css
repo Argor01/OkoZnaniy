@@ -1,10 +1,14 @@
 
+/* Основные стили для AdminLayout */
+
 .adminLayout {
   min-height: 100vh;
+  background: #f0f2f5;
 }
 
 .contentLayout {
   background: #f1f5f9;
+  transition: margin-left 0.2s ease;
 }
 
 .content {
@@ -12,6 +16,7 @@
   padding: 0;
   background: #f1f5f9;
   min-height: calc(100vh - 64px);
+  overflow-x: hidden;
 }
 
 .contentInner {
@@ -21,25 +26,103 @@
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
   min-height: calc(100vh - 112px);
+  overflow-x: auto;
 }
 
+/* Адаптивность для планшетов */
 @media (max-width: 1024px) {
   .contentInner {
     margin: 16px;
     padding: 20px;
     min-height: calc(100vh - 96px);
+    border-radius: 10px;
+  }
+  
+  /* Улучшения для планшетного интерфейса */
+  .adminLayout {
+    position: relative;
+  }
+  
+  .contentLayout {
+    width: 100%;
   }
 }
 
+/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
+  .adminLayout {
+    background: #f0f2f5;
+  }
+  
+  .contentLayout {
+    background: #f1f5f9;
+  }
+  
   .content {
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 56px);
+    background: #f1f5f9;
   }
 
   .contentInner {
-    margin: 12px;
-    padding: 16px;
-    min-height: calc(100vh - 88px);
+    margin: 8px;
+    padding: 12px;
+    min-height: calc(100vh - 72px);
     border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
   }
+  
+  /* Убираем лишние отступы на мобильных */
+  .contentLayout {
+    margin-left: 0 !important;
+  }
+}
+
+/* Адаптивность для маленьких мобильных устройств */
+@media (max-width: 480px) {
+  .contentInner {
+    margin: 4px;
+    padding: 8px;
+    min-height: calc(100vh - 64px);
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  
+  .content {
+    min-height: calc(100vh - 52px);
+    background: #f1f5f9;
+  }
+}
+
+/* Улучшения для сенсорных устройств */
+@media (hover: none) and (pointer: coarse) {
+  .contentInner {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Анимации */
+.contentInner {
+  transition: all 0.2s ease;
+}
+
+/* Скроллбар для контента */
+.contentInner::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.contentInner::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.contentInner::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.contentInner::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

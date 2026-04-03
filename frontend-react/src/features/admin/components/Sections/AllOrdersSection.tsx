@@ -32,6 +32,7 @@ import {
   ORDER_PRIORITY_COLORS,
   ORDER_PRIORITIES
 } from '@/utils/constants';
+import styles from './AllOrdersSection.module.css';
 
 const { Text } = Typography;
 const { Search } = Input;
@@ -136,14 +137,14 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       width: 300,
       render: (record: Order) => (
         <div>
-          <div className="allOrdersHeaderRow">
+          <div className={styles.allOrdersHeaderRow}>
             <strong>#{record.id}</strong>
             {record.is_urgent && <Tag color="red">Срочно</Tag>}
           </div>
-          <div className="allOrdersTitle">
+          <div className={styles.allOrdersTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="allOrdersMetaText">
+          <Text type="secondary" className={styles.allOrdersMetaText}>
             {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
           </Text>
         </div>
@@ -155,10 +156,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       width: 180,
       render: (record: Order) => (
         <div>
-          <div className="allOrdersPersonName">
+          <div className={styles.allOrdersPersonName}>
             {record.client.first_name} {record.client.last_name}
           </div>
-          <Text type="secondary" className="allOrdersPersonHandle">
+          <Text type="secondary" className={styles.allOrdersPersonHandle}>
             @{record.client.username}
           </Text>
         </div>
@@ -171,10 +172,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       render: (record: Order) => (
         record.expert ? (
           <div>
-            <div className="allOrdersPersonName">
+            <div className={styles.allOrdersPersonName}>
               {record.expert.first_name} {record.expert.last_name}
             </div>
-            <Text type="secondary" className="allOrdersPersonHandle">
+            <Text type="secondary" className={styles.allOrdersPersonHandle}>
               @{record.expert.username}
             </Text>
           </div>
@@ -216,11 +217,11 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
         const isNearDeadline = deadlineDate.diff(dayjs(), 'days') <= 3;
         
         return (
-          <div className={isOverdue ? 'allOrdersDeadlineOverdue' : isNearDeadline ? 'allOrdersDeadlineNear' : 'allOrdersDeadline'}>
-            <div className="allOrdersDeadlineDate">
+          <div className={isOverdue ? styles.allOrdersDeadlineOverdue : isNearDeadline ? styles.allOrdersDeadlineNear : styles.allOrdersDeadline}>
+            <div className={styles.allOrdersDeadlineDate}>
               {deadlineDate.format('DD.MM.YYYY')}
             </div>
-            <div className="allOrdersDeadlineTime">
+            <div className={styles.allOrdersDeadlineTime}>
               {deadlineDate.format('HH:mm')}
             </div>
           </div>
@@ -274,11 +275,11 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
           </Col>
         </Row>
 
-        <div className="allOrdersFiltersRow">
+        <div className={styles.allOrdersFiltersRow}>
           <Search
             placeholder="Поиск по названию, описанию или клиенту"
             allowClear
-            className="allOrdersSearch"
+            className={styles.allOrdersSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -286,7 +287,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
           
           <Select
             placeholder="Статус"
-            className="allOrdersSelectStatus"
+            className={styles.allOrdersSelectStatus}
             value={statusFilter}
             onChange={setStatusFilter}
           >
@@ -301,7 +302,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
           <Select
             placeholder="Предмет"
-            className="allOrdersSelectSubject"
+            className={styles.allOrdersSelectSubject}
             value={subjectFilter}
             onChange={setSubjectFilter}
           >
@@ -315,7 +316,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
           <RangePicker
             placeholder={['Дата от', 'Дата до']}
-            className="allOrdersRangePicker"
+            className={styles.allOrdersRangePicker}
             value={dateRange}
             onChange={setDateRange}
           />

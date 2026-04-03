@@ -6,11 +6,11 @@ import {
 import {
   SearchOutlined, FilterOutlined, EyeOutlined,
   ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined,
-  DollarOutlined, UserOutlined, FileTextOutlined
+  DollarOutlined, UserOutlined, FileTextOutlined, CloseCircleOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
-import './ArbitrationSection.css';
+import styles from './ArbitrationSection.module.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -280,7 +280,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   ];
 
   return (
-    <div className="arbitration-section">
+    <div className={styles.arbitrationSection}>
       {/* Статистика */}
       {stats && (
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -347,21 +347,21 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       )}
 
       {/* Фильтры */}
-      <Card style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 16 }} className={styles.filtersContainer}>
         <Space wrap>
           <Input
             placeholder="Поиск по номеру, теме, истцу..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+            className={styles.searchInput}
             allowClear
           />
           <Select
             placeholder="Статус"
             value={statusFilter}
             onChange={setStatusFilter}
-            style={{ width: 200 }}
+            className={styles.statusSelect}
             allowClear
           >
             <Option value="submitted">Подано</Option>
@@ -374,7 +374,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
             placeholder="Приоритет"
             value={priorityFilter}
             onChange={setPriorityFilter}
-            style={{ width: 150 }}
+            className={styles.prioritySelect}
             allowClear
           >
             <Option value="low">Низкий</Option>

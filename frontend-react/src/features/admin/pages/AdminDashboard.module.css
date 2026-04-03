@@ -1,4 +1,5 @@
 
+/* Основные стили для AdminDashboard */
 
 .loading {
   display: flex;
@@ -52,7 +53,57 @@
   max-width: 400px;
 }
 
+/* Глобальные стили для админ панели */
+:global(.adminPageLayout) {
+  min-height: 100vh;
+  background: #f0f2f5;
+}
 
+:global(.adminPageCenter) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+:global(.adminPageCenterPadded) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  :global(.adminPageCenterPadded) {
+    padding: 16px;
+  }
+  
+  /* Общие стили для карточек */
+  :global(.ant-card) {
+    margin-bottom: 16px;
+  }
+  
+  :global(.ant-card-head) {
+    padding: 0 16px;
+  }
+  
+  :global(.ant-card-body) {
+    padding: 16px;
+  }
+  
+  /* Статистика */
+  :global(.ant-statistic-title) {
+    font-size: 13px;
+  }
+  
+  :global(.ant-statistic-content) {
+    font-size: 20px;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .loading p,
   .error p {
@@ -68,4 +119,395 @@
     height: 32px;
     border-width: 3px;
   }
+  
+  :global(.adminPageCenterPadded) {
+    padding: 12px;
+  }
+  
+  /* Карточки */
+  :global(.ant-card) {
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+  
+  :global(.ant-card-head) {
+    padding: 0 12px;
+    min-height: 48px;
+  }
+  
+  :global(.ant-card-head-title) {
+    font-size: 16px;
+  }
+  
+  :global(.ant-card-body) {
+    padding: 12px;
+  }
+  
+  /* Статистика */
+  :global(.ant-row) {
+    margin: 0 -6px;
+  }
+  
+  :global(.ant-col) {
+    padding: 0 6px;
+    margin-bottom: 12px;
+  }
+  
+  :global(.ant-statistic) {
+    text-align: center;
+  }
+  
+  :global(.ant-statistic-title) {
+    font-size: 12px;
+  }
+  
+  :global(.ant-statistic-content) {
+    font-size: 18px;
+  }
+  
+  /* Кнопки */
+  :global(.ant-btn) {
+    min-height: 44px;
+    border-radius: 8px;
+  }
+  
+  :global(.ant-btn-sm) {
+    min-height: 36px;
+  }
+  
+  /* Формы */
+  :global(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+  
+  :global(.ant-form-item-label) {
+    padding-bottom: 4px;
+  }
+  
+  :global(.ant-form-item-label > label) {
+    font-size: 13px;
+  }
+  
+  :global(.ant-input),
+  :global(.ant-select-selector),
+  :global(.ant-picker) {
+    min-height: 44px;
+    font-size: 16px; /* Предотвращает зум на iOS */
+    border-radius: 8px;
+  }
+  
+  :global(.ant-input-affix-wrapper) {
+    min-height: 44px;
+    border-radius: 8px;
+  }
+  
+  :global(.ant-input-affix-wrapper input) {
+    font-size: 16px;
+  }
+  
+  :global(textarea.ant-input) {
+    font-size: 16px;
+    min-height: 80px;
+  }
+  
+  /* Таблицы */
+  :global(.ant-table-wrapper) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  :global(.ant-table-thead > tr > th) {
+    padding: 8px 4px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  :global(.ant-table-tbody > tr > td) {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+  
+  :global(.ant-table-pagination) {
+    margin: 16px 0;
+    text-align: center;
+  }
+  
+  :global(.ant-pagination-options) {
+    display: none;
+  }
+  
+  :global(.ant-pagination-total-text) {
+    display: none;
+  }
+  
+  /* Модальные окна */
+  :global(.ant-modal) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    top: 0 !important;
+  }
+  
+  :global(.ant-modal-content) {
+    border-radius: 0 !important;
+    height: 100vh !important;
+  }
+  
+  :global(.ant-modal-header) {
+    padding: 16px !important;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  :global(.ant-modal-title) {
+    font-size: 16px !important;
+  }
+  
+  :global(.ant-modal-body) {
+    padding: 16px !important;
+    height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+  }
+  
+  :global(.ant-modal-footer) {
+    padding: 12px 16px !important;
+    border-top: 1px solid #f0f0f0;
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+  
+  :global(.ant-modal-footer .ant-btn) {
+    width: 100% !important;
+    height: 44px !important;
+  }
+  
+  /* Алерты */
+  :global(.ant-alert) {
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  
+  :global(.ant-alert-message) {
+    font-size: 14px;
+  }
+  
+  :global(.ant-alert-description) {
+    font-size: 13px;
+  }
+  
+  /* Теги */
+  :global(.ant-tag) {
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+  
+  /* Описания */
+  :global(.ant-descriptions-item-label) {
+    font-size: 12px;
+  }
+  
+  :global(.ant-descriptions-item-content) {
+    font-size: 12px;
+  }
+  
+  /* Прогресс бары */
+  :global(.ant-progress-text) {
+    font-size: 11px;
+  }
+}
+
+/* Адаптивность для маленьких мобильных устройств */
+@media (max-width: 480px) {
+  :global(.adminPageCenterPadded) {
+    padding: 8px;
+  }
+  
+  /* Карточки */
+  :global(.ant-card-head) {
+    padding: 0 8px;
+    min-height: 44px;
+  }
+  
+  :global(.ant-card-head-title) {
+    font-size: 15px;
+  }
+  
+  :global(.ant-card-body) {
+    padding: 8px;
+  }
+  
+  /* Статистика */
+  :global(.ant-row) {
+    margin: 0 -4px;
+  }
+  
+  :global(.ant-col) {
+    padding: 0 4px;
+    margin-bottom: 8px;
+  }
+  
+  :global(.ant-statistic-title) {
+    font-size: 11px;
+  }
+  
+  :global(.ant-statistic-content) {
+    font-size: 16px;
+  }
+  
+  /* Кнопки */
+  :global(.ant-btn) {
+    min-height: 40px;
+  }
+  
+  :global(.ant-btn-sm) {
+    min-height: 32px;
+  }
+  
+  /* Формы */
+  :global(.ant-form-item) {
+    margin-bottom: 12px;
+  }
+  
+  :global(.ant-form-item-label > label) {
+    font-size: 12px;
+  }
+  
+  :global(.ant-input),
+  :global(.ant-select-selector),
+  :global(.ant-picker) {
+    min-height: 40px;
+  }
+  
+  :global(.ant-input-affix-wrapper) {
+    min-height: 40px;
+  }
+  
+  :global(textarea.ant-input) {
+    min-height: 60px;
+  }
+  
+  /* Таблицы */
+  :global(.ant-table-thead > tr > th) {
+    padding: 6px 2px;
+    font-size: 11px;
+  }
+  
+  :global(.ant-table-tbody > tr > td) {
+    padding: 6px 2px;
+    font-size: 11px;
+  }
+  
+  /* Модальные окна */
+  :global(.ant-modal-header) {
+    padding: 12px !important;
+  }
+  
+  :global(.ant-modal-title) {
+    font-size: 15px !important;
+  }
+  
+  :global(.ant-modal-body) {
+    padding: 12px !important;
+  }
+  
+  :global(.ant-modal-footer) {
+    padding: 10px 12px !important;
+  }
+  
+  :global(.ant-modal-footer .ant-btn) {
+    height: 40px !important;
+  }
+  
+  /* Алерты */
+  :global(.ant-alert-message) {
+    font-size: 13px;
+  }
+  
+  :global(.ant-alert-description) {
+    font-size: 12px;
+  }
+  
+  /* Теги */
+  :global(.ant-tag) {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  /* Описания */
+  :global(.ant-descriptions-item-label) {
+    font-size: 11px;
+  }
+  
+  :global(.ant-descriptions-item-content) {
+    font-size: 11px;
+  }
+}
+
+/* Улучшения для сенсорных устройств */
+@media (hover: none) and (pointer: coarse) {
+  :global(.ant-btn) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  :global(.ant-table-tbody > tr) {
+    cursor: pointer;
+  }
+  
+  :global(.ant-table-tbody > tr:active) {
+    background-color: #f5f5f5;
+  }
+  
+  /* Увеличиваем область нажатия для мелких элементов */
+  :global(.ant-btn-sm) {
+    min-height: 36px;
+    min-width: 36px;
+  }
+  
+  :global(.ant-switch) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Анимации */
+:global(.ant-card) {
+  transition: all 0.2s ease;
+}
+
+:global(.ant-btn) {
+  transition: all 0.2s ease;
+}
+
+:global(.ant-btn:hover) {
+  transform: translateY(-1px);
+}
+
+:global(.ant-table-tbody > tr) {
+  transition: background-color 0.2s ease;
+}
+
+/* Скроллбары */
+:global(.ant-table-body)::-webkit-scrollbar,
+:global(.ant-modal-body)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+:global(.ant-table-body)::-webkit-scrollbar-track,
+:global(.ant-modal-body)::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+:global(.ant-table-body)::-webkit-scrollbar-thumb,
+:global(.ant-modal-body)::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+:global(.ant-table-body)::-webkit-scrollbar-thumb:hover,
+:global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

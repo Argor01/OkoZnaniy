@@ -17,6 +17,23 @@
   border-radius: 12px;
 }
 
+.filtersCard :global(.ant-space-horizontal) {
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filtersCard :global(.ant-space-horizontal > .ant-space-item) {
+  margin-right: 16px;
+}
+
+.filtersCard :global(.ant-select) {
+  min-width: 150px;
+}
+
+.filtersCard :global(.ant-btn) {
+  min-width: 140px;
+}
+
 .searchInput {
   width: 100%;
 }
@@ -67,10 +84,56 @@
   border-top: 1px solid #f0f0f0;
 }
 
+/* Планшетная адаптация */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .container {
+    padding: 20px;
+  }
+
+  .filtersCard :global(.ant-space-horizontal) {
+    gap: 14px;
+  }
+
+  .filtersCard :global(.ant-space-horizontal > .ant-space-item) {
+    margin-right: 14px;
+  }
+
+  .filtersCard :global(.ant-select) {
+    min-width: 160px;
+  }
+
+  .filtersCard :global(.ant-btn) {
+    min-width: 150px;
+  }
+}
+
 /* Мобильная адаптация */
 @media (max-width: 768px) {
   .container {
     padding: 16px;
+  }
+
+  .filtersCard :global(.ant-space-item) {
+    margin-bottom: 12px;
+  }
+
+  .filtersCard :global(.ant-space-horizontal) {
+    gap: 12px !important;
+  }
+
+  .filtersCard :global(.ant-space-horizontal > .ant-space-item) {
+    margin-right: 12px;
+  }
+
+  .filtersCard :global(.ant-select) {
+    width: 100% !important;
+    min-width: 150px;
+    margin-bottom: 8px;
+  }
+
+  .filtersCard :global(.ant-btn) {
+    width: 100%;
+    margin-top: 8px;
   }
 
   .questionHeader {
@@ -86,5 +149,49 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .filtersCard {
+    padding: 16px 12px;
+  }
+
+  .filtersCard :global(.ant-space-vertical) {
+    gap: 16px !important;
+  }
+
+  .filtersCard :global(.ant-space-horizontal) {
+    flex-direction: column;
+    gap: 12px !important;
+    width: 100%;
+  }
+
+  .filtersCard :global(.ant-space-horizontal > .ant-space-item) {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .filtersCard :global(.ant-select) {
+    width: 100% !important;
+    min-width: unset;
+  }
+
+  .filtersCard :global(.ant-btn) {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .questionTitle {
+    font-size: 15px;
+  }
+
+  .questionCard {
+    padding: 12px;
   }
 }

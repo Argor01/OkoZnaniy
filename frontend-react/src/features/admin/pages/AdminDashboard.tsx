@@ -16,6 +16,7 @@ import { User } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
+import styles from './AdminDashboard.module.css';
 import '@/styles/modals.css';
 import '@/styles/admin-dashboard.css';
 
@@ -57,8 +58,8 @@ const AdminDashboard: React.FC = () => {
   
   if (loading) {
     return (
-      <Layout className="adminPageLayout">
-        <Content className="adminPageCenter">
+      <Layout className={styles.loading}>
+        <Content>
           <Spin size="large" />
         </Content>
       </Layout>
@@ -74,8 +75,8 @@ const AdminDashboard: React.FC = () => {
   
   if (!user || user.role !== 'admin') {
     return (
-      <Layout className="adminPageLayout">
-        <Content className="adminPageCenterPadded">
+      <Layout>
+        <Content className={styles.error}>
           <Result
             status="403"
             title="Доступ запрещен"
@@ -251,7 +252,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       onMenuSelect={handleMenuClick}
       onLogout={onLogout}
     >
-      <Suspense fallback={<div className="adminPageCenter"><Spin size="large" /></div>}>
+      <Suspense fallback={<div className={styles.loading}><Spin size="large" /></div>}>
         {renderSection()}
         
         <PartnerModal

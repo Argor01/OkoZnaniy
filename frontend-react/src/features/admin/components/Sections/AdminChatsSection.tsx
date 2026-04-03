@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import styles from './AdminChatsSection.module.css';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -189,8 +190,19 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
     <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
       {showList && listPanel}
       {showChat && chatPanel}
-      <Modal title="Создать групповой чат" open={createOpen} onCancel={() => { setCreateOpen(false); form.resetFields(); }}
-        onOk={() => form.validateFields().then(v => createMut.mutate(v))} okText="Создать" cancelText="Отмена">
+      <Modal 
+        title="Создать групповой чат" 
+        open={createOpen} 
+        onCancel={() => { setCreateOpen(false); form.resetFields(); }}
+        onOk={() => form.validateFields().then(v => createMut.mutate(v))} 
+        okText="Создать" 
+        cancelText="Отмена"
+        width={isMobile ? '100vw' : 640}
+        centered={!isMobile}
+        destroyOnClose
+        maskClosable={false}
+        className={styles.modalContent}
+      >
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="Название" rules={[{ required: true, message: "Введите название" }]}><Input placeholder="Например: Отдел поддержки" /></Form.Item>
           <Form.Item name="description" label="Описание"><Input.TextArea placeholder="О чём этот чат?" /></Form.Item>
@@ -203,8 +215,19 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
           </Form.Item>
         </Form>
       </Modal>
-      <Modal title="Добавить участника" open={inviteOpen} onCancel={() => setInviteOpen(false)}
-        onOk={() => invForm.validateFields().then(v => invMut.mutate(v.uid))} okText="Добавить" cancelText="Отмена">
+      <Modal 
+        title="Добавить участника" 
+        open={inviteOpen} 
+        onCancel={() => setInviteOpen(false)}
+        onOk={() => invForm.validateFields().then(v => invMut.mutate(v.uid))} 
+        okText="Добавить" 
+        cancelText="Отмена"
+        width={isMobile ? '100vw' : 480}
+        centered={!isMobile}
+        destroyOnClose
+        maskClosable={false}
+        className={styles.modalContent}
+      >
         <Form form={invForm} layout="vertical">
           <Form.Item name="uid" label="Пользователь" rules={[{ required: true }]}>
             <Select showSearch optionFilterProp="children" placeholder="Выберите пользователя">
@@ -213,7 +236,16 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
           </Form.Item>
         </Form>
       </Modal>
-      <Modal title="Участники чата" open={membersOpen} onCancel={() => setMembersOpen(false)} footer={[<Button key="close" onClick={() => setMembersOpen(false)}>Закрыть</Button>]}>
+      <Modal 
+        title="Участники чата" 
+        open={membersOpen} 
+        onCancel={() => setMembersOpen(false)} 
+        footer={[<Button key="close" onClick={() => setMembersOpen(false)}>Закрыть</Button>]}
+        width={isMobile ? '100vw' : 600}
+        centered={!isMobile}
+        destroyOnClose
+        className={styles.modalContent}
+      >
         <List
           dataSource={selRoom?.members ?? []}
           renderItem={(member: any) => (

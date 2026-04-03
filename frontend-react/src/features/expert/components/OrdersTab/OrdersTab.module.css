@@ -30,24 +30,35 @@
 
 .ordersFilterGroup {
   width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+.ordersFilterGroup :global(.ant-radio-button-wrapper) {
+  flex: 1;
+  text-align: center;
+  margin-right: 0 !important;
 }
 
 .ordersFilterButton {
   font-weight: 500;
   text-align: center;
   font-family: 'Jost-SemiBold', sans-serif;
+  margin-right: 0 !important;
 }
 
 .ordersFilterButtonLeft {
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
 }
 
 .ordersFilterButtonRight {
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
 }
 
 .ordersFilterButtonMobile {
   min-width: auto;
+  margin: 0 4px;
+  border-radius: 8px !important;
 }
 
 .ordersFilterButtonDesktop {
@@ -360,9 +371,24 @@
     margin-bottom: 20px;
   }
   
+  .ordersFilterGroup {
+    display: flex;
+    gap: 12px;
+  }
+  
   .ordersFilterGroup :global(.ant-radio-button-wrapper) {
     text-align: center;
     flex: 1;
+    margin-right: 0 !important;
+    border-radius: 8px !important;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper:first-child) {
+    border-radius: 8px !important;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper:last-child) {
+    border-radius: 8px !important;
   }
   
   .ordersFilterButtonMobile {
@@ -497,7 +523,9 @@
   
   .ordersFilterButtonMobile {
     font-size: 12px;
-    padding: 6px 2px;
+    padding: 6px 8px;
+    margin: 0 2px;
+    border-radius: 6px !important;
   }
   
   .statusTag,

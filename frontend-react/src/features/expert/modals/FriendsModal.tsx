@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Modal, Input, Button, Avatar, Spin, Empty, Typography } from 'antd';
-import { MessageOutlined, UserOutlined } from '@ant-design/icons';
+import { MessageOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
 import styles from './FriendsModal.module.css';
@@ -46,13 +46,25 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
   onOpenProfile
 }) => {
   const [searchText, setSearchText] = useState('');
-  const [isTablet, setIsTablet] = React.useState(window.innerWidth <= 840 && window.innerWidth > 480);
-  const [isSmallMobile, setIsSmallMobile] = React.useState(window.innerWidth <= 480);
+  const [screenSize, setScreenSize] = React.useState(() => {
+    const width = window.innerWidth;
+    if (width <= 360) return 'xs';
+    if (width <= 480) return 'sm';
+    if (width <= 600) return 'md';
+    if (width <= 840) return 'lg';
+    if (width <= 1024) return 'xl';
+    return 'xxl';
+  });
 
   React.useEffect(() => {
     const handleResize = () => {
-      setIsTablet(window.innerWidth <= 840 && window.innerWidth > 480);
-      setIsSmallMobile(window.innerWidth <= 480);
+      const width = window.innerWidth;
+      if (width <= 360) setScreenSize('xs');
+      else if (width <= 480) setScreenSize('sm');
+      else if (width <= 600) setScreenSize('md');
+      else if (width <= 840) setScreenSize('lg');
+      else if (width <= 1024) setScreenSize('xl');
+      else setScreenSize('xxl');
     };
     
     window.addEventListener('resize', handleResize);
@@ -65,42 +77,78 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
     enabled: visible, 
   });
 
-  const filteredUsers = recentUsers?.filter((user: User) => {
-    if (!searchText) return true;
+  const filteredUsers = useMemo(() => {
+    if (!recentUsers) return [];
+    if (!searchText) return recentUsers;
+    
     const search = searchText.toLowerCase();
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-    const username = (user.username || '').toLowerCase();
-    return fullName.includes(search) || username.includes(search);
-  }) || [];
+    return recentUsers.filter((user: User) => {
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+      const username = (user.username || '').toLowerCase();
+      const bio = (user.bio || '').toLowerCase();
+      return fullName.includes(search) || username.includes(search) || bio.includes(search);
+    });
+  }, [recentUsers, searchText]);
 
   // Адаптивные размеры
-  const modalWidth = isSmallMobile ? '100vw' : isTablet ? '95vw' : isMobile ? '100%' : 800;
-  const avatarSize = isSmallMobile ? 48 : isTablet ? 52 : 56;
+  const modalConfig = useMemo(() => {
+    switch (screenSize) {
+      case 'xs':
+        return { width: '100vw', avatarSize: 40, centered: false };
+      case 'sm':
+        return { width: '100vw', avatarSize: 48, centered: false };
+      case 'md':
+        return { width: '98vw', avatarSize: 52, centered: true };
+      case 'lg':
+        return { width: '95vw', avatarSize: 56, centered: true };
+      case 'xl':
+        return { width: '90vw', avatarSize: 60, centered: true };
+      default:
+        return { width: 800, avatarSize: 64, centered: true };
+    }
+  }, [screenSize]);
+
+  const handleChatClick = useCallback((user: User) => {
+    onOpenChat(user);
+    onClose();
+  }, [onOpenChat, onClose]);
+
+  const handleProfileClick = useCallback((user: User) => {
+    onOpenProfile(user);
+    onClose();
+  }, [onOpenProfile, onClose]);
+
+  const getBioText = useCallback((bio: string) => {
+    const maxLength = screenSize === 'xs' ? 30 : screenSize === 'sm' ? 40 : 60;
+    return bio.length > maxLength ? `${bio.slice(0, maxLength)}...` : bio;
+  }, [screenSize]);
 
   return (
     <Modal
       title={
         <div className={styles.friendsModalTitle}>
-          Последние пользователи
+          Мои друзья
         </div>
       }
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={modalWidth}
-      centered={!isSmallMobile}
+      width={modalConfig.width}
+      centered={modalConfig.centered}
       wrapClassName={styles.friendsModalWrap}
       destroyOnClose
+      maskClosable={true}
     >
       <div className={styles.friendsModalContent}>
         <div className={styles.friendsModalSearchRow}>
           <Input.Search
-            placeholder={isSmallMobile ? "Поиск..." : "Поиск пользователей..."}
+            placeholder={screenSize === 'xs' || screenSize === 'sm' ? "Поиск..." : "Поиск пользователей..."}
             allowClear
-            size={isSmallMobile ? 'middle' : 'large'}
+            size={screenSize === 'xs' || screenSize === 'sm' ? 'middle' : 'large'}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className={styles.friendsModalSearch}
+            prefix={<SearchOutlined />}
           />
         </div>
         
@@ -110,7 +158,16 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
             <Text className={styles.friendsModalLoadingText}>Загрузка пользователей...</Text>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <Empty description={searchText ? "Пользователи не найдены" : "Пока нет активных пользователей"} />
+          <div className={styles.friendsModalEmpty}>
+            <Empty 
+              description={
+                <Text className={styles.friendsModalEmptyText}>
+                  {searchText ? "Пользователи не найдены" : "Пока нет активных пользователей"}
+                </Text>
+              }
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          </div>
         ) : (
           <div className={styles.friendsModalGrid}>
             {filteredUsers.map((user: User) => (
@@ -120,7 +177,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
               >
                 <div className={styles.friendsModalCardHeader}>
                   <Avatar 
-                    size={avatarSize} 
+                    size={modalConfig.avatarSize} 
                     src={user.avatar}
                     className={`${styles.friendsModalAvatar} ${avatarColorClasses[user.id % avatarColorClasses.length]}`}
                   >
@@ -137,7 +194,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                     </Text>
                     {user.bio && (
                       <Text type="secondary" className={styles.friendsModalBio}>
-                        {user.bio.length > (isSmallMobile ? 40 : 60) ? `${user.bio.slice(0, isSmallMobile ? 40 : 60)}...` : user.bio}
+                        {getBioText(user.bio)}
                       </Text>
                     )}
                   </div>
@@ -148,23 +205,17 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                     size="small" 
                     icon={<MessageOutlined />} 
                     className={styles.friendsModalActionButton}
-                    onClick={() => {
-                      onOpenChat(user);
-                      onClose();
-                    }}
+                    onClick={() => handleChatClick(user)}
                   >
-                    Написать
+                    {screenSize === 'xs' ? '' : 'Написать'}
                   </Button>
                   <Button 
                     size="small" 
                     icon={<UserOutlined />}
                     className={styles.friendsModalActionButton}
-                    onClick={() => {
-                      onOpenProfile(user);
-                      onClose();
-                    }}
+                    onClick={() => handleProfileClick(user)}
                   >
-                    {isSmallMobile ? '' : 'Профиль'}
+                    {screenSize === 'xs' || screenSize === 'sm' ? '' : 'Профиль'}
                   </Button>
                 </div>
               </div>

@@ -123,8 +123,8 @@ const RegisterWithEmailVerification: React.FC = () => {
 
   if (step === 'verify') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+      <div className="register-page">
+        <div className="verification-container">
           <EmailVerificationForm
             email={email}
             onSuccess={handleVerificationSuccess}
@@ -133,10 +133,10 @@ const RegisterWithEmailVerification: React.FC = () => {
             }}
           />
           
-          <div className="text-center mt-4">
+          <div className="verification-back-button">
             <button
               onClick={() => setStep('register')}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="verification-back-button"
             >
               ← Вернуться к регистрации
             </button>
@@ -147,182 +147,166 @@ const RegisterWithEmailVerification: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="register-page">
+      <div className="register-container">
+        <div className="register-header">
+          <h2 className="register-title">
             Регистрация
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="register-subtitle">
             {fromGoogle ? 'Завершите регистрацию с Google аккаунтом' : 'Создайте аккаунт на платформе OkoZnaniy'}
           </p>
           {fromGoogle && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-700">
+            <div className="register-info-box register-info-google">
+              <p>
                 ✓ Email из Google: <strong>{formData.email}</strong>
               </p>
-              <p className="text-xs text-blue-600 mt-1">
+              <p style={{ fontSize: '12px', marginTop: '4px', marginBottom: 0 }}>
                 Создайте пароль для завершения регистрации
               </p>
             </div>
           )}
           {formData.referral_code && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-700">
+            <div className="register-info-box register-info-referral">
+              <p>
                 ✓ Реферальный код: <strong>{formData.referral_code}</strong>
               </p>
-              <p className="text-xs text-green-600 mt-1">
+              <p style={{ fontSize: '12px', marginTop: '4px', marginBottom: 0 }}>
                 Вы регистрируетесь по приглашению партнера
               </p>
             </div>
           )}
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                disabled={fromGoogle}
-                className={`appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm ${fromGoogle ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                placeholder="your@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Пароль
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Минимум 8 символов"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password2" className="block text-sm font-medium text-gray-700 mb-1">
-                Подтвердите пароль
-              </label>
-              <input
-                id="password2"
-                name="password2"
-                type="password"
-                required
-                value={formData.password2}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Повторите пароль"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                Я хочу
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              >
-                <option value="client">Заказывать работы</option>
-                <option value="expert">Выполнять работы</option>
-                <option value="partner">Стать партнером</option>
-              </select>
-            </div>
+        <form className="register-form" onSubmit={handleSubmit}>
+          <div className="register-field">
+            <label htmlFor="email" className="register-label">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              disabled={fromGoogle}
+              className="register-input"
+              placeholder="your@email.com"
+            />
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="agreement"
-                  name="agreement"
-                  type="checkbox"
-                  required
-                  checked={agreement}
-                  onChange={(e) => setAgreement(e.target.checked)}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="agreement" className="font-medium text-gray-700">
-                  Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">Политикой обработки персональных данных</a>
-                </label>
-              </div>
+          <div className="register-field">
+            <label htmlFor="password" className="register-label">
+              Пароль
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              className="register-input"
+              placeholder="Минимум 8 символов"
+            />
+          </div>
+
+          <div className="register-field">
+            <label htmlFor="password2" className="register-label">
+              Подтвердите пароль
+            </label>
+            <input
+              id="password2"
+              name="password2"
+              type="password"
+              required
+              value={formData.password2}
+              onChange={handleChange}
+              className="register-input"
+              placeholder="Повторите пароль"
+            />
+          </div>
+
+          <div className="register-field">
+            <label htmlFor="role" className="register-label">
+              Я хочу
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="register-select"
+            >
+              <option value="client">Заказывать работы</option>
+              <option value="expert">Выполнять работы</option>
+              <option value="partner">Стать партнером</option>
+            </select>
+          </div>
+
+          <div className="register-checkbox-group">
+            <div className="register-checkbox-item">
+              <input
+                id="agreement"
+                name="agreement"
+                type="checkbox"
+                required
+                checked={agreement}
+                onChange={(e) => setAgreement(e.target.checked)}
+                className="register-checkbox"
+              />
+              <label htmlFor="agreement" className="register-checkbox-label">
+                Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer">обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Политикой обработки персональных данных</a>
+              </label>
             </div>
 
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="userAgreement"
-                  name="userAgreement"
-                  type="checkbox"
-                  required
-                  checked={userAgreement}
-                  onChange={(e) => setUserAgreement(e.target.checked)}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="userAgreement" className="font-medium text-gray-700">
-                  Я принимаю <a href={formData.role === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">пользовательское соглашение</a>
-                </label>
-              </div>
+            <div className="register-checkbox-item">
+              <input
+                id="userAgreement"
+                name="userAgreement"
+                type="checkbox"
+                required
+                checked={userAgreement}
+                onChange={(e) => setUserAgreement(e.target.checked)}
+                className="register-checkbox"
+              />
+              <label htmlFor="userAgreement" className="register-checkbox-label">
+                Я принимаю <a href={formData.role === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer">пользовательское соглашение</a>
+              </label>
             </div>
 
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="newsletter"
-                  name="newsletter"
-                  type="checkbox"
-                  checked={newsletter}
-                  onChange={(e) => setNewsletter(e.target.checked)}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="newsletter" className="font-medium text-gray-700">
-                  Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">согласие на получение новостной и рекламной рассылки</a>
-                </label>
-              </div>
+            <div className="register-checkbox-item">
+              <input
+                id="newsletter"
+                name="newsletter"
+                type="checkbox"
+                checked={newsletter}
+                onChange={(e) => setNewsletter(e.target.checked)}
+                className="register-checkbox"
+              />
+              <label htmlFor="newsletter" className="register-checkbox-label">
+                Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer">согласие на получение новостной и рекламной рассылки</a>
+              </label>
             </div>
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="register-error">
+              {error}
             </div>
           )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Регистрация...' : 'Зарегистрироваться'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="register-button"
+          >
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+          </button>
 
-          <div className="text-center">
-            <a href="/login" className="text-sm text-indigo-600 hover:text-indigo-500">
+          <div className="register-footer">
+            <a href="/login">
               Уже есть аккаунт? Войти
             </a>
           </div>

@@ -1,0 +1,268 @@
+/* Основные стили для ArbitrationSection */
+
+.arbitrationSection {
+  padding: 24px;
+}
+
+.arbitrationSection :global(.ant-card) {
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.arbitrationSection :global(.ant-statistic-title) {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 8px;
+}
+
+.arbitrationSection :global(.ant-statistic-content) {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.arbitrationSection :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+}
+
+.arbitrationSection :global(.ant-table-tbody > tr:hover) {
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.arbitrationSection :global(.ant-tag) {
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.arbitrationSection :global(.ant-badge-count) {
+  background: #ff4d4f;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* Фильтры */
+.filtersContainer {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filtersContainer :global(.ant-space) {
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  min-width: 250px;
+  max-width: 350px;
+}
+
+.statusSelect {
+  min-width: 150px;
+}
+
+.prioritySelect {
+  min-width: 120px;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .arbitrationSection {
+    padding: 16px;
+  }
+  
+  .filtersContainer :global(.ant-space) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .searchInput,
+  .statusSelect,
+  .prioritySelect {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-title) {
+    font-size: 13px;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-content) {
+    font-size: 20px;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .arbitrationSection {
+    padding: 12px;
+  }
+  
+  /* Статистика - 2 колонки */
+  .arbitrationSection :global(.ant-row) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    margin: 0 -4px !important;
+  }
+  
+  .arbitrationSection :global(.ant-col) {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding: 0 4px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .arbitrationSection :global(.ant-statistic) {
+    text-align: center;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-title) {
+    font-size: 12px !important;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-content) {
+    font-size: 18px !important;
+  }
+  
+  /* Фильтры */
+  .filtersContainer {
+    padding: 12px;
+  }
+  
+  .filtersContainer :global(.ant-space) {
+    gap: 6px !important;
+  }
+  
+  .searchInput,
+  .statusSelect,
+  .prioritySelect {
+    box-sizing: border-box;
+  }
+  
+  .searchInput :global(.ant-input) {
+    font-size: 16px; /* Предотвращает зум на iOS */
+  }
+  
+  /* Таблица */
+  .arbitrationSection :global(.ant-table-wrapper) {
+    overflow-x: auto;
+  }
+  
+  .arbitrationSection :global(.ant-table) {
+    min-width: 1000px;
+  }
+  
+  .arbitrationSection :global(.ant-table-thead > tr > th) {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+  
+  .arbitrationSection :global(.ant-table-tbody > tr > td) {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Пагинация */
+  .arbitrationSection :global(.ant-pagination) {
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  .arbitrationSection :global(.ant-pagination-options) {
+    display: none !important;
+  }
+  
+  .arbitrationSection :global(.ant-pagination-total-text) {
+    display: none !important;
+  }
+}
+
+/* Адаптивность для маленьких мобильных устройств */
+@media (max-width: 480px) {
+  .arbitrationSection {
+    padding: 8px;
+  }
+  
+  /* Статистика - 3 колонки на очень маленьких экранах */
+  .arbitrationSection :global(.ant-col) {
+    flex: 0 0 33.333% !important;
+    max-width: 33.333% !important;
+    padding: 0 2px !important;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-title) {
+    font-size: 10px !important;
+  }
+  
+  .arbitrationSection :global(.ant-statistic-content) {
+    font-size: 14px !important;
+  }
+  
+  /* Фильтры */
+  .filtersContainer {
+    padding: 8px;
+  }
+  
+  .arbitrationSection :global(.ant-table-thead > tr > th) {
+    padding: 6px 2px !important;
+    font-size: 11px !important;
+  }
+  
+  .arbitrationSection :global(.ant-table-tbody > tr > td) {
+    padding: 6px 2px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Улучшения для сенсорных устройств */
+@media (hover: none) and (pointer: coarse) {
+  .arbitrationSection :global(.ant-btn) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .arbitrationSection :global(.ant-table-tbody > tr) {
+    cursor: pointer;
+  }
+  
+  .arbitrationSection :global(.ant-table-tbody > tr:active) {
+    background-color: #f0f0f0;
+  }
+}
+
+/* Анимации */
+.arbitrationSection :global(.ant-table-tbody > tr) {
+  transition: background-color 0.2s ease;
+}
+
+.arbitrationSection :global(.ant-btn) {
+  transition: all 0.2s ease;
+}
+
+.arbitrationSection :global(.ant-btn:hover) {
+  transform: translateY(-1px);
+}
+
+/* Скроллбар для таблицы */
+.arbitrationSection :global(.ant-table-body)::-webkit-scrollbar {
+  height: 6px;
+}
+
+.arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

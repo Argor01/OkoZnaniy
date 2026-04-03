@@ -79,8 +79,9 @@
 
 .profileStatsRowMobile {
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   overflow: visible;
+  justify-content: space-between;
 }
 
 .profileStatColumn {
@@ -89,8 +90,9 @@
 }
 
 .profileStatColumnMobile {
-  flex: 1 1 100%;
-  min-width: 100%;
+  flex: 1;
+  min-width: 0;
+  max-width: 48%;
 }
 
 .profileStatSpace {
@@ -100,6 +102,9 @@
 .profileStatLabel {
   font-size: 15px;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profileStatRate {
@@ -108,6 +113,7 @@
 
 .profileStatSubtext {
   font-size: 16px;
+  white-space: nowrap;
 }
 
 .profileRight {
@@ -225,11 +231,12 @@
   }
   
   .profileStatColumn {
-    min-width: 140px;
+    min-width: 130px;
+    max-width: 45%;
   }
   
   .profileStatLabel {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .profileStatRate {
@@ -273,26 +280,30 @@
   }
   
   .profileStatsRow {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 16px;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
   }
   
   .profileStatsRowMobile {
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 12px;
+    flex-wrap: nowrap;
     overflow: visible;
+    justify-content: space-between;
   }
   
   .profileStatColumn {
-    flex: 1 1 100%;
-    min-width: 100%;
+    flex: 1;
+    min-width: 0;
+    max-width: 48%;
     text-align: center;
   }
   
   .profileStatColumnMobile {
-    flex: 1 1 100%;
-    min-width: 100%;
+    flex: 1;
+    min-width: 0;
+    max-width: 48%;
+    text-align: center;
   }
   
   .profileRight {
@@ -329,18 +340,28 @@
   .profileStatLabel,
   .profileStatsLine,
   .profileStatsMeta {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .profileStatSubtext {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .profileStatRate {
-    font-size: 16px;
+    font-size: 14px;
   }
   
   .profileStatsRow {
-    gap: 12px;
+    gap: 8px;
+  }
+  
+  .profileStatColumn,
+  .profileStatColumnMobile {
+    max-width: 48%;
+  }
+  
+  .profileStatLabel {
+    font-size: 12px;
+    line-height: 1.2;
   }
 }
