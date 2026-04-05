@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
+import axios from 'axios';
 import styles from './RightSidebar.module.css';
 
 dayjs.extend(relativeTime);
@@ -34,43 +35,35 @@ interface Question {
   tags: string[];
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
 
   useEffect(() => {
-    // Загружаем вопросы из localStorage
-    const loadQuestions = () => {
-      const stored = localStorage.getItem('knowledge_questions');
-      if (stored) {
-        try {
-          const allQuestions = JSON.parse(stored);
-          const recentQuestions = allQuestions.slice(-5);
-          setQuestions(recentQuestions);
-        } catch (error) {
-          console.error('Failed to parse questions:', error);
-          setQuestions([]);
-        }
-      } else {
+    const loadQuestions = async () => {
+      try {
+        const response = await axios.get(`${API_BASE}/api/knowledge/questions/`);
+        const allQuestions = response.data;
+        const recentQuestions = allQuestions.slice(-5);
+        setQuestions(recentQuestions);
+      } catch (error) {
+        console.error('Failed to load questions:', error);
         setQuestions([]);
       }
     };
 
     loadQuestions();
 
-    // Обновляем список при изменении localStorage
-    const handleStorageChange = () => {
+    const handleUpdate = () => {
       loadQuestions();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Также слушаем кастомное событие для обновления в рамках одной вкладки
-    window.addEventListener('knowledgeQuestionsUpdated', handleStorageChange);
+    window.addEventListener('knowledgeQuestionsUpdated', handleUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('knowledgeQuestionsUpdated', handleStorageChange);
+      window.removeEventListener('knowledgeQuestionsUpdated', handleUpdate);
     };
   }, []);
 
