@@ -13,8 +13,10 @@ const getApiBaseUrl = () => {
     console.log('🔍 DEV mode:', import.meta.env.DEV);
   }
 
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  return 'http://localhost:8000';
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl !== undefined && envUrl !== '') return envUrl;
+  if (import.meta.env.DEV) return 'http://localhost:8000';
+  return '';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
