@@ -74,7 +74,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
 class QuestionDetailSerializer(serializers.ModelSerializer):
     author = QuestionAuthorSerializer(read_only=True)
     tags = serializers.SerializerMethodField()
-    answers = AnswerSerializer(many=True, read_only=True)
+    answers = serializers.SerializerMethodField()
     answers_count = serializers.IntegerField(read_only=True)
     
     class Meta:
@@ -87,6 +87,9 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
     
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
+    
+    def get_answers(self, obj):
+        return AnswerSerializer(obj.answers.all(), many=True, context=self.context).data
 
 
 
