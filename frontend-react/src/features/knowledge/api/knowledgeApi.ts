@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from '@/api/client';
 import { API_URL } from '@/config/api';
 
 export interface Category {
@@ -45,7 +45,7 @@ export interface Answer {
 
 export const knowledgeApi = {
   getCategories: async (): Promise<Category[]> => {
-    const response = await axios.get(`${API_URL}/catalog/categories/`);
+    const response = await apiClient.get('/catalog/categories/');
     return response.data;
   },
   
@@ -54,12 +54,12 @@ export const knowledgeApi = {
     status?: string;
     search?: string;
   }): Promise<Question[]> => {
-    const response = await axios.get(`${API_URL}/knowledge/questions/`, { params });
+    const response = await apiClient.get('/knowledge/questions/', { params });
     return response.data;
   },
   
   getQuestion: async (id: number): Promise<Question> => {
-    const response = await axios.get(`${API_URL}/knowledge/questions/${id}/`);
+    const response = await apiClient.get(`/knowledge/questions/${id}/`);
     return response.data;
   },
   
@@ -69,28 +69,28 @@ export const knowledgeApi = {
     category: string;
     tags: string[];
   }): Promise<Question> => {
-    const response = await axios.post(`${API_URL}/knowledge/questions/`, data);
+    const response = await apiClient.post('/knowledge/questions/', data);
     return response.data;
   },
   
   addAnswer: async (questionId: number, content: string): Promise<Answer> => {
-    const response = await axios.post(
-      `${API_URL}/knowledge/questions/${questionId}/add_answer/`,
+    const response = await apiClient.post(
+      `/knowledge/questions/${questionId}/add_answer/`,
       { content }
     );
     return response.data;
   },
   
   toggleLike: async (answerId: number): Promise<{ liked: boolean; likes_count: number }> => {
-    const response = await axios.post(`${API_URL}/knowledge/answers/${answerId}/toggle_like/`);
+    const response = await apiClient.post(`/knowledge/answers/${answerId}/toggle_like/`);
     return response.data;
   },
   
   deleteAnswer: async (answerId: number): Promise<void> => {
-    await axios.delete(`${API_URL}/knowledge/answers/${answerId}/`);
+    await apiClient.delete(`/knowledge/answers/${answerId}/`);
   },
   
   deleteQuestion: async (questionId: number): Promise<void> => {
-    await axios.delete(`${API_URL}/knowledge/questions/${questionId}/`);
+    await apiClient.delete(`/knowledge/questions/${questionId}/`);
   },
 };
