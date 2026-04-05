@@ -3,14 +3,14 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   position: sticky;
-  top: 88px; /* header + gap */
-  /* margin-top: 104px; */
+  top: 88px;
   height: max-content;
   max-height: calc(100vh - 88px - 24px);
   overflow-y: auto;
   flex: 1;
-  max-width: 420px;
-  min-width: 350px;
+  max-width: 320px;
+  min-width: 300px;
+  width: 100%;
   border-radius: 22px;
   z-index: 999;
   padding: 16px;
