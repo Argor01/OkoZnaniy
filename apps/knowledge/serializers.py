@@ -97,14 +97,19 @@ class QuestionCreateSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
         child=serializers.CharField(max_length=50),
         required=False,
-        allow_empty=True
+        allow_empty=True,
+        write_only=True
     )
+    tags_output = serializers.SerializerMethodField(read_only=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = Question
-        fields = ['title', 'description', 'category', 'tags', 'author']
+        fields = ['title', 'description', 'category', 'tags', 'tags_output', 'author']
         read_only_fields = ['author']
+    
+    def get_tags_output(self, obj):
+        return [tag.name for tag in obj.tags.all()]
     
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
