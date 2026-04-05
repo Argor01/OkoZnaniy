@@ -9,8 +9,8 @@
   max-height: calc(100vh - 88px - 24px);
   overflow-y: auto;
   flex: 1;
-  max-width: 340px;
-  min-width: 290px;
+  max-width: 420px;
+  min-width: 350px;
   border-radius: 22px;
   z-index: 999;
   padding: 16px;
