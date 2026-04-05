@@ -11,6 +11,7 @@ from .serializers import (
     AnswerSerializer,
     AnswerCreateSerializer
 )
+from apps.notifications.services import NotificationService
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -119,6 +120,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             if question.status == 'open':
                 question.status = 'answered'
                 question.save(update_fields=['status'])
+            
+            # Уведомляем автора вопроса о новом ответе
+            NotificationService.notify_new_answer(question, answer, request.user)
             
             return Response(
                 AnswerSerializer(answer, context={'request': request}).data,

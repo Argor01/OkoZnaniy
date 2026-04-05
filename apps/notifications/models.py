@@ -23,6 +23,7 @@ class NotificationType(models.TextChoices):
     APPLICATION_APPROVED = 'application_approved', 'Анкета одобрена'
     APPLICATION_REJECTED = 'application_rejected', 'Анкета отклонена'
     EXPERT_VIOLATION = 'expert_violation', 'Нарушение правил экспертом'
+    NEW_ANSWER = 'new_answer', 'Новый ответ на вопрос'
 
 
 class Notification(models.Model):

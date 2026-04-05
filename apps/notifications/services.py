@@ -373,6 +373,20 @@ class NotificationService:
         )
 
     @staticmethod
+    def notify_new_answer(question, answer, expert):
+        """Уведомляет автора вопроса о новом ответе"""
+        if question.author:
+            NotificationService.create_notification(
+                recipient=question.author,
+                type=NotificationType.NEW_ANSWER,
+                title="Новый ответ на ваш вопрос",
+                message=f"Эксперт {expert.get_full_name() or expert.username} ответил на ваш вопрос '{question.title[:50]}...'",
+                related_object_id=question.id,
+                related_object_type='question',
+                data={'answer_id': answer.id}
+            )
+
+    @staticmethod
     def notify_document_uploaded(document):
         """Уведомляет администраторов о загрузке нового документа экспертом"""
         admins = User.objects.filter(is_staff=True)
