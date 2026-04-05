@@ -96,13 +96,16 @@ class QuestionCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_empty=True
     )
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = Question
-        fields = ['title', 'description', 'category', 'tags']
+        fields = ['title', 'description', 'category', 'tags', 'author']
+        read_only_fields = ['author']
     
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
+        validated_data.pop('author', None)  # Remove author from validated_data to avoid conflict
         request = self.context.get('request')
         author = request.user if request else None
         question = Question.objects.create(author=author, **validated_data)
