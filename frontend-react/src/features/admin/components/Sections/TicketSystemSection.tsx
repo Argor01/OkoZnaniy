@@ -38,6 +38,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useTickets, useTicketActions } from '@/features/admin/hooks';
+import { supportApi } from '@/features/admin/api/support';
 import styles from './TicketSystemSection.module.css';
 
 const { Text, Title } = Typography;
@@ -183,6 +184,18 @@ export const TicketSystemSection: React.FC = () => {
     }
   };
 
+  const handleTransferToArbitration = async (ticket: Ticket) => {
+    if (!confirm('Передать обращение в арбитраж?')) return;
+    try {
+      await supportApi.transferToArbitration(ticket.id);
+      antMessage.success('Обращение передано в арбитраж');
+      handleCloseDetails();
+      refetch();
+    } catch (error) {
+      antMessage.error('Не удалось передать обращение в арбитраж');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors = {
       open: 'orange',
@@ -289,9 +302,6 @@ export const TicketSystemSection: React.FC = () => {
     setMessageText: (text: string) => void;
     sendMessage: () => void;
     sending: boolean;
-    handleUpdateStatus: (ticketId: number, status: string) => Promise<void>;
-    handleUpdatePriority: (ticketId: number, priority: string) => Promise<void>;
-    navigate: (path: string) => void;
   }> = useMemo(() => {
     const TicketDetailsComponent: React.FC<{
       ticket: Ticket;
@@ -299,57 +309,8 @@ export const TicketSystemSection: React.FC = () => {
       setMessageText: (text: string) => void;
       sendMessage: () => void;
       sending: boolean;
-      handleUpdateStatus: (ticketId: number, status: string) => Promise<void>;
-      handleUpdatePriority: (ticketId: number, priority: string) => Promise<void>;
-      navigate: (path: string) => void;
-    }> = ({ ticket, messageText, setMessageText, sendMessage, sending, handleUpdateStatus, handleUpdatePriority, navigate }) => (
+    }> = ({ ticket, messageText, setMessageText, sendMessage, sending }) => (
       <div>
-        <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <Select
-            value={ticket.status}
-            onChange={(value) => handleUpdateStatus(ticket.id, value)}
-            size="small"
-            style={{ minWidth: '120px' }}
-          >
-            <Option value="new">Новый</Option>
-            <Option value="open">Открыт</Option>
-            <Option value="in_progress">В работе</Option>
-            <Option value="completed">Завершен</Option>
-          </Select>
-          <Select
-            value={ticket.priority}
-            onChange={(value) => handleUpdatePriority(ticket.id, value)}
-            size="small"
-            style={{ minWidth: '120px' }}
-          >
-            <Option value="low">Низкий</Option>
-            <Option value="medium">Средний</Option>
-            <Option value="high">Высокий</Option>
-            <Option value="urgent">Срочный</Option>
-          </Select>
-          <Button
-            size="small"
-            icon={<TagOutlined />}
-            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=tags`)}
-          >
-            Теги
-          </Button>
-          <Button
-            size="small"
-            icon={<MessageOutlined />}
-            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=client-chat`)}
-          >
-            Чат с клиентом
-          </Button>
-          <Button
-            size="small"
-            icon={<TeamOutlined />}
-            onClick={() => navigate(`/admin/tickets/${ticket.ticket_number}?action=team-chat`)}
-          >
-            Чат команды
-          </Button>
-        </div>
-
         <Card size="small" title="Информация об обращении" style={{ marginBottom: '16px' }}>
           <Descriptions size="small" column={1}>
             <Descriptions.Item label="Тема">{ticket.subject}</Descriptions.Item>
@@ -428,6 +389,19 @@ export const TicketSystemSection: React.FC = () => {
           </div>
         </Card>
 
+        {ticket.type === 'support_request' && (
+          <Card size="small" title="Действия" style={{ marginBottom: '16px' }}>
+            <Button
+              type="primary"
+              icon={<FileTextOutlined />}
+              onClick={() => handleTransferToArbitration(ticket)}
+              block
+            >
+              Передать в арбитраж
+            </Button>
+          </Card>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <TextArea
             value={messageText}
@@ -442,7 +416,7 @@ export const TicketSystemSection: React.FC = () => {
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text type="secondary" style={{ fontSize: '12px' }}>
-              💡 Ctrl+Enter для отправки
+              Ctrl+Enter для отправки
             </Text>
             <Button
               type="primary"
@@ -459,7 +433,7 @@ export const TicketSystemSection: React.FC = () => {
       </div>
     );
     return TicketDetailsComponent;
-  }, [handleUpdateStatus, handleUpdatePriority, navigate, messagesEndRef]);
+  }, [handleTransferToArbitration, messagesEndRef]);
 
   const columns = [
     {
@@ -699,9 +673,6 @@ export const TicketSystemSection: React.FC = () => {
             setMessageText={setMessageText}
             sendMessage={sendMessage}
             sending={sending}
-            handleUpdateStatus={handleUpdateStatus}
-            handleUpdatePriority={handleUpdatePriority}
-            navigate={navigate}
           />
         )}
       </Drawer>

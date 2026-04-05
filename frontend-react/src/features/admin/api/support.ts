@@ -64,6 +64,11 @@ export const supportApi = {
     return response.data;
   },
 
+  transferToArbitration: async (requestId: number) => {
+    const response = await apiClient.post(`${API_ENDPOINTS.admin.support.requests.detail(requestId)}transfer_to_arbitration/`);
+    return response.data;
+  },
+
   // Support Chats
   getSupportChats: async (): Promise<SupportChat[]> => {
     const response = await apiClient.get(API_ENDPOINTS.admin.support.chats.list);

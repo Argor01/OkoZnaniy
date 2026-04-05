@@ -243,6 +243,43 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         serializer = SupportMessageSerializer(message)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def transfer_to_arbitration(self, request, pk=None):
+        """Передать обращение в арбитраж (создать арбитражное дело)"""
+        support_request = self.get_object()
+        
+        from apps.arbitration.models import ArbitrationCase
+        from apps.arbitration.serializers import ArbitrationCaseSerializer
+        
+        # Создаём арбитражное дело на основе обращения
+        case_data = {
+            'plaintiff': support_request.user_id,
+            'subject': support_request.subject,
+            'description': support_request.description,
+            'reason': 'other',
+            'priority': support_request.priority,
+        }
+        
+        serializer = ArbitrationCaseSerializer(data=case_data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        arbitration_case = serializer.save()
+        
+        # Автоматически подаём дело
+        arbitration_case.submit()
+        
+        log_activity(
+            request.user,
+            'transferred_to_arbitration',
+            f'Обращение #{support_request.ticket_number} передано в арбитраж',
+            meta={'support_request_id': support_request.id, 'case_id': arbitration_case.id},
+            support_request=support_request
+        )
+        
+        return Response({
+            'message': 'Обращение передано в арбитраж',
+            'case': ArbitrationCaseSerializer(arbitration_case).data
+        })
+
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         old_status = instance.status

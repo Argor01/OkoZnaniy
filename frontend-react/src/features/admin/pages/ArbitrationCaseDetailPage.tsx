@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Row, Col, Descriptions, Tag, Button, Space, Input,
   message, Spin, Empty, Typography, Divider, Avatar, Timeline,
-  Modal, InputNumber, Select, Popconfirm, Tooltip
+  Popconfirm, Tooltip
 } from 'antd';
 import {
-  ArrowLeftOutlined, UserOutlined, SendOutlined, DollarOutlined,
-  CheckCircleOutlined, CloseCircleOutlined, FileTextOutlined,
+  ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
+  CheckCircleOutlined, CloseCircleOutlined, DollarOutlined,
   ClockCircleOutlined, MessageOutlined, HistoryOutlined,
   ExclamationCircleOutlined, LinkOutlined
 } from '@ant-design/icons';
@@ -16,7 +16,6 @@ import './ArbitrationCaseDetailPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 interface ArbitrationCaseDetail {
   id: number;
@@ -100,10 +99,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [messageText, setMessageText] = useState('');
-  const [refundModalVisible, setRefundModalVisible] = useState(false);
-  const [refundPercentage, setRefundPercentage] = useState(0);
-  const [decisionModalVisible, setDecisionModalVisible] = useState(false);
-  const [decisionText, setDecisionText] = useState('');
   const feedEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -191,56 +186,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
     }
   };
 
-  const handleProcessRefund = async () => {
-    if (!caseData) return;
-
-    try {
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/process-refund/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ refund_percentage: refundPercentage })
-      });
-
-      if (response.ok) {
-        message.success(`Возврат ${refundPercentage}% оформлен`);
-        setRefundModalVisible(false);
-        fetchCaseData();
-      } else {
-        message.error('Ошибка при оформлении возврата');
-      }
-    } catch (error) {
-      message.error('Ошибка при оформлении возврата');
-    }
-  };
-
-  const handleMakeDecision = async () => {
-    if (!decisionText.trim() || !caseData) return;
-
-    try {
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/make-decision/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          decision: decisionText,
-          approved_refund_percentage: refundPercentage
-        })
-      });
-
-      if (response.ok) {
-        message.success('Решение принято');
-        setDecisionModalVisible(false);
-        setDecisionText('');
-        fetchCaseData();
-      } else {
-        message.error('Ошибка при принятии решения');
-      }
-    } catch (error) {
-      message.error('Ошибка при принятии решения');
-    }
-  };
-
   const handleCloseCase = async (finalMessage: string) => {
     if (!caseData) return;
 
@@ -260,28 +205,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       }
     } catch (error) {
       message.error('Ошибка при закрытии дела');
-    }
-  };
-
-  const handleUpdateStatus = async (newStatus: string) => {
-    if (!caseData) return;
-
-    try {
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/update-status/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (response.ok) {
-        message.success('Статус обновлен');
-        fetchCaseData();
-      } else {
-        message.error('Ошибка при обновлении статуса');
-      }
-    } catch (error) {
-      message.error('Ошибка при обновлении статуса');
     }
   };
 
@@ -500,27 +423,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                   Взять в работу
                 </Button>
 
-                <Button
-                  block
-                  size="large"
-                  icon={<DollarOutlined />}
-                  onClick={() => setRefundModalVisible(true)}
-                  disabled={caseData.status === 'closed'}
-                  style={{ background: '#52c41a', color: 'white', borderColor: '#52c41a' }}
-                >
-                  Оформить возврат
-                </Button>
-
-                <Button
-                  block
-                  size="large"
-                  icon={<FileTextOutlined />}
-                  onClick={() => setDecisionModalVisible(true)}
-                  disabled={caseData.status === 'closed'}
-                >
-                  Принять решение
-                </Button>
-
                 <Popconfirm
                   title="Закрыть дело?"
                   description={
@@ -547,27 +449,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                     Закрыть дело
                   </Button>
                 </Popconfirm>
-
-                <Divider />
-
-                <div>
-                  <Text strong style={{ display: 'block', marginBottom: 8 }}>
-                    Изменить статус:
-                  </Text>
-                  <Select
-                    value={caseData.status}
-                    onChange={handleUpdateStatus}
-                    style={{ width: '100%' }}
-                    size="large"
-                  >
-                    <Option value="submitted">Подано</Option>
-                    <Option value="under_review">На рассмотрении</Option>
-                    <Option value="awaiting_response">Ожидает ответа</Option>
-                    <Option value="in_arbitration">В арбитраже</Option>
-                    <Option value="decision_made">Решение принято</Option>
-                    <Option value="closed">Закрыто</Option>
-                  </Select>
-                </div>
               </Space>
             </Card>
           </Col>
@@ -686,72 +567,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
             </Card>
           </Col>
         </Row>
-
-        {/* Модальное окно возврата */}
-        <Modal
-          title="Оформить возврат средств"
-          open={refundModalVisible}
-          onOk={handleProcessRefund}
-          onCancel={() => setRefundModalVisible(false)}
-          okText="Оформить"
-          cancelText="Отмена"
-        >
-          <Space direction="vertical" style={{ width: '100%' }} size="large">
-            <div>
-              <Text>Процент возврата:</Text>
-              <InputNumber
-                value={refundPercentage}
-                onChange={(v) => setRefundPercentage(v || 0)}
-                min={0}
-                max={100}
-                formatter={(v) => `${v}%`}
-                parser={(v) => Number(v?.replace('%', ''))}
-                style={{ width: '100%', marginTop: 8 }}
-                size="large"
-              />
-            </div>
-            <Text type="secondary">
-              Укажите процент возврата от суммы заказа. Решение будет зафиксировано в системе.
-            </Text>
-          </Space>
-        </Modal>
-
-        {/* Модальное окно решения */}
-        <Modal
-          title="Принять решение по делу"
-          open={decisionModalVisible}
-          onOk={handleMakeDecision}
-          onCancel={() => setDecisionModalVisible(false)}
-          okText="Принять решение"
-          cancelText="Отмена"
-          width={600}
-        >
-          <Space direction="vertical" style={{ width: '100%' }} size="large">
-            <div>
-              <Text strong>Текст решения:</Text>
-              <TextArea
-                value={decisionText}
-                onChange={(e) => setDecisionText(e.target.value)}
-                placeholder="Опишите принятое решение подробно..."
-                rows={6}
-                style={{ marginTop: 8 }}
-              />
-            </div>
-            <div>
-              <Text strong>Одобренный процент возврата:</Text>
-              <InputNumber
-                value={refundPercentage}
-                onChange={(v) => setRefundPercentage(v || 0)}
-                min={0}
-                max={100}
-                formatter={(v) => `${v}%`}
-                parser={(v) => Number(v?.replace('%', ''))}
-                style={{ width: '100%', marginTop: 8 }}
-                size="large"
-              />
-            </div>
-          </Space>
-        </Modal>
       </div>
     </AdminLayout>
   );
