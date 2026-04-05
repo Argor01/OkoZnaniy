@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Avatar, Badge, Button, Card, Descriptions, Empty, Input, message as antMessage,
   Modal, Select, Space, Spin, Tag, Typography, Row, Col, Divider, Rate, Tooltip,
-  InputNumber, Popconfirm
+  Popconfirm
 } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
@@ -92,8 +92,6 @@ export const ArbitrationDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
-  const [refundModalVisible, setRefundModalVisible] = useState(false);
-  const [refundPercentage, setRefundPercentage] = useState(0);
   const [finalModalVisible, setFinalModalVisible] = useState(false);
   const [finalText, setFinalText] = useState('');
   const feedEndRef = useRef<HTMLDivElement>(null);
@@ -132,33 +130,6 @@ export const ArbitrationDetailPage: React.FC = () => {
       antMessage.success('Статус обновлен');
     } catch { 
       antMessage.error('Не удалось обновить статус'); 
-    }
-  };
-
-  const handleProcessRefund = async () => {
-    if (!ticket) return;
-    setSending(true);
-    try {
-      const endpoint = ticket.type === 'claim' 
-        ? `/api/admin-panel/claims/${ticket.id}/process_refund/`
-        : `/api/admin-panel/support-requests/${ticket.id}/process_refund/`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ refund_percentage: refundPercentage }),
-      });
-      if (response.ok) {
-        antMessage.success(`Возврат ${refundPercentage}% оформлен`);
-        setRefundModalVisible(false);
-        doRefetch();
-      } else {
-        antMessage.error('Ошибка при оформлении возврата');
-      }
-    } catch {
-      antMessage.error('Ошибка при оформлении возврата');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -488,37 +459,6 @@ export const ArbitrationDetailPage: React.FC = () => {
                   </div>
                 </Tooltip>
 
-                {ticket.type === 'claim' && (
-                  <Popconfirm
-                    title="Оформить возврат средств?"
-                    description={
-                      <div style={{ padding: '12px 0' }}>
-                        <InputNumber
-                          value={refundPercentage}
-                          onChange={(v) => setRefundPercentage(v || 0)}
-                          min={0}
-                          max={100}
-                          style={{ width: '100%' }}
-                          formatter={(v) => `${v}%`}
-                          parser={(v) => Number(v?.replace('%', ''))}
-                        />
-                        <Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
-                          Укажите процент возврата от суммы заказа
-                        </Text>
-                      </div>
-                    }
-                    onConfirm={handleProcessRefund}
-                    okText="Оформить"
-                    cancelText="Отмена"
-                    icon={<DollarOutlined style={{ color: '#fa8c16' }} />}
-                  >
-                    <div className="action-button success">
-                      <DollarOutlined className="action-button-icon" />
-                      <span className="action-button-text">Возврат средств</span>
-                    </div>
-                  </Popconfirm>
-                )}
-
                 <Popconfirm
                   title="Закрыть обращение?"
                   description={
@@ -544,24 +484,6 @@ export const ArbitrationDetailPage: React.FC = () => {
                   </div>
                 </Popconfirm>
               </div>
-
-              <Divider />
-
-              {/* Смена статуса и приоритета */}
-              <Space direction="vertical" style={{ width: '100%' }} size="small">
-                <Text strong style={{ fontSize: 13 }}>Статус:</Text>
-                <Select 
-                  value={ticket.status} 
-                  onChange={handleUpdateStatus} 
-                  style={{ width: '100%' }}
-                  size="large"
-                >
-                  <Option value="new">Новый</Option>
-                  <Option value="open">Открыт</Option>
-                  <Option value="in_progress">В работе</Option>
-                  <Option value="completed">Завершен</Option>
-                </Select>
-              </Space>
             </Card>
           </Col>
         </Row>
