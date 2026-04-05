@@ -45,7 +45,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
                 Q(title__icontains=search) | Q(description__icontains=search)
             )
         
-        return queryset
+        return queryset.order_by('-created_at')
     
     def get_serializer_class(self):
         if self.action == 'list':
