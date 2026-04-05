@@ -103,7 +103,9 @@ class QuestionCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
-        question = Question.objects.create(**validated_data)
+        request = self.context.get('request')
+        author = request.user if request else None
+        question = Question.objects.create(author=author, **validated_data)
         
         # Создаем теги
         for tag_name in tags_data:
