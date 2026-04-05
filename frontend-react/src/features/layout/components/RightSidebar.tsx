@@ -45,8 +45,7 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
       if (stored) {
         try {
           const allQuestions = JSON.parse(stored);
-          // Берем последние 4 вопроса
-          const recentQuestions = allQuestions.slice(0, 4);
+          const recentQuestions = allQuestions.slice(-4);
           setQuestions(recentQuestions);
         } catch (error) {
           console.error('Failed to parse questions:', error);
