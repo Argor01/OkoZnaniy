@@ -267,12 +267,15 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         # Автоматически подаём дело
         arbitration_case.submit()
         
+        # Удаляем обращение после успешной передачи в арбитраж
+        support_request_id = support_request.id
+        support_request.delete()
+        
         log_activity(
             request.user,
             'transferred_to_arbitration',
             f'Обращение #{support_request.ticket_number} передано в арбитраж',
-            meta={'support_request_id': support_request.id, 'case_id': arbitration_case.id},
-            support_request=support_request
+            meta={'support_request_id': support_request_id, 'case_id': arbitration_case.id}
         )
         
         return Response({
