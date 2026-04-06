@@ -279,6 +279,8 @@ export const TicketSystemSection: React.FC = () => {
   };
 
   const filteredTickets = tickets.filter(ticket => {
+    if (ticket.type === 'claim') return false;
+    
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesSearch = 
@@ -302,10 +304,10 @@ export const TicketSystemSection: React.FC = () => {
   });
 
   const ticketStats = {
-    total: tickets.length,
-    open: tickets.filter(t => t.status === 'open' || t.status === 'new').length,
-    inProgress: tickets.filter(t => t.status === 'in_progress').length,
-    completed: tickets.filter(t => t.status === 'completed').length,
+    total: tickets.filter(t => t.type !== 'claim').length,
+    open: tickets.filter(t => t.type !== 'claim' && (t.status === 'open' || t.status === 'new')).length,
+    inProgress: tickets.filter(t => t.type !== 'claim' && t.status === 'in_progress').length,
+    completed: tickets.filter(t => t.type !== 'claim' && t.status === 'completed').length,
   };
 
   const TicketDetails: React.FC<{
