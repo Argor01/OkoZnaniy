@@ -12,6 +12,7 @@ import {
   ExclamationCircleOutlined, LinkOutlined
 } from '@ant-design/icons';
 import { AdminLayout } from '@/features/admin/components/Layout';
+import { apiClient } from '@/api/client';
 import './ArbitrationCaseDetailPage.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -112,11 +113,8 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const fetchCaseData = async () => {
     try {
       setLoading(true);
-      // Fetch case details
-      const caseResponse = await fetch(`/api/arbitration/cases/?case_number=${caseNumber}`, {
-        credentials: 'include'
-      });
-      const caseList = await caseResponse.json();
+      const caseResponse = await apiClient.get(`/arbitration/cases/?case_number=${caseNumber}`);
+      const caseList = caseResponse.data;
       const caseDetail = caseList.results?.[0] || caseList[0];
       
       if (!caseDetail) {
@@ -126,12 +124,8 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       
       setCaseData(caseDetail);
 
-      // Fetch activity feed
-      const feedResponse = await fetch(`/api/arbitration/cases/${caseDetail.id}/activity-feed/`, {
-        credentials: 'include'
-      });
-      const feedData = await feedResponse.json();
-      setFeed(feedData.feed || []);
+      const feedResponse = await apiClient.get(`/arbitration/cases/${caseDetail.id}/activity-feed/`);
+      setFeed(feedResponse.data.feed || []);
     } catch (error) {
       message.error('Ошибка при загрузке данных');
       console.error(error);
@@ -145,20 +139,10 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
 
     try {
       setSending(true);
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/send-message/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ message: messageText })
-      });
-
-      if (response.ok) {
-        message.success('Сообщение отправлено');
-        setMessageText('');
-        fetchCaseData();
-      } else {
-        message.error('Ошибка при отправке сообщения');
-      }
+      await apiClient.post(`/arbitration/cases/${caseData.id}/send-message/`, { message: messageText });
+      message.success('Сообщение отправлено');
+      setMessageText('');
+      fetchCaseData();
     } catch (error) {
       message.error('Ошибка при отправке сообщения');
     } finally {
@@ -170,17 +154,9 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
     if (!caseData) return;
 
     try {
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/take-in-work/`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        message.success('Дело взято в работу');
-        fetchCaseData();
-      } else {
-        message.error('Ошибка');
-      }
+      await apiClient.post(`/arbitration/cases/${caseData.id}/take-in-work/`);
+      message.success('Дело взято в работу');
+      fetchCaseData();
     } catch (error) {
       message.error('Ошибка');
     }
@@ -190,19 +166,9 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
     if (!caseData) return;
 
     try {
-      const response = await fetch(`/api/arbitration/cases/${caseData.id}/close-case/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ message: finalMessage })
-      });
-
-      if (response.ok) {
-        message.success('Дело закрыто');
-        fetchCaseData();
-      } else {
-        message.error('Ошибка при закрытии дела');
-      }
+      await apiClient.post(`/arbitration/cases/${caseData.id}/close-case/`, { message: finalMessage });
+      message.success('Дело закрыто');
+      fetchCaseData();
     } catch (error) {
       message.error('Ошибка при закрытии дела');
     }
