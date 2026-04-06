@@ -401,8 +401,8 @@ export const TicketSystemSection: React.FC = () => {
           </div>
         </Card>
 
-        {ticket.type === 'support_request' && (
-          <Card size="small" title="Действия" style={{ marginBottom: '16px' }}>
+        <Card size="small" title="Действия" style={{ marginBottom: '16px' }}>
+          {ticket.type === 'support_request' && (
             <Button
               type="primary"
               icon={<FileTextOutlined />}
@@ -412,17 +412,17 @@ export const TicketSystemSection: React.FC = () => {
             >
               Передать в арбитраж
             </Button>
-            <Button
-              danger
-              type="primary"
-              icon={<DeleteOutlined />}
-              onClick={() => handleDeleteTicket(ticket)}
-              block
-            >
-              Удалить обращение
-            </Button>
-          </Card>
-        )}
+          )}
+          <Button
+            danger
+            type="primary"
+            icon={<DeleteOutlined />}
+            onClick={() => handleDeleteTicket(ticket)}
+            block
+          >
+            Удалить обращение
+          </Button>
+        </Card>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <TextArea
