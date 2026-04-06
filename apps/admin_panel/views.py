@@ -253,7 +253,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         
         # Создаём арбитражное дело на основе обращения
         case_data = {
-            'plaintiff': support_request.user_id,
+            'plaintiff_id': support_request.user_id,
             'subject': support_request.subject,
             'description': support_request.description,
             'reason': 'other',

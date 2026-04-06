@@ -42,6 +42,7 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
     activities = ArbitrationActivitySerializer(many=True, read_only=True)
     
     # Write-only поля для связей
+    plaintiff_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     order_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     defendant_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     assigned_user_ids = serializers.ListField(
@@ -60,7 +61,7 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArbitrationCase
         fields = [
-            'id', 'case_number', 'plaintiff', 'defendant', 'defendant_id',
+            'id', 'case_number', 'plaintiff', 'plaintiff_id', 'defendant', 'defendant_id',
             'order', 'order_id', 'reason', 'reason_display', 'subject',
             'description', 'refund_type', 'refund_type_display',
             'requested_refund_percentage', 'requested_refund_amount',
@@ -80,6 +81,13 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Удаляем write-only поля
         assigned_user_ids = validated_data.pop('assigned_user_ids', None)
+        plaintiff_id = validated_data.pop('plaintiff_id', None)
+        
+        # Получаем plaintiff из user_id если передан
+        if plaintiff_id:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            validated_data['plaintiff'] = User.objects.get(id=plaintiff_id)
         
         # Создаем дело
         case = ArbitrationCase.objects.create(**validated_data)
