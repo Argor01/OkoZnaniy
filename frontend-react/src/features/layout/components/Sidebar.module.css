@@ -5,10 +5,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   position: sticky;
-  top: 88px; /* header + gap */
-  /* margin-top: 104px; */
+  top: 104px;
   height: max-content;
-  max-height: calc(100vh - 88px - 24px); /* viewport height minus top offset and bottom gap */
+  max-height: calc(100vh - 104px - 24px);
   overflow-y: auto;
   flex: 1;
   max-width: 320px !important;

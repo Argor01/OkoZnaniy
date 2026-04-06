@@ -3,9 +3,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   position: sticky;
-  top: 88px;
+  top: 104px;
   height: max-content;
-  max-height: calc(100vh - 88px - 24px);
+  max-height: calc(100vh - 104px - 24px);
   overflow-y: auto;
   flex: 0 0 auto;
   min-width: auto;
