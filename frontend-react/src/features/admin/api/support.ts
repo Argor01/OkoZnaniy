@@ -210,4 +210,13 @@ export const supportApi = {
     const chat = chats.find((c: any) => c.id === chatId);
     return chat ? chat.messages : [];
   },
+
+  // Удаление обращения
+  deleteTicket: async (ticketId: number, type: 'support_request' | 'claim') => {
+    const endpoint = type === 'support_request'
+      ? API_ENDPOINTS.admin.support.requests.detail(ticketId)
+      : API_ENDPOINTS.admin.support.claims.detail(ticketId);
+    const response = await apiClient.delete(endpoint);
+    return response.data;
+  },
 };

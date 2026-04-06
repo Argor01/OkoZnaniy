@@ -33,7 +33,8 @@ import {
   FileTextOutlined,
   TeamOutlined,
   TagOutlined,
-  DollarOutlined
+  DollarOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -95,7 +96,7 @@ interface Ticket {
 export const TicketSystemSection: React.FC = () => {
   const navigate = useNavigate();
   const { tickets: rawTickets = [], loading, refetch } = useTickets(true);
-  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority } = useTicketActions();
+  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority, deleteTicket: deleteTicketFn } = useTicketActions();
 
   const tickets = rawTickets as unknown as Ticket[];
 
@@ -193,6 +194,17 @@ export const TicketSystemSection: React.FC = () => {
       refetch();
     } catch (error) {
       antMessage.error('Не удалось передать обращение в арбитраж');
+    }
+  };
+
+  const handleDeleteTicket = async (ticket: Ticket) => {
+    if (!confirm('Удалить обращение? Это действие нельзя отменить.')) return;
+    try {
+      await deleteTicketFn(ticket.id, ticket.type);
+      handleCloseDetails();
+      refetch();
+    } catch (error) {
+      antMessage.error('Не удалось удалить обращение');
     }
   };
 
@@ -396,8 +408,18 @@ export const TicketSystemSection: React.FC = () => {
               icon={<FileTextOutlined />}
               onClick={() => handleTransferToArbitration(ticket)}
               block
+              style={{ marginBottom: '8px' }}
             >
               Передать в арбитраж
+            </Button>
+            <Button
+              danger
+              type="primary"
+              icon={<DeleteOutlined />}
+              onClick={() => handleDeleteTicket(ticket)}
+              block
+            >
+              Удалить обращение
             </Button>
           </Card>
         )}

@@ -242,6 +242,16 @@ export const useTicketActions = () => {
     onError: () => message.error('Ошибка при обновлении тегов'),
   });
 
+  const { mutateAsync: deleteTicket } = useMutation({
+    mutationFn: ({ ticketId, ticketType }: { ticketId: number; ticketType: 'support_request' | 'claim' }) =>
+      supportApi.deleteTicket(ticketId, ticketType),
+    onSuccess: () => {
+      message.success('Обращение удалено');
+      invalidateTickets();
+    },
+    onError: () => message.error('Ошибка при удалении обращения'),
+  });
+
   return { 
     sendMessage: (ticketId: number, message: string, ticketType: 'support_request' | 'claim') => sendMessage({ ticketId, message, ticketType }), 
     updateStatus: (ticketId: number, status: string, ticketType: 'support_request' | 'claim') => updateStatus({ ticketId, status, ticketType }), 
@@ -250,6 +260,7 @@ export const useTicketActions = () => {
     assignUsers: (ticketId: number, userIds: number[], ticketType: 'support_request' | 'claim') => assignUsers({ ticketId, userIds, ticketType }),
     addTag: (ticketId: number, tag: string, ticketType: 'support_request' | 'claim') => addTag({ ticketId, tag, ticketType }),
     removeTag: (ticketId: number, tag: string, ticketType: 'support_request' | 'claim') => removeTag({ ticketId, tag, ticketType }),
-    updateTags: (ticketId: number, tags: string, ticketType: 'support_request' | 'claim') => updateTags({ ticketId, tags, ticketType })
+    updateTags: (ticketId: number, tags: string, ticketType: 'support_request' | 'claim') => updateTags({ ticketId, tags, ticketType }),
+    deleteTicket: (ticketId: number, ticketType: 'support_request' | 'claim') => deleteTicket({ ticketId, ticketType }),
   };
 };
