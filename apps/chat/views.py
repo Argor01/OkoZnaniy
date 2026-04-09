@@ -1019,7 +1019,11 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def get_or_create_by_user(self, request):
-        """Получить или создать чат с конкретным пользователем"""
+        """Получить или создать чат с конкретным пользователем.
+        
+        Гарантирует уникальность чата между парой пользователей:
+        сначала ищет существующий чат, и только если не находит — создаёт новый.
+        """
         from apps.users.models import User
         
         user_id = request.data.get('user_id')
@@ -1047,109 +1051,82 @@ class ChatViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        requester_role = getattr(request.user, 'role', None)
-        other_role = getattr(other_user, 'role', None)
-        resolved_client = request.user
-        resolved_expert = other_user
-        if requester_role == 'expert' and other_role == 'client':
-            resolved_client = other_user
-            resolved_expert = request.user
-        elif requester_role == 'client' and other_role == 'expert':
-            resolved_client = request.user
-            resolved_expert = other_user
+        # Определяем client/expert по ID (меньший ID = client), чтобы constraint работал корректно
         user_ids = sorted([request.user.id, other_user.id])
+        resolved_client_id = user_ids[0]
+        resolved_expert_id = user_ids[1]
 
-        def find_pair_chat():
-            return Chat.objects.filter(
-                order__isnull=True
-            ).filter(
-                Q(client_id=request.user.id, expert_id=other_user.id) |
-                Q(client_id=other_user.id, expert_id=request.user.id)
+        # Сначала ищем существующий чат между этими пользователями
+        # Используем client_id/expert_id для надёжного поиска
+        chat = Chat.objects.filter(
+            order__isnull=True,
+            client_id=resolved_client_id,
+            expert_id=resolved_expert_id,
+        ).order_by('id').first()
+
+        if not chat:
+            # Пробуем найти в обратном порядке (на случай старых данных)
+            chat = Chat.objects.filter(
+                order__isnull=True,
+                client_id=resolved_expert_id,
+                expert_id=resolved_client_id,
             ).order_by('id').first()
 
-        with transaction.atomic():
-            User.objects.select_for_update().filter(id__in=user_ids).order_by('id')
-
+        if not chat:
+            # Ищем через ManyToMany как запасной вариант
             chat = Chat.objects.filter(
                 participants=request.user,
-                order__isnull=True
+                order__isnull=True,
             ).filter(
-                participants=other_user
+                participants=other_user,
             ).order_by('id').first()
 
-            if not chat:
+        if chat:
+            # Чат найден — удаляем дубликаты и обновляем поля
+            duplicates = Chat.objects.filter(
+                order__isnull=True,
+            ).filter(
+                Q(client_id=resolved_client_id, expert_id=resolved_expert_id) |
+                Q(client_id=resolved_expert_id, expert_id=resolved_client_id),
+            ).exclude(id=chat.id)
+            if duplicates.exists():
+                duplicates.delete()
+
+            # Обновляем context_title если передан и чат его не имеет
+            if context_title and not chat.context_title:
+                chat.context_title = context_title
+                chat.save(update_fields=['context_title'])
+
+            chat.participants.add(request.user, other_user)
+        else:
+            # Чат не найден — создаём новый
+            with transaction.atomic():
                 try:
-                    with transaction.atomic():
-                        chat = Chat.objects.create(
-                            order=None,
-                            client=resolved_client,
-                            expert=resolved_expert,
-                            context_title=context_title
-                        )
-                        chat.participants.add(request.user, other_user)
+                    chat = Chat.objects.create(
+                        order=None,
+                        client_id=resolved_client_id,
+                        expert_id=resolved_expert_id,
+                        context_title=context_title,
+                    )
+                    chat.participants.add(request.user, other_user)
                 except IntegrityError:
+                    # Constraint сработал — ищем созданный чат
                     chat = Chat.objects.filter(
-                        participants=request.user,
-                        order__isnull=True
-                    ).filter(
-                        participants=other_user
+                        order__isnull=True,
+                        client_id=resolved_client_id,
+                        expert_id=resolved_expert_id,
                     ).order_by('id').first()
                     if not chat:
-                        chat = find_pair_chat()
-                        if chat:
-                            chat.participants.add(request.user, other_user)
-                    if not chat:
-                        raise
-            else:
-                duplicates = Chat.objects.filter(
-                    participants=request.user,
-                    order__isnull=True
-                ).filter(
-                    participants=other_user
-                ).exclude(id=chat.id).order_by('id')
-                if duplicates.exists():
-                    duplicates.delete()
-
-                updated_fields = []
-                if resolved_client and chat.client_id != resolved_client.id:
-                    chat.client = resolved_client
-                    updated_fields.append('client')
-                if resolved_expert and chat.expert_id != resolved_expert.id:
-                    chat.expert = resolved_expert
-                    updated_fields.append('expert')
-                if context_title and chat.order_id is None and (not chat.context_title or chat.context_title != context_title):
-                    chat.context_title = context_title
-                    updated_fields.append('context_title')
-                if updated_fields:
-                    try:
-                        with transaction.atomic():
-                            chat.save(update_fields=updated_fields)
-                    except IntegrityError:
                         chat = Chat.objects.filter(
-                            participants=request.user,
-                            order__isnull=True
-                        ).filter(
-                            participants=other_user
+                            order__isnull=True,
+                            client_id=resolved_expert_id,
+                            expert_id=resolved_client_id,
                         ).order_by('id').first()
-                        if not chat:
-                            chat = find_pair_chat()
-                            if chat:
-                                chat.participants.add(request.user, other_user)
-                        if not chat:
-                            raise
-            normalize_fields = []
-            if resolved_client and chat.client_id != resolved_client.id:
-                chat.client = resolved_client
-                normalize_fields.append('client')
-            if resolved_expert and chat.expert_id != resolved_expert.id:
-                chat.expert = resolved_expert
-                normalize_fields.append('expert')
-            if context_title and chat.order_id is None and (not chat.context_title or chat.context_title != context_title):
-                chat.context_title = context_title
-                normalize_fields.append('context_title')
-            if normalize_fields:
-                chat.save(update_fields=normalize_fields)
-            chat.participants.add(request.user, other_user)
+                    if chat:
+                        chat.participants.add(request.user, other_user)
+                    else:
+                        raise
+
         chat.hidden_for_users.remove(request.user)
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
