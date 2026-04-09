@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'antd';
 import { CustomerServiceOutlined } from '@ant-design/icons';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '@/styles/support.css';
 
 interface SupportButtonProps {
@@ -10,6 +10,7 @@ interface SupportButtonProps {
 
 const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [shouldShow, setShouldShow] = React.useState<boolean | null>(null);
 
   const token = localStorage.getItem('access_token');
@@ -36,7 +37,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   }
 
   const handleSupportClick = () => {
-    window.dispatchEvent(new CustomEvent('openSupportChat'));
+    navigate('/support/claim-form?mode=support');
   };
 
   if (type === 'float') {

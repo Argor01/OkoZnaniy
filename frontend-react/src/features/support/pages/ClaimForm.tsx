@@ -11,12 +11,17 @@ import {
   Typography,
   message,
 } from 'antd';
-import { ArrowLeftOutlined, CheckCircleOutlined, CustomerServiceOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  ArrowLeftOutlined,
+  CheckCircleOutlined,
+  CustomerServiceOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import { DashboardLayout } from '@/features/layout';
 import { ordersApi } from '@/features/orders/api/orders';
 import { supportRequestsApi } from '@/features/support/api/requests';
 
-const { Paragraph, Text, Title } = Typography;
+const { Paragraph, Title } = Typography;
 
 type SupportMode = 'support' | 'arbitration';
 
@@ -28,7 +33,6 @@ interface FormValues {
   reason?: string;
   refund_type?: 'full' | 'partial' | 'none';
   refund_percentage?: number;
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
 }
 
 const defaultDescriptionByMode: Record<SupportMode, string> = {
@@ -51,7 +55,6 @@ const ClaimForm: React.FC = () => {
       mode: initialMode,
       order_id: Number.isFinite(initialOrderId) && initialOrderId > 0 ? initialOrderId : undefined,
       refund_type: initialMode === 'arbitration' ? 'none' : undefined,
-      priority: 'medium',
       description: defaultDescriptionByMode[initialMode],
     });
   }, [form, initialMode, initialOrderId]);
@@ -62,8 +65,8 @@ const ClaimForm: React.FC = () => {
         const response = await ordersApi.getClientOrders({ ordering: '-created_at' });
         const items = Array.isArray(response)
           ? response
-          : Array.isArray((response as any)?.results)
-            ? (response as any).results
+          : Array.isArray((response as { results?: Array<{ id: number; title?: string }> })?.results)
+            ? (response as { results: Array<{ id: number; title?: string }> }).results
             : [];
         setOrders(items);
       } catch {
@@ -85,7 +88,6 @@ const ClaimForm: React.FC = () => {
         await supportRequestsApi.createSupportRequest({
           subject: values.subject,
           description: values.description,
-          priority: values.priority ?? 'medium',
         });
         message.success('Обращение отправлено в поддержку');
       } else {
@@ -102,8 +104,9 @@ const ClaimForm: React.FC = () => {
       }
 
       navigate('/support');
-    } catch (error: any) {
-      message.error(error?.response?.data?.detail || error?.response?.data?.error || 'Не удалось отправить обращение');
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { detail?: string; error?: string } } };
+      message.error(apiError?.response?.data?.detail || apiError?.response?.data?.error || 'Не удалось отправить обращение');
     } finally {
       setSubmitting(false);
     }
@@ -148,7 +151,6 @@ const ClaimForm: React.FC = () => {
               onFinish={handleSubmit}
               initialValues={{
                 mode: initialMode,
-                priority: 'medium',
                 refund_type: 'none',
               }}
             >
@@ -184,24 +186,13 @@ const ClaimForm: React.FC = () => {
                   showCount
                   placeholder={
                     mode === 'arbitration'
-                      ? 'Опишите, что произошло по заказу, какие были договорённости и что вы ожидаете по итогу.'
+                      ? 'Опишите, что произошло по заказу, какие были договоренности и что вы ожидаете по итогу.'
                       : 'Опишите вопрос как можно понятнее. Если уже были действия или ошибки, тоже укажите их.'
                   }
                 />
               </Form.Item>
 
-              {mode === 'support' ? (
-                <Form.Item name="priority" label="Срочность">
-                  <Select
-                    options={[
-                      { value: 'low', label: 'Низкая' },
-                      { value: 'medium', label: 'Средняя' },
-                      { value: 'high', label: 'Высокая' },
-                      { value: 'urgent', label: 'Срочная' },
-                    ]}
-                  />
-                </Form.Item>
-              ) : (
+              {mode === 'support' ? null : (
                 <>
                   <Form.Item
                     name="order_id"
@@ -281,7 +272,7 @@ const ClaimForm: React.FC = () => {
               type="success"
               showIcon
               message="После отправки"
-              description="Обращение появится в центре обращений. Там же будет видно изменение статуса, ответы поддержки и ход решения."
+              description="После отправки откройте вкладку сообщений и зайдите в раздел поддержки. Там будет видно ваше обращение, его статус, ответы поддержки и ход решения."
             />
           </Space>
         </Card>
