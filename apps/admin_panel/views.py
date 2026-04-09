@@ -1236,11 +1236,30 @@ def get_ticket_activity(request, ticket_type, pk):
         return Response({'error': 'Неверный тип тикета'}, status=400)
 
     # Объединяем и сортируем по времени
-    all_items = ticket_messages + chat_messages + activities
+    ticket_message_keys = {
+        (
+            item.get('sender', {}).get('id'),
+            (item.get('text') or '').strip(),
+            item.get('created_at'),
+        )
+        for item in ticket_messages
+    }
+    deduped_chat_messages = []
+    for item in chat_messages:
+        message_key = (
+            item.get('sender', {}).get('id'),
+            (item.get('text') or '').strip(),
+            item.get('created_at'),
+        )
+        if message_key in ticket_message_keys:
+            continue
+        deduped_chat_messages.append(item)
+
+    all_items = ticket_messages + deduped_chat_messages + activities
     all_items.sort(key=lambda x: x['created_at'])
 
     return Response({
-        'messages': ticket_messages + chat_messages,
+        'messages': ticket_messages + deduped_chat_messages,
         'activities': activities,
         'feed': all_items,
     })
