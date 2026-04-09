@@ -1,18 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Table, Tag, Button, Space, Input, Select, Card, Row, Col,
-  Statistic, Badge, Tooltip, message, Modal, Typography
+  Badge,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Empty,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Statistic,
+  Table,
+  Tag,
+  Typography,
+  message,
 } from 'antd';
 import {
-  SearchOutlined, FilterOutlined, EyeOutlined,
-  ClockCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined,
-  DollarOutlined, UserOutlined, FileTextOutlined, CloseCircleOutlined
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  FilterOutlined,
+  SearchOutlined,
+  SendOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
+import { arbitrationApi } from '@/features/admin/api/arbitration';
 import styles from './ArbitrationSection.module.css';
 
-const { Title, Text } = Typography;
+const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
 
 interface ArbitrationCase {
@@ -66,36 +88,39 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   cases,
   loading,
   onRefresh,
-  stats
+  stats,
 }) => {
-  const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
-  const [priorityFilter, setPriorityFilter] = useState<string | undefined>();
   const [filteredCases, setFilteredCases] = useState<ArbitrationCase[]>(cases);
+  const [selectedCase, setSelectedCase] = useState<ArbitrationCase | null>(null);
+  const [detailData, setDetailData] = useState<any | null>(null);
+  const [feedData, setFeedData] = useState<any[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
 
   useEffect(() => {
     let filtered = cases;
 
     if (searchText) {
-      filtered = filtered.filter(c =>
-        c.case_number.toLowerCase().includes(searchText.toLowerCase()) ||
-        c.subject.toLowerCase().includes(searchText.toLowerCase()) ||
-        c.plaintiff.first_name.toLowerCase().includes(searchText.toLowerCase()) ||
-        c.plaintiff.last_name.toLowerCase().includes(searchText.toLowerCase())
+      const query = searchText.toLowerCase();
+      filtered = filtered.filter((item) =>
+        item.case_number.toLowerCase().includes(query) ||
+        item.subject.toLowerCase().includes(query) ||
+        item.plaintiff.first_name.toLowerCase().includes(query) ||
+        item.plaintiff.last_name.toLowerCase().includes(query)
       );
     }
 
     if (statusFilter) {
-      filtered = filtered.filter(c => c.status === statusFilter);
-    }
-
-    if (priorityFilter) {
-      filtered = filtered.filter(c => c.priority === priorityFilter);
+      filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
     setFilteredCases(filtered);
-  }, [cases, searchText, statusFilter, priorityFilter]);
+  }, [cases, searchText, statusFilter]);
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { color: string; icon: React.ReactNode }> = {
@@ -111,14 +136,63 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
     return configs[status] || { color: 'default', icon: <FileTextOutlined /> };
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors: Record<string, string> = {
-      low: 'green',
-      medium: 'blue',
-      high: 'orange',
-      urgent: 'red',
-    };
-    return colors[priority] || 'default';
+  const loadCaseDetails = async (caseItem: ArbitrationCase) => {
+    try {
+      setDetailLoading(true);
+      setSelectedCase(caseItem);
+      setModalOpen(true);
+      const detail = await arbitrationApi.getCase(caseItem.case_number);
+      setDetailData(detail);
+      const feed = await arbitrationApi.getActivityFeed(detail.id);
+      setFeedData(feed.feed || []);
+    } catch {
+      message.error('Не удалось загрузить дело');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedCase(null);
+    setDetailData(null);
+    setFeedData([]);
+    setMessageText('');
+  };
+
+  const refreshSelectedCase = async () => {
+    if (!selectedCase) return;
+    await loadCaseDetails(selectedCase);
+    onRefresh();
+  };
+
+  const handleStatusChange = async (status: string) => {
+    if (!detailData?.id) return;
+    try {
+      setStatusUpdating(true);
+      await arbitrationApi.updateStatus(detailData.id, status);
+      await refreshSelectedCase();
+      message.success('Статус обновлен');
+    } catch {
+      message.error('Не удалось обновить статус');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!detailData?.id || !messageText.trim()) return;
+    try {
+      setSending(true);
+      await arbitrationApi.sendMessage(detailData.id, messageText);
+      setMessageText('');
+      await refreshSelectedCase();
+      message.success('Сообщение отправлено');
+    } catch {
+      message.error('Не удалось отправить сообщение');
+    } finally {
+      setSending(false);
+    }
   };
 
   const columns: ColumnsType<ArbitrationCase> = [
@@ -130,13 +204,10 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       fixed: 'left',
       render: (text, record) => (
         <Space direction="vertical" size={0}>
-          <Text strong style={{ color: '#1890ff', cursor: 'pointer' }}
-                onClick={() => navigate(`/admin/arbitration/case/${record.case_number}`)}>
+          <Text strong style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => loadCaseDetails(record)}>
             {text}
           </Text>
-          {record.unread_count > 0 && (
-            <Badge count={record.unread_count} size="small" />
-          )}
+          {record.unread_count > 0 ? <Badge count={record.unread_count} size="small" /> : null}
         </Space>
       ),
     },
@@ -148,12 +219,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
         <Space>
           <UserOutlined style={{ color: '#1890ff' }} />
           <Space direction="vertical" size={0}>
-            <Text strong>
-              {record.plaintiff.first_name} {record.plaintiff.last_name}
-            </Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {record.plaintiff.email}
-            </Text>
+            <Text strong>{record.plaintiff.first_name} {record.plaintiff.last_name}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.plaintiff.email}</Text>
           </Space>
         </Space>
       ),
@@ -167,12 +234,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
           <Space>
             <UserOutlined style={{ color: '#fa8c16' }} />
             <Space direction="vertical" size={0}>
-              <Text strong>
-                {record.defendant.first_name} {record.defendant.last_name}
-              </Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {record.defendant.email}
-              </Text>
+              <Text strong>{record.defendant.first_name} {record.defendant.last_name}</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>{record.defendant.email}</Text>
             </Space>
           </Space>
         ) : (
@@ -186,28 +249,16 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       key: 'subject',
       ellipsis: true,
       render: (text, record) => (
-        <Tooltip title={text}>
-          <Space direction="vertical" size={0}>
-            <Text>{text}</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {record.reason_display}
-            </Text>
-          </Space>
-        </Tooltip>
+        <Space direction="vertical" size={0}>
+          <Text>{text}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{record.reason_display}</Text>
+        </Space>
       ),
     },
     {
       title: 'Статус',
       key: 'status',
-      width: 180,
-      filters: [
-        { text: 'Подано', value: 'submitted' },
-        { text: 'На рассмотрении', value: 'under_review' },
-        { text: 'В арбитраже', value: 'in_arbitration' },
-        { text: 'Решение принято', value: 'decision_made' },
-        { text: 'Закрыто', value: 'closed' },
-      ],
-      onFilter: (value, record) => record.status === value,
+      width: 190,
       render: (_, record) => {
         const config = getStatusConfig(record.status);
         return (
@@ -218,31 +269,12 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       },
     },
     {
-      title: 'Приоритет',
-      key: 'priority',
-      width: 120,
-      filters: [
-        { text: 'Низкий', value: 'low' },
-        { text: 'Средний', value: 'medium' },
-        { text: 'Высокий', value: 'high' },
-        { text: 'Срочный', value: 'urgent' },
-      ],
-      onFilter: (value, record) => record.priority === value,
-      render: (_, record) => (
-        <Tag color={getPriorityColor(record.priority)}>
-          {record.priority_display}
-        </Tag>
-      ),
-    },
-    {
       title: 'Ответственный',
       key: 'assigned_admin',
-      width: 150,
+      width: 160,
       render: (_, record) => (
         record.assigned_admin ? (
-          <Text>
-            {record.assigned_admin.first_name} {record.assigned_admin.last_name}
-          </Text>
+          <Text>{record.assigned_admin.first_name} {record.assigned_admin.last_name}</Text>
         ) : (
           <Text type="secondary">Не назначен</Text>
         )
@@ -252,27 +284,22 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       title: 'Создано',
       dataIndex: 'created_at',
       key: 'created_at',
-      width: 150,
-      sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      width: 160,
       render: (text) => new Date(text).toLocaleString('ru-RU', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       }),
     },
     {
       title: 'Действия',
       key: 'actions',
-      width: 120,
+      width: 130,
       fixed: 'right',
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<EyeOutlined />}
-          onClick={() => navigate(`/admin/arbitration/case/${record.case_number}`)}
-        >
+        <Button type="primary" icon={<EyeOutlined />} onClick={() => loadCaseDetails(record)}>
           Открыть
         </Button>
       ),
@@ -281,138 +308,118 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
   return (
     <div className={styles.arbitrationSection}>
-      {/* Статистика */}
-      {stats && (
+      {stats ? (
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="Всего дел"
-                value={stats.total_cases}
-                prefix={<FileTextOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="Новые"
-                value={stats.new_cases}
-                valueStyle={{ color: '#1890ff' }}
-                prefix={<ExclamationCircleOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="В работе"
-                value={stats.in_progress}
-                valueStyle={{ color: '#fa8c16' }}
-                prefix={<ClockCircleOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="Ожидают решения"
-                value={stats.awaiting_decision}
-                valueStyle={{ color: '#722ed1' }}
-                prefix={<ClockCircleOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="Закрыто"
-                value={stats.closed_cases}
-                valueStyle={{ color: '#52c41a' }}
-                prefix={<CheckCircleOutlined />}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Card>
-              <Statistic
-                title="Срочные"
-                value={stats.urgent_cases}
-                valueStyle={{ color: '#ff4d4f' }}
-                prefix={<ExclamationCircleOutlined />}
-              />
-            </Card>
-          </Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Всего дел" value={stats.total_cases} prefix={<FileTextOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Новые" value={stats.new_cases} valueStyle={{ color: '#1890ff' }} prefix={<ExclamationCircleOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="В работе" value={stats.in_progress} valueStyle={{ color: '#fa8c16' }} prefix={<ClockCircleOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Ожидают решения" value={stats.awaiting_decision} valueStyle={{ color: '#722ed1' }} prefix={<ClockCircleOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Закрыто" value={stats.closed_cases} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Срочные" value={stats.urgent_cases} valueStyle={{ color: '#ff4d4f' }} prefix={<ExclamationCircleOutlined />} /></Card></Col>
         </Row>
-      )}
+      ) : null}
 
-      {/* Фильтры */}
       <Card style={{ marginBottom: 16 }} className={styles.filtersContainer}>
         <Space wrap>
           <Input
             placeholder="Поиск по номеру, теме, истцу..."
             prefix={<SearchOutlined />}
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(event) => setSearchText(event.target.value)}
             className={styles.searchInput}
             allowClear
           />
-          <Select
-            placeholder="Статус"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            className={styles.statusSelect}
-            allowClear
-          >
+          <Select placeholder="Статус" value={statusFilter} onChange={setStatusFilter} className={styles.statusSelect} allowClear>
             <Option value="submitted">Подано</Option>
             <Option value="under_review">На рассмотрении</Option>
             <Option value="in_arbitration">В арбитраже</Option>
             <Option value="decision_made">Решение принято</Option>
             <Option value="closed">Закрыто</Option>
           </Select>
-          <Select
-            placeholder="Приоритет"
-            value={priorityFilter}
-            onChange={setPriorityFilter}
-            className={styles.prioritySelect}
-            allowClear
-          >
-            <Option value="low">Низкий</Option>
-            <Option value="medium">Средний</Option>
-            <Option value="high">Высокий</Option>
-            <Option value="urgent">Срочный</Option>
-          </Select>
-          <Button
-            icon={<FilterOutlined />}
-            onClick={() => {
-              setSearchText('');
-              setStatusFilter(undefined);
-              setPriorityFilter(undefined);
-            }}
-          >
+          <Button icon={<FilterOutlined />} onClick={() => { setSearchText(''); setStatusFilter(undefined); }}>
             Сбросить фильтры
           </Button>
-          <Button type="primary" onClick={onRefresh}>
-            Обновить
-          </Button>
+          <Button type="primary" onClick={onRefresh}>Обновить</Button>
         </Space>
       </Card>
 
-      {/* Таблица */}
       <Card>
         <Table
           columns={columns}
           dataSource={filteredCases}
           loading={loading}
           rowKey="id"
-          scroll={{ x: 1400 }}
-          pagination={{
-            pageSize: 20,
-            showSizeChanger: true,
-            showTotal: (total) => `Всего: ${total} дел`,
-          }}
+          scroll={{ x: 1300 }}
+          pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (total) => `Всего: ${total} дел` }}
+          onRow={(record) => ({ onClick: () => loadCaseDetails(record), style: { cursor: 'pointer' } })}
         />
       </Card>
+
+      <Modal title={selectedCase ? `Арбитраж ${selectedCase.case_number}` : 'Арбитраж'} open={modalOpen} onCancel={closeModal} footer={null} width={900} destroyOnClose>
+        {detailLoading || !detailData ? (
+          <div style={{ padding: 32, textAlign: 'center' }}><Spin /></div>
+        ) : (
+          <Space direction="vertical" size={16} style={{ width: '100%' }}>
+            <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
+              <Space direction="vertical" size={4}>
+                <Title level={4} style={{ margin: 0 }}>{detailData.subject}</Title>
+                <Text type="secondary">{detailData.reason_display || detailData.reason}</Text>
+              </Space>
+              <Tag color={getStatusConfig(detailData.status).color} icon={getStatusConfig(detailData.status).icon}>
+                {detailData.status_display || detailData.status}
+              </Tag>
+            </Space>
+
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Истец">{detailData.plaintiff?.first_name} {detailData.plaintiff?.last_name} · {detailData.plaintiff?.email}</Descriptions.Item>
+              <Descriptions.Item label="Ответчик">{detailData.defendant ? `${detailData.defendant.first_name} ${detailData.defendant.last_name} · ${detailData.defendant.email}` : 'Не указан'}</Descriptions.Item>
+              <Descriptions.Item label="Описание">
+                <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{detailData.description || 'Описание не заполнено'}</Paragraph>
+              </Descriptions.Item>
+              {detailData.order ? <Descriptions.Item label="Заказ">#{detailData.order.id} · {detailData.order.title}</Descriptions.Item> : null}
+            </Descriptions>
+
+            <Card size="small" title="Действия">
+              <Space wrap>
+                <Button onClick={() => handleStatusChange('under_review')} disabled={detailData.status === 'under_review' || detailData.status === 'closed'} loading={statusUpdating}>Взять в работу</Button>
+                <Button type="primary" onClick={() => handleStatusChange('closed')} disabled={detailData.status === 'closed'} loading={statusUpdating}>Закрыть дело</Button>
+              </Space>
+            </Card>
+
+            <Card size="small" title="Переписка и история">
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                {feedData.length === 0 ? (
+                  <Empty description="История пока пуста" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                ) : (
+                  feedData.map((item) => (
+                    <Card key={item.id} size="small" styles={{ body: { padding: 12 } }}>
+                      <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                        <Space wrap>
+                          <Text strong>{item.sender ? `${item.sender.first_name ?? ''} ${item.sender.last_name ?? ''}`.trim() || 'Участник' : 'Система'}</Text>
+                          {item.kind === 'message'
+                            ? (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="blue">Сообщение</Tag>)
+                            : <Tag>Событие</Tag>}
+                          <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
+                        </Space>
+                        <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{item.text || item.description || 'Обновление дела'}</Paragraph>
+                      </Space>
+                    </Card>
+                  ))
+                )}
+              </Space>
+            </Card>
+
+            <Card size="small" title="Сообщение по делу">
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                <Input.TextArea value={messageText} onChange={(event) => setMessageText(event.target.value)} autoSize={{ minRows: 4, maxRows: 8 }} placeholder="Введите сообщение по арбитражу" />
+                <div>
+                  <Button type="primary" icon={<SendOutlined />} onClick={handleSendMessage} loading={sending} disabled={!messageText.trim()}>Отправить</Button>
+                </div>
+              </Space>
+            </Card>
+          </Space>
+        )}
+      </Modal>
     </div>
   );
 };
