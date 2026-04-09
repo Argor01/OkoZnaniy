@@ -170,29 +170,48 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       (item) => !(item.kind === 'activity' && item.activity_type === 'message')
     ) ?? [];
 
-    if (!feedItems.length) {
-      return <Empty description="??????? ????????? ???? ?????" />;
-    }
+      if (!feedItems.length) {
+        return <Empty description="История обращения пока пуста" />;
+      }
 
     return (
       <div style={{ display: 'grid', gap: 12 }}>
         {feedItems.map((item) => {
           if (item.kind === 'message') {
             const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
+            const isSupportMessage = Boolean(item.is_admin);
 
             return (
-              <Card key={item.id} size="small" styles={{ body: { padding: 12 } }}>
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Space size={8} wrap>
-                    <Text strong>{author}</Text>
-                    {item.is_admin ? <Tag color="blue">Поддержка</Tag> : <Tag>Вы</Tag>}
-                    <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: isSupportMessage ? 'flex-start' : 'flex-end',
+                }}
+              >
+                <Card
+                  size="small"
+                  style={{
+                    width: 'fit-content',
+                    maxWidth: compact ? '100%' : '78%',
+                    borderRadius: 16,
+                    background: isSupportMessage ? '#eef7ff' : '#fff8e6',
+                    borderColor: isSupportMessage ? '#b7dcff' : '#f5d27a',
+                  }}
+                  styles={{ body: { padding: '12px 14px' } }}
+                >
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Space size={8} wrap>
+                      <Text strong>{author}</Text>
+                      {isSupportMessage ? <Tag color="blue">Поддержка</Tag> : <Tag>Вы</Tag>}
+                      <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
+                    </Space>
+                    <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+                      {item.text}
+                    </Paragraph>
                   </Space>
-                  <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
-                    {item.text}
-                  </Paragraph>
-                </Space>
-              </Card>
+                </Card>
+              </div>
             );
           }
 
