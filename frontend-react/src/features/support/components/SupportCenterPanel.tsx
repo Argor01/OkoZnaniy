@@ -337,12 +337,6 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
               description="Здесь видны ответы поддержки, изменения статуса и все важные действия по обращению."
             />
 
-            <Card size="small" styles={{ body: { padding: 12 } }}>
-              <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
-                {selectedItem.description}
-              </Paragraph>
-            </Card>
-
             {renderFeed()}
 
             <Card size="small" styles={{ body: { padding: 12 } }}>

@@ -13,6 +13,8 @@ from .serializers import (
 )
 from apps.director.models import DirectorChatRoom, DirectorChatMessage
 from apps.director.serializers import DirectorChatRoomSerializer, DirectorChatMessageSerializer
+from apps.notifications.models import NotificationType
+from apps.notifications.services import NotificationService
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.orders.serializers import OrderSerializer
@@ -261,6 +263,20 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
             is_admin=(request.user.role in ['admin', 'director'])
         )
         log_activity(request.user, 'message', msg_text, support_request=support_request)
+        if request.user.role in ['admin', 'director'] and support_request.user_id:
+            NotificationService.create_notification(
+                recipient=support_request.user,
+                type=NotificationType.NEW_COMMENT,
+                title=f"Ответ по обращению #{support_request.ticket_number}",
+                message="Поддержка оставила новый комментарий по вашему обращению.",
+                related_object_id=support_request.id,
+                related_object_type='support_request',
+                data={
+                    'ticket_type': 'support_request',
+                    'ticket_id': support_request.id,
+                    'ticket_number': support_request.ticket_number,
+                }
+            )
         serializer = SupportMessageSerializer(message)
         return Response(serializer.data)
 
@@ -440,6 +456,20 @@ class ClaimViewSet(viewsets.ModelViewSet):
             is_admin=(request.user.role in ['admin', 'director'])
         )
         log_activity(request.user, 'message', msg_text, claim=claim)
+        if request.user.role in ['admin', 'director'] and claim.user_id:
+            NotificationService.create_notification(
+                recipient=claim.user,
+                type=NotificationType.NEW_COMMENT,
+                title=f"Ответ по обращению #{claim.ticket_number}",
+                message="Поддержка оставила новый комментарий по вашему обращению.",
+                related_object_id=claim.id,
+                related_object_type='claim',
+                data={
+                    'ticket_type': 'claim',
+                    'ticket_id': claim.id,
+                    'ticket_number': claim.ticket_number,
+                }
+            )
         serializer = ClaimMessageSerializer(msg)
         return Response(serializer.data)
     
