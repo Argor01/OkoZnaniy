@@ -12,7 +12,9 @@ import {
   ExclamationCircleOutlined, LinkOutlined
 } from '@ant-design/icons';
 import { AdminLayout } from '@/features/admin/components/Layout';
+import { useAdminAuth } from '@/features/admin/hooks';
 import { apiClient } from '@/api/client';
+import type { MenuKey } from '@/features/admin/types';
 import './ArbitrationCaseDetailPage.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -95,12 +97,23 @@ interface FeedItem {
 export const ArbitrationCaseDetailPage: React.FC = () => {
   const { caseNumber } = useParams<{ caseNumber: string }>();
   const navigate = useNavigate();
+  const { user, handleLogout } = useAdminAuth();
   const [caseData, setCaseData] = useState<ArbitrationCaseDetail | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [messageText, setMessageText] = useState('');
   const feedEndRef = useRef<HTMLDivElement>(null);
+
+  const handleMenuSelect = (key: MenuKey) => {
+    try {
+      localStorage.setItem('adminDashboard_selectedMenu', key);
+    } catch {
+      // Ignore storage failures and still navigate back to the dashboard.
+    }
+
+    navigate('/admin/dashboard');
+  };
 
   useEffect(() => {
     fetchCaseData();
@@ -204,7 +217,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedMenu="arbitration" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="arbitration" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
           <Spin size="large" tip="Загрузка дела..." />
         </div>
@@ -214,7 +227,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
 
   if (!caseData) {
     return (
-      <AdminLayout selectedMenu="arbitration" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="arbitration" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <Card>
           <Empty description="Дело не найдено" />
           <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
@@ -226,7 +239,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   }
 
   return (
-    <AdminLayout selectedMenu="arbitration" onMenuSelect={() => {}} onLogout={() => {}}>
+    <AdminLayout user={user} selectedMenu="arbitration" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
       <div className="arbitration-detail-page">
         {/* Header */}
         <div className="page-header">

@@ -12,8 +12,9 @@ import {
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
+import { useAdminAuth, useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
+import type { MenuKey } from '@/features/admin/types';
 import '@/styles/ticket-detail.css';
 
 const { Text } = Typography;
@@ -74,6 +75,7 @@ const getPriorityText = (p: string) => ({ low: 'Низкий', medium: 'Сред
 export const TicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const { user, handleLogout } = useAdminAuth();
   const [replyText, setReplyText] = useState('');
   const [finalText, setFinalText] = useState('');
   const [sending, setSending] = useState(false);
@@ -92,6 +94,16 @@ export const TicketDetailPage: React.FC = () => {
   const { feed, loading: feedLoading, refetch: refetchFeed } =
     useTicketActivity(ticket?.id ?? null, ticket?.type ?? null);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority, assignUsers, addTag, removeTag } = useTicketActions();
+
+  const handleMenuSelect = (key: MenuKey) => {
+    try {
+      localStorage.setItem('adminDashboard_selectedMenu', key);
+    } catch {
+      // Ignore storage failures and still navigate back to the dashboard.
+    }
+
+    navigate('/admin/dashboard');
+  };
 
   useEffect(() => {
     const action = new URLSearchParams(window.location.search).get('action');
@@ -186,7 +198,7 @@ export const TicketDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>
       </AdminLayout>
     );
@@ -194,7 +206,7 @@ export const TicketDetailPage: React.FC = () => {
 
   if (!ticket) {
     return (
-      <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <Card>
           <Empty description="Обращение не найдено" />
           <div style={{ textAlign: 'center', marginTop: 16 }}>
@@ -251,7 +263,7 @@ export const TicketDetailPage: React.FC = () => {
   };
 
   return (
-    <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+    <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
       <div style={{ padding: '0 24px' }}>
         <Breadcrumb style={{ marginBottom: 16 }}>
           <Breadcrumb.Item>

@@ -14,8 +14,9 @@ import {
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
+import { useAdminAuth, useTicketActions, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
+import type { MenuKey } from '@/features/admin/types';
 import '../../../styles/arbitration-detail.css';
 
 const { Text, Title, Paragraph } = Typography;
@@ -90,6 +91,7 @@ const getInitials = (firstName: string, lastName: string) => {
 export const ArbitrationDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const { user, handleLogout } = useAdminAuth();
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [finalModalVisible, setFinalModalVisible] = useState(false);
@@ -100,6 +102,16 @@ export const ArbitrationDetailPage: React.FC = () => {
   const ticket = rawTicket as unknown as TicketDetail | null;
   const { feed, loading: feedLoading, refetch: refetchFeed } = useTicketActivity(ticket?.id ?? null, ticket?.type ?? null);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus } = useTicketActions();
+
+  const handleMenuSelect = (key: MenuKey) => {
+    try {
+      localStorage.setItem('adminDashboard_selectedMenu', key);
+    } catch {
+      // Ignore storage failures and still navigate back to the dashboard.
+    }
+
+    navigate('/admin/dashboard');
+  };
 
   const doRefetch = () => { refetch(); refetchFeed(); };
 
@@ -170,7 +182,7 @@ export const ArbitrationDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <div className="arbitration-page">
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
             <Spin size="large" tip="Загрузка обращения..." />
@@ -182,7 +194,7 @@ export const ArbitrationDetailPage: React.FC = () => {
 
   if (!ticket) {
     return (
-      <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+      <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
         <div className="arbitration-page">
           <Card className="arbitration-card">
             <Empty description="Обращение не найдено" />
@@ -198,7 +210,7 @@ export const ArbitrationDetailPage: React.FC = () => {
   const statusConfig = getStatusConfig(ticket.status);
 
   return (
-    <AdminLayout selectedMenu="tickets" onMenuSelect={() => {}} onLogout={() => {}}>
+    <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
       <div className="arbitration-page">
         {/* Header */}
         <div className="arbitration-header">
