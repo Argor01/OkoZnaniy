@@ -180,27 +180,6 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
 
   return (
     <div style={{ display: 'grid', gap: 16, height: '100%', overflow: 'auto', padding: compact ? 12 : 24 }}>
-      {!selectedItem ? (
-        <Card>
-          <Space direction="vertical" size={16} style={{ width: '100%' }}>
-            <Space direction="vertical" size={4}>
-              <Title level={4} style={{ margin: 0 }}>Центр обращений</Title>
-              <Text type="secondary">
-                Вместо чата с поддержкой здесь хранятся все ваши обращения и ход их решения.
-              </Text>
-            </Space>
-            <Space wrap>
-              <Button type="primary" icon={<CustomerServiceOutlined />} onClick={() => goToForm('support')}>
-                Подать обращение
-              </Button>
-              <Button icon={<ExclamationCircleOutlined />} onClick={() => goToForm('arbitration')}>
-                Подать жалобу по заказу
-              </Button>
-            </Space>
-          </Space>
-        </Card>
-      ) : null}
-
       <Card>
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
