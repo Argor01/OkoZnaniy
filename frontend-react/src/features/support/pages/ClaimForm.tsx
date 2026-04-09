@@ -1,448 +1,289 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Form, Input, Select, Button, Card, message, Steps, Radio, InputNumber,
-  Divider, Typography
+  Alert,
+  Button,
+  Card,
+  Form,
+  Input,
+  Select,
+  Space,
+  Typography,
+  message,
 } from 'antd';
-import {
-  ArrowLeftOutlined, FileTextOutlined, UserOutlined, DollarOutlined,
-  CheckCircleOutlined, ExclamationCircleOutlined
-} from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckCircleOutlined, CustomerServiceOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { DashboardLayout } from '@/features/layout';
-import { adminPanelApi } from '@/features/admin/api';
+import { ordersApi } from '@/features/orders/api/orders';
+import { supportRequestsApi } from '@/features/support/api/requests';
 
-const { Text } = Typography;
-const { TextArea } = Input;
-const { Option } = Select;
+const { Paragraph, Text, Title } = Typography;
 
-interface ClaimFormData {
-  claim_type: string;
+type SupportMode = 'support' | 'arbitration';
+
+interface FormValues {
+  mode: SupportMode;
   subject: string;
   description: string;
-  reason: string;
-  refund_type: string;
-  refund_percentage: number;
   order_id?: number;
-  plaintiff_id?: number;
-  defendant_id?: number;
+  reason?: string;
+  refund_type?: 'full' | 'partial' | 'none';
+  refund_percentage?: number;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
 }
+
+const defaultDescriptionByMode: Record<SupportMode, string> = {
+  support: '',
+  arbitration: '',
+};
 
 const ClaimForm: React.FC = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<ClaimFormData>({
-    claim_type: 'complaint',
-    subject: '',
-    description: '',
-    reason: 'order_not_completed',
-    refund_type: 'none',
-    refund_percentage: 0,
-  });
+  const [searchParams] = useSearchParams();
+  const [form] = Form.useForm<FormValues>();
+  const [submitting, setSubmitting] = React.useState(false);
+  const [orders, setOrders] = React.useState<Array<{ id: number; title?: string }>>([]);
 
-  // Получение заказов пользователя для выбора
-  const [userOrders, setUserOrders] = useState<any[]>([]);
-  
-  useEffect(() => {
-    const loadUserOrders = async () => {
+  const initialMode = (searchParams.get('mode') === 'arbitration' ? 'arbitration' : 'support') as SupportMode;
+  const initialOrderId = Number(searchParams.get('orderId') || '');
+
+  React.useEffect(() => {
+    form.setFieldsValue({
+      mode: initialMode,
+      order_id: Number.isFinite(initialOrderId) && initialOrderId > 0 ? initialOrderId : undefined,
+      refund_type: initialMode === 'arbitration' ? 'none' : undefined,
+      priority: 'medium',
+      description: defaultDescriptionByMode[initialMode],
+    });
+  }, [form, initialMode, initialOrderId]);
+
+  React.useEffect(() => {
+    const loadOrders = async () => {
       try {
-        // Загружаем заказы пользователя через orders API
-        const response = await fetch('/api/orders/my-orders/', {
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUserOrders(Array.isArray(data) ? data : []);
-        }
-      } catch (error) {
-        console.error('Ошибка загрузки заказов:', error);
+        const response = await ordersApi.getClientOrders({ ordering: '-created_at' });
+        const items = Array.isArray(response)
+          ? response
+          : Array.isArray((response as any)?.results)
+            ? (response as any).results
+            : [];
+        setOrders(items);
+      } catch {
+        setOrders([]);
       }
     };
-    loadUserOrders();
+
+    void loadOrders();
   }, []);
 
-  const updateFormData = (values: Partial<ClaimFormData>) => {
-    setFormData(prev => ({ ...prev, ...values }));
-  };
+  const mode = Form.useWatch('mode', form) ?? initialMode;
+  const refundType = Form.useWatch('refund_type', form) ?? 'none';
 
-  const nextStep = () => {
-    setCurrentStep(prev => prev + 1);
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => prev - 1);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.description.trim()) {
-      message.error('Пожалуйста, заполните описание претензии');
-      return;
-    }
-
-    setLoading(true);
+  const handleSubmit = async (values: FormValues) => {
     try {
-      const claimData: any = {
-        claim_type: formData.claim_type,
-        subject: formData.subject || `Претензия: ${formData.reason}`,
-        description: formData.description,
-        reason: formData.reason,
-        refund_type: formData.refund_type,
-        refund_percentage: formData.refund_percentage,
-      };
+      setSubmitting(true);
 
-      if (formData.order_id) {
-        claimData.order_id = formData.order_id;
+      if (values.mode === 'support') {
+        await supportRequestsApi.createSupportRequest({
+          subject: values.subject,
+          description: values.description,
+          priority: values.priority ?? 'medium',
+        });
+        message.success('Обращение отправлено в поддержку');
+      } else {
+        await supportRequestsApi.createClaim({
+          claim_type: 'complaint',
+          subject: values.subject,
+          description: values.description,
+          order_id: values.order_id,
+          reason: values.reason ?? 'other',
+          refund_type: values.refund_type ?? 'none',
+          refund_percentage: values.refund_type === 'partial' ? values.refund_percentage ?? 0 : 0,
+        });
+        message.success('Жалоба передана в арбитраж');
       }
 
-      const response = await fetch('/api/admin-panel/claims/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(claimData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка создания претензии');
-      }
-      
-      message.success('Претензия успешно создана!');
       navigate('/support');
     } catch (error: any) {
-      console.error('Ошибка создания претензии:', error);
-      message.error(error.response?.data?.message || 'Не удалось создать претензию');
+      message.error(error?.response?.data?.detail || error?.response?.data?.error || 'Не удалось отправить обращение');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const steps = [
-    {
-      title: 'Тип претензии',
-      icon: <FileTextOutlined />,
-    },
-    {
-      title: 'Детали',
-      icon: <ExclamationCircleOutlined />,
-    },
-    {
-      title: 'Финансы',
-      icon: <DollarOutlined />,
-    },
-    {
-      title: 'Проверка',
-      icon: <CheckCircleOutlined />,
-    },
-  ];
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
-            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16 }}>
-              Выберите тип претензии
-            </Text>
-            <Radio.Group
-              value={formData.claim_type}
-              onChange={(e) => updateFormData({ claim_type: e.target.value })}
-              style={{ width: '100%' }}
-            >
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, padding: 12, cursor: 'pointer', background: formData.claim_type === 'complaint' ? '#e6f7ff' : '#fff' }} onClick={() => updateFormData({ claim_type: 'complaint' })}>
-                  <Text strong>Жалоба</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Жалоба на качество работы или поведение исполнителя
-                  </Text>
-                </div>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, padding: 12, cursor: 'pointer', background: formData.claim_type === 'refund' ? '#e6f7ff' : '#fff' }} onClick={() => updateFormData({ claim_type: 'refund' })}>
-                  <Text strong>Возврат средств</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Требование возврата полной или частичной суммы
-                  </Text>
-                </div>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, padding: 12, cursor: 'pointer', background: formData.claim_type === 'quality' ? '#e6f7ff' : '#fff' }} onClick={() => updateFormData({ claim_type: 'quality' })}>
-                  <Text strong>Качество работы</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Претензии к качеству выполненной работы
-                  </Text>
-                </div>
-              </div>
-              <div>
-                <div style={{ border: '1px solid #d9d9d9', borderRadius: 8, padding: 12, cursor: 'pointer', background: formData.claim_type === 'other' ? '#e6f7ff' : '#fff' }} onClick={() => updateFormData({ claim_type: 'other' })}>
-                  <Text strong>Другое</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Прочие вопросы требующие вмешательства администрации
-                  </Text>
-                </div>
-              </div>
-            </Radio.Group>
-
-            {userOrders.length > 0 && (
-              <>
-                <Divider>Связать с заказом</Divider>
-                <Select
-                  value={formData.order_id}
-                  onChange={(value) => updateFormData({ order_id: value })}
-                  placeholder="Выберите заказ (необязательно)"
-                  style={{ width: '100%' }}
-                  allowClear
-                >
-                  {userOrders.map((order) => (
-                    <Option key={order.id} value={order.id}>
-                      Заказ #{order.id} - {order.title}
-                    </Option>
-                  ))}
-                </Select>
-              </>
-            )}
-          </div>
-        );
-
-      case 1:
-        return (
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
-            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16 }}>
-              Причина и описание
-            </Text>
-            
-            <Form layout="vertical" style={{ marginBottom: 16 }}>
-              <Form.Item label="Причина претензии" required>
-                <Select
-                  value={formData.reason}
-                  onChange={(value) => updateFormData({ reason: value })}
-                  style={{ width: '100%' }}
-                >
-                  <Option value="order_not_completed">Заказ не выполнен</Option>
-                  <Option value="poor_quality">Низкое качество работы</Option>
-                  <Option value="deadline_violation">Нарушение сроков</Option>
-                  <Option value="contact_violation">Нарушение контактов</Option>
-                  <Option value="other">Другое</Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item label="Тема" required>
-                <Input
-                  value={formData.subject}
-                  onChange={(e) => updateFormData({ subject: e.target.value })}
-                  placeholder="Краткая тема претензии"
-                  maxLength={255}
-                />
-              </Form.Item>
-
-              <Form.Item label="Описание претензии" required>
-                <TextArea
-                  value={formData.description}
-                  onChange={(e) => updateFormData({ description: e.target.value })}
-                  placeholder="Подробно опишите вашу претензию..."
-                  rows={6}
-                  showCount
-                  maxLength={2000}
-                />
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  {formData.description.length}/2000 символов
-                </Text>
-              </Form.Item>
-            </Form>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
-            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16 }}>
-              Финансовые требования
-            </Text>
-            
-            <Form layout="vertical">
-              <Form.Item label="Тип возврата" required>
-                <Radio.Group
-                  value={formData.refund_type}
-                  onChange={(e) => updateFormData({ refund_type: e.target.value })}
-                  style={{ width: '100%' }}
-                >
-                  <div style={{ marginBottom: 12 }}>
-                    <Radio value="full">Полный возврат</Radio>
-                  </div>
-                  <div style={{ marginBottom: 12 }}>
-                    <Radio value="partial">Частичный возврат</Radio>
-                  </div>
-                  <div>
-                    <Radio value="none">Без возврата</Radio>
-                  </div>
-                </Radio.Group>
-              </Form.Item>
-
-              {formData.refund_type === 'partial' && (
-                <>
-                  <Form.Item label="Процент возврата" required>
-                    <InputNumber
-                      value={formData.refund_percentage}
-                      onChange={(value) => updateFormData({ refund_percentage: value || 0 })}
-                      min={0}
-                      max={100}
-                      style={{ width: '100%' }}
-                      formatter={(value) => `${value}%`}
-                      parser={(value) => Number(value?.replace('%', ''))}
-                    />
-                  </Form.Item>
-                  <Form.Item>
-                    <div style={{ background: '#f5f5f5', padding: 12, borderRadius: 4 }}>
-                      <Text type="secondary">
-                        Укажите процент от суммы заказа, который вы хотите вернуть.
-                      </Text>
-                    </div>
-                  </Form.Item>
-                </>
-              )}
-
-              {formData.refund_type === 'full' && (
-                <Form.Item>
-                  <div style={{ background: '#e6f7ff', padding: 12, borderRadius: 4, border: '1px solid #91d5ff' }}>
-                    <Text type="secondary">
-                      Будет запрошен полный возврат суммы заказа.
-                    </Text>
-                  </div>
-                </Form.Item>
-              )}
-            </Form>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
-            <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 16 }}>
-              Проверка данных
-            </Text>
-            
-            <Card size="small" style={{ marginBottom: 12 }}>
-              <div style={{ marginBottom: 8 }}>
-                <Text type="secondary">Тип претензии:</Text>
-                <br />
-                <Text strong>
-                  {{
-                    complaint: 'Жалоба',
-                    refund: 'Возврат средств',
-                    quality: 'Качество работы',
-                    other: 'Другое',
-                  }[formData.claim_type]}
-                </Text>
-              </div>
-              <Divider style={{ margin: '8px 0' }} />
-              <div style={{ marginBottom: 8 }}>
-                <Text type="secondary">Причина:</Text>
-                <br />
-                <Text strong>
-                  {{
-                    order_not_completed: 'Заказ не выполнен',
-                    poor_quality: 'Низкое качество работы',
-                    deadline_violation: 'Нарушение сроков',
-                    contact_violation: 'Нарушение контактов',
-                    other: 'Другое',
-                  }[formData.reason]}
-                </Text>
-              </div>
-              {formData.subject && (
-                <>
-                  <Divider style={{ margin: '8px 0' }} />
-                  <div style={{ marginBottom: 8 }}>
-                    <Text type="secondary">Тема:</Text>
-                    <br />
-                    <Text>{formData.subject}</Text>
-                  </div>
-                </>
-              )}
-              <Divider style={{ margin: '8px 0' }} />
-              <div style={{ marginBottom: 8 }}>
-                <Text type="secondary">Описание:</Text>
-                <br />
-                <Text>{formData.description || 'Не указано'}</Text>
-              </div>
-              <Divider style={{ margin: '8px 0' }} />
-              <div style={{ marginBottom: 8 }}>
-                <Text type="secondary">Финансовые требования:</Text>
-                <br />
-                <Text strong>
-                  {{
-                    full: 'Полный возврат',
-                    partial: `Частичный возврат (${formData.refund_percentage}%)`,
-                    none: 'Без возврата',
-                  }[formData.refund_type]}
-                </Text>
-              </div>
-            </Card>
-
-            <div style={{ background: '#fffbe6', padding: 12, borderRadius: 4, border: '1px solid #ffe58f' }}>
-              <Text type="secondary">
-                <ExclamationCircleOutlined /> После отправки претензия будет рассмотрена администрацией в ближайшее время.
-              </Text>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
+      setSubmitting(false);
     }
   };
 
   return (
     <DashboardLayout>
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: 880, margin: '0 auto', padding: '24px 16px' }}>
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
           onClick={() => navigate('/support')}
           style={{ marginBottom: 16 }}
         >
-          Назад
+          Назад к обращениям
         </Button>
 
-        <Card title="Подать претензию (Арбитраж)">
-          <Steps
-            current={currentStep}
-            items={steps}
-            style={{ marginBottom: 32 }}
-          />
+        <Card>
+          <Space direction="vertical" size={20} style={{ width: '100%' }}>
+            <div>
+              <Title level={3} style={{ marginBottom: 8 }}>Форма обращения</Title>
+              <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                Здесь можно быстро отправить обычный вопрос в поддержку или открыть арбитражный спор по заказу.
+              </Paragraph>
+            </div>
 
-          {renderStepContent()}
+            <Alert
+              type={mode === 'arbitration' ? 'warning' : 'info'}
+              showIcon
+              icon={mode === 'arbitration' ? <ExclamationCircleOutlined /> : <CustomerServiceOutlined />}
+              message={mode === 'arbitration' ? 'Арбитраж по заказу' : 'Обычное обращение'}
+              description={
+                mode === 'arbitration'
+                  ? 'Используйте этот режим, если вопрос связан с заказом, сроками, исполнением или возвратом денег.'
+                  : 'Используйте этот режим для обычных вопросов по сервису, аккаунту, оплате или работе платформы.'
+              }
+            />
 
-          <Divider />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-            <Button
-              disabled={currentStep === 0}
-              onClick={prevStep}
+            <Form<FormValues>
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                mode: initialMode,
+                priority: 'medium',
+                refund_type: 'none',
+              }}
             >
-              Назад
-            </Button>
-            
-            {currentStep < steps.length - 1 ? (
-              <Button
-                type="primary"
-                onClick={nextStep}
+              <Form.Item
+                name="mode"
+                label="Тип обращения"
+                rules={[{ required: true, message: 'Выберите тип обращения' }]}
               >
-                Далее
-              </Button>
-            ) : (
-              <Button
-                type="primary"
-                icon={<CheckCircleOutlined />}
-                onClick={handleSubmit}
-                loading={loading}
-                disabled={!formData.description.trim()}
+                <Select
+                  options={[
+                    { value: 'support', label: 'Обычное обращение' },
+                    { value: 'arbitration', label: 'Арбитраж по заказу' },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="subject"
+                label="Тема"
+                rules={[{ required: true, message: 'Укажите тему обращения' }]}
               >
-                Отправить претензию
-              </Button>
-            )}
-          </div>
+                <Input placeholder="Коротко опишите, с чем нужна помощь" maxLength={255} />
+              </Form.Item>
+
+              <Form.Item
+                name="description"
+                label="Описание"
+                rules={[{ required: true, message: 'Опишите ситуацию' }]}
+              >
+                <Input.TextArea
+                  rows={7}
+                  maxLength={3000}
+                  showCount
+                  placeholder={
+                    mode === 'arbitration'
+                      ? 'Опишите, что произошло по заказу, какие были договорённости и что вы ожидаете по итогу.'
+                      : 'Опишите вопрос как можно понятнее. Если уже были действия или ошибки, тоже укажите их.'
+                  }
+                />
+              </Form.Item>
+
+              {mode === 'support' ? (
+                <Form.Item name="priority" label="Срочность">
+                  <Select
+                    options={[
+                      { value: 'low', label: 'Низкая' },
+                      { value: 'medium', label: 'Средняя' },
+                      { value: 'high', label: 'Высокая' },
+                      { value: 'urgent', label: 'Срочная' },
+                    ]}
+                  />
+                </Form.Item>
+              ) : (
+                <>
+                  <Form.Item
+                    name="order_id"
+                    label="Связанный заказ"
+                    rules={[{ required: true, message: 'Выберите заказ для арбитража' }]}
+                  >
+                    <Select
+                      showSearch
+                      optionFilterProp="label"
+                      placeholder="Выберите заказ"
+                      options={orders.map((order) => ({
+                        value: order.id,
+                        label: `Заказ #${order.id}${order.title ? ` - ${order.title}` : ''}`,
+                      }))}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="reason"
+                    label="Причина спора"
+                    rules={[{ required: true, message: 'Выберите причину' }]}
+                  >
+                    <Select
+                      options={[
+                        { value: 'order_not_completed', label: 'Заказ не выполнен' },
+                        { value: 'poor_quality', label: 'Низкое качество работы' },
+                        { value: 'deadline_violation', label: 'Нарушение сроков' },
+                        { value: 'contact_violation', label: 'Нарушение правил общения' },
+                        { value: 'other', label: 'Другое' },
+                      ]}
+                    />
+                  </Form.Item>
+
+                  <Form.Item name="refund_type" label="Что требуется по деньгам">
+                    <Select
+                      options={[
+                        { value: 'none', label: 'Возврат не требуется' },
+                        { value: 'full', label: 'Полный возврат' },
+                        { value: 'partial', label: 'Частичный возврат' },
+                      ]}
+                    />
+                  </Form.Item>
+
+                  {refundType === 'partial' ? (
+                    <Form.Item
+                      name="refund_percentage"
+                      label="Процент возврата"
+                      rules={[{ required: true, message: 'Укажите процент возврата' }]}
+                    >
+                      <Select
+                        options={[
+                          { value: 10, label: '10%' },
+                          { value: 25, label: '25%' },
+                          { value: 50, label: '50%' },
+                          { value: 75, label: '75%' },
+                          { value: 100, label: '100%' },
+                        ]}
+                      />
+                    </Form.Item>
+                  ) : null}
+                </>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<CheckCircleOutlined />}
+                  loading={submitting}
+                >
+                  {mode === 'arbitration' ? 'Отправить в арбитраж' : 'Отправить обращение'}
+                </Button>
+              </div>
+            </Form>
+
+            <Alert
+              type="success"
+              showIcon
+              message="После отправки"
+              description="Обращение появится в центре обращений. Там же будет видно изменение статуса, ответы поддержки и ход решения."
+            />
+          </Space>
         </Card>
       </div>
     </DashboardLayout>

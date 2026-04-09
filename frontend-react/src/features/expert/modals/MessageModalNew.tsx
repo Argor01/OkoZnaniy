@@ -45,14 +45,13 @@ import { getMediaUrl } from '../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
+import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
 import { ROUTES } from '@/utils/constants';
 import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
 
 const { Text } = Typography;
-const SUPPORT_CLAIM_DRAFT_KEY = 'support_claim_draft';
-
 interface MessageModalProps {
   visible: boolean;
   onClose: () => void;
@@ -62,7 +61,6 @@ interface MessageModalProps {
   selectedUserId?: number; 
   selectedOrderId?: number; 
   chatContextTitle?: string;
-  supportUserId?: number;
   userProfile?: { role?: string };
 }
 
@@ -85,13 +83,6 @@ type WorkOfferData = {
   delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
   delivered_message_id?: number;
 } & Record<string, unknown>;
-
-type SupportClaimDraft = {
-  category?: string;
-  text?: string;
-  orderRelevance?: string;
-  refundType?: string;
-};
 
 type OrderForChat = {
   id: number;
@@ -245,15 +236,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   selectedUserId,
   selectedOrderId,
   chatContextTitle,
-  supportUserId: supportUserIdProp,
   userProfile
 }) => {
-  console.log('🔧 MessageModalNew rendered with supportUserIdProp:', supportUserIdProp);
   const navigate = useNavigate();
   
   const [messageText, setMessageText] = useState<string>('');
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
+  const [supportCenterSelected, setSupportCenterSelected] = useState(false);
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -834,16 +824,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
-  const loadOrCreateSupportChat = useCallback(async (userId?: number) => {
-    console.log('🔧 loadOrCreateSupportChat called with userId:', userId);
-    if (!userId) {
-      console.error('🔧 No userId provided to loadOrCreateSupportChat');
-      antMessage.error('ID пользователя поддержки не найден. Обратитесь к администратору.');
-      return;
-    }
-    console.log('🔧 Calling loadOrCreateChatWithUser with userId:', userId);
-    await loadOrCreateChatWithUser(userId);
-  }, [loadOrCreateChatWithUser]);
+  const loadOrCreateSupportChat = useCallback(async () => {
+    setSupportCenterSelected(true);
+    setSelectedChat(null);
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -895,62 +879,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     };
   }, [visible, loadChats]);
 
-    // Обработчик события для загрузки чата поддержки
   useEffect(() => {
-    const handleLoadSupportChatInModal = async (event: Event) => {
-      const customEvent = event as CustomEvent;
-      let userId = customEvent.detail?.supportUserId;
-      
-      console.log('🔧 handleLoadSupportChatInModal triggered, visible:', visible, 'userId:', userId);
-      
-      // Если userId не передан в событии, пытаемся получить из других источников
-      if (!userId) {
-        userId = (() => {
-          if (typeof supportUserIdProp === 'number' && supportUserIdProp > 0) return supportUserIdProp;
-          const raw = localStorage.getItem('support_user_id');
-          if (!raw) return null;
-          const parsed = Number(raw);
-          return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-        })();
-      }
-
-      // Если support user ID не найден, попробуем получить его из API
-      if (!userId) {
-        try {
-          const response = await fetch('/api/users/support_user/', {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data?.id) {
-              localStorage.setItem('support_user_id', String(data.id));
-              userId = data.id;
-            }
-          } else {
-            console.log('🔧 API response not ok:', response.status);
-          }
-        } catch (error) {
-          console.error('Ошибка получения support user ID:', error);
-        }
-      }
-
-      if (userId) {
-        console.log('🔧 Loading support chat with userId:', userId);
-        await loadOrCreateSupportChat(userId);
-      } else {
-        console.log('🔧 No support user ID available');
-        antMessage.error('ID пользователя поддержки не найден. Обратитесь к администратору.');
-      }
+    const handleOpenSupportCenter = () => {
+      setSupportCenterSelected(true);
+      setSelectedChat(null);
     };
 
-    window.addEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
-    return () => {
-      window.removeEventListener('loadSupportChatInModal', handleLoadSupportChatInModal);
-    };
-  }, [loadOrCreateSupportChat, supportUserIdProp, visible]);
+    window.addEventListener('openSupportCenter', handleOpenSupportCenter);
+    return () => window.removeEventListener('openSupportCenter', handleOpenSupportCenter);
+  }, []);
 
     // Обработчик события для открытия чата по userId (после назначения исполнителя)
   useEffect(() => {
@@ -2035,60 +1972,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
     const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
-  
-    const supportUserId = useMemo(() => {
-    const fromProp = typeof supportUserIdProp === 'number' && supportUserIdProp > 0 ? supportUserIdProp : null;
-    const raw = localStorage.getItem('support_user_id');
-    const fromStorage = raw ? Number(raw) : null;
-    const finalId = fromProp || (Number.isFinite(fromStorage) && fromStorage > 0 ? fromStorage : null);
-    
-    console.log('🔧 Support user ID calculation:', {
-      supportUserIdProp,
-      fromProp,
-      rawFromStorage: raw,
-      fromStorage,
-      finalId
-    });
-    
-    return finalId;
-  }, [supportUserIdProp]);
-  
+
+  const supportUserId = null;
+
   const supportAvatarSrc = '/assets/icons/support.png';
-  
-  const supportChat = useMemo(() => (
-    supportUserId ? (safeChatList.find((chat) => chat.other_user?.id === supportUserId) ?? null) : null
-  ), [supportUserId, safeChatList]);
-  
-  const isSupportChatSelected = useMemo(() => (
-    !!supportUserId && selectedChat?.other_user?.id === supportUserId
-  ), [supportUserId, selectedChat?.other_user?.id]);
 
-  useEffect(() => {
-    if (!visible || !supportUserId) return;
-    const raw = localStorage.getItem(SUPPORT_CLAIM_DRAFT_KEY);
-    if (!raw) return;
+  const supportChat = null;
 
-    let draft: SupportClaimDraft | null = null;
-    try {
-      const parsed = JSON.parse(raw) as SupportClaimDraft;
-      if (parsed && typeof parsed === 'object') draft = parsed;
-    } catch {
-      draft = null;
-    }
-
-    localStorage.removeItem(SUPPORT_CLAIM_DRAFT_KEY);
-    if (!draft) return;
-
-    void (async () => {
-      await loadOrCreateChatWithUser(supportUserId);
-      setSelectedClaimCategory(typeof draft?.category === 'string' && draft.category ? draft.category : 'Другое');
-      setOrderRelevance(typeof draft?.orderRelevance === 'string' ? draft.orderRelevance : '');
-      setRefundType(typeof draft?.refundType === 'string' ? draft.refundType : '');
-      setClaimText(typeof draft?.text === 'string' ? draft.text : '');
-      setShowClaimCategories(false);
-      setClaimModalOpen(true);
-    })();
-  }, [loadOrCreateChatWithUser, supportUserId, visible]);
+  const isSupportChatSelected = supportCenterSelected;
 
   const hasActiveOffersInSelectedChat = useMemo(() => {
     const messages = selectedChat?.messages;
@@ -2256,35 +2147,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
   };
 
-  const handleOverdueComplaint = async () => {
+const handleOverdueComplaint = async () => {
     if (!effectiveOrderId) return;
-    if (!supportUserId) {
-      antMessage.error('Поддержка не настроена');
-      return;
-    }
-    const expertName = selectedChat?.other_user?.username || 'эксперт';
-    const deadlineText = order?.deadline ? new Date(order.deadline).toLocaleString('ru-RU') : 'не указан';
-    const title = order?.title || `Заказ #${effectiveOrderId}`;
-    const text = [
-      'Здравствуйте!',
-      '',
-      `Хочу подать претензию по заказу #${effectiveOrderId}.`,
-      `Заказ: ${title}`,
-      `Эксперт: ${expertName}`,
-      `Срок сдачи: ${deadlineText}`,
-      'Причина: заказ не выполнен в срок.',
-      '',
-      'Описание ситуации:',
-      ''
-    ].join('\n');
-
-    await loadOrCreateChatWithUser(supportUserId);
-    setSelectedClaimCategory('Заказ не выполнен');
-    setOrderRelevance('Заказ актуален');
-    setRefundType('Возврат предоплаты');
-    setClaimText(text);
-    setShowClaimCategories(false);
-    setClaimModalOpen(true);
+    onClose();
+    navigate(`/support/claim-form?mode=arbitration&orderId=${effectiveOrderId}`);
   };
 
   const handleGoToOrder = useCallback(() => {
@@ -2300,12 +2166,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [effectiveOrderId, navigate, onClose]);
 
   const handleContactSupport = useCallback(async () => {
-    if (!supportUserId) {
-      antMessage.error('Поддержка не настроена');
-      return;
-    }
-    await loadOrCreateSupportChat(supportUserId);
-  }, [loadOrCreateSupportChat, supportUserId]);
+    setSupportCenterSelected(true);
+    setSelectedChat(null);
+  }, []);
 
     const filteredChats = useMemo(() => safeChatList.filter(chat => {
     if (searchQuery) {
@@ -2317,11 +2180,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return true;
   }), [safeChatList, searchQuery]);
   
-    const filteredChatsWithoutSupport = useMemo(() => (
-    supportUserId
-      ? filteredChats.filter((chat) => chat.other_user?.id !== supportUserId)
-      : filteredChats
-  ), [filteredChats, supportUserId]);
+    const filteredChatsWithoutSupport = filteredChats;
   
   const normalizedSearchQuery = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
   
@@ -2443,6 +2302,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             {showPinnedSupport && (
               <div 
                 onClick={async () => {
+                  setSupportCenterSelected(true);
+                  setSelectedChat(null);
+                  return;
                   let userId = supportUserId;
                   console.log('🔧 Support chat click - initial supportUserId:', userId);
                   
@@ -2507,7 +2369,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                       ellipsis 
                       className={`${styles.chatListPreview} ${styles.chatListPreviewSupport} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${isMobile ? styles.chatListPreviewSupportMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
                     >
-                      {supportChat?.last_message?.text || 'Написать в поддержку'}
+                      {'Мои обращения и ответы поддержки'}
                     </Text>
                     {(supportChat?.unread_count ?? 0) > 0 && (
                       <Badge 
@@ -2557,7 +2419,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     trigger={['contextMenu']}
                   >
                     <div
-                      onClick={() => loadChatDetail(chat.id)}
+                      onClick={() => {
+                        setSupportCenterSelected(false);
+                        loadChatDetail(chat.id);
+                      }}
                       onContextMenu={handleContextMenu}
                       className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${selectedChat?.id === chat.id ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
                     >
@@ -2608,37 +2473,40 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
         
         <div 
-          key={selectedChat ? `chat-${selectedChat.id}` : 'no-chat'}
-          className={`${styles.chatPanel} ${(!selectedChat && isMobile) ? styles.chatPanelHidden : ''}`}
+          key={selectedChat ? `chat-${selectedChat.id}` : (isSupportChatSelected ? 'support-center' : 'no-chat')}
+          className={`${styles.chatPanel} ${(!selectedChat && !isSupportChatSelected && isMobile) ? styles.chatPanelHidden : ''}`}
         >
           
           <div
-            className={`${styles.chatHeader} ${selectedChat ? styles.chatHeaderActive : styles.chatHeaderEmpty} ${
-              selectedChat
+            className={`${styles.chatHeader} ${(selectedChat || isSupportChatSelected) ? styles.chatHeaderActive : styles.chatHeaderEmpty} ${
+              (selectedChat || isSupportChatSelected)
                 ? (isMobile ? styles.chatHeaderPaddingMobileActive : styles.chatHeaderPaddingDesktopActive)
                 : (isMobile ? styles.chatHeaderPaddingMobileEmpty : styles.chatHeaderPaddingDesktopEmpty)
             }`}
           >
-            {selectedChat ? (
+            {selectedChat || isSupportChatSelected ? (
               <>
                 <Space>
                   {isMobile && (
                     <Button
                       type="text"
                       icon={<ArrowLeftOutlined />}
-                      onClick={() => setSelectedChat(null)}
+                      onClick={() => {
+                        setSelectedChat(null);
+                        setSupportCenterSelected(false);
+                      }}
                       size="small"
                     />
                   )}
                   <Avatar
                     size={isMobile ? 32 : 36}
-                    icon={<UserOutlined />}
-                    src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat.other_user?.avatar)}
+                    icon={isSupportChatSelected ? <CustomerServiceOutlined /> : <UserOutlined />}
+                    src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat?.other_user?.avatar)}
                     className={isSupportChatSelected ? 'support-avatar' : styles.chatHeaderAvatar}
                   />
                   <div>
                     <Text className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
-                      {isSupportChatSelected ? 'Техническая поддержка' : (selectedChat.other_user?.username || 'Пользователь')}
+                      {isSupportChatSelected ? 'Центр обращений' : (selectedChat?.other_user?.username || 'Пользователь')}
                     </Text>
                     {!isSupportChatSelected ? (
                       effectiveOrderId && !isClosedOrder ? (
@@ -2710,7 +2578,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
                     danger
                     icon={<ExclamationCircleOutlined />}
                     size={isMobile ? 'middle' : 'large'}
-                    onClick={() => setClaimModalOpen(true)}
+                    onClick={() => {
+                      onClose();
+                      navigate('/support/claim-form?mode=support');
+                    }}
                     className={`${styles.chatClaimButton} ${isMobile ? styles.chatClaimButtonMobile : ''}`}
                     title="Подать претензию"
                   />
@@ -2903,7 +2774,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             onDragLeave={handleChatDragLeave}
             onDrop={handleChatDrop}
           >
-            {selectedChat ? (
+            {isSupportChatSelected ? (
+              <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
+                <SupportCenterPanel
+                  active={visible && isSupportChatSelected}
+                  compact
+                  onNavigateToForm={(mode) => {
+                    onClose();
+                    navigate(`/support/claim-form?mode=${mode}`);
+                  }}
+                />
+              </div>
+            ) : selectedChat ? (
               <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
                 {isChatFrozen ? (
                   <div className={styles.chatFrozenNotice}>

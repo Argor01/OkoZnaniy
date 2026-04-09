@@ -130,6 +130,7 @@ export const ROUTES = {
     survey: '/improvements',
   },
   supportChat: {
+    root: '/support',
     detail: '/support-chat/:chatId',
   },
 };

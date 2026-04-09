@@ -191,14 +191,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   React.useEffect(() => {
     const handleOpenSupportChat = () => {
       // Перенаправляем на форму подачи жалобы вместо открытия чата
-      navigate('/support/claim-form');
+      closeAllModals();
+      setMessageModalVisible(true);
+      setSelectedUserIdForChat(undefined);
+      setSelectedOrderIdForChat(undefined);
+      setSelectedChatContextTitle(undefined);
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('openSupportCenter'));
+      }, 300);
     };
 
     window.addEventListener('openSupportChat', handleOpenSupportChat);
     return () => {
       window.removeEventListener('openSupportChat', handleOpenSupportChat);
     };
-  }, [closeAllModals, navigate]);
+  }, [closeAllModals]);
 
   // Обработчик события для открытия чата по userId или chatId
   React.useEffect(() => {
@@ -261,8 +268,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleSupportClick = useCallback(() => {
     // Перенаправляем на форму подачи жалобы
-    navigate('/support/claim-form');
-  }, [navigate]);
+    closeAllModals();
+    setMessageModalVisible(true);
+    setSelectedUserIdForChat(undefined);
+    setSelectedOrderIdForChat(undefined);
+    setSelectedChatContextTitle(undefined);
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('openSupportCenter'));
+    }, 300);
+  }, [closeAllModals]);
 
   const handleHeaderMenuClick = useCallback(() => {
     if (isMobile) {

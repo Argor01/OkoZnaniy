@@ -20,6 +20,15 @@ from apps.orders.serializers import OrderSerializer
 User = get_user_model()
 
 
+def can_access_ticket(user, ticket):
+    """Доступ к обращению есть у администратора и владельца обращения."""
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    if getattr(user, 'role', None) == 'admin':
+        return True
+    return getattr(ticket, 'user_id', None) == user.id
+
+
 def log_activity(actor, activity_type, text, meta=None, support_request=None, claim=None):
     """Записать событие в ленту активности тикета"""
     TicketActivity.objects.create(
@@ -144,14 +153,24 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     """ViewSet для запросов в поддержку"""
     queryset = SupportRequest.objects.all()
     serializer_class = SupportRequestSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     
+    def get_permissions(self):
+        if self.action in ['create', 'list', 'retrieve', 'send_message']:
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
+
     def get_queryset(self):
         queryset = super().get_queryset()
+        if self.request.user.role != 'admin':
+            return queryset.filter(user=self.request.user)
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
         return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
     
     @action(detail=True, methods=['post'])
     def take_request(self, request, pk=None):
@@ -233,11 +252,13 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         """Отправить сообщение в запрос"""
         support_request = self.get_object()
         msg_text = request.data.get('message', '')
+        if not msg_text.strip():
+            return Response({'error': 'Сообщение не может быть пустым'}, status=400)
         message = SupportMessage.objects.create(
             request=support_request,
             sender=request.user,
             message=msg_text,
-            is_admin=True
+            is_admin=(request.user.role in ['admin', 'director'])
         )
         log_activity(request.user, 'message', msg_text, support_request=support_request)
         serializer = SupportMessageSerializer(message)
@@ -319,7 +340,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
         - list, retrieve: только администраторы или владелец претензии
         - update, partial_update, destroy, actions: только администраторы
         """
-        if self.action == 'create':
+        if self.action in ['create', 'send_message']:
             return [IsAuthenticated()]
         elif self.action in ['list', 'retrieve']:
             # Для list и retrieve проверим в get_queryset
@@ -410,6 +431,8 @@ class ClaimViewSet(viewsets.ModelViewSet):
         """Отправить сообщение в претензию"""
         claim = self.get_object()
         msg_text = request.data.get('message', '')
+        if not msg_text.strip():
+            return Response({'error': 'Сообщение не может быть пустым'}, status=400)
         msg = ClaimMessage.objects.create(
             claim=claim,
             sender=request.user,
@@ -1060,7 +1083,7 @@ def report_message(request, message_id):
 # ============= ЛЕНТА АКТИВНОСТИ ТИКЕТА =============
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def get_ticket_activity(request, ticket_type, pk):
     """
     Возвращает объединённую ленту:
@@ -1075,6 +1098,8 @@ def get_ticket_activity(request, ticket_type, pk):
             ticket = SupportRequest.objects.get(pk=pk)
         except SupportRequest.DoesNotExist:
             return Response({'error': 'Тикет не найден'}, status=404)
+        if not can_access_ticket(request.user, ticket):
+            return Response({'error': 'Недостаточно прав'}, status=403)
 
         # Сообщения тикета
         ticket_messages = [
@@ -1138,6 +1163,8 @@ def get_ticket_activity(request, ticket_type, pk):
             ticket = Claim.objects.get(pk=pk)
         except Claim.DoesNotExist:
             return Response({'error': 'Тикет не найден'}, status=404)
+        if not can_access_ticket(request.user, ticket):
+            return Response({'error': 'Недостаточно прав'}, status=403)
 
         ticket_messages = [
             {

@@ -2,7 +2,7 @@ import React from 'react';
 import { DashboardLayout } from '@/features/layout';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
 
-const SupportChat: React.FC = () => {
+const SupportCenterPage: React.FC = () => {
   return (
     <DashboardLayout>
       <SupportCenterPanel />
@@ -10,4 +10,4 @@ const SupportChat: React.FC = () => {
   );
 };
 
-export default SupportChat;
+export default SupportCenterPage;
