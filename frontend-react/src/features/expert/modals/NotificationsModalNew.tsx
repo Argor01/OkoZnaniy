@@ -98,6 +98,13 @@ const extractOrderId = (notification: Notification): number | null => {
 };
 
 const resolveNotificationTarget = (notification: Notification): string | null => {
+  if (
+    ['support_request', 'claim', 'arbitration_case'].includes(notification.related_object_type || '') ||
+    ['support_request', 'claim', 'arbitration_case'].includes(String(notification.data?.ticket_type || ''))
+  ) {
+    return '/support';
+  }
+
   const orderId = extractOrderId(notification);
   if (orderId) return `/orders/${orderId}`;
 

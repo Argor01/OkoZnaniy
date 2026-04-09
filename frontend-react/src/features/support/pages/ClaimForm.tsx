@@ -62,7 +62,7 @@ const ClaimForm: React.FC = () => {
   React.useEffect(() => {
     const loadOrders = async () => {
       try {
-        const response = await ordersApi.getClientOrders({ ordering: '-created_at' });
+        const response = await ordersApi.getMyOrders({ ordering: '-created_at' });
         const items = Array.isArray(response)
           ? response
           : Array.isArray((response as { results?: Array<{ id: number; title?: string }> })?.results)
@@ -220,7 +220,7 @@ const ClaimForm: React.FC = () => {
                         { value: 'order_not_completed', label: 'Заказ не выполнен' },
                         { value: 'poor_quality', label: 'Низкое качество работы' },
                         { value: 'deadline_violation', label: 'Нарушение сроков' },
-                        { value: 'contact_violation', label: 'Нарушение правил общения' },
+                        { value: 'contract_violation', label: 'Нарушение договоренностей' },
                         { value: 'other', label: 'Другое' },
                       ]}
                     />

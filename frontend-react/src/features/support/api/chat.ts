@@ -185,7 +185,17 @@ export const chatApi = {
     subject: string;
     description: string;
   }): Promise<any> => {
-    const response = await apiClient.post('/admin-panel/claims/', data);
+    const response = await apiClient.post('/arbitration/cases/submit-claim/', {
+      order_id: data.order_id,
+      subject: data.subject,
+      description: data.description,
+      reason: 'other',
+      refund_type: 'none',
+      requested_refund_percentage: 0,
+      requested_refund_amount: null,
+      deadline_relevant: false,
+      evidence_files: [],
+    });
     return response.data;
   },
 };

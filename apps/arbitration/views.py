@@ -18,6 +18,9 @@ from .serializers import (
     ComplaintSerializer
 )
 from apps.orders.models import Order
+from apps.chat.models import Chat, Message as ChatMessage
+from apps.notifications.models import NotificationType
+from apps.notifications.services import NotificationService
 
 User = get_user_model()
 
@@ -41,6 +44,69 @@ def log_activity(case, actor, activity_type, description, metadata=None):
     )
 
 
+def freeze_case_context(case):
+    """Заморозить заказ и связанный чат на время арбитража."""
+    if not case.order_id:
+        return
+
+    order = case.order
+    if order:
+        order.freeze(f'Открыт арбитраж {case.case_number}')
+        if not order.has_issues:
+            order.has_issues = True
+            order.save(update_fields=['has_issues', 'updated_at'])
+
+    for chat in Chat.objects.filter(order_id=case.order_id):
+        chat.freeze(f'Открыт арбитраж {case.case_number}')
+
+
+def unfreeze_case_context(case):
+    """Разморозить заказ и чат, если по заказу не осталось активных арбитражей."""
+    if not case.order_id:
+        return
+
+    has_active_cases = ArbitrationCase.objects.filter(order_id=case.order_id).exclude(
+        id=case.id
+    ).exclude(status__in=['closed', 'rejected']).exists()
+
+    if has_active_cases:
+        return
+
+    order = case.order
+    if order:
+        order.unfreeze()
+        if order.has_issues:
+            order.has_issues = False
+            order.save(update_fields=['has_issues', 'updated_at'])
+
+    for chat in Chat.objects.filter(order_id=case.order_id):
+        chat.unfreeze()
+
+
+def notify_case_participants(case, *, title, message_text, exclude_user_ids=None, notification_type=NotificationType.NEW_COMMENT):
+    exclude_ids = set(exclude_user_ids or [])
+    recipients = []
+    for user in [case.plaintiff, case.defendant]:
+        if user and user.id not in exclude_ids:
+            recipients.append(user)
+
+    for recipient in recipients:
+        NotificationService.create_notification(
+            recipient=recipient,
+            type=notification_type,
+            title=title,
+            message=message_text,
+            related_object_id=case.id,
+            related_object_type='arbitration_case',
+            data={
+                'ticket_type': 'arbitration_case',
+                'case_id': case.id,
+                'case_number': case.case_number,
+                'order_id': case.order_id,
+            }
+        )
+
+
 class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     """ViewSet для арбитражных дел"""
     queryset = ArbitrationCase.objects.all()
@@ -60,7 +126,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         - list, retrieve: пользователь видит свои дела или админы видят все
         - update, partial_update, destroy, admin actions: только администраторы
         """
-        if self.action in ['create', 'submit_claim']:
+        if self.action in ['create', 'submit_claim', 'send_message', 'activity_feed']:
             return [IsAuthenticated()]
         elif self.action in ['list', 'retrieve', 'my_cases']:
             return [IsAuthenticated()]
@@ -123,12 +189,21 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         
         # Автоматически подаем дело
         case.submit()
+        freeze_case_context(case)
         
         log_activity(
             case,
             request.user,
             'submitted',
             f'Дело подано пользователем {request.user.get_full_name() or request.user.username}'
+        )
+
+        notify_case_participants(
+            case,
+            title=f'Открыт арбитраж {case.case_number}',
+            message_text='По заказу открыт арбитраж. Заказ и переписка временно заморожены до решения.',
+            exclude_user_ids=[],
+            notification_type=NotificationType.STATUS_CHANGED,
         )
         
         return Response(
@@ -150,6 +225,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         """Взять дело в работу (только для админов)"""
         case = self.get_object()
         
+        old_status = case.status
         if case.status == 'submitted':
             case.status = 'under_review'
         elif case.status in ['draft', 'awaiting_response']:
@@ -163,7 +239,15 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             request.user,
             'admin_assigned',
             f'Администратор {request.user.get_full_name() or request.user.username} взял дело в работу',
-            {'old_status': case.status, 'new_status': case.status}
+            {'old_status': old_status, 'new_status': case.status}
+        )
+
+        notify_case_participants(
+            case,
+            title=f'Арбитраж {case.case_number} принят в работу',
+            message_text='Администратор взял арбитраж в работу. Следите за обновлениями в центре обращений.',
+            exclude_user_ids=[request.user.id],
+            notification_type=NotificationType.STATUS_CHANGED,
         )
         
         return Response({
@@ -214,6 +298,12 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 'message_sent',
                 f'Сообщение от {request.user.get_full_name() or request.user.username}'
             )
+            notify_case_participants(
+                case,
+                title=f'Новое сообщение по арбитражу {case.case_number}',
+                message_text='По арбитражу появился новый комментарий. Откройте центр обращений, чтобы посмотреть детали.',
+                exclude_user_ids=[request.user.id],
+            )
         
         return Response(
             ArbitrationMessageSerializer(message).data,
@@ -247,6 +337,17 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             'status_changed',
             f'Статус изменен: {status_labels.get(old_status, old_status)} → {status_labels.get(new_status, new_status)}',
             {'old_status': old_status, 'new_status': new_status}
+        )
+
+        if new_status in ['closed', 'rejected']:
+            unfreeze_case_context(case)
+
+        notify_case_participants(
+            case,
+            title=f'Обновлён статус арбитража {case.case_number}',
+            message_text=f'Статус арбитража изменён на «{status_labels.get(new_status, new_status)}».',
+            exclude_user_ids=[request.user.id],
+            notification_type=NotificationType.STATUS_CHANGED,
         )
         
         return Response({
@@ -345,12 +446,21 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         case.status = 'closed'
         case.closed_at = timezone.now()
         case.save()
+        unfreeze_case_context(case)
         
         log_activity(
             case,
             request.user,
             'closed',
             f'Дело закрыто администратором {request.user.get_full_name() or request.user.username}'
+        )
+
+        notify_case_participants(
+            case,
+            title=f'Арбитраж {case.case_number} закрыт',
+            message_text='Арбитраж завершён. Заказ и переписка снова доступны в обычном режиме.',
+            exclude_user_ids=[request.user.id],
+            notification_type=NotificationType.STATUS_CHANGED,
         )
         
         return Response({
@@ -427,6 +537,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 'kind': 'activity',
                 'id': f'act_{a.id}',
                 'activity_type': a.activity_type,
+                'text': a.description,
                 'description': a.description,
                 'metadata': a.metadata,
                 'actor': {
@@ -438,14 +549,39 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             }
             for a in case.activities.select_related('actor').all()
         ]
+
+        order_chat_messages = []
+        if request.user.role == 'admin' and case.order_id:
+            chat_messages = ChatMessage.objects.filter(
+                chat__order_id=case.order_id
+            ).select_related('sender', 'chat').order_by('created_at')
+
+            for chat_message in chat_messages:
+                order_chat_messages.append({
+                    'kind': 'message',
+                    'id': f'chat_{chat_message.id}',
+                    'sender': {
+                        'id': chat_message.sender.id,
+                        'first_name': chat_message.sender.first_name,
+                        'last_name': chat_message.sender.last_name,
+                        'role': getattr(chat_message.sender, 'role', ''),
+                    },
+                    'text': chat_message.text or (chat_message.file_name or 'Файл в чате заказа'),
+                    'message_type': chat_message.message_type,
+                    'is_internal': False,
+                    'source': 'order_chat',
+                    'chat_id': chat_message.chat_id,
+                    'created_at': chat_message.created_at.isoformat(),
+                })
         
         # Объединяем и сортируем
-        feed = messages + activities
+        feed = messages + activities + order_chat_messages
         feed.sort(key=lambda x: x['created_at'])
         
         return Response({
             'messages': messages,
             'activities': activities,
+            'order_chat_messages': order_chat_messages,
             'feed': feed
         })
 

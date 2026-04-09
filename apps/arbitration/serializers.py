@@ -3,6 +3,7 @@ from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Co
 from apps.users.serializers import UserSerializer
 from apps.orders.serializers import OrderSerializer
 from apps.orders.models import Order, OrderFile
+from django.contrib.auth import get_user_model
 
 
 class ArbitrationMessageSerializer(serializers.ModelSerializer):
@@ -184,6 +185,10 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
     )
     
     def validate(self, data):
+        request = self.context['request']
+        user = request.user
+        order_id = data.get('order_id')
+
         # Проверка: описание не может быть пустым
         if not data.get('description', '').strip():
             raise serializers.ValidationError({
@@ -196,16 +201,51 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
                 raise serializers.ValidationError({
                     'requested_refund_percentage': 'Укажите процент возврата'
                 })
+
+        if order_id:
+            try:
+                order = Order.objects.select_related('client', 'expert').get(id=order_id)
+            except Order.DoesNotExist:
+                raise serializers.ValidationError({
+                    'order_id': 'Заказ не найден'
+                })
+
+            if user.id not in {getattr(order.client, 'id', None), getattr(order.expert, 'id', None)}:
+                raise serializers.ValidationError({
+                    'order_id': 'Вы не участвуете в этом заказе'
+                })
+
+            if not order.expert_id:
+                raise serializers.ValidationError({
+                    'order_id': 'По заказу пока не назначен исполнитель'
+                })
         
         return data
     
     def create(self, validated_data):
         # Получаем текущего пользователя из контекста
         user = self.context['request'].user
+        order = None
+        defendant = None
+
+        order_id = validated_data.get('order_id')
+        if order_id:
+            order = Order.objects.select_related('client', 'expert').get(id=order_id)
+            if order.client_id == user.id:
+                defendant = order.expert
+            elif order.expert_id == user.id:
+                defendant = order.client
+
+        if not defendant:
+            defendant_id = validated_data.pop('defendant_id', None)
+            if defendant_id:
+                User = get_user_model()
+                defendant = User.objects.get(id=defendant_id)
         
         # Создаем дело
         case = ArbitrationCase.objects.create(
             plaintiff=user,
+            defendant=defendant,
             **validated_data
         )
         

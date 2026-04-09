@@ -57,8 +57,8 @@ export const arbitrationApi = {
     return response.data;
   },
 
-  getCase: async (caseNumber: string): Promise<ArbitrationCase> => {
-    const response = await apiClient.get(API_ENDPOINTS.admin.arbitration.cases.detail(caseNumber));
+  getCase: async (caseId: number): Promise<ArbitrationCase> => {
+    const response = await apiClient.get(API_ENDPOINTS.admin.arbitration.cases.detail(String(caseId)));
     return response.data;
   },
 

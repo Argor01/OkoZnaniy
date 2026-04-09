@@ -1,5 +1,17 @@
-export type SupportConversationType = 'support_request' | 'claim';
-export type SupportConversationStatus = 'open' | 'in_progress' | 'completed' | 'new' | 'pending_approval';
+export type SupportConversationType = 'support_request' | 'claim' | 'arbitration_case';
+export type SupportConversationStatus =
+  | 'open'
+  | 'in_progress'
+  | 'completed'
+  | 'new'
+  | 'pending_approval'
+  | 'submitted'
+  | 'under_review'
+  | 'awaiting_response'
+  | 'in_arbitration'
+  | 'decision_made'
+  | 'closed'
+  | 'rejected';
 export type SupportConversationPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface SupportConversation {
@@ -54,7 +66,7 @@ export interface CreateSupportRequestPayload {
 }
 
 export interface CreateClaimPayload {
-  claim_type: string;
+  claim_type?: string;
   subject: string;
   description: string;
   reason?: string;

@@ -141,7 +141,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       setDetailLoading(true);
       setSelectedCase(caseItem);
       setModalOpen(true);
-      const detail = await arbitrationApi.getCase(caseItem.case_number);
+      const detail = await arbitrationApi.getCase(caseItem.id);
       setDetailData(detail);
       const feed = await arbitrationApi.getActivityFeed(detail.id);
       setFeedData(feed.feed || []);
@@ -397,7 +397,9 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                         <Space wrap>
                           <Text strong>{item.sender ? `${item.sender.first_name ?? ''} ${item.sender.last_name ?? ''}`.trim() || 'Участник' : 'Система'}</Text>
                           {item.kind === 'message'
-                            ? (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="blue">Сообщение</Tag>)
+                            ? item.source === 'order_chat'
+                              ? <Tag color="geekblue">Чат по заказу</Tag>
+                              : (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="blue">Сообщение</Tag>)
                             : <Tag>Событие</Tag>}
                           <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
                         </Space>

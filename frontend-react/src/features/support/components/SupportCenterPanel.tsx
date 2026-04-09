@@ -38,6 +38,13 @@ const statusMeta: Record<string, { color: string; label: string }> = {
   in_progress: { color: 'processing', label: 'В работе' },
   completed: { color: 'green', label: 'Решено' },
   pending_approval: { color: 'purple', label: 'Ожидает решения' },
+  submitted: { color: 'blue', label: 'Подано' },
+  under_review: { color: 'processing', label: 'На рассмотрении' },
+  awaiting_response: { color: 'gold', label: 'Ожидает ответа' },
+  in_arbitration: { color: 'volcano', label: 'В арбитраже' },
+  decision_made: { color: 'cyan', label: 'Решение принято' },
+  closed: { color: 'green', label: 'Закрыто' },
+  rejected: { color: 'red', label: 'Отклонено' },
 };
 
 interface SupportCenterPanelProps {
@@ -115,6 +122,10 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       return items;
     }
 
+    if (selectedType === 'claim') {
+      return items.filter((item) => item.type === 'claim' || item.type === 'arbitration_case');
+    }
+
     return items.filter((item) => item.type === selectedType);
   }, [items, selectedType]);
 
@@ -179,7 +190,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
         {feedItems.map((item) => {
           if (item.kind === 'message') {
             const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
-            const isSupportMessage = Boolean(item.is_admin);
+            const isSupportMessage = Boolean(item.is_admin) || item.sender?.role === 'admin';
+            const isOrderChat = item.source === 'order_chat';
 
             return (
               <div
@@ -203,7 +215,13 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                   <Space direction="vertical" size={4} style={{ width: '100%' }}>
                     <Space size={8} wrap>
                       <Text strong>{author}</Text>
-                      {isSupportMessage ? <Tag color="blue">Поддержка</Tag> : <Tag>Вы</Tag>}
+                      {isOrderChat ? (
+                        <Tag color="geekblue">Чат по заказу</Tag>
+                      ) : isSupportMessage ? (
+                        <Tag color="blue">Поддержка</Tag>
+                      ) : (
+                        <Tag>Вы</Tag>
+                      )}
                       <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
                     </Space>
                     <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
@@ -288,8 +306,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                           <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
                             <Space wrap>
                               <Text strong>{item.subject}</Text>
-                              <Tag color={item.type === 'claim' ? 'volcano' : 'blue'}>
-                                {item.type === 'claim' ? 'Арбитраж' : 'Обращение'}
+                              <Tag color={item.type === 'support_request' ? 'blue' : 'volcano'}>
+                                {item.type === 'support_request' ? 'Обращение' : 'Арбитраж'}
                               </Tag>
                             </Space>
                             <Text type="secondary">#{item.ticket_number}</Text>
@@ -340,8 +358,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
               <Space direction="vertical" size={4}>
                 <Space wrap>
-                  <Tag color={selectedItem.type === 'claim' ? 'volcano' : 'blue'}>
-                    {selectedItem.type === 'claim' ? 'Арбитраж' : 'Обращение'}
+                  <Tag color={selectedItem.type === 'support_request' ? 'blue' : 'volcano'}>
+                    {selectedItem.type === 'support_request' ? 'Обращение' : 'Арбитраж'}
                   </Tag>
                   <Text type="secondary">#{selectedItem.ticket_number}</Text>
                 </Space>
