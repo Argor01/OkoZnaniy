@@ -243,8 +243,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleArbitrationClick = useCallback(() => {
     closeAllModals();
-    setArbitrationModalVisible(true);
-  }, [closeAllModals]);
+    navigate('/support');
+  }, [closeAllModals, navigate]);
 
   const handleFinanceClick = useCallback(() => {
     closeAllModals();
@@ -388,6 +388,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const getSelectedKey = () => {
     const path = location.pathname;
     if (path === '/expert') return 'dashboard';
+    if (path.startsWith('/support')) return 'arbitration';
     if (path === '/create-order') return 'create-order';
     if (path === '/orders-feed') return 'orders-feed';
     if (path.startsWith('/improvements')) return 'improvements';

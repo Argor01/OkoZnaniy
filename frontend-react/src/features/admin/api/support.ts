@@ -60,7 +60,7 @@ export const supportApi = {
   },
 
   sendSupportMessage: async (requestId: number, message: string) => {
-    const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.messages(requestId), { message });
+    const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.sendMessage(requestId), { message });
     return response.data;
   },
 
@@ -146,7 +146,7 @@ export const supportApi = {
   },
 
   sendClaimMessage: async (claimId: number, message: string) => {
-    const response = await apiClient.post(API_ENDPOINTS.admin.support.claims.messages(claimId), { message });
+    const response = await apiClient.post(API_ENDPOINTS.admin.support.claims.sendMessage(claimId), { message });
     return response.data;
   },
 

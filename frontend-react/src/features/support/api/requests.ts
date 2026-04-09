@@ -43,18 +43,33 @@ const normalizeClaim = (item: any): SupportConversation => ({
 const endpointSegment = (type: SupportConversationType) =>
   type === 'support_request' ? 'support-requests' : 'claims';
 
+const extractItems = <T,>(payload: unknown): T[] => {
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  if (payload && typeof payload === 'object') {
+    const maybeResults = (payload as { results?: unknown }).results;
+    if (Array.isArray(maybeResults)) {
+      return maybeResults as T[];
+    }
+  }
+
+  return [];
+};
+
 export const supportRequestsApi = {
   async listAll(): Promise<SupportConversation[]> {
-    const [supportRequestsResponse, claimsResponse] = await Promise.all([
+    const [supportRequestsResponse, claimsResponse] = await Promise.allSettled([
       apiClient.get('/admin-panel/support-requests/'),
       apiClient.get('/admin-panel/claims/'),
     ]);
 
-    const supportRequests = Array.isArray(supportRequestsResponse.data)
-      ? supportRequestsResponse.data.map(normalizeSupportRequest)
+    const supportRequests = supportRequestsResponse.status === 'fulfilled'
+      ? extractItems<any>(supportRequestsResponse.value.data).map(normalizeSupportRequest)
       : [];
-    const claims = Array.isArray(claimsResponse.data)
-      ? claimsResponse.data.map(normalizeClaim)
+    const claims = claimsResponse.status === 'fulfilled'
+      ? extractItems<any>(claimsResponse.value.data).map(normalizeClaim)
       : [];
 
     return [...supportRequests, ...claims].sort(

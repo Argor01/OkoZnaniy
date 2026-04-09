@@ -115,6 +115,7 @@ export const API_ENDPOINTS = {
         take: (id: number) => `/admin-panel/support-requests/${id}/take/`,
         complete: (id: number) => `/admin-panel/support-requests/${id}/complete/`,
         messages: (id: number) => `/admin-panel/support-requests/${id}/messages/`,
+        sendMessage: (id: number) => `/admin-panel/support-requests/${id}/send_message/`,
       },
       claims: {
         list: '/admin-panel/claims/',
@@ -130,6 +131,7 @@ export const API_ENDPOINTS = {
         escalate: (id: number) => `/admin-panel/claims/${id}/escalate/`,
         requestInfo: (id: number) => `/admin-panel/claims/${id}/request-info/`,
         messages: (id: number) => `/admin-panel/claims/${id}/messages/`,
+        sendMessage: (id: number) => `/admin-panel/claims/${id}/send_message/`,
       },
       chats: {
         list: '/admin-panel/support-chats/',
