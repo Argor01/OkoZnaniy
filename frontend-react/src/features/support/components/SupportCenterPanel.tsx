@@ -166,13 +166,17 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       );
     }
 
-    if (!activity?.feed?.length) {
-      return <Empty description="История обращения пока пуста" />;
+    const feedItems = activity?.feed?.filter(
+      (item) => !(item.kind === 'activity' && item.activity_type === 'message')
+    ) ?? [];
+
+    if (!feedItems.length) {
+      return <Empty description="??????? ????????? ???? ?????" />;
     }
 
     return (
       <div style={{ display: 'grid', gap: 12 }}>
-        {activity.feed.map((item) => {
+        {feedItems.map((item) => {
           if (item.kind === 'message') {
             const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
 
