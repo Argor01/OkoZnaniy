@@ -14,5 +14,8 @@ docker compose rm -f frontend
 docker compose build frontend
 docker compose up -d frontend
 
+echo "=== Restarting backend services ==="
+docker compose restart backend celery
+
 echo "=== Done ==="
 docker ps --format "table {{.Names}}\t{{.Status}}"
