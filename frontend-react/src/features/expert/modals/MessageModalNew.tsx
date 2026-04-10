@@ -824,11 +824,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
 
-  const loadOrCreateSupportChat = useCallback(async () => {
-    setSupportCenterSelected(true);
-    setSelectedChat(null);
-  }, []);
-
   useEffect(() => {
     if (visible) {
       loadChats();
@@ -1973,11 +1968,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
 
-  const supportUserId = null;
-
   const supportAvatarSrc = '/assets/icons/support.png';
-
-  const supportChat = null;
 
   const isSupportChatSelected = supportCenterSelected;
 
@@ -2180,17 +2171,6 @@ const handleOverdueComplaint = async () => {
     return true;
   }), [safeChatList, searchQuery]);
   
-    const filteredChatsWithoutSupport = filteredChats;
-  
-  const normalizedSearchQuery = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
-  
-  const showPinnedSupport = useMemo(() => (
-    !normalizedSearchQuery ||
-      'техническая поддержка'.includes(normalizedSearchQuery) ||
-      'поддержка'.includes(normalizedSearchQuery) ||
-      'support'.includes(normalizedSearchQuery)
-  ), [normalizedSearchQuery]);
-
   const groupedMessages = useMemo(() => {
     if (!selectedChat?.messages) return [];
     
@@ -2299,99 +2279,17 @@ const handleOverdueComplaint = async () => {
 
           
           <div className={styles.chatList}>
-            {showPinnedSupport && (
-              <div 
-                onClick={async () => {
-                  setSupportCenterSelected(true);
-                  setSelectedChat(null);
-                  return;
-                  let userId = supportUserId;
-                  console.log('🔧 Support chat click - initial supportUserId:', userId);
-                  
-                  // Если support user ID не найден, попробуем получить его из API
-                  if (!userId) {
-                    console.log('🔧 Support user ID not found, fetching from API...');
-                    try {
-                      const response = await fetch('/api/users/support_user/', {
-                        headers: {
-                          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                          'Content-Type': 'application/json',
-                        },
-                      });
-                      if (response.ok) {
-                        const data = await response.json();
-                        console.log('🔧 API response:', data);
-                        if (data?.id) {
-                          localStorage.setItem('support_user_id', String(data.id));
-                          userId = data.id;
-                          console.log('🔧 Set support user ID to:', userId);
-                        }
-                      } else {
-                        console.error('🔧 API response not ok:', response.status, response.statusText);
-                      }
-                    } catch (error) {
-                      console.error('Ошибка получения support user ID:', error);
-                    }
-                  }
-
-                  if (!userId) {
-                    console.error('🔧 No support user ID available');
-                    antMessage.error('Поддержка не настроена. Обратитесь к администратору.');
-                    return;
-                  }
-                  
-                  console.log('🔧 Opening support chat with user ID:', userId);
-                  await loadOrCreateSupportChat(userId);
-                }}
-                className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isSupportChatSelected ? styles.chatListItemSelected : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListItemUnread : ''}`}
-              >
-                <Avatar
-                  className="support-avatar"
-                  size={isMobile ? 36 : 40}
-                  icon={<CustomerServiceOutlined />}
-                  src={supportAvatarSrc}
-                />
-                <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
-                  <div className={styles.chatListHeaderRow}>
-                    <Text
-                      strong
-                      ellipsis
-                      className={`${styles.chatListName} ${styles.chatListNameSupport} ${isMobile ? styles.chatListNameMobile : ''} ${isMobile ? styles.chatListNameSupportMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListNameUnread : ''}`}
-                    >
-                      Техническая поддержка
-                    </Text>
-                    <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
-                      {supportChat?.last_message ? formatTimestamp(supportChat.last_message.created_at) : ''}
-                    </Text>
-                  </div>
-                  <div className={styles.chatListMetaRow}>
-                    <Text 
-                      ellipsis 
-                      className={`${styles.chatListPreview} ${styles.chatListPreviewSupport} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${isMobile ? styles.chatListPreviewSupportMobile : ''} ${(supportChat?.unread_count ?? 0) > 0 ? styles.chatListPreviewUnread : ''}`}
-                    >
-                      {'Мои обращения и ответы поддержки'}
-                    </Text>
-                    {(supportChat?.unread_count ?? 0) > 0 && (
-                      <Badge 
-                        dot
-                        className={styles.chatBadge}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
             {loading ? (
               <div className={styles.chatListLoading}>
                 <Spin />
               </div>
-            ) : filteredChatsWithoutSupport.length === 0 && !showPinnedSupport ? (
+            ) : filteredChats.length === 0 ? (
               <div className={`${styles.chatListEmpty} ${isMobile ? styles.chatListEmptyMobile : ''}`}>
                 <MessageOutlined className={`${styles.chatListEmptyIcon} ${isMobile ? styles.chatListEmptyIconMobile : ''}`} />
                 {searchQuery ? 'Ничего не найдено' : 'Нет чатов'}
               </div>
-                        ) : (
-              filteredChatsWithoutSupport.map((chat) => {
+            ) : (
+              filteredChats.map((chat) => {
                 const menuItems: MenuProps['items'] = [
                   {
                     key: 'pin',
