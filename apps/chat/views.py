@@ -75,7 +75,14 @@ class ChatViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-                self.perform_destroy(chat)
+        chat.hidden_for_users.add(request.user)
+        ChatPin.objects.filter(chat=chat, user=request.user).delete()
+
+        participants_count = chat.participants.count()
+        hidden_count = chat.hidden_for_users.count()
+        if participants_count > 0 and hidden_count >= participants_count:
+            self.perform_destroy(chat)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
@@ -100,6 +107,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 last_message_time=Max('messages__created_at'),
                 is_pinned=Exists(pinned_subquery)
             ).order_by('-is_pinned', '-last_message_time')
+        queryset = queryset.exclude(hidden_for_users=user)
         
             # Получаем ID пользователя поддержки из настроек или переменной окружения
         from django.conf import settings

@@ -1994,7 +1994,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       icon: <ExclamationCircleOutlined />,
       content: hasActiveOffersInSelectedChat
         ? 'В этом чате есть активные индивидуальные предложения. Сначала дождитесь окончания действия предложения или отклоните/примите его.'
-        : 'Чат будет удалён без возможности восстановления.',
+        : 'Чат будет удалён только для вас. У другого участника он останется, если он не удалит его у себя.',
       okText: 'Удалить',
       cancelText: 'Отмена',
       okButtonProps: { danger: true, disabled: hasActiveOffersInSelectedChat, loading: deletingChat },
@@ -2004,7 +2004,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           await chatApi.deleteChat(selectedChat.id);
           setSelectedChat(null);
           await loadChats();
-          antMessage.success('Чат удалён');
+          antMessage.success('Чат удалён только для вас');
         } catch (error: unknown) {
           antMessage.error(getErrorDetail(error) || 'Не удалось удалить чат');
         } finally {
