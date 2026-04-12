@@ -527,17 +527,7 @@ const OrdersFeed: React.FC = () => {
             </div>
           }
           className={styles.loadingBlock}
-        >
-          {userProfile?.role !== 'client' && (
-            <AppButton 
-              variant="primary" 
-              size="large"
-              onClick={() => navigate('/create-order')}
-            >
-              Создать первый заказ
-            </AppButton>
-          )}
-        </AppEmpty>
+        />
       ) : (
         <div className={styles.ordersGrid}>
           {paginatedOrders.map((order: OrdersFeedOrder) => {

@@ -3,7 +3,7 @@ import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select } fr
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
 import { catalogApi } from '@/features/common/api/catalog';
-import SkillsSelect from '../components/inputs/SkillsSelect';
+import SkillsSelectNew from '../components/inputs/SkillsSelectNew';
 import styles from './SpecializationModal.module.css';
 
 type SpecializationFormValues = {
@@ -28,21 +28,27 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const [isMobile] = React.useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
 
   React.useEffect(() => {
-    if (visible) {
-      document.body.style.setProperty('overflow', 'hidden', 'important');
-      document.documentElement.style.setProperty('overflow', 'hidden', 'important');
-    } else {
-      document.body.style.removeProperty('overflow');
-      document.documentElement.style.removeProperty('overflow');
-    }
-    return () => {
-      document.body.style.removeProperty('overflow');
-      document.documentElement.style.removeProperty('overflow');
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
     };
-  }, [visible]);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  React.useEffect(() => {
+    if (visible && isMobile) {
+      // Блокируем прокрутку только на мобильных устройствах
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [visible, isMobile]);
 
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects'],
@@ -127,6 +133,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       onCancel={handleClose}
       onOk={() => form.submit()}
       width={isMobile ? '100%' : 600}
+      style={isMobile ? { top: 0, paddingBottom: 0 } : {}}
       okText={editingSpecialization ? 'Сохранить' : 'Добавить'}
       cancelText="Отмена"
       okButtonProps={{
@@ -138,6 +145,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         size: isMobile ? 'middle' : 'large',
       }}
       wrapClassName={`${styles.specializationModalWrap} ${isMobile ? styles.specializationModalWrapMobile : styles.specializationModalWrapDesktop}`}
+      destroyOnClose
+      maskClosable={false}
     >
       <Form
         form={form}
@@ -264,7 +273,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           name="skills"
           extra="Начните вводить навык или выберите из списка. Можно добавить свои навыки."
         >
-          <SkillsSelect
+          <SkillsSelectNew
             size={isMobile ? 'middle' : 'large'}
             placeholder="Начните писать навык"
             valueType="name"

@@ -1,3 +1,4 @@
+/* Updated mobile header styles */
 .dashboardHeader {
   background: var(--color-brand-blue-500);
   padding: 0 24px;
@@ -115,11 +116,14 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
+  color: white !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 .menuButton:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
 }
 
 .balanceButton {
@@ -289,6 +293,24 @@
   color: #6b7280;
 }
 
+/* Ensure menu button icon is white on mobile */
+.menuButton :global(.anticon-menu) {
+  color: white !important;
+}
+
+.menuButton:hover :global(.anticon-menu) {
+  color: white !important;
+}
+
+/* Ensure logout button icon color */
+.logoutButton :global(.anticon-logout) {
+  color: #ff4d4f !important;
+}
+
+.logoutButton:hover :global(.anticon-logout) {
+  color: #ff4d4f !important;
+}
+
 /* Apply Jost-SemiBold font to all header elements */
 .dashboardHeader,
 .dashboardHeader :global(*) {
@@ -303,13 +325,15 @@
 
 /* Mobile logout button styling */
 .logoutButton {
-  background: rgba(255, 77, 79, 0.15) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
   color: #ff4d4f !important;
+  border-radius: 50% !important;
 }
 
 .logoutButton:hover {
-  background: rgba(255, 77, 79, 0.25) !important;
+  background: rgba(255, 255, 255, 1) !important;
   color: #ff4d4f !important;
+  transform: scale(1.1);
 }
 
 @media (max-width: 840px) {
@@ -343,6 +367,65 @@
   
   .menuButton {
     margin-right: 8px;
+    color: white !important;
+  }
+  
+  .menuButton :global(.anticon) {
+    color: white !important;
+  }
+
+  /* Mobile Navigation Icons */
+  .mobileNavIcons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+  }
+
+  .mobileNavIcon {
+    font-size: 18px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    color: white !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .mobileNavIcon:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    transform: scale(1.05) !important;
+  }
+
+  .mobileNavIconActive {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #1890ff !important;
+    font-weight: 600 !important;
+  }
+
+  .mobileNavIconActive:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #1890ff !important;
+  }
+
+  /* Mobile dropdown styles */
+  .mobileNavIcon :global(.ant-dropdown) {
+    z-index: 1001 !important;
+  }
+
+  .mobileNavIcon :global(.ant-dropdown-menu) {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .mobileNavIcon :global(.ant-dropdown-menu-item) {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
   }
   
   .iconButton {
@@ -354,6 +437,8 @@
   .logoutButton {
     width: 40px !important;
     height: 40px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 50% !important;
   }
 }
 
@@ -373,6 +458,31 @@
     line-height: 36px !important;
   }
   
+  .menuButton {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    color: white !important;
+    margin-right: 6px;
+  }
+  
+  .menuButton :global(.anticon) {
+    color: white !important;
+  }
+
+  /* Mobile Navigation Icons for small screens */
+  .mobileNavIcons {
+    gap: 2px !important;
+    margin-left: 6px !important;
+  }
+
+  .mobileNavIcon {
+    font-size: 16px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 6px !important;
+  }
+  
   .iconButton {
     width: 36px;
     height: 36px;
@@ -382,5 +492,7 @@
   .logoutButton {
     width: 36px !important;
     height: 36px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 50% !important;
   }
 }

@@ -13,6 +13,7 @@ import { AppSelect } from '@/components/ui/AppSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
 import { AppUpload } from '@/components/ui/AppUpload';
 import { AppButton } from '@/components/ui/AppButton';
+import { useDeviceType } from '@/hooks/useDeviceType';
 
 import styles from './EditOrderModal.module.css';
 
@@ -57,6 +58,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 }) => {
   const [form] = Form.useForm<EditOrderFormValues>();
   const queryClient = useQueryClient();
+  const { isMobile, isTablet, isDesktop } = useDeviceType();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [existingFiles, setExistingFiles] = useState<Array<{ id: number; filename: string }>>([]);
   const [filesToDelete, setFilesToDelete] = useState<number[]>([]);
@@ -349,20 +351,21 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         open={visible}
         onCancel={onClose}
         onOk={() => form.submit()}
-        width={900}
-        style={{ top: 20 }}
+        width={isMobile ? '100%' : isTablet ? 700 : 900}
+        style={isMobile ? { top: 0, paddingBottom: 0 } : { top: 20 }}
+        bodyStyle={isMobile ? { height: '100vh', overflow: 'auto', padding: '16px' } : {}}
         okText="Сохранить изменения"
         cancelText="Отмена"
         okButtonProps={{
           loading: submitLocked || updateOrderMutation.isPending || isUploading,
           disabled: !canEdit || submitLocked || updateOrderMutation.isPending || isUploading,
-          size: 'large',
+          size: isMobile ? 'large' : 'large',
         }}
         cancelButtonProps={{
           onClick: onClose,
-          size: 'large',
+          size: isMobile ? 'large' : 'large',
         }}
-        wrapClassName={styles.editOrderModalWrap}
+        wrapClassName={`${styles.editOrderModalWrap} ${isMobile ? styles.editOrderModalMobile : isTablet ? styles.editOrderModalTablet : styles.editOrderModalDesktop}`}
       >
         {!canEdit && (
           <div className={styles.editDisabledWarning}>

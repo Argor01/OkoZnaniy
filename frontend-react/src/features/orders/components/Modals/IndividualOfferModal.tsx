@@ -5,7 +5,9 @@ import { CloseOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { catalogApi } from '@/features/common/api/catalog';
 import { AppButton, AppInput, AppSelect, AppDatePicker } from '@/components/ui';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import styles from './IndividualOfferModal.module.css';
+import modalStyles from '../../../expert/modals/MessageModalNew.module.css';
 
 const { Text, Title } = Typography;
 
@@ -47,6 +49,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
   workTitle,
 }) => {
   const [form] = Form.useForm();
+  const { isMobile, isTablet, isDesktop } = useDeviceType();
 
   const isIndividual = variant === 'individual';
 
@@ -81,12 +84,34 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
     onSubmit(data);
   };
 
+  const getSelectClassName = () => {
+    if (isMobile) {
+      return modalStyles.specializationSelectorMobile;
+    }
+    if (isTablet) {
+      return modalStyles.specializationSelectorTablet;
+    }
+    return '';
+  };
+
+  const getSelectPopupClassName = () => {
+    if (isMobile) {
+      return modalStyles.specializationDropdownMobile;
+    }
+    if (isTablet) {
+      return modalStyles.specializationDropdownTablet;
+    }
+    return '';
+  };
+
   return (
     <Modal
       open={open}
       onCancel={onClose}
       footer={null}
-      width={600}
+      width={isMobile ? '100%' : isTablet ? 500 : 600}
+      style={isMobile ? { top: 0, paddingBottom: 0 } : {}}
+      bodyStyle={isMobile ? { height: '100vh', overflow: 'auto' } : {}}
       title={
         <div className={styles.titleWrapper}>
           <Title level={4} className={styles.title}>
@@ -145,10 +170,13 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                 rules={[{ required: true, message: 'Укажите тип работы' }]}
               >
                 <AppSelect
+                  className={getSelectClassName()}
+                  popupClassName={getSelectPopupClassName()}
                   placeholder="Выберите тип работы"
                   loading={workTypesLoading}
                   showSearch
                   optionFilterProp="label"
+                  size={isMobile ? 'large' : 'middle'}
                   options={workTypes
                     .filter((w) => w.is_active !== false)
                     .map((w) => ({ value: w.id, label: w.name }))}
@@ -161,10 +189,13 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                 rules={[{ required: true, message: 'Укажите предмет' }]}
               >
                 <AppSelect
+                  className={getSelectClassName()}
+                  popupClassName={getSelectPopupClassName()}
                   placeholder="Выберите предмет"
                   loading={subjectsLoading}
                   showSearch
                   optionFilterProp="label"
+                  size={isMobile ? 'large' : 'middle'}
                   options={subjects
                     .filter((s) => s.is_active !== false)
                     .map((s) => ({ value: s.id, label: s.name }))}

@@ -67,7 +67,41 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* Mobile adaptations */
+@media (max-width: 768px) {
+  .inputField {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+  
+  .inputField:global(.ant-select) :global(.ant-select-selector) {
+    padding: 6px 14px !important;
+    min-height: 44px;
+  }
+  
+  .textareaField {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+}
+
 @media (max-width: 480px) {
+  .inputField {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .inputField:global(.ant-select) :global(.ant-select-selector) {
+    padding: 4px 12px !important;
+    min-height: 40px;
+  }
+  
+  .textareaField {
+    font-size: 13px;
+    padding: 8px 12px;
+    min-height: 80px;
+  }
+  
   .textareaField :global(.ant-input) {
     min-height: 80px;
     height: auto;
@@ -119,13 +153,46 @@
 
 .specializationModalWrapMobile :global(.ant-modal-content) {
   border-radius: 16px;
-  margin: 16px;
-  max-width: calc(100% - 32px);
+  margin: 8px;
+  max-width: calc(100% - 16px);
+  max-height: calc(100vh - 16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .specializationModalWrapDesktop :global(.ant-modal-content) {
   border-radius: 24px;
   max-width: 600px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile full screen modal */
+@media (max-width: 480px) {
+  .specializationModalWrapMobile :global(.ant-modal) {
+    top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .specializationModalWrapMobile :global(.ant-modal-content) {
+    margin: 0;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .specializationModalWrapMobile :global(.ant-modal-body) {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .specializationModalWrap :global(.ant-modal-header) {
@@ -134,16 +201,20 @@
   padding: 24px 32px;
   border-bottom: 1px solid rgba(102, 126, 234, 0.1);
   border-radius: 24px 24px 0 0;
+  flex-shrink: 0;
 }
 
 .specializationModalWrapMobile :global(.ant-modal-header) {
   padding: 16px 20px;
   border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
 }
 
 .specializationModalWrap :global(.ant-modal-body) {
   padding: 32px;
   background: rgba(255, 255, 255, 0.95);
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
 }
 
 .specializationModalWrap :global(.ant-form-item-label > label) {
@@ -152,8 +223,27 @@
 
 .specializationModalWrapMobile :global(.ant-modal-body) {
   padding: 20px;
-  max-height: calc(100vh - 200px);
   overflow-y: auto;
+  flex: 1;
+  max-height: calc(100vh - 140px);
+}
+
+/* Desktop scrolling */
+@media (min-width: 769px) {
+  .specializationModalWrapDesktop :global(.ant-modal-body) {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+}
+
+/* Mobile specific body styles */
+@media (max-width: 480px) {
+  .specializationModalWrapMobile :global(.ant-modal-body) {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(100vh - 120px);
+  }
 }
 
 .specializationModalWrap :global(.ant-modal-footer) {
@@ -161,11 +251,13 @@
   background: rgba(255, 255, 255, 0.95);
   border-top: 1px solid rgba(102, 126, 234, 0.1);
   border-radius: 0 0 24px 24px;
+  flex-shrink: 0;
 }
 
 .specializationModalWrapMobile :global(.ant-modal-footer) {
   padding: 16px 20px;
   border-radius: 0 0 16px 16px;
+  flex-shrink: 0;
 }
 
 .specializationModalTitle {
@@ -228,7 +320,35 @@
   resize: vertical;
 }
 
+/* Form item spacing for mobile */
+@media (max-width: 768px) {
+  .specializationModalWrap :global(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+  
+  .specializationModalWrap :global(.ant-form-item-label) {
+    padding-bottom: 4px;
+  }
+  
+  .specializationModalWrap :global(.ant-form-item-label > label) {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 480px) {
+  .specializationModalWrap :global(.ant-form-item) {
+    margin-bottom: 12px;
+  }
+  
+  .specializationModalWrap :global(.ant-form-item-label > label) {
+    font-size: 13px;
+  }
+  
+  .specializationModalWrap :global(.ant-form-item-extra) {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
   .specializationsField :global(.ant-input) {
     min-height: 100px;
     max-height: 200px;

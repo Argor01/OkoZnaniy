@@ -42,3 +42,60 @@
 .fullWidth {
   width: 100%;
 }
+
+/* Mobile Adaptive Styles */
+@media (max-width: 768px) {
+  .titleWrapper {
+    padding-right: var(--spacing-md, 16px);
+  }
+
+  .title {
+    font-size: 18px !important;
+  }
+
+  .body {
+    padding: 0 0 var(--spacing-md, 16px);
+  }
+
+  .text,
+  .textCompact {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .submitButton {
+    width: 100%;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .submitItem {
+    margin-top: var(--spacing-md, 16px);
+  }
+}
+
+@media (max-width: 480px) {
+  .titleWrapper {
+    padding-right: var(--spacing-sm, 12px);
+  }
+
+  .title {
+    font-size: 16px !important;
+  }
+
+  .body {
+    padding: 0 0 var(--spacing-sm, 12px);
+  }
+
+  .text,
+  .textCompact {
+    font-size: 13px;
+    margin-bottom: var(--spacing-sm, 12px);
+  }
+
+  .submitButton {
+    height: 52px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}

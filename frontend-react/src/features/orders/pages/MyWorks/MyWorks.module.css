@@ -1,6 +1,7 @@
 ﻿
 
 
+/* Force cache refresh - updated */
 .contentContainer {
   max-width: 1200px;
   margin: 0 auto;
@@ -365,11 +366,26 @@
   border: 1px solid #d1d5db;
   background: #ffffff;
   transition: all 0.3s ease;
+  min-width: 200px;
 }
 
 .searchInput:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Mobile search input */
+@media (max-width: 1024px) {
+  .searchInput {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .searchInput {
+    font-size: 14px;
+  }
 }
 
 .filterSelect {
@@ -411,6 +427,36 @@
   gap: 12px;
 }
 
+/* Mobile page header */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .pageTitle {
+    font-size: 18px !important;
+  }
+  
+  .pageHeaderRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 16px !important;
+  }
+  
+  .pageHeaderRight {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 .rating {
   display: inline-flex;
   align-items: center;
@@ -433,8 +479,11 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
+/* Test HMR update */
 .tabButton {
   appearance: none;
   border: 1px solid #e5e7eb;
@@ -447,6 +496,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .tabButton:hover {
@@ -456,6 +508,72 @@
 .tabActive {
   border-color: #3b82f6;
   background: rgba(59, 130, 246, 0.06);
+}
+
+/* Mobile adaptations */
+@media (max-width: 1024px) {
+  .controlsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .tabsRow {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  
+  .tabsRow::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .tabsRow::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .tabsRow::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+  }
+}
+
+/* Updated mobile styles for better visibility */
+@media (max-width: 768px) {
+  .tabButton {
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    border-width: 1px;
+  }
+  
+  .countBadge {
+    min-width: 20px;
+    height: 18px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabButton {
+    padding: 6px 8px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  
+  .countBadge {
+    min-width: 18px;
+    height: 16px;
+    font-size: 10px;
+    padding: 0 4px;
+  }
+  
+  .tabsRow {
+    gap: 6px;
+  }
 }
 
 .countBadge {
@@ -501,6 +619,43 @@
   vertical-align: middle;
 }
 
+/* Mobile table adaptations */
+@media (max-width: 768px) {
+  .table :global(.ant-table) {
+    border-radius: 8px;
+  }
+  
+  .table :global(.ant-table-thead > tr > th) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .table :global(.ant-table-tbody > tr > td) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table :global(.ant-table-thead > tr > th) {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .table :global(.ant-table-tbody > tr > td) {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .table :global(.ant-table-pagination) {
+    margin: 16px 0 0 0;
+  }
+  
+  .table :global(.ant-pagination-options) {
+    display: none;
+  }
+}
+
 .titleCell {
   display: flex;
   flex-direction: column;
@@ -509,16 +664,39 @@
 
 .titleText {
   font-weight: 600;
-
   color: #111827;
+  word-break: break-word;
 }
 
 .titleMeta {
   font-size: 12px;
   color: #6b7280;
+  word-break: break-word;
 }
 
 .muted {
   color: #9ca3af;
+}
+
+/* Mobile title cell */
+@media (max-width: 768px) {
+  .titleText {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .titleMeta {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .titleText {
+    font-size: 13px;
+  }
+  
+  .titleMeta {
+    font-size: 10px;
+  }
 }
 

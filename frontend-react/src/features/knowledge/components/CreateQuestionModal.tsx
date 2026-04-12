@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Tag, message } from 'antd';
 import { knowledgeApi, Category } from '../api/knowledgeApi';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import styles from './CreateQuestionModal.module.css';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -184,6 +185,12 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
       okText="Опубликовать"
       cancelText="Отмена"
       width={600}
+      className={styles.questionModal}
+      okButtonProps={{ className: styles.submitButton }}
+      cancelButtonProps={{ className: styles.cancelButton }}
+      centered={false}
+      destroyOnClose={true}
+      maskClosable={false}
     >
       <Form
         form={form}
@@ -198,11 +205,14 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             { min: 10, message: 'Заголовок должен содержать минимум 10 символов' },
             { max: 200, message: 'Заголовок не должен превышать 200 символов' }
           ]}
+          className={styles.formItem}
         >
           <Input 
             placeholder="Кратко опишите ваш вопрос"
             maxLength={200}
             showCount
+            className={styles.titleInput}
+            size="large"
           />
         </Form.Item>
 
@@ -213,12 +223,14 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             { required: true, message: 'Введите описание вопроса' },
             { min: 20, message: 'Описание должно содержать минимум 20 символов' }
           ]}
+          className={styles.formItem}
         >
           <TextArea
             rows={6}
             placeholder="Опишите ваш вопрос подробнее..."
             maxLength={2000}
             showCount
+            className={styles.descriptionTextarea}
           />
         </Form.Item>
 
@@ -226,8 +238,15 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
           name="category"
           label="Категория"
           rules={[{ required: true, message: 'Выберите категорию' }]}
+          className={styles.formItem}
         >
-          <Select placeholder="Выберите категорию">
+          <Select 
+            placeholder="Выберите категорию"
+            className={styles.categorySelect}
+            size="large"
+            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            dropdownStyle={{ zIndex: 10001 }}
+          >
             {categories.map(cat => (
               <Option key={cat.id} value={cat.name}>
                 {cat.name}
@@ -236,7 +255,10 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
           </Select>
         </Form.Item>
 
-        <Form.Item label="Теги (до 5 тегов)">
+        <Form.Item 
+          label="Теги (до 5 тегов)"
+          className={styles.formItem}
+        >
           <Select
             mode="multiple"
             placeholder="Выберите теги"
@@ -248,6 +270,10 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
               (option?.children as string).toLowerCase().includes(input.toLowerCase())
             }
             style={{ width: '100%' }}
+            className={styles.tagsSelect}
+            size="large"
+            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            dropdownStyle={{ zIndex: 10001 }}
           >
             {AVAILABLE_TAGS.map(tag => (
               <Option key={tag} value={tag}>

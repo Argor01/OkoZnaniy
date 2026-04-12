@@ -285,6 +285,47 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           />
         )}
         {!isMobile && renderNavItems()}
+        {isMobile && (
+          <div className={styles.mobileNavIcons}>
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.key;
+              
+              if (item.children) {
+                const isChildActive = item.children.some(child => location.pathname === child.key);
+                const menuItems: MenuProps['items'] = item.children.map(child => ({
+                  key: child.key,
+                  label: child.label,
+                  onClick: () => navigate(child.key),
+                }));
+
+                return (
+                  <Dropdown 
+                    key={item.key} 
+                    menu={{ items: menuItems }}
+                    trigger={['click']}
+                    placement="bottomLeft"
+                  >
+                    <Button 
+                      type="text" 
+                      className={`${styles.mobileNavIcon} ${isChildActive ? styles.mobileNavIconActive : ''}`}
+                      icon={item.icon}
+                    />
+                  </Dropdown>
+                );
+              }
+
+              return (
+                <Button
+                  key={item.key}
+                  type="text"
+                  className={`${styles.mobileNavIcon} ${isActive ? styles.mobileNavIconActive : ''}`}
+                  icon={item.icon}
+                  onClick={() => navigate(item.key)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className={styles.headerLogo}>

@@ -60,9 +60,9 @@
 
 .chatMenuButton {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 48px;
-  z-index: 10;
+  z-index: 1000;
   width: 40px;
   height: 40px;
 }
@@ -97,11 +97,15 @@
   padding: 12px;
   padding-right: 48px;
   background: #ffffff;
+  display: flex;
+  align-items: center;
 }
 
 .chatSearchHeaderMobile {
   padding: 8px;
   padding-right: 48px;
+  display: flex;
+  align-items: center;
 }
 
 .chatSearchIcon {
@@ -116,18 +120,70 @@
 .chatSearchInput {
   border-radius: 8px;
   font-size: 14px;
+  width: 100%;
 }
 
 .chatSearchInput :global(.ant-input) {
   font-size: 14px;
 }
 
+/* Search Button Alignment Fix */
+.chatSearchInput :global(.ant-input-search) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInput :global(.ant-input-search-button) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 40px !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.chatSearchInput :global(.ant-input-wrapper) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInput :global(.ant-input-group-addon) {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
 .chatSearchInputMobile {
   font-size: 12px;
+  width: 100%;
 }
 
 .chatSearchInputMobile :global(.ant-input) {
   font-size: 12px;
+}
+
+/* Mobile Search Button Alignment Fix */
+.chatSearchInputMobile :global(.ant-input-search) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInputMobile :global(.ant-input-search-button) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.chatSearchInputMobile :global(.ant-input-wrapper) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInputMobile :global(.ant-input-group-addon) {
+  display: flex;
+  align-items: center;
+  padding: 0;
 }
 
 .chatList {
@@ -1880,6 +1936,14 @@
     height: 32px;
     width: 32px;
   }
+
+  /* Menu Button Mobile */
+  .chatMenuButton {
+    top: 6px !important;
+    right: 84px !important;
+    width: 32px !important;
+    height: 32px !important;
+  }
   
   /* Messages */
   .chatMessages {
@@ -1965,10 +2029,16 @@
   .chatSearchHeader {
     padding: 10px !important;
     padding-right: 48px !important;
+    display: flex !important;
+    align-items: center !important;
   }
   
   .chatSearchInput {
     font-size: 13px !important;
+  }
+
+  .chatSearchInput :global(.ant-input-search-button) {
+    height: 38px !important;
   }
   
   /* Order Summary */
@@ -2118,6 +2188,26 @@
   .chatHeaderSubtitle {
     font-size: 12px !important;
   }
+
+  /* Menu Button Small Mobile */
+  .chatMenuButton {
+    top: 4px !important;
+    right: 80px !important;
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  /* Search Header Small Mobile */
+  .chatSearchHeader {
+    padding: 8px !important;
+    padding-right: 80px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .chatSearchInput :global(.ant-input-search-button) {
+    height: 34px !important;
+  }
   
   /* Messages */
   .chatMessages {
@@ -2224,6 +2314,194 @@
   .offerPrice {
     font-size: 18px !important;
   }
+
+  /* Mobile Specialization Selector Styles */
+  .specializationSelectorMobile {
+    margin-bottom: 12px;
+  }
+
+  .specializationSelectorMobile :global(.ant-select-selector) {
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    padding: 0 12px !important;
+    border: 2px solid #e5e7eb !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .specializationSelectorMobile :global(.ant-select-selection-item) {
+    font-size: 16px !important;
+    line-height: 40px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+  }
+
+  .specializationSelectorMobile :global(.ant-select-selection-placeholder) {
+    font-size: 16px !important;
+    color: #9ca3af !important;
+    line-height: 40px !important;
+  }
+
+  .specializationSelectorMobile :global(.ant-select-arrow) {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    right: 12px !important;
+  }
+
+  .specializationSelectorMobile:hover :global(.ant-select-selector) {
+    border-color: #3b82f6 !important;
+  }
+
+  .specializationSelectorMobile :global(.ant-select-focused .ant-select-selector) {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  }
+
+  /* Compact mobile dropdown for specialization */
+  .specializationDropdownMobile {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    max-height: 60vh !important;
+    margin-top: 4px !important;
+  }
+
+  .specializationDropdownMobile :global(.ant-select-item) {
+    padding: 14px 16px !important;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+  }
+
+  .specializationDropdownMobile :global(.ant-select-item:last-child) {
+    border-bottom: none !important;
+  }
+
+  .specializationDropdownMobile :global(.ant-select-item-option-selected) {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    font-weight: 600 !important;
+  }
+
+  .specializationDropdownMobile :global(.ant-select-item-option-active) {
+    background-color: #f0f9ff !important;
+    color: #1e40af !important;
+  }
+
+  /* Compressed selector variant for mobile */
+  .compactSpecializationSelector {
+    margin-bottom: 8px;
+  }
+
+  .compactSpecializationSelector :global(.ant-select-selector) {
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    padding: 0 10px !important;
+    border: 1px solid #d1d5db !important;
+    background: #f9fafb !important;
+  }
+
+  .compactSpecializationSelector :global(.ant-select-selection-item) {
+    font-size: 14px !important;
+    line-height: 38px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+  }
+
+  .compactSpecializationSelector :global(.ant-select-selection-placeholder) {
+    font-size: 14px !important;
+    color: #9ca3af !important;
+    line-height: 38px !important;
+  }
+
+  .compactSpecializationSelector :global(.ant-select-arrow) {
+    font-size: 12px !important;
+    color: #6b7280 !important;
+    right: 10px !important;
+  }
+}
+
+/* Tablet Adaptive Styles */
+@media (min-width: 481px) and (max-width: 768px) {
+  /* Tablet Specialization Selector Styles */
+  .specializationSelectorTablet {
+    margin-bottom: 10px;
+  }
+
+  .specializationSelectorTablet :global(.ant-select-selector) {
+    height: 42px !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    padding: 0 12px !important;
+    border: 1px solid #d1d5db !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .specializationSelectorTablet :global(.ant-select-selection-item) {
+    font-size: 15px !important;
+    line-height: 40px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+  }
+
+  .specializationSelectorTablet :global(.ant-select-selection-placeholder) {
+    font-size: 15px !important;
+    color: #9ca3af !important;
+    line-height: 40px !important;
+  }
+
+  .specializationSelectorTablet :global(.ant-select-arrow) {
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    right: 12px !important;
+  }
+
+  .specializationSelectorTablet:hover :global(.ant-select-selector) {
+    border-color: #3b82f6 !important;
+  }
+
+  .specializationSelectorTablet :global(.ant-select-focused .ant-select-selector) {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  }
+
+  /* Tablet dropdown for specialization */
+  .specializationDropdownTablet {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12) !important;
+    max-height: 65vh !important;
+    margin-top: 2px !important;
+  }
+
+  .specializationDropdownTablet :global(.ant-select-item) {
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+  }
+
+  .specializationDropdownTablet :global(.ant-select-item:last-child) {
+    border-bottom: none !important;
+  }
+
+  .specializationDropdownTablet :global(.ant-select-item-option-selected) {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    font-weight: 600 !important;
+  }
+
+  .specializationDropdownTablet :global(.ant-select-item-option-active) {
+    background-color: #f0f9ff !important;
+    color: #1e40af !important;
+  }
 }
   
   .chatHeaderTitle {
@@ -2289,4 +2567,51 @@
   .chatListTime {
     font-size: 11px;
   }
+
+/* Mobile Menu Sidebar */
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 85vw;
+  max-width: 320px;
+  background: linear-gradient(180deg, var(--color-brand-orange-500) 0%, var(--color-brand-orange-400) 100%);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px 10px 16px 10px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobileMenu::-webkit-scrollbar {
+  display: none;
+}
+
+.mobileMenuOpen {
+  transform: translateX(0);
+}
+
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobileMenuOverlayVisible {
+  opacity: 1;
+  visibility: visible;
+}
 

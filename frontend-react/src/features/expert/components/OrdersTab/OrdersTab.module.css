@@ -24,6 +24,7 @@
   border-radius: 8px;
 }
 
+/* Updated mobile filter styles */
 .ordersFilterRow {
   margin-bottom: 24px;
 }
@@ -373,14 +374,33 @@
   
   .ordersFilterGroup {
     display: flex;
-    gap: 12px;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  
+  .ordersFilterGroup::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .ordersFilterGroup::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .ordersFilterGroup::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
   }
   
   .ordersFilterGroup :global(.ant-radio-button-wrapper) {
     text-align: center;
-    flex: 1;
+    flex: 0 0 auto;
     margin-right: 0 !important;
     border-radius: 8px !important;
+    white-space: nowrap;
+    min-width: fit-content;
   }
   
   .ordersFilterGroup :global(.ant-radio-button-wrapper:first-child) {
@@ -393,9 +413,11 @@
   
   .ordersFilterButtonMobile {
     min-width: auto;
-    flex: 1;
+    flex: 0 0 auto;
     font-size: 13px;
-    padding: 8px 4px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    border-radius: 8px !important;
   }
   
   .orderCard {
@@ -522,10 +544,13 @@
   }
   
   .ordersFilterButtonMobile {
-    font-size: 12px;
-    padding: 6px 8px;
+    font-size: 11px;
+    padding: 6px 10px;
     margin: 0 2px;
     border-radius: 6px !important;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    min-width: fit-content;
   }
   
   .statusTag,
@@ -539,5 +564,40 @@
   .fileTag {
     font-size: 12px;
     padding: 3px 8px;
+  }
+}
+
+/* Additional mobile improvements */
+@media (max-width: 600px) {
+  .ordersFilterGroup {
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) {
+    flex: 0 0 auto;
+    min-width: fit-content;
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) :global(.ant-space) {
+    gap: 4px !important;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) :global(.anticon) {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+  
+  .ordersFilterGroup :global(.ant-radio-button-wrapper) :global(.anticon) {
+    font-size: 11px;
   }
 }

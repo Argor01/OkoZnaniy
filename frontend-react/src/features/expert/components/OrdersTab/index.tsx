@@ -236,7 +236,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               >
                 <Space>
                   <UserOutlined />
-                  Мои размещенные заказы
+                  {isMobile ? 'Мои заказы' : 'Мои размещенные заказы'}
                 </Space>
               </Radio.Button>
               <Radio.Button 
@@ -245,7 +245,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               >
                 <Space>
                   <FilterOutlined />
-                  Доступные заказы
+                  {isMobile ? 'Доступные' : 'Доступные заказы'}
                 </Space>
               </Radio.Button>
               <Radio.Button
@@ -254,7 +254,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
               >
                 <Space>
                   <ClockCircleOutlined />
-                  Неактивные заказы
+                  {isMobile ? 'Неактивные' : 'Неактивные заказы'}
                 </Space>
               </Radio.Button>
             </Radio.Group>
