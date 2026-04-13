@@ -1,0 +1,6 @@
+/* Partner Turnover - Modular Structure */
+
+@import './Layout.module.css';
+@import './Charts.module.css';
+@import './Tables.module.css';
+@import './Responsive.module.css';

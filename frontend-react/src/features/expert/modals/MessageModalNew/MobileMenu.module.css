@@ -1,0 +1,47 @@
+/* Mobile Menu Sidebar */
+
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 85vw;
+  max-width: 320px;
+  background: linear-gradient(180deg, var(--color-brand-orange-500) 0%, var(--color-brand-orange-400) 100%);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20px 10px 16px 10px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobileMenu::-webkit-scrollbar {
+  display: none;
+}
+
+.mobileMenuOpen {
+  transform: translateX(0);
+}
+
+.mobileMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobileMenuOverlayVisible {
+  opacity: 1;
+  visibility: visible;
+}

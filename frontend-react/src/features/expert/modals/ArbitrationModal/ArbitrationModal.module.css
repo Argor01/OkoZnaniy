@@ -1,0 +1,16 @@
+/* Arbitration Modal - Modular Structure */
+
+/* Modal layout and structure */
+@import './Layout.module.css';
+
+/* Tabs */
+@import './Tabs.module.css';
+
+/* Content sections */
+@import './Content.module.css';
+
+/* Forms */
+@import './Forms.module.css';
+
+/* Responsive */
+@import './Responsive.module.css';

@@ -1,0 +1,77 @@
+/* Chat Window */
+
+.chatMainCard {
+  flex: 1;
+  height: 100%;
+  width: auto;
+}
+
+.chatMainCard :global(.ant-card-body) {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatHeader {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+}
+
+.chatHeaderInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatBackButton {
+  flex-shrink: 0;
+}
+
+.chatHeaderTitleWrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.chatHeaderTitle {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatHeaderSubtitle {
+  font-size: 12px;
+}
+
+.chatParticipantsBar {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fff;
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+}
+
+.chatParticipantsRow {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.participantAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}

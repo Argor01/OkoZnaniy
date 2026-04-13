@@ -1,0 +1,109 @@
+/* Modal Components (Claims, Revisions, etc.) */
+
+.hiddenInput {
+  display: none;
+}
+
+.buttonSuccess {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.simpleModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.revisionModalSpacing {
+  margin-bottom: 24px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.claimModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claimModalTitleIcon {
+  color: #ef4444;
+}
+
+.claimModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.claimWarningBox {
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+}
+
+.claimWarningText {
+  font-size: 13px;
+  color: #991b1b;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.formLabelSmall {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.claimTextArea {
+  font-size: 14px;
+}
+
+.claimFiles {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claimFileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.claimFileIcon {
+  color: #6b7280;
+}
+
+.claimFileName {
+  font-size: 12px;
+  color: #374151;
+  flex: 1;
+}
+
+.claimFileSize {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.claimFileRemoveButton {
+  color: #ef4444;
+  padding: 0;
+  height: 20px;
+  min-width: 20px;
+  line-height: 20px;
+}

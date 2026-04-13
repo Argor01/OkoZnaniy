@@ -1,0 +1,5 @@
+/* Notifications Modal - Modular Structure */
+
+@import './Layout.module.css';
+@import './List.module.css';
+@import './Responsive.module.css';

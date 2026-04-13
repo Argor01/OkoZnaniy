@@ -1,0 +1,6 @@
+/* User Conversations Section - Modular Structure */
+
+@import './Layout.module.css';
+@import './ChatList.module.css';
+@import './Messages.module.css';
+@import './Responsive.module.css';

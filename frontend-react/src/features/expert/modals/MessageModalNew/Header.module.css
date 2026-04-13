@@ -1,0 +1,96 @@
+/* Chat Header */
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.chatHeaderActive {
+  background: #ffffff;
+}
+
+.chatHeaderEmpty {
+  background: #e0f2fe;
+  border-bottom-color: #bae6fd;
+}
+
+.chatHeaderPaddingMobileActive {
+  padding: 8px 12px;
+  padding-right: 96px;
+}
+
+.chatHeaderPaddingDesktopActive {
+  padding: 12px 16px;
+  padding-right: 140px;
+}
+
+.chatHeaderPaddingMobileEmpty {
+  padding: 8px 12px;
+}
+
+.chatHeaderPaddingDesktopEmpty {
+  padding: 12px 16px;
+  padding-right: 56px;
+}
+
+.chatHeaderAvatar {
+  background-color: #6b7280;
+}
+
+.chatHeaderTitle {
+  font-size: 16px;
+  color: #1f2937;
+  font-weight: 500;
+  font-family: 'Jost-SemiBold', sans-serif;
+}
+
+.chatHeaderTitleMobile {
+  font-size: 18px;
+}
+
+.chatHeaderSubtitle {
+  font-size: 15px;
+  color: #6b7280;
+  display: block;
+}
+
+.chatHeaderSubtitleMobile {
+  font-size: 13px;
+}
+
+.chatClaimButton {
+  position: absolute;
+  right: 40px;
+  top: 8px;
+  font-size: 22px;
+  color: #ef4444;
+  z-index: 10;
+  padding: 6px;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatClaimButtonMobile {
+  right: 36px;
+  top: 6px;
+  font-size: 20px;
+  padding: 4px;
+  height: 32px;
+  width: 32px;
+}
+
+.chatHeaderEmptyText {
+  font-size: 14px;
+  color: #0369a1;
+  font-weight: 500;
+  font-family: 'Jost-SemiBold', sans-serif;
+}
+
+.chatHeaderEmptyTextMobile {
+  font-size: 12px;
+}

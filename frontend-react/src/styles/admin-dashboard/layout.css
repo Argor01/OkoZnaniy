@@ -1,0 +1,18 @@
+/* Admin Dashboard Layout */
+
+.adminPageLayout {
+  min-height: 100vh;
+}
+
+.adminPageCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.adminPageCenterPadded {
+  padding: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

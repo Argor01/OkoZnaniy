@@ -1,0 +1,195 @@
+/* Chat Input Area */
+
+.chatInputContainer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.chatInputContainerMobile {
+  padding: 8px 12px 12px 12px;
+}
+
+.claimCarouselWrapper {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+  position: relative;
+  overflow: hidden;
+}
+
+.claimCarouselWrapperMobile {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+@keyframes scroll-carousel {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.claimCarouselTrack {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+  animation: scroll-carousel 20s linear infinite;
+}
+
+.claimCarouselTrack:hover {
+  animation-play-state: paused;
+}
+
+.claimCarouselButton {
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background: #ffffff;
+  color: #ef4444;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.claimCarouselButton:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.claimCarouselButtonMobile {
+  font-size: 11px;
+}
+
+.chatInputRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.chatInputRowMobile {
+  gap: 8px;
+}
+
+.chatInputField {
+  flex: 1;
+  min-width: 0;
+}
+
+.chatInputActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chatInputActionsMobile {
+  gap: 6px;
+}
+
+.chatEmojiButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+
+.chatEmojiButton:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+}
+
+.chatEmojiButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.chatInput {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 15px;
+  padding: 10px 14px;
+  resize: none;
+  font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+.chatInputMobile {
+  font-size: 14px;
+}
+
+.chatAttachButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+
+.chatAttachButton:hover {
+  background: #f9fafb;
+  border-color: #3b82f6;
+}
+
+.chatAttachButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.chatSendButton {
+  width: 44px;
+  height: 44px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.chatSendButton:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+.chatSendButtonDisabled {
+  background: #9ca3af;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.chatSendButtonDisabled:hover {
+  background: #9ca3af;
+  transform: scale(1);
+}
+
+.chatSendButtonMobile {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}

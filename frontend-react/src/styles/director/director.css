@@ -1,0 +1,6 @@
+/* Director Dashboard - Modular Structure */
+
+@import './layout.css';
+@import './statistics.css';
+@import './charts.css';
+@import './responsive.css';

@@ -1,0 +1,28 @@
+/* Admin Dashboard - Modular Structure */
+
+/* Layout and structure */
+@import './layout.css';
+
+/* Sidebar */
+@import './sidebar.css';
+
+/* Header */
+@import './header.css';
+
+/* Cards and statistics */
+@import './cards.css';
+
+/* Tables */
+@import './tables.css';
+
+/* Filters */
+@import './filters.css';
+
+/* Modals */
+@import './modals.css';
+
+/* Orders section */
+@import './orders.css';
+
+/* Responsive styles */
+@import './responsive.css';

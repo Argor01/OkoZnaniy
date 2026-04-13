@@ -1,6 +1,5 @@
-/* Orders Tab - Modular Structure */
+/* Problem Orders Section - Modular Structure */
 
 @import './Layout.module.css';
-@import './Filters.module.css';
 @import './Cards.module.css';
 @import './Responsive.module.css';

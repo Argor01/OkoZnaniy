@@ -1,0 +1,22 @@
+/* Admin Chats Section - Modular Structure */
+
+/* Layout and container */
+@import './Layout.module.css';
+
+/* Chat list */
+@import './ChatList.module.css';
+
+/* Chat item */
+@import './ChatItem.module.css';
+
+/* Chat window */
+@import './ChatWindow.module.css';
+
+/* Message bubble */
+@import './MessageBubble.module.css';
+
+/* Filters */
+@import './Filters.module.css';
+
+/* Responsive */
+@import './Responsive.module.css';

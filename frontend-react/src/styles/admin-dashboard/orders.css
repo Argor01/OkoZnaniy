@@ -1,0 +1,78 @@
+/* Admin Orders Section */
+/* Стили для секции заказов */
+
+.allOrdersHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.allOrdersTitle {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.allOrdersMetaText {
+  font-size: 12px;
+}
+
+.allOrdersPersonName {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.allOrdersPersonHandle {
+  font-size: 11px;
+}
+
+.allOrdersDeadline {
+  color: inherit;
+}
+
+.allOrdersDeadlineOverdue {
+  color: #ff4d4f;
+}
+
+.allOrdersDeadlineNear {
+  color: #faad14;
+}
+
+.allOrdersDeadlineDate {
+  font-size: 12px;
+}
+
+.allOrdersDeadlineTime {
+  font-size: 11px;
+}
+
+.allOrdersSectionHeader {
+  margin-bottom: 16px;
+}
+
+.allOrdersStatsRow {
+  margin-bottom: 24px;
+}
+
+.allOrdersStatNew .ant-statistic-content-value {
+  color: #1890ff;
+}
+
+.allOrdersStatInProgress .ant-statistic-content-value {
+  color: #faad14;
+}
+
+.allOrdersStatCompleted .ant-statistic-content-value {
+  color: #52c41a;
+}
+
+.allOrdersStatCancelled .ant-statistic-content-value {
+  color: #ff4d4f;
+}
+
+.allOrdersModalActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+

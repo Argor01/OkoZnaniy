@@ -1,0 +1,76 @@
+/* Arbitration Modal Layout */
+
+.arbitrationModalWrap :global(.ant-modal-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.arbitrationModalWrap :global(.ant-modal-content) {
+  border-radius: 24px;
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 80px);
+}
+
+.arbitrationModalWrapMobile :global(.ant-modal-content) {
+  border-radius: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  box-shadow: none;
+}
+
+.arbitrationModalWrapDesktop :global(.ant-modal-content) {
+  border-radius: 24px;
+}
+
+.arbitrationModalWrap :global(.ant-modal-header) {
+  display: none;
+}
+
+.arbitrationModalWrap :global(.ant-modal-body) {
+  padding: 0;
+  margin: 0;
+  background: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.arbitrationModalContent {
+  background: #f3f4f6;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.arbitrationModalContentMobile {
+  padding: 16px;
+}
+
+.arbitrationModalContentDesktop {
+  padding: 32px;
+}
+
+.arbitrationModalTitle {
+  color: #1f2937;
+  display: block;
+  font-family: 'Jost-SemiBold', sans-serif;
+}
+
+.arbitrationModalTitleMobile {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.arbitrationModalTitleDesktop {
+  font-size: 24px;
+  margin-bottom: 24px;
+}

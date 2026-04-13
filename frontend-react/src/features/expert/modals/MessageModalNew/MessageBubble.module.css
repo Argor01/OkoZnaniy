@@ -1,0 +1,213 @@
+/* Message Bubbles */
+
+.messageRow {
+  display: flex;
+}
+
+.messageRowMine {
+  justify-content: flex-end;
+}
+
+.messageRowOther {
+  justify-content: flex-start;
+}
+
+.messageBubble {
+  display: block;
+}
+
+.messageBubbleCard {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.messageBubbleRegular {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.messageBubbleRegularMobile {
+  max-width: 85%;
+  padding: 8px 12px;
+}
+
+.messageBubbleRegularDesktop {
+  max-width: 70%;
+  padding: 10px 14px;
+}
+
+.messageBubbleCardMobile {
+  max-width: 92%;
+}
+
+.messageBubbleCardDesktop {
+  max-width: 420px;
+}
+
+.messageBubbleMine {
+  border-radius: 16px 16px 4px 16px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+}
+
+.messageBubbleOther {
+  border-radius: 16px 16px 16px 4px;
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.messageText {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 16px;
+  font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
+}
+
+.messageTextMobile {
+  font-size: 15px;
+}
+
+.messageTextMine {
+  color: #ffffff;
+}
+
+.messageTextOther {
+  color: #1f2937;
+}
+
+.messageTime {
+  font-size: 12px;
+}
+
+.messageTimeMobile {
+  font-size: 11px;
+}
+
+.messageTimeMine {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.messageTimeOther {
+  color: #9ca3af;
+}
+
+.messageReadStatus {
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(1px);
+}
+
+.messageReadStatusRead {
+  color: #60a5fa;
+}
+
+.messageReadStatusUnread {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.messageReadIcons {
+  position: relative;
+  display: inline-block;
+}
+
+.messageReadIconsMobile {
+  width: 16px;
+  height: 12px;
+}
+
+.messageReadIconsDesktop {
+  width: 18px;
+  height: 14px;
+}
+
+.messageReadCheck {
+  position: absolute;
+  top: 0;
+}
+
+.messageReadCheckFirst {
+  left: 0;
+}
+
+.messageReadCheckSecond {
+  top: 0;
+}
+
+.messageReadCheckSecondMobile {
+  left: 6px;
+}
+
+.messageReadCheckSecondDesktop {
+  left: 7px;
+}
+
+.messageReadCheckMobile {
+  font-size: 11px;
+}
+
+.messageReadCheckDesktop {
+  font-size: 12px;
+}
+
+.messageReadCheckSingle {
+  font-size: 12px;
+}
+
+/* System Message */
+.messageRowSystem {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.messageBubbleSystem {
+  max-width: 90%;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.messageSystemCard {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffebe8 100%);
+  border: 2px solid #ff4d4f;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15);
+}
+
+.messageSystemCard::before {
+  content: '';
+}
+
+.messageSystemIcon {
+  color: #ff4d4f;
+  font-size: 24px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.messageSystemText {
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.messageSystemTextMobile {
+  font-size: 13px;
+}
+
+.messageSystemTime {
+  color: #ff7875;
+  font-size: 11px;
+  margin-top: 12px;
+  font-weight: 500;
+}

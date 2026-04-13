@@ -1,6 +1,6 @@
-/* Orders Tab - Modular Structure */
+/* Partners Map - Modular Structure */
 
-@import './Layout.module.css';
+@import './Map.module.css';
 @import './Filters.module.css';
 @import './Cards.module.css';
 @import './Responsive.module.css';

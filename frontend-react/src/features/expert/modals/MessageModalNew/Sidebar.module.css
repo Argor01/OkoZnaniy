@@ -1,0 +1,118 @@
+/* Chat Sidebar & Search */
+
+.chatSidebar {
+  background: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatSidebarMobile {
+  width: 100%;
+  border-right: none;
+  border-bottom: 1px solid #e5e7eb;
+  height: 100%;
+}
+
+.chatSidebarTablet {
+  width: 250px;
+}
+
+.chatSidebarDesktop {
+  width: 300px;
+}
+
+.chatSidebarHidden {
+  display: none;
+}
+
+.chatSearchHeader {
+  padding: 12px;
+  padding-right: 48px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchHeaderMobile {
+  padding: 8px;
+  padding-right: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchIcon {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.chatSearchIconMobile {
+  font-size: 12px;
+}
+
+.chatSearchInput {
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.chatSearchInput :global(.ant-input) {
+  font-size: 14px;
+}
+
+.chatSearchInput :global(.ant-input-search) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInput :global(.ant-input-search-button) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 40px !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.chatSearchInput :global(.ant-input-wrapper) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInput :global(.ant-input-group-addon) {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.chatSearchInputMobile {
+  font-size: 12px;
+  width: 100%;
+}
+
+.chatSearchInputMobile :global(.ant-input) {
+  font-size: 12px;
+}
+
+.chatSearchInputMobile :global(.ant-input-search) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInputMobile :global(.ant-input-search-button) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.chatSearchInputMobile :global(.ant-input-wrapper) {
+  display: flex;
+  align-items: center;
+}
+
+.chatSearchInputMobile :global(.ant-input-group-addon) {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}

@@ -1,0 +1,45 @@
+/* Admin Filters */
+/* Стили для фильтров и поиска */
+
+.allOrdersFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.allOrdersSearch {
+  width: 300px;
+}
+
+.allOrdersSelectStatus {
+  width: 150px;
+}
+
+.allOrdersSelectSubject {
+  width: 150px;
+}
+
+.allOrdersSelectPriority {
+  width: 120px;
+}
+
+.allOrdersRangePicker {
+  width: 240px;
+}
+
+.userRolesFiltersRow {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.userRolesSearch {
+  width: 300px;
+}
+
+.userRolesRoleSelect {
+  width: 150px;
+}
+

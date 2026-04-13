@@ -1,0 +1,28 @@
+/* Chat List */
+
+.chatListHeader {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.chatListHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chatListTitle {
+  margin: 0;
+}
+
+.chatListSearch {
+  width: 100%;
+}
+
+.chatListScroll {
+  flex: 1;
+  overflow: auto;
+}

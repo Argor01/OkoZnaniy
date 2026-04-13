@@ -1,0 +1,34 @@
+/* Landing Page - Modular Structure */
+
+/* Base styles and common elements */
+@import './base.css';
+
+/* Header section */
+@import './header.css';
+
+/* Hero section */
+@import './hero.css';
+
+/* Features section */
+@import './features.css';
+
+/* How it works section */
+@import './how-it-works.css';
+
+/* Testimonials section */
+@import './testimonials.css';
+
+/* Pricing section */
+@import './pricing.css';
+
+/* CTA section */
+@import './cta.css';
+
+/* Footer section */
+@import './footer.css';
+
+/* Animations */
+@import './animations.css';
+
+/* Responsive styles */
+@import './responsive.css';

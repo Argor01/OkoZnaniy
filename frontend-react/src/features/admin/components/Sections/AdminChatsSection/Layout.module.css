@@ -1,0 +1,29 @@
+/* Admin Chats Layout */
+
+.chatContainer {
+  height: 80vh;
+  display: flex;
+  transition: all 0.3s ease;
+  gap: 16px;
+}
+
+.chatListCard {
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  height: 100%;
+}
+
+.chatListCard :global(.ant-card-body) {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatListCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chatListCardHidden {
+  display: none;
+}

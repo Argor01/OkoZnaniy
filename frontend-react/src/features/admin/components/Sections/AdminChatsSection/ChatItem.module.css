@@ -1,0 +1,73 @@
+/* Chat Item */
+
+.chatRoomItem {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 12px 16px;
+}
+
+.chatRoomItem:hover {
+  background-color: #f5f5f5;
+}
+
+.chatRoomItemActive {
+  background-color: #f0f8ff;
+  border-left: 3px solid #1890ff;
+}
+
+.chatRoomAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+
+.roomTypeGeneral {
+  background-color: #1890ff;
+}
+
+.roomTypeDepartment {
+  background-color: #52c41a;
+}
+
+.roomTypeProject {
+  background-color: #faad14;
+}
+
+.roomTypePrivate {
+  background-color: #722ed1;
+}
+
+.chatRoomTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatRoomNameUnread {
+  font-weight: 700;
+}
+
+.chatRoomMutedIcon {
+  color: #ccc;
+  margin-left: 4px;
+}
+
+.chatRoomLastMessage {
+  font-size: 12px;
+  color: #666;
+}
+
+.chatRoomLastMessageUnread {
+  font-weight: 700;
+}
+
+.chatRoomMeta {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}

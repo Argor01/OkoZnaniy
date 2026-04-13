@@ -1,6 +1,6 @@
-/* Orders Tab - Modular Structure */
+/* My Works - Modular Structure */
 
 @import './Layout.module.css';
-@import './Filters.module.css';
 @import './Cards.module.css';
+@import './Filters.module.css';
 @import './Responsive.module.css';

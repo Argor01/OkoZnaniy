@@ -1,0 +1,6 @@
+/* Order Detail - Modular Structure */
+
+@import './Layout.module.css';
+@import './Info.module.css';
+@import './Actions.module.css';
+@import './Responsive.module.css';
