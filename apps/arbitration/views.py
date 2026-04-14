@@ -107,6 +107,52 @@ def notify_case_participants(case, *, title, message_text, exclude_user_ids=None
         )
 
 
+def build_order_chat_feed(case):
+    """Собирает переписку по заказу для отображения администратору в арбитраже."""
+    if not case.order_id or not case.order:
+        return []
+
+    client_id = case.order.client_id
+    expert_id = case.order.expert_id
+    participant_ids = {user_id for user_id in [client_id, expert_id] if user_id}
+    if len(participant_ids) < 2:
+        return []
+
+    related_chats = Chat.objects.filter(order_id=case.order_id).filter(
+        Q(client_id=client_id, expert_id=expert_id)
+        | Q(client_id=expert_id, expert_id=client_id)
+    )
+
+    chat_messages = ChatMessage.objects.filter(
+        chat__in=related_chats,
+        sender_id__in=participant_ids,
+    ).select_related('sender', 'chat').order_by('created_at', 'id')
+
+    return [
+        {
+            'kind': 'message',
+            'id': f'chat_{chat_message.id}',
+            'sender': {
+                'id': chat_message.sender.id,
+                'first_name': chat_message.sender.first_name,
+                'last_name': chat_message.sender.last_name,
+                'role': getattr(chat_message.sender, 'role', ''),
+            },
+            'text': chat_message.text or '',
+            'message_type': chat_message.message_type,
+            'is_internal': False,
+            'source': 'order_chat',
+            'source_label': 'Переписка по заказу',
+            'chat_id': chat_message.chat_id,
+            'chat_context_title': chat_message.chat.context_title,
+            'file_name': chat_message.file_name,
+            'file_url': chat_message.file.url if chat_message.file else None,
+            'created_at': chat_message.created_at.isoformat(),
+        }
+        for chat_message in chat_messages
+    ]
+
+
 class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     """ViewSet для арбитражных дел"""
     queryset = ArbitrationCase.objects.all()
@@ -180,11 +226,22 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         Пошаговая подача претензии
         POST /api/arbitration/cases/submit-claim/
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f'[submit_claim] Request data: {request.data}')
+        logger.info(f'[submit_claim] Request user: {request.user}')
+        
         serializer = ArbitrationSubmissionSerializer(
             data=request.data,
             context={'request': request}
         )
-        serializer.is_valid(raise_exception=True)
+        try:
+            is_valid = serializer.is_valid()
+            if not is_valid:
+                logger.error(f'[submit_claim] Validation errors: {serializer.errors}')
+        except Exception as e:
+            logger.error(f'[submit_claim] Exception during validation: {e}')
+            raise
         case = serializer.save()
         
         # Автоматически подаем дело
@@ -573,6 +630,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                     'chat_id': chat_message.chat_id,
                     'created_at': chat_message.created_at.isoformat(),
                 })
+            order_chat_messages = build_order_chat_feed(case)
         
         # Объединяем и сортируем
         feed = messages + activities + order_chat_messages
