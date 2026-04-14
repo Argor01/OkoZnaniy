@@ -15,7 +15,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Установка зависимостей Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=100 --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 # Создание пользователя для безопасности
 RUN adduser --disabled-password --gecos '' appuser

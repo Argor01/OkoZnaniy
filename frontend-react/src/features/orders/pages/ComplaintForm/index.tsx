@@ -323,11 +323,11 @@ const ComplaintForm: React.FC = () => {
               </Select>
             </Form.Item>
 
-            {isOrderRelevant === false && (
+            {isOrderRelevant === true && (
               <Form.Item
-                label="Дата, до которой заказ был актуален"
+                label="Дата, до которой заказ будет актуален"
                 name="relevant_until"
-                rules={[{ required: !isOrderRelevant, message: 'Укажите дату' }]}
+                rules={[{ required: isOrderRelevant, message: 'Укажите дату' }]}
               >
                 <DatePicker
                   size="large"
