@@ -226,22 +226,11 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         Пошаговая подача претензии
         POST /api/arbitration/cases/submit-claim/
         """
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f'[submit_claim] Request data: {request.data}')
-        logger.info(f'[submit_claim] Request user: {request.user}')
-        
         serializer = ArbitrationSubmissionSerializer(
             data=request.data,
             context={'request': request}
         )
-        try:
-            is_valid = serializer.is_valid()
-            if not is_valid:
-                logger.error(f'[submit_claim] Validation errors: {serializer.errors}')
-        except Exception as e:
-            logger.error(f'[submit_claim] Exception during validation: {e}')
-            raise
+        serializer.is_valid(raise_exception=True)
         case = serializer.save()
         
         # Автоматически подаем дело

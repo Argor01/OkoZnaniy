@@ -182,10 +182,6 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
     )
     
     def validate(self, data):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f'[ArbitrationSubmission] validate() called with data: {data}')
-        
         request = self.context['request']
         user = request.user
         order_id = data.get('order_id')
@@ -213,7 +209,6 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
 
             client_id = getattr(order.client, 'id', None)
             expert_id = getattr(order.expert, 'id', None)
-            logger.info(f'[ArbitrationSubmission] user.id={user.id}, client_id={client_id}, expert_id={expert_id}')
             
             if user.id not in {client_id, expert_id}:
                 raise serializers.ValidationError({
