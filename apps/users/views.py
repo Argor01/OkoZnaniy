@@ -253,11 +253,14 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def client_orders(self, request):
         """
-        Получение заказов, размещённых текущим пользователем (где он заказчик).
-        Доступно любому авторизованному пользователю — показываем заказы по полю client.
+        Получение заказов текущего пользователя (где он клиент ИЛИ эксперт).
+        Доступно любому авторизованному пользователю.
         """
         user = request.user
-        orders = user.client_orders.prefetch_related('bids__expert', 'files', 'comments').all()
+        from django.db.models import Q
+        orders = Order.objects.filter(
+            Q(client=user) | Q(expert=user)
+        ).prefetch_related('bids__expert', 'files', 'comments').all()
 
         from datetime import timedelta
         from django.utils import timezone
