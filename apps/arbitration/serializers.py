@@ -211,7 +211,11 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
                     'order_id': 'Заказ не найден'
                 })
 
-            if user.id not in {getattr(order.client, 'id', None), getattr(order.expert, 'id', None)}:
+            client_id = getattr(order.client, 'id', None)
+            expert_id = getattr(order.expert, 'id', None)
+            logger.info(f'[ArbitrationSubmission] user.id={user.id}, client_id={client_id}, expert_id={expert_id}')
+            
+            if user.id not in {client_id, expert_id}:
                 raise serializers.ValidationError({
                     'order_id': 'Вы не участвуете в этом заказе'
                 })
