@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Complaint
 from apps.users.serializers import UserSerializer
@@ -155,7 +156,7 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
     
     # Шаг 2: Причина и описание
     reason = serializers.ChoiceField(choices=ArbitrationCase.REASON_CHOICES)
-    description = serializers.CharField()
+    description = serializers.CharField(allow_blank=True)
     deadline_relevant = serializers.BooleanField(default=False)
     
     # Шаг 3: Финансовые требования
@@ -163,16 +164,12 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
         choices=ArbitrationCase.REFUND_TYPE_CHOICES,
         default='none'
     )
-    requested_refund_percentage = serializers.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+    requested_refund_percentage = serializers.FloatField(
         default=0,
         min_value=0,
         max_value=100
     )
-    requested_refund_amount = serializers.DecimalField(
-        max_digits=15,
-        decimal_places=2,
+    requested_refund_amount = serializers.FloatField(
         required=False,
         allow_null=True
     )
@@ -241,6 +238,11 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
             if defendant_id:
                 User = get_user_model()
                 defendant = User.objects.get(id=defendant_id)
+        
+        # Конвертируем float в Decimal для модели
+        validated_data['requested_refund_percentage'] = Decimal(str(validated_data.get('requested_refund_percentage', 0)))
+        if validated_data.get('requested_refund_amount') is not None:
+            validated_data['requested_refund_amount'] = Decimal(str(validated_data['requested_refund_amount']))
         
         # Создаем дело
         case = ArbitrationCase.objects.create(
