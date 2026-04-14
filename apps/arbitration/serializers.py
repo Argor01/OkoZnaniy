@@ -182,6 +182,10 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
     )
     
     def validate(self, data):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f'[ArbitrationSubmission] validate() called with data: {data}')
+        
         request = self.context['request']
         user = request.user
         order_id = data.get('order_id')
