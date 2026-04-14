@@ -901,9 +901,37 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
+    def perform_destroy(self, instance):
+        order = instance.order
+        user = self.request.user
+        can_delete = (
+            user.is_staff
+            or instance.uploaded_by_id == user.id
+            or order.client_id == user.id
+            or order.expert_id == user.id
+        )
+        if not can_delete:
+            raise PermissionDenied('Недостаточно прав для удаления файла.')
+
+        storage_file = instance.file
+        instance.delete()
+        if storage_file:
+            storage_file.delete(save=False)
+
+    def _mark_expert_view(self, request, order_file):
+        user = request.user
+        if (
+            getattr(user, 'role', None) == 'expert'
+            and user.id != order_file.uploaded_by_id
+            and order_file.expert_viewed_at is None
+        ):
+            order_file.expert_viewed_at = timezone.now()
+            order_file.save(update_fields=['expert_viewed_at'])
+
     @action(detail=True, methods=['get'])
     def download(self, request, order_pk=None, pk=None):
         order_file = self.get_object()
+        self._mark_expert_view(request, order_file)
         file_handle = order_file.file.open()
         
         # Получаем MIME-тип файла
@@ -921,6 +949,7 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def view(self, request, order_pk=None, pk=None):
         order_file = self.get_object()
+        self._mark_expert_view(request, order_file)
         file_handle = order_file.file.open()
 
         # Получаем MIME-тип файла

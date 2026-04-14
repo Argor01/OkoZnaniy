@@ -194,6 +194,7 @@ class Order(models.Model):
         help_text="Приватная заметка заказчика, видимая только ему"
     )
 
+
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
@@ -311,6 +312,11 @@ class OrderFile(models.Model):
         blank=True,
         null=True,
         verbose_name="Описание"
+    )
+    expert_viewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Просмотрен экспертом"
     )
 
     class Meta:

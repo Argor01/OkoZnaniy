@@ -13,6 +13,7 @@ export interface OrderFile {
   uploaded_by: { id: number; username: string };
   description?: string | null;
   created_at: string;
+  expert_viewed_at?: string | null;
   file_size?: string;
 }
 

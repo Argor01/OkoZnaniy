@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined, EditOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined, EditOutlined, CloseOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order, OrderFile } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { chatApi } from '@/features/support/api/chat';
@@ -127,6 +127,56 @@ const OrderDetail: React.FC = () => {
     }
   }, [orderId]);
 
+  const formatFileDateTime = React.useCallback((value?: string | null) => {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return parsed.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }, []);
+
+  const canDeleteOrderFile = React.useCallback((file: any) => {
+    const uploaderId = Number(file?.uploaded_by?.id ?? 0);
+    const profileId = Number(userProfile?.id ?? 0);
+    return profileId > 0 && uploaderId === profileId;
+  }, [userProfile?.id]);
+
+  const refreshOrderWithLists = React.useCallback(async () => {
+    await refetchOrder();
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
+      queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
+      queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] }),
+    ]);
+  }, [orderId, queryClient, refetchOrder]);
+
+  const handleDeleteOrderFile = React.useCallback((file: any) => {
+    if (!orderId || !file?.id) return;
+    const filename = file?.filename || file?.file_name || 'файл';
+    Modal.confirm({
+      title: 'Удалить файл?',
+      content: `Файл "${filename}" будет удалён из заказа.`,
+      okText: 'Удалить',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await ordersApi.deleteOrderFile(Number(orderId), Number(file.id));
+          await refreshOrderWithLists();
+          message.success('Файл удалён');
+        } catch (e: any) {
+          message.error(e?.response?.data?.detail || 'Не удалось удалить файл');
+        }
+      },
+    });
+  }, [orderId, refreshOrderWithLists]);
+
   const getOrderFileIcon = React.useCallback((filename: string) => {
     const ext = filename.split('.').pop()?.toLowerCase();
     if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
@@ -206,16 +256,6 @@ const OrderDetail: React.FC = () => {
       return orderClientIdFromOrder > 0 ? uploadedById === orderClientIdFromOrder : true;
     });
   }, [order?.files, deliveredWorkFiles]);
-
-  const refreshOrderWithLists = React.useCallback(async () => {
-    await refetchOrder();
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
-      queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
-      queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] }),
-    ]);
-  }, [orderId, queryClient, refetchOrder]);
 
     const handleApproveFromCard = React.useCallback(async () => {
     if (!orderId) return;
@@ -723,14 +763,21 @@ const OrderDetail: React.FC = () => {
                   <>
                     <div className={styles.orderFilesGrid}>
                       {deliveredWorkFiles.map((file: any, index: number) => (
-                        <button
-                          type="button"
+                        <div
                           className={styles.orderFileTile}
                           key={file.id ?? `delivered-${index}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDownloadFile(file);
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleDownloadFile(file);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <div className={styles.orderFileIconBox}>
                             {getOrderFileIcon(file.filename || file.file_name || `Файл #${file.id || index + 1}`)}
@@ -738,8 +785,24 @@ const OrderDetail: React.FC = () => {
                           <div className={`${styles.orderFileName} ${styles.deliveredFileName}`}>
                             {formatOrderFileTileName(file.filename || file.file_name || `Файл #${file.id || index + 1}`)}
                           </div>
+                          <div className={styles.orderFileMeta}>
+                            <span>{formatFileDateTime(file.created_at)}</span>
+                          </div>
+                          {canDeleteOrderFile(file) ? (
+                            <button
+                              type="button"
+                              className={styles.orderFileDeleteButton}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteOrderFile(file);
+                              }}
+                              aria-label="Удалить файл"
+                            >
+                              <DeleteOutlined />
+                            </button>
+                          ) : null}
                           <DownloadOutlined className={styles.orderFileDownloadIcon} />
-                        </button>
+                        </div>
                       ))}
                     </div>
                     <Text type="secondary" className={styles.deliveredWorkMeta}>
@@ -759,14 +822,21 @@ const OrderDetail: React.FC = () => {
                 <Title level={4} className={styles.sectionTitle}>Прикрепленные файлы</Title>
                 <div className={styles.orderFilesGrid}>
                   {attachedOrderFiles.map((file: any, index: number) => (
-                    <button
-                      type="button"
+                    <div
                       className={styles.orderFileTile}
                       key={file.id ?? index}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDownloadFile(file);
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleDownloadFile(file);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <div className={styles.orderFileIconBox}>
                         {getOrderFileIcon(file.filename || file.file_name || `Файл ${index + 1}`)}
@@ -774,8 +844,29 @@ const OrderDetail: React.FC = () => {
                       <div className={styles.orderFileName}>
                         {formatOrderFileTileName(file.filename || file.file_name || `Файл ${index + 1}`)}
                       </div>
+                      <div className={styles.orderFileMeta}>
+                        <span>{formatFileDateTime(file.created_at)}</span>
+                        <span>
+                          {file.expert_viewed_at
+                            ? `Эксперт открыл: ${formatFileDateTime(file.expert_viewed_at)}`
+                            : 'Эксперт ещё не открывал'}
+                        </span>
+                      </div>
+                      {canDeleteOrderFile(file) ? (
+                        <button
+                          type="button"
+                          className={styles.orderFileDeleteButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteOrderFile(file);
+                          }}
+                          aria-label="Удалить файл"
+                        >
+                          <DeleteOutlined />
+                        </button>
+                      ) : null}
                       <DownloadOutlined className={styles.orderFileDownloadIcon} />
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>

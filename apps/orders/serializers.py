@@ -23,9 +23,9 @@ class OrderFileSerializer(serializers.ModelSerializer):
         model = OrderFile
         fields = [
             'id', 'file', 'file_type', 'file_type_display', 'uploaded_by',
-            'created_at', 'description', 'file_url', 'view_url', 'download_url', 'filename', 'file_size'
+            'created_at', 'expert_viewed_at', 'description', 'file_url', 'view_url', 'download_url', 'filename', 'file_size'
         ]
-        read_only_fields = ['uploaded_by', 'created_at']
+        read_only_fields = ['uploaded_by', 'created_at', 'expert_viewed_at']
 
     def get_file_url(self, obj):
         if obj.file:
