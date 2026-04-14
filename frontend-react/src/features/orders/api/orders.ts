@@ -45,7 +45,7 @@ export const ordersApi = {
 
   
   getMyOrders: async (params?: { status?: string; ordering?: string }) => {
-    const response = await apiClient.get(API_ENDPOINTS.orders.list, { params });
+    const response = await apiClient.get(API_ENDPOINTS.orders.clientOrders, { params });
     return response.data.results || response.data;
   },
 
