@@ -128,7 +128,10 @@ const CreateOrder: React.FC = () => {
     mutationFn: (data: CreateOrderRequest) => ordersApi.createOrder(data),
     onSuccess: () => {
       message.success('Заказ успешно создан!');
+      // Инвалидируем все связанные с заказами запросы
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] });
     },
     onError: (error: Error) => {
       console.error('Ошибка создания заказа:', error);
@@ -196,6 +199,11 @@ const CreateOrder: React.FC = () => {
                 };
 
       const createdOrder = await createOrderMutation.mutateAsync(orderData);
+      
+      // Принудительно обновляем кэш заказов для текущего пользователя
+      await queryClient.invalidateQueries({ queryKey: ['orders-feed'] });
+      await queryClient.refetchQueries({ queryKey: ['orders-feed'] });
+      
       const filesToUpload = [...fileList];
       setFileList([]);
       navigate(`/orders/${createdOrder.id}`, { state: { from: '/orders-feed' } });

@@ -106,16 +106,19 @@ const OrdersFeed: React.FC = () => {
     }
     return [];
   };
+  
+  // Для клиентов загружаем их собственные заказы
+  // Для экспертов - доступные для отклика заказы
   const [available, own] = await Promise.all([
-    // Клиенты видят все заказы, эксперты - только доступные для отклика
-    userProfile?.role === 'client'
-      ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
-      : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
-    // Для клиентов также загружаем их собственные заказы (для корректного отображения)
     userProfile?.role === 'client'
       ? ordersApi.getClientOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
+      : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
+    // Дополнительно для клиентов загружаем все их заказы
+    userProfile?.role === 'client'
+      ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
       : Promise.resolve([] as OrdersFeedOrder[]),
   ]);
+  
       const merged = [...(Array.isArray(available) ? available : []), ...own];
       const byId = new Map<number, OrdersFeedOrder>();
       merged.forEach((item: OrdersFeedOrder) => {
@@ -149,6 +152,11 @@ const OrdersFeed: React.FC = () => {
           })
         : data;
     },
+    // Добавляем зависимость от userProfile для автоматического обновления
+    enabled: !!userProfile,
+    staleTime: 0, // Данные сразу считаются устаревшими
+    refetchOnMount: true, // Перезагружать при монтировании
+    refetchOnWindowFocus: true, // Перезагружать при фокусе окна
   });
 
   
