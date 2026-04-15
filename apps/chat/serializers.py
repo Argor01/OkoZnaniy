@@ -46,6 +46,8 @@ class ChatListSerializer(serializers.ModelSerializer):
 
     def get_is_frozen(self, obj):
         request = self.context.get('request')
+        if getattr(obj, 'order', None) and getattr(obj.order, 'is_frozen', False):
+            return True
         if obj.is_frozen:
             return True
         if request and request.user and getattr(request.user, 'is_banned_for_contacts', False):
@@ -54,6 +56,8 @@ class ChatListSerializer(serializers.ModelSerializer):
         return bool(other and getattr(other, 'is_banned_for_contacts', False))
 
     def get_frozen_reason(self, obj):
+        if getattr(obj, 'order', None) and getattr(obj.order, 'is_frozen', False) and getattr(obj.order, 'frozen_reason', None):
+            return obj.order.frozen_reason
         if obj.is_frozen and obj.frozen_reason:
             return obj.frozen_reason
         request = self.context.get('request')
@@ -113,6 +117,8 @@ class ChatDetailSerializer(serializers.ModelSerializer):
 
     def get_is_frozen(self, obj):
         request = self.context.get('request')
+        if getattr(obj, 'order', None) and getattr(obj.order, 'is_frozen', False):
+            return True
         if obj.is_frozen:
             return True
         if request and request.user and getattr(request.user, 'is_banned_for_contacts', False):
@@ -121,6 +127,8 @@ class ChatDetailSerializer(serializers.ModelSerializer):
         return bool(other and getattr(other, 'is_banned_for_contacts', False))
 
     def get_frozen_reason(self, obj):
+        if getattr(obj, 'order', None) and getattr(obj.order, 'is_frozen', False) and getattr(obj.order, 'frozen_reason', None):
+            return obj.order.frozen_reason
         if obj.is_frozen and obj.frozen_reason:
             return obj.frozen_reason
         request = self.context.get('request')

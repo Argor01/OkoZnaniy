@@ -85,6 +85,12 @@ interface FeedItem {
   text?: string;
   message_type?: string;
   is_internal?: boolean;
+  source?: 'order_chat';
+  source_label?: string;
+  chat_id?: number;
+  chat_context_title?: string | null;
+  file_name?: string;
+  file_url?: string | null;
   activity_type?: string;
   description?: string;
   actor?: {
@@ -213,6 +219,16 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       urgent: 'red',
     };
     return colors[priority] || 'default';
+  };
+
+  const getRoleLabel = (role?: string) => {
+    const labels: Record<string, string> = {
+      admin: 'Админ',
+      client: 'Заказчик',
+      expert: 'Исполнитель',
+      user: 'Пользователь',
+    };
+    return labels[role || ''] || role || 'Участник';
   };
 
   if (loading) {
@@ -459,15 +475,17 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                     {feed.map((item) => {
                       if (item.kind === 'message') {
                         const isAdmin = item.message_type === 'admin';
+                        const isOrderChatMessage = item.source === 'order_chat';
+                        const messageBody = item.text?.trim() || item.file_name || 'Сообщение без текста';
                         return (
                           <Timeline.Item
                             key={item.id}
-                            color={isAdmin ? 'blue' : 'green'}
+                            color={isOrderChatMessage ? 'orange' : isAdmin ? 'blue' : 'green'}
                             dot={<MessageOutlined />}
                           >
                             <div className="feed-message">
                               <Space>
-                                <Avatar size={32} style={{ background: isAdmin ? '#1890ff' : '#52c41a' }}>
+                                <Avatar size={32} style={{ background: isOrderChatMessage ? '#fa8c16' : isAdmin ? '#1890ff' : '#52c41a' }}>
                                   {getInitials(
                                     item.sender?.first_name || '',
                                     item.sender?.last_name || ''
@@ -478,15 +496,40 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                                     {item.sender?.first_name} {item.sender?.last_name}
                                   </Text>
                                   {isAdmin && <Tag color="blue" style={{ marginLeft: 8 }}>Админ</Tag>}
+                                  {!isAdmin && item.sender?.role && (
+                                    <Tag color={isOrderChatMessage ? 'orange' : 'default'} style={{ marginLeft: 8 }}>
+                                      {getRoleLabel(item.sender.role)}
+                                    </Tag>
+                                  )}
+                                  {isOrderChatMessage && (
+                                    <Tag color="orange" style={{ marginLeft: 8 }}>
+                                      {item.source_label || 'Переписка по заказу'}
+                                    </Tag>
+                                  )}
                                   <br />
                                   <Text type="secondary" style={{ fontSize: 12 }}>
                                     {new Date(item.created_at).toLocaleString('ru-RU')}
                                   </Text>
+                                  {isOrderChatMessage && (
+                                    <>
+                                      <br />
+                                      <Text type="secondary" style={{ fontSize: 12 }}>
+                                        Чат #{item.chat_id}{item.chat_context_title ? ` • ${item.chat_context_title}` : ''}
+                                      </Text>
+                                    </>
+                                  )}
                                 </div>
                               </Space>
                               <Paragraph style={{ marginTop: 8, marginBottom: 0 }}>
-                                {item.text}
+                                {messageBody}
                               </Paragraph>
+                              {item.file_url && (
+                                <Paragraph style={{ marginTop: 8, marginBottom: 0 }}>
+                                  <a href={item.file_url} target="_blank" rel="noopener noreferrer">
+                                    Открыть файл{item.file_name ? `: ${item.file_name}` : ''}
+                                  </a>
+                                </Paragraph>
+                              )}
                             </div>
                           </Timeline.Item>
                         );
