@@ -11,11 +11,6 @@ WebSocket consumers для real-time обновлений.
 import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-
-User = get_user_model()
 
 
 class AuthenticatedConsumer(AsyncJsonWebsocketConsumer):
@@ -42,8 +37,13 @@ class AuthenticatedConsumer(AsyncJsonWebsocketConsumer):
         return params.get("token")
 
     @database_sync_to_async
-    def _get_user_from_token(self, token: str) -> User | None:
+    def _get_user_from_token(self, token: str):
         """Получает пользователя из JWT токена."""
+        from django.contrib.auth import get_user_model
+        from rest_framework_simplejwt.tokens import AccessToken
+        from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+
+        User = get_user_model()
         try:
             access_token = AccessToken(token)
             user_id = access_token.get("user_id")

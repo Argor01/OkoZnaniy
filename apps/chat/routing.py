@@ -1,20 +1,21 @@
 """
 WebSocket routing для Django Channels.
+
+Импорты consumers выполнятся после инициализации Django в asgi.py.
 """
 
 from django.urls import path
-from .consumers import ChatConsumer, NotificationConsumer, OrderConsumer, ArbitrationConsumer
 
-websocket_urlpatterns = [
-    # Чат: ws://host/ws/chat/<chat_id>/?token=<jwt>
-    path("ws/chat/<int:chat_id>/", ChatConsumer.as_asgi()),
+websocket_urlpatterns = []
 
-    # Уведомления: ws://host/ws/notifications/?token=<jwt>
-    path("ws/notifications/", NotificationConsumer.as_asgi()),
 
-    # Заказы: ws://host/ws/orders/<order_id>/?token=<jwt>
-    path("ws/orders/<int:order_id>/", OrderConsumer.as_asgi()),
+def get_websocket_urlpatterns():
+    """Лениво загружает URL паттерны после инициализации Django."""
+    from .consumers import ChatConsumer, NotificationConsumer, OrderConsumer, ArbitrationConsumer
 
-    # Арбитраж: ws://host/ws/arbitration/<case_id>/?token=<jwt>
-    path("ws/arbitration/<int:case_id>/", ArbitrationConsumer.as_asgi()),
-]
+    return [
+        path("ws/chat/<int:chat_id>/", ChatConsumer.as_asgi()),
+        path("ws/notifications/", NotificationConsumer.as_asgi()),
+        path("ws/orders/<int:order_id>/", OrderConsumer.as_asgi()),
+        path("ws/arbitration/<int:case_id>/", ArbitrationConsumer.as_asgi()),
+    ]
