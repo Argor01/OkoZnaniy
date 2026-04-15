@@ -847,29 +847,34 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     loadChatDetail(selectedChat.id);
   }, [visible, selectedChat?.id, loadChatDetail]);
 
-        // Polling for new messages every 1 second
+        // Polling for new messages every 5 seconds (reduced from 1s to prevent flickering)
   useEffect(() => {
     if (!visible || !selectedChat?.id) return;
+    // Don't poll if document is hidden (tab not active)
+    if (document.hidden) return;
     let cancelled = false;
     const poll = async () => {
-      if (cancelled) return;
+      if (cancelled || document.hidden) return;
       await loadChatDetail(selectedChat.id);
     };
-    const id = window.setInterval(poll, 1000);
+    const id = window.setInterval(poll, 5000);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
   }, [visible, selectedChat?.id, loadChatDetail]);
 
+    // Polling for chat list every 30 seconds (reduced from 10s to prevent flickering)
     useEffect(() => {
     if (!visible) return;
+    // Don't poll if document is hidden
+    if (document.hidden) return;
     let cancelled = false;
     const poll = async () => {
-      if (cancelled) return;
+      if (cancelled || document.hidden) return;
       await loadChats(true);
     };
-    const id = window.setInterval(poll, 10000);
+    const id = window.setInterval(poll, 30000);
     return () => {
       cancelled = true;
       window.clearInterval(id);
