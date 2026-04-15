@@ -109,14 +109,10 @@ class ComplaintsApi {
     if (data.refund_percent) formData.append('refund_percent', String(data.refund_percent));
     formData.append('description', data.description);
     if (data.files?.length) {
-      data.files.forEach(file => formData.append('files', file));
+      data.files.forEach(file => formData.append('files_upload', file));
     }
 
-    const response = await api.post(this.baseUrl, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post(this.baseUrl, formData);
     return response.data;
   }
 

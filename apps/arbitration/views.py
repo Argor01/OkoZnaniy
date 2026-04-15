@@ -773,3 +773,45 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         
         serializer = ComplaintSerializer(complaints, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], url_path='chat')
+    def chat(self, request, pk=None):
+        """Получить чат претензии (переписку по связанному заказу)"""
+        complaint = self.get_object()
+        
+        if not complaint.order_id:
+            return Response({'messages': [], 'chat_id': None})
+        
+        # Получаем чат по заказу
+        related_chats = Chat.objects.filter(order_id=complaint.order_id).order_by('-created_at')
+        chat = related_chats.first()
+        
+        if not chat:
+            return Response({'messages': [], 'chat_id': None})
+        
+        # Получаем сообщения из чата
+        messages = ChatMessage.objects.filter(chat=chat).select_related('sender').order_by('created_at')
+        
+        messages_data = [
+            {
+                'id': msg.id,
+                'sender': {
+                    'id': msg.sender.id,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'role': getattr(msg.sender, 'role', ''),
+                },
+                'text': msg.text or '',
+                'message_type': msg.message_type,
+                'file_name': msg.file_name,
+                'file_url': msg.file.url if msg.file else None,
+                'created_at': msg.created_at.isoformat(),
+            }
+            for msg in messages
+        ]
+        
+        return Response({
+            'chat_id': chat.id,
+            'chat_context_title': chat.context_title,
+            'messages': messages_data,
+        })

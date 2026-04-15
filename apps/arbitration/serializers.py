@@ -282,6 +282,12 @@ class ComplaintSerializer(serializers.ModelSerializer):
     
     # Write-only поля
     order_id = serializers.IntegerField(write_only=True)
+    files_upload = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True,
+        required=False,
+        allow_empty=True,
+    )
     
     class Meta:
         model = Complaint
@@ -290,7 +296,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
             'complaint_type',
             'is_order_relevant', 'relevant_until',
             'financial_requirement',
-            'refund_percent', 'description', 'files',
+            'refund_percent', 'description', 'files', 'files_upload',
             'status',
             'created_at', 'updated_at', 'resolved_at', 'resolution',
             'chat_id',
@@ -305,11 +311,11 @@ class ComplaintSerializer(serializers.ModelSerializer):
         return [
             {
                 'id': f.id,
-                'file_name': f.filename(),
+                'file_name': f.file.name.split('/')[-1] if f.file else '',
                 'file_url': f.file.url if f.file else None,
                 'file_type': f.file_type,
             }
-                        for f in files
+            for f in files
         ]
     
     def validate_order_id(self, value):
@@ -332,6 +338,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
         if not request or not request.user:
             raise serializers.ValidationError('Пользователь не авторизован')
         
+        files_upload = validated_data.pop('files_upload', [])
         order_id = validated_data.pop('order_id')
         
         # Получаем заказ
@@ -360,6 +367,15 @@ class ComplaintSerializer(serializers.ModelSerializer):
             order=order,
             **validated_data
         )
+        
+        # Сохраняем файлы
+        for uploaded_file in files_upload:
+            OrderFile.objects.create(
+                order=order,
+                file=uploaded_file,
+                uploaded_by=request.user,
+                file_type='task',
+            )
         
         # Замораживаем заказ
         order.freeze(f'Открыта претензия #{complaint.id}')
