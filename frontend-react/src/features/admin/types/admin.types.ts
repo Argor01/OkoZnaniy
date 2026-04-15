@@ -73,17 +73,14 @@ export type MenuKey =
   | 'support_open'
   | 'support_in_progress'
   | 'support_completed'
-
   | 'tickets'
   | 'arbitration'
   | 'communication'
   | 'admin_group_chats'
- 
+  | 'admin_chats'
   | 'blocking'
   | 'user_roles'
-
   | 'orders_management'
-
   | 'new_claims'
   | 'in_progress_claims'
   | 'completed_claims'

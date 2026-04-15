@@ -27,6 +27,7 @@ export interface Question {
   answers_count: number;
   status: 'open' | 'answered' | 'closed';
   tags: string[];
+  answers?: Answer[];
 }
 
 export interface Answer {

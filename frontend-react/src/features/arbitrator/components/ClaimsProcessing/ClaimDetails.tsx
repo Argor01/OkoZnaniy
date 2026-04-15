@@ -145,7 +145,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
 
   
   const quickRefundMutation = useMutation({
-    mutationFn: (data: { decision_type: string; refund_amount: number; reasoning: string; require_approval: boolean }) =>
+    mutationFn: (data: { decision_type: 'revision' | 'other' | 'no_refund' | 'full_refund' | 'partial_refund'; refund_amount: number; reasoning: string; require_approval: boolean }) =>
       arbitratorApi.makeDecision(claim.id, data),
     onSuccess: () => {
       message.success('Возврат средств оформлен');
@@ -186,7 +186,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
     onClose();
   };
 
-  const tabItems = [
+  const tabItems: Array<{ key: string; label: string | React.ReactNode; children: React.ReactNode }> = [
     {
       key: 'info',
       label: 'Информация',

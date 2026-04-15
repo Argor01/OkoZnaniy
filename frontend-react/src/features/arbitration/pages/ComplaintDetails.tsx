@@ -507,14 +507,14 @@ const ComplaintDetails: React.FC = () => {
                   placeholder="Напишите сообщение... (Enter для отправки, Shift+Enter для новой строки)"
                   className={styles.chatInput}
                   autoSize={{ minRows: 1, maxRows: 4 }}
-                  disabled={sendingMessage || complaint.status === 'closed' || complaint.status === 'resolved'}
+                  disabled={sendingMessage || (complaint.status as string) === 'closed' || (complaint.status as string) === 'resolved'}
                 />
                 <AppButton
                   type="primary"
                   icon={<SendOutlined />}
                   onClick={handleSendMessage}
                   loading={sendingMessage}
-                  disabled={!chatInput.trim() || complaint.status === 'closed' || complaint.status === 'resolved'}
+                  disabled={!chatInput.trim() || (complaint.status as string) === 'closed' || (complaint.status as string) === 'resolved'}
                   className={styles.sendButton}
                 >
                   {isMobile ? '' : 'Отправить'}

@@ -10,6 +10,7 @@ export interface ExpertStatistics {
   total_earnings: number | null;
   response_time_avg: number;
   last_updated: string;
+  points?: number;
 }
 
 export interface Education {

@@ -170,7 +170,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   // Обновление заказа
   const updateOrderMutation = useMutation({
     mutationFn: ({ orderId, data }: { orderId: number; data: Partial<Order> }) =>
-      ordersApi.updateOrder(orderId, data),
+      ordersApi.updateOrder(orderId, data as any),
     onSuccess: () => {
       message.success('Заказ успешно обновлен!');
       queryClient.invalidateQueries({ queryKey: ['order'] });
@@ -232,7 +232,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         deadline: deadlineWithTime.toISOString(),
         subject_id: values.subject,
         work_type_id: values.work_type,
-        budget: values.budget || null,
+        budget: values.budget ? String(values.budget) : undefined,
         client_note: values.client_note || undefined,
       };
 

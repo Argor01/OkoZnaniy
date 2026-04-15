@@ -267,7 +267,7 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             maxTagCount={5}
             showSearch
             filterOption={(input, option) =>
-              (option?.children as string).toLowerCase().includes(input.toLowerCase())
+              String(option?.label ?? option?.children ?? '').toLowerCase().includes(input.toLowerCase())
             }
             style={{ width: '100%' }}
             className={styles.tagsSelect}

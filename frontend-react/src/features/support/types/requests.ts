@@ -37,7 +37,7 @@ export interface SupportFeedItem {
   created_at: string;
   text?: string;
   is_admin?: boolean;
-  source?: 'ticket' | 'chat';
+  source?: 'ticket' | 'chat' | 'order_chat';
   activity_type?: string;
   meta?: Record<string, unknown>;
   sender?: {

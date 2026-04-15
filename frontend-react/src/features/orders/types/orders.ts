@@ -56,7 +56,7 @@ export interface Order {
   id: number;
   title: string;
   description: string;
-  budget: string;
+  budget: string | number;
   deadline: string;
   status: string;
   is_overdue?: boolean;

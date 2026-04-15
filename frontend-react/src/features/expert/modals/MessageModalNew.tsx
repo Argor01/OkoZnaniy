@@ -58,9 +58,10 @@ interface MessageModalProps {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  selectedUserId?: number; 
-  selectedOrderId?: number; 
+  selectedUserId?: number;
+  selectedOrderId?: number;
   chatContextTitle?: string;
+  supportUserId?: number;
   userProfile?: { role?: string };
 }
 
@@ -103,6 +104,7 @@ type OrderForChat = {
   work_type?: { name?: string | null } | null;
   custom_subject?: string | null;
   custom_work_type?: string | null;
+  files?: Array<{ id: number; file_name: string; file_url: string; file_type?: string }>;
 };
 
 const getErrorDetail = (error: unknown): string | undefined => {
