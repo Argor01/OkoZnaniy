@@ -553,7 +553,7 @@ const OrderDetail: React.FC = () => {
                   <div className={styles.clientMeta}>
                     <AppButton 
                       variant="link" 
-                      onClick={() => navigate(`/user/${order.client?.id}`)}
+                      onClick={() => navigate(`/user/${order.client?.username}`)}
                       className={styles.clientNameLink}
                     >
                       {clientDisplayName}
@@ -1026,7 +1026,7 @@ const OrderDetail: React.FC = () => {
                                 src={bid.expert.avatar} 
                                 icon={<UserOutlined />}
                                 className={styles.bidAvatar}
-                                onClick={() => navigate(`/user/${bid.expert.id}`)}
+                                onClick={() => navigate(`/user/${bid.expert.username}`)}
                               />
                             }
                             title={
@@ -1034,7 +1034,7 @@ const OrderDetail: React.FC = () => {
                                 <Space className={styles.bidIdentityRow} wrap>
                                   <AppButton 
                                     variant="link" 
-                                    onClick={() => navigate(`/user/${bid.expert.id}`)}
+                                    onClick={() => navigate(`/user/${bid.expert.username}`)}
                                     className={styles.bidUserLink}
                                   >
                                     <Text strong>{bid.expert.username}</Text>
@@ -1099,7 +1099,7 @@ const OrderDetail: React.FC = () => {
                   <div className={styles.expertMeta}>
                     <AppButton 
                       variant="link" 
-                      onClick={() => navigate(`/user/${order.expert.id}`)}
+                      onClick={() => navigate(`/user/${order.expert.username}`)}
                       className={styles.expertLink}
                     >
                       <Text strong className={styles.expertName}>{order.expert.username}</Text>

@@ -81,13 +81,13 @@ const QuestionDetail: React.FC = () => {
     navigate('/knowledge');
   };
 
-  const handleUserClick = (userId: number, event: React.MouseEvent) => {
+  const handleUserClick = (userId: number, username: string | undefined, event: React.MouseEvent) => {
     event.stopPropagation();
     // Не переходим на профиль для моковых/несуществующих пользователей
-    if (userId === 0 || userId === 999) {
+    if (userId === 0 || userId === 999 || !username) {
       return;
     }
-    navigate(`/user/${userId}`);
+    navigate(`/user/${username}`);
   };
 
   const handleDeleteQuestion = async () => {
@@ -208,7 +208,7 @@ const QuestionDetail: React.FC = () => {
         <div className={styles.questionHeader}>
           <Space 
             style={{ cursor: 'pointer' }}
-            onClick={(e) => handleUserClick(question.author.id, e)}
+            onClick={(e) => handleUserClick(question.author.id, question.author.username, e)}
           >
             <Avatar size={48} icon={<UserOutlined />} />
             <div>
@@ -299,7 +299,7 @@ const QuestionDetail: React.FC = () => {
               <div className={styles.answerHeader}>
                 <Space 
                   style={{ cursor: 'pointer' }}
-                  onClick={(e) => handleUserClick(answer.author.id, e)}
+                  onClick={(e) => handleUserClick(answer.author.id, answer.author.username, e)}
                 >
                   <Avatar icon={<UserOutlined />} />
                   <div>

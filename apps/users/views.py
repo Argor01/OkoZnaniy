@@ -72,6 +72,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'username'
     
     def get_serializer_class(self):
         if self.action == 'create':

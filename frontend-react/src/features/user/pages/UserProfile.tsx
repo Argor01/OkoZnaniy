@@ -14,27 +14,27 @@ import styles from './UserProfile.module.css';
 const { Text, Paragraph } = Typography;
 
 const UserProfile: FC = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
 
   
   const { data: userData, isLoading: userLoading, error: userError } = useQuery({
-    queryKey: ['user', userId],
+    queryKey: ['user', username],
     queryFn: async () => {
-      const response = await apiClient.get(`/users/${userId}/`);
+      const response = await apiClient.get(`/users/${username}/`);
       return response.data;
     },
-    enabled: !!userId,
+    enabled: !!username,
     refetchOnWindowFocus: true,
     refetchInterval: 15000,
   });
 
   
   const { data: ordersStats, isLoading: statsLoading } = useQuery({
-    queryKey: ['user-orders-stats', userId],
+    queryKey: ['user-orders-stats', userData?.id],
     queryFn: async () => {
       try {
-        const response = await apiClient.get(`/orders/orders/?client=${userId}`);
+        const response = await apiClient.get(`/orders/orders/?client=${userData?.id}`);
         const orders = response.data as { results?: Array<{ status?: string }> };
         const relevantOrders = (orders.results || []).filter((order) => order.status !== 'cancelled');
         const total = relevantOrders.length;
@@ -45,30 +45,30 @@ const UserProfile: FC = () => {
         return { total: 0, completed: 0, success_rate: 0 };
       }
     },
-    enabled: !!userId,
+    enabled: !!userData?.id,
   });
 
   
   const { data: expertStats, isLoading: expertStatsLoading } = useQuery({
-    queryKey: ['expert-stats', userId],
-    queryFn: () => expertsApi.getExpertStatistics(Number(userId)),
-    enabled: !!userId && userData?.role === 'expert',
+    queryKey: ['expert-stats', userData?.id],
+    queryFn: () => expertsApi.getExpertStatistics(Number(userData?.id)),
+    enabled: !!userData?.id && userData?.role === 'expert',
   });
 
   
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
-    queryKey: ['expert-reviews', userId],
-    queryFn: () => expertsApi.getReviews(Number(userId)),
-    enabled: !!userId && userData?.role === 'expert',
+    queryKey: ['expert-reviews', userData?.id],
+    queryFn: () => expertsApi.getReviews(Number(userData?.id)),
+    enabled: !!userData?.id && userData?.role === 'expert',
     refetchOnWindowFocus: true,
     refetchInterval: 20000,
   });
 
   const { data: liveSpecializations = [] } = useQuery({
-    queryKey: ['expert-specializations-public', userId],
+    queryKey: ['expert-specializations-public', userData?.id],
     queryFn: async () => {
       const all = await expertsApi.getSpecializations();
-      const currentId = Number(userId);
+      const currentId = Number(userData?.id);
       if (!Number.isFinite(currentId) || currentId <= 0) return [];
       return all.filter((spec: any) => {
         const expertIdRaw = typeof spec?.expert === 'object' ? spec?.expert?.id : spec?.expert;
@@ -76,7 +76,7 @@ const UserProfile: FC = () => {
         return Number.isFinite(expertId) && expertId === currentId;
       });
     },
-    enabled: !!userId && userData?.role === 'expert',
+    enabled: !!userData?.id && userData?.role === 'expert',
     refetchOnWindowFocus: true,
     refetchInterval: 15000,
   });
@@ -87,18 +87,18 @@ const UserProfile: FC = () => {
       : (Array.isArray(userData?.specializations) ? userData.specializations : []);
 
   const handleWriteMessage = async () => {
-    if (!userId) {
+    if (!userData?.id) {
       antMessage.error('ID пользователя не найден');
       return;
     }
 
     try {
       // Создаем или получаем чат с этим пользователем
-      const chatData = await chatApi.getOrCreateByUser(Number(userId));
+      const chatData = await chatApi.getOrCreateByUser(Number(userData.id));
       
       // Открываем модальное окно чата с этим чатом
       const event = new CustomEvent('openChatById', {
-        detail: { chatId: chatData.id, userId: Number(userId) }
+        detail: { chatId: chatData.id, userId: Number(userData.id) }
       });
       window.dispatchEvent(event);
       
@@ -388,9 +388,9 @@ const UserProfile: FC = () => {
                           <div
                             role="button"
                             tabIndex={0}
-                            onClick={() => navigate(`/user/${review.client.id}`)}
+                            onClick={() => navigate(`/user/${review.client.username}`)}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
+                              if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.username}`);
                             }}
                             className={styles.reviewUser}
                           >

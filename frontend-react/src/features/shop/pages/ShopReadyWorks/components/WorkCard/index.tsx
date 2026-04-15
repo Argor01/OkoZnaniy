@@ -97,7 +97,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
               className={styles.authorLink}
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/user/${work.author.id}`);
+                navigate(`/user/${work.author.username}`);
               }}
             >
               {work.author.name || work.author.username || work.author_name || 'Неизвестен'}

@@ -113,13 +113,13 @@ export const KnowledgePortal: React.FC = () => {
     navigate(`/knowledge/${questionId}`);
   };
 
-  const handleUserClick = (userId: number, event: React.MouseEvent) => {
+  const handleUserClick = (userId: number, username: string | undefined, event: React.MouseEvent) => {
     event.stopPropagation();
     // Не переходим на профиль для моковых/несуществующих пользователей
-    if (userId === 0 || userId === 999) {
+    if (userId === 0 || userId === 999 || !username) {
       return;
     }
-    navigate(`/user/${userId}`);
+    navigate(`/user/${username}`);
   };
 
   return (
@@ -194,7 +194,7 @@ export const KnowledgePortal: React.FC = () => {
                 <div className={styles.questionHeader}>
                   <Space 
                     style={{ cursor: 'pointer' }}
-                    onClick={(e) => handleUserClick(question.author.id, e)}
+                    onClick={(e) => handleUserClick(question.author.id, question.author.username, e)}
                   >
                     <Avatar icon={<UserOutlined />} />
                     <div>

@@ -120,10 +120,10 @@ const WorkDetail: React.FC = () => {
                       <AppButton 
                         variant="link" 
                         onClick={() => {
-                          if (work.client?.id) {
-                            navigate(`/user/${work.client.id}`);
+                          if (work.client?.username) {
+                            navigate(`/user/${work.client.username}`);
                           } else {
-                            console.error('Client ID is not available');
+                            console.error('Client username is not available');
                           }
                         }}
                         className={styles.clientLink}

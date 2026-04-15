@@ -49,9 +49,9 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(`/user/${review.client.id}`)}
+                  onClick={() => navigate(`/user/${review.client.username}`)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.id}`);
+                    if (e.key === 'Enter' || e.key === ' ') navigate(`/user/${review.client.username}`);
                   }}
                   className={styles.reviewUser}
                 >

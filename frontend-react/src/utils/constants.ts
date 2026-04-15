@@ -93,10 +93,10 @@ export const ROUTES = {
     root: '/expert',
     clientOrders: '/expert/client-orders',
     application: '/expert-application',
-    profile: '/expert/:userId',
+    profile: '/expert/:username',
   },
   user: {
-    profile: '/user/:userId',
+    profile: '/user/:username',
   },
   partner: {
     root: '/partner',
