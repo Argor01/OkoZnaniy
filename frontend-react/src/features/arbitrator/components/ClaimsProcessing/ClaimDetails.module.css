@@ -1,0 +1,33 @@
+.refundSlider {
+  margin: 24px 0;
+}
+
+.refundAmount {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-color, #1890ff);
+  margin-bottom: 8px;
+}
+
+.quickRefundAlert {
+  margin-bottom: 24px;
+}
+
+.refundButton {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.percentageLabel {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 8px;
+}
+
+.calculatedAmount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--success-color, #52c41a);
+}

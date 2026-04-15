@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Select, Input, Button, Space, message, Checkbox, Upload, InputNumber } from 'antd';
+import { Form, Select, Input, Button, Space, message, Checkbox, Upload, InputNumber, Radio, Slider } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
 import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
@@ -28,6 +28,8 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   const [requireApproval, setRequireApproval] = useState(false);
   const [decisionType, setDecisionType] = useState<string>('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [refundInputType, setRefundInputType] = useState<'amount' | 'percentage'>('percentage');
+  const [refundPercentage, setRefundPercentage] = useState<number>(50);
 
   const handleSubmit = async (values: any) => {
     setLoading(true);
@@ -61,7 +63,26 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
     
     if (value !== 'partial_refund') {
       form.setFieldsValue({ refund_amount: undefined });
+      setRefundPercentage(50);
+    } else if (value === 'partial_refund' && refundInputType === 'percentage') {
+      
+      const calculatedAmount = Math.round((orderAmount * refundPercentage) / 100);
+      form.setFieldsValue({ refund_amount: calculatedAmount });
     }
+  };
+
+  const handleRefundInputTypeChange = (type: 'amount' | 'percentage') => {
+    setRefundInputType(type);
+    if (type === 'percentage') {
+      const calculatedAmount = Math.round((orderAmount * refundPercentage) / 100);
+      form.setFieldsValue({ refund_amount: calculatedAmount });
+    }
+  };
+
+  const handlePercentageChange = (value: number) => {
+    setRefundPercentage(value);
+    const calculatedAmount = Math.round((orderAmount * value) / 100);
+    form.setFieldsValue({ refund_amount: calculatedAmount });
   };
 
   return (
@@ -89,29 +110,64 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
       </Form.Item>
 
       {decisionType === 'partial_refund' && (
-        <Form.Item
-          name="refund_amount"
-          label="Сумма возврата"
-          rules={[
-            { required: true, message: 'Укажите сумму возврата' },
-            { type: 'number', min: 1, message: 'Сумма должна быть больше 0' },
-            {
-              type: 'number',
-              max: orderAmount,
-              message: `Сумма не может превышать ${orderAmount.toLocaleString()} ₽`,
-            },
-          ]}
-        >
-          <InputNumber
-            className="arbitratorSelectFull"
-            placeholder="Введите сумму возврата"
-            min={1}
-            max={orderAmount}
-            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-            parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
-            suffix="₽"
-          />
-        </Form.Item>
+        <>
+          <Form.Item label="Способ указания суммы возврата">
+            <Radio.Group
+              value={refundInputType}
+              onChange={(e) => handleRefundInputTypeChange(e.target.value)}
+            >
+              <Radio.Button value="percentage">Процент от суммы</Radio.Button>
+              <Radio.Button value="amount">Точная сумма</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+
+          {refundInputType === 'percentage' && (
+            <Form.Item label={`Процент возврата: ${refundPercentage}% (${Math.round((orderAmount * refundPercentage) / 100).toLocaleString()} ₽)`}>
+              <Slider
+                min={0}
+                max={100}
+                step={5}
+                value={refundPercentage}
+                onChange={handlePercentageChange}
+                marks={{
+                  0: '0%',
+                  25: '25%',
+                  50: '50%',
+                  75: '75%',
+                  100: '100%',
+                }}
+                tooltip={{
+                  formatter: (value) => `${value}% (${Math.round((orderAmount * (value || 0)) / 100).toLocaleString()} ₽)`,
+                }}
+              />
+            </Form.Item>
+          )}
+
+          <Form.Item
+            name="refund_amount"
+            label="Сумма возврата"
+            rules={[
+              { required: true, message: 'Укажите сумму возврата' },
+              { type: 'number', min: 1, message: 'Сумма должна быть больше 0' },
+              {
+                type: 'number',
+                max: orderAmount,
+                message: `Сумма не может превышать ${orderAmount.toLocaleString()} ₽`,
+              },
+            ]}
+          >
+            <InputNumber
+              className="arbitratorSelectFull"
+              placeholder="Введите сумму возврата"
+              min={1}
+              max={orderAmount}
+              disabled={refundInputType === 'percentage'}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
+              suffix="₽"
+            />
+          </Form.Item>
+        </>
       )}
 
       <Form.Item

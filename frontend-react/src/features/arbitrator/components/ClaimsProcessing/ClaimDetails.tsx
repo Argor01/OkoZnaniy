@@ -15,6 +15,9 @@ import {
   Input,
   Select,
   message,
+  Radio,
+  Slider,
+  InputNumber,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -22,12 +25,14 @@ import {
   FileTextOutlined,
   SendOutlined,
   QuestionCircleOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
 import type { Claim, RequestInfoRequest, SendForApprovalRequest } from '@/features/arbitrator/api/types';
 import DecisionForm from './DecisionForm';
+import styles from './ClaimDetails.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -105,6 +110,9 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
   const [activeTab, setActiveTab] = useState('info');
   const [requestInfoForm] = Form.useForm();
   const [approvalForm] = Form.useForm();
+  const [quickRefundForm] = Form.useForm();
+  const [showQuickRefund, setShowQuickRefund] = useState(false);
+  const [refundPercentage, setRefundPercentage] = useState<number>(50);
 
   
   const requestInfoMutation = useMutation({
@@ -135,12 +143,42 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
     },
   });
 
+  
+  const quickRefundMutation = useMutation({
+    mutationFn: (data: { decision_type: string; refund_amount: number; reasoning: string; require_approval: boolean }) =>
+      arbitratorApi.makeDecision(claim.id, data),
+    onSuccess: () => {
+      message.success('Возврат средств оформлен');
+      quickRefundForm.resetFields();
+      setShowQuickRefund(false);
+      queryClient.invalidateQueries({ queryKey: ['arbitrator-claims'] });
+      onClose();
+    },
+    onError: (error: any) => {
+      message.error(error?.response?.data?.detail || 'Ошибка при оформлении возврата');
+    },
+  });
+
   const handleRequestInfo = (values: RequestInfoRequest) => {
     requestInfoMutation.mutate(values);
   };
 
   const handleSendForApproval = (values: SendForApprovalRequest) => {
     sendForApprovalMutation.mutate(values);
+  };
+
+  const handleQuickRefund = (values: any) => {
+    const refundAmount = Math.round((claim.order.amount * refundPercentage) / 100);
+    quickRefundMutation.mutate({
+      decision_type: refundPercentage === 100 ? 'full_refund' : 'partial_refund',
+      refund_amount: refundAmount,
+      reasoning: values.reasoning || `Возврат ${refundPercentage}% от суммы заказа`,
+      require_approval: values.require_approval || false,
+    });
+  };
+
+  const handleRefundPercentageChange = (value: number) => {
+    setRefundPercentage(value);
   };
 
   const handleDecisionSuccess = () => {
@@ -422,6 +460,96 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
   ];
 
   if (showDecisionForm && claim.status !== 'completed') {
+    tabItems.push({
+      key: 'quick-refund',
+      label: (
+        <span>
+          <DollarOutlined /> Возврат средств
+        </span>
+      ),
+      children: (
+        <div>
+          <Alert
+            message="Быстрый возврат средств"
+            description={`Сумма заказа: ${claim.order.amount.toLocaleString()} ₽`}
+            type="info"
+            showIcon
+            className={styles.quickRefundAlert}
+          />
+          <Form
+            form={quickRefundForm}
+            layout="vertical"
+            onFinish={handleQuickRefund}
+            initialValues={{ require_approval: false }}
+          >
+            <Form.Item 
+              label={
+                <div>
+                  <div className={styles.percentageLabel}>Процент возврата: {refundPercentage}%</div>
+                  <div className={styles.calculatedAmount}>
+                    {Math.round((claim.order.amount * refundPercentage) / 100).toLocaleString()} ₽
+                  </div>
+                </div>
+              }
+            >
+              <Slider
+                className={styles.refundSlider}
+                min={0}
+                max={100}
+                step={5}
+                value={refundPercentage}
+                onChange={handleRefundPercentageChange}
+                marks={{
+                  0: '0%',
+                  25: '25%',
+                  50: '50%',
+                  75: '75%',
+                  100: '100%',
+                }}
+                tooltip={{
+                  formatter: (value) => `${value}% (${Math.round((claim.order.amount * (value || 0)) / 100).toLocaleString()} ₽)`,
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="reasoning"
+              label="Обоснование (опционально)"
+            >
+              <TextArea
+                rows={3}
+                placeholder={`Возврат ${refundPercentage}% от суммы заказа`}
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="require_approval"
+              valuePropName="checked"
+            >
+              <Radio.Group>
+                <Radio value={false}>Оформить возврат сразу</Radio>
+                <Radio value={true}>Отправить на согласование дирекции</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                icon={<DollarOutlined />}
+                htmlType="submit"
+                loading={quickRefundMutation.isPending}
+                className={styles.refundButton}
+              >
+                Оформить возврат {Math.round((claim.order.amount * refundPercentage) / 100).toLocaleString()} ₽
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+      ),
+    });
+
     tabItems.push({
       key: 'decision',
       label: 'Принять решение',
