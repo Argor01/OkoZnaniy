@@ -50,6 +50,7 @@ import { ROUTES } from '@/utils/constants';
 import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
+import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
 const { Text } = Typography;
 interface MessageModalProps {
@@ -297,6 +298,61 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   const dragDepthRef = useRef(0);
+
+  // WebSocket для real-time обновлений чата
+  const handleNewMessage = useCallback((wsMessage: any) => {
+    if (!selectedChat) return;
+    
+    // Добавляем новое сообщение в текущий чат
+    const newMsg: Message = {
+      id: wsMessage.id,
+      sender: wsMessage.sender || { id: wsMessage.sender_id, username: '', first_name: '', last_name: '' },
+      sender_id: wsMessage.sender?.id,
+      text: wsMessage.text,
+      message_type: wsMessage.message_type,
+      created_at: wsMessage.created_at,
+      is_read: wsMessage.is_read,
+      is_mine: false,
+      file_name: wsMessage.file_name ?? null,
+      file_url: wsMessage.file_url ?? null,
+    };
+
+    setSelectedChat((prev) => {
+      if (!prev || prev.id !== selectedChat.id) return prev;
+      return {
+        ...prev,
+        messages: [...(prev.messages || []), newMsg],
+      };
+    });
+
+    // Обновляем список чатов (последнее сообщение)
+    setChatList((prev) => {
+      return prev.map((chat) => {
+        if (chat.id !== selectedChat.id) return chat;
+        return {
+          ...chat,
+          last_message: {
+            text: wsMessage.text,
+            sender_id: wsMessage.sender?.id,
+            created_at: wsMessage.created_at,
+            file_name: wsMessage.file_name ?? null,
+            file_url: wsMessage.file_url ?? null,
+          },
+          last_message_time: wsMessage.created_at,
+        };
+      });
+    });
+
+    // Автоскролл вниз
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }, [selectedChat]);
+
+  const { isConnected: wsConnected } = useChatWebSocket(
+    selectedChat?.id ?? null,
+    handleNewMessage
+  );
 
   const emojiVersion = useMemo<EmojiVersionLevel>(() => {
     const family = detectDeviceEmojiFamily();
@@ -847,22 +903,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     loadChatDetail(selectedChat.id);
   }, [visible, selectedChat?.id, loadChatDetail]);
 
-        // Polling for new messages every 5 seconds (reduced from 1s to prevent flickering)
-  useEffect(() => {
-    if (!visible || !selectedChat?.id) return;
-    // Don't poll if document is hidden (tab not active)
-    if (document.hidden) return;
-    let cancelled = false;
-    const poll = async () => {
-      if (cancelled || document.hidden) return;
-      await loadChatDetail(selectedChat.id);
-    };
-    const id = window.setInterval(poll, 5000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [visible, selectedChat?.id, loadChatDetail]);
+        // WebSocket handles real-time message updates.
+        // No polling needed for messages anymore.
 
     // Polling for chat list every 30 seconds (reduced from 10s to prevent flickering)
     useEffect(() => {
