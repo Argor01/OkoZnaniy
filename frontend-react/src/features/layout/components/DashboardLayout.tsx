@@ -261,6 +261,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setFaqModalVisible(true);
   }, [closeAllModals]);
 
+  const handleImprovementsClick = useCallback(() => {
+    closeAllModals();
+    navigate('/improvements');
+  }, [closeAllModals, navigate]);
+
   const handleProfileClick = useCallback(() => {
     closeAllModals();
     setProfileModalVisible(true);
@@ -502,6 +507,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onFinanceClick={handleFinanceClick}
             onFriendsClick={handleFriendsClick}
             onFaqClick={handleFaqClick}
+            onImprovementsClick={handleImprovementsClick}
             mobileDrawerOpen={mobileMenuVisible}
             onMobileDrawerChange={setMobileMenuVisible}
             collapsed={false}

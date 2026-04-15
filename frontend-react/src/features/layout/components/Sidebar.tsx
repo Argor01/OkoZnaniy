@@ -14,6 +14,7 @@ import {
   MenuOutlined,
   UnorderedListOutlined,
   BookOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
@@ -49,6 +50,7 @@ interface SidebarProps {
   onFinanceClick?: () => void;
   onFriendsClick?: () => void;
   onFaqClick?: () => void;
+  onImprovementsClick?: () => void;
   mobileDrawerOpen?: boolean;
   onMobileDrawerChange?: (open: boolean) => void;
   collapsed?: boolean;
@@ -68,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   onFinanceClick,
   onFriendsClick,
   onFaqClick,
+  onImprovementsClick,
   mobileDrawerOpen = false,
   onMobileDrawerChange,
   collapsed = false,
@@ -114,6 +117,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
     if (key === 'faq') {
       onFaqClick?.();
+      return;
+    }
+    if (key === 'improvements') {
+      onImprovementsClick?.();
       return;
     }
     if (key === 'knowledge') {
@@ -198,6 +205,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     onArbitrationClick,
     onFriendsClick,
     onFaqClick,
+    onImprovementsClick,
     onLogout,
     onMenuSelect
   ]);
@@ -289,6 +297,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       key: 'knowledge',
       icon: <BookOutlined />,
       label: 'Портал Знаний',
+    },
+    {
+      key: 'improvements',
+      icon: <BulbOutlined />,
+      label: 'Рекомендации по улучшению',
     },
     {
       key: 'faq',
