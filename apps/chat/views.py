@@ -9,6 +9,7 @@ from django.db.models import Q, Max, Count, Prefetch
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
+from .websocket_utils import notify_chat_message, notify_typing
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
@@ -298,6 +299,27 @@ class ChatViewSet(viewsets.ModelViewSet):
                     )
                 except Exception:
                     pass
+
+        # WebSocket уведомление о новом сообщении
+        try:
+            message_serializer = MessageSerializer(message, context={'request': request})
+            notify_chat_message(chat.id, message_serializer.data)
+
+            # Уведомляем всех участников чата через персональные уведомления
+            for participant in chat.participants.exclude(id=request.user.id):
+                from .websocket_utils import notify_new_notification
+                notify_new_notification(
+                    participant.id,
+                    {
+                        'id': message.id,
+                        'chat_id': chat.id,
+                        'sender': request.user.username,
+                        'text': (message.text or '')[:100],
+                        'created_at': message.created_at.isoformat(),
+                    }
+                )
+        except Exception:
+            pass
 
         if message_type == 'offer':
             try:

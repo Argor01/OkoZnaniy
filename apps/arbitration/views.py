@@ -19,6 +19,11 @@ from .serializers import (
 )
 from apps.orders.models import Order
 from apps.chat.models import Chat, Message as ChatMessage
+from apps.chat.websocket_utils import (
+    notify_arbitration_message,
+    notify_arbitration_status,
+    notify_arbitration_activity,
+)
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
 
@@ -335,6 +340,14 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             text=text,
             is_internal=is_internal and request.user.role == 'admin'
         )
+
+        # WebSocket уведомление о новом сообщении
+        if not is_internal:
+            try:
+                message_data = ArbitrationMessageSerializer(message).data
+                notify_arbitration_message(case.id, message_data)
+            except Exception:
+                pass
         
         # Логируем активность
         if not is_internal:
@@ -375,6 +388,21 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             case.closed_at = timezone.now()
         
         case.save()
+
+        # WebSocket уведомление об изменении статуса
+        try:
+            notify_arbitration_status(
+                case.id,
+                {
+                    'case_id': case.id,
+                    'case_number': case.case_number,
+                    'old_status': old_status,
+                    'new_status': new_status,
+                    'status_label': dict(ArbitrationCase.STATUS_CHOICES).get(new_status, new_status),
+                }
+            )
+        except Exception:
+            pass
         
         status_labels = dict(ArbitrationCase.STATUS_CHOICES)
         log_activity(

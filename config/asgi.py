@@ -1,7 +1,8 @@
 import os
 from django.core.asgi import get_asgi_application
-from channels .routing import ProtocolTypeRouter, URLRouter
-import apps.chat.routing  # если чат будет расширяться
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+import apps.chat.routing
 
 """
 ASGI config for config project.
@@ -15,10 +16,10 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = ProtocolTypeRouter({
-    # (http->django views is added by default)
     "http": get_asgi_application(),
-    # (websocket->daphne is added by default)
-    #"websocket": URLRouter(
-        #apps.chat.routing.websocket_urlpatterns
-    #),
+    "websocket": AllowedHostsOriginValidator(
+        URLRouter(
+            apps.chat.routing.websocket_urlpatterns
+        )
+    ),
 })

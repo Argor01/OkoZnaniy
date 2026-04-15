@@ -27,6 +27,26 @@ class NotificationService:
         if expires_in:
             notification.expires_at = timezone.now() + expires_in
             notification.save(update_fields=['expires_at'])
+
+        # WebSocket уведомление
+        try:
+            from apps.chat.websocket_utils import notify_new_notification
+            notify_new_notification(
+                recipient.id,
+                {
+                    'id': notification.id,
+                    'type': notification.type,
+                    'title': notification.title,
+                    'message': notification.message,
+                    'related_object_id': notification.related_object_id,
+                    'related_object_type': notification.related_object_type,
+                    'data': notification.data,
+                    'is_read': False,
+                    'created_at': notification.created_at.isoformat(),
+                }
+            )
+        except Exception:
+            pass
             
         return notification
 
