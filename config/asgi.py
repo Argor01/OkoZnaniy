@@ -1,5 +1,4 @@
 import os
-import django
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
@@ -14,13 +13,15 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 """
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-django.setup()
 
-# Импортируем routing после инициализации Django
+# Сначала создаём HTTP приложение (оно вызывает django.setup())
+django_asgi_app = get_asgi_application()
+
+# Теперь Django инициализирован, можно импортировать consumers
 import apps.chat.routing
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AllowedHostsOriginValidator(
         URLRouter(
             apps.chat.routing.get_websocket_urlpatterns()
