@@ -92,6 +92,7 @@ export const titleMap: Record<MenuKey, string> = {
   communication: 'Коммуникация',
   internal_communication: 'Внутренняя коммуникация',
   admin_group_chats: 'Групповые чаты администраторов',
+  admin_chats: 'Чаты админов',
   
   new_claims: 'Новые заявки',
   in_progress_claims: 'Заявки в работе',

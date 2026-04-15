@@ -226,7 +226,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         .second(0)
         .millisecond(0);
 
-      const orderData: Partial<Order> = {
+      const orderData: any = {
         title: values.title,
         description: values.description,
         deadline: deadlineWithTime.toISOString(),
