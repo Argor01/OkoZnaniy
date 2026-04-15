@@ -112,7 +112,11 @@ class ComplaintsApi {
       data.files.forEach(file => formData.append('files', file));
     }
 
-    const response = await api.post(this.baseUrl, formData);
+    const response = await api.post(this.baseUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   }
 

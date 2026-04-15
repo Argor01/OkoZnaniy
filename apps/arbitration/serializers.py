@@ -329,28 +329,39 @@ class ComplaintSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """При создании претензии автоматически замораживаем заказ"""
         request = self.context.get('request')
+        if not request or not request.user:
+            raise serializers.ValidationError('Пользователь не авторизован')
+        
         order_id = validated_data.pop('order_id')
         
-        # Получаем заказ и замораживаем его
-        order = None
+        # Получаем заказ
         try:
-            order = Order.objects.get(id=order_id)
-            order.freeze(f'Открыта претензия #pending')
+            order = Order.objects.select_related('client', 'expert').get(id=order_id)
         except Order.DoesNotExist:
-            pass
+            raise serializers.ValidationError({'order_id': 'Заказ не найден'})
         
-        # Получаем ответчика из заказа
-        defendant = order.expert if order and order.expert else None
+        # Проверяем, что пользователь участвует в заказе
+        if request.user.id not in {order.client_id, order.expert_id}:
+            raise serializers.ValidationError({'order_id': 'Вы не участвуете в этом заказе'})
         
-        # Удаляем plaintiff из validated_data, если там есть (чтобы не дублировалось)
-        validated_data.pop('plaintiff', None)
+        # Определяем ответчика
+        if request.user.id == order.client_id:
+            defendant = order.expert
+        else:
+            defendant = order.client
+        
+        if not defendant:
+            raise serializers.ValidationError({'order_id': 'Не удалось определить ответчика'})
         
         # Создаем претензию
         complaint = Complaint.objects.create(
-            plaintiff=request.user if request else None,
+            plaintiff=request.user,
             defendant=defendant,
-            order_id=order_id,
+            order=order,
             **validated_data
         )
+        
+        # Замораживаем заказ
+        order.freeze(f'Открыта претензия #{complaint.id}')
         
         return complaint
