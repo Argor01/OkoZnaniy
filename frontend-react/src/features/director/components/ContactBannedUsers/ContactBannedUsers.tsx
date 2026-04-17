@@ -67,10 +67,15 @@ const ContactBannedUsers: React.FC = () => {
   const [banDurationType, setBanDurationType] = useState<'temporary' | 'permanent'>('temporary');
 
   // Используем React Query для загрузки данных
-  const { data: users = [], isLoading: loading } = useQuery<ContactBannedUser[]>({
+  const { data: users = [], isLoading: loading, error } = useQuery<ContactBannedUser[]>({
     queryKey: ['contact-banned-users'],
     queryFn: async () => {
+      if (debugEnabled) console.log('🔄 Загрузка забаненных пользователей...');
       const response = await apiClient.get('/users/contact_banned_users/');
+      if (debugEnabled) {
+        console.log('📦 Получены данные:', response.data);
+        console.log('📊 Количество пользователей:', response.data?.length || 0);
+      }
       return response.data;
     },
     staleTime: 0, // Данные сразу считаются устаревшими
@@ -78,6 +83,15 @@ const ContactBannedUsers: React.FC = () => {
     refetchOnWindowFocus: true, // Обновление при фокусе окна
     refetchOnMount: true, // Обновление при монтировании
   });
+
+  // Логируем ошибки и данные
+  React.useEffect(() => {
+    if (debugEnabled) {
+      console.log('👥 Пользователи в состоянии:', users);
+      console.log('⏳ Загрузка:', loading);
+      console.log('❌ Ошибка:', error);
+    }
+  }, [users, loading, error, debugEnabled]);
 
   // Мутация для блокировки пользователя
   const banMutation = useMutation({
@@ -320,6 +334,14 @@ const ContactBannedUsers: React.FC = () => {
   return (
     <div>
       <Card>
+        {error && (
+          <div style={{ marginBottom: 16 }}>
+            <Text type="danger">
+              Ошибка загрузки данных: {(error as Error).message}
+            </Text>
+          </div>
+        )}
+        
         <div className={styles.filtersRow}>
           <Search
             placeholder="Поиск по имени, email или username"
