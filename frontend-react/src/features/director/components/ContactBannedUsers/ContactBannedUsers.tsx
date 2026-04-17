@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { 
   Card, 
   Table, 
@@ -23,6 +23,7 @@ import {
   MailOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import styles from './ContactBannedUsers.module.css';
 
@@ -46,8 +47,7 @@ interface ContactBannedUser {
 }
 
 const ContactBannedUsers: React.FC = () => {
-  const [users, setUsers] = useState<ContactBannedUser[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const debugEnabled =
     import.meta.env.DEV &&
     typeof window !== 'undefined' &&
@@ -59,22 +59,36 @@ const ContactBannedUsers: React.FC = () => {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [unbanForm] = Form.useForm();
 
-  const fetchBannedUsers = useCallback(async () => {
-    setLoading(true);
-    try {
+  // Используем React Query для загрузки данных
+  const { data: users = [], isLoading: loading } = useQuery<ContactBannedUser[]>({
+    queryKey: ['contact-banned-users'],
+    queryFn: async () => {
       const response = await apiClient.get('/users/contact_banned_users/');
-      setUsers(response.data);
-    } catch (error) {
-      if (debugEnabled) console.error('Ошибка загрузки забаненных пользователей:', error);
-      message.error('Не удалось загрузить список забаненных пользователей');
-    } finally {
-      setLoading(false);
-    }
-  }, [debugEnabled]);
+      return response.data;
+    },
+    refetchInterval: 30000, // Автообновление каждые 30 секунд
+    refetchOnWindowFocus: true, // Обновление при фокусе окна
+  });
 
-  useEffect(() => {
-    fetchBannedUsers();
-  }, [fetchBannedUsers]);
+  // Мутация для разбана пользователя
+  const unbanMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      await apiClient.patch(`/users/${userId}/unban_for_contacts/`);
+    },
+    onSuccess: (_, userId) => {
+      const user = users.find(u => u.id === userId);
+      message.success(`Пользователь ${user?.username} разбанен`);
+      setUnbanModalVisible(false);
+      setSelectedUser(null);
+      unbanForm.resetFields();
+      // Инвалидируем кэш для обновления данных
+      queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
+    },
+    onError: (error) => {
+      if (debugEnabled) console.error('Ошибка разбана:', error);
+      message.error('Не удалось разбанить пользователя');
+    },
+  });
 
   const handleUnbanUser = (user: ContactBannedUser) => {
     setSelectedUser(user);
@@ -83,18 +97,7 @@ const ContactBannedUsers: React.FC = () => {
 
   const handleUnbanConfirm = async () => {
     if (!selectedUser) return;
-    
-    try {
-      await apiClient.patch(`/users/${selectedUser.id}/unban_for_contacts/`);
-      message.success(`Пользователь ${selectedUser.username} разбанен`);
-      setUnbanModalVisible(false);
-      setSelectedUser(null);
-      unbanForm.resetFields();
-      fetchBannedUsers();
-    } catch (error) {
-      if (debugEnabled) console.error('Ошибка разбана:', error);
-      message.error('Не удалось разбанить пользователя');
-    }
+    unbanMutation.mutate(selectedUser.id);
   };
 
   const handleViewDetails = (user: ContactBannedUser) => {
@@ -351,7 +354,8 @@ const ContactBannedUsers: React.FC = () => {
         }}
         okText="Разбанить"
         cancelText="Отмена"
-        okButtonProps={{ type: 'primary' }}
+        okButtonProps={{ type: 'primary', loading: unbanMutation.isPending }}
+        confirmLoading={unbanMutation.isPending}
       >
         {selectedUser && (
           <div>
