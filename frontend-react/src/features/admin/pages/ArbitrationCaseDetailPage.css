@@ -76,6 +76,22 @@
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
+.refund-modal-field {
+  width: 100%;
+}
+
+.refund-modal-hint {
+  display: block;
+  margin-top: 8px;
+}
+
+.refund-modal-summary {
+  padding: 12px 14px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;

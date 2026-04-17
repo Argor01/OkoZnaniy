@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Row, Col, Descriptions, Tag, Button, Space, Input,
   message, Spin, Empty, Typography, Divider, Avatar, Timeline,
-  Popconfirm, Tooltip
+  Popconfirm, Tooltip, Modal, Select, InputNumber
 } from 'antd';
 import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
@@ -108,6 +108,10 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [processingRefund, setProcessingRefund] = useState(false);
+  const [refundPercentage, setRefundPercentage] = useState(100);
+  const [refundAmount, setRefundAmount] = useState<number | null>(null);
   const [messageText, setMessageText] = useState('');
   const feedEndRef = useRef<HTMLDivElement>(null);
 
@@ -190,6 +194,39 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       fetchCaseData();
     } catch (error) {
       message.error('Ошибка при закрытии дела');
+    }
+  };
+
+  const openRefundModal = () => {
+    if (!caseData) return;
+
+    setRefundPercentage(Number(caseData.requested_refund_percentage) || 100);
+    setRefundAmount(caseData.requested_refund_amount ?? null);
+    setRefundModalOpen(true);
+  };
+
+  const handleProcessRefund = async () => {
+    if (!caseData) return;
+
+    if (!Number.isFinite(refundPercentage) || refundPercentage < 1 || refundPercentage > 100) {
+      message.error('Укажите корректный процент возврата от 1 до 100');
+      return;
+    }
+
+    try {
+      setProcessingRefund(true);
+      await apiClient.post(`/arbitration/cases/${caseData.id}/process-refund/`, {
+        refund_percentage: refundPercentage,
+        refund_amount: refundAmount ?? undefined,
+      });
+      message.success(`Возврат ${refundPercentage}% оформлен`);
+      setRefundModalOpen(false);
+      fetchCaseData();
+    } catch (error) {
+      message.error('Ошибка при оформлении возврата');
+      console.error(error);
+    } finally {
+      setProcessingRefund(false);
     }
   };
 
@@ -418,6 +455,18 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                   Взять в работу
                 </Button>
 
+                {caseData.refund_type !== 'none' && (
+                  <Button
+                    block
+                    size="large"
+                    icon={<DollarOutlined />}
+                    onClick={openRefundModal}
+                    disabled={caseData.status === 'closed'}
+                  >
+                    Оформить возврат
+                  </Button>
+                )}
+
                 <Popconfirm
                   title="Закрыть дело?"
                   description={
@@ -590,6 +639,68 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
           </Col>
         </Row>
       </div>
+      <Modal
+        title="Оформить возврат"
+        open={refundModalOpen}
+        onCancel={() => setRefundModalOpen(false)}
+        onOk={handleProcessRefund}
+        okText="Оформить"
+        cancelText="Отмена"
+        confirmLoading={processingRefund}
+        destroyOnHidden
+      >
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <div className="refund-modal-field">
+            <Text strong>Быстрый выбор процента</Text>
+            <Select
+              style={{ width: '100%', marginTop: 8 }}
+              value={refundPercentage}
+              onChange={(value) => setRefundPercentage(value)}
+              options={[
+                { value: 25, label: '25%' },
+                { value: 50, label: '50%' },
+                { value: 75, label: '75%' },
+                { value: 100, label: '100%' },
+              ]}
+            />
+          </div>
+
+          <div className="refund-modal-field">
+            <Text strong>Процент возврата</Text>
+            <InputNumber
+              min={1}
+              max={100}
+              addonAfter="%"
+              value={refundPercentage}
+              onChange={(value) => setRefundPercentage(Number(value) || 0)}
+              style={{ width: '100%', marginTop: 8 }}
+            />
+          </div>
+
+          <div className="refund-modal-field">
+            <Text strong>Сумма возврата</Text>
+            <InputNumber
+              min={0}
+              precision={2}
+              addonAfter="₽"
+              value={refundAmount}
+              onChange={(value) => setRefundAmount(value === null ? null : Number(value))}
+              style={{ width: '100%', marginTop: 8 }}
+              placeholder="Необязательно"
+            />
+            <Text type="secondary" className="refund-modal-hint">
+              Если сумму не заполнять, система сохранит только процент возврата.
+            </Text>
+          </div>
+
+          <div className="refund-modal-summary">
+            <Text type="secondary">
+              Запрошено клиентом: {caseData.requested_refund_percentage}%
+              {caseData.requested_refund_amount ? ` (${caseData.requested_refund_amount} ₽)` : ''}
+            </Text>
+          </div>
+        </Space>
+      </Modal>
     </AdminLayout>
   );
 };
