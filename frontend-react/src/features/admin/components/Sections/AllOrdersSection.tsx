@@ -15,13 +15,21 @@ import {
   Row,
   Col,
   Descriptions,
-  Divider
+  Divider,
+  Tabs,
+  List,
+  Avatar,
+  Empty
 } from 'antd';
 import { 
   EyeOutlined,
   SearchOutlined,
+  MessageOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import apiClient from '@/api/client';
 import { AdminOrder as Order } from '@/features/orders/types/orders';
 import { useAllOrders, useOrderActions } from '@/features/admin/hooks/useAdminOrders';
 import { 
@@ -48,6 +56,89 @@ const getEntityLabel = (value: unknown): string => {
     if (typeof name === 'string') return name;
   }
   return '';
+};
+
+interface ChatMessage {
+  id: number;
+  sender: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+  };
+  text: string;
+  created_at: string;
+  message_type: string;
+}
+
+interface OrderChatProps {
+  orderId: number;
+}
+
+const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
+  const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
+    queryKey: ['order-chat', orderId],
+    queryFn: async () => {
+      try {
+        // Сначала получаем чат по заказу
+        const chatResponse = await apiClient.get(`/chat/chats/?order_id=${orderId}`);
+        const chats = chatResponse.data.results || chatResponse.data;
+        
+        if (!chats || chats.length === 0) {
+          return [];
+        }
+        
+        const chat = chats[0];
+        
+        // Затем получаем сообщения из чата
+        const messagesResponse = await apiClient.get(`/chat/chats/${chat.id}/messages/`);
+        return messagesResponse.data.results || messagesResponse.data || [];
+      } catch (error) {
+        console.error('Error loading chat:', error);
+        return [];
+      }
+    },
+    enabled: !!orderId,
+  });
+
+  if (isLoading) {
+    return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка переписки...</div>;
+  }
+
+  if (messages.length === 0) {
+    return (
+      <Empty 
+        description="Переписка отсутствует"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    );
+  }
+
+  return (
+    <List
+      dataSource={messages}
+      renderItem={(msg) => (
+        <List.Item key={msg.id}>
+          <List.Item.Meta
+            avatar={<Avatar icon={<UserOutlined />} />}
+            title={
+              <div>
+                <Text strong>{msg.sender.first_name} {msg.sender.last_name}</Text>
+                <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                  @{msg.sender.username}
+                </Text>
+                <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                  {dayjs(msg.created_at).format('DD.MM.YYYY HH:mm')}
+                </Text>
+              </div>
+            }
+            description={msg.text}
+          />
+        </List.Item>
+      )}
+      style={{ maxHeight: 400, overflow: 'auto' }}
+    />
+  );
 };
 
 interface AllOrdersTableProps {
@@ -353,62 +444,100 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             Закрыть
           </Button>,
         ]}
-        width={800}
+        width={900}
       >
         {selectedOrder && (
-          <div>
-            <Descriptions column={2} bordered size="small">
-              <Descriptions.Item label="Название" span={2}>
-                <strong>{selectedOrder.title}</strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Описание" span={2}>
-                {selectedOrder.description}
-              </Descriptions.Item>
-              <Descriptions.Item label="Предмет">
-                {getEntityLabel(selectedOrder.subject)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Тип работы">
-                {getEntityLabel(selectedOrder.work_type)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Статус">
-                <Tag color={getStatusColor(selectedOrder.status)}>
-                  {getStatusLabel(selectedOrder.status)}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Бюджет">
-                <strong>{(Number(selectedOrder.budget) || 0).toLocaleString()} ₽</strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Дедлайн">
-                {dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}
-              </Descriptions.Item>
-              <Descriptions.Item label="Клиент">
-                {selectedOrder.client.first_name} {selectedOrder.client.last_name}
-                <br />
-                <Text type="secondary">@{selectedOrder.client.username}</Text>
-                <br />
-                <Text type="secondary">{selectedOrder.client.email}</Text>
-              </Descriptions.Item>
-              <Descriptions.Item label="Эксперт">
-                {selectedOrder.expert ? (
-                  <>
-                    {selectedOrder.expert.first_name} {selectedOrder.expert.last_name}
-                    <br />
-                    <Text type="secondary">@{selectedOrder.expert.username}</Text>
-                    <br />
-                    <Text type="secondary">{selectedOrder.expert.email}</Text>
-                  </>
-                ) : (
-                  <Text type="secondary">Не назначен</Text>
-                )}
-              </Descriptions.Item>
-              <Descriptions.Item label="Создан">
-                {dayjs(selectedOrder.created_at).format('DD.MM.YYYY HH:mm')}
-              </Descriptions.Item>
-              <Descriptions.Item label="Обновлен">
-                {dayjs(selectedOrder.updated_at).format('DD.MM.YYYY HH:mm')}
-              </Descriptions.Item>
-            </Descriptions>
-          </div>
+          <Tabs
+            defaultActiveKey="info"
+            items={[
+              {
+                key: 'info',
+                label: 'Информация о заказе',
+                children: (
+                  <Descriptions column={2} bordered size="small">
+                    <Descriptions.Item label="Название" span={2}>
+                      <strong>{selectedOrder.title}</strong>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Описание" span={2}>
+                      {selectedOrder.description}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Предмет">
+                      {getEntityLabel(selectedOrder.subject)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Тип работы">
+                      {getEntityLabel(selectedOrder.work_type)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Статус">
+                      <Tag color={getStatusColor(selectedOrder.status)}>
+                        {getStatusLabel(selectedOrder.status)}
+                      </Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Бюджет">
+                      <strong>{(Number(selectedOrder.budget) || 0).toLocaleString()} ₽</strong>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Дедлайн">
+                      {dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Создан">
+                      {dayjs(selectedOrder.created_at).format('DD.MM.YYYY HH:mm')}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Обновлен">
+                      {dayjs(selectedOrder.updated_at).format('DD.MM.YYYY HH:mm')}
+                    </Descriptions.Item>
+                  </Descriptions>
+                ),
+              },
+              {
+                key: 'participants',
+                label: 'Участники',
+                children: (
+                  <div>
+                    <Divider orientation="left">Клиент</Divider>
+                    <Descriptions column={1} bordered size="small">
+                      <Descriptions.Item label="Имя">
+                        {selectedOrder.client.first_name} {selectedOrder.client.last_name}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Username">
+                        @{selectedOrder.client.username}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Email">
+                        {selectedOrder.client.email}
+                      </Descriptions.Item>
+                    </Descriptions>
+
+                    <Divider orientation="left">Эксперт</Divider>
+                    {selectedOrder.expert ? (
+                      <Descriptions column={1} bordered size="small">
+                        <Descriptions.Item label="Имя">
+                          {selectedOrder.expert.first_name} {selectedOrder.expert.last_name}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Username">
+                          @{selectedOrder.expert.username}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Email">
+                          {selectedOrder.expert.email}
+                        </Descriptions.Item>
+                      </Descriptions>
+                    ) : (
+                      <Empty 
+                        description="Эксперт не назначен"
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      />
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: 'chat',
+                label: (
+                  <span>
+                    <MessageOutlined /> Переписка
+                  </span>
+                ),
+                children: <OrderChat orderId={selectedOrder.id} />,
+              },
+            ]}
+          />
         )}
       </Modal>
     </div>
