@@ -57,6 +57,7 @@ const ContactBannedUsers: React.FC = () => {
     window.localStorage?.getItem('debug_api') === '1';
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [banSourceFilter, setBanSourceFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<ContactBannedUser | null>(null);
   const [unbanModalVisible, setUnbanModalVisible] = useState(false);
   const [banModalVisible, setBanModalVisible] = useState(false);
@@ -190,7 +191,13 @@ const ContactBannedUsers: React.FC = () => {
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    return matchesSearch && matchesRole;
+    const isSystemBan = user.banned_by === 'system' || user.banned_by === 'Система' || user.banned_by.toLowerCase().includes('система');
+    const matchesBanSource = 
+      banSourceFilter === 'all' || 
+      (banSourceFilter === 'system' && isSystemBan) ||
+      (banSourceFilter === 'manual' && !isSystemBan);
+    
+    return matchesSearch && matchesRole && matchesBanSource;
   });
 
   const columns = [
@@ -258,10 +265,23 @@ const ContactBannedUsers: React.FC = () => {
       title: 'Забанил',
       dataIndex: 'banned_by',
       key: 'banned_by',
-      width: 120,
-      render: (bannedBy: string) => (
-        <Text type="secondary">{bannedBy}</Text>
-      ),
+      width: 150,
+      render: (bannedBy: string) => {
+        const isSystemBan = bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
+        return (
+          <Space>
+            {isSystemBan ? (
+              <Tag color="purple" icon={<WarningOutlined />}>
+                Система
+              </Tag>
+            ) : (
+              <Tag color="blue" icon={<UserOutlined />}>
+                {bannedBy}
+              </Tag>
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: 'Действия',
@@ -321,13 +341,36 @@ const ContactBannedUsers: React.FC = () => {
             <Option value="expert">Эксперты</Option>
             <Option value="partner">Партнеры</Option>
           </Select>
+
+          <Select
+            placeholder="Источник бана"
+            className={styles.roleSelect}
+            value={banSourceFilter}
+            onChange={setBanSourceFilter}
+          >
+            <Option value="all">Все</Option>
+            <Option value="system">Система</Option>
+            <Option value="manual">Вручную</Option>
+          </Select>
         </div>
 
         <div className={styles.statsRow}>
           <Tag color="red">
             Всего забанено: {filteredData.length}
           </Tag>
+          <Tag color="purple">
+            Системой: {filteredData.filter(u => {
+              const bannedBy = u.banned_by || '';
+              return bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
+            }).length}
+          </Tag>
           <Tag color="blue">
+            Вручную: {filteredData.filter(u => {
+              const bannedBy = u.banned_by || '';
+              return !(bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система'));
+            }).length}
+          </Tag>
+          <Tag color="orange">
             Экспертов: {filteredData.filter(u => u.role === 'expert').length}
           </Tag>
           <Tag color="green">
