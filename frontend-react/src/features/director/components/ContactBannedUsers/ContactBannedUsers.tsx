@@ -66,8 +66,10 @@ const ContactBannedUsers: React.FC = () => {
       const response = await apiClient.get('/users/contact_banned_users/');
       return response.data;
     },
+    staleTime: 0, // Данные сразу считаются устаревшими
     refetchInterval: 30000, // Автообновление каждые 30 секунд
     refetchOnWindowFocus: true, // Обновление при фокусе окна
+    refetchOnMount: true, // Обновление при монтировании
   });
 
   // Мутация для разбана пользователя
@@ -75,14 +77,15 @@ const ContactBannedUsers: React.FC = () => {
     mutationFn: async (userId: number) => {
       await apiClient.patch(`/users/${userId}/unban_for_contacts/`);
     },
-    onSuccess: (_, userId) => {
+    onSuccess: async (_, userId) => {
       const user = users.find(u => u.id === userId);
       message.success(`Пользователь ${user?.username} разбанен`);
       setUnbanModalVisible(false);
       setSelectedUser(null);
       unbanForm.resetFields();
-      // Инвалидируем кэш для обновления данных
-      queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
+      // Инвалидируем кэш и принудительно перезагружаем данные
+      await queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
+      await queryClient.refetchQueries({ queryKey: ['contact-banned-users'] });
     },
     onError: (error) => {
       if (debugEnabled) console.error('Ошибка разбана:', error);
