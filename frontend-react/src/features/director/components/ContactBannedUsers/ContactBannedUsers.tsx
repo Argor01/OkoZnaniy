@@ -11,7 +11,9 @@ import {
   Modal,
   message,
   Tooltip,
-  Form
+  Form,
+  Radio,
+  InputNumber
 } from 'antd';
 import { 
   UserOutlined, 
@@ -20,7 +22,8 @@ import {
   UnlockOutlined,
   WarningOutlined,
   PhoneOutlined,
-  MailOutlined
+  MailOutlined,
+  LockOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -56,8 +59,11 @@ const ContactBannedUsers: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<ContactBannedUser | null>(null);
   const [unbanModalVisible, setUnbanModalVisible] = useState(false);
+  const [banModalVisible, setBanModalVisible] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [unbanForm] = Form.useForm();
+  const [banForm] = Form.useForm();
+  const [banDurationType, setBanDurationType] = useState<'temporary' | 'permanent'>('temporary');
 
   // Используем React Query для загрузки данных
   const { data: users = [], isLoading: loading } = useQuery<ContactBannedUser[]>({
@@ -70,6 +76,30 @@ const ContactBannedUsers: React.FC = () => {
     refetchInterval: 30000, // Автообновление каждые 30 секунд
     refetchOnWindowFocus: true, // Обновление при фокусе окна
     refetchOnMount: true, // Обновление при монтировании
+  });
+
+  // Мутация для блокировки пользователя
+  const banMutation = useMutation({
+    mutationFn: async (data: { userId: number; days?: number; reason: string }) => {
+      await apiClient.patch(`/users/${data.userId}/ban_for_contacts/`, {
+        days: data.days,
+        reason: data.reason,
+      });
+    },
+    onSuccess: async (_, variables) => {
+      const user = users.find(u => u.id === variables.userId);
+      message.success(`Пользователь ${user?.username} заблокирован`);
+      setBanModalVisible(false);
+      setSelectedUser(null);
+      banForm.resetFields();
+      setBanDurationType('temporary');
+      await queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
+      await queryClient.refetchQueries({ queryKey: ['contact-banned-users'] });
+    },
+    onError: (error) => {
+      if (debugEnabled) console.error('Ошибка блокировки:', error);
+      message.error('Не удалось заблокировать пользователя');
+    },
   });
 
   // Мутация для разбана пользователя
@@ -98,9 +128,31 @@ const ContactBannedUsers: React.FC = () => {
     setUnbanModalVisible(true);
   };
 
+  const handleBanUser = (user: ContactBannedUser) => {
+    setSelectedUser(user);
+    setBanModalVisible(true);
+    banForm.resetFields();
+    setBanDurationType('temporary');
+  };
+
   const handleUnbanConfirm = async () => {
     if (!selectedUser) return;
     unbanMutation.mutate(selectedUser.id);
+  };
+
+  const handleBanConfirm = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      const values = await banForm.validateFields();
+      banMutation.mutate({
+        userId: selectedUser.id,
+        days: banDurationType === 'permanent' ? undefined : values.days,
+        reason: values.reason,
+      });
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
   };
 
   const handleViewDetails = (user: ContactBannedUser) => {
@@ -214,7 +266,7 @@ const ContactBannedUsers: React.FC = () => {
     {
       title: 'Действия',
       key: 'actions',
-      width: 150,
+      width: 200,
       render: (record: ContactBannedUser) => (
         <Space>
           <Tooltip title="Подробно">
@@ -222,6 +274,14 @@ const ContactBannedUsers: React.FC = () => {
               size="small" 
               icon={<EyeOutlined />}
               onClick={() => handleViewDetails(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Заблокировать">
+            <Button 
+              size="small" 
+              danger
+              icon={<LockOutlined />}
+              onClick={() => handleBanUser(record)}
             />
           </Tooltip>
           <Tooltip title="Разбанить">
@@ -343,6 +403,84 @@ const ContactBannedUsers: React.FC = () => {
               </div>
             </Space>
           </div>
+        )}
+      </Modal>
+
+      <Modal
+        title={`Заблокировать пользователя ${selectedUser?.username}`}
+        open={banModalVisible}
+        onOk={handleBanConfirm}
+        onCancel={() => {
+          setBanModalVisible(false);
+          setSelectedUser(null);
+          banForm.resetFields();
+          setBanDurationType('temporary');
+        }}
+        okText="Заблокировать"
+        cancelText="Отмена"
+        okButtonProps={{ danger: true, loading: banMutation.isPending }}
+        confirmLoading={banMutation.isPending}
+        width={600}
+      >
+        {selectedUser && (
+          <Form form={banForm} layout="vertical" initialValues={{ days: 7 }}>
+            <div className={styles.banSection}>
+              <Text strong>Информация о пользователе:</Text>
+              <div className={styles.infoBlock}>
+                <div><strong>Имя:</strong> {selectedUser.first_name} {selectedUser.last_name}</div>
+                <div><strong>Email:</strong> {selectedUser.email || 'Не указан'}</div>
+                <div><strong>Текущих нарушений:</strong> {selectedUser.contact_violations_count}</div>
+              </div>
+            </div>
+
+            <Form.Item label="Тип блокировки" style={{ marginTop: 16 }}>
+              <Radio.Group 
+                value={banDurationType} 
+                onChange={(e) => setBanDurationType(e.target.value)}
+              >
+                <Radio value="temporary">Временная</Radio>
+                <Radio value="permanent">Навсегда</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            {banDurationType === 'temporary' && (
+              <Form.Item
+                name="days"
+                label="Количество дней"
+                rules={[
+                  { required: true, message: 'Укажите количество дней' },
+                  { type: 'number', min: 1, message: 'Минимум 1 день' },
+                  { type: 'number', max: 365, message: 'Максимум 365 дней' },
+                ]}
+              >
+                <InputNumber
+                  min={1}
+                  max={365}
+                  style={{ width: '100%' }}
+                  placeholder="Введите количество дней"
+                />
+              </Form.Item>
+            )}
+
+            <Form.Item
+              name="reason"
+              label="Причина блокировки"
+              rules={[{ required: true, message: 'Укажите причину блокировки' }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Укажите причину блокировки пользователя..."
+                showCount
+                maxLength={500}
+              />
+            </Form.Item>
+
+            <Text type="warning">
+              {banDurationType === 'permanent' 
+                ? 'Пользователь будет заблокирован навсегда и не сможет отправлять сообщения в чатах.'
+                : 'Пользователь будет временно заблокирован и не сможет отправлять сообщения в чатах на указанный период.'}
+            </Text>
+          </Form>
         )}
       </Modal>
 
