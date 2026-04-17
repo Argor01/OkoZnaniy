@@ -32,6 +32,11 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
   const dataSource = users;
 
   const filteredData = dataSource.filter(user => {
+    // Исключаем директоров из списка - администратор не может их блокировать
+    if (user.role === 'director') {
+      return false;
+    }
+    
     const searchLower = searchText.toLowerCase();
     const matchesSearch = 
       (user.username || '').toLowerCase().includes(searchLower) ||
@@ -207,7 +212,6 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
           >
             <Option value="all">Все роли</Option>
             <Option value="admin">Администраторы</Option>
-            <Option value="director">Директоры</Option>
             <Option value="expert">Эксперты</Option>
             <Option value="client">Клиенты</Option>
             <Option value="partner">Партнеры</Option>

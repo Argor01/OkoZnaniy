@@ -310,8 +310,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Клиент принимает ставку: назначает эксперта, фиксирует бюджет и создает чат с данными заказа."""
         order = self.get_object()
         user = request.user
-        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+        
+        # Проверка прав: клиент-владелец, staff или director
+        user_role = getattr(user, 'role', None)
+        is_owner = user_role == 'client' and order.client_id == user.id
+        is_staff = user.is_staff or user_role in ['director', 'admin', 'arbitrator']
+        
+        # Логирование для отладки
+        logger.info(f"accept_bid: user={user.id}, role={user_role}, is_owner={is_owner}, is_staff={is_staff}, order_client={order.client_id}")
+        
+        if not (is_owner or is_staff):
+            logger.warning(f"accept_bid: Недостаточно прав для user={user.id}, role={user_role}")
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        
         bid_id = request.data.get('bid_id')
         if not bid_id:
             return Response({'bid_id': 'Не указан ID ставки'}, status=status.HTTP_400_BAD_REQUEST)
