@@ -79,6 +79,7 @@ export type MenuKey =
   | 'admin_group_chats'
   | 'admin_chats'
   | 'blocking'
+  | 'contact_bans'
   | 'user_roles'
   | 'orders_management'
   | 'new_claims'
