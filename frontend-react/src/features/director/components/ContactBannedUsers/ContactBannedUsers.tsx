@@ -49,6 +49,29 @@ interface ContactBannedUser {
   telegram_id: number | null;
 }
 
+const normalizeBannedUsers = (payload: unknown): ContactBannedUser[] => {
+  if (Array.isArray(payload)) {
+    return payload as ContactBannedUser[];
+  }
+
+  if (payload && typeof payload === 'object') {
+    const candidate = payload as { results?: unknown; data?: unknown };
+    if (Array.isArray(candidate.results)) {
+      return candidate.results as ContactBannedUser[];
+    }
+    if (Array.isArray(candidate.data)) {
+      return candidate.data as ContactBannedUser[];
+    }
+  }
+
+  return [];
+};
+
+const isSystemBanSource = (value?: string | null): boolean => {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === 'system' || normalized === 'система' || normalized.includes('система');
+};
+
 const ContactBannedUsers: React.FC = () => {
   const queryClient = useQueryClient();
   const debugEnabled =
@@ -72,16 +95,19 @@ const ContactBannedUsers: React.FC = () => {
     queryFn: async () => {
       if (debugEnabled) console.log('🔄 Загрузка забаненных пользователей...');
       const response = await apiClient.get('/users/contact_banned_users/');
+      const normalizedUsers = normalizeBannedUsers(response.data);
       if (debugEnabled) {
         console.log('📦 Получены данные:', response.data);
-        console.log('📊 Количество пользователей:', response.data?.length || 0);
+        console.log('📊 Количество пользователей:', normalizedUsers.length);
       }
-      return response.data;
+      return normalizedUsers;
     },
     staleTime: 0, // Данные сразу считаются устаревшими
-    refetchInterval: 30000, // Автообновление каждые 30 секунд
+    refetchInterval: 10000, // Автообновление каждые 10 секунд
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true, // Обновление при фокусе окна
     refetchOnMount: true, // Обновление при монтировании
+    refetchOnReconnect: true,
   });
 
   // Логируем ошибки и данные
@@ -205,7 +231,7 @@ const ContactBannedUsers: React.FC = () => {
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    const isSystemBan = user.banned_by === 'system' || user.banned_by === 'Система' || user.banned_by.toLowerCase().includes('система');
+    const isSystemBan = isSystemBanSource(user.banned_by);
     const matchesBanSource = 
       banSourceFilter === 'all' || 
       (banSourceFilter === 'system' && isSystemBan) ||
@@ -281,7 +307,7 @@ const ContactBannedUsers: React.FC = () => {
       key: 'banned_by',
       width: 150,
       render: (bannedBy: string) => {
-        const isSystemBan = bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
+        const isSystemBan = isSystemBanSource(bannedBy);
         return (
           <Space>
             {isSystemBan ? (
@@ -382,14 +408,12 @@ const ContactBannedUsers: React.FC = () => {
           </Tag>
           <Tag color="purple">
             Системой: {filteredData.filter(u => {
-              const bannedBy = u.banned_by || '';
-              return bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
+              return isSystemBanSource(u.banned_by);
             }).length}
           </Tag>
           <Tag color="blue">
             Вручную: {filteredData.filter(u => {
-              const bannedBy = u.banned_by || '';
-              return !(bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система'));
+              return !isSystemBanSource(u.banned_by);
             }).length}
           </Tag>
           <Tag color="orange">

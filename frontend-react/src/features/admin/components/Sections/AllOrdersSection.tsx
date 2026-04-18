@@ -15,7 +15,6 @@ import {
   Row,
   Col,
   Descriptions,
-  Divider,
   Tabs,
   List,
   Avatar,
@@ -71,28 +70,42 @@ interface ChatMessage {
   message_type: string;
 }
 
+interface OrderChatParticipant {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  role?: string;
+}
+
+interface OrderChatThread {
+  id: number;
+  order_id: number | null;
+  participants?: OrderChatParticipant[];
+  messages?: ChatMessage[];
+}
+
 interface OrderChatProps {
   orderId: number;
 }
 
 const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
-  const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
+  const { data: orderChats = [], isLoading } = useQuery<OrderChatThread[]>({
     queryKey: ['order-chat', orderId],
     queryFn: async () => {
       try {
-        // Сначала получаем чат по заказу
-        const chatResponse = await apiClient.get(`/chat/chats/?order_id=${orderId}`);
-        const chats = chatResponse.data.results || chatResponse.data;
-        
-        if (!chats || chats.length === 0) {
-          return [];
-        }
-        
-        const chat = chats[0];
-        
-        // Затем получаем сообщения из чата
-        const messagesResponse = await apiClient.get(`/chat/chats/${chat.id}/messages/`);
-        return messagesResponse.data.results || messagesResponse.data || [];
+        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
+        const payload = chatResponse.data;
+        const chats = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : Array.isArray(payload?.data)
+              ? payload.data
+              : [];
+
+        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(orderId));
       } catch (error) {
         console.error('Error loading chat:', error);
         return [];
@@ -100,6 +113,10 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
     },
     enabled: !!orderId,
   });
+
+  const messages = orderChats
+    .flatMap((chat) => chat.messages || [])
+    .sort((a, b) => dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf());
 
   if (isLoading) {
     return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка переписки...</div>;
@@ -138,6 +155,77 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
       )}
       style={{ maxHeight: 400, overflow: 'auto' }}
     />
+  );
+};
+
+interface OrderParticipantsProps {
+  order: Order;
+}
+
+const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
+  const { data: orderChats = [], isLoading } = useQuery<OrderChatThread[]>({
+    queryKey: ['order-chat-participants', order.id],
+    queryFn: async () => {
+      try {
+        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
+        const payload = chatResponse.data;
+        const chats = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : Array.isArray(payload?.data)
+              ? payload.data
+              : [];
+
+        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(order.id));
+      } catch (error) {
+        console.error('Error loading order participants:', error);
+        return [];
+      }
+    },
+    enabled: !!order.id,
+  });
+
+  const participantsMap = new Map<number, OrderChatParticipant>();
+
+  if (order.client?.id) {
+    participantsMap.set(order.client.id, { ...order.client, role: 'client' });
+  }
+
+  if (order.expert?.id) {
+    participantsMap.set(order.expert.id, { ...order.expert, role: 'expert' });
+  }
+
+  orderChats.forEach((chat) => {
+    (chat.participants || []).forEach((participant) => {
+      if (!participant?.id) return;
+      participantsMap.set(participant.id, participant);
+    });
+  });
+
+  const participants = Array.from(participantsMap.values());
+
+  if (isLoading) {
+    return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка участников...</div>;
+  }
+
+  if (participants.length === 0) {
+    return <Empty description="Участники не найдены" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+  }
+
+  return (
+    <Descriptions column={1} bordered size="small">
+      {participants.map((participant) => (
+        <Descriptions.Item
+          key={participant.id}
+          label={`${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.username}
+        >
+          <div><strong>Username:</strong> @{participant.username}</div>
+          <div><strong>Email:</strong> {participant.email || '-'}</div>
+          <div><strong>Роль:</strong> {participant.role || '-'}</div>
+        </Descriptions.Item>
+      ))}
+    </Descriptions>
   );
 };
 
@@ -490,42 +578,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
               {
                 key: 'participants',
                 label: 'Участники',
-                children: (
-                  <div>
-                    <Divider orientation="left">Клиент</Divider>
-                    <Descriptions column={1} bordered size="small">
-                      <Descriptions.Item label="Имя">
-                        {selectedOrder.client.first_name} {selectedOrder.client.last_name}
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Username">
-                        @{selectedOrder.client.username}
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Email">
-                        {selectedOrder.client.email}
-                      </Descriptions.Item>
-                    </Descriptions>
-
-                    <Divider orientation="left">Эксперт</Divider>
-                    {selectedOrder.expert ? (
-                      <Descriptions column={1} bordered size="small">
-                        <Descriptions.Item label="Имя">
-                          {selectedOrder.expert.first_name} {selectedOrder.expert.last_name}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Username">
-                          @{selectedOrder.expert.username}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Email">
-                          {selectedOrder.expert.email}
-                        </Descriptions.Item>
-                      </Descriptions>
-                    ) : (
-                      <Empty 
-                        description="Эксперт не назначен"
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      />
-                    )}
-                  </div>
-                ),
+                children: <OrderParticipants order={selectedOrder} />,
               },
               {
                 key: 'chat',
