@@ -553,7 +553,15 @@ const OrderDetail: React.FC = () => {
                   <div className={styles.clientMeta}>
                     <AppButton 
                       variant="link" 
-                      onClick={() => navigate(`/user/${order.client?.username}`)}
+                      onClick={() => {
+                        const username = order.client?.username;
+                        if (username) {
+                          navigate(`/user/${username}`);
+                        } else {
+                          console.error('Client username not available:', order.client);
+                          message.error('Не удалось открыть профиль пользователя');
+                        }
+                      }}
                       className={styles.clientNameLink}
                     >
                       {clientDisplayName}
@@ -1026,7 +1034,15 @@ const OrderDetail: React.FC = () => {
                                 src={bid.expert.avatar} 
                                 icon={<UserOutlined />}
                                 className={styles.bidAvatar}
-                                onClick={() => navigate(`/user/${bid.expert.username}`)}
+                                onClick={() => {
+                                  const username = bid.expert.username;
+                                  if (username) {
+                                    navigate(`/user/${username}`);
+                                  } else {
+                                    console.error('Expert username not available:', bid.expert);
+                                    message.error('Не удалось открыть профиль эксперта');
+                                  }
+                                }}
                               />
                             }
                             title={
@@ -1034,7 +1050,15 @@ const OrderDetail: React.FC = () => {
                                 <Space className={styles.bidIdentityRow} wrap>
                                   <AppButton 
                                     variant="link" 
-                                    onClick={() => navigate(`/user/${bid.expert.username}`)}
+                                    onClick={() => {
+                                      const username = bid.expert.username;
+                                      if (username) {
+                                        navigate(`/user/${username}`);
+                                      } else {
+                                        console.error('Expert username not available:', bid.expert);
+                                        message.error('Не удалось открыть профиль эксперта');
+                                      }
+                                    }}
                                     className={styles.bidUserLink}
                                   >
                                     <Text strong>{bid.expert.username}</Text>
@@ -1099,7 +1123,15 @@ const OrderDetail: React.FC = () => {
                   <div className={styles.expertMeta}>
                     <AppButton 
                       variant="link" 
-                      onClick={() => navigate(`/user/${order.expert.username}`)}
+                      onClick={() => {
+                        const username = order.expert?.username;
+                        if (username) {
+                          navigate(`/user/${username}`);
+                        } else {
+                          console.error('Expert username not available:', order.expert);
+                          message.error('Не удалось открыть профиль эксперта');
+                        }
+                      }}
                       className={styles.expertLink}
                     >
                       <Text strong className={styles.expertName}>{order.expert.username}</Text>
