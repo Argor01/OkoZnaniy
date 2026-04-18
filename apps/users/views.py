@@ -256,14 +256,26 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def client_orders(self, request):
         """
-        Получение заказов текущего пользователя (где он клиент ИЛИ эксперт).
-        Доступно любому авторизованному пользователю.
+        Получение заказов для текущего пользователя.
+        - Клиенты видят все доступные заказы (новые без эксперта) + свои заказы
+        - Эксперты видят только свои заказы (где они клиент или исполнитель)
+        - Остальные видят только свои заказы
         """
         user = request.user
         from django.db.models import Q
-        orders = Order.objects.filter(
-            Q(client=user) | Q(expert=user)
-        ).prefetch_related('bids__expert', 'files', 'comments').all()
+        
+        # Для клиентов показываем все доступные заказы + их собственные
+        if getattr(user, 'role', None) == 'client':
+            # Все новые заказы без эксперта (доступные для просмотра)
+            available_orders = Q(status='new', expert__isnull=True)
+            # Плюс все заказы пользователя (как клиента или эксперта)
+            own_orders = Q(client=user) | Q(expert=user)
+            orders = Order.objects.filter(available_orders | own_orders)
+        else:
+            # Для остальных - только свои заказы
+            orders = Order.objects.filter(Q(client=user) | Q(expert=user))
+        
+        orders = orders.prefetch_related('bids__expert', 'files', 'comments').all()
 
         from datetime import timedelta
         from django.utils import timezone
