@@ -209,6 +209,16 @@ class ChatModerationService:
             status='pending'
         )
         
+        # Баним пользователя за обмен контактами
+        if message and message.sender:
+            user = message.sender
+            user.is_banned_for_contacts = True
+            user.contact_ban_reason = f"Обнаружен обмен контактами: {violation_type}"
+            user.contact_ban_date = timezone.now()
+            user.contact_violations_count += 1
+            user.banned_by = None  # Система
+            user.save()
+        
         # Уведомляем администраторов
         ChatModerationService._notify_admins_about_violation(violation)
         ChatModerationService._freeze_expert_scope_if_needed(chat, message, violation)
@@ -297,6 +307,13 @@ class ChatModerationService:
             violation.reviewed_by = admin_user
             violation.reviewed_at = timezone.now()
             violation.save()
+            
+            # Снимаем бан с пользователя, если администратор одобрил
+            if violation.user:
+                user = violation.user
+                user.is_banned_for_contacts = False
+                user.contact_ban_reason = None
+                user.save()
 
         ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
         
