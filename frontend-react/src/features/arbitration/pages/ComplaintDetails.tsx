@@ -12,7 +12,7 @@ import {
   FileTextOutlined, FileImageOutlined, FileZipOutlined, DollarOutlined, BookOutlined, ClockCircleOutlined,
   DownloadOutlined, MessageOutlined, SendOutlined, PaperClipOutlined, NumberOutlined, ReadOutlined, DatabaseOutlined
 } from '@ant-design/icons';
-import { complaintsApi, Complaint } from '../api/complaints';
+import { complaintsApi, Complaint } from '@/features/arbitration/api/complaints';
 import { ordersApi } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { AppButton, AppCard } from '@/components/ui';
