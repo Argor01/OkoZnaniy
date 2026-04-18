@@ -299,6 +299,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   const dragDepthRef = useRef(0);
+  const hasCachedChatsRef = useRef(false);
 
   // WebSocket для real-time обновлений чата
   const handleNewMessage = useCallback((wsMessage: any) => {
@@ -929,7 +930,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      loadChats();
+      void loadChats(hasCachedChatsRef.current);
 
       if (selectedOrderId && selectedUserId) {
         loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
@@ -2061,6 +2062,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   };
 
     const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
+  const showChatListLoading = loading && safeChatList.length === 0;
+
+  useEffect(() => {
+    hasCachedChatsRef.current = safeChatList.length > 0;
+  }, [safeChatList.length]);
 
   const supportAvatarSrc = '/assets/icons/support.png';
 
@@ -2373,7 +2379,7 @@ const handleOverdueComplaint = async () => {
 
           
           <div className={styles.chatList}>
-            {loading ? (
+            {showChatListLoading ? (
               <div className={styles.chatListLoading}>
                 <Spin />
               </div>

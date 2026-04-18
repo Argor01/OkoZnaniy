@@ -1,38 +1,36 @@
 services:
   backend:
-    build: 
+    build: &backend_build
       context: .
       dockerfile: Dockerfile
-    restart: always
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-      - DJANGO_ENV=${DJANGO_ENV:-production}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      - LOGIN_REDIRECT_URL=${FRONTEND_URL:-http://localhost:5173}/expert
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - EMAIL_HOST=${EMAIL_HOST:-smtp.yandex.ru}
-      - EMAIL_PORT=${EMAIL_PORT:-587}
-      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
-      - PAYMENT_ENCRYPTION_KEY=${PAYMENT_ENCRYPTION_KEY}
+    environment: &backend_env
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG:-False}
+      DJANGO_ENV: ${DJANGO_ENV:-production}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      LOGIN_REDIRECT_URL: ${FRONTEND_URL:-http://localhost:5173}/expert
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.yandex.ru}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+      PAYMENT_ENCRYPTION_KEY: ${PAYMENT_ENCRYPTION_KEY}
     volumes:
       - static_files:/app/static
       - media_files:/app/media
-      - .:/app
-    # Порт НЕ пробрасывается наружу — только внутри Docker-сети через nginx
     expose:
       - "8000"
     networks:
@@ -51,22 +49,25 @@ services:
     build:
       context: ./frontend-react
       dockerfile: Dockerfile.prod
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+    expose:
+      - "80"
     networks:
       - app_network
 
   postgres:
     image: postgres:15-alpine
-    restart: always
+    restart: unless-stopped
     environment:
-      - POSTGRES_DB=oko_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      POSTGRES_DB: oko_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-password.sh:/usr/local/bin/init-password.sh
+      - ./docker/postgres/init-password.sh:/usr/local/bin/init-password.sh:ro
     command: ["/bin/sh", "-c", "chmod +x /usr/local/bin/init-password.sh && /usr/local/bin/init-password.sh"]
     networks:
       - app_network
@@ -79,35 +80,26 @@ services:
 
   redis:
     image: redis:7-alpine
-    restart: always
-    # Пароль на Redis
+    restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD} --bind 0.0.0.0
     volumes:
       - redis_data:/data
-    # Порт НЕ пробрасывается наружу
     expose:
       - "6379"
     networks:
       - app_network
 
   celery:
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    build: *backend_build
     command: celery -A config worker -l INFO
-    restart: always
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-False}
-    volumes:
-      - .:/app
+      <<: *backend_env
     networks:
       - app_network
 
@@ -115,7 +107,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.bot
-    restart: always
+    restart: unless-stopped
     depends_on:
       backend:
         condition: service_started
@@ -124,37 +116,37 @@ services:
       redis:
         condition: service_started
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_BOT_WEBHOOK_URL=${TELEGRAM_BOT_WEBHOOK_URL:-}
-      - BACKEND_URL=http://backend:8000
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
-      - DEBUG=${DEBUG:-False}
-      - PYTHONPATH=/app
-      - DJANGO_SETTINGS_MODULE=config.settings
-    volumes:
-      - .:/app
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_WEBHOOK_URL: ${TELEGRAM_BOT_WEBHOOK_URL:-}
+      BACKEND_URL: http://backend:8000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      DEBUG: ${DEBUG:-False}
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: config.settings
     networks:
       - app_network
 
   nginx:
     image: nginx:alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./docker/nginx/ssl:/etc/nginx/ssl
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
       - static_files:/var/www/static
       - media_files:/var/www/media
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
     networks:
       - app_network
 
