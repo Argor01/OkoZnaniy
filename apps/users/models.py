@@ -1,6 +1,7 @@
 # apps/users/models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 class Roles(models.TextChoices):
     CLIENT = 'client'
@@ -62,6 +63,10 @@ class User(AbstractUser):
     contact_ban_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата бана за контакты")
     contact_violations_count = models.PositiveIntegerField(default=0, verbose_name="Количество нарушений")
     banned_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='banned_users', verbose_name="Кто забанил")
+    blocked_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата блокировки")
+    block_reason = models.TextField(blank=True, null=True, verbose_name="Причина блокировки")
+    unblock_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата разблокировки")
+    blocked_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='blocked_users_by_admin', verbose_name="Кто заблокировал")
     
     def save(self, *args, **kwargs):
         # Генерируем реферальный код для партнеров
@@ -69,6 +74,20 @@ class User(AbstractUser):
             import uuid
             self.referral_code = str(uuid.uuid4())[:8].upper()
         super().save(*args, **kwargs)
+
+    def is_temporary_block_active(self):
+        return bool(not self.is_active and self.unblock_date and self.unblock_date > timezone.now())
+
+    def unblock_if_expired(self):
+        if self.is_active or not self.unblock_date or self.unblock_date > timezone.now():
+            return False
+        self.is_active = True
+        self.blocked_at = None
+        self.block_reason = ''
+        self.unblock_date = None
+        self.blocked_by = None
+        self.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+        return True
 
 
 class PartnerEarning(models.Model):

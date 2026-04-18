@@ -129,6 +129,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer для модели User"""
+    is_blocked = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -139,13 +140,20 @@ class UserSerializer(serializers.ModelSerializer):
             'education', 'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate',
             'total_referrals', 'active_referrals', 'total_earnings',
-            'city', 'email_verified'
+            'city', 'email_verified', 'is_active', 'is_blocked',
+            'date_joined', 'last_login', 'blocked_at', 'block_reason',
+            'unblock_date', 'contact_violations_count'
         ]
         read_only_fields = [
             'id', 'balance', 'frozen_balance', 'is_verified',
             'referral_code', 'total_referrals', 'active_referrals',
-            'total_earnings', 'email_verified'
+            'total_earnings', 'email_verified', 'is_blocked',
+            'date_joined', 'last_login', 'blocked_at', 'block_reason',
+            'unblock_date', 'contact_violations_count'
         ]
+
+    def get_is_blocked(self, obj):
+        return not obj.is_active
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

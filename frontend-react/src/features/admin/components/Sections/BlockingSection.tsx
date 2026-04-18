@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography } from 'antd';
+import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography, DatePicker } from 'antd';
 import { LockOutlined, UnlockOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useUsers, useUserActions } from '@/features/admin/hooks';
@@ -12,7 +12,7 @@ const { Search } = Input;
 interface BlockingTableProps {
   users?: AdminUser[];
   loading?: boolean;
-  onBlockUser?: (userId: number) => Promise<void>;
+  onBlockUser?: (userId: number, payload?: { reason?: string; unblock_date?: string | null }) => Promise<void>;
   onUnblockUser?: (userId: number) => Promise<void>;
 }
 
@@ -68,7 +68,10 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
     try {
       const values = await form.validateFields();
       if (actionType === 'block' && onBlockUser) {
-        await onBlockUser(selectedUser.id);
+        await onBlockUser(selectedUser.id, {
+          reason: values.reason?.trim(),
+          unblock_date: values.unblock_date ? values.unblock_date.toISOString() : null,
+        });
         message.success(`Пользователь ${selectedUser.username} заблокирован`);
       } else if (actionType === 'unblock' && onUnblockUser) {
         await onUnblockUser(selectedUser.id);
@@ -292,6 +295,20 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
               }
             />
           </Form.Item>
+          {actionType === 'block' && (
+            <Form.Item
+              name="unblock_date"
+              label="Разблокировать автоматически"
+              extra="Оставьте пустым для постоянной блокировки"
+            >
+              <DatePicker
+                showTime
+                format="DD.MM.YYYY HH:mm"
+                className="blockedUsersSearch"
+                disabledDate={(current) => !!current && current < dayjs().startOf('day')}
+              />
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </div>

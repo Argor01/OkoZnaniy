@@ -86,7 +86,8 @@ export const useUserActions = () => {
   });
 
   const { mutateAsync: blockUser, isPending: blockingUser } = useMutation({
-    mutationFn: (userId: number) => adminPanelApi.blockUser(userId),
+    mutationFn: ({ userId, payload }: { userId: number; payload?: { reason?: string; unblock_date?: string | null } }) =>
+      adminPanelApi.blockUser(userId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_USERS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_BLOCKED_USERS });
@@ -108,7 +109,8 @@ export const useUserActions = () => {
   return {
     changeRole,
     changeUserRole: (userId: number, role: string) => changeRole({ userId, role }), // Compatibility alias
-    blockUser,
+    blockUser: (userId: number, payload?: { reason?: string; unblock_date?: string | null }) =>
+      blockUser({ userId, payload }),
     unblockUser,
     changingRole,
     blockingUser,

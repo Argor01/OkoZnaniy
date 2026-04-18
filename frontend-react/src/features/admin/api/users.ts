@@ -22,8 +22,11 @@ export const usersApi = {
     return [];
   },
 
-  blockUser: async (userId: number): Promise<void> => {
-    await apiClient.post(API_ENDPOINTS.admin.users.block(userId));
+  blockUser: async (
+    userId: number,
+    payload?: { reason?: string; unblock_date?: string | null }
+  ): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.admin.users.block(userId), payload ?? {});
   },
 
   unblockUser: async (userId: number): Promise<void> => {

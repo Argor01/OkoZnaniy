@@ -24,6 +24,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
     expert = UserSerializer(read_only=True)
     participants = UserSerializer(many=True, read_only=True)
+    order_id = serializers.IntegerField(read_only=True)
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
@@ -33,7 +34,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
+        fields = ['id', 'order', 'order_id', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
                   'frozen_reason', 'last_message', 'unread_count', 'other_user', 'is_pinned']
     
     def get_other_user(self, obj):
@@ -98,14 +99,16 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     expert = UserSerializer(read_only=True)
     participants = UserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
+    order_id = serializers.IntegerField(read_only=True)
+    unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
     is_frozen = serializers.SerializerMethodField()
     frozen_reason = serializers.SerializerMethodField()
     
     class Meta:
         model = Chat
-        fields = ['id', 'order', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
-                  'frozen_reason', 'frozen_at', 'messages', 'other_user']
+        fields = ['id', 'order', 'order_id', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
+                  'frozen_reason', 'frozen_at', 'messages', 'other_user', 'unread_count']
 
     def get_other_user(self, obj):
         request = self.context.get('request')
@@ -138,6 +141,12 @@ class ChatDetailSerializer(serializers.ModelSerializer):
         if other and getattr(other, 'is_banned_for_contacts', False):
             return other.contact_ban_reason or 'Собеседник находится на проверке правил безопасности.'
         return obj.frozen_reason
+
+    def get_unread_count(self, obj):
+        request = self.context.get('request')
+        if request and request.user:
+            return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
+        return 0
 
 
 class SupportMessageSerializer(serializers.ModelSerializer):

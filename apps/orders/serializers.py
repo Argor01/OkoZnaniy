@@ -7,6 +7,8 @@ from apps.users.serializers import UserSerializer
 from django.utils import timezone
 from rest_framework.reverse import reverse
 
+MAX_ORDER_BUDGET = 99_999_999.99
+
 class OrderFileSerializer(serializers.ModelSerializer):
     uploaded_by = UserSerializer(read_only=True)
     file_type_display = serializers.CharField(source='get_file_type_display', read_only=True)
@@ -223,6 +225,10 @@ class OrderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'budget': 'Цена должна быть больше 0'
             })
+        elif budget is not None and budget > MAX_ORDER_BUDGET:
+            raise serializers.ValidationError({
+                'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
+            })
         
         return data
 
@@ -293,6 +299,10 @@ class OrderSerializer(serializers.ModelSerializer):
         if budget is not None and budget <= 0:
             raise serializers.ValidationError({
                 'budget': 'Цена должна быть больше 0'
+            })
+        if budget is not None and budget > MAX_ORDER_BUDGET:
+            raise serializers.ValidationError({
+                'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
             })
         
                                         

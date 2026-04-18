@@ -51,6 +51,7 @@ import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 const { Text } = Typography;
 interface MessageModalProps {
@@ -615,6 +616,50 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         if (!silent) setLoading(false);
       }
     }, []);
+
+  const handleNotificationEvent = useCallback((event: { data?: { chat_id?: number; text?: string; created_at?: string } }) => {
+    const chatId = event.data?.chat_id;
+    if (!chatId) return;
+    if (selectedChat?.id === chatId) {
+      void loadChats(true);
+      return;
+    }
+
+    setChatList((prev) => {
+      let found = false;
+      const next = prev.map((chat) => {
+        if (chat.id !== chatId) return chat;
+        found = true;
+        return {
+          ...chat,
+          unread_count: (chat.unread_count || 0) + 1,
+          last_message: {
+            text: event.data?.text || chat.last_message?.text || '',
+            sender_id: chat.last_message?.sender_id || 0,
+            created_at: event.data?.created_at || new Date().toISOString(),
+            file_name: chat.last_message?.file_name ?? null,
+            file_url: chat.last_message?.file_url ?? null,
+          },
+          last_message_time: event.data?.created_at || new Date().toISOString(),
+        };
+      });
+
+      if (!found) return prev;
+      return [...next].sort((a, b) => {
+        const aPinned = a.is_pinned ? 1 : 0;
+        const bPinned = b.is_pinned ? 1 : 0;
+        if (aPinned !== bPinned) return bPinned - aPinned;
+        return new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime();
+      });
+    });
+
+    void loadChats(true);
+  }, [loadChats, selectedChat?.id]);
+
+  useWebSocket({
+    enabled: visible,
+    onNotification: handleNotificationEvent,
+  });
 
   const syncChatListItemFromDetail = useCallback((detail: ChatDetail) => {
     const lastMessage = Array.isArray(detail.messages) && detail.messages.length > 0

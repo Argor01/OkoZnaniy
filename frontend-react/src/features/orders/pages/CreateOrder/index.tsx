@@ -45,6 +45,8 @@ const ALLOWED_FILE_EXTENSIONS = [
   'zip', 'rar', '7z',
 ];
 
+const MAX_ORDER_BUDGET = 99_999_999.99;
+
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -488,6 +490,9 @@ const CreateOrder: React.FC = () => {
                     if (value !== undefined && value !== null && Number(value) <= 0) {
                       return Promise.reject(new Error('Стоимость должна быть больше 0'));
                     }
+                    if (value !== undefined && value !== null && Number(value) > MAX_ORDER_BUDGET) {
+                      return Promise.reject(new Error(`Стоимость не может превышать ${MAX_ORDER_BUDGET.toLocaleString('ru-RU')} ₽`));
+                    }
                     return Promise.resolve();
                   }
                 }
@@ -496,6 +501,7 @@ const CreateOrder: React.FC = () => {
               <AppInput.Number
                 placeholder="Стоимость (необязательно)"
                 min={1}
+                max={MAX_ORDER_BUDGET}
                 className={`${styles.priceInput} ${styles.fullWidth}`}
               />
             </Form.Item>

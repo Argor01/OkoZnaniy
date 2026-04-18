@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Count
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
 from .serializers import (
@@ -43,6 +44,27 @@ def log_activity(actor, activity_type, text, meta=None, support_request=None, cl
     )
 
 
+def _release_expired_blocks():
+    for user in User.objects.filter(is_active=False, unblock_date__isnull=False):
+        user.unblock_if_expired()
+
+
+def _serialize_admin_user(user):
+    data = UserSerializer(user).data
+    block_duration = 'permanent'
+    if data.get('unblock_date'):
+        block_duration = 'temporary'
+    data.update({
+        'is_blocked': not user.is_active,
+        'blocked_at': user.blocked_at,
+        'block_reason': user.block_reason or '',
+        'unblock_date': user.unblock_date,
+        'block_duration': block_duration,
+        'violation_count': getattr(user, 'contact_violations_count', 0),
+    })
+    return data
+
+
 class IsAdminUser(IsAuthenticated):
     """Проверка прав администратора"""
     def has_permission(self, request, view):
@@ -55,18 +77,18 @@ class IsAdminUser(IsAuthenticated):
 @permission_classes([IsAdminUser])
 def get_all_users(request):
     """Получить всех пользователей"""
+    _release_expired_blocks()
     users = User.objects.all().order_by('-date_joined')
-    serializer = UserSerializer(users, many=True)
-    return Response(serializer.data)
+    return Response([_serialize_admin_user(user) for user in users])
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_blocked_users(request):
     """Получить заблокированных пользователей"""
+    _release_expired_blocks()
     users = User.objects.filter(is_active=False).order_by('-date_joined')
-    serializer = UserSerializer(users, many=True)
-    return Response(serializer.data)
+    return Response([_serialize_admin_user(user) for user in users])
 
 
 @api_view(['POST'])
@@ -75,9 +97,23 @@ def block_user(request, user_id):
     """Заблокировать пользователя"""
     try:
         user = User.objects.get(id=user_id)
+        unblock_date = None
+        unblock_date_raw = request.data.get('unblock_date')
+        if isinstance(unblock_date_raw, str) and unblock_date_raw.strip():
+            unblock_date = parse_datetime(unblock_date_raw.strip())
+            if unblock_date is None:
+                return Response({'error': 'Некорректная дата разблокировки'}, status=400)
+            if timezone.is_naive(unblock_date):
+                unblock_date = timezone.make_aware(unblock_date, timezone.get_current_timezone())
+            if unblock_date <= timezone.now():
+                return Response({'error': 'Дата разблокировки должна быть в будущем'}, status=400)
         user.is_active = False
-        user.save()
-        return Response({'message': 'Пользователь заблокирован'})
+        user.blocked_at = timezone.now()
+        user.block_reason = (request.data.get('reason') or '').strip()
+        user.unblock_date = unblock_date
+        user.blocked_by = request.user
+        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+        return Response({'message': 'Пользователь заблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)
 
@@ -89,8 +125,12 @@ def unblock_user(request, user_id):
     try:
         user = User.objects.get(id=user_id)
         user.is_active = True
-        user.save()
-        return Response({'message': 'Пользователь разблокирован'})
+        user.blocked_at = None
+        user.block_reason = ''
+        user.unblock_date = None
+        user.blocked_by = None
+        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+        return Response({'message': 'Пользователь разблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)
 

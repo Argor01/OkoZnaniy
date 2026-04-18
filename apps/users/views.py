@@ -19,6 +19,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.utils.dateparse import parse_datetime
 
 logger = logging.getLogger(__name__)
 from apps.orders.models import Order, Transaction
@@ -56,6 +57,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 if username:
                     try:
                         user = User.objects.get(username=username)
+                        user.unblock_if_expired()
                         user.last_login = timezone.now()
                         user.save(update_fields=['last_login'])
                         if settings.DEBUG:
@@ -919,8 +921,23 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        unblock_date = None
+        unblock_date_raw = request.data.get('unblock_date')
+        if isinstance(unblock_date_raw, str) and unblock_date_raw.strip():
+            unblock_date = parse_datetime(unblock_date_raw.strip())
+            if unblock_date is None:
+                return Response({'error': 'Некорректная дата разблокировки'}, status=status.HTTP_400_BAD_REQUEST)
+            if timezone.is_naive(unblock_date):
+                unblock_date = timezone.make_aware(unblock_date, timezone.get_current_timezone())
+            if unblock_date <= timezone.now():
+                return Response({'error': 'Дата разблокировки должна быть в будущем'}, status=status.HTTP_400_BAD_REQUEST)
+
         user.is_active = False
-        user.save()
+        user.blocked_at = timezone.now()
+        user.block_reason = (request.data.get('reason') or '').strip()
+        user.unblock_date = unblock_date
+        user.blocked_by = request.user
+        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
         
         return Response({
             'message': f'Пользователь {user.username} заблокирован',
@@ -946,7 +963,11 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         user.is_active = True
-        user.save()
+        user.blocked_at = None
+        user.block_reason = ''
+        user.unblock_date = None
+        user.blocked_by = None
+        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
         
         return Response({
             'message': f'Пользователь {user.username} разблокирован',
