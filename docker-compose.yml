@@ -68,7 +68,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init-password.sh:/usr/local/bin/init-password.sh:ro
-    command: ["/bin/sh", "-c", "chmod +x /usr/local/bin/init-password.sh && /usr/local/bin/init-password.sh"]
+    command: ["/bin/sh", "/usr/local/bin/init-password.sh"]
     networks:
       - app_network
     healthcheck:
