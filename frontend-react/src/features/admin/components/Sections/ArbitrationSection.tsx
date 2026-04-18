@@ -17,6 +17,9 @@ import {
   Tag,
   Typography,
   message,
+  Slider,
+  Radio,
+  Form,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -29,6 +32,7 @@ import {
   SearchOutlined,
   SendOutlined,
   UserOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { arbitrationApi } from '@/features/admin/api/arbitration';
@@ -101,6 +105,9 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [refundPercentage, setRefundPercentage] = useState<number>(50);
+  const [refundForm] = Form.useForm();
+  const [refundProcessing, setRefundProcessing] = useState(false);
 
   useEffect(() => {
     let filtered = cases;
@@ -192,6 +199,34 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       message.error('Не удалось отправить сообщение');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!detailData?.order?.id) {
+      message.error('Заказ не найден');
+      return;
+    }
+    
+    try {
+      const values = await refundForm.validateFields();
+      setRefundProcessing(true);
+      
+      const orderAmount = detailData.order.amount || 0;
+      const refundAmount = Math.round((orderAmount * refundPercentage) / 100);
+      
+      // Здесь должен быть вызов API для возврата средств
+      // await arbitrationApi.processRefund(detailData.id, { amount: refundAmount, percentage: refundPercentage, reason: values.reason });
+      
+      message.success(`Возврат ${refundAmount.toLocaleString()} ₽ (${refundPercentage}%) оформлен`);
+      await refreshSelectedCase();
+      refundForm.resetFields();
+      setRefundPercentage(50);
+    } catch (error) {
+      console.error('Refund error:', error);
+      message.error('Не удалось оформить возврат');
+    } finally {
+      setRefundProcessing(false);
     }
   };
 
@@ -385,6 +420,80 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                 <Button type="primary" onClick={() => handleStatusChange('closed')} disabled={detailData.status === 'closed'} loading={statusUpdating}>Закрыть дело</Button>
               </Space>
             </Card>
+
+            {detailData.order && (
+              <Card size="small" title={<Space><DollarOutlined />Возврат средств</Space>}>
+                <Form form={refundForm} layout="vertical">
+                  <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                    <div>
+                      <Text strong>Сумма заказа: </Text>
+                      <Text style={{ fontSize: 16, color: '#1890ff' }}>
+                        {(detailData.order.amount || 0).toLocaleString()} ₽
+                      </Text>
+                    </div>
+
+                    <div>
+                      <div style={{ marginBottom: 8 }}>
+                        <Text strong>Процент возврата: {refundPercentage}%</Text>
+                      </div>
+                      <div style={{ marginBottom: 8 }}>
+                        <Text style={{ fontSize: 18, color: '#52c41a', fontWeight: 600 }}>
+                          {Math.round(((detailData.order.amount || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                        </Text>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={5}
+                        value={refundPercentage}
+                        onChange={setRefundPercentage}
+                        marks={{
+                          0: '0%',
+                          25: '25%',
+                          50: '50%',
+                          75: '75%',
+                          100: '100%',
+                        }}
+                        tooltip={{
+                          formatter: (value) => `${value}% (${Math.round(((detailData.order.amount || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
+                        }}
+                      />
+                    </div>
+
+                    <Form.Item
+                      name="reason"
+                      label="Обоснование (опционально)"
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Input.TextArea
+                        rows={2}
+                        placeholder={`Возврат ${refundPercentage}% от суммы заказа`}
+                        maxLength={300}
+                        showCount
+                      />
+                    </Form.Item>
+
+                    <Form.Item name="requireApproval" initialValue={false} style={{ marginBottom: 0 }}>
+                      <Radio.Group>
+                        <Radio value={false}>Оформить возврат сразу</Radio>
+                        <Radio value={true}>Отправить на согласование</Radio>
+                      </Radio.Group>
+                    </Form.Item>
+
+                    <Button
+                      type="primary"
+                      icon={<DollarOutlined />}
+                      onClick={handleRefund}
+                      loading={refundProcessing}
+                      size="large"
+                      block
+                    >
+                      Оформить возврат {Math.round(((detailData.order.amount || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                    </Button>
+                  </Space>
+                </Form>
+              </Card>
+            )}
 
             <Card size="small" title="Переписка и история">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
