@@ -1,21 +1,4 @@
-import axios from 'axios';
-import { API_BASE_URL } from '@/config/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Добавляем токен авторизации к запросам
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import apiClient from '@/api/client';
 
 export interface Complaint {
   id: number;
@@ -82,20 +65,20 @@ export interface UpdateComplaintRequest {
 }
 
 class ComplaintsApi {
-  private baseUrl = 'api/arbitration/complaints';
+  private baseUrl = '/arbitration/complaints/';
 
   async getAll(): Promise<Complaint[]> {
-    const response = await api.get(this.baseUrl);
+    const response = await apiClient.get(this.baseUrl);
     return response.data;
   }
 
   async getById(id: number): Promise<Complaint> {
-    const response = await api.get(`${this.baseUrl}/${id}`);
+    const response = await apiClient.get(`${this.baseUrl}${id}/`);
     return response.data;
   }
 
   async getByOrderId(orderId: number): Promise<Complaint[]> {
-    const response = await api.get(`${this.baseUrl}?order_id=${orderId}`);
+    const response = await apiClient.get(`${this.baseUrl}?order_id=${orderId}`);
     return response.data;
   }
 
@@ -106,28 +89,30 @@ class ComplaintsApi {
     formData.append('is_order_relevant', String(data.is_order_relevant));
     if (data.relevant_until) formData.append('relevant_until', data.relevant_until);
     formData.append('financial_requirement', data.financial_requirement);
-    if (data.refund_percent) formData.append('refund_percent', String(data.refund_percent));
+    if (typeof data.refund_percent === 'number') {
+      formData.append('refund_percent', String(data.refund_percent));
+    }
     formData.append('description', data.description);
     if (data.files?.length) {
-      data.files.forEach(file => formData.append('files_upload', file));
+      data.files.forEach((file) => formData.append('files_upload', file));
     }
 
-    const response = await api.post(this.baseUrl, formData);
+    const response = await apiClient.post(this.baseUrl, formData);
     return response.data;
   }
 
   async update(id: number, data: UpdateComplaintRequest): Promise<Complaint> {
-    const response = await api.patch(`${this.baseUrl}/${id}`, data);
+    const response = await apiClient.patch(`${this.baseUrl}${id}/`, data);
     return response.data;
   }
 
   async close(id: number, resolution?: string): Promise<Complaint> {
-    const response = await api.patch(`${this.baseUrl}/${id}/close`, { resolution });
+    const response = await apiClient.patch(`${this.baseUrl}${id}/close/`, { resolution });
     return response.data;
   }
 
   async getChat(complaintId: number) {
-    const response = await api.get(`${this.baseUrl}/${complaintId}/chat`);
+    const response = await apiClient.get(`${this.baseUrl}${complaintId}/chat/`);
     return response.data;
   }
 }
