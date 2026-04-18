@@ -313,7 +313,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         # Проверка прав: клиент-владелец, staff или director
         user_role = getattr(user, 'role', None)
-        is_owner = user_role == 'client' and order.client_id == user.id
+        is_owner = order.client_id == user.id
         is_staff = user.is_staff or user_role in ['director', 'admin', 'arbitrator']
         
         # Логирование для отладки
