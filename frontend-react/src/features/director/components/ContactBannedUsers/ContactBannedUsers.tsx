@@ -169,6 +169,37 @@ const ContactBannedUsers: React.FC = () => {
     setUnbanModalVisible(true);
   };
 
+  // Мутация для разморозки чатов пользователя
+  const unfreezeChatsMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      if (debugEnabled) console.log('🔓 Размораживаем чаты пользователя:', userId);
+      const response = await apiClient.post(`/users/${userId}/unfreeze_chats/`);
+      return response.data;
+    },
+    onSuccess: async (_, userId) => {
+      const user = users.find(u => u.id === userId);
+      message.success(`Чаты пользователя ${user?.username} разморожены`);
+      await queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
+      await queryClient.refetchQueries({ queryKey: ['contact-banned-users'] });
+    },
+    onError: (error) => {
+      if (debugEnabled) console.error('Ошибка разморозки чатов:', error);
+      message.error('Не удалось разморозить чаты');
+    },
+  });
+
+  const handleUnfreezeChats = (user: ContactBannedUser) => {
+    Modal.confirm({
+      title: 'Разморозить переписку?',
+      content: `Вы уверены, что хотите разморозить все чаты пользователя ${user.username}? Пользователь сможет снова отправлять сообщения.`,
+      okText: 'Разморозить',
+      cancelText: 'Отмена',
+      onOk: () => {
+        unfreezeChatsMutation.mutate(user.id);
+      },
+    });
+  };
+
   const handleBanUser = (user: ContactBannedUser) => {
     setSelectedUser(user);
     setBanModalVisible(true);
@@ -452,6 +483,16 @@ const ContactBannedUsers: React.FC = () => {
         footer={[
           <Button key="close" onClick={() => setDetailsModalVisible(false)}>
             Закрыть
+          </Button>,
+          <Button 
+            key="unfreeze" 
+            type="default"
+            icon={<UnlockOutlined />}
+            onClick={() => {
+              handleUnfreezeChats(selectedUser!);
+            }}
+          >
+            Разморозить переписку
           </Button>,
           <Button 
             key="unban" 
