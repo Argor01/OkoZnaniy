@@ -304,7 +304,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
               <DatePicker
                 showTime
                 format="DD.MM.YYYY HH:mm"
-                className="blockedUsersSearch"
+                className="blockedUsersModalField"
                 disabledDate={(current) => !!current && current < dayjs().startOf('day')}
               />
             </Form.Item>

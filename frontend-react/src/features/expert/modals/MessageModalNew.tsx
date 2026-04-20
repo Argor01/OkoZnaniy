@@ -2250,13 +2250,18 @@ const handleOverdueComplaint = async () => {
   const handleGoToOrder = useCallback(() => {
     if (!effectiveOrderId) return;
     const path = ROUTES.orders.detail.replace(':orderId', String(effectiveOrderId));
+    const sourcePath = `${window.location.pathname}${window.location.search}`;
+
     onClose();
-    navigate(path, {
-      state: {
-        from: `${window.location.pathname}${window.location.search}`,
-        source: 'order-chat',
-      },
-    });
+
+    window.setTimeout(() => {
+      navigate(path, {
+        state: {
+          from: sourcePath,
+          source: 'order-chat',
+        },
+      });
+    }, 0);
   }, [effectiveOrderId, navigate, onClose]);
 
   const handleContactSupport = useCallback(async () => {

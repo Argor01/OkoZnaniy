@@ -19,17 +19,20 @@
 }
 
 .searchInput {
-  width: 300px;
+  flex: 1 1 320px;
+  min-width: 260px;
 }
 
 .roleSelect {
-  width: 150px;
+  flex: 0 1 180px;
+  min-width: 170px;
 }
 
 .statsRow {
   margin-bottom: 16px;
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .detailsBody {
@@ -56,4 +59,12 @@
 
 .unbanSection {
   margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .searchInput,
+  .roleSelect {
+    width: 100%;
+    min-width: 0;
+  }
 }
