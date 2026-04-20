@@ -1045,9 +1045,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       console.error('🔧 No chatId or userId provided to handleOpenChatById');
     };
 
-    window.addEventListener('openChatById', handleOpenChatById);
+    window.addEventListener('messageModalOpenChatById', handleOpenChatById);
     return () => {
-      window.removeEventListener('openChatById', handleOpenChatById);
+      window.removeEventListener('messageModalOpenChatById', handleOpenChatById);
     };
   }, [visible, hydrateClosedOrdersForChat, loadChats, loadOrCreateChatWithUser, toPositiveNumber]);
 
@@ -2337,6 +2337,7 @@ const handleOverdueComplaint = async () => {
       centered
       onCancel={onClose}
       footer={null}
+      destroyOnHidden
       width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
       wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
     >
