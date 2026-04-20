@@ -46,6 +46,7 @@ import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
+import { supportRequestsApi } from '@/features/support/api/requests';
 import { ROUTES } from '@/utils/constants';
 import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
@@ -1044,9 +1045,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       console.error('🔧 No chatId or userId provided to handleOpenChatById');
     };
 
-    window.addEventListener('openChatById', handleOpenChatById);
+    window.addEventListener('messageModalOpenChatById', handleOpenChatById);
     return () => {
-      window.removeEventListener('openChatById', handleOpenChatById);
+      window.removeEventListener('messageModalOpenChatById', handleOpenChatById);
     };
   }, [visible, hydrateClosedOrdersForChat, loadChats, loadOrCreateChatWithUser, toPositiveNumber]);
 
@@ -1755,7 +1756,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       
       const claimType = claimTypeMap[selectedClaimCategory] || 'other';
 
-      const claim = await chatApi.createClaim({
+      const claim = await supportRequestsApi.createClaim({
         order_id: effectiveOrderId || undefined,
         claim_type: claimType,
         subject: selectedClaimCategory,
@@ -1810,6 +1811,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setOrderRelevance('');
       setRefundType('');
       setShowClaimCategories(false);
+      onClose();
+      navigate(ROUTES.supportChat.root);
       antMessage.success('Претензия отправлена в техническую поддержку');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Не удалось отправить претензию');
@@ -2247,13 +2250,18 @@ const handleOverdueComplaint = async () => {
   const handleGoToOrder = useCallback(() => {
     if (!effectiveOrderId) return;
     const path = ROUTES.orders.detail.replace(':orderId', String(effectiveOrderId));
+    const sourcePath = `${window.location.pathname}${window.location.search}`;
+
     onClose();
-    navigate(path, {
-      state: {
-        from: `${window.location.pathname}${window.location.search}`,
-        source: 'order-chat',
-      },
-    });
+
+    window.setTimeout(() => {
+      navigate(path, {
+        state: {
+          from: sourcePath,
+          source: 'order-chat',
+        },
+      });
+    }, 0);
   }, [effectiveOrderId, navigate, onClose]);
 
   const handleContactSupport = useCallback(async () => {
@@ -2329,6 +2337,7 @@ const handleOverdueComplaint = async () => {
       centered
       onCancel={onClose}
       footer={null}
+      destroyOnHidden
       width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
       wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
     >

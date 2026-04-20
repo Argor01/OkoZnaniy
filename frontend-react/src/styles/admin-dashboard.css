@@ -2014,15 +2014,18 @@
 }
 
 .blockedUsersSearch {
-  width: 300px;
+  flex: 1 1 300px;
+  min-width: 260px;
 }
 
 .blockedUsersSelectRole {
-  width: 150px;
+  flex: 0 1 180px;
+  min-width: 160px;
 }
 
 .blockedUsersSelectBlockType {
-  width: 150px;
+  flex: 0 1 180px;
+  min-width: 160px;
 }
 
 .blockedUsersSummaryRow {
@@ -2040,6 +2043,10 @@
   padding: 12px;
   background: #f5f5f5;
   border-radius: 6px;
+}
+
+.blockedUsersModalField {
+  width: 100%;
 }
 
 .overdue-row {
@@ -2311,6 +2318,13 @@
 
 /* Мобильная адаптация */
 @media (max-width: 768px) {
+  .blockedUsersSearch,
+  .blockedUsersSelectRole,
+  .blockedUsersSelectBlockType {
+    width: 100%;
+    min-width: 0;
+  }
+
   .userRolesFiltersRow {
     flex-direction: column;
   }

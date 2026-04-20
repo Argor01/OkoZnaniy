@@ -224,7 +224,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       
       // Отправляем событие для загрузки чата в MessageModalNew
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('openChatById', {
+        window.dispatchEvent(new CustomEvent('messageModalOpenChatById', {
           detail: { chatId, userId }
         }));
       }, 300);
@@ -316,7 +316,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         if (chatId) {
           setMessageModalVisible(true);
           setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('openChatById', {
+            window.dispatchEvent(new CustomEvent('messageModalOpenChatById', {
               detail: { chatId }
             }));
           }, 300);

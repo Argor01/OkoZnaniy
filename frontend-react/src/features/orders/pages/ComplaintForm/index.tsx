@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Form, Input, InputNumber, Select, DatePicker, Upload, message, Space, Card, Divider, Avatar, Modal } from 'antd';
 import { ArrowLeftOutlined, UploadOutlined, FileOutlined, LinkOutlined, CheckCircleOutlined, RightOutlined } from '@ant-design/icons';
 import { complaintsApi, CreateComplaintRequest, Complaint } from '@/features/arbitration/api/complaints';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
+import { supportRequestsApi } from '@/features/support/api/requests';
 import { AppButton, AppCard } from '@/components/ui';
 import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutlined, ClockCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { formatCurrency } from '@/utils/formatters';
@@ -43,7 +44,6 @@ interface ComplaintFormData {
 const ComplaintForm: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const [form] = Form.useForm<ComplaintFormData>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -85,6 +85,34 @@ const ComplaintForm: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      const reasonMap: Record<string, string> = {
+        not_completed: 'order_not_completed',
+        poor_quality: 'poor_quality',
+        not_paid: 'payment_dispute',
+        unjustified_review: 'other',
+        ready_works_shop: 'other',
+        other: 'other',
+      };
+      const refundType =
+        values.financial_requirement === 'no_refund'
+          ? 'none'
+          : values.refund_percent && values.refund_percent > 0 && values.refund_percent < 100
+            ? 'partial'
+            : 'full';
+
+      await supportRequestsApi.createClaim({
+        order_id: Number(orderId),
+        claim_type: values.complaint_type,
+        subject: COMPLAINT_TYPES.find((item) => item.value === values.complaint_type)?.label || values.complaint_type,
+        description: values.description,
+        reason: reasonMap[values.complaint_type] || 'other',
+        refund_type: refundType,
+        refund_percentage: refundType === 'partial' ? values.refund_percent : undefined,
+      });
+
+      message.success('Претензия подана. Открываю центр обращений.');
+      navigate('/support');
+      return;
       // Подготовка данных для отправки
       const createData: CreateComplaintRequest = {
         order_id: Number(orderId),
@@ -110,7 +138,7 @@ const ComplaintForm: React.FC = () => {
       if (errorMsg.includes('уже есть открытая претензия') || errorMsg.includes('already')) {
         message.warning('У вас уже есть открытая претензия по этому заказу');
         setTimeout(() => {
-          navigate('/arbitration');
+          navigate('/support');
         }, 1000);
       } else {
         message.error(errorMsg);

@@ -350,6 +350,7 @@ const DirectorDashboard: React.FC = () => {
             isMobile ? 'directorDashboardContentMobile' : '',
             isTablet ? 'directorDashboardContentTablet' : '',
           ].filter(Boolean).join(' ')}
+          key={selectedMenu}
         >
           {currentMenuItem?.component}
         </Content>

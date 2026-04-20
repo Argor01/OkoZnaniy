@@ -72,6 +72,8 @@ const isSystemBanSource = (value?: string | null): boolean => {
   return normalized === 'system' || normalized === 'система' || normalized.includes('система');
 };
 
+const CONTACT_BANNED_USERS_QUERY_KEY = ['contact-banned-users'] as const;
+
 const ContactBannedUsers: React.FC = () => {
   const queryClient = useQueryClient();
   const debugEnabled =
@@ -91,7 +93,7 @@ const ContactBannedUsers: React.FC = () => {
 
   // Используем React Query для загрузки данных
   const { data: users = [], isLoading: loading, error } = useQuery<ContactBannedUser[]>({
-    queryKey: ['contact-banned-users'],
+    queryKey: CONTACT_BANNED_USERS_QUERY_KEY,
     queryFn: async () => {
       if (debugEnabled) console.log('🔄 Загрузка забаненных пользователей...');
       const response = await apiClient.get('/users/contact_banned_users/');
@@ -103,10 +105,10 @@ const ContactBannedUsers: React.FC = () => {
       return normalizedUsers;
     },
     staleTime: 0, // Данные сразу считаются устаревшими
-    refetchInterval: 10000, // Автообновление каждые 10 секунд
+    refetchInterval: 5000, // Автообновление каждые 10 секунд
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: true, // Обновление при фокусе окна
-    refetchOnMount: true, // Обновление при монтировании
+    refetchOnMount: 'always', // Обновление при монтировании
     refetchOnReconnect: true,
   });
 
@@ -134,8 +136,8 @@ const ContactBannedUsers: React.FC = () => {
       setSelectedUser(null);
       banForm.resetFields();
       setBanDurationType('temporary');
-      await queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
-      await queryClient.refetchQueries({ queryKey: ['contact-banned-users'] });
+      await queryClient.invalidateQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
+      await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
     },
     onError: (error) => {
       if (debugEnabled) console.error('Ошибка блокировки:', error);
@@ -155,8 +157,8 @@ const ContactBannedUsers: React.FC = () => {
       setSelectedUser(null);
       unbanForm.resetFields();
       // Инвалидируем кэш и принудительно перезагружаем данные
-      await queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
-      await queryClient.refetchQueries({ queryKey: ['contact-banned-users'] });
+      await queryClient.invalidateQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
+      await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
     },
     onError: (error) => {
       if (debugEnabled) console.error('Ошибка разбана:', error);
@@ -167,6 +169,37 @@ const ContactBannedUsers: React.FC = () => {
   const handleUnbanUser = (user: ContactBannedUser) => {
     setSelectedUser(user);
     setUnbanModalVisible(true);
+  };
+
+  // Мутация для разморозки чатов пользователя
+  const unfreezeChatsMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      if (debugEnabled) console.log('🔓 Размораживаем чаты пользователя:', userId);
+      const response = await apiClient.post(`/users/${userId}/unfreeze_chats/`);
+      return response.data;
+    },
+    onSuccess: async (_, userId) => {
+      const user = users.find(u => u.id === userId);
+      message.success(`Чаты пользователя ${user?.username} разморожены`);
+      await queryClient.invalidateQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
+      await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
+    },
+    onError: (error) => {
+      if (debugEnabled) console.error('Ошибка разморозки чатов:', error);
+      message.error('Не удалось разморозить чаты');
+    },
+  });
+
+  const handleUnfreezeChats = (user: ContactBannedUser) => {
+    Modal.confirm({
+      title: 'Разморозить переписку?',
+      content: `Вы уверены, что хотите разморозить все чаты пользователя ${user.username}? Пользователь сможет снова отправлять сообщения.`,
+      okText: 'Разморозить',
+      cancelText: 'Отмена',
+      onOk: () => {
+        unfreezeChatsMutation.mutate(user.id);
+      },
+    });
   };
 
   const handleBanUser = (user: ContactBannedUser) => {
@@ -452,6 +485,16 @@ const ContactBannedUsers: React.FC = () => {
         footer={[
           <Button key="close" onClick={() => setDetailsModalVisible(false)}>
             Закрыть
+          </Button>,
+          <Button 
+            key="unfreeze" 
+            type="default"
+            icon={<UnlockOutlined />}
+            onClick={() => {
+              handleUnfreezeChats(selectedUser!);
+            }}
+          >
+            Разморозить переписку
           </Button>,
           <Button 
             key="unban" 

@@ -1090,6 +1090,46 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': self.get_serializer(user).data
         })
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unfreeze_chats(self, request, pk=None):
+        """Разморозить все чаты пользователя"""
+        if request.user.role not in ['admin', 'director']:
+            return Response(
+                {'error': 'Доступно только для администраторов и директоров'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Пользователь не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Размораживаем все чаты пользователя
+        from apps.chat.models import Chat
+        frozen_chats = Chat.objects.filter(
+            models.Q(client=user) | models.Q(expert=user),
+            is_frozen=True
+        )
+        
+        unfrozen_count = 0
+        for chat in frozen_chats:
+            chat.unfreeze()
+            unfrozen_count += 1
+        
+        # Также снимаем бан с пользователя, если он забанен
+        if user.is_banned_for_contacts:
+            user.is_banned_for_contacts = False
+            user.save()
+        
+        return Response({
+            'message': f'Разморожено чатов: {unfrozen_count}',
+            'unfrozen_count': unfrozen_count,
+            'user': self.get_serializer(user).data
+        })
+
 
 
 

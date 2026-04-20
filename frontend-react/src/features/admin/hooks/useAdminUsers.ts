@@ -91,6 +91,7 @@ export const useUserActions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_USERS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_BLOCKED_USERS });
+      queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
       message.success('Пользователь заблокирован');
     },
     onError: () => message.error('Ошибка при блокировке пользователя'),
@@ -101,6 +102,7 @@ export const useUserActions = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_USERS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_BLOCKED_USERS });
+      queryClient.invalidateQueries({ queryKey: ['contact-banned-users'] });
       message.success('Пользователь разблокирован');
     },
     onError: () => message.error('Ошибка при разблокировке пользователя'),

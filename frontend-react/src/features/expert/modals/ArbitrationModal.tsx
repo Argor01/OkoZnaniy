@@ -1,24 +1,21 @@
-import React, { useState } from 'react';
-import { Modal, Typography, Tag, Empty, Spin } from 'antd';
-import { 
+import React, { useMemo, useState } from 'react';
+import { Modal, Typography, Tag, Spin } from 'antd';
+import {
   TrophyOutlined,
   ClockCircleOutlined,
-  FileDoneOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   HourglassOutlined,
   CalendarOutlined,
-  DollarOutlined,
-  PaperClipOutlined,
   EyeOutlined,
-  QuestionCircleOutlined,
   BookOutlined,
-  ReadOutlined,
   NumberOutlined,
-  DatabaseOutlined
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { complaintsApi, Complaint } from '@/features/arbitration/api/complaints';
+import { useNavigate } from 'react-router-dom';
+import { supportRequestsApi } from '@/features/support/api/requests';
+import type { SupportConversation } from '@/features/support/types/requests';
 import { AppButton } from '@/components/ui';
 import styles from './ArbitrationModal.module.css';
 
@@ -30,108 +27,40 @@ interface ArbitrationModalProps {
   isMobile: boolean;
 }
 
-const STATUS_CONFIG: Record<Complaint['status'], {
-  key: string;
-  color: string;
-  icon: React.ReactNode;
-  label: string;
-  tabLabel: string;
-}> = {
-  open: { 
-    key: 'open',
-    color: 'green', 
-    icon: <HourglassOutlined />, 
-    label: 'Открыт',
-    tabLabel: 'Открытые'
-  },
-  in_progress: { 
-    key: 'in_progress',
-    color: 'blue', 
-    icon: <ClockCircleOutlined />, 
-    label: 'В работе',
-    tabLabel: 'В работе'
-  },
-  resolved: { 
-    key: 'resolved',
-    color: 'cyan', 
-    icon: <CheckCircleOutlined />, 
-    label: 'Решён',
-    tabLabel: 'Решённые'
-  },
-  closed: { 
-    key: 'closed',
-    color: 'default', 
-    icon: <CloseCircleOutlined />, 
-    label: 'Закрыт',
-    tabLabel: 'Закрытые'
-  },
+const STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
+  submitted: { color: 'blue', icon: <HourglassOutlined />, label: 'Подано' },
+  under_review: { color: 'processing', icon: <ClockCircleOutlined />, label: 'На рассмотрении' },
+  in_arbitration: { color: 'orange', icon: <ExclamationCircleOutlined />, label: 'В арбитраже' },
+  decision_made: { color: 'cyan', icon: <CheckCircleOutlined />, label: 'Решение принято' },
+  closed: { color: 'default', icon: <CloseCircleOutlined />, label: 'Закрыто' },
+  rejected: { color: 'red', icon: <CloseCircleOutlined />, label: 'Отклонено' },
 };
 
-const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
-  visible,
-  onClose,
-  isMobile
-}) => {
-  const [arbitrationStatusFilter, setArbitrationStatusFilter] = useState<Complaint['status'] | 'all'>('all');
+const ArbitrationModal: React.FC<ArbitrationModalProps> = ({ visible, onClose, isMobile }) => {
+  const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<string | 'all'>('all');
 
-    const { data: complaints, isLoading } = useQuery<Complaint[]>({
-    queryKey: ['complaints'],
+  const { data: items = [], isLoading } = useQuery<SupportConversation[]>({
+    queryKey: ['support-center-arbitration'],
     queryFn: async () => {
-      const response = await complaintsApi.getAll();
-      // Если ответ содержит results (пагинация), используем его
-      return Array.isArray(response) ? response : (response as any).results || [];
+      const response = await supportRequestsApi.listAll();
+      return response.filter((item) => item.type === 'arbitration_case' || item.type === 'claim');
     },
     enabled: visible,
   });
-  const statusConfigMap = {
-    pending: {
-      badge: styles.arbitrationStatusBadgePending,
-      icon: styles.arbitrationStatusIconPending,
-      text: styles.arbitrationStatusTextPending,
-      label: 'Ожидает рассмотрения',
-      Icon: ClockCircleOutlined,
-    },
-    in_review: {
-      badge: styles.arbitrationStatusBadgeInReview,
-      icon: styles.arbitrationStatusIconInReview,
-      text: styles.arbitrationStatusTextInReview,
-      label: 'На рассмотрении',
-      Icon: FileDoneOutlined,
-    },
-    resolved: {
-      badge: styles.arbitrationStatusBadgeResolved,
-      icon: styles.arbitrationStatusIconResolved,
-      text: styles.arbitrationStatusTextResolved,
-      label: 'Решено',
-      Icon: CheckCircleOutlined,
-    },
-    rejected: {
-      badge: styles.arbitrationStatusBadgeRejected,
-      icon: styles.arbitrationStatusIconRejected,
-      text: styles.arbitrationStatusTextRejected,
-      label: 'Отклонено',
-      Icon: CloseCircleOutlined,
-    },
-    default: {
-      badge: styles.arbitrationStatusBadgeDefault,
-      icon: styles.arbitrationStatusIconDefault,
-      text: styles.arbitrationStatusTextDefault,
-      label: 'Неизвестно',
-      Icon: QuestionCircleOutlined,
-    },
-  } as const;
 
-    const filteredComplaints = complaints?.filter(
-    (c) => arbitrationStatusFilter === 'all' || c.status === arbitrationStatusFilter
-  ) || [];
+  const filteredItems = useMemo(
+    () => items.filter((item) => statusFilter === 'all' || item.status === statusFilter),
+    [items, statusFilter]
+  );
 
-  const getTabCount = (status: Complaint['status']) => {
-    return complaints?.filter((c) => c.status === status).length || 0;
-  };
+  const hasActiveItems = items.some((item) =>
+    ['submitted', 'under_review', 'in_arbitration'].includes(item.status)
+  );
 
-  const handleViewDetails = (complaintId: number) => {
+  const openSupportCenter = () => {
     onClose();
-    window.location.href = `/arbitration/complaint/${complaintId}`;
+    navigate('/support');
   };
 
   return (
@@ -152,95 +81,92 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
 
         <div className={`${styles.arbitrationModalTabs} ${isMobile ? styles.arbitrationModalTabsMobile : styles.arbitrationModalTabsDesktop}`}>
           <div
-            onClick={() => setArbitrationStatusFilter('all')}
-            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabActiveAll : styles.arbitrationModalTabInactive}`}
+            onClick={() => setStatusFilter('all')}
+            className={`${styles.arbitrationModalTab} ${statusFilter === 'all' ? styles.arbitrationModalTabActiveAll : styles.arbitrationModalTabInactive}`}
           >
-            <TrophyOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabIconAll : styles.arbitrationModalTabIconInactive}`} />
-            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'all' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
+            <TrophyOutlined className={`${styles.arbitrationModalTabIcon} ${statusFilter === 'all' ? styles.arbitrationModalTabIconAll : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${statusFilter === 'all' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Все
             </Text>
           </div>
           <div
-            onClick={() => setArbitrationStatusFilter('open')}
-            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'open' ? styles.arbitrationModalTabActivePending : styles.arbitrationModalTabInactive}`}
+            onClick={() => setStatusFilter('submitted')}
+            className={`${styles.arbitrationModalTab} ${statusFilter === 'submitted' ? styles.arbitrationModalTabActivePending : styles.arbitrationModalTabInactive}`}
           >
-            <HourglassOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'open' ? styles.arbitrationModalTabIconPending : styles.arbitrationModalTabIconInactive}`} />
-            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'open' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
-              Открытые
+            <HourglassOutlined className={`${styles.arbitrationModalTabIcon} ${statusFilter === 'submitted' ? styles.arbitrationModalTabIconPending : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${statusFilter === 'submitted' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
+              Новые
             </Text>
           </div>
           <div
-            onClick={() => setArbitrationStatusFilter('in_progress')}
-            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'in_progress' ? styles.arbitrationModalTabActiveInReview : styles.arbitrationModalTabInactive}`}
+            onClick={() => setStatusFilter('under_review')}
+            className={`${styles.arbitrationModalTab} ${statusFilter === 'under_review' ? styles.arbitrationModalTabActiveInReview : styles.arbitrationModalTabInactive}`}
           >
-            <ClockCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'in_progress' ? styles.arbitrationModalTabIconInReview : styles.arbitrationModalTabIconInactive}`} />
-            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'in_progress' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
+            <ClockCircleOutlined className={`${styles.arbitrationModalTabIcon} ${statusFilter === 'under_review' ? styles.arbitrationModalTabIconInReview : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${statusFilter === 'under_review' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               В работе
             </Text>
           </div>
           <div
-            onClick={() => setArbitrationStatusFilter('resolved')}
-            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabActiveResolved : styles.arbitrationModalTabInactive}`}
+            onClick={() => setStatusFilter('decision_made')}
+            className={`${styles.arbitrationModalTab} ${statusFilter === 'decision_made' ? styles.arbitrationModalTabActiveResolved : styles.arbitrationModalTabInactive}`}
           >
-            <CheckCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabIconResolved : styles.arbitrationModalTabIconInactive}`} />
-            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'resolved' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
-              Решённые
+            <CheckCircleOutlined className={`${styles.arbitrationModalTabIcon} ${statusFilter === 'decision_made' ? styles.arbitrationModalTabIconResolved : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${statusFilter === 'decision_made' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
+              Решены
             </Text>
           </div>
           <div
-            onClick={() => setArbitrationStatusFilter('closed')}
-            className={`${styles.arbitrationModalTab} ${arbitrationStatusFilter === 'closed' ? styles.arbitrationModalTabActiveRejected : styles.arbitrationModalTabInactive}`}
+            onClick={() => setStatusFilter('closed')}
+            className={`${styles.arbitrationModalTab} ${statusFilter === 'closed' ? styles.arbitrationModalTabActiveRejected : styles.arbitrationModalTabInactive}`}
           >
-            <CloseCircleOutlined className={`${styles.arbitrationModalTabIcon} ${arbitrationStatusFilter === 'closed' ? styles.arbitrationModalTabIconRejected : styles.arbitrationModalTabIconInactive}`} />
-            <Text className={`${styles.arbitrationModalTabLabel} ${arbitrationStatusFilter === 'closed' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
+            <CloseCircleOutlined className={`${styles.arbitrationModalTabIcon} ${statusFilter === 'closed' ? styles.arbitrationModalTabIconRejected : styles.arbitrationModalTabIconInactive}`} />
+            <Text className={`${styles.arbitrationModalTabLabel} ${statusFilter === 'closed' ? styles.arbitrationModalTabLabelActive : styles.arbitrationModalTabLabelInactive}`}>
               Закрытые
             </Text>
           </div>
         </div>
 
-        {complaints?.some(c => c.status === 'open') && (
+        {hasActiveItems ? (
           <div className={styles.arbitrationModalNotice}>
             <HourglassOutlined className={styles.arbitrationModalNoticeIcon} />
-            <Text>
-              У вас есть открытые претензии. Заказ автоматически заморожен до изменения статуса по претензии.
-            </Text>
+            <Text>Показываются актуальные арбитражные обращения из центра обращений.</Text>
           </div>
-        )}
+        ) : null}
 
-                <div className={styles.arbitrationModalList}>
+        <div className={styles.arbitrationModalList}>
           {isLoading ? (
             <div className={styles.arbitrationModalEmpty}>
               <Spin size="large" tip="Загрузка претензий..." />
             </div>
-          ) : filteredComplaints.length > 0 ? (
+          ) : filteredItems.length > 0 ? (
             <div className={styles.arbitrationModalListInner}>
-              {filteredComplaints.map((complaint) => {
-                const statusConfig = STATUS_CONFIG[complaint.status];
+              {filteredItems.map((item) => {
+                const statusMeta = STATUS_CONFIG[item.status] || STATUS_CONFIG.closed;
 
                 return (
-                                    <div
-                    key={complaint.id}
+                  <div
+                    key={`${item.type}-${item.id}`}
                     className={`${styles.arbitrationModalCard} ${isMobile ? styles.arbitrationModalCardMobile : styles.arbitrationModalCardDesktop}`}
                   >
                     <div className={`${styles.arbitrationModalCardHeader} ${isMobile ? styles.arbitrationModalCardHeaderMobile : styles.arbitrationModalCardHeaderDesktop}`}>
                       <div className={`${styles.arbitrationModalCardHeaderInfo} ${isMobile ? styles.arbitrationModalCardHeaderInfoMobile : styles.arbitrationModalCardHeaderInfoDesktop}`}>
                         <Text strong className={`${styles.arbitrationModalCardTitle} ${isMobile ? styles.arbitrationModalCardTitleMobile : styles.arbitrationModalCardTitleDesktop}`}>
-                          Претензия №{complaint.id}
+                          Обращение №{item.ticket_number}
                         </Text>
                         <Text type="secondary" className={`${styles.arbitrationModalCardMeta} ${isMobile ? styles.arbitrationModalCardMetaMobile : styles.arbitrationModalCardMetaDesktop}`}>
-                          Заказ №{complaint.order.id}
+                          {item.order?.id ? `Заказ №${item.order.id}` : 'Без привязки к заказу'}
                         </Text>
                       </div>
-                      <Tag 
-                        icon={statusConfig.icon}
-                        color={statusConfig.color}
+                      <Tag
+                        icon={statusMeta.icon}
+                        color={statusMeta.color}
                         className={`${styles.arbitrationModalStatusBadge} ${isMobile ? styles.arbitrationModalStatusBadgeMobile : styles.arbitrationModalStatusBadgeDesktop}`}
                       >
-                        {statusConfig.label}
+                        {statusMeta.label}
                       </Tag>
                     </div>
 
-                    {/* Сетка характеристик в стиле OrderDetail */}
                     <div className={styles.arbitrationModalGrid}>
                       <div className={styles.arbitrationModalGridItem}>
                         <div className={styles.arbitrationModalGridIcon}>
@@ -248,50 +174,30 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
                         </div>
                         <div>
                           <div className={styles.arbitrationModalGridLabel}>Объект спора</div>
-                          <div className={styles.arbitrationModalGridValue}>Заказ №{complaint.order.id}</div>
+                          <div className={styles.arbitrationModalGridValue}>
+                            {item.order?.id ? `Заказ №${item.order.id}` : 'Не указан'}
+                          </div>
                         </div>
                       </div>
-                      
-                                            <div className={styles.arbitrationModalGridItem}>
+
+                      <div className={styles.arbitrationModalGridItem}>
                         <div className={`${styles.arbitrationModalGridIcon} ${styles.arbitrationModalGridIconPurple}`}>
                           <BookOutlined />
                         </div>
                         <div>
-                          <div className={styles.arbitrationModalGridLabel}>Тип претензии</div>
-                          <div className={styles.arbitrationModalGridValue}>
-                            {complaint.complaint_type === 'not_completed' && 'Заказ не выполнен'}
-                            {complaint.complaint_type === 'poor_quality' && 'Заказ выполнен некачественно'}
-                            {complaint.complaint_type === 'not_paid' && 'Заказ не оплачен'}
-                            {complaint.complaint_type === 'unjustified_review' && 'Необоснованный отзыв'}
-                            {complaint.complaint_type === 'ready_works_shop' && 'Магазин готовых работ'}
-                            {complaint.complaint_type === 'other' && 'Другое'}
-                          </div>
+                          <div className={styles.arbitrationModalGridLabel}>Тема</div>
+                          <div className={styles.arbitrationModalGridValue}>{item.subject}</div>
                         </div>
                       </div>
-                      
-                                            <div className={styles.arbitrationModalGridItem}>
+
+                      <div className={styles.arbitrationModalGridItem}>
                         <div className={`${styles.arbitrationModalGridIcon} ${styles.arbitrationModalGridIconOrange}`}>
-                          <ReadOutlined />
-                        </div>
-                        <div>
-                          <div className={styles.arbitrationModalGridLabel}>Финансовые требования</div>
-                          <div className={styles.arbitrationModalGridValue}>
-                            {complaint.financial_requirement === 'prepayment_refund' && 'Возврат предоплаты'}
-                            {complaint.financial_requirement === 'prepayment_refund_plus_penalty' && 'Возврат предоплаты и неустойка'}
-                            {complaint.financial_requirement === 'no_refund' && 'Возврат не требуется'}
-                            {complaint.refund_percent && ` (${complaint.refund_percent}%)`}
-                          </div>
-                        </div>
-                      </div>
-                      
-                                            <div className={styles.arbitrationModalGridItem}>
-                        <div className={`${styles.arbitrationModalGridIcon} ${styles.arbitrationModalGridIconDefault}`}>
-                          <DatabaseOutlined />
+                          <CalendarOutlined />
                         </div>
                         <div>
                           <div className={styles.arbitrationModalGridLabel}>Дата подачи</div>
                           <div className={styles.arbitrationModalGridValue}>
-                            {new Date(complaint.created_at).toLocaleDateString('ru-RU')}
+                            {new Date(item.created_at).toLocaleDateString('ru-RU')}
                           </div>
                         </div>
                       </div>
@@ -299,33 +205,14 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
 
                     <div className={styles.arbitrationModalDescriptionWrapper}>
                       <Text strong className={styles.arbitrationModalDescriptionTitle}>Описание:</Text>
-                      <Paragraph 
-                        ellipsis={{ rows: 2, expandable: true, symbol: 'Показать больше' }}
-                        className={styles.arbitrationModalDescription}
-                      >
-                        {complaint.description}
+                      <Paragraph className={styles.arbitrationModalDescription}>
+                        {item.description}
                       </Paragraph>
                     </div>
 
-                    {complaint.resolution && (
-                      <div className={`${styles.arbitrationModalDecision} ${complaint.status === 'resolved' ? styles.arbitrationModalDecisionResolved : styles.arbitrationModalDecisionRejected}`}>
-                        <Text strong className={`${styles.arbitrationModalDecisionTitle} ${complaint.status === 'resolved' ? styles.arbitrationModalDecisionTitleResolved : styles.arbitrationModalDecisionTitleRejected}`}>
-                          Резолюция:
-                        </Text>
-                        <Text className={`${styles.arbitrationModalDecisionText} ${complaint.status === 'resolved' ? styles.arbitrationModalDecisionTextResolved : styles.arbitrationModalDecisionTextRejected}`}>
-                          {complaint.resolution}
-                        </Text>
-                      </div>
-                    )}
-
                     <div className={`${styles.arbitrationModalFooter} ${isMobile ? styles.arbitrationModalFooterMobile : styles.arbitrationModalFooterDesktop}`}>
-                      <AppButton
-                        type="primary"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewDetails(complaint.id)}
-                      >
-                        Подробнее
+                      <AppButton variant="secondary" icon={<EyeOutlined />} onClick={openSupportCenter}>
+                        Открыть в центре обращений
                       </AppButton>
                     </div>
                   </div>
@@ -336,10 +223,7 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({
             <div className={styles.arbitrationModalEmpty}>
               <TrophyOutlined className={styles.arbitrationModalEmptyIcon} />
               <Text type="secondary" className={styles.arbitrationModalEmptyText}>
-                {arbitrationStatusFilter === 'all' 
-                  ? 'У вас нет претензий' 
-                  : `Нет претензий со статусом "${STATUS_CONFIG[arbitrationStatusFilter as Complaint['status']]?.label || ''}"`
-                }
+                {statusFilter === 'all' ? 'Нет претензий' : 'Нет претензий в этом статусе'}
               </Text>
             </div>
           )}
