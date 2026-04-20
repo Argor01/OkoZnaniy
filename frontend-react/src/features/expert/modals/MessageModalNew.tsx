@@ -46,6 +46,7 @@ import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
+import { supportRequestsApi } from '@/features/support/api/requests';
 import { ROUTES } from '@/utils/constants';
 import styles from './MessageModalNew.module.css';
 import '../../../styles/messages.css';
@@ -1755,7 +1756,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       
       const claimType = claimTypeMap[selectedClaimCategory] || 'other';
 
-      const claim = await chatApi.createClaim({
+      const claim = await supportRequestsApi.createClaim({
         order_id: effectiveOrderId || undefined,
         claim_type: claimType,
         subject: selectedClaimCategory,
@@ -1810,6 +1811,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setOrderRelevance('');
       setRefundType('');
       setShowClaimCategories(false);
+      onClose();
+      navigate(ROUTES.supportChat.root);
       antMessage.success('Претензия отправлена в техническую поддержку');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Не удалось отправить претензию');
