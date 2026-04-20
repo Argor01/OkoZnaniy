@@ -27,7 +27,6 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
-      PAYMENT_ENCRYPTION_KEY: ${PAYMENT_ENCRYPTION_KEY}
     volumes:
       - static_files:/app/static
       - media_files:/app/media

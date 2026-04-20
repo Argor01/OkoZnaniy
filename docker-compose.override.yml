@@ -1,10 +1,34 @@
 services:
-  # Отключаем nginx для локальной разработки
+  backend:
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DEBUG: "True"
+      DJANGO_ENV: development
+      FRONTEND_URL: "http://localhost:5173"  # Порт фронта для разработки
+    volumes:
+      - .:/app  # Для hot-reload
+
+  frontend:
+    # Для режима разработки React (Vite)
+    ports:
+      - "5173:5173"  # Пробрасываем порт Vite
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    environment:
+      VITE_API_URL: "http://localhost:8000"  # URL бэкенда
+    volumes:
+      - ./frontend-react:/app
+      - /app/node_modules  # Анонимный volume для node_modules
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
   nginx:
-    profiles:
-      - production
-  
-  # Отключаем telegram-bot для локальной разработки
-  telegram-bot:
-    profiles:
-      - production
+    ports:
+      - "8080:80"  # Если нужен nginx (не основной для разработки)
