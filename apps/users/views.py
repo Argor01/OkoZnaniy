@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.http import Http404
 import logging
 
 from rest_framework import viewsets, permissions, status
@@ -579,17 +580,21 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def retrieve(self, request, pk=None):
-        """Получить данные пользователя по ID (публичный доступ)"""
+    def retrieve(self, request, *args, **kwargs):
+        """Получить данные пользователя по username или числовому id.
+
+        Логика поиска инкапсулирована в ``get_object`` — он умеет и в
+        username, и в ``pk``. Здесь лишь нормализуем 404.
+        """
         try:
-            user = User.objects.get(pk=pk)
-            serializer = self.get_serializer(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
+            user = self.get_object()
+        except Http404:
             return Response(
                 {'error': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
             )
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def partner_dashboard(self, request):
