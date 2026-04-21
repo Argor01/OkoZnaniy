@@ -75,7 +75,31 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'username'
-    
+    # Разрешаем в URL любые символы кроме слэша: никнеймы могут содержать
+    # точки/пробелы, а из карточки заказа также может прилетать числовой id.
+    lookup_value_regex = '[^/]+'
+
+    def get_object(self):
+        """Ищем пользователя и по username, и по числовому id.
+
+        Фронтенд иногда открывает профиль как ``/user/<id>`` из карточки
+        заказа, а иногда как ``/user/<username>`` из чата/списков. Базовый
+        lookup по ``username`` в этом случае падает на 404. Расширяем
+        стандартный ``get_object`` так, чтобы оба варианта отрабатывали.
+        """
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        lookup_value = self.kwargs.get(lookup_url_kwarg)
+        if lookup_value is not None and str(lookup_value).isdigit():
+            queryset = self.filter_queryset(self.get_queryset())
+            try:
+                obj = queryset.get(pk=int(lookup_value))
+            except User.DoesNotExist:
+                obj = None
+            if obj is not None:
+                self.check_object_permissions(self.request, obj)
+                return obj
+        return super().get_object()
+
     def get_serializer_class(self):
         if self.action == 'create':
             from .serializers import CustomRegisterSerializer
