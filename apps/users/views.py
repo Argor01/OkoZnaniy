@@ -1033,8 +1033,27 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(data)
 
+    def _resolve_contact_ban_user(self, pk=None, username=None):
+        """Найти пользователя по числовому id или username.
+
+        UserViewSet использует ``lookup_field='username'``, поэтому роутер
+        передаёт значение из URL в kwarg ``username``. Фронтенд же
+        отправляет числовой ``id`` пользователя. Этот хелпер принимает
+        оба варианта и возвращает пользователя либо ``None``.
+        """
+        lookup = pk if pk is not None else username
+        if lookup is None:
+            return None
+        lookup_str = str(lookup)
+        try:
+            if lookup_str.isdigit():
+                return User.objects.get(pk=int(lookup_str))
+            return User.objects.get(username=lookup_str)
+        except User.DoesNotExist:
+            return None
+
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
-    def ban_for_contacts(self, request, pk=None):
+    def ban_for_contacts(self, request, pk=None, username=None, *args, **kwargs):
         """Забанить пользователя за обмен контактами"""
         if request.user.role not in ['admin', 'director']:
             return Response(
@@ -1042,16 +1061,15 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+        user = self._resolve_contact_ban_user(pk=pk, username=username)
+        if user is None:
             return Response(
                 {'error': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
         from django.utils import timezone
-        
+
         reason = request.data.get('reason', 'Обмен контактными данными в чате')
         user.is_banned_for_contacts = True
         user.contact_ban_reason = reason
@@ -1059,14 +1077,14 @@ class UserViewSet(viewsets.ModelViewSet):
         user.contact_violations_count += 1
         user.banned_by = request.user
         user.save()
-        
+
         return Response({
             'message': f'Пользователь {user.username} забанен за обмен контактами',
             'user': self.get_serializer(user).data
         })
 
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
-    def unban_for_contacts(self, request, pk=None):
+    def unban_for_contacts(self, request, pk=None, username=None, *args, **kwargs):
         """Разбанить пользователя за обмен контактами"""
         if request.user.role not in ['admin', 'director']:
             return Response(
@@ -1074,9 +1092,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+        user = self._resolve_contact_ban_user(pk=pk, username=username)
+        if user is None:
             return Response(
                 {'error': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
@@ -1084,14 +1101,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
         user.is_banned_for_contacts = False
         user.save()
-        
+
         return Response({
             'message': f'Пользователь {user.username} разбанен',
             'user': self.get_serializer(user).data
         })
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def unfreeze_chats(self, request, pk=None):
+    def unfreeze_chats(self, request, pk=None, username=None, *args, **kwargs):
         """Разморозить все чаты пользователя"""
         if request.user.role not in ['admin', 'director']:
             return Response(
@@ -1099,9 +1116,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+        user = self._resolve_contact_ban_user(pk=pk, username=username)
+        if user is None:
             return Response(
                 {'error': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
