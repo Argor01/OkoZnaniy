@@ -20,6 +20,30 @@ import json
 # Create your views here.
 logger = logging.getLogger(__name__)
 
+
+def _ensure_not_banned_for_contacts(user, action_detail):
+    """Проверка бана за обмен контактами с авто-снятием истёкшего временного бана.
+
+    Возвращает Response с 400, если пользователь забанен. Иначе None.
+    action_detail — человекочитаемое описание действия, которое блокируется.
+    """
+    if not user or not user.is_authenticated:
+        return None
+    if getattr(user, 'role', None) in ('admin', 'director'):
+        return None
+    if hasattr(user, 'unban_for_contacts_if_expired'):
+        user.unban_for_contacts_if_expired()
+    if getattr(user, 'is_banned_for_contacts', False):
+        return Response(
+            {
+                'detail': f'{action_detail} недоступно. Пользователь находится на проверке за обмен контактными данными.',
+                'frozen': True,
+                'frozen_reason': getattr(user, 'contact_ban_reason', None) or 'Пользователь находится на проверке'
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -118,6 +142,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.action == 'available':
             return AvailableOrderSerializer
         return super().get_serializer_class()
+
+    def create(self, request, *args, **kwargs):
+        blocked = _ensure_not_banned_for_contacts(request.user, 'Создание заказа')
+        if blocked is not None:
+            return blocked
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         # Дополнительная валидация дедлайна
@@ -1016,6 +1046,12 @@ class BidViewSet(viewsets.ModelViewSet):
             return Bid.objects.filter(order_id=order_id, expert_id=user.id).select_related('expert', 'order')
 
         return Bid.objects.none()
+
+    def create(self, request, *args, **kwargs):
+        blocked = _ensure_not_banned_for_contacts(request.user, 'Отклик на заказ')
+        if blocked is not None:
+            return blocked
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         order_id = self.kwargs['order_pk']

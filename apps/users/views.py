@@ -1098,17 +1098,38 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         from django.utils import timezone
+        from datetime import timedelta
 
         reason = request.data.get('reason', 'Обмен контактными данными в чате')
+        now = timezone.now()
+
+        days_raw = request.data.get('days')
+        try:
+            days = int(days_raw) if days_raw not in (None, '') else None
+        except (TypeError, ValueError):
+            return Response(
+                {'error': 'Параметр days должен быть целым числом'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if days is not None and days <= 0:
+            return Response(
+                {'error': 'Параметр days должен быть положительным'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         user.is_banned_for_contacts = True
         user.contact_ban_reason = reason
-        user.contact_ban_date = timezone.now()
+        user.contact_ban_date = now
+        user.contact_ban_until = now + timedelta(days=days) if days else None
         user.contact_violations_count += 1
         user.banned_by = request.user
         user.save()
 
         return Response({
-            'message': f'Пользователь {user.username} забанен за обмен контактами',
+            'message': (
+                f'Пользователь {user.username} заблокирован на {days} дн.'
+                if days else f'Пользователь {user.username} забанен за обмен контактами'
+            ),
             'user': self.get_serializer(user).data
         })
 
@@ -1129,6 +1150,9 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         user.is_banned_for_contacts = False
+        user.contact_ban_reason = None
+        user.contact_ban_date = None
+        user.contact_ban_until = None
         user.save()
 
         return Response({

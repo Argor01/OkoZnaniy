@@ -61,6 +61,7 @@ class User(AbstractUser):
     is_banned_for_contacts = models.BooleanField(default=False, verbose_name="Забанен за обмен контактами")
     contact_ban_reason = models.TextField(blank=True, null=True, verbose_name="Причина бана за контакты")
     contact_ban_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата бана за контакты")
+    contact_ban_until = models.DateTimeField(blank=True, null=True, verbose_name="Действителен до (временный бан)")
     contact_violations_count = models.PositiveIntegerField(default=0, verbose_name="Количество нарушений")
     banned_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='banned_users', verbose_name="Кто забанил")
     blocked_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата блокировки")
@@ -77,6 +78,43 @@ class User(AbstractUser):
 
     def is_temporary_block_active(self):
         return bool(not self.is_active and self.unblock_date and self.unblock_date > timezone.now())
+
+    def unban_for_contacts_if_expired(self):
+        """Снимает временный бан за контакты, если его срок истёк.
+
+        Возвращает True, если бан был снят, иначе False.
+        Также размораживает чаты и заказы пользователя.
+        """
+        if not self.is_banned_for_contacts:
+            return False
+        if not self.contact_ban_until or self.contact_ban_until > timezone.now():
+            return False
+
+        self.is_banned_for_contacts = False
+        self.contact_ban_reason = None
+        self.contact_ban_date = None
+        self.contact_ban_until = None
+        self.save(update_fields=[
+            'is_banned_for_contacts', 'contact_ban_reason',
+            'contact_ban_date', 'contact_ban_until',
+        ])
+
+        try:
+            from django.db.models import Q
+            from apps.chat.models import Chat as ChatModel
+            from apps.orders.models import Order
+            for chat in ChatModel.objects.filter(is_frozen=True).filter(
+                Q(expert=self) | Q(client=self) | Q(participants=self)
+            ).distinct():
+                chat.unfreeze()
+            for order in Order.objects.filter(is_frozen=True).filter(
+                Q(expert=self) | Q(client=self)
+            ).distinct():
+                order.unfreeze()
+        except Exception:
+            pass
+
+        return True
 
     def unblock_if_expired(self):
         if self.is_active or not self.unblock_date or self.unblock_date > timezone.now():

@@ -3,6 +3,7 @@ import {
   Avatar,
   Button,
   Card,
+  DatePicker,
   Descriptions,
   Empty,
   Input,
@@ -20,13 +21,17 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
+  MessageOutlined,
   ReloadOutlined,
   SearchOutlined,
   SendOutlined,
+  StopOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import dayjs, { Dayjs } from 'dayjs';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import apiClient from '@/api/client';
 import { useTicket, useTicketActions, useTickets } from '@/features/admin/hooks';
 import styles from './TicketSystemSection.module.css';
 
@@ -53,6 +58,8 @@ interface TicketRow {
 
 interface TicketDetail extends TicketRow {
   description?: string;
+  reason?: string;
+  defendant?: { id?: number; first_name?: string; last_name?: string } | null;
   messages?: Array<{
     id: number;
     sender?: {
@@ -77,6 +84,10 @@ export const TicketSystemSection: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const [contactActionLoading, setContactActionLoading] = useState(false);
+  const [contactBanPeriodModalVisible, setContactBanPeriodModalVisible] = useState(false);
+  const [contactBanUntil, setContactBanUntil] = useState<Dayjs | null>(null);
 
   const { ticket: rawTicket, loading: detailLoading, refetch: refetchTicket } = useTicket(selectedTicketId ?? 0);
   const selectedTicket = rawTicket as TicketDetail | undefined;
@@ -277,6 +288,94 @@ export const TicketSystemSection: React.FC = () => {
 
   const messages = useMemo(() => selectedTicket?.messages ?? [], [selectedTicket]);
 
+  const isContactViolation = useMemo(() => {
+    if (!selectedTicket) return false;
+    if (selectedTicket.reason === 'contact_violation') return true;
+    const tagList = selectedTicket.tags_list ?? [];
+    if (tagList.some((t) => /контакт/i.test(t) || /нарушен/i.test(t))) return true;
+    const subject = selectedTicket.subject || '';
+    return /обмен.*контакт|Нарушение.*контакт/i.test(subject);
+  }, [selectedTicket]);
+
+  const contactViolationUserId = useMemo(() => {
+    if (!selectedTicket || !isContactViolation) return null;
+    return selectedTicket.defendant?.id ?? selectedTicket.user?.id ?? null;
+  }, [selectedTicket, isContactViolation]);
+
+  const contactViolationUserName = useMemo(() => {
+    if (!selectedTicket || !isContactViolation) return null;
+    const d = selectedTicket.defendant;
+    return (
+      [d?.first_name, d?.last_name].filter(Boolean).join(' ') ||
+      [selectedTicket.user?.first_name, selectedTicket.user?.last_name].filter(Boolean).join(' ') ||
+      null
+    );
+  }, [selectedTicket, isContactViolation]);
+
+  const refreshAll = async () => {
+    await Promise.all([refetch(), refetchTicket()]);
+  };
+
+  const handleUnfreezeContactChat = async () => {
+    if (!contactViolationUserId) return;
+    setContactActionLoading(true);
+    try {
+      await apiClient.post(`/users/${contactViolationUserId}/unfreeze_chats/`);
+      message.success('Чат разморожен');
+      await refreshAll();
+    } catch {
+      message.error('Не удалось разморозить чат');
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const handlePermanentContactBan = async () => {
+    if (!contactViolationUserId) return;
+    setContactActionLoading(true);
+    try {
+      await apiClient.patch(`/users/${contactViolationUserId}/ban_for_contacts/`, {
+        reason: `Блокировка по обращению ${selectedTicket?.ticket_number || ''}`.trim(),
+      });
+      message.success(
+        contactViolationUserName
+          ? `Пользователь ${contactViolationUserName} заблокирован`
+          : 'Пользователь заблокирован'
+      );
+      await refreshAll();
+    } catch {
+      message.error('Не удалось заблокировать пользователя');
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
+  const handlePeriodContactBan = async () => {
+    if (!contactViolationUserId || !contactBanUntil) return;
+    const diffInHours = contactBanUntil.diff(dayjs(), 'hour', true);
+    const days = Math.max(1, Math.ceil(diffInHours / 24));
+
+    setContactActionLoading(true);
+    try {
+      await apiClient.patch(`/users/${contactViolationUserId}/ban_for_contacts/`, {
+        days,
+        reason: `Временная блокировка по обращению ${selectedTicket?.ticket_number || ''}`.trim(),
+      });
+      message.success(
+        contactViolationUserName
+          ? `Пользователь ${contactViolationUserName} заблокирован на период`
+          : 'Пользователь заблокирован на период'
+      );
+      setContactBanPeriodModalVisible(false);
+      setContactBanUntil(null);
+      await refreshAll();
+    } catch {
+      message.error('Не удалось заблокировать пользователя на период');
+    } finally {
+      setContactActionLoading(false);
+    }
+  };
+
   return (
     <div className={styles.ticketSystemWrapper}>
       <div style={{ width: '100%' }}>
@@ -378,6 +477,36 @@ export const TicketSystemSection: React.FC = () => {
                 <Button onClick={() => handleStatusChange('in_progress')} disabled={selectedTicket.status === 'in_progress' || selectedTicket.status === 'completed'} loading={updatingStatus}>Взять в работу</Button>
                 <Button type="primary" onClick={() => handleStatusChange('completed')} disabled={selectedTicket.status === 'completed'} loading={updatingStatus}>Закрыть обращение</Button>
               </Space>
+              {isContactViolation && contactViolationUserId ? (
+                <>
+                  <div style={{ marginTop: 12, marginBottom: 4 }}>
+                    <Text strong>Нарушение: обмен контактными данными в чате</Text>
+                  </div>
+                  <Space wrap>
+                    <Button
+                      icon={<MessageOutlined />}
+                      loading={contactActionLoading}
+                      onClick={handleUnfreezeContactChat}
+                    >
+                      Разморозить чат
+                    </Button>
+                    <Button
+                      danger
+                      icon={<StopOutlined />}
+                      loading={contactActionLoading}
+                      onClick={handlePermanentContactBan}
+                    >
+                      Заблокировать пользователя
+                    </Button>
+                    <Button
+                      loading={contactActionLoading}
+                      onClick={() => setContactBanPeriodModalVisible(true)}
+                    >
+                      Заблокировать на период
+                    </Button>
+                  </Space>
+                </>
+              ) : null}
             </Card>
 
             <Card size="small" title="Ответ клиенту">
@@ -390,6 +519,31 @@ export const TicketSystemSection: React.FC = () => {
             </Card>
           </Space>
         )}
+      </Modal>
+
+      <Modal
+        title="Заблокировать пользователя на период"
+        open={contactBanPeriodModalVisible}
+        onOk={handlePeriodContactBan}
+        onCancel={() => {
+          setContactBanPeriodModalVisible(false);
+          setContactBanUntil(null);
+        }}
+        okText="Заблокировать"
+        cancelText="Отмена"
+        okButtonProps={{ loading: contactActionLoading, disabled: !contactBanUntil }}
+      >
+        <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+          Выберите дату и время окончания блокировки{contactViolationUserName ? ` для ${contactViolationUserName}` : ''}.
+        </Text>
+        <DatePicker
+          showTime
+          value={contactBanUntil}
+          onChange={(value) => setContactBanUntil(value)}
+          style={{ width: '100%' }}
+          format="DD.MM.YYYY HH:mm"
+          disabledDate={(current) => !!current && current < dayjs().startOf('day')}
+        />
       </Modal>
     </div>
   );

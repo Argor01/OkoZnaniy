@@ -141,6 +141,8 @@ class ChatViewSet(viewsets.ModelViewSet):
         chat = self.get_object()
 
         if hasattr(request.user, 'role') and request.user.role not in ['admin', 'director']:
+            if hasattr(request.user, 'unban_for_contacts_if_expired'):
+                request.user.unban_for_contacts_if_expired()
             if getattr(request.user, 'is_banned_for_contacts', False):
                 return Response(
                     {
@@ -151,6 +153,8 @@ class ChatViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             other_user = chat.participants.exclude(id=request.user.id).first()
+            if other_user and hasattr(other_user, 'unban_for_contacts_if_expired'):
+                other_user.unban_for_contacts_if_expired()
             if other_user and getattr(other_user, 'is_banned_for_contacts', False):
                 return Response(
                     {
