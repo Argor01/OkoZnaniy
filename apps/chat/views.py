@@ -1064,25 +1064,32 @@ class ChatViewSet(viewsets.ModelViewSet):
         context_title = request.data.get('context_title')
         if context_title is not None:
             context_title = str(context_title).strip()[:255] or None
-        if not user_id:
+        if user_id in (None, '', 0, '0'):
             return Response(
                 {'detail': 'user_id обязателен'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
-            other_user = User.objects.get(id=user_id)
+            user_id_int = int(user_id)
+        except (TypeError, ValueError):
+            return Response(
+                {'detail': 'user_id должен быть числом'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user_id_int == request.user.id:
+            return Response(
+                {'detail': 'Нельзя создать чат с самим собой'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            other_user = User.objects.get(id=user_id_int)
         except User.DoesNotExist:
             return Response(
                 {'detail': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Нельзя создать чат с самим собой
-        if other_user.id == request.user.id:
-            return Response(
-                {'detail': 'Нельзя создать чат с самим собой'},
-                status=status.HTTP_400_BAD_REQUEST
             )
         
         # Определяем client/expert по ID (меньший ID = client), чтобы constraint работал корректно

@@ -6,6 +6,7 @@ import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined }
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
 import { chatApi } from '@/features/support/api/chat';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
@@ -16,6 +17,7 @@ const { Text, Paragraph } = Typography;
 const UserProfile: FC = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
 
   
   const { data: userData, isLoading: userLoading, error: userError } = useQuery({
@@ -87,25 +89,34 @@ const UserProfile: FC = () => {
       : (Array.isArray(userData?.specializations) ? userData.specializations : []);
 
   const handleWriteMessage = async () => {
-    if (!userData?.id) {
+    const targetId = Number(userData?.id);
+    if (!Number.isFinite(targetId) || targetId <= 0) {
       antMessage.error('ID пользователя не найден');
       return;
     }
 
+    if (currentUser && Number(currentUser.id) === targetId) {
+      antMessage.warning('Нельзя открыть чат с самим собой');
+      return;
+    }
+
     try {
-      // Создаем или получаем чат с этим пользователем
-      const chatData = await chatApi.getOrCreateByUser(Number(userData.id));
-      
-      // Открываем модальное окно чата с этим чатом
+      const chatData = await chatApi.getOrCreateByUser(targetId);
+
       const event = new CustomEvent('openChatById', {
-        detail: { chatId: chatData.id, userId: Number(userData.id) }
+        detail: { chatId: chatData.id, userId: targetId }
       });
       window.dispatchEvent(event);
-      
+
       antMessage.success('Чат открыт');
     } catch (error: any) {
       console.error('Ошибка создания чата:', error);
-      antMessage.error(error.response?.data?.detail || 'Не удалось создать чат');
+      const data = error?.response?.data;
+      const backendMessage =
+        data?.detail ||
+        (typeof data === 'string' ? data : undefined) ||
+        (data && typeof data === 'object' ? Object.values(data).flat().join(', ') : undefined);
+      antMessage.error(backendMessage || 'Не удалось создать чат');
     }
   };
 
