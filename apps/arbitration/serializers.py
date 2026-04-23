@@ -219,7 +219,21 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
                 raise serializers.ValidationError({
                     'order_id': 'По заказу пока не назначен исполнитель'
                 })
-        
+
+            existing = ArbitrationCase.objects.filter(
+                order_id=order_id,
+                plaintiff=user,
+            ).exclude(status__in=['closed', 'rejected']).first()
+            if existing is not None:
+                raise serializers.ValidationError({
+                    'order_id': (
+                        f'По этому заказу у вас уже есть активная претензия '
+                        f'({existing.case_number}). Подать новую можно после '
+                        f'закрытия предыдущей.'
+                    ),
+                    'existing_case_number': existing.case_number,
+                })
+
         return data
     
     def create(self, validated_data):
