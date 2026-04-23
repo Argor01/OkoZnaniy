@@ -65,7 +65,9 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 base_username = email.split('@')[0]
                 username = base_username
                 counter = 1
-                while User.objects.filter(username=username, is_active=True).exists():
+                # Глобальная уникальность — архивированные пользователи держат username
+                # на уровне БД, поэтому суффикс прибавляем пока есть ЛЮБОЕ совпадение.
+                while User.objects.filter(username=username).exists():
                     username = f"{base_username}{counter}"
                     counter += 1
                 validated_data['username'] = username

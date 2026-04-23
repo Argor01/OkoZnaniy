@@ -454,18 +454,26 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         if phone and User.objects.filter(phone=phone, is_active=True).exists():
             return Response({'detail': 'Пользователь с таким телефоном уже существует'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Генерация/проверка username — также по активным, чтобы архивированные не держали имя.
+        # Генерация/проверка username.
+        # Нам нужна глобальная уникальность (на уровне БД username UNIQUE),
+        # но бизнес-ошибку «занято» показываем только если username держит активный
+        # пользователь — архивированный держит имя, но новому подберём суффикс автоматически.
         if not username:
             base_username = (email.split('@')[0] if email else (phone or 'user'))
             candidate = base_username
             suffix = 1
-            while User.objects.filter(username=candidate, is_active=True).exists():
+            while User.objects.filter(username=candidate).exists():
                 candidate = f"{base_username}{suffix}"
                 suffix += 1
             username = candidate
         else:
             if User.objects.filter(username=username, is_active=True).exists():
                 return Response({'detail': 'Имя пользователя занято'}, status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(username=username).exclude(is_active=True).exists():
+                return Response(
+                    {'detail': 'Имя пользователя занято архивированным сотрудником — укажите другое'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         user = User.objects.create_user(
             username=username,
