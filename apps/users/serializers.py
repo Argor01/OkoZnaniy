@@ -65,7 +65,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 base_username = email.split('@')[0]
                 username = base_username
                 counter = 1
-                while User.objects.filter(username=username).exists():
+                while User.objects.filter(username=username, is_active=True).exists():
                     username = f"{base_username}{counter}"
                     counter += 1
                 validated_data['username'] = username

@@ -120,30 +120,27 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
-        
-        # Проверяем, существует ли пользователь с таким email
+
+        # Проверяем только среди активных пользователей — архивированные/деактивированные
+        # сотрудники не должны блокировать повторную регистрацию с тем же email.
         if email:
-            try:
-                existing_user = User.objects.get(email=email)
-                
+            existing_user = User.objects.filter(email=email, is_active=True).first()
+            if existing_user:
                 # Если email не подтвержден, отправляем код повторно
                 if not existing_user.email_verified:
                     verification_code = create_verification_code(existing_user)
                     send_verification_code(existing_user.email, verification_code.code)
-                    
+
                     response_data = UserSerializer(existing_user).data
                     response_data['message'] = 'Код подтверждения отправлен повторно на ваш email.'
                     response_data['email_verification_required'] = True
-                    
+
                     return Response(response_data, status=status.HTTP_200_OK)
                 else:
-                    # Email уже подтвержден
                     return Response(
                         {'email': ['Пользователь с таким email уже существует и подтвержден.']},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-            except User.DoesNotExist:
-                pass  # Пользователь не существует, продолжаем регистрацию
         
         serializer = self.get_serializer(data=request.data)
         

@@ -447,23 +447,24 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         if role not in allowed_roles:
             return Response({'detail': 'Недопустимая роль'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Уникальность email/телефона
-        if email and User.objects.filter(email=email).exists():
+        # Уникальность email/телефона — проверяем только среди активных пользователей,
+        # чтобы архивированные сотрудники не блокировали регистрацию с тем же контактом.
+        if email and User.objects.filter(email=email, is_active=True).exists():
             return Response({'detail': 'Пользователь с таким email уже существует'}, status=status.HTTP_400_BAD_REQUEST)
-        if phone and User.objects.filter(phone=phone).exists():
+        if phone and User.objects.filter(phone=phone, is_active=True).exists():
             return Response({'detail': 'Пользователь с таким телефоном уже существует'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Генерация/проверка username
+        # Генерация/проверка username — также по активным, чтобы архивированные не держали имя.
         if not username:
             base_username = (email.split('@')[0] if email else (phone or 'user'))
             candidate = base_username
             suffix = 1
-            while User.objects.filter(username=candidate).exists():
+            while User.objects.filter(username=candidate, is_active=True).exists():
                 candidate = f"{base_username}{suffix}"
                 suffix += 1
             username = candidate
         else:
-            if User.objects.filter(username=username).exists():
+            if User.objects.filter(username=username, is_active=True).exists():
                 return Response({'detail': 'Имя пользователя занято'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(
