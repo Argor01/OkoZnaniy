@@ -454,7 +454,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           />
         </Form.Item>
 
-        <Form.Item label="Образование">
+        <Form.Item label="Образование" required tooltip="Добавьте минимум одно образование">
           <Form.List name="educations">
             {(fields, { add, remove }) => (
               <>
