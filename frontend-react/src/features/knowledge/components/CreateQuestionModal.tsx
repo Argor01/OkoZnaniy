@@ -145,25 +145,42 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    let values;
     try {
-      const values = await form.validateFields();
+      values = await form.validateFields();
+    } catch (validationError: any) {
+      const firstError = validationError?.errorFields?.[0]?.errors?.[0];
+      if (firstError) {
+        message.error(firstError);
+      } else {
+        message.error('Заполните обязательные поля');
+      }
+      return;
+    }
+
+    try {
       setLoading(true);
 
-      // Создаем новый вопрос через API
       const newQuestion = await knowledgeApi.createQuestion({
         title: values.title,
         description: values.description,
         category: values.category,
         tags: tags
       });
-      
+
       message.success('Вопрос успешно создан!');
       form.resetFields();
       setTags([]);
       onSuccess(newQuestion);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create question:', error);
-      message.error('Не удалось создать вопрос');
+      const backendError =
+        error?.response?.data?.detail ||
+        (typeof error?.response?.data === 'string' ? error.response.data : undefined) ||
+        (error?.response?.data && typeof error.response.data === 'object'
+          ? Object.values(error.response.data).flat().join(', ')
+          : undefined);
+      message.error(backendError || 'Не удалось создать вопрос');
     } finally {
       setLoading(false);
     }
