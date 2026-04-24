@@ -241,6 +241,23 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         # Автоматически подаем дело
         case.submit()
         freeze_case_context(case)
+
+        # Защита от ложного срабатывания авто-бана за обмен контактами:
+        # если истец описал в претензии контактные данные ответчика (например,
+        # цитирует сообщение нарушителя), детектор может ошибочно повесить
+        # «is_banned_for_contacts» на истца. После подачи претензии снимаем с
+        # истца этот флаг — он не виноват, что приводит факты как доказательство.
+        try:
+            user = request.user
+            if getattr(user, 'is_banned_for_contacts', False):
+                user.is_banned_for_contacts = False
+                user.contact_ban_until = None
+                user.contact_ban_reason = None
+                user.save(update_fields=[
+                    'is_banned_for_contacts', 'contact_ban_until', 'contact_ban_reason'
+                ])
+        except Exception:
+            pass
         
         log_activity(
             case,
@@ -249,11 +266,22 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             f'Дело подано пользователем {request.user.get_full_name() or request.user.username}'
         )
 
+        # Дополнительно отдельно уведомляем истца и ответчика о факте подачи претензии
+        # (используем выделенный тип COMPLAINT_FILED, чтобы фронт мог показать соответствующую
+        # карточку с переходом на дело и возможностью дать пояснения).
+        try:
+            from apps.notifications.services import NotificationService as _NS
+            _NS.notify_complaint_filed(case)
+        except Exception:
+            # Если новый тип ещё не задеплоен в БД (миграция не накатилась),
+            # не валим подачу претензии — оставляем только базовое status_changed.
+            pass
+
         notify_case_participants(
             case,
             title=f'Открыт арбитраж {case.case_number}',
             message_text='По заказу открыт арбитраж. Заказ и переписка временно заморожены до решения.',
-            exclude_user_ids=[],
+            exclude_user_ids=[case.plaintiff_id, case.defendant_id] if case.defendant_id else [],
             notification_type=NotificationType.STATUS_CHANGED,
         )
         

@@ -79,7 +79,23 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
     # Пропускаем системные сообщения
     if instance.message_type == 'system':
         return
-    
+
+    # Если по заказу из этого чата уже открыт активный арбитраж и автор сообщения
+    # — истец, не баним его за упоминание контактов: он, скорее всего, цитирует
+    # ответчика как доказательство нарушения.
+    try:
+        order_id = getattr(instance.chat, 'order_id', None)
+        if order_id:
+            from apps.arbitration.models import ArbitrationCase
+            has_active_complaint_by_sender = ArbitrationCase.objects.filter(
+                order_id=order_id,
+                plaintiff_id=instance.sender_id,
+            ).exclude(status__in=['closed', 'rejected']).exists()
+            if has_active_complaint_by_sender:
+                return
+    except Exception:
+        pass
+
     # Проверяем сообщение на контакты
     detection_result = ContactDetectionService.detect_contacts(instance.text)
     
