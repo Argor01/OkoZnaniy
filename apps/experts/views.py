@@ -119,7 +119,16 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ExpertReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        # Публичный список отзывов на профиле эксперта — без авторизации.
+        if self.action == 'public_list':
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
     def get_queryset(self):
+        # Для публичного списка отдаём только опубликованные отзывы по запрошенному эксперту.
+        if self.action == 'public_list':
+            return ExpertReview.objects.filter(is_published=True)
         if self.request.user.is_staff:
             return ExpertReview.objects.all()
         if self.request.user.role == 'expert':
@@ -132,7 +141,155 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
             expert=order.expert,
             client=self.request.user
         )
-        NotificationService.notify_review_created(review)
+        try:
+            NotificationService.notify_review_received(review)
+        except Exception:
+            logger.exception('Не удалось отправить уведомление о новом отзыве')
+
+    @action(detail=True, methods=['post'], url_path='reply', permission_classes=[permissions.IsAuthenticated])
+    def reply(self, request, pk=None):
+        """Эксперт оставляет ответ на отзыв клиента."""
+        review = get_object_or_404(ExpertReview, pk=pk)
+        if review.expert_id != request.user.id and not request.user.is_staff:
+            return Response({'detail': 'Только эксперт-получатель отзыва может на него ответить.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        text = (request.data.get('reply_text') or '').strip()
+        if not text:
+            return Response({'reply_text': 'Введите текст ответа.'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(text) > 2000:
+            return Response({'reply_text': 'Слишком длинный ответ (максимум 2000 символов).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        review.reply_text = text
+        review.reply_at = timezone.now()
+        review.save(update_fields=['reply_text', 'reply_at'])
+        try:
+            NotificationService.notify_review_reply(review)
+        except Exception:
+            logger.exception('Не удалось отправить уведомление об ответе на отзыв')
+        return Response(self.get_serializer(review).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='appeal', permission_classes=[permissions.IsAuthenticated])
+    def appeal(self, request, pk=None):
+        """Эксперт обжалует отзыв — отзыв скрывается до решения админа."""
+        review = get_object_or_404(ExpertReview, pk=pk)
+        if review.expert_id != request.user.id:
+            return Response({'detail': 'Обжаловать отзыв может только эксперт.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        if review.is_appealed and not review.appeal_resolved:
+            return Response({'detail': 'Обжалование уже подано и ожидает рассмотрения.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        reason = (request.data.get('appeal_reason') or '').strip()
+        if len(reason) < 10:
+            return Response({'appeal_reason': 'Опишите причину обжалования (минимум 10 символов).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        review.is_appealed = True
+        review.appeal_reason = reason
+        review.appeal_at = timezone.now()
+        review.appeal_resolved = False
+        review.appeal_resolution = ''
+        # На время рассмотрения отзыв скрываем из публичного профиля.
+        review.is_published = False
+        review.save(update_fields=[
+            'is_appealed', 'appeal_reason', 'appeal_at',
+            'appeal_resolved', 'appeal_resolution', 'is_published',
+        ])
+        try:
+            NotificationService.notify_review_appeal(review)
+        except Exception:
+            logger.exception('Не удалось отправить уведомление об обжаловании отзыва')
+        return Response(self.get_serializer(review).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='resolve-appeal',
+            permission_classes=[permissions.IsAuthenticated])
+    def resolve_appeal(self, request, pk=None):
+        """Админ выносит решение по обжалованию: keep / remove."""
+        if not (request.user.is_staff or getattr(request.user, 'role', None) in ('admin', 'arbitrator')):
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        review = get_object_or_404(ExpertReview, pk=pk)
+        decision = request.data.get('decision')
+        resolution = (request.data.get('resolution') or '').strip()
+        if decision not in ('keep', 'remove'):
+            return Response({'decision': 'Допустимые значения: keep, remove.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        review.appeal_resolved = True
+        review.appeal_resolution = resolution
+        if decision == 'remove':
+            review.is_published = False
+        else:
+            review.is_published = True
+            review.is_appealed = False
+        review.save(update_fields=[
+            'appeal_resolved', 'appeal_resolution', 'is_published', 'is_appealed',
+        ])
+        return Response(self.get_serializer(review).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='public', permission_classes=[permissions.AllowAny])
+    def public_list(self, request):
+        """Публичный список отзывов об эксперте + статистика по звёздам.
+
+        Параметры:
+        * expert (обязателен) — id или username эксперта;
+        * rating — фильтр по оценке (1..5), можно несколько через запятую;
+        * limit — максимум записей (default 50, max 200);
+        * ordering — created_at | -created_at | rating | -rating.
+        """
+        expert_param = request.query_params.get('expert')
+        if not expert_param:
+            return Response({'expert': 'Укажите id или username эксперта.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        expert_qs = User.objects.filter(role__in=['expert', 'client'])
+        if expert_param.isdigit():
+            expert = expert_qs.filter(pk=int(expert_param)).first()
+        else:
+            expert = expert_qs.filter(username=expert_param).first()
+        if not expert:
+            return Response({'detail': 'Эксперт не найден.'}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = ExpertReview.objects.filter(expert=expert, is_published=True)
+
+        rating_param = request.query_params.get('rating')
+        if rating_param:
+            try:
+                rating_values = [int(v) for v in rating_param.split(',') if v.strip()]
+                rating_values = [v for v in rating_values if 1 <= v <= 5]
+            except ValueError:
+                rating_values = []
+            if rating_values:
+                qs = qs.filter(rating__in=rating_values)
+
+        ordering = request.query_params.get('ordering') or '-created_at'
+        if ordering not in ('-created_at', 'created_at', '-rating', 'rating'):
+            ordering = '-created_at'
+        qs = qs.order_by(ordering)
+
+        try:
+            limit = min(int(request.query_params.get('limit', 50)), 200)
+        except (TypeError, ValueError):
+            limit = 50
+
+        # Сводка по звёздам для фильтра в UI — считаем по всем опубликованным
+        # отзывам эксперта (без учёта пользовательского rating-фильтра).
+        all_published = ExpertReview.objects.filter(expert=expert, is_published=True)
+        agg = all_published.aggregate(
+            avg=Avg('rating'),
+            total=Count('id'),
+        )
+        breakdown_qs = (
+            all_published.values('rating')
+            .annotate(count=Count('id'))
+            .order_by('rating')
+        )
+        breakdown = {str(i): 0 for i in range(1, 6)}
+        for row in breakdown_qs:
+            breakdown[str(row['rating'])] = row['count']
+
+        items = self.get_serializer(qs[:limit], many=True).data
+        return Response({
+            'count': agg['total'] or 0,
+            'average_rating': round(float(agg['avg'] or 0), 2),
+            'breakdown': breakdown,
+            'results': items,
+        })
 
 class ExpertRatingViewSet(viewsets.ModelViewSet):
     serializer_class = ExpertRatingSerializer

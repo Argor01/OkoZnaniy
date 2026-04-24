@@ -179,6 +179,15 @@ class ExpertReview(models.Model):
         default=True,
         verbose_name="Опубликован"
     )
+    # Ответ эксперта на отзыв клиента
+    reply_text = models.TextField(blank=True, default="", verbose_name="Ответ эксперта")
+    reply_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата ответа эксперта")
+    # Обжалование отзыва экспертом — попадает на модерацию админа
+    is_appealed = models.BooleanField(default=False, verbose_name="Обжалован")
+    appeal_reason = models.TextField(blank=True, default="", verbose_name="Причина обжалования")
+    appeal_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата обжалования")
+    appeal_resolved = models.BooleanField(default=False, verbose_name="Обжалование рассмотрено")
+    appeal_resolution = models.TextField(blank=True, default="", verbose_name="Решение по обжалованию")
 
     class Meta:
         verbose_name = "Отзыв об эксперте"
@@ -248,6 +257,15 @@ class ExpertRating(models.Model):
         "Дата обновления",
         auto_now=True
     )
+    # Ответ эксперта на отзыв клиента
+    reply_text = models.TextField(blank=True, default="", verbose_name="Ответ эксперта")
+    reply_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата ответа эксперта")
+    # Обжалование отзыва экспертом — попадает на модерацию админа
+    is_appealed = models.BooleanField(default=False, verbose_name="Обжалован")
+    appeal_reason = models.TextField(blank=True, default="", verbose_name="Причина обжалования")
+    appeal_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата обжалования")
+    appeal_resolved = models.BooleanField(default=False, verbose_name="Обжалование рассмотрено")
+    appeal_resolution = models.TextField(blank=True, default="", verbose_name="Решение по обжалованию")
 
     class Meta:
         verbose_name = "Рейтинг эксперта"

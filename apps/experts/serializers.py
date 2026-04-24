@@ -58,9 +58,18 @@ class ExpertReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExpertReview
-        fields = ['id', 'expert', 'order', 'client', 'rating', 
-                 'comment', 'created_at']
-        read_only_fields = ['expert', 'client', 'created_at']
+        fields = [
+            'id', 'expert', 'order', 'client', 'rating', 'comment', 'created_at',
+            'reply_text', 'reply_at',
+            'is_appealed', 'appeal_reason', 'appeal_at',
+            'appeal_resolved', 'appeal_resolution',
+        ]
+        read_only_fields = [
+            'expert', 'client', 'created_at',
+            'reply_text', 'reply_at',
+            'is_appealed', 'appeal_reason', 'appeal_at',
+            'appeal_resolved', 'appeal_resolution',
+        ]
 
     def to_representation(self, instance):
         # При чтении заменяем ID заказа на объект с деталями
