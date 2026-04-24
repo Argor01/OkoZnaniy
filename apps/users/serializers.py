@@ -132,6 +132,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer для модели User"""
     is_blocked = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -156,6 +157,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_blocked(self, obj):
         return not obj.is_active
+    
+    def get_email(self, obj):
+        """Email показывается только владельцу аккаунта или админам"""
+        request = self.context.get('request')
+        if not request or not request.user:
+            return None
+        
+        # Показываем email только владельцу или админам/директорам
+        if request.user.id == obj.id or request.user.is_staff or getattr(request.user, 'role', None) in ['admin', 'director']:
+            return obj.email
+        
+        return None
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -258,11 +271,11 @@ class ExpertApplicationSerializer(serializers.Serializer):
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
-    """Упрощенный serializer для пользователя"""
+    """Упрощенный serializer для пользователя (без email для приватности)"""
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'avatar']
+        fields = ['id', 'username', 'role', 'avatar']
 
 
 class PublicUserProfileSerializer(serializers.ModelSerializer):
@@ -287,7 +300,6 @@ class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     role = serializers.CharField(source='user.role', read_only=True)
     avatar = serializers.ImageField(source='user.avatar', read_only=True)
-    email = serializers.EmailField(source='user.email', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     area_display = serializers.CharField(source='get_area_display', read_only=True)
 
@@ -299,7 +311,6 @@ class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
             'username',
             'role',
             'avatar',
-            'email',
             'area',
             'area_display',
             'comment',

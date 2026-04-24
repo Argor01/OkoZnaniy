@@ -6,13 +6,13 @@ User = get_user_model()
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
-    """Базовая информация о пользователе"""
+    """Базовая информация о пользователе (без email для приватности)"""
     online = serializers.SerializerMethodField()
     last_seen = serializers.SerializerMethodField()
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'online', 'last_seen']
+        fields = ['id', 'username', 'first_name', 'last_name', 'role', 'online', 'last_seen']
     
     def get_online(self, obj):
         # Можно добавить логику проверки онлайн-статуса
