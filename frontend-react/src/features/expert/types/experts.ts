@@ -94,6 +94,13 @@ export interface ExpertReview {
   comment?: string;
   text?: string;
   created_at: string;
+  reply_text?: string;
+  reply_at?: string | null;
+  is_appealed?: boolean;
+  appeal_reason?: string;
+  appeal_at?: string | null;
+  appeal_resolved?: boolean;
+  appeal_resolution?: string;
 }
 
 export interface CreateExpertRatingRequest {
