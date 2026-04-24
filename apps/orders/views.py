@@ -518,6 +518,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
             stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
             stats.update_statistics()
+        # Шлём уведомление о завершении заказа + просьбу клиенту оставить отзыв.
+        try:
+            NotificationService.notify_order_completed(order)
+        except Exception:
+            pass
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -632,7 +637,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save()
         
         NotificationService.notify_status_changed(order, old_status)
-        
+        try:
+            NotificationService.notify_order_completed(order)
+        except Exception:
+            pass
+
         return Response(OrderSerializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
