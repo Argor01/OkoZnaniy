@@ -25,6 +25,10 @@ class NotificationType(models.TextChoices):
     APPLICATION_REJECTED = 'application_rejected', 'Анкета отклонена'
     EXPERT_VIOLATION = 'expert_violation', 'Нарушение правил экспертом'
     NEW_ANSWER = 'new_answer', 'Новый ответ на вопрос'
+    COMPLAINT_FILED = 'complaint_filed', 'На вас подана претензия'
+    REVIEW_REQUEST = 'review_request', 'Оставьте отзыв о работе'
+    REVIEW_REPLY = 'review_reply', 'Ответ на ваш отзыв'
+    REVIEW_APPEAL = 'review_appeal', 'Обжалование отзыва'
 
 
 class Notification(models.Model):

@@ -231,6 +231,117 @@ class NotificationService:
                 related_object_id=order.id,
                 related_object_type='order'
             )
+        # Просим клиента оставить отзыв о работе эксперта
+        if order.client and order.expert_id:
+            expert_name = order.expert.get_full_name() or order.expert.username
+            NotificationService.create_notification(
+                recipient=order.client,
+                type=NotificationType.REVIEW_REQUEST,
+                title="Оставьте отзыв о работе",
+                message=(
+                    f"Заказ {NotificationService._order_ref(order)} завершён. "
+                    f"Поделитесь впечатлениями о работе эксперта {expert_name}."
+                ),
+                related_object_id=order.id,
+                related_object_type='order',
+                data={
+                    'order_id': order.id,
+                    'expert_id': order.expert_id,
+                    'expert_username': getattr(order.expert, 'username', None),
+                },
+                expires_in=timedelta(days=30),
+            )
+
+    @staticmethod
+    def notify_complaint_filed(case):
+        """Уведомляем ответчика о поданной на него претензии."""
+        if not case.defendant_id:
+            return
+        plaintiff_name = (
+            case.plaintiff.get_full_name() or case.plaintiff.username
+            if case.plaintiff_id else 'пользователь'
+        )
+        NotificationService.create_notification(
+            recipient=case.defendant,
+            type=NotificationType.COMPLAINT_FILED,
+            title=f"На вас подана претензия {case.case_number}",
+            message=(
+                f"{plaintiff_name} подал претензию по заказу №{case.order_id}. "
+                f"Откройте дело, чтобы дать пояснения."
+            ),
+            related_object_id=case.id,
+            related_object_type='arbitration_case',
+            data={
+                'case_id': case.id,
+                'case_number': case.case_number,
+                'order_id': case.order_id,
+            },
+        )
+        # Истцу — подтверждение, что претензия зарегистрирована.
+        if case.plaintiff_id:
+            NotificationService.create_notification(
+                recipient=case.plaintiff,
+                type=NotificationType.COMPLAINT_FILED,
+                title=f"Претензия {case.case_number} зарегистрирована",
+                message=(
+                    f"Ваша претензия по заказу №{case.order_id} принята. "
+                    f"Дождитесь ответа второй стороны и решения арбитра."
+                ),
+                related_object_id=case.id,
+                related_object_type='arbitration_case',
+                data={
+                    'case_id': case.id,
+                    'case_number': case.case_number,
+                    'order_id': case.order_id,
+                },
+            )
+
+    @staticmethod
+    def notify_review_reply(review):
+        """Клиент видит, что эксперт ответил на его отзыв."""
+        recipient = getattr(review, 'client', None)
+        if not recipient:
+            return
+        expert_name = review.expert.get_full_name() or review.expert.username
+        NotificationService.create_notification(
+            recipient=recipient,
+            type=NotificationType.REVIEW_REPLY,
+            title="Ответ на ваш отзыв",
+            message=f"Эксперт {expert_name} ответил на ваш отзыв.",
+            related_object_id=review.id,
+            related_object_type='expert_review',
+            data={
+                'review_id': review.id,
+                'expert_id': review.expert_id,
+                'expert_username': getattr(review.expert, 'username', None),
+            },
+        )
+
+    @staticmethod
+    def notify_review_appeal(review):
+        """Админы получают уведомление, что эксперт обжаловал отзыв."""
+        from django.db.models import Q
+        admins = User.objects.filter(is_active=True).filter(
+            Q(role__in=['admin', 'arbitrator']) | Q(is_staff=True)
+        ).distinct()
+        for admin in admins:
+            NotificationService.create_notification(
+                recipient=admin,
+                type=NotificationType.REVIEW_APPEAL,
+                title=f"Обжалование отзыва #{review.id}",
+                message=(
+                    f"Эксперт {review.expert.username} обжаловал отзыв клиента "
+                    f"{review.client.username} (оценка {review.rating}/5)."
+                ),
+                related_object_id=review.id,
+                related_object_type='expert_review',
+                data={
+                    'review_id': review.id,
+                    'expert_id': review.expert_id,
+                    'client_id': review.client_id,
+                    'rating': review.rating,
+                },
+            )
 
     @staticmethod
     def notify_new_contact(contact):
