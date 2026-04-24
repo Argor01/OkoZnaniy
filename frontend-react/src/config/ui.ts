@@ -58,12 +58,12 @@ export const BOX_SHADOW = {
 
 
 export const COLORS = {
-  primary: '#1890ff',
+  primary: '#2b9fe6',
   secondary: '#764ba2',
   success: '#52c41a',
   warning: '#f59e0b',
   error: '#ff4d4f',
-  info: '#1890ff',
+  info: '#2b9fe6',
   text: {
     primary: '#1f2937',
     secondary: '#6b7280',
@@ -86,7 +86,7 @@ export const STATUS_COLORS = {
   WARNING: '#faad14', // Slightly different from COLORS.warning (#f59e0b)
   ERROR: COLORS.error,
   INFO: COLORS.info,
-  PROCESSING: '#1890ff',
+  PROCESSING: '#2b9fe6',
   DEFAULT: '#d9d9d9',
 } as const;
 

@@ -69,7 +69,7 @@
 }
 
 .allOrdersStatNew .ant-statistic-content-value {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .allOrdersStatInProgress .ant-statistic-content-value {
@@ -789,7 +789,7 @@
 
 .ticketSystemTitleIcon {
   font-size: 18px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatsGrid {
@@ -812,7 +812,7 @@
 }
 
 .ticketSystemStatTotal {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatOpen {
@@ -820,7 +820,7 @@
 }
 
 .ticketSystemStatInProgress {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatCompleted {
@@ -860,7 +860,7 @@
 }
 
 .ticketSystemTicketCardSelected {
-  border: 2px solid #1890ff;
+  border: 2px solid #2b9fe6;
   background: #e6f7ff;
 }
 
@@ -912,7 +912,7 @@
 }
 
 .ticketSystemMessageBadge .ant-badge-count {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
 }
 
 .ticketSystemBackButton {
@@ -1097,7 +1097,7 @@
 
 .inProgressClaimsMessageIcon {
   font-size: 16px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .inProgressClaimsActivityCell {
@@ -1546,7 +1546,7 @@
 
 .inProgressRequestsResponseIcon {
   font-size: 16px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .inProgressRequestsResponseTime {
@@ -1735,7 +1735,7 @@
 
 .newClaimsMessageIcon {
   font-size: 16px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .newClaimsCreatedCell {
@@ -1874,7 +1874,7 @@
 
 .claimsProcessingMessageIcon {
   font-size: 16px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .claimsProcessingHeader {
@@ -1886,7 +1886,7 @@
 }
 
 .claimsProcessingStatNew .ant-statistic-content-value {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .claimsProcessingStatInvestigating .ant-statistic-content-value {
@@ -2145,7 +2145,7 @@
   margin-bottom: 16px;
 }
 .directorCommStatIconInfo {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 .directorCommStatIconAlert {
   color: #ff4d4f;

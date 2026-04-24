@@ -49,7 +49,7 @@
 }
 
 .ticketSystemResizer:hover {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
 }
 
 .ticketSystemResizer:active {
@@ -63,7 +63,7 @@
 }
 
 .ticketSystemTitleIcon {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatsGrid {
@@ -87,7 +87,7 @@
 }
 
 .ticketSystemStatTotal {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatOpen {
@@ -95,7 +95,7 @@
 }
 
 .ticketSystemStatInProgress {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .ticketSystemStatCompleted {
@@ -137,7 +137,7 @@
 }
 
 .ticketSystemTicketCardSelected {
-  border-color: #1890ff;
+  border-color: #2b9fe6;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .ticketSystemTicketNumber {
-  color: #1890ff;
+  color: #2b9fe6;
   font-size: 12px;
 }
 

@@ -1,6 +1,6 @@
 .arbitratorNavCount {
   margin-left: 8px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .arbitratorNavMenu {
@@ -100,7 +100,7 @@
 
 .arbitratorSiderIcon {
   font-size: 32px;
-  color: #1890ff;
+  color: #2b9fe6;
   margin-bottom: 8px;
 }
 
@@ -276,14 +276,14 @@
   margin-bottom: 8px;
   border-radius: 8px;
   border: 1px solid #f0f0f0;
-  border-left: 4px solid #1890ff;
+  border-left: 4px solid #2b9fe6;
   background-color: transparent;
 }
 
 .arbitratorMessageItemUnread {
   background-color: #f0f7ff;
-  border: 2px solid #1890ff;
-  border-left: 4px solid #1890ff;
+  border: 2px solid #2b9fe6;
+  border-left: 4px solid #2b9fe6;
 }
 
 .arbitratorMessageItemDirector {
@@ -291,7 +291,7 @@
 }
 
 .arbitratorMessageAvatar {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
 }
 
 .arbitratorClaimLink {
@@ -362,5 +362,5 @@
 
 .arbitratorAmountHighlight {
   font-size: 12px;
-  color: #1890ff;
+  color: #2b9fe6;
 }

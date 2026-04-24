@@ -25,7 +25,7 @@
 }
 
 .profileAvatar {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
   border: 3px solid #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
@@ -184,7 +184,7 @@
   color: #1f2937;
   text-decoration: underline;
   text-decoration-style: dashed;
-  text-decoration-color: #1890ff;
+  text-decoration-color: #2b9fe6;
   text-underline-offset: 3px;
   font-weight: 600;
 }

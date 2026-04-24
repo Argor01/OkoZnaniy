@@ -29,7 +29,7 @@ export const REQUEST_CATEGORIES: Record<RequestCategory, string> = {
 
 
 export const REQUEST_STATUS_COLORS: Record<RequestStatus, string> = {
-  open: '#1890ff',      
+  open: '#2b9fe6',      
   in_progress: '#faad14', 
   completed: '#52c41a',   
   closed: '#8c8c8c',      
@@ -38,7 +38,7 @@ export const REQUEST_STATUS_COLORS: Record<RequestStatus, string> = {
 
 export const REQUEST_PRIORITY_COLORS: Record<RequestPriority, string> = {
   low: '#8c8c8c',       
-  medium: '#1890ff',    
+  medium: '#2b9fe6',    
   high: '#faad14',      
   urgent: '#ff4d4f',    
 };
@@ -49,7 +49,7 @@ export const REQUEST_CATEGORY_COLORS: Record<RequestCategory, string> = {
   billing: '#13c2c2',    
   account: '#52c41a',    
   order: '#faad14',      
-  general: '#1890ff',    
+  general: '#2b9fe6',    
 };
 
 

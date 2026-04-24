@@ -138,7 +138,7 @@
     
     .senderName {
       font-weight: 500;
-      color: #1890ff;
+      color: #2b9fe6;
       margin-right: 4px;
     }
     
@@ -176,7 +176,7 @@
 
 
 .actionButton {
-  color: #1890ff;
+  color: #2b9fe6;
   border-color: transparent;
   
   &:hover {
@@ -423,7 +423,7 @@
 }
 
 .table .ant-table-expand-icon {
-  color: #1890ff;
+  color: #2b9fe6;
   
   &:hover {
     color: #40a9ff;

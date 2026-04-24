@@ -46,7 +46,7 @@
   padding: 12px;
   background: #fafafa;
   border-radius: 6px;
-  border-left: 3px solid #1890ff;
+  border-left: 3px solid #2b9fe6;
 }
 
 .infoItem span:first-child {
@@ -82,7 +82,7 @@
 .statValue {
   font-size: 20px;
   font-weight: 600;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .form {

@@ -365,7 +365,7 @@ const PartnerTurnover: React.FC = () => {
                             formatter={(value: number) => formatCurrency(value)}
                           />
                           <Legend />
-                          <Bar dataKey="turnover" fill="#1890ff" name="Оборот" />
+                          <Bar dataKey="turnover" fill="#2b9fe6" name="Оборот" />
                           <Bar dataKey="commission" fill="#52c41a" name="Комиссия" />
                         </BarChart>
                       </ResponsiveContainer>
@@ -403,7 +403,7 @@ const PartnerTurnover: React.FC = () => {
                             dataKey="value"
                           >
                             {topPartners.map((_: any, idx: number) => (
-                              <Cell key={`cell-${idx}`} fill={['#1890ff', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96'][idx]} />
+                              <Cell key={`cell-${idx}`} fill={['#2b9fe6', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96'][idx]} />
                             ))}
                           </Pie>
                           <Tooltip 

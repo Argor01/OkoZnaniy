@@ -30,6 +30,10 @@
 
 body {
   font-family: 'Jost-Regular', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  background: #ffffff;
+  color: var(--text-primary, #1f2937);
 }
 
 h1, h2, h3, h4, h5, h6, .ant-typography-h1, .ant-typography-h2, .ant-typography-h3, .ant-typography-h4, .ant-typography-h5, .ant-typography-h6 {
@@ -80,13 +84,13 @@ a {
 .ant-btn.balanceButton:hover,
 .ant-btn.balanceButton:focus,
 .ant-btn.balanceButton:active {
-  background: #1890ff;
+  background: #2b9fe6;
   color: white;
   border: none;
 }
 
 .ant-btn.balanceButton:hover {
-  background: #1890ff;
+  background: #2b9fe6;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 }

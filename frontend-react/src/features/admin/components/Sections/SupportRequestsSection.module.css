@@ -17,7 +17,7 @@
 
 .headerIcon {
   margin-right: 8px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .tabs {
@@ -52,11 +52,11 @@
 
 .badgeActive :global(.ant-badge-count) {
   background-color: #fff;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .badgeInactive :global(.ant-badge-count) {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
   color: #fff;
 }
 
@@ -310,13 +310,13 @@
 
 
 .tabButton.ant-btn-primary {
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  background: linear-gradient(135deg, #2b9fe6 0%, #096dd9 100%);
   border: none;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 
 .tabButton.ant-btn-primary:hover {
-  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #40a9ff 0%, #2b9fe6 100%);
   box-shadow: 0 4px 16px rgba(24, 144, 255, 0.4);
 }
 
@@ -330,7 +330,7 @@
 }
 
 .requestItem[data-priority="medium"] {
-  border-left: 4px solid #1890ff;
+  border-left: 4px solid #2b9fe6;
 }
 
 .requestItem[data-priority="low"] {

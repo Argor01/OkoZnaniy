@@ -74,7 +74,7 @@
 
 .statCardHighlightMobile {
   background: #f0f9ff;
-  border: 2px solid #1890ff;
+  border: 2px solid #2b9fe6;
 }
 
 .statSuffix {
@@ -118,7 +118,7 @@
 }
 
 .statisticTurnover :global(.ant-statistic-content-value) {
-  color: #1890ff;
+  color: #2b9fe6;
   font-size: 24px;
   font-weight: 600;
 }
@@ -303,9 +303,9 @@
     font-size: 18px;
     font-weight: 700;
     border-radius: 10px;
-    border: 3px solid #1890ff;
+    border: 3px solid #2b9fe6;
     background: #ffffff;
-    color: #1890ff;
+    color: #2b9fe6;
     cursor: pointer;
     margin: 0 6px;
     min-width: 120px;
@@ -317,7 +317,7 @@
   }
   
   .datePickerContainer :global(.ant-picker-header-view *:hover) {
-    background: #1890ff;
+    background: #2b9fe6;
     color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(24,144,255,0.4);
@@ -343,8 +343,8 @@
   }
   
   .datePickerContainer :global(.ant-picker-header button:hover) {
-    border-color: #1890ff;
-    color: #1890ff;
+    border-color: #2b9fe6;
+    color: #2b9fe6;
     background: #f0f9ff;
   }
   

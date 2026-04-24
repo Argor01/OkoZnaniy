@@ -66,7 +66,7 @@
 
 .requestId {
   font-weight: 600;
-  color: #1890ff;
+  color: #2b9fe6;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
@@ -140,7 +140,7 @@
     min-width: 24px;
     height: 24px;
     background: #e6f7ff;
-    color: #1890ff;
+    color: #2b9fe6;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
@@ -168,7 +168,7 @@
 
 
 .actionButton {
-  color: #1890ff;
+  color: #2b9fe6;
   border-color: transparent;
   
   &:hover {
@@ -317,7 +317,7 @@
 
 .table .ant-table-column-sorter-up.active,
 .table .ant-table-column-sorter-down.active {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 
@@ -326,7 +326,7 @@
 }
 
 .table .ant-table-filter-trigger.active {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 

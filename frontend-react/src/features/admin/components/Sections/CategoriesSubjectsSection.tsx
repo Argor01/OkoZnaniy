@@ -613,7 +613,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             name="color"
             label="Цвет"
           >
-            <Input placeholder="#1890ff" />
+            <Input placeholder="#2b9fe6" />
           </Form.Item>
 
           <Form.Item

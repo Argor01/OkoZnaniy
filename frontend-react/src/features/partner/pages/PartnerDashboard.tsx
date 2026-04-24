@@ -99,15 +99,15 @@ const StatisticsPanel: React.FC<{
         <Col xs={24} sm={12} md={6}>
           <Card 
             style={{ 
-              borderLeft: '4px solid #1890ff',
+              borderLeft: '4px solid #2b9fe6',
               background: 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)'
             }}
           >
             <Statistic
               title="Всего рефералов"
               value={partnerInfo.total_referrals}
-              prefix={<TeamOutlined style={{ color: '#1890ff' }} />}
-              valueStyle={{ color: '#1890ff' }}
+              prefix={<TeamOutlined style={{ color: '#2b9fe6' }} />}
+              valueStyle={{ color: '#2b9fe6' }}
             />
           </Card>
         </Col>

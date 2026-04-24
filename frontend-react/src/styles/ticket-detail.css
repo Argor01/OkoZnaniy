@@ -18,7 +18,7 @@
 }
 
 .ticketDetailBreadcrumb a {
-  color: #1890ff;
+  color: #2b9fe6;
   transition: color 0.2s;
 }
 
@@ -240,8 +240,8 @@
 }
 
 .ticketDetailPage .ant-btn-primary {
-  background: #1890ff;
-  border-color: #1890ff;
+  background: #2b9fe6;
+  border-color: #2b9fe6;
   box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
 }
 

@@ -54,13 +54,13 @@ interface TicketDetail {
 }
 
 const ACTIVITY_ICON: Record<string, React.ReactNode> = {
-  status_change: <SwapOutlined style={{ color: '#1890ff' }} />,
+  status_change: <SwapOutlined style={{ color: '#2b9fe6' }} />,
   priority_change: <StarOutlined style={{ color: '#faad14' }} />,
   tag_added: <TagOutlined style={{ color: '#52c41a' }} />,
   tag_removed: <TagOutlined style={{ color: '#ff4d4f' }} />,
   observer_added: <EyeOutlined style={{ color: '#722ed1' }} />,
   observer_removed: <EyeOutlined style={{ color: '#ff4d4f' }} />,
-  assigned: <UserOutlined style={{ color: '#1890ff' }} />,
+  assigned: <UserOutlined style={{ color: '#2b9fe6' }} />,
   completed: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
 };
 
@@ -298,14 +298,14 @@ export const TicketDetailPage: React.FC = () => {
       const fromChat = item.source === 'chat';
       return (
         <div key={item.id} style={{ display: 'flex', flexDirection: isAdmin ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 16, padding: '0 4px' }}>
-          <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#1890ff' : '#52c41a', flexShrink: 0 }} />
+          <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#2b9fe6' : '#52c41a', flexShrink: 0 }} />
           <div style={{ maxWidth: '72%' }}>
             <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 3, textAlign: isAdmin ? 'right' : 'left' }}>
               {name}
               {fromChat && <Tag color="cyan" style={{ marginLeft: 4, fontSize: 10, lineHeight: '16px' }}>из чата</Tag>}
             </div>
             <div style={{
-              background: isAdmin ? '#1890ff' : '#f0f0f0',
+              background: isAdmin ? '#2b9fe6' : '#f0f0f0',
               color: isAdmin ? '#fff' : '#000',
               padding: '8px 14px',
               borderRadius: isAdmin ? '14px 14px 2px 14px' : '14px 14px 14px 2px',

@@ -155,7 +155,7 @@ const NewAdminDashboard: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider width={250} style={{ background: '#fff' }}>
         <div style={{ padding: '16px', textAlign: 'center', borderBottom: '1px solid #f0f0f0' }}>
-          <SettingsIcon style={{ fontSize: '24px', color: '#1890ff' }} />
+          <SettingsIcon style={{ fontSize: '24px', color: '#2b9fe6' }} />
           <Title level={4} style={{ margin: '8px 0 0 0' }}>
             ЛК администратора
           </Title>

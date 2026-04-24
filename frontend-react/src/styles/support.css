@@ -8,7 +8,7 @@
 }
 .supportChatsCardTitleIcon {
   font-size: 18px;
-  color: #1890ff;
+  color: #2b9fe6;
 }
 .supportChatsSearchIcon {
   color: #bfbfbf;
@@ -62,7 +62,7 @@
 }
 .supportChatsListItemSelected {
   background-color: #e6f7ff;
-  border-color: #1890ff;
+  border-color: #2b9fe6;
 }
 .supportChatsListItemSelected:hover {
   background-color: #e6f7ff;
@@ -71,7 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1890ff;
+  background-color: #2b9fe6;
 }
 .supportChatsListTitleRow {
   display: flex;
@@ -208,7 +208,7 @@
   cursor: default;
 }
 .supportChatsMessageBubbleAdmin {
-  background: #1890ff;
+  background: #2b9fe6;
   color: #fff;
   border-radius: 16px 16px 4px 16px;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
@@ -306,7 +306,7 @@
 }
 .supportChatsMessageInput:focus,
 .supportChatsMessageInputMobile:focus {
-  border-color: #1890ff;
+  border-color: #2b9fe6;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
 .supportChatsComposerActions {
@@ -322,7 +322,7 @@
   transition: all 0.3s ease;
 }
 .supportChatsUploadButton:hover {
-  border-color: #1890ff;
+  border-color: #2b9fe6;
   transform: scale(1.03);
 }
 .supportChatsSendButton {
@@ -417,7 +417,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .supportChatBubbleMine {
-  background-color: #1890ff;
+  background-color: #2b9fe6;
   color: #fff;
 }
 .supportChatSender {

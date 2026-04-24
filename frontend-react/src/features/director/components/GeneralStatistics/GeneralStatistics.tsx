@@ -246,7 +246,7 @@ const GeneralStatistics: React.FC = () => {
               },
               layout: {
                 fillColor: function (rowIndex: number) {
-                  return rowIndex === 0 ? '#1890ff' : null;
+                  return rowIndex === 0 ? '#2b9fe6' : null;
                 }
               }
             },
@@ -261,7 +261,7 @@ const GeneralStatistics: React.FC = () => {
               },
               layout: {
                 fillColor: function (rowIndex: number) {
-                  return rowIndex === 0 ? '#1890ff' : null;
+                  return rowIndex === 0 ? '#2b9fe6' : null;
                 }
               }
             }

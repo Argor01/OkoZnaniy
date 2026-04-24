@@ -306,7 +306,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
               Назад к списку
             </Button>
             <Title level={2} style={{ margin: 0 }}>
-              <FileTextOutlined style={{ color: '#1890ff', marginRight: 12 }} />
+              <FileTextOutlined style={{ color: '#2b9fe6', marginRight: 12 }} />
               Арбитражное дело #{caseData.case_number}
             </Title>
           </div>
@@ -331,7 +331,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                     Истец
                   </Text>
                   <Space>
-                    <Avatar size={40} style={{ background: '#1890ff' }}>
+                    <Avatar size={40} style={{ background: '#2b9fe6' }}>
                       {getInitials(caseData.plaintiff.first_name, caseData.plaintiff.last_name)}
                     </Avatar>
                     <div>
@@ -534,7 +534,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                           >
                             <div className="feed-message">
                               <Space>
-                                <Avatar size={32} style={{ background: isOrderChatMessage ? '#fa8c16' : isAdmin ? '#1890ff' : '#52c41a' }}>
+                                <Avatar size={32} style={{ background: isOrderChatMessage ? '#fa8c16' : isAdmin ? '#2b9fe6' : '#52c41a' }}>
                                   {getInitials(
                                     item.sender?.first_name || '',
                                     item.sender?.last_name || ''

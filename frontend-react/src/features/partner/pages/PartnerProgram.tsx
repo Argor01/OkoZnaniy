@@ -155,10 +155,10 @@ export const PartnerProgram: React.FC<PartnerProgramProps> = ({
           <Col xs={24} lg={24}>
             <Card size="small" style={{ height: '100%' }}>
               <div style={{ textAlign: 'center' }}>
-                <Title level={4} style={{ color: '#1890ff', margin: '0 0 8px 0' }}>
+                <Title level={4} style={{ color: '#2b9fe6', margin: '0 0 8px 0' }}>
                   Партнерская комиссия
                 </Title>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#1890ff' }}>25%</div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#2b9fe6' }}>25%</div>
                 <Text type="secondary">с каждой покупки работы клиентом</Text>
               </div>
             </Card>

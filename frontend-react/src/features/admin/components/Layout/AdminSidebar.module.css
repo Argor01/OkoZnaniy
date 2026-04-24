@@ -25,7 +25,7 @@
 
 .icon {
   font-size: 32px;
-  color: #1890ff;
+  color: #2b9fe6;
   margin-bottom: 8px;
   display: block;
 }
@@ -163,7 +163,7 @@
 
 .menu :global(.ant-menu-item-selected) {
   background-color: #e6f7ff;
-  color: #1890ff;
+  color: #2b9fe6;
   font-weight: 600;
 }
 
@@ -173,7 +173,7 @@
 }
 
 .menu :global(.ant-menu-submenu-selected) > :global(.ant-menu-submenu-title) {
-  color: #1890ff;
+  color: #2b9fe6;
   font-weight: 600;
 }
 

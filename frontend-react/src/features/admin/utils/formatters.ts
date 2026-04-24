@@ -200,7 +200,7 @@ export const formatTags = (tags: string[]): string => {
 export const getProgressColor = (percent: number): string => {
   if (percent >= 80) return '#52c41a';
   if (percent >= 60) return '#faad14';
-  if (percent >= 40) return '#1890ff';
+  if (percent >= 40) return '#2b9fe6';
   return '#ff4d4f';
 };
 

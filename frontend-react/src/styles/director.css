@@ -42,7 +42,7 @@
 
 .directorDashboardSiderIcon {
   font-size: 32px;
-  color: #1890ff;
+  color: #2b9fe6;
   margin-bottom: 8px;
 }
 
@@ -111,7 +111,7 @@
 
 .directorDashboardMobileHeaderIcon {
   font-size: 28px;
-  color: #1890ff;
+  color: #2b9fe6;
   margin-bottom: 8px;
 }
 
@@ -357,7 +357,7 @@
 
 .monthlyTurnoverChangeCardPositive {
   background: #f0f9ff;
-  border: 2px solid #1890ff;
+  border: 2px solid #2b9fe6;
 }
 
 .monthlyTurnoverChangeCardNegative {
@@ -370,7 +370,7 @@
 }
 
 .monthlyTurnoverStatistic :global(.ant-statistic-content-value) {
-  color: #1890ff;
+  color: #2b9fe6;
   font-size: 24px;
   font-weight: 600;
 }
@@ -615,12 +615,12 @@
 
 .incomeExpenseHighlightCard {
   background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-  border: 2px solid #1890ff;
+  border: 2px solid #2b9fe6;
 }
 
 .incomeExpenseHighlightCardMobile {
   background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-  border: 2px solid #1890ff;
+  border: 2px solid #2b9fe6;
 }
 
 .incomeExpenseIncomeStatistic {
@@ -688,12 +688,12 @@
 .incomeExpenseNetStatistic :global(.ant-statistic-title) {
   font-size: 13px !important;
   margin-bottom: 4px !important;
-  color: #1890ff !important;
+  color: #2b9fe6 !important;
   font-weight: 600;
 }
 
 .incomeExpenseNetStatistic :global(.ant-statistic-content-value) {
-  color: #1890ff;
+  color: #2b9fe6;
   font-size: 24px;
   font-weight: 700;
 }
@@ -851,7 +851,7 @@
 }
 
 .directorCommStatIconInfo {
-  color: #1890ff;
+  color: #2b9fe6;
 }
 
 .directorCommStatIconAlert {

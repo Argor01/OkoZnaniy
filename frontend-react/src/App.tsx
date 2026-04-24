@@ -31,13 +31,31 @@ const App: React.FC = () => {
         locale={ruRU}
         theme={{
           token: {
-            colorPrimary: '#1890ff',
+            colorPrimary: '#2b9fe6',
+            colorInfo: '#2b9fe6',
+            colorLink: '#0f7fda',
+            colorWarning: '#ffa831',
+            colorBgLayout: '#ffffff',
             fontFamily: 'Jost-Regular, system-ui, Avenir, Helvetica, Arial, sans-serif',
+            fontSize: 15,
+            fontSizeHeading1: 32,
+            fontSizeHeading2: 26,
+            fontSizeHeading3: 22,
+            fontSizeHeading4: 18,
+            fontSizeHeading5: 16,
+            borderRadius: 10,
           },
           components: {
             Typography: {
               fontFamilyCode: 'Jost-SemiBold, sans-serif',
-            }
+            },
+            Button: {
+              fontWeight: 500,
+              controlHeight: 38,
+            },
+            Input: {
+              controlHeight: 38,
+            },
           }
         }}
       >

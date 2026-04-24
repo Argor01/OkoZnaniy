@@ -57,7 +57,7 @@ const getStatusConfig = (status: string) => {
   const configs: Record<string, { color: string; text: string; icon: React.ReactNode }> = {
     new: { color: '#fa8c16', text: 'Новый', icon: <ExclamationCircleOutlined /> },
     open: { color: '#fa8c16', text: 'Открыт', icon: <ExclamationCircleOutlined /> },
-    in_progress: { color: '#1890ff', text: 'В работе', icon: <ClockCircleOutlined /> },
+    in_progress: { color: '#2b9fe6', text: 'В работе', icon: <ClockCircleOutlined /> },
     completed: { color: '#52c41a', text: 'Завершен', icon: <CheckCircleOutlined /> },
     pending_approval: { color: '#722ed1', text: 'Ожидает одобрения', icon: <ClockCircleOutlined /> },
   };
@@ -224,7 +224,7 @@ export const ArbitrationDetailPage: React.FC = () => {
               Назад к списку
             </Button>
             <h1>
-              <FileTextOutlined style={{ color: '#1890ff' }} />
+              <FileTextOutlined style={{ color: '#2b9fe6' }} />
               {ticket.type === 'claim' ? 'Арбитражное обращение' : 'Обращение в поддержку'}
               <span className="ticket-number">#{ticket.ticket_number}</span>
             </h1>
@@ -315,7 +315,7 @@ export const ArbitrationDetailPage: React.FC = () => {
               <Card className="detail-card">
                 <div className="detail-card-label">Связанный заказ</div>
                 <div className="detail-card-value">
-                  <LinkOutlined style={{ color: '#1890ff' }} />
+                  <LinkOutlined style={{ color: '#2b9fe6' }} />
                   <a href={`/orders/${ticket.order.id}`} target="_blank" rel="noopener noreferrer">
                     #{ticket.order.id} - {ticket.order.title}
                   </a>
@@ -343,7 +343,7 @@ export const ArbitrationDetailPage: React.FC = () => {
           <Col xs={24} lg={ticket.type === 'claim' ? 16 : 18}>
             <Card className="arbitration-card" title={
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <MessageOutlined style={{ color: '#1890ff' }} />
+                <MessageOutlined style={{ color: '#2b9fe6' }} />
                 Переписка
               </span>
             }>
@@ -409,9 +409,9 @@ export const ArbitrationDetailPage: React.FC = () => {
           <Col xs={24} lg={ticket.type === 'claim' ? 8 : 6}>
             {/* Кнопка открытия чата для арбитража */}
             {ticket.type === 'claim' && ticket.support_chat_id && (
-              <Card className="arbitration-card" style={{ marginBottom: 24, borderLeft: '4px solid #1890ff' }}>
+              <Card className="arbitration-card" style={{ marginBottom: 24, borderLeft: '4px solid #2b9fe6' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <MessageOutlined style={{ fontSize: 32, color: '#1890ff', marginBottom: 12 }} />
+                  <MessageOutlined style={{ fontSize: 32, color: '#2b9fe6', marginBottom: 12 }} />
                   <Title level={5} style={{ margin: '0 0 8px 0' }}>История переписки</Title>
                   <Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 13 }}>
                     Изучите все сообщения между сторонами для понимания сути конфликта

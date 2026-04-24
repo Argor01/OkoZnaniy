@@ -172,7 +172,7 @@ const DirectorCommunication: React.FC = () => {
                                       padding: '10px',
                                       background: msg.author.role === 'director' ? '#e6f7ff' : '#fff',
                                       borderRadius: '8px',
-                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#1890ff' : '#d9d9d9'}`,
+                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : '#d9d9d9'}`,
                                     }}
                                   >
                                     <div style={{ marginBottom: 6 }}>
@@ -293,7 +293,7 @@ const DirectorCommunication: React.FC = () => {
                     onClick={() => setSelectedCommunication(comm.id)}
                     style={{
                       cursor: 'pointer',
-                      border: selectedCommunication === comm.id ? '2px solid #1890ff' : undefined,
+                      border: selectedCommunication === comm.id ? '2px solid #2b9fe6' : undefined,
                     }}
                   >
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
@@ -378,7 +378,7 @@ const DirectorCommunication: React.FC = () => {
                               padding: '12px',
                               background: msg.author.role === 'director' ? '#e6f7ff' : '#fff',
                               borderRadius: '8px',
-                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#1890ff' : '#d9d9d9'}`,
+                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : '#d9d9d9'}`,
                             }}
                           >
                             <div
