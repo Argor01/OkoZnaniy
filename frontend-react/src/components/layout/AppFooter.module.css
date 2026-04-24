@@ -96,6 +96,37 @@
   color: white;
 }
 
+.becomeExpertButton {
+  background-color: var(--color-brand-orange-500);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+  text-align: center;
+  width: fit-content;
+  font-family: var(--font-display);
+}
+
+.becomeExpertButton:hover {
+  background-color: var(--color-brand-orange-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.becomeExpertButton:active {
+  transform: translateY(0);
+}
+
+.becomeExpertButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .linksInline,
 .statsInline,
 .servicesInline {

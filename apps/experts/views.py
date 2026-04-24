@@ -1013,6 +1013,9 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 for education_data in educations_data:
                     Education.objects.create(application=existing_application, **education_data)
                 
+                # Создаем уведомление о повторной подаче анкеты
+                NotificationService.notify_application_submitted(existing_application)
+                
                 return existing_application
             else:
                 for field, value in serializer.validated_data.items():
@@ -1058,6 +1061,9 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
             # Создаем записи об образовании
             for education_data in educations_data:
                 Education.objects.create(application=application, **education_data)
+            
+            # Создаем уведомление о подаче анкеты
+            NotificationService.notify_application_submitted(application)
             
             # Возвращаем созданную анкету
             return application

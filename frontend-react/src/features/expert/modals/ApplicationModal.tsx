@@ -100,6 +100,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
   const [applicationForm] = Form.useForm();
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 575);
@@ -170,7 +171,10 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
   const createApplicationMutation = useMutation({
     mutationFn: expertsApi.createApplication,
     onSuccess: () => {
-      message.success('Анкета успешно отправлена!');
+      message.success({
+        content: 'Анкета успешно подана и находится на рассмотрении! Мы уведомим вас о результате.',
+        duration: 5,
+      });
       applicationForm.resetFields();
       onClose();
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });

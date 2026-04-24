@@ -626,3 +626,15 @@ class EmailService:
             except Exception as e2:
                 print(f"Ошибка fallback отправки партнерского email: {e2}")
                 return False
+
+    @staticmethod
+    def notify_application_submitted(application):
+        """Уведомляет пользователя о том, что анкета подана и находится на рассмотрении"""
+        NotificationService.create_notification(
+            recipient=application.expert,
+            type=NotificationType.APPLICATION_SUBMITTED,
+            title="Анкета эксперта подана",
+            message="Ваша анкета успешно подана и находится на рассмотрении. Мы уведомим вас о результате проверки.",
+            related_object_id=application.id,
+            related_object_type='application'
+        )

@@ -43,6 +43,7 @@ const getNotificationIcon = (type: string) => {
     'payment_received': styles.notificationsIconSuccess,
     'order_completed': styles.notificationsIconSuccess,
     'new_contact': styles.notificationsIconPrimary,
+    'application_submitted': styles.notificationsIconInfo,
     'application_approved': styles.notificationsIconSuccess,
     'application_rejected': styles.notificationsIconDanger,
     'expert_violation': styles.notificationsIconDanger,
@@ -65,6 +66,7 @@ const getNotificationIcon = (type: string) => {
     'payment_received': <CheckCircleOutlined className={iconClassName} />,
     'order_completed': <CheckCircleOutlined className={iconClassName} />,
     'new_contact': <QuestionCircleOutlined className={iconClassName} />,
+    'application_submitted': <FileDoneOutlined className={iconClassName} />,
     'application_approved': <CheckCircleOutlined className={iconClassName} />,
     'application_rejected': <ClockCircleOutlined className={iconClassName} />,
     'expert_violation': <QuestionCircleOutlined className={iconClassName} />,
@@ -77,10 +79,10 @@ const getNotificationCategory = (type: string): string => {
   if (['new_order', 'new_bid', 'order_taken', 'order_assigned', 'order_completed', 'status_changed', 'expert_violation'].includes(type)) {
     return 'orders';
   }
-  if (['new_comment', 'file_uploaded'].includes(type)) {
-    return 'forum';
+  if (['review_received', 'new_rating', 'rating_milestone'].includes(type)) {
+    return 'reviews';
   }
-  if (['new_contact', 'application_approved', 'application_rejected'].includes(type)) {
+  if (['new_contact', 'application_approved', 'application_rejected', 'application_submitted'].includes(type)) {
     return 'questions';
   }
   return 'all';
@@ -258,7 +260,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
           {[
             { key: 'all', label: 'Все', icon: <BellOutlined /> },
             { key: 'orders', label: 'Заказы', icon: <FileDoneOutlined /> },
-            { key: 'forum', label: 'Форум', icon: <CommentOutlined /> },
+            { key: 'reviews', label: 'Отзывы', icon: <TrophyOutlined /> },
             { key: 'questions', label: 'Вопросы', icon: <QuestionCircleOutlined /> },
           ].map(tab => (
             <div

@@ -20,6 +20,7 @@ class NotificationType(models.TextChoices):
     PAYMENT_RECEIVED = 'payment_received', 'Получена оплата'
     ORDER_COMPLETED = 'order_completed', 'Заказ завершен'
     NEW_CONTACT = 'new_contact', 'Новое обращение'
+    APPLICATION_SUBMITTED = 'application_submitted', 'Анкета подана'
     APPLICATION_APPROVED = 'application_approved', 'Анкета одобрена'
     APPLICATION_REJECTED = 'application_rejected', 'Анкета отклонена'
     EXPERT_VIOLATION = 'expert_violation', 'Нарушение правил экспертом'

@@ -2510,9 +2510,33 @@ const handleOverdueComplaint = async () => {
                     icon={isSupportChatSelected ? <CustomerServiceOutlined /> : <UserOutlined />}
                     src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat?.other_user?.avatar)}
                     className={isSupportChatSelected ? 'support-avatar' : styles.chatHeaderAvatar}
+                    style={!isSupportChatSelected ? { cursor: 'pointer' } : undefined}
+                    onClick={() => {
+                      if (!isSupportChatSelected && selectedChat?.other_user?.username) {
+                        onClose();
+                        const role = selectedChat.other_user.role || 'user';
+                        const profilePath = role === 'expert' 
+                          ? `/expert/${selectedChat.other_user.username}`
+                          : `/user/${selectedChat.other_user.username}`;
+                        navigate(profilePath);
+                      }
+                    }}
                   />
                   <div>
-                    <Text className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
+                    <Text 
+                      className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}
+                      style={!isSupportChatSelected ? { cursor: 'pointer' } : undefined}
+                      onClick={() => {
+                        if (!isSupportChatSelected && selectedChat?.other_user?.username) {
+                          onClose();
+                          const role = selectedChat.other_user.role || 'user';
+                          const profilePath = role === 'expert' 
+                            ? `/expert/${selectedChat.other_user.username}`
+                            : `/user/${selectedChat.other_user.username}`;
+                          navigate(profilePath);
+                        }
+                      }}
+                    >
                       {isSupportChatSelected ? 'Центр обращений' : (selectedChat?.other_user?.username || 'Пользователь')}
                     </Text>
                     {!isSupportChatSelected ? (

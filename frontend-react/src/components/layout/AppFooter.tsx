@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState, Suspense } from 'react';
 import { Layout } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
+import { authApi } from '@/features/auth/api/auth';
 import styles from './AppFooter.module.css';
 
 const { Footer } = Layout;
+
+const ApplicationModal = React.lazy(() => import('@/features/expert/modals/ApplicationModal'));
 
 interface AppFooterProps {
   userRole?: 'client' | 'expert' | 'partner' | 'admin' | string;
@@ -23,7 +27,11 @@ interface PublicStats {
 }
 
 export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
+  const [applicationModalVisible, setApplicationModalVisible] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  
   const agreementLink = userRole === 'expert' || userRole === 'partner'
     ? '/docs/user_agreement_expert.pdf'
     : '/docs/user_agreement_client.pdf';
@@ -32,6 +40,23 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
     // Перенаправляем на форму подачи жалобы
     window.location.href = '/support/claim-form';
   }, []);
+
+  const handleBecomeExpertClick = async () => {
+    setIsCheckingAuth(true);
+    try {
+      const user = await authApi.getCurrentUser();
+      if (user) {
+        // Пользователь авторизован - открываем модальное окно
+        setApplicationModalVisible(true);
+      }
+    } catch (error) {
+      // Пользователь не авторизован - переходим на страницу регистрации
+      navigate('/become-expert');
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
+
   const services = [
     'Дипломная работа',
     'Курсовая работа',
@@ -98,9 +123,13 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
 
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>Вакансии</h3>
-            <div className={styles.linksInline}>
-              <a href="/become-author" className={styles.link}>Стать автором</a>
-            </div>
+            <button 
+              onClick={handleBecomeExpertClick}
+              disabled={isCheckingAuth}
+              className={styles.becomeExpertButton}
+            >
+              Стать экспертом
+            </button>
           </div>
         </div>
 
@@ -112,6 +141,16 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
           </div>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        {applicationModalVisible && (
+          <ApplicationModal
+            visible={applicationModalVisible}
+            onClose={() => setApplicationModalVisible(false)}
+            application={null}
+          />
+        )}
+      </Suspense>
     </Footer>
   );
 };

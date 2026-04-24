@@ -429,6 +429,11 @@
 
 .chatHeaderAvatar {
   background-color: #6b7280;
+  transition: opacity 0.2s ease;
+}
+
+.chatHeaderAvatar:hover {
+  opacity: 0.8;
 }
 
 .chatHeaderTitle {
@@ -436,6 +441,11 @@
   color: #1f2937;
   font-weight: 500;
   font-family: 'Jost-SemiBold', sans-serif;
+  transition: color 0.2s ease;
+}
+
+.chatHeaderTitle:hover {
+  color: #2b9fe6;
 }
 
 .chatHeaderTitleMobile {

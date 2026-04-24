@@ -8,7 +8,6 @@ import type { User } from '@/features/auth/api/auth';
 import { expertsApi, type Specialization } from '@/features/expert/api/experts';
 import { useNotifications } from '@/hooks/useNotifications';
 import ProfileHeader from '../../components/ProfileHeader/index';
-import ApplicationStatus from '../../components/ApplicationStatus/index';
 import { UserProfile } from '../../types';
 import styles from './ExpertDashboard.module.css';
 
@@ -61,7 +60,6 @@ const ExpertDashboard: FC = () => {
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
   const tabsRef = useRef<HTMLDivElement>(null);
-  const applicationStatusRef = useRef<HTMLDivElement>(null);
 
   const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
@@ -249,15 +247,6 @@ const ExpertDashboard: FC = () => {
     }
   }, [location.search, items, activeTab]);
 
-  React.useEffect(() => {
-    const focus = new URLSearchParams(location.search).get('focus');
-    if (focus !== 'application') return;
-    const timer = window.setTimeout(() => {
-      applicationStatusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 120);
-    return () => window.clearTimeout(timer);
-  }, [location.search]);
-
   return (
     <>
       <div className={styles.expertContentContainer}>
@@ -269,15 +258,6 @@ const ExpertDashboard: FC = () => {
           isMobile={isMobile}
           onEditProfile={handleEditProfile}
         />
-        
-        <div ref={applicationStatusRef}>
-          <ApplicationStatus
-            application={application || null}
-            applicationLoading={applicationLoading}
-            userProfile={userProfile}
-            onOpenApplicationModal={handleOpenApplicationModal}
-          />
-        </div>
         
         <div ref={tabsRef}>
           <Suspense fallback={<div style={{ padding: '24px' }}><Skeleton active paragraph={{ rows: 6 }} /></div>}>
