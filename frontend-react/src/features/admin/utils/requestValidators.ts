@@ -200,7 +200,7 @@ export const validateSendMessage = (data: Partial<SendMessageForm>): ValidationR
 
 export const validateFile = (file: File): FileValidationResult => {
   
-  const maxSize = 10 * 1024 * 1024;
+  const maxSize = 50 * 1024 * 1024;
   
   
   const allowedTypes = [

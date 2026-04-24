@@ -1830,9 +1830,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       return false;
     }
 
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      antMessage.error('Размер файла не должен превышать 10 МБ');
+      antMessage.error('Размер файла не должен превышать 50 МБ');
       return false;
     }
 
@@ -1959,7 +1959,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const addAttachedFiles = useCallback((files: File[]) => {
     if (!Array.isArray(files) || files.length === 0) return;
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024;
     const existing = new Set(attachedFiles.map((f) => `${f.name}_${f.size}`));
     const next: File[] = [];
 

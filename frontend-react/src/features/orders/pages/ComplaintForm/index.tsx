@@ -468,9 +468,9 @@ const ComplaintForm: React.FC = () => {
                 fileList={fileList}
                 onChange={({ fileList: newFileList }) => setFileList(newFileList)}
                 beforeUpload={(file) => {
-                  const isLt10M = file.size < 10 * 1024 * 1024;
-                  if (!isLt10M) {
-                    message.error('Максимальный размер файла: 10 МБ');
+                  const isLt50M = file.size < 50 * 1024 * 1024;
+                  if (!isLt50M) {
+                    message.error('Максимальный размер файла: 50 МБ');
                     return false;
                   }
                   setFileList(prev => [...prev, file]);

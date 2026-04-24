@@ -96,7 +96,7 @@ export const AUTO_REFRESH_INTERVALS = {
 
 
 export const FILE_UPLOAD_LIMITS = {
-  maxSize: 10 * 1024 * 1024, 
+  maxSize: 50 * 1024 * 1024, 
   allowedTypes: [
     'image/jpeg',
     'image/png',

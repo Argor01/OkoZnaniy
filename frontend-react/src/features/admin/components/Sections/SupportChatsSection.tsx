@@ -147,9 +147,9 @@ export const SupportChatsSection: React.FC = () => {
   };
 
   const handleFileSelect = (file: File) => {
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      antMessage.error('Размер файла не должен превышать 10 МБ');
+      antMessage.error('Размер файла не должен превышать 50 МБ');
       return false;
     }
 
