@@ -72,10 +72,7 @@
 .faqModalTitle {
   font-size: 24px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1f2937;
   margin-bottom: 8px;
   font-family: 'Jost-SemiBold', sans-serif;
 }
@@ -119,7 +116,7 @@
 }
 
 .faqModalItem {
-  background: #f9fafb;
+  background: transparent;
   border-radius: 12px;
   margin-bottom: 8px;
   border: 1px solid #e5e7eb;
