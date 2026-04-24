@@ -215,6 +215,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Не используем get_object(), чтобы не упереться в get_queryset с фильтрацией по пользователю
         order = get_object_or_404(self.serializer_class.Meta.model, pk=pk)
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, 'Взятие заказа в работу')
+        if blocked is not None:
+            return blocked
         # Простейшая проверка роли для MVP
         if getattr(user, 'role', None) != 'expert':
             return Response({'detail': 'Только эксперт может взять заказ.'}, status=status.HTTP_403_FORBIDDEN)
@@ -252,6 +255,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Эксперт отправляет работу на проверку: in_progress -> review."""
         order = self.get_object()
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, 'Отправка работы на проверку')
+        if blocked is not None:
+            return blocked
         if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status not in ['in_progress', 'revision']:
@@ -338,6 +344,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_bid(self, request, pk=None):
         """Клиент принимает ставку: назначает эксперта, фиксирует бюджет и создает чат с данными заказа."""
+        blocked = _ensure_not_banned_for_contacts(request.user, 'Принятие ставки')
+        if blocked is not None:
+            return blocked
         order = self.get_object()
         user = request.user
         
@@ -513,6 +522,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def revision(self, request, pk=None):
+        blocked = _ensure_not_banned_for_contacts(request.user, 'Отправка на доработку')
+        if blocked is not None:
+            return blocked
         """Клиент отправляет на доработку: review -> revision."""
         order = self.get_object()
         user = request.user
@@ -576,6 +588,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def take_order(self, request, pk=None):
+        blocked = _ensure_not_banned_for_contacts(request.user, 'Взятие заказа')
+        if blocked is not None:
+            return blocked
         order = self.get_object()
         if order.status != 'new':
             return Response(
