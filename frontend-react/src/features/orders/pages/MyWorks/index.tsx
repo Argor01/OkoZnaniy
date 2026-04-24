@@ -283,14 +283,34 @@ const MyWorks: React.FC = () => {
       key: 'buyer',
       render: (_: unknown, record: Order) => {
       const isClient = userProfile?.role === 'client';
+      const counterpartyUsername = isClient
+        ? record?.expert?.username
+        : record?.client?.username;
       const username = isClient
         ? (record?.expert?.username ?? 'Не назначен')
         : (record?.client?.username ?? record?.client_name ?? '—');
       const avatarSrc = isClient ? record?.expert?.avatar : record?.client?.avatar;
+      const handleOpenProfile = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (counterpartyUsername) {
+          navigate(`/user/${counterpartyUsername}`);
+        }
+      };
         return (
           <Space size={8}>
             <Avatar size={24} src={avatarSrc} icon={<UserOutlined />} />
-            <span>{username}</span>
+            {counterpartyUsername ? (
+              <a
+                onClick={handleOpenProfile}
+                style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+              >
+                {username}
+              </a>
+            ) : (
+              <span>{username}</span>
+            )}
           </Space>
         );
       },
