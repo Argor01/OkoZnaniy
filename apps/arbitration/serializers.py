@@ -215,7 +215,12 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
                     'order_id': 'Вы не участвуете в этом заказе'
                 })
 
-            if not order.expert_id:
+            # Если по заказу ещё не назначен исполнитель (status='new'), претензию
+            # подавать рано — клиенту надо сначала отозвать заказ или выбрать эксперта.
+            # Если же заказ уже в работе и эксперт был отвязан (например, бан),
+            # позволяем подать жалобу даже без expert_id.
+            order_status = str(getattr(order, 'status', '') or '')
+            if not order.expert_id and order_status in ('new', 'draft', ''):
                 raise serializers.ValidationError({
                     'order_id': 'По заказу пока не назначен исполнитель'
                 })

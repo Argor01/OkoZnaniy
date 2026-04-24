@@ -132,16 +132,37 @@ const ComplaintForm: React.FC = () => {
       setCreatedComplaint(complaint);
       setShowSuccessModal(true);
     } catch (e: any) {
-      const errorMsg = e?.response?.data?.detail || e?.response?.data?.order_id?.[0] || 'Не удалось подать претензию';
-      
+      const data = e?.response?.data;
+      let errorMsg = 'Не удалось подать претензию';
+      if (data) {
+        if (typeof data === 'string') {
+          errorMsg = data;
+        } else if (data.detail) {
+          errorMsg = String(data.detail);
+        } else if (typeof data === 'object') {
+          const fieldErrors = Object.entries(data)
+            .filter(([key]) => key !== 'existing_case_number')
+            .map(([key, value]) => {
+              if (Array.isArray(value)) return `${key}: ${value.join('; ')}`;
+              if (typeof value === 'string') return `${key}: ${value}`;
+              return null;
+            })
+            .filter(Boolean);
+          if (fieldErrors.length > 0) {
+            errorMsg = fieldErrors.join('\n');
+          }
+        }
+      }
+
       // Если уже есть открытая претензия, перенаправляем в арбитраж
-      if (errorMsg.includes('уже есть открытая претензия') || errorMsg.includes('already')) {
+      if (errorMsg.includes('уже есть') || errorMsg.includes('активная претензия') || errorMsg.includes('already')) {
         message.warning('У вас уже есть открытая претензия по этому заказу');
         setTimeout(() => {
           navigate('/support');
         }, 1000);
       } else {
         message.error(errorMsg);
+        console.error('[ComplaintForm] submit failed:', data);
       }
     } finally {
       setIsSubmitting(false);
