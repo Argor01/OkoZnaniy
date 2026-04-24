@@ -400,20 +400,38 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def destroy(self, request, pk=None):
-        """Полное удаление сотрудника из системы (только для архивированных)"""
+        """Полное удаление сотрудника из системы.
+
+        Удалять можно:
+        * полностью архивированных сотрудников (is_active=False);
+        * деактивированных экспертов (role=client, application_approved=False,
+          has_submitted_application=True или application.status='deactivated') —
+          в этом случае запись находится во вкладке «Архив», но is_active=True.
+
+        Просто активного директора/админа/обычного клиента удалять нельзя —
+        для них предусмотрены деактивация или архивация.
+        """
         user = self.get_object()
-        
-        # Проверяем, что пользователь архивирован
-        if user.is_active:
-            return Response(
-                {'detail': 'Можно удалять только архивированных сотрудников'},
-                status=status.HTTP_400_BAD_REQUEST
+
+        if not user.is_active:
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        is_deactivated_expert = (
+            getattr(user, 'role', None) == 'client'
+            and (
+                getattr(user, 'application_approved', None) is False
+                and getattr(user, 'has_submitted_application', False)
             )
-        
-        # Удаляем пользователя
-        user.delete()
-        
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        )
+        if is_deactivated_expert:
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {'detail': 'Сначала переведите сотрудника в архив или деактивируйте его'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @action(detail=False, methods=['post'])
     def register(self, request):
