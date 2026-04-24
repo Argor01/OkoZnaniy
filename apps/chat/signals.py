@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import SupportChat, SupportMessage, Message, Chat
-from .services import ContactDetectionService, ChatModerationService
+from .services import ContactDetectionService, ChatModerationService, violation_type_label
 from apps.admin_panel.models import SupportRequest, SupportMessage as AdminSupportMessage
 
 
@@ -141,7 +141,7 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
 📋 Детали нарушения:
 • Чат: #{instance.chat.id}
 • Пользователь: {instance.sender.username} ({instance.sender.first_name} {instance.sender.last_name})
-• Тип нарушения: {violation_type}
+• Тип нарушения: {violation_type_label(violation_type)}
 • Уровень риска: {detection_result['risk_level']}
 
 📞 Обнаруженные контактные данные:

@@ -7,6 +7,21 @@ from django.conf import settings
 from django.utils import timezone
 
 
+VIOLATION_TYPE_LABELS = {
+    'phone': 'номер телефона',
+    'email': 'email-адрес',
+    'telegram': 'Telegram',
+    'whatsapp': 'WhatsApp',
+    'social': 'социальные сети',
+    'keywords': 'подозрительные ключевые слова',
+    'multiple': 'несколько типов контактов',
+}
+
+
+def violation_type_label(violation_type: str) -> str:
+    return VIOLATION_TYPE_LABELS.get(violation_type, violation_type)
+
+
 class ContactDetectionService:
     """Сервис для обнаружения контактных данных в сообщениях"""
     
@@ -196,7 +211,8 @@ class ChatModerationService:
         from .models import Chat, ContactViolationLog
         
         # Замораживаем чат
-        chat.freeze(f"Обнаружен обмен контактами: {violation_type}")
+        violation_label = violation_type_label(violation_type)
+        chat.freeze(f"Обнаружен обмен контактами: {violation_label}")
         
         # Создаем запись о нарушении
         violation = ContactViolationLog.objects.create(
@@ -213,7 +229,7 @@ class ChatModerationService:
         if message and message.sender:
             user = message.sender
             user.is_banned_for_contacts = True
-            user.contact_ban_reason = f"Обнаружен обмен контактами: {violation_type}"
+            user.contact_ban_reason = f"Обнаружен обмен контактами: {violation_label}"
             user.contact_ban_date = timezone.now()
             user.contact_violations_count += 1
             user.banned_by = None  # Система
@@ -239,7 +255,7 @@ class ChatModerationService:
                 recipient=admin,
                 type='chat_violation',
                 title='Обнаружен обмен контактами в чате',
-                message=f'Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.violation_type}',
+                message=f'Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}',
                 related_object_id=violation.id,
                 related_object_type='contact_violation'
             )
