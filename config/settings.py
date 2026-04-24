@@ -144,6 +144,14 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': [
             'email',
         ],
+        'AUTH_PARAMS': {
+            'display': 'popup',
+        },
+        'APP': {
+            'client_id': os.getenv('VK_CLIENT_ID', ''),
+            'secret': os.getenv('VK_CLIENT_SECRET', ''),
+            'key': os.getenv('VK_SERVICE_KEY', ''),
+        },
         'LOGIN_REDIRECT_URL': '/api/users/vk/callback/',
     }
 }
