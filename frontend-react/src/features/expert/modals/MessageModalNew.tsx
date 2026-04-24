@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antMessage, Spin, Upload, Card, Rate, Tabs, Select, Carousel, DatePicker, Dropdown, Popover, MenuProps } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/features/common';
 import {
   MessageOutlined,
@@ -244,7 +245,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   userProfile
 }) => {
   const navigate = useNavigate();
-  
+  const queryClient = useQueryClient();
+
   const [messageText, setMessageText] = useState<string>('');
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<ChatDetail | null>(null);
@@ -812,6 +814,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
       if (hasUnreadIncomingMessages) {
         await chatApi.markAsRead(chatId);
+        queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
         setSelectedChat((prev) =>
           prev && prev.id === chatId
             ? {
@@ -2171,6 +2174,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           await chatApi.markAsUnread(chatId);
           antMessage.success('Чат помечен как непрочитанный');
         }
+        queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
       
         // Перезагружаем список для синхронизации с сервером
         await loadChats(true);
