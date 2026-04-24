@@ -213,6 +213,54 @@ export const expertsApi = {
     return data;
   },
 
+  async createReview(payload: { order: number; rating: number; comment?: string }) {
+    const { data } = await apiClient.post('/experts/reviews/', payload);
+    return data;
+  },
+
+  async getPublicReviews(params: {
+    expert: number | string;
+    rating?: number[];
+    ordering?: '-created_at' | 'created_at' | '-rating' | 'rating';
+    limit?: number;
+  }): Promise<{
+    count: number;
+    average_rating: number;
+    breakdown: Record<string, number>;
+    results: ExpertReview[];
+  }> {
+    const query: Record<string, string | number> = { expert: params.expert };
+    if (params.rating && params.rating.length > 0) {
+      query.rating = params.rating.join(',');
+    }
+    if (params.ordering) query.ordering = params.ordering;
+    if (params.limit) query.limit = params.limit;
+    const { data } = await apiClient.get('/experts/reviews/public/', { params: query });
+    return data;
+  },
+
+  async replyToReview(reviewId: number, replyText: string) {
+    const { data } = await apiClient.post(`/experts/reviews/${reviewId}/reply/`, {
+      reply_text: replyText,
+    });
+    return data;
+  },
+
+  async appealReview(reviewId: number, appealReason: string) {
+    const { data } = await apiClient.post(`/experts/reviews/${reviewId}/appeal/`, {
+      appeal_reason: appealReason,
+    });
+    return data;
+  },
+
+  async resolveReviewAppeal(reviewId: number, decision: 'keep' | 'remove', resolution?: string) {
+    const { data } = await apiClient.post(`/experts/reviews/${reviewId}/resolve-appeal/`, {
+      decision,
+      resolution: resolution ?? '',
+    });
+    return data;
+  },
+
   async getExpertStatistics(expertId: number): Promise<ExpertStatistics> {
     const { data } = await apiClient.get(`/experts/statistics/?expert=${expertId}`);
     const raw = data?.results?.[0] || data;
