@@ -125,7 +125,7 @@ export const KnowledgePortal: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Title level={2}>Портал Знаний</Title>
+        <Title level={2}>Око Ответы</Title>
         <Paragraph>
           Задавайте вопросы и получайте ответы от экспертов
         </Paragraph>

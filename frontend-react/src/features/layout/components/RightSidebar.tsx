@@ -90,7 +90,7 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
           onClick={handleTitleClick}
           style={{ cursor: 'pointer' }}
         >
-          Портал Знаний
+          Око Ответы
         </Title>
         
         <div className={styles.questionsList}>

@@ -1338,12 +1338,13 @@
 .messageText {
   display: block;
   margin-bottom: 4px;
-  font-size: 16px;
+  font-size: 18px;
+  line-height: 1.5;
   font-family: 'Jost-Regular', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
 }
 
 .messageTextMobile {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .messageTextMine {
@@ -1965,7 +1966,8 @@
   }
   
   .messageText {
-    font-size: 14px !important;
+    font-size: 17px !important;
+    line-height: 1.5 !important;
   }
   
   .messageFileBlock {
@@ -2225,7 +2227,8 @@
   }
   
   .messageText {
-    font-size: 13px !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
   }
   
   .messageFileBlock {
@@ -2544,7 +2547,8 @@
   }
   
   .messageText {
-    font-size: 13px;
+    font-size: 16px;
+    line-height: 1.5;
   }
   
   .messageFileBlock {

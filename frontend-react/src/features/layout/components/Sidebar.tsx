@@ -296,7 +296,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     {
       key: 'knowledge',
       icon: <BookOutlined />,
-      label: 'Портал Знаний',
+      label: 'Око Ответы',
     },
     {
       key: 'improvements',
