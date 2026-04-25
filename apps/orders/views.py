@@ -1075,6 +1075,27 @@ class BidViewSet(viewsets.ModelViewSet):
         blocked = _ensure_not_banned_for_contacts(request.user, 'Отклик на заказ')
         if blocked is not None:
             return blocked
+        # #1: запрет на повторный отклик одного и того же эксперта.
+        # На уровне БД unique_together (order, expert) и так не даст вставку,
+        # но perform_create раньше делал get_or_create + update — после чего
+        # сабмит «второго отклика» молча обновлял первый и слал уведомление
+        # повторно. Теперь — если активный отклик уже есть, возвращаем 400.
+        order_id = self.kwargs.get('order_pk')
+        if order_id and getattr(request.user, 'role', None) == 'expert':
+            from .models import Bid as _Bid, BidStatus as _BS
+            existing = _Bid.objects.filter(
+                order_id=order_id,
+                expert_id=request.user.id,
+                status=_BS.ACTIVE,
+            ).first()
+            if existing:
+                return Response(
+                    {
+                        'detail': 'Вы уже откликнулись на этот заказ.',
+                        'bid_id': existing.id,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
