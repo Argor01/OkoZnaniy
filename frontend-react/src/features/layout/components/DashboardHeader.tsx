@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Badge, Button, Dropdown, Layout, Space, Typography, message } from 'antd';
 import {
   UserOutlined,
@@ -179,33 +179,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     );
   };
 
-  const profileMenuItems = useMemo<MenuProps['items']>(() => [
-    {
-      key: 'profile',
-      label: 'Редактировать профиль',
-      icon: <UserOutlined />,
-      onClick: onProfileClick,
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      label: 'Выйти',
-      icon: <LogoutOutlined />,
-      danger: true,
-      onClick: onLogout,
-    },
-  ], [onProfileClick, onLogout]);
-
-  const handleProfileMenuClick: MenuProps['onClick'] = ({ key }) => {
-    if (key === 'profile') {
-      onProfileClick?.();
-    } else if (key === 'logout') {
-      onLogout?.();
-    }
-  };
-
   const supportMenuItems = useMemo<MenuProps['items']>(() => [
     {
       key: 'support-info',
@@ -374,13 +347,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
               </Dropdown>
 
               
-              <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight">
-                <div className={styles.profileSection}>
-                  <Text className={styles.username}>
-                    {userProfile?.username || 'Пользователь'}
-                  </Text>
-                </div>
-              </Dropdown>
+              <Button
+                type="text"
+                className={styles.profileSection}
+                onClick={() => {
+                  navigate(ROUTES.expert.root);
+                }}
+              >
+                <Text className={styles.username}>
+                  {userProfile?.username || 'Пользователь'}
+                </Text>
+              </Button>
             </>
           )}
           

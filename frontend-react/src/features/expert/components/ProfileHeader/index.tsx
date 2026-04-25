@@ -148,6 +148,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
           </div>
         </div>
         <div className={styles.profileRight}>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={onEditProfile}
+            style={{ alignSelf: 'flex-end', marginBottom: '10px' }}
+          >
+          </Button>
           <div className={styles.profileStats}>
                         <Text type="secondary" className={styles.profileStatsMeta}>
                           На сайте: <span className={styles.statsNumber}>{userProfile?.date_joined ? Math.floor((Date.now() - new Date(userProfile.date_joined).getTime()) / (1000 * 60 * 60 * 24)) : 0}</span> дней

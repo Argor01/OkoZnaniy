@@ -7,8 +7,7 @@
   height: max-content;
   max-height: calc(100vh - 104px - 24px);
   overflow-y: auto;
-  flex: 0 0 auto;
-  min-width: auto;
+  flex: 1 0 auto !important;
   width: auto;
   max-width: 320px;
   border-radius: 22px;

@@ -45,9 +45,14 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
     const loadQuestions = async () => {
       try {
         const response = await axios.get(`${API_BASE}/api/knowledge/questions/`);
-        const allQuestions = response.data;
-        const recentQuestions = allQuestions.slice(-5);
-        setQuestions(recentQuestions);
+        const payload = response.data;
+        const allQuestions: unknown =
+          Array.isArray(payload) ? payload :
+          (payload && typeof payload === 'object' && Array.isArray((payload as any).results)) ? (payload as any).results :
+          [];
+
+        const recentQuestions = (allQuestions as Question[]).slice(-5);
+        setQuestions(Array.isArray(recentQuestions) ? recentQuestions : []);
       } catch (error) {
         console.error('Failed to load questions:', error);
         setQuestions([]);
