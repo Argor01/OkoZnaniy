@@ -159,10 +159,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [navigate]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  // #18: промежуточный брейкпоинт — на ноутбучных экранах (≈1024-1280px)
+  // трёхколоночный layout (sidebar 320 + content 1000 + rightSidebar 320)
+  // не влезал и съезжал. Ниже 1280 скрываем правую колонку и даём
+  // контенту растянуться.
+  const [isCompact, setIsCompact] = useState(window.innerWidth <= 1280);
 
   React.useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 840);
+      setIsCompact(window.innerWidth <= 1280);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -529,7 +535,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </Content>
           </Layout>
           
-          {!isMobile && (
+          {!isCompact && (
             <RightSidebar />
           )}
         </div>

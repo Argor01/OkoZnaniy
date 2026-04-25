@@ -134,11 +134,22 @@
 
 
 .mainLayoutContent {
-  flex: 2;
+  flex: 1 1 auto;
   max-width: 1000px; /* Ограничиваем ширину основного контента */
+  min-width: 0; /* #18: без этого flex-child переполнял родителя на узких экранах */
   background: transparent;
   min-height: 0; /* To allow truncation if needed */
   margin: 0 24px; /* Отступы от боковых панелей */
+}
+
+/* #18: на компактных экранах (<=1280px) правая колонка скрыта —
+ * отдаём всю доступную ширину основному контенту, чтобы карточки
+ * и таблицы не ломались. */
+@media (max-width: 1280px) {
+  .mainLayoutContent {
+    max-width: none;
+    margin: 0 16px;
+  }
 }
 
 .mainContent {
