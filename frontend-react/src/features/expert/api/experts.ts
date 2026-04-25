@@ -255,6 +255,23 @@ export const expertsApi = {
     return data;
   },
 
+  async getPendingReviews(): Promise<{
+    count: number;
+    results: Array<{
+      order_id: number;
+      order_title: string;
+      order_number?: string | null;
+      completed_at: string | null;
+      expert_id: number | null;
+      expert_username: string | null;
+      expert_full_name: string | null;
+      expert_avatar: string | null;
+    }>;
+  }> {
+    const { data } = await apiClient.get('/experts/reviews/pending/');
+    return data;
+  },
+
   async resolveReviewAppeal(reviewId: number, decision: 'keep' | 'remove', resolution?: string) {
     const { data } = await apiClient.post(`/experts/reviews/${reviewId}/resolve-appeal/`, {
       decision,

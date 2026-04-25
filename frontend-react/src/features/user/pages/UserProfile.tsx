@@ -10,6 +10,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
+import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
 
 const { Text, Paragraph } = Typography;
@@ -162,7 +163,10 @@ const UserProfile: FC = () => {
 
         <Card>
           <Space direction="vertical" size="large" className={styles.fullWidth}>
-            
+            {currentUser && Number(currentUser.id) === Number(userData.id) ? (
+              <PendingReviewsCard />
+            ) : null}
+
             <div className={styles.profileStack}>
               
                             <Card className={styles.headerCard}>

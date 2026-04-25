@@ -197,7 +197,70 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
             NotificationService.notify_review_appeal(review)
         except Exception:
             logger.exception('Не удалось отправить уведомление об обжаловании отзыва')
+        try:
+            self._create_review_appeal_ticket(review)
+        except Exception:
+            logger.exception('Не удалось создать тикет по обжалованию отзыва')
         return Response(self.get_serializer(review).data, status=status.HTTP_200_OK)
+
+    @staticmethod
+    def _create_review_appeal_ticket(review):
+        """
+        Создаёт SupportRequest по обжалованию отзыва.
+        Это позволяет видеть жалобу одновременно у админа (раздел Обращения)
+        и у клиента (мои обращения).
+        """
+        from apps.admin_panel.models import SupportRequest
+        from apps.notifications.services import NotificationService
+        from apps.notifications.models import NotificationType
+
+        if not review.client_id:
+            return
+        existing = SupportRequest.objects.filter(
+            user=review.client,
+            tags__contains='#review-appeal',
+            description__contains=f'review_id={review.id}',
+        ).first()
+        if existing:
+            return
+        expert_name = (
+            review.expert.get_full_name() or review.expert.username
+            if review.expert_id else 'эксперт'
+        )
+        subject = f"Обжалование отзыва #{review.id}"
+        description = (
+            f"review_id={review.id}\n\n"
+            f"Эксперт {expert_name} обжаловал ваш отзыв "
+            f"(оценка {review.rating}/5).\n\n"
+            f"Причина: {review.appeal_reason or '—'}\n\n"
+            f"До решения администратора отзыв скрыт из публичного профиля."
+        )
+        ticket = SupportRequest.objects.create(
+            user=review.client,
+            subject=subject,
+            description=description,
+            status='open',
+            priority='medium',
+            auto_created=True,
+            tags='#review-appeal, #отзывы',
+        )
+        NotificationService.create_notification(
+            recipient=review.client,
+            type=NotificationType.REVIEW_APPEAL,
+            title=f"Обращение #{ticket.ticket_number}",
+            message=(
+                f"Эксперт {expert_name} обжаловал ваш отзыв. "
+                f"Ваше обращение зарегистрировано — администратор рассмотрит дело."
+            ),
+            related_object_id=ticket.id,
+            related_object_type='support_request',
+            data={
+                'ticket_id': ticket.id,
+                'ticket_number': ticket.ticket_number,
+                'review_id': review.id,
+                'ticket_type': 'support_request',
+            },
+        )
 
     @action(detail=True, methods=['post'], url_path='resolve-appeal',
             permission_classes=[permissions.IsAuthenticated])
@@ -222,6 +285,49 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
             'appeal_resolved', 'appeal_resolution', 'is_published', 'is_appealed',
         ])
         return Response(self.get_serializer(review).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='pending',
+            permission_classes=[permissions.IsAuthenticated])
+    def pending_for_client(self, request):
+        """Заказы текущего пользователя, по которым ещё не оставлен отзыв.
+
+        Полезно для виджета «Поставьте отзыв» в личном кабинете клиента —
+        клиент может закрыть модалку после завершения заказа и оставить
+        отзыв позже.
+        """
+        from apps.orders.models import Order
+        user = request.user
+        orders = (
+            Order.objects.filter(
+                client=user,
+                status__in=['completed', 'closed'],
+                expert__isnull=False,
+                expert_rating__isnull=True,
+            )
+            .select_related('expert')
+            .order_by('-updated_at', '-created_at')[:20]
+        )
+        data = [
+            {
+                'order_id': order.id,
+                'order_title': getattr(order, 'title', '') or f'Заказ #{order.id}',
+                'order_number': getattr(order, 'order_number', None),
+                'completed_at': order.updated_at,
+                'expert_id': order.expert_id,
+                'expert_username': getattr(order.expert, 'username', None),
+                'expert_full_name': (
+                    order.expert.get_full_name() if order.expert_id else None
+                ),
+                'expert_avatar': (
+                    getattr(order.expert.profile, 'avatar', None).url
+                    if order.expert_id and getattr(order.expert, 'profile', None)
+                    and getattr(order.expert.profile, 'avatar', None)
+                    else None
+                ),
+            }
+            for order in orders
+        ]
+        return Response({'count': len(data), 'results': data})
 
     @action(detail=False, methods=['get'], url_path='public', permission_classes=[permissions.AllowAny])
     def public_list(self, request):

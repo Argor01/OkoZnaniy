@@ -47,6 +47,10 @@ const getNotificationIcon = (type: string) => {
     'application_approved': styles.notificationsIconSuccess,
     'application_rejected': styles.notificationsIconDanger,
     'expert_violation': styles.notificationsIconDanger,
+    'review_request': styles.notificationsIconWarning,
+    'review_reply': styles.notificationsIconWarning,
+    'review_appeal': styles.notificationsIconDanger,
+    'complaint_filed': styles.notificationsIconDanger,
   };
   const iconClassName = iconClassMap[type] || styles.notificationsIconMuted;
   const iconMap: Record<string, React.ReactNode> = {
@@ -70,6 +74,10 @@ const getNotificationIcon = (type: string) => {
     'application_approved': <CheckCircleOutlined className={iconClassName} />,
     'application_rejected': <ClockCircleOutlined className={iconClassName} />,
     'expert_violation': <QuestionCircleOutlined className={iconClassName} />,
+    'review_request': <TrophyOutlined className={iconClassName} />,
+    'review_reply': <CommentOutlined className={iconClassName} />,
+    'review_appeal': <QuestionCircleOutlined className={iconClassName} />,
+    'complaint_filed': <QuestionCircleOutlined className={iconClassName} />,
   };
   return iconMap[type] || <BellOutlined className={iconClassName} />;
 };
@@ -79,7 +87,7 @@ const getNotificationCategory = (type: string): string => {
   if (['new_order', 'new_bid', 'order_taken', 'order_assigned', 'order_completed', 'status_changed', 'expert_violation'].includes(type)) {
     return 'orders';
   }
-  if (['review_received', 'new_rating', 'rating_milestone'].includes(type)) {
+  if (['review_received', 'new_rating', 'rating_milestone', 'review_request', 'review_reply', 'review_appeal'].includes(type)) {
     return 'reviews';
   }
   if (['new_contact', 'application_approved', 'application_rejected', 'application_submitted'].includes(type)) {
@@ -118,8 +126,18 @@ const resolveNotificationTarget = (notification: Notification): string | null =>
     return '/expert?tab=specializations';
   }
 
-  if (notification.type === 'review_received' || notification.type === 'new_rating' || notification.type === 'rating_milestone') {
+  if (
+    notification.type === 'review_received' ||
+    notification.type === 'new_rating' ||
+    notification.type === 'rating_milestone' ||
+    notification.type === 'review_reply' ||
+    notification.type === 'review_appeal'
+  ) {
     return '/expert?tab=reviews';
+  }
+  if (notification.type === 'review_request') {
+    const orderId = extractOrderId(notification);
+    return orderId ? `/orders/${orderId}` : '/dashboard?tab=pending-reviews';
   }
 
   if (notification.related_object_type === 'expert_application') return '/expert?focus=application';
