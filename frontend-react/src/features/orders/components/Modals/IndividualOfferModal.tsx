@@ -1,7 +1,7 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Modal, Typography, Form } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Modal, Typography, Form, message } from 'antd';
+import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { catalogApi } from '@/features/common/api/catalog';
 import { AppButton, AppInput, AppSelect, AppDatePicker } from '@/components/ui';
@@ -50,6 +50,11 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const { isMobile, isTablet, isDesktop } = useDeviceType();
+  const queryClient = useQueryClient();
+  const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState('');
+  const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
+  const [newWorkTypeName, setNewWorkTypeName] = useState('');
 
   const isIndividual = variant === 'individual';
 
@@ -63,6 +68,42 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
     queryKey: ['work-types'],
     queryFn: () => catalogApi.getWorkTypes(),
     enabled: open && isIndividual,
+  });
+
+  const normalizeName = (raw: string) =>
+    raw
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+
+  const createSubjectMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createSubject(name),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      setNewSubjectModalVisible(false);
+      setNewSubjectName('');
+      message.success('Новый предмет добавлен');
+      if (data?.id) form.setFieldValue('subject_id', data.id);
+    },
+    onError: () => {
+      message.error('Не удалось добавить предмет');
+    },
+  });
+
+  const createWorkTypeMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createWorkType(name),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['work-types'] });
+      setNewWorkTypeModalVisible(false);
+      setNewWorkTypeName('');
+      message.success('Новый тип работы добавлен');
+      if (data?.id) form.setFieldValue('work_type_id', data.id);
+    },
+    onError: () => {
+      message.error('Не удалось добавить тип работы');
+    },
   });
 
   const handleFinish = (values: OfferFormValues) => {
@@ -180,6 +221,21 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                   options={workTypes
                     .filter((w) => w.is_active !== false)
                     .map((w) => ({ value: w.id, label: w.name }))}
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <div className={styles.selectDropdownFooter}>
+                        <AppButton
+                          variant="text"
+                          icon={<PlusOutlined />}
+                          onClick={() => setNewWorkTypeModalVisible(true)}
+                          className={styles.selectDropdownButton}
+                        >
+                          Добавить новый тип работы
+                        </AppButton>
+                      </div>
+                    </>
+                  )}
                 />
               </Form.Item>
 
@@ -199,6 +255,21 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                   options={subjects
                     .filter((s) => s.is_active !== false)
                     .map((s) => ({ value: s.id, label: s.name }))}
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <div className={styles.selectDropdownFooter}>
+                        <AppButton
+                          variant="text"
+                          icon={<PlusOutlined />}
+                          onClick={() => setNewSubjectModalVisible(true)}
+                          className={styles.selectDropdownButton}
+                        >
+                          Добавить новый предмет
+                        </AppButton>
+                      </div>
+                    </>
+                  )}
                 />
               </Form.Item>
             </>
@@ -290,6 +361,66 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
           </Form.Item>
         </Form>
       </div>
+
+      <Modal
+        title="Добавить новый предмет"
+        open={newSubjectModalVisible}
+        onOk={() => {
+          const name = normalizeName(newSubjectName);
+          if (!name) {
+            message.error('Введите название предмета');
+            return;
+          }
+          createSubjectMutation.mutate(name);
+        }}
+        onCancel={() => {
+          setNewSubjectModalVisible(false);
+          setNewSubjectName('');
+        }}
+        confirmLoading={createSubjectMutation.isPending}
+        okText="Добавить"
+        cancelText="Отмена"
+      >
+        <AppInput
+          placeholder="Название предмета"
+          value={newSubjectName}
+          onChange={(e) => setNewSubjectName(e.target.value)}
+          onPressEnter={() => {
+            const name = normalizeName(newSubjectName);
+            if (name) createSubjectMutation.mutate(name);
+          }}
+        />
+      </Modal>
+
+      <Modal
+        title="Добавить новый тип работы"
+        open={newWorkTypeModalVisible}
+        onOk={() => {
+          const name = normalizeName(newWorkTypeName);
+          if (!name) {
+            message.error('Введите название типа работы');
+            return;
+          }
+          createWorkTypeMutation.mutate(name);
+        }}
+        onCancel={() => {
+          setNewWorkTypeModalVisible(false);
+          setNewWorkTypeName('');
+        }}
+        confirmLoading={createWorkTypeMutation.isPending}
+        okText="Добавить"
+        cancelText="Отмена"
+      >
+        <AppInput
+          placeholder="Название типа работы"
+          value={newWorkTypeName}
+          onChange={(e) => setNewWorkTypeName(e.target.value)}
+          onPressEnter={() => {
+            const name = normalizeName(newWorkTypeName);
+            if (name) createWorkTypeMutation.mutate(name);
+          }}
+        />
+      </Modal>
     </Modal>
   );
 };

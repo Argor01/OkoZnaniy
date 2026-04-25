@@ -700,3 +700,65 @@
   }
 }
 
+
+.filtersBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.filtersRowTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.filtersRowTop .searchInput {
+  flex: 1 1 240px;
+  min-width: 200px;
+}
+
+.orderIdInput {
+  flex: 0 1 160px;
+  min-width: 140px;
+}
+
+.filterSelect {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+.filtersToggleRow {
+  display: flex;
+}
+
+.filtersToggle {
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+}
+
+.filtersAdvancedRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.budgetGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.budgetLabel {
+  font-weight: 500;
+}
+
+.budgetInput {
+  width: 130px;
+}

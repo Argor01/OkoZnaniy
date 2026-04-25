@@ -1,7 +1,8 @@
 import type { FC } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, message as antMessage } from 'antd';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, Segmented, message as antMessage } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
@@ -15,10 +16,13 @@ import styles from './UserProfile.module.css';
 
 const { Text, Paragraph } = Typography;
 
+type ReviewFilter = 'all' | 'positive' | 'negative';
+
 const UserProfile: FC = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all');
 
   
   const { data: userData, isLoading: userLoading, error: userError } = useQuery({
@@ -88,6 +92,20 @@ const UserProfile: FC = () => {
     liveSpecializations.length > 0
       ? liveSpecializations
       : (Array.isArray(userData?.specializations) ? userData.specializations : []);
+
+  const positiveReviews = useMemo(
+    () => (reviews as ExpertReview[]).filter((r) => Number(r.rating) >= 4),
+    [reviews],
+  );
+  const negativeReviews = useMemo(
+    () => (reviews as ExpertReview[]).filter((r) => Number(r.rating) <= 3),
+    [reviews],
+  );
+  const filteredReviews = useMemo(() => {
+    if (reviewFilter === 'positive') return positiveReviews;
+    if (reviewFilter === 'negative') return negativeReviews;
+    return reviews as ExpertReview[];
+  }, [reviewFilter, reviews, positiveReviews, negativeReviews]);
 
   const handleWriteMessage = async () => {
     const targetId = Number(userData?.id);
@@ -381,20 +399,42 @@ const UserProfile: FC = () => {
             
             {userData.role === 'expert' && (
               <Card 
-                title={`Отзывы (${reviews.length})`} 
+                title={
+                  <div className={styles.reviewsHeader}>
+                    <span>{`Отзывы (${reviews.length})`}</span>
+                    {reviews.length > 0 && (
+                      <Segmented
+                        size="small"
+                        value={reviewFilter}
+                        onChange={(value) => setReviewFilter(value as ReviewFilter)}
+                        options={[
+                          { label: `Все (${reviews.length})`, value: 'all' },
+                          {
+                            label: `Хорошие (${positiveReviews.length})`,
+                            value: 'positive',
+                          },
+                          {
+                            label: `Плохие (${negativeReviews.length})`,
+                            value: 'negative',
+                          },
+                        ]}
+                      />
+                    )}
+                  </div>
+                }
                 className={styles.reviewsCard}
               >
                 {reviewsLoading ? (
                   <div className={styles.reviewsLoading}>
                     <Spin />
                   </div>
-                ) : reviews.length === 0 ? (
+                ) : filteredReviews.length === 0 ? (
                   <div className={styles.reviewsEmpty}>
-                    Нет отзывов
+                    {reviews.length === 0 ? 'Нет отзывов' : 'Нет отзывов в этой категории'}
                   </div>
                 ) : (
                   <div className={styles.reviewsList}>
-                    {reviews.map((review: ExpertReview) => (
+                    {filteredReviews.map((review: ExpertReview) => (
                       <div 
                         key={review.id}
                         className={styles.reviewItem}

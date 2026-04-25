@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Typography, Table, Tag, Avatar, Space } from 'antd';
-import { SearchOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
+import { SearchOutlined, StarFilled, UserOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AppInput } from '@/components/ui';
+import { AppInput, AppSelect, AppButton } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { expertsApi } from '@/features/expert/api/experts';
+import { catalogApi, type Subject, type WorkType } from '@/features/common/api/catalog';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -77,9 +78,24 @@ const MyWorks: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
+  const [orderIdSearch, setOrderIdSearch] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
+  const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
+  const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 100000]);
+  const [showFilters, setShowFilters] = useState(false);
   const rawInitialTab = searchParams.get('tab');
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
+
+  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
+  const { data: workTypes = [] } = useQuery<WorkType[]>({
+    queryKey: ['work-types'],
+    queryFn: () => catalogApi.getWorkTypes(),
+  });
 
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile'],
@@ -195,13 +211,14 @@ const MyWorks: React.FC = () => {
 
   const filteredOrders = useMemo(() => {
     const query = searchText.trim().toLowerCase();
+    const orderIdQuery = orderIdSearch.trim();
     const source = activeTab === 'inactive' ? inactiveOrders : orders;
     return source.filter((order) => {
       if (activeTab !== 'all') {
         if (activeTab === 'review') {
           if (!isReviewGroup(order)) return false;
         } else if (activeTab === 'inactive') {
-          return true;
+          // pass
         } else if (activeTab === 'revision') {
           if (String(order?.status ?? '') !== 'revision') return false;
         } else if (activeTab === 'in_progress') {
@@ -213,13 +230,37 @@ const MyWorks: React.FC = () => {
         if (!isAllTabGroup(order)) return false;
       }
 
+      if (orderIdQuery && String(order.id) !== orderIdQuery) return false;
+
+      if (selectedSubject) {
+        const subjectId = Number(order?.subject?.id);
+        if (subjectId !== selectedSubject) return false;
+      }
+      if (selectedWorkType) {
+        const workTypeId = Number(order?.work_type?.id);
+        if (workTypeId !== selectedWorkType) return false;
+      }
+      const orderBudget = Number(order?.budget);
+      if (Number.isFinite(orderBudget) && orderBudget > 0) {
+        if (orderBudget < budgetRange[0] || orderBudget > budgetRange[1]) return false;
+      }
+
       if (!query) return true;
       const title = String(order?.title ?? '').toLowerCase();
       const description = String(order?.description ?? '').toLowerCase();
       const buyer = String(order?.client?.username ?? order?.client_name ?? '').toLowerCase();
       return title.includes(query) || description.includes(query) || buyer.includes(query);
     });
-  }, [orders, inactiveOrders, activeTab, searchText]);
+  }, [
+    orders,
+    inactiveOrders,
+    activeTab,
+    searchText,
+    orderIdSearch,
+    selectedSubject,
+    selectedWorkType,
+    budgetRange,
+  ]);
 
   const averageRatingText =
     typeof expertStats?.average_rating === 'number' && Number.isFinite(expertStats.average_rating)
@@ -473,14 +514,99 @@ const MyWorks: React.FC = () => {
           </button>
         </div>
 
-        <AppInput
-          placeholder="Поиск..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          allowClear
-          className={styles.searchInput}
-        />
+        <div className={styles.filtersBlock}>
+          <div className={styles.filtersRowTop}>
+            <AppInput
+              placeholder="Поиск по названию или описанию..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+              className={styles.searchInput}
+            />
+            <AppInput
+              placeholder="Номер заказа"
+              prefix="№"
+              value={orderIdSearch}
+              onChange={(e) => setOrderIdSearch(e.target.value.replace(/[^\d]/g, ''))}
+              allowClear
+              className={styles.orderIdInput}
+            />
+            <AppSelect
+              placeholder="Предмет"
+              className={styles.filterSelect}
+              value={selectedSubject}
+              onChange={setSelectedSubject}
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              suffixIcon={<FilterOutlined />}
+              options={(fetchedSubjects || []).map((subject) => ({
+                value: subject.id,
+                label: subject.name,
+              }))}
+            />
+            <AppSelect
+              placeholder="Тип работы"
+              className={styles.filterSelect}
+              value={selectedWorkType}
+              onChange={setSelectedWorkType}
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              suffixIcon={<FilterOutlined />}
+              options={(workTypes || []).map((wt) => ({
+                value: wt.id,
+                label: wt.name,
+              }))}
+            />
+          </div>
+          <div className={styles.filtersToggleRow}>
+            <AppButton
+              variant="link"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className={styles.filtersToggle}
+            >
+              {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
+            </AppButton>
+          </div>
+          {showFilters && (
+            <div className={styles.filtersAdvancedRow}>
+              <div className={styles.budgetGroup}>
+                <span className={styles.budgetLabel}>Бюджет:</span>
+                <AppInput.Number
+                  min={0}
+                  max={budgetRange[1]}
+                  value={budgetRange[0]}
+                  onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
+                  placeholder="От"
+                  controls={false}
+                  className={styles.budgetInput}
+                  formatter={(value) => `${value} ₽`}
+                  parser={(value) => {
+                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                    return Number.isFinite(num) ? num : 0;
+                  }}
+                />
+                <span>—</span>
+                <AppInput.Number
+                  min={budgetRange[0]}
+                  max={1000000}
+                  value={budgetRange[1]}
+                  onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 100000])}
+                  placeholder="До"
+                  controls={false}
+                  className={styles.budgetInput}
+                  formatter={(value) => `${value} ₽`}
+                  parser={(value) => {
+                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                    return Number.isFinite(num) ? num : 0;
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <Table
