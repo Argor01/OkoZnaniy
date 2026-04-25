@@ -19,7 +19,14 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      refetchOnWindowFocus: false,
+      // #15: «не всё автоматически обновляется» — включаем обновление при
+      // возврате во вкладку и при повторном монтировании компонента.
+      // react-query всё равно держит кэш, так что дополнительные запросы
+      // идут только после дедупликации.
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMount: true,
+      staleTime: 30_000,
     },
   },
 });
