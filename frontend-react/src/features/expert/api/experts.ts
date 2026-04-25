@@ -30,7 +30,9 @@ export const expertsApi = {
 
   async getReviews(expertId?: number): Promise<ExpertReview[]> {
     const params = expertId ? { expert: expertId } : {};
-    const { data } = await apiClient.get('/experts/ratings/', { params });
+    // Используем публичный эндпоинт, который отдаёт только опубликованные отзывы
+    // (без обжалуемых на модерации) и поддерживает фильтрацию по эксперту без авторизации.
+    const { data } = await apiClient.get('/experts/reviews/public/', { params });
     const raw: unknown = (data as { results?: unknown })?.results ?? data;
     const items: unknown[] = Array.isArray(raw) ? raw : [];
     const debugEnabled = import.meta.env.DEV && localStorage.getItem('debug_reviews') === '1';

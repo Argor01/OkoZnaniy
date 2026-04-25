@@ -31,7 +31,7 @@ class ExpertMatchingService:
                 filter=Q(expert__expert_orders__status__in=['in_progress', 'revision'])
             ),
             # Средний рейтинг
-            avg_rating=Avg('expert__received_ratings__rating'),
+            avg_rating=Avg('expert__reviews__rating'),
             # Процент успешных заказов
             success_rate=ExpressionWrapper(
                 F('expert__statistics__completed_orders') * 100.0 / 

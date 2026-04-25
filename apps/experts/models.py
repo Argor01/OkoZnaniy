@@ -153,7 +153,7 @@ class ExpertReview(models.Model):
     order = models.OneToOneField(
         'orders.Order',
         on_delete=models.CASCADE,
-        related_name='expert_review',
+        related_name='expert_rating',
         verbose_name="Заказ"
     )
     client = models.ForeignKey(
@@ -174,6 +174,10 @@ class ExpertReview(models.Model):
     created_at = models.DateTimeField(
         default=timezone.now,
         verbose_name="Создан"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Обновлён"
     )
     is_published = models.BooleanField(
         default=True,
@@ -221,65 +225,6 @@ class ExpertReview(models.Model):
         except Exception:
             # Игнорируем ошибки при обновлении статистики
             pass
-
-class ExpertRating(models.Model):
-    expert = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='received_ratings',
-        verbose_name="Эксперт"
-    )
-    client = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='given_ratings',
-        verbose_name="Клиент"
-    )
-    order = models.OneToOneField(
-        'orders.Order',
-        on_delete=models.CASCADE,
-        related_name='expert_rating',
-        verbose_name="Заказ"
-    )
-    rating = models.PositiveSmallIntegerField(
-        "Оценка",
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-    comment = models.TextField(
-        "Комментарий",
-        blank=True
-    )
-    created_at = models.DateTimeField(
-        "Дата создания",
-        default=timezone.now
-    )
-    updated_at = models.DateTimeField(
-        "Дата обновления",
-        auto_now=True
-    )
-    # Ответ эксперта на отзыв клиента
-    reply_text = models.TextField(blank=True, default="", verbose_name="Ответ эксперта")
-    reply_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата ответа эксперта")
-    # Обжалование отзыва экспертом — попадает на модерацию админа
-    is_appealed = models.BooleanField(default=False, verbose_name="Обжалован")
-    appeal_reason = models.TextField(blank=True, default="", verbose_name="Причина обжалования")
-    appeal_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата обжалования")
-    appeal_resolved = models.BooleanField(default=False, verbose_name="Обжалование рассмотрено")
-    appeal_resolution = models.TextField(blank=True, default="", verbose_name="Решение по обжалованию")
-
-    class Meta:
-        verbose_name = "Рейтинг эксперта"
-        verbose_name_plural = "Рейтинги экспертов"
-        ordering = ['-created_at']
-        unique_together = ['expert', 'order']
-        indexes = [
-            models.Index(fields=['expert', '-created_at']),
-            models.Index(fields=['client', '-created_at']),
-            models.Index(fields=['rating']),
-        ]
-
-    def __str__(self):
-        return f"Рейтинг {self.rating} для {self.expert.username} от {self.client.username}"
 
 class ExpertStatistics(models.Model):
     expert = models.OneToOneField(
@@ -344,7 +289,7 @@ class ExpertStatistics(models.Model):
         self.completed_orders = orders.filter(status='completed').count()
         
         # Обновляем рейтинг
-        ratings = ExpertRating.objects.filter(expert=self.expert)
+        ratings = ExpertReview.objects.filter(expert=self.expert, is_published=True)
         if ratings.exists():
             avg_rating = ratings.aggregate(
                 avg_rating=models.Avg('rating')

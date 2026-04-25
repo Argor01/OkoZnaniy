@@ -7,7 +7,7 @@ from django.db.models import Avg, Count, Q
 import logging
 
 logger = logging.getLogger(__name__)
-from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
+from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertApplication, Education
 from .serializers import (
     SpecializationSerializer, ExpertDocumentSerializer,
     ExpertReviewSerializer, ExpertStatisticsSerializer,
@@ -308,7 +308,7 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
-        qs = ExpertRating.objects.select_related('expert', 'client', 'order').order_by('-created_at')
+        qs = ExpertReview.objects.select_related('expert', 'client', 'order').order_by('-created_at')
         user = self.request.user
 
         if user.is_staff:
@@ -332,7 +332,7 @@ class ExpertRatingViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Проверка на дубликат перед валидацией
         order_id = request.data.get('order')
-        if order_id and ExpertRating.objects.filter(order_id=order_id, client=request.user).exists():
+        if order_id and ExpertReview.objects.filter(order_id=order_id, client=request.user).exists():
             return Response(
                 {'detail': 'Вы уже оставили отзыв на этот заказ'},
                 status=status.HTTP_400_BAD_REQUEST

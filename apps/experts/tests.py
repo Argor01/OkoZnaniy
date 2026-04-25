@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from apps.orders.models import Order
-from apps.experts.models import ExpertRating, ExpertStatistics
+from apps.experts.models import ExpertReview as ExpertRating, ExpertStatistics
 from apps.catalog.models import Subject, WorkType
 
 User = get_user_model()

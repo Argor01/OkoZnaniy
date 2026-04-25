@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertRating, ExpertApplication, Education
+from .models import Specialization, ExpertDocument, ExpertReview, ExpertStatistics, ExpertApplication, Education
 from apps.users.serializers import UserSerializer, SimpleUserSerializer
 from apps.catalog.serializers import SubjectSerializer
 from apps.catalog.models import Subject
@@ -102,9 +102,9 @@ class ExpertRatingSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)
     client = SimpleUserSerializer(read_only=True)
     order_info = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
-        model = ExpertRating
+        model = ExpertReview
         fields = ['id', 'expert', 'client', 'order', 'order_info', 'rating', 'comment', 'created_at', 'updated_at']
         read_only_fields = ['expert', 'client', 'created_at', 'updated_at']
 
@@ -165,7 +165,7 @@ class ExpertRatingSerializer(serializers.ModelSerializer):
             )
         
         # Проверяем, что отзыв еще не оставлен (только при создании)
-        if not self.instance and ExpertRating.objects.filter(order=order).exists():
+        if not self.instance and ExpertReview.objects.filter(order=order).exists():
             raise serializers.ValidationError(
                 "Отзыв для этого заказа уже существует"
             )
@@ -179,7 +179,7 @@ class ExpertRatingDetailSerializer(serializers.ModelSerializer):
     order = serializers.SerializerMethodField()
 
     class Meta:
-        model = ExpertRating
+        model = ExpertReview
         fields = ['id', 'expert', 'client', 'order', 'rating', 'comment', 'created_at']
         read_only_fields = fields
 

@@ -743,10 +743,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Создаем или обновляем отзыв (используем ExpertRating)
-        from apps.experts.models import ExpertRating
-        
-        review, created = ExpertRating.objects.update_or_create(
+        # Создаем или обновляем отзыв (единая модель ExpertReview)
+        from apps.experts.models import ExpertReview
+
+        review, created = ExpertReview.objects.update_or_create(
             order=order,
             defaults={
                 'expert': order.expert,
