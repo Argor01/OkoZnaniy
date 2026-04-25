@@ -1,7 +1,7 @@
 """
 Модуль для восстановления пароля через код подтверждения
 """
-import random
+import secrets
 import string
 from datetime import timedelta
 from django.utils import timezone
@@ -11,8 +11,8 @@ from django.core.cache import cache
 
 
 def generate_reset_code():
-    """Генерирует 6-значный код для сброса пароля"""
-    return ''.join(random.choices(string.digits, k=6))
+    """Генерирует криптографически стойкий 6-значный код для сброса пароля."""
+    return ''.join(secrets.choice(string.digits) for _ in range(6))
 
 
 def create_password_reset_code(user):

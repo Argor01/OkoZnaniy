@@ -1,7 +1,7 @@
 """
 Система подтверждения email через код
 """
-import random
+import secrets
 import string
 import logging
 from datetime import timedelta
@@ -16,8 +16,8 @@ User = get_user_model()
 
 
 def generate_verification_code():
-    """Генерирует 6-значный код"""
-    return ''.join(random.choices(string.digits, k=6))
+    """Генерирует криптографически стойкий 6-значный код подтверждения email."""
+    return ''.join(secrets.choice(string.digits) for _ in range(6))
 
 
 def create_verification_code(user, email=None):

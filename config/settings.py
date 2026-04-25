@@ -327,6 +327,20 @@ REST_FRAMEWORK = {
     ],
     'SEARCH_PARAM': 'search',
     'ORDERING_PARAM': 'ordering',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '120/minute',
+        'user': '600/minute',
+        'login': '10/minute',
+        'register': '5/hour',
+        'password_reset': '5/hour',
+        'email_verify': '10/hour',
+        'send_email': '5/hour',
+    },
 }
 
 # JWT settings
@@ -355,7 +369,9 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True if DEBUG else False
+# Никогда не выставляем CORS_ALLOW_ALL_ORIGINS=True вместе с CORS_ALLOW_CREDENTIALS=True
+# (нарушение спецификации CORS и риск кражи cookie через сторонние сайты).
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",

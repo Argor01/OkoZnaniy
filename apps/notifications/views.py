@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from django.utils import timezone
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -52,6 +53,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def send_registration_email(request):
     """Отправляет инструкцию по регистрации на указанный email"""
     email = request.data.get('email')
@@ -86,6 +88,7 @@ def send_registration_email(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def send_partner_email(request):
     """Отправляет информацию о партнерской программе на указанный email"""
     email = request.data.get('email')
@@ -116,3 +119,7 @@ def send_partner_email(request):
             {"error": "Ошибка отправки email. Попробуйте позже"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+send_registration_email.throttle_scope = 'send_email'
+send_partner_email.throttle_scope = 'send_email'

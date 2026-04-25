@@ -36,12 +36,15 @@ from .serializers import (
 from .telegram_auth import verify_telegram_auth, get_or_create_telegram_user, generate_tokens_for_user
 from .email_verification import create_verification_code, send_verification_code, verify_code, resend_verification_code
 from .password_reset import create_password_reset_code, send_password_reset_code, verify_password_reset_code, delete_password_reset_code
+from rest_framework.throttling import ScopedRateThrottle
 
 User = get_user_model()
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'login'
+
     def post(self, request, *args, **kwargs):
         import logging
         from django.conf import settings
@@ -117,6 +120,22 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return [permissions.AllowAny()]  # Публичный доступ к профилям
         return super().get_permissions()
+
+    # Скоупы троттлинга для чувствительных анонимных эндпоинтов.
+    _SENSITIVE_THROTTLE_SCOPES = {
+        'create': 'register',
+        'request_password_reset': 'password_reset',
+        'reset_password_with_code': 'password_reset',
+        'verify_email_code': 'email_verify',
+        'resend_verification_code': 'email_verify',
+    }
+
+    def get_throttles(self):
+        scope = self._SENSITIVE_THROTTLE_SCOPES.get(self.action)
+        if scope:
+            self.throttle_scope = scope
+            return [ScopedRateThrottle()]
+        return super().get_throttles()
 
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
@@ -490,7 +509,7 @@ class UserViewSet(viewsets.ModelViewSet):
         code = request.data.get('code')
         new_password = request.data.get('new_password')
         
-        logger.info(f"🔐 Password reset request: email={email}, code={code}")
+        logger.info(f"🔐 Password reset request received for email={email}")
         
         if not all([email, code, new_password]):
             logger.warning("❌ Missing required fields")
@@ -1218,8 +1237,11 @@ def public_stats_view(request):
     logger = logging.getLogger(__name__)
     
     # Логирование для отладки
-    auth_header = request.headers.get('Authorization', 'нет заголовка')
-    logger.info(f"[PublicStats] Request headers - Authorization: {auth_header[:50] if auth_header and len(auth_header) > 50 else auth_header}")
+    auth_header = request.headers.get('Authorization', '')
+    logger.info(
+        "[PublicStats] Request received (auth_header_present=%s)",
+        bool(auth_header and auth_header.startswith('Bearer ')),
+    )
     
     # Пытаемся аутентифицировать пользователя по токену вручную
     user = None
