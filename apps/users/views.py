@@ -285,19 +285,26 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         user = request.user
         from django.db.models import Q
-        
-        # Для клиентов показываем все доступные заказы + их собственные
-        if getattr(user, 'role', None) == 'client':
-            # Все новые заказы без эксперта (доступные для просмотра)
+
+        # #2: «Мои заказы» должно содержать только заказы пользователя.
+        # Раньше для клиентов тут была примесь всех доступных (status=new,
+        # expert__isnull=True), из-за чего в список «Мои заказы» попадали
+        # чужие заказы и выглядели как дубликаты. Для ленты доступных заказов
+        # есть отдельный эндпоинт `/orders/available/`.
+        include_available = str(
+            request.query_params.get('include_available', '')
+        ).strip().lower() in {'1', 'true', 'yes'}
+
+        own_orders = Q(client=user) | Q(expert=user)
+        if include_available and getattr(user, 'role', None) == 'client':
             available_orders = Q(status='new', expert__isnull=True)
-            # Плюс все заказы пользователя (как клиента или эксперта)
-            own_orders = Q(client=user) | Q(expert=user)
-            orders = Order.objects.filter(available_orders | own_orders)
+            orders = Order.objects.filter(own_orders | available_orders)
         else:
-            # Для остальных - только свои заказы
-            orders = Order.objects.filter(Q(client=user) | Q(expert=user))
-        
-        orders = orders.prefetch_related('bids__expert', 'files', 'comments').all()
+            orders = Order.objects.filter(own_orders)
+
+        orders = orders.prefetch_related(
+            'bids__expert', 'files', 'comments'
+        ).distinct()
 
         from datetime import timedelta
         from django.utils import timezone
