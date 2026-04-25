@@ -1,7 +1,7 @@
  .sidebar {
-  --sidebar-accent: var(--color-brand-orange-500);
+  --sidebar-accent: var(--color-brand-blue-500);
   --sidebar-content-bg: #ffffff;
-  background: linear-gradient(180deg, var(--color-brand-orange-500) 0%, var(--color-brand-orange-400) 100%);
+  background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   position: sticky;
@@ -115,7 +115,7 @@
 .sidebarMenu :global(.ant-menu-item) .anticon,
 .sidebarMenu :global(.ant-menu-submenu-title) .anticon {
   font-size: 18px !important;
-  color: rgba(255, 255, 255, 0.9);
+  color: #4b5563;
 }
 
 .sidebarMenu :global(.ant-menu-item),
@@ -126,19 +126,20 @@
   height: 42px !important;
   line-height: 42px !important;
   padding-inline: 14px !important;
-  color: rgba(255, 255, 255, 0.95) !important;
+  color: #1f2a44 !important;
 }
 
 .sidebarMenu :global(.ant-menu-item:hover),
 .sidebarMenu :global(.ant-menu-submenu-title:hover) {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: var(--color-brand-blue-100, #d6ecfe) !important;
+  color: var(--color-brand-blue-700, #0f7fda) !important;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
-  background: var(--sidebar-content-bg) !important;
-  color: #1f2a44 !important;
+  background: var(--color-brand-blue-500, #2b9fe6) !important;
+  color: #ffffff !important;
   border-radius: 999px !important;
   margin-right: 8px !important;
   width: calc(100% - 8px) !important;
@@ -156,14 +157,14 @@
 .sidebarMenu :global(.ant-menu-item-selected:hover),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title:hover),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title:hover) {
-  background: var(--sidebar-content-bg) !important;
-  color: #1f2a44 !important;
+  background: var(--color-brand-blue-600, #238ce2) !important;
+  color: #ffffff !important;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected .anticon),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title .anticon),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title .anticon) {
-  color: var(--sidebar-accent) !important;
+  color: #ffffff !important;
 }
 
 .sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item),
@@ -171,7 +172,7 @@
   font-family: 'Jost-Regular', sans-serif !important;
   font-size: 14px !important;
   font-weight: normal !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: #1f2a44 !important;
 }
 
 /* ДОБАВИТЬ: Иконки подпунктов в открытом аккордеоне тоже черные */
@@ -231,7 +232,7 @@
   bottom: 0;
   width: 85vw;
   max-width: 320px;
-  background: linear-gradient(180deg, var(--color-brand-orange-500) 0%, var(--color-brand-orange-400) 100%);
+  background: #ffffff;
   overflow-y: auto;
   display: flex;
   flex-direction: column;

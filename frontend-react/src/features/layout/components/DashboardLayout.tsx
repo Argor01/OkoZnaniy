@@ -159,6 +159,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [navigate]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isChatMobile, setIsChatMobile] = useState(window.innerWidth <= 768);
+  const [isChatTablet, setIsChatTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
+  const [isChatDesktop, setIsChatDesktop] = useState(window.innerWidth > 1024);
   // #18: промежуточный брейкпоинт — на ноутбучных экранах (≈1024-1280px)
   // трёхколоночный layout (sidebar 320 + content 1000 + rightSidebar 320)
   // не влезал и съезжал. Ниже 1280 скрываем правую колонку и даём
@@ -167,8 +170,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   React.useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 840);
-      setIsCompact(window.innerWidth <= 1280);
+      const w = window.innerWidth;
+      setIsMobile(w <= 840);
+      setIsCompact(w <= 1280);
+      setIsChatMobile(w <= 768);
+      setIsChatTablet(w > 768 && w <= 1024);
+      setIsChatDesktop(w > 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -562,9 +569,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               setSelectedOrderIdForChat(undefined);
               setSelectedChatContextTitle(undefined);
             }}
-            isMobile={window.innerWidth <= 768}
-            isTablet={window.innerWidth > 768 && window.innerWidth <= 1024}
-            isDesktop={window.innerWidth > 1024}
+            isMobile={isChatMobile}
+            isTablet={isChatTablet}
+            isDesktop={isChatDesktop}
             selectedUserId={selectedUserIdForChat}
             selectedOrderId={selectedOrderIdForChat}
             chatContextTitle={selectedChatContextTitle}
@@ -576,7 +583,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <NotificationsModal
             visible={notificationsModalVisible}
             onClose={handleNotificationsClose}
-            isMobile={window.innerWidth <= 768}
+            isMobile={isChatMobile}
           />
         )}
                 <ArbitrationModal 

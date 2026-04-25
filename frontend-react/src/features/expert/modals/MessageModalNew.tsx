@@ -2342,7 +2342,7 @@ const handleOverdueComplaint = async () => {
       onCancel={onClose}
       footer={null}
       destroyOnHidden
-      width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
+      width={isMobile ? '100%' : (isDesktop ? 'min(1600px, calc(100vw - 48px))' : 'calc(100vw - 32px)')}
       wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
     >
       <ErrorBoundary>

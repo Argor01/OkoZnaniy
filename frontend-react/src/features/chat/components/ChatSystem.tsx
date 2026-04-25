@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Input, Button, Avatar, Badge, Typography, Empty, Alert } from 'antd';
 import {
   UserOutlined,
@@ -84,7 +85,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? '100%' : 900}
+      width={isMobile ? '100%' : 'min(900px, calc(100vw - 24px))'}
       className={`${styles.chatModal} ${isMobile ? styles.chatModalMobile : ''}`}
     >
       <div className={styles.chatContainer}>

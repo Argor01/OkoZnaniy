@@ -332,8 +332,37 @@ class ChatModerationService:
                 user.save()
 
         ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
-        
+        ChatModerationService._post_unfreeze_system_message(chat)
+
         return violation
+
+    @staticmethod
+    def _post_unfreeze_system_message(chat):
+        """Публикует системное сообщение о разморозке чата."""
+        from django.contrib.auth import get_user_model
+        from .models import Message
+
+        User = get_user_model()
+        system_user, _ = User.objects.get_or_create(
+            username='system',
+            defaults={
+                'email': 'system@platform.com',
+                'first_name': 'Система',
+                'last_name': 'Безопасности',
+                'is_active': False,
+            },
+        )
+        Message.objects.create(
+            chat=chat,
+            sender=system_user,
+            text=(
+                "ЧАТ РАЗМОРОЖЕН\n\n"
+                "Администратор завершил проверку. "
+                "Обмен контактными данными запрещён правилами платформы — "
+                "повторные нарушения приведут к блокировке."
+            ),
+            message_type='system',
+        )
 
     @staticmethod
     def _unfreeze_expert_scope_if_possible(chat, violation):

@@ -11,6 +11,10 @@
   height: 100vh;
 }
 
+.chatModal :global(.ant-modal) {
+  max-width: calc(100vw - 24px);
+}
+
 .chatContainer {
   display: flex;
   height: 100%;
@@ -75,8 +79,8 @@
 }
 
 .chatItem.active {
-  background: rgba(102, 126, 234, 0.1);
-  border-left: 3px solid #667eea;
+  background: var(--color-brand-blue-100, #d6ecfe);
+  border-left: 3px solid var(--color-brand-blue-500, #2b9fe6);
 }
 
 .chatItemContent {
@@ -111,7 +115,7 @@
   color: #1f2937;
 }
 .unreadDot :global(.ant-badge-dot) {
-  background-color: #3b82f6;
+  background-color: var(--color-brand-blue-500, #2b9fe6);
 }
 
 .chatWindow {
@@ -170,9 +174,13 @@
 }
 
 .message.mine .messageContent {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-brand-blue-500, #2b9fe6) 0%, var(--color-brand-blue-700, #0f7fda) 100%);
+  color: #fff;
   border-bottom-right-radius: 4px;
+}
+
+.message.mine .messageContent :global(.ant-typography) {
+  color: #fff;
 }
 
 .message.theirs .messageContent {
@@ -236,6 +244,12 @@
 }
 
 
+@media (max-width: 1024px) {
+  .chatList {
+    width: 260px;
+  }
+}
+
 @media (max-width: 840px) {
   .chatList {
     width: 100%;
@@ -253,5 +267,35 @@
 
   .message {
     max-width: 85%;
+  }
+
+  .chatWindowHeader {
+    padding: 12px 14px;
+  }
+
+  .chatWindowMessages {
+    padding: 14px;
+  }
+
+  .chatWindowInput {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatList {
+    width: 100%;
+  }
+
+  .chatListHeader {
+    padding: 14px;
+  }
+
+  .searchBox {
+    padding: 8px 12px;
+  }
+
+  .chatItem {
+    padding: 10px 12px;
   }
 }

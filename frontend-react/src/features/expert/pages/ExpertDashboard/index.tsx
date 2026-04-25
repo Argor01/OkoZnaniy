@@ -56,6 +56,8 @@ const ExpertDashboard: FC = () => {
   
   const [activeTab, setActiveTab] = useState<string>('about');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
   const [editingSpecialization, setEditingSpecialization] = useState<Specialization | null>(null);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   
@@ -130,7 +132,10 @@ const ExpertDashboard: FC = () => {
 
   React.useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 840);
+      const w = window.innerWidth;
+      setIsMobile(w <= 840);
+      setIsTablet(w > 840 && w <= 1024);
+      setIsDesktop(w > 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -314,8 +319,8 @@ const ExpertDashboard: FC = () => {
               setSelectedUserIdForChat(undefined);
             }}
             isMobile={isMobile}
-            isTablet={window.innerWidth > 840 && window.innerWidth <= 1024}
-            isDesktop={window.innerWidth > 1024}
+            isTablet={isTablet}
+            isDesktop={isDesktop}
             selectedUserId={selectedUserIdForChat}
             userProfile={userProfile || undefined}
           />
