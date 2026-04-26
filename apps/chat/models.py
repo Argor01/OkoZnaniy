@@ -57,10 +57,38 @@ class Chat(models.Model):
     
     def unfreeze(self):
         """Разморозить чат"""
+        was_frozen = self.is_frozen
         self.is_frozen = False
         self.frozen_reason = ''
         self.frozen_at = None
         self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
+
+        if was_frozen:
+            self._post_unfreeze_system_message()
+
+    def _post_unfreeze_system_message(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        system_user, _ = User.objects.get_or_create(
+            username='system',
+            defaults={
+                'email': 'system@platform.com',
+                'first_name': 'Система',
+                'last_name': 'Безопасности',
+                'is_active': False,
+            },
+        )
+        Message.objects.create(
+            chat=self,
+            sender=system_user,
+            text=(
+                "ЧАТ РАЗМОРОЖЕН\n\n"
+                "Администратор завершил проверку. "
+                "Обмен контактными данными запрещён правилами платформы — "
+                "повторные нарушения приведут к блокировке."
+            ),
+            message_type='system',
+        )
 
 
 class ChatPin(models.Model):

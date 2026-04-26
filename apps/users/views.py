@@ -1060,8 +1060,31 @@ class UserViewSet(viewsets.ModelViewSet):
         user.block_reason = ''
         user.unblock_date = None
         user.blocked_by = None
-        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
-        
+        user.is_banned_for_contacts = False
+        user.contact_ban_reason = None
+        user.contact_ban_date = None
+        user.contact_ban_until = None
+        user.save(update_fields=[
+            'is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by',
+            'is_banned_for_contacts', 'contact_ban_reason', 'contact_ban_date', 'contact_ban_until',
+        ])
+
+        # Размораживаем все чаты и заказы пользователя
+        try:
+            from django.db.models import Q
+            from apps.chat.models import Chat as ChatModel
+            from apps.orders.models import Order
+            for chat in ChatModel.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user) | Q(participants=user)
+            ).distinct():
+                chat.unfreeze()
+            for order in Order.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user)
+            ).distinct():
+                order.unfreeze()
+        except Exception:
+            pass
+
         return Response({
             'message': f'Пользователь {user.username} разблокирован',
             'user': self.get_serializer(user).data
@@ -1255,11 +1278,26 @@ class UserViewSet(viewsets.ModelViewSet):
         for chat in frozen_chats:
             chat.unfreeze()
             unfrozen_count += 1
+
+        # Размораживаем заказы пользователя
+        from apps.orders.models import Order
+        frozen_orders = Order.objects.filter(
+            models.Q(client=user) | models.Q(expert=user),
+            is_frozen=True
+        )
+        for order in frozen_orders:
+            order.unfreeze()
         
         # Также снимаем бан с пользователя, если он забанен
         if user.is_banned_for_contacts:
             user.is_banned_for_contacts = False
-            user.save()
+            user.contact_ban_reason = None
+            user.contact_ban_date = None
+            user.contact_ban_until = None
+            user.save(update_fields=[
+                'is_banned_for_contacts', 'contact_ban_reason',
+                'contact_ban_date', 'contact_ban_until',
+            ])
         
         return Response({
             'message': f'Разморожено чатов: {unfrozen_count}',

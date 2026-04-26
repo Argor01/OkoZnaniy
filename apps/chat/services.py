@@ -332,7 +332,6 @@ class ChatModerationService:
                 user.save()
 
         ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
-        ChatModerationService._post_unfreeze_system_message(chat)
 
         return violation
 
