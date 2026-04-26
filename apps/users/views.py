@@ -58,21 +58,32 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             username = request.data.get('username')
             if username:
                 try:
-                    user = User.objects.get(username=username)
-                    user.unblock_if_expired()
-                    user.unban_for_contacts_if_expired()
+                    if '@' in username:
+                        user = User.objects.filter(email=username, is_active=False).first()
+                    else:
+                        user = User.objects.filter(username=username, is_active=False).first()
 
-                    if not user.is_active:
-                        detail = 'Ваш аккаунт заблокирован.'
-                        if user.block_reason:
-                            detail += f' Причина: {user.block_reason}'
-                        if user.unblock_date:
-                            detail += f' Разблокировка: {user.unblock_date.strftime("%d.%m.%Y %H:%M")}'
-                        return Response(
-                            {'detail': detail},
-                            status=status.HTTP_403_FORBIDDEN,
-                        )
-                except User.DoesNotExist:
+                    if not user and '@' in username:
+                        user = User.objects.filter(email=username).first()
+                    elif not user:
+                        user = User.objects.filter(username=username).first()
+
+                    if user:
+                        user.unblock_if_expired()
+                        user.unban_for_contacts_if_expired()
+                        user.refresh_from_db()
+
+                        if not user.is_active:
+                            detail = 'Ваш аккаунт заблокирован.'
+                            if user.block_reason:
+                                detail += f' Причина: {user.block_reason}'
+                            if user.unblock_date:
+                                detail += f' Разблокировка: {user.unblock_date.strftime("%d.%m.%Y %H:%M")}'
+                            return Response(
+                                {'detail': detail},
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
+                except Exception:
                     pass
 
             response = super().post(request, *args, **kwargs)

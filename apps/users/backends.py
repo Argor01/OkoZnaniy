@@ -33,8 +33,8 @@ class EmailOrUsernameBackend(ModelBackend):
             else:
                 user = User.objects.filter(username=username).first()
         
-        # Проверяем пароль
-        if user and user.check_password(password):
+        # Проверяем пароль и активность
+        if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
-        
+
         return None
