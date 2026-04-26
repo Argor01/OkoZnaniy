@@ -86,7 +86,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
             verified_experts_annotated=Count('experts', filter=Q(experts__is_verified=True), distinct=True),
             orders_count=Count('orders'),
             completed_orders_count=Count('orders', filter=Q(orders__status='completed')),
-            avg_rating=Avg('orders__expert_review__rating', filter=Q(orders__status='completed'))
+            avg_rating=Avg('orders__expert_rating__rating', filter=Q(orders__status='completed'))
         )
         
         # Фильтрация по наличию экспертов

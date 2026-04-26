@@ -18,6 +18,10 @@ echo "Redis started"
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+# Create test users (idempotent — safe to run on every start)
+echo "Ensuring test users exist..."
+python manage.py create_test_users || echo "Warning: could not create test users"
+
 # Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput

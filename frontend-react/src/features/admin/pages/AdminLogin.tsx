@@ -170,12 +170,23 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         password: account.password
       });
       
+      const actualRole = auth?.user?.role || '';
+      
+      if (actualRole !== account.role) {
+        message.error(
+          `Аккаунт ${account.email} имеет роль "${actualRole}" вместо "${account.role}". ` +
+          `Обратитесь к администратору для назначения правильной роли.`
+        );
+        authApi.logout();
+        return;
+      }
+      
       message.success(`Успешный вход как ${account.label}!`);
       
       
       if (onSuccess && auth?.user) {
         
-        if (account.role === 'admin') {
+        if (actualRole === 'admin') {
           onSuccess(auth.user);
           
           return;
@@ -183,7 +194,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       }
       
       
-      await redirectByRole(account.role, navigate);
+      await redirectByRole(actualRole, navigate);
     } catch (error: any) {
       const errorMessage = handleError(error);
       message.error(`Ошибка входа как ${account.label}: ${errorMessage}`);

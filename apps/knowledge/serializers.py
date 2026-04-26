@@ -11,6 +11,7 @@ class QuestionTagSerializer(serializers.ModelSerializer):
 class AnswerAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField(source='username')
+    username = serializers.CharField()
     avatar = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     
@@ -49,6 +50,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 class QuestionAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField(source='username')
+    username = serializers.CharField()
     avatar = serializers.SerializerMethodField()
     
     def get_avatar(self, obj):

@@ -26,6 +26,7 @@ interface Question {
   author: {
     id: number;
     name: string;
+    username?: string;
     avatar?: string;
   };
   created_at: string;
@@ -80,6 +81,12 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
     navigate(`/knowledge/${questionId}`);
   };
 
+  const handleAuthorClick = (author: Question['author'], event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!author.username) return;
+    navigate(`/user/${author.username}`);
+  };
+
   return (
     <Sider
       width="auto"
@@ -115,7 +122,10 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
                     icon={<UserOutlined />} 
                     className={styles.avatar}
                   />
-                  <Text className={styles.authorName}>{q.author.name}</Text>
+                  <Text
+                    className={styles.authorName}
+                    onClick={(e) => handleAuthorClick(q.author, e)}
+                  >{q.author.name}</Text>
                 </div>
                 
                 <Text className={styles.questionText}>

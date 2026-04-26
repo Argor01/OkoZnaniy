@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Typography, Spin, message as antMessage } from 'antd';
+import { Modal, Typography, Spin, Space, Avatar, message as antMessage } from 'antd';
 import { ErrorBoundary } from '@/features/common';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,9 +9,14 @@ import {
   CommentOutlined, 
   QuestionCircleOutlined,
   ClockCircleOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  StarFilled,
+  UserOutlined
 } from '@ant-design/icons';
 import { notificationsApi, Notification } from '@/features/common/api/notifications';
+import { ordersApi } from '@/features/orders/api/orders';
+import { apiClient } from '@/api/client';
+import { getMediaUrl } from '@/config/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './NotificationsModalNew.module.css';
@@ -195,9 +200,83 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     }
   };
 
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewOrderData, setReviewOrderData] = useState<{
+    orderId: number;
+    orderTitle: string;
+    expertName: string;
+    expertAvatar: string | null;
+    completedAt: string | null;
+  } | null>(null);
+  const [reviewOrderLoading, setReviewOrderLoading] = useState(false);
+
+  const handleReviewNotificationClick = async (notification: Notification) => {
+    const orderId = extractOrderId(notification);
+    if (!orderId) {
+      antMessage.error('Не удалось определить заказ');
+      return;
+    }
+
+    setReviewOrderLoading(true);
+    setReviewModalOpen(true);
+    setReviewRating(5);
+    setReviewComment('');
+
+    try {
+      const order = await ordersApi.getById(orderId);
+      const expertName = order.expert?.full_name || order.expert?.username || notification.data?.expert_username as string || 'Эксперт';
+      const expertAvatar = order.expert?.avatar || null;
+      setReviewOrderData({
+        orderId,
+        orderTitle: order.title || `Заказ #${orderId}`,
+        expertName,
+        expertAvatar,
+        completedAt: order.completed_at || order.updated_at || null,
+      });
+    } catch {
+      const data = notification.data || {};
+      setReviewOrderData({
+        orderId,
+        orderTitle: `Заказ #${orderId}`,
+        expertName: (data.expert_username as string) || 'Эксперт',
+        expertAvatar: null,
+        completedAt: null,
+      });
+    } finally {
+      setReviewOrderLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewOrderData) return;
+    setReviewSubmitting(true);
+    try {
+      await apiClient.post('/experts/reviews/', {
+        order: reviewOrderData.orderId,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+      });
+      antMessage.success('Спасибо за отзыв!');
+      setReviewModalOpen(false);
+      setReviewOrderData(null);
+    } catch {
+      antMessage.error('Не удалось сохранить отзыв');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.is_read) {
       await handleMarkAsRead(notification);
+    }
+
+    if (notification.type === 'review_request') {
+      await handleReviewNotificationClick(notification);
+      return;
     }
 
     const target = resolveNotificationTarget(notification);
@@ -346,6 +425,76 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         </div>
       </div>
       </ErrorBoundary>
+
+      <Modal
+        open={reviewModalOpen}
+        centered
+        title="Оставьте отзыв о работе"
+        okText="Отправить отзыв"
+        cancelText="Отмена"
+        onCancel={() => { setReviewModalOpen(false); setReviewOrderData(null); }}
+        onOk={handleSubmitReview}
+        okButtonProps={{ loading: reviewSubmitting, disabled: reviewOrderLoading }}
+        destroyOnHidden
+        width={480}
+      >
+        {reviewOrderLoading ? (
+          <div style={{ textAlign: 'center', padding: '32px 0' }}>
+            <Spin size="large" />
+          </div>
+        ) : reviewOrderData ? (
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0' }}>
+              <Avatar
+                size={48}
+                src={getMediaUrl(reviewOrderData.expertAvatar)}
+                icon={<UserOutlined />}
+              />
+              <div>
+                <Text strong style={{ display: 'block', fontSize: 16 }}>
+                  {reviewOrderData.expertName}
+                </Text>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {reviewOrderData.orderTitle}
+                </Text>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Text strong>Оценка:</Text>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <StarFilled
+                    key={star}
+                    style={{
+                      fontSize: 28,
+                      cursor: 'pointer',
+                      color: star <= reviewRating ? 'var(--color-brand-orange-500, #ff9500)' : '#d9d9d9',
+                    }}
+                    onClick={() => setReviewRating(star)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Поделитесь впечатлениями (необязательно)"
+              style={{
+                width: '100%',
+                border: '1px solid #d9d9d9',
+                borderRadius: 8,
+                padding: '8px 12px',
+                resize: 'vertical',
+                fontFamily: 'inherit',
+                fontSize: 14,
+              }}
+              rows={4}
+            />
+          </Space>
+        ) : null}
+      </Modal>
     </Modal>
   );
 };

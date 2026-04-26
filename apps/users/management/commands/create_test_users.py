@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+STAFF_ROLES = {'admin', 'director'}
+
 class Command(BaseCommand):
     help = 'Создает тестовых пользователей для разработки'
 
@@ -19,15 +21,25 @@ class Command(BaseCommand):
         ]
         
         for user_data in users_data:
-            user, created = User.objects.get_or_create(
-                username=user_data['username'],
-                defaults={
-                    'email': user_data['email'],
-                    'role': user_data['role'],
-                }
-            )
+            # Try to find user by email first (someone may have registered
+            # with the same email via the normal registration form).
+            user = User.objects.filter(email=user_data['email']).first()
+            created = False
+            if user is None:
+                user, created = User.objects.get_or_create(
+                    username=user_data['username'],
+                    defaults={
+                        'email': user_data['email'],
+                        'role': user_data['role'],
+                    }
+                )
+
             user.set_password(user_data['password'])
             user.role = user_data['role']
+            user.is_active = True
+            user.email_verified = True
+            if user_data['role'] in STAFF_ROLES:
+                user.is_staff = True
             user.save()
             
             status = 'Создан' if created else 'Обновлен'

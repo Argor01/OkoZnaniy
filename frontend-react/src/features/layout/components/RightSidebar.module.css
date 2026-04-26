@@ -98,6 +98,12 @@
   font-size: 13px;
   font-weight: 500;
   color: #4b5563;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.authorName:hover {
+  color: var(--color-brand-blue-500, #2b9fe6);
 }
 
 .questionText {

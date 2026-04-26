@@ -286,10 +286,10 @@ class Complexity(models.Model):
 
     @property
     def average_rating(self):
-        completed_orders = self.orders.filter(status='completed', expert_review__isnull=False)
+        completed_orders = self.orders.filter(status='completed', expert_rating__isnull=False)
         if not completed_orders.exists():
             return None
-        return completed_orders.aggregate(models.Avg('expert_review__rating'))['expert_review__rating__avg']
+        return completed_orders.aggregate(models.Avg('expert_rating__rating'))['expert_rating__rating__avg']
 
 
 class DiscountRule(models.Model):
