@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Card, Tabs, Typography } from 'antd';
-import { TeamOutlined, UserAddOutlined, FileTextOutlined, InboxOutlined } from '@ant-design/icons';
+import { TeamOutlined, UserAddOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import EmployeeRegistration from './EmployeeRegistration';
 import ExpertApplications from './ExpertApplications';
 import EmployeeList from './EmployeeList';
-import EmployeeArchive from './EmployeeArchive';
 
 const { Title } = Typography;
 
@@ -22,8 +21,6 @@ const PersonnelManagement: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
     } else if (key === 'applications') {
       queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
-    } else if (key === 'archive') {
-      queryClient.invalidateQueries({ queryKey: ['director-personnel-archive'] });
     }
   };
 
@@ -57,16 +54,6 @@ const PersonnelManagement: React.FC = () => {
         </span>
       ),
       children: <EmployeeList />,
-    },
-    {
-      key: 'archive',
-      label: (
-        <span>
-          <InboxOutlined className="personnelManagementTabIcon" />
-          Архив
-        </span>
-      ),
-      children: <EmployeeArchive />,
     },
   ];
 

@@ -17,7 +17,6 @@ import {
 import {
   StopOutlined,
   CheckCircleOutlined,
-  InboxOutlined,
   EyeOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
@@ -28,7 +27,6 @@ import {
   getExpertApplications,
   deactivateEmployee,
   activateEmployee,
-  archiveEmployee,
 } from '@/features/director/api/directorApi';
 import { type Employee, type ExpertApplication } from '@/features/director/api/types';
 import styles from './EmployeeList.module.css';
@@ -42,7 +40,7 @@ const EmployeeList: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchText, setSearchText] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('active'); // По умолчанию показываем только активных
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const queryClient = useQueryClient();
 
   const { data: employees, isLoading } = useQuery({
@@ -156,18 +154,7 @@ const EmployeeList: React.FC = () => {
     },
   });
 
-  const archiveMutation = useMutation({
-    mutationFn: (id: number) => archiveEmployee(id),
-    onSuccess: () => {
-      message.success('Сотрудник заархивирован');
-      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
-      queryClient.invalidateQueries({ queryKey: ['director-personnel-archive'] });
-    },
-    onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при архивации сотрудника';
-      message.error(errorMessage);
-    },
-  });
+
 
   const handleViewDetails = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -198,17 +185,7 @@ const EmployeeList: React.FC = () => {
     });
   };
 
-  const handleArchive = (employee: Employee) => {
-    Modal.confirm({
-      title: 'Архивировать сотрудника',
-      content: `Вы уверены, что хотите заархивировать ${employee.first_name} ${employee.last_name}?`,
-      okText: 'Архивировать',
-      cancelText: 'Отмена',
-      onOk: () => {
-        archiveMutation.mutate(employee.id);
-      },
-    });
-  };
+
 
   const getRoleLabel = (role: string) => {
     const roleLabels: Record<string, string> = {
@@ -352,23 +329,14 @@ const EmployeeList: React.FC = () => {
               </Tooltip>
             ) : (
 
-              <>
-                <Tooltip title="Деактивировать">
-                  <Button
-                    type="text"
-                    icon={<StopOutlined />}
-                    onClick={() => handleDeactivate(record)}
-                    danger
-                  />
-                </Tooltip>
-                <Tooltip title="Архивировать">
-                  <Button
-                    type="text"
-                    icon={<InboxOutlined />}
-                    onClick={() => handleArchive(record)}
-                  />
-                </Tooltip>
-              </>
+              <Tooltip title="Деактивировать">
+                <Button
+                  type="text"
+                  icon={<StopOutlined />}
+                  onClick={() => handleDeactivate(record)}
+                  danger
+                />
+              </Tooltip>
             )}
           </Space>
         );
