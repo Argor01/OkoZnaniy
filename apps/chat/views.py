@@ -908,8 +908,21 @@ class ChatViewSet(viewsets.ModelViewSet):
     def unread_count(self, request):
         """Получить общее количество непрочитанных сообщений"""
         user = request.user
+
+        visible_chats = Chat.objects.filter(participants=user).exclude(hidden_for_users=user)
+
+        support_user_id = getattr(settings, 'SUPPORT_USER_ID', None)
+        if support_user_id:
+            visible_chats = visible_chats.exclude(participants__id=support_user_id)
+
+        visible_chats = visible_chats.exclude(
+            Q(context_title__icontains='поддержка') |
+            Q(context_title__icontains='support') |
+            Q(context_title__icontains='техподдержка')
+        )
+
         count = Message.objects.filter(
-            chat__participants=user
+            chat__in=visible_chats
         ).exclude(
             sender=user
         ).filter(
