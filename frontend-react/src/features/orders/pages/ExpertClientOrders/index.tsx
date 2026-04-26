@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Typography, Table, Tag, Avatar, Space } from 'antd';
-import { SearchOutlined, UserOutlined } from '@ant-design/icons';
+import { SearchOutlined, UserOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AppInput } from '@/components/ui';
+import { AppInput, AppSelect, AppButton } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
+import { catalogApi, type Subject, type WorkType } from '@/features/common/api/catalog';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -72,9 +73,24 @@ const ExpertClientOrders: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState('');
+  const [orderIdSearch, setOrderIdSearch] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
+  const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
+  const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 100000]);
+  const [showFilters, setShowFilters] = useState(false);
   const rawInitialTab = searchParams.get('tab');
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
+
+  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
+    queryKey: ['subjects'],
+    queryFn: () => catalogApi.getSubjects(),
+  });
+
+  const { data: workTypes = [] } = useQuery<WorkType[]>({
+    queryKey: ['work-types'],
+    queryFn: () => catalogApi.getWorkTypes(),
+  });
 
   const { data: clientOrdersData, isLoading: clientOrdersLoading } = useQuery({
     queryKey: ['expert-client-orders-overview'],
@@ -174,11 +190,27 @@ const ExpertClientOrders: React.FC = () => {
         if (!isAllTabGroup(order)) return false;
       }
 
-      if (!query) return true;
-      const title = String(order?.title ?? '').toLowerCase();
-      const description = String(order?.description ?? '').toLowerCase();
-      const expert = String(order?.expert?.username ?? '').toLowerCase();
-      return title.includes(query) || description.includes(query) || expert.includes(query);
+      if (!query) {
+        // still apply other filters below
+      } else {
+        const title = String(order?.title ?? '').toLowerCase();
+        const description = String(order?.description ?? '').toLowerCase();
+        const expert = String(order?.expert?.username ?? '').toLowerCase();
+        if (!title.includes(query) && !description.includes(query) && !expert.includes(query)) return false;
+      }
+
+      const normalizedOrderIdSearch = orderIdSearch.trim();
+      if (normalizedOrderIdSearch && String(order.id) !== normalizedOrderIdSearch) return false;
+
+      if (selectedSubject && order.subject?.id !== selectedSubject) return false;
+      if (selectedWorkType && order.work_type?.id !== selectedWorkType) return false;
+
+      const orderBudget = Number(order.budget);
+      if (Number.isFinite(orderBudget) && orderBudget > 0) {
+        if (orderBudget < budgetRange[0] || orderBudget > budgetRange[1]) return false;
+      }
+
+      return true;
     });
   }, [orders, inactiveOrders, activeTab, searchText]);
 
@@ -391,14 +423,99 @@ const ExpertClientOrders: React.FC = () => {
           </button>
         </div>
 
-        <AppInput
-          placeholder="Поиск..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          allowClear
-          className={styles.searchInput}
-        />
+        <div className={styles.filtersBlock}>
+          <div className={styles.filtersRowTop}>
+            <AppInput
+              placeholder="Поиск по названию или описанию..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+              className={styles.searchInput}
+            />
+            <AppInput
+              placeholder="Номер заказа"
+              prefix="№"
+              value={orderIdSearch}
+              onChange={(e) => setOrderIdSearch(e.target.value.replace(/[^\d]/g, ''))}
+              allowClear
+              className={styles.orderIdInput}
+            />
+            <AppSelect
+              placeholder="Предмет"
+              className={styles.filterSelect}
+              value={selectedSubject}
+              onChange={setSelectedSubject}
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              suffixIcon={<FilterOutlined />}
+              options={(fetchedSubjects || []).map((subject) => ({
+                value: subject.id,
+                label: subject.name,
+              }))}
+            />
+            <AppSelect
+              placeholder="Тип работы"
+              className={styles.filterSelect}
+              value={selectedWorkType}
+              onChange={setSelectedWorkType}
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              suffixIcon={<FilterOutlined />}
+              options={(workTypes || []).map((wt) => ({
+                value: wt.id,
+                label: wt.name,
+              }))}
+            />
+          </div>
+          <div className={styles.filtersToggleRow}>
+            <AppButton
+              variant="link"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className={styles.filtersToggle}
+            >
+              {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
+            </AppButton>
+          </div>
+          {showFilters && (
+            <div className={styles.filtersAdvancedRow}>
+              <div className={styles.budgetGroup}>
+                <span className={styles.budgetLabel}>Бюджет:</span>
+                <AppInput.Number
+                  min={0}
+                  max={budgetRange[1]}
+                  value={budgetRange[0]}
+                  onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
+                  placeholder="От"
+                  controls={false}
+                  className={styles.budgetInput}
+                  formatter={(value) => `${value} ₽`}
+                  parser={(value) => {
+                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                    return Number.isFinite(num) ? num : 0;
+                  }}
+                />
+                <span>—</span>
+                <AppInput.Number
+                  min={budgetRange[0]}
+                  max={1000000}
+                  value={budgetRange[1]}
+                  onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 100000])}
+                  placeholder="До"
+                  controls={false}
+                  className={styles.budgetInput}
+                  formatter={(value) => `${value} ₽`}
+                  parser={(value) => {
+                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
+                    return Number.isFinite(num) ? num : 0;
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <Table
