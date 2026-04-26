@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input } from 'antd';
+import { Typography, Space, Tag, Avatar, Spin, message, List, Divider, Empty, Badge, Dropdown, Modal, Input, Button } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, DollarOutlined, CheckCircleOutlined, MessageOutlined, StarOutlined, StarFilled, BookOutlined, ClockCircleOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ReadOutlined, NumberOutlined, DatabaseOutlined, UploadOutlined, InboxOutlined, EditOutlined, CloseOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ordersApi, Bid, Order, OrderFile } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
@@ -268,15 +268,10 @@ const OrderDetail: React.FC = () => {
     try {
       setReviewSubmitting(true);
       setReviewActionLoading('approve');
-      
-      // Сначала принимаем работу
+
       await ordersApi.approveOrder(Number(orderId));
-      
-      // Затем оставляем отзыв (если есть комментарий)
-      if (reviewComment.trim() || reviewRating > 0) {
-        await ordersApi.createReview(Number(orderId), reviewRating, reviewComment.trim());
-      }
-      
+      await ordersApi.createReview(Number(orderId), reviewRating, reviewComment.trim());
+
       await refreshOrderWithLists();
       setReviewModalOpen(false);
       setReviewRating(5);
@@ -289,6 +284,27 @@ const OrderDetail: React.FC = () => {
       setReviewActionLoading(null);
     }
   }, [orderId, refreshOrderWithLists, reviewRating, reviewComment]);
+
+  const handleApproveWithoutReview = React.useCallback(async () => {
+    if (!orderId) return;
+    try {
+      setReviewSubmitting(true);
+      setReviewActionLoading('approve');
+
+      await ordersApi.approveOrder(Number(orderId));
+
+      await refreshOrderWithLists();
+      setReviewModalOpen(false);
+      setReviewRating(5);
+      setReviewComment('');
+      message.success('Работа принята. Вы сможете оставить отзыв позже в разделе «Отзывы».');
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось принять работу');
+    } finally {
+      setReviewSubmitting(false);
+      setReviewActionLoading(null);
+    }
+  }, [orderId, refreshOrderWithLists]);
 
   const handleRevisionFromCard = React.useCallback(async () => {
     setRevisionModalOpen(true);
@@ -1227,12 +1243,25 @@ const OrderDetail: React.FC = () => {
           setReviewRating(5);
           setReviewComment('');
         }}
-        onOk={handleConfirmReviewAndApprove}
-        okButtonProps={{ loading: reviewSubmitting }}
-        okText="Принять и оставить отзыв"
-        cancelText="Отмена"
-        title="Оставьте отзыв о работе эксперта"
+        title="Принять работу"
         destroyOnHidden
+        footer={[
+          <Button
+            key="approve-only"
+            onClick={handleApproveWithoutReview}
+            loading={reviewSubmitting && reviewActionLoading === 'approve'}
+          >
+            Принять без отзыва
+          </Button>,
+          <Button
+            key="approve-with-review"
+            type="primary"
+            onClick={handleConfirmReviewAndApprove}
+            loading={reviewSubmitting && reviewActionLoading === 'approve'}
+          >
+            Принять и оставить отзыв
+          </Button>,
+        ]}
       >
         <div className={styles.revisionModalSpacing}>
           <div className={styles.reviewModalContent}>

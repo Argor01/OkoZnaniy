@@ -176,7 +176,7 @@ export const AppRoutes: React.FC = () => {
       />
       <Route
         path={ROUTES.admin.directorLogin}
-        element={<Navigate to={ROUTES.admin.root} replace />}
+        element={<AdminLogin />}
       />
       <Route 
         path={ROUTES.admin.dashboard} 

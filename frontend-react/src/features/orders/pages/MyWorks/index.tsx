@@ -118,12 +118,16 @@ const MyWorks: React.FC = () => {
     queryKey: ['client-orders-overview'],
     queryFn: () => ordersApi.getClientOrders({ ordering: '-created_at' }),
     enabled: userProfile?.role === 'client',
+    refetchInterval: 15000,
+    refetchIntervalInBackground: false,
   });
 
   const { data: inactiveClientOrdersData, isLoading: inactiveOrdersLoading } = useQuery({
     queryKey: ['client-orders-overview-inactive'],
     queryFn: () => ordersApi.getClientOrders({ inactive: true, ordering: '-created_at' }),
     enabled: userProfile?.role === 'client',
+    refetchInterval: 15000,
+    refetchIntervalInBackground: false,
   });
 
   const orders: Order[] = useMemo(() => {
@@ -616,6 +620,7 @@ const MyWorks: React.FC = () => {
         rowKey={(record) => record.id}
         loading={isLoading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
+        scroll={{ x: 'max-content' }}
         onRow={(record) => ({
           onClick: () => navigate(`/orders/${record.id}`),
           style: { cursor: 'pointer' },

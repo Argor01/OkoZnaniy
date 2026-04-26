@@ -9,7 +9,8 @@ export const useSupportChats = (enabled: boolean = true) => {
     queryKey: QUERY_KEYS.ADMIN_SUPPORT_CHATS,
     queryFn: adminPanelApi.getSupportChats,
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;

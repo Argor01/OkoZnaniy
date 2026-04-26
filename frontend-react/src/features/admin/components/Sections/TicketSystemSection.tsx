@@ -21,11 +21,11 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
-  MessageOutlined,
   ReloadOutlined,
   SearchOutlined,
   SendOutlined,
   StopOutlined,
+  UnlockOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
@@ -316,15 +316,19 @@ export const TicketSystemSection: React.FC = () => {
     await Promise.all([refetch(), refetchTicket()]);
   };
 
-  const handleUnfreezeContactChat = async () => {
+  const handleUnbanContactUser = async () => {
     if (!contactViolationUserId) return;
     setContactActionLoading(true);
     try {
-      await apiClient.post(`/users/${contactViolationUserId}/unfreeze_chats/`);
-      message.success('Чат разморожен');
+      await apiClient.patch(`/users/${contactViolationUserId}/unban_for_contacts/`);
+      message.success(
+        contactViolationUserName
+          ? `Пользователь ${contactViolationUserName} разблокирован`
+          : 'Пользователь разблокирован'
+      );
       await refreshAll();
     } catch {
-      message.error('Не удалось разморозить чат');
+      message.error('Не удалось разблокировать пользователя');
     } finally {
       setContactActionLoading(false);
     }
@@ -484,19 +488,19 @@ export const TicketSystemSection: React.FC = () => {
                   </div>
                   <Space wrap>
                     <Button
-                      icon={<MessageOutlined />}
-                      loading={contactActionLoading}
-                      onClick={handleUnfreezeContactChat}
-                    >
-                      Разморозить чат
-                    </Button>
-                    <Button
                       danger
                       icon={<StopOutlined />}
                       loading={contactActionLoading}
                       onClick={handlePermanentContactBan}
                     >
                       Заблокировать пользователя
+                    </Button>
+                    <Button
+                      icon={<UnlockOutlined />}
+                      loading={contactActionLoading}
+                      onClick={handleUnbanContactUser}
+                    >
+                      Разблокировать пользователя
                     </Button>
                     <Button
                       loading={contactActionLoading}

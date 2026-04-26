@@ -9,7 +9,8 @@ export const useChatRooms = (enabled: boolean = true) => {
     queryKey: QUERY_KEYS.ADMIN_CHAT_ROOMS,
     queryFn: adminPanelApi.getChatRooms,
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
@@ -29,7 +30,8 @@ export const useChatMessages = (roomId: number | null) => {
     queryKey: [...QUERY_KEYS.ADMIN_CHAT_ROOMS, roomId, 'messages'],
     queryFn: () => roomId ? adminPanelApi.getChatRoomMessages(roomId) : Promise.resolve([]),
     enabled: !!roomId,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     refetchInterval: 5000, // Poll every 5 seconds for new messages
   });
 

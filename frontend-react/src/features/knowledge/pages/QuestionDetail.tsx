@@ -81,13 +81,19 @@ const QuestionDetail: React.FC = () => {
     navigate('/knowledge');
   };
 
-  const handleUserClick = (userId: number, username: string | undefined, event: React.MouseEvent) => {
+  const handleUserClick = (
+    userId: number,
+    username: string | undefined,
+    role: string | undefined,
+    event: React.MouseEvent
+  ) => {
     event.stopPropagation();
     // Не переходим на профиль для моковых/несуществующих пользователей
     if (userId === 0 || userId === 999 || !username) {
       return;
     }
-    navigate(`/user/${username}`);
+    const path = role === 'expert' ? `/expert/${username}` : `/user/${username}`;
+    navigate(path);
   };
 
   const handleDeleteQuestion = async () => {
@@ -208,11 +214,16 @@ const QuestionDetail: React.FC = () => {
         <div className={styles.questionHeader}>
           <Space 
             style={{ cursor: 'pointer' }}
-            onClick={(e) => handleUserClick(question.author.id, question.author.username, e)}
+            onClick={(e) => handleUserClick(question.author.id, question.author.username, (question.author as { role?: string }).role, e)}
           >
             <Avatar size={48} icon={<UserOutlined />} />
             <div>
-              <Text strong className={styles.authorName}>{question.author.name}</Text>
+              <Text
+                strong
+                className={styles.authorName}
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => handleUserClick(question.author.id, question.author.username, (question.author as { role?: string }).role, e)}
+              >{question.author.name}</Text>
               <br />
               <Text type="secondary" className={styles.dateText}>
                 <ClockCircleOutlined /> {dayjs(question.created_at).fromNow()}
@@ -299,12 +310,16 @@ const QuestionDetail: React.FC = () => {
               <div className={styles.answerHeader}>
                 <Space 
                   style={{ cursor: 'pointer' }}
-                  onClick={(e) => handleUserClick(answer.author.id, answer.author.username, e)}
+                  onClick={(e) => handleUserClick(answer.author.id, answer.author.username, answer.author.role, e)}
                 >
                   <Avatar icon={<UserOutlined />} />
                   <div>
                     <Space>
-                      <Text strong>{answer.author.name}</Text>
+                      <Text
+                        strong
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => handleUserClick(answer.author.id, answer.author.username, answer.author.role, e)}
+                      >{answer.author.name}</Text>
                       {answer.author.role && (
                         <Tag color="purple">{answer.author.role}</Tag>
                       )}

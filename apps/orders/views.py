@@ -760,7 +760,26 @@ class OrderViewSet(viewsets.ModelViewSet):
         from apps.experts.models import ExpertStatistics
         stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
         stats.update_statistics()
-        
+
+        # Уведомление эксперту о новом/обновлённом отзыве
+        try:
+            NotificationService.notify_review_received(review)
+        except Exception:
+            pass
+
+        # Снимаем напоминание клиенту "оставьте отзыв" (если оно есть)
+        try:
+            from apps.notifications.models import Notification, NotificationType
+            Notification.objects.filter(
+                recipient=user,
+                type=NotificationType.REVIEW_REQUEST,
+                related_object_type='order',
+                related_object_id=order.id,
+                is_read=False,
+            ).update(is_read=True)
+        except Exception:
+            pass
+
         # Возвращаем данные отзыва
         return Response({
             'id': review.id,

@@ -8,7 +8,7 @@ import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
   LinkOutlined, TagOutlined, PlusOutlined, SwapOutlined, StarOutlined,
   EyeOutlined, MessageOutlined, HistoryOutlined, CheckCircleOutlined,
-  CloseCircleOutlined, DollarOutlined,
+  CloseCircleOutlined, DollarOutlined, UnlockOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { formatDistanceToNow } from 'date-fns';
@@ -134,15 +134,19 @@ export const TicketDetailPage: React.FC = () => {
 
   const doRefetch = () => { refetch(); refetchFeed(); };
 
-  const handleUnfreezeContactChat = async () => {
+  const handleUnbanContactUser = async () => {
     if (!contactViolationUserId) return;
     setContactActionLoading(true);
     try {
-      await apiClient.post(`/users/${contactViolationUserId}/unfreeze_chats/`);
-      message.success('Чат разморожен');
+      await apiClient.patch(`/users/${contactViolationUserId}/unban_for_contacts/`);
+      message.success(
+        contactViolationUserName
+          ? `Пользователь ${contactViolationUserName} разблокирован`
+          : 'Пользователь разблокирован'
+      );
       doRefetch();
     } catch {
-      message.error('Не удалось разморозить чат');
+      message.error('Не удалось разблокировать пользователя');
     } finally {
       setContactActionLoading(false);
     }
@@ -577,19 +581,19 @@ export const TicketDetailPage: React.FC = () => {
                   <>
                     <Button
                       block
-                      icon={<MessageOutlined />}
-                      loading={contactActionLoading}
-                      onClick={handleUnfreezeContactChat}
-                    >
-                      Разморозить чат
-                    </Button>
-                    <Button
-                      block
                       danger
                       loading={contactActionLoading}
                       onClick={handlePermanentContactBan}
                     >
                       Заблокировать пользователя
+                    </Button>
+                    <Button
+                      block
+                      icon={<UnlockOutlined />}
+                      loading={contactActionLoading}
+                      onClick={handleUnbanContactUser}
+                    >
+                      Разблокировать пользователя
                     </Button>
                     <Button
                       block

@@ -7,14 +7,18 @@
   height: max-content;
   max-height: calc(100vh - 104px - 24px);
   overflow-y: auto;
-  flex: 1 0 auto !important;
-  width: auto;
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  min-width: 280px;
   max-width: 320px;
   border-radius: 22px;
   z-index: 999;
   padding: 16px;
+  box-sizing: border-box;
   transition: width 0.26s ease;
   margin-bottom: 24px;
+  word-break: normal;
+  overflow-wrap: anywhere;
   
   /* Скрыть скроллбар */
   scrollbar-width: none;
@@ -50,6 +54,9 @@
   font-size: 20px !important;
   padding-bottom: 12px;
   border-bottom: 1px solid #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .questionsList {

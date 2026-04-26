@@ -9,7 +9,8 @@ export const useDirectorCommunications = (enabled: boolean = true) => {
     queryKey: QUERY_KEYS.ADMIN_DIRECTOR_COMMUNICATIONS,
     queryFn: adminPanelApi.getDirectorCommunications,
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     staleTime: QUERY_CONFIG.staleTime,
   });
 
@@ -21,7 +22,8 @@ export const useDirectorCommunicationMessages = (communicationId: number | null)
     queryKey: communicationId ? QUERY_KEYS.ADMIN_DIRECTOR_COMMUNICATION_MESSAGES(communicationId) : ['admin-director-communications-messages-disabled'],
     queryFn: () => communicationId ? adminPanelApi.getDirectorCommunicationMessages(communicationId) : Promise.resolve([]),
     enabled: !!communicationId,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     refetchInterval: 5000,
   });
 

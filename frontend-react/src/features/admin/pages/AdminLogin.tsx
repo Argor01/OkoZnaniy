@@ -8,10 +8,11 @@ import {
   SafetyOutlined, 
   BankOutlined 
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type User } from '@/features/auth/api/auth';
 import { DEV_ACCOUNTS, type DevAccount } from '@/config/devAccounts';
 import { redirectByRole } from '@/utils/roleRedirect';
+import { ROUTES } from '@/utils/constants';
 import '@/styles/admin-login.css';
 
 const { Title, Paragraph } = Typography;
@@ -25,6 +26,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDirectorLogin = location.pathname === ROUTES.admin.directorLogin;
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +44,18 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       try {
         const user = await authApi.getCurrentUser();
         if (cancelled) return;
+        // On directorLogin route, allow non-directors to re-authenticate by clearing
+        // the existing session instead of bouncing them to their old dashboard.
+        if (isDirectorLogin && user?.role !== 'director') {
+          try {
+            await Promise.resolve(authApi.logout());
+          } catch {
+            // ignore
+          }
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          return;
+        }
         await redirectByRole(user?.role ?? '', navigate);
       } catch (_error) {
         authApi.logout();
@@ -54,7 +69,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, isDirectorLogin]);
 
   
   const handleError = (error: any): string => {

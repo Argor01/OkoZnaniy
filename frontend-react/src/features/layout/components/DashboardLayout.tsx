@@ -166,13 +166,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // трёхколоночный layout (sidebar 320 + content 1000 + rightSidebar 320)
   // не влезал и съезжал. Ниже 1280 скрываем правую колонку и даём
   // контенту растянуться.
-  const [isCompact, setIsCompact] = useState(window.innerWidth <= 1280);
+  const [isCompact, setIsCompact] = useState(window.innerWidth <= 1400);
 
   React.useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
       setIsMobile(w <= 840);
-      setIsCompact(w <= 1280);
+      setIsCompact(w <= 1400);
       setIsChatMobile(w <= 768);
       setIsChatTablet(w > 768 && w <= 1024);
       setIsChatDesktop(w > 1024);

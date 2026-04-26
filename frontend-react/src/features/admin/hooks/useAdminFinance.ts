@@ -10,7 +10,8 @@ export const useTariffs = (enabled: boolean = true) => {
     queryKey: QUERY_KEYS.ADMIN_TARIFFS,
     queryFn: adminPanelApi.getTariffs,
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
@@ -65,7 +66,8 @@ export const useCommissions = (enabled: boolean = true) => {
     queryKey: QUERY_KEYS.ADMIN_COMMISSIONS,
     queryFn: adminPanelApi.getCommissions,
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;

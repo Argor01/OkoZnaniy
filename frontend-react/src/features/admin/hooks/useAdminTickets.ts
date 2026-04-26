@@ -31,7 +31,8 @@ export const useTickets = (enabled: boolean = true) => {
       return allTickets;
     },
     enabled,
-    initialData: [],
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
   });
 
   return { tickets, loading, refetch };

@@ -352,7 +352,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  }, [selectedChat]);
+
+    // Отмечаем входящее сообщение прочитанным, если чат открыт
+    if (!newMsg.is_mine && !newMsg.is_read && selectedChat?.id) {
+      const chatIdToMark = selectedChat.id;
+      chatApi
+        .markAsRead(chatIdToMark)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+        })
+        .catch(() => {});
+    }
+  }, [selectedChat, queryClient]);
 
   const { isConnected: wsConnected } = useChatWebSocket(
     selectedChat?.id ?? null,

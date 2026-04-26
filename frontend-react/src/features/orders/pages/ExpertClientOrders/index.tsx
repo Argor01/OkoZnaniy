@@ -408,6 +408,7 @@ const ExpertClientOrders: React.FC = () => {
         rowKey={(record) => record.id}
         loading={clientOrdersLoading || inactiveOrdersLoading}
         pagination={{ pageSize: 10, showSizeChanger: true }}
+        scroll={{ x: 'max-content' }}
         onRow={(record) => ({
           onClick: () => navigate(`/orders/${record.id}`),
           style: { cursor: 'pointer' },
