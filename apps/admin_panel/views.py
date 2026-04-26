@@ -129,7 +129,31 @@ def unblock_user(request, user_id):
         user.block_reason = ''
         user.unblock_date = None
         user.blocked_by = None
-        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+        user.is_banned_for_contacts = False
+        user.contact_ban_reason = None
+        user.contact_ban_date = None
+        user.contact_ban_until = None
+        user.save(update_fields=[
+            'is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by',
+            'is_banned_for_contacts', 'contact_ban_reason', 'contact_ban_date', 'contact_ban_until',
+        ])
+
+        # Размораживаем все чаты и заказы пользователя
+        try:
+            from django.db.models import Q
+            from apps.chat.models import Chat as ChatModel
+            from apps.orders.models import Order
+            for chat in ChatModel.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user) | Q(participants=user)
+            ).distinct():
+                chat.unfreeze()
+            for order in Order.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user)
+            ).distinct():
+                order.unfreeze()
+        except Exception:
+            pass
+
         return Response({'message': 'Пользователь разблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)

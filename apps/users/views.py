@@ -1207,6 +1207,22 @@ class UserViewSet(viewsets.ModelViewSet):
         user.contact_ban_until = None
         user.save()
 
+        # Размораживаем все чаты и заказы пользователя
+        try:
+            from django.db.models import Q
+            from apps.chat.models import Chat as ChatModel
+            from apps.orders.models import Order
+            for chat in ChatModel.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user) | Q(participants=user)
+            ).distinct():
+                chat.unfreeze()
+            for order in Order.objects.filter(is_frozen=True).filter(
+                Q(expert=user) | Q(client=user)
+            ).distinct():
+                order.unfreeze()
+        except Exception:
+            pass
+
         return Response({
             'message': f'Пользователь {user.username} разбанен',
             'user': self.get_serializer(user).data
