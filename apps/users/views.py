@@ -49,26 +49,44 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         import logging
         from django.conf import settings
         from django.utils import timezone
+        from rest_framework.response import Response
         logger = logging.getLogger(__name__)
         try:
             if settings.DEBUG:
                 logger.debug("[Token View] Login request received")
-            
+
+            username = request.data.get('username')
+            if username:
+                try:
+                    user = User.objects.get(username=username)
+                    user.unblock_if_expired()
+                    user.unban_for_contacts_if_expired()
+
+                    if not user.is_active:
+                        detail = 'Ваш аккаунт заблокирован.'
+                        if user.block_reason:
+                            detail += f' Причина: {user.block_reason}'
+                        if user.unblock_date:
+                            detail += f' Разблокировка: {user.unblock_date.strftime("%d.%m.%Y %H:%M")}'
+                        return Response(
+                            {'detail': detail},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
+                except User.DoesNotExist:
+                    pass
+
             response = super().post(request, *args, **kwargs)
-            
-            if response.status_code == 200:
-                username = request.data.get('username')
-                if username:
-                    try:
-                        user = User.objects.get(username=username)
-                        user.unblock_if_expired()
-                        user.last_login = timezone.now()
-                        user.save(update_fields=['last_login'])
-                        if settings.DEBUG:
-                            logger.debug(f"[Token View] Updated last_login for user_id: {user.id}")
-                    except User.DoesNotExist:
-                        pass
-            
+
+            if response.status_code == 200 and username:
+                try:
+                    user = User.objects.get(username=username)
+                    user.last_login = timezone.now()
+                    user.save(update_fields=['last_login'])
+                    if settings.DEBUG:
+                        logger.debug(f"[Token View] Updated last_login for user_id: {user.id}")
+                except User.DoesNotExist:
+                    pass
+
             return response
         except Exception as e:
             logger.error(f"[Token View] Error in post: {str(e)}")
