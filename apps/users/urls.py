@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from . import views
+from . import views, vkid
 
 """config URL Configuration
 
@@ -29,6 +29,8 @@ urlpatterns = [
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
     path('google/callback/', views.google_callback, name='google_callback'),
     path('vk/callback/', views.vk_callback, name='vk_callback'),
+    path('vkid/login/', vkid.vkid_login, name='vkid_login'),
+    path('vkid/callback/', vkid.vkid_callback, name='vkid_callback'),
     
     # Специфичные маршруты должны идти перед общими router.urls
     path('partners_list/', views.UserViewSet.as_view({'get': 'partners_list'}), name='partners_list'),
