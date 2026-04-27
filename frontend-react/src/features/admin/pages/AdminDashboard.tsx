@@ -37,6 +37,7 @@ const AdminChatsSection = lazy(() => import('@/features/admin/components/Section
 const UserConversationsSection = lazy(() => import('@/features/admin/components/Sections/UserConversationsSection').then(m => ({ default: m.UserConversationsSection })));
 const BlockingSection = lazy(() => import('@/features/admin/components/Sections/BlockingSection').then(m => ({ default: m.BlockingSection })));
 const ContactBannedUsersSection = lazy(() => import('@/features/director/components/ContactBannedUsers').then(m => ({ default: m.default })));
+const KnowledgeBaseSection = lazy(() => import('@/features/admin/components/Sections/KnowledgeBaseSection').then(m => ({ default: m.KnowledgeBaseSection })));
 
 const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
 const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
@@ -246,6 +247,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'user_conversations':
         return (
           <UserConversationsSection />
+        );
+
+      case 'knowledge_base':
+        return (
+          <KnowledgeBaseSection />
         );
     }
   };

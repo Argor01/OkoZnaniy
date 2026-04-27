@@ -1,0 +1,77 @@
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: 16px;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  font-size: 14px;
+}
+
+.required::after {
+  content: ' *';
+  color: #ff4d4f;
+}
+
+.uploadArea {
+  margin-top: 4px;
+}
+
+.fileList {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.fileItemName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 4px;
+  }
+  .submitRow {
+    flex-direction: column;
+  }
+  .submitRow button {
+    width: 100%;
+  }
+}

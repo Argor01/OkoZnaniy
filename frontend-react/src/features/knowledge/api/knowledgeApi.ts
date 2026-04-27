@@ -46,6 +46,63 @@ export interface Answer {
   is_liked?: boolean;
 }
 
+export interface ArticleFile {
+  id: number;
+  file_url: string;
+  original_name: string;
+  file_size: number;
+  uploaded_at: string;
+}
+
+export interface ArticleAuthor {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+}
+
+export interface Article {
+  id: number;
+  title: string;
+  description: string;
+  work_type: string;
+  subject: string;
+  author: ArticleAuthor;
+  views_count: number;
+  files_count?: number;
+  files?: ArticleFile[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export const articlesApi = {
+  getArticles: async (params?: {
+    search?: string;
+    work_type?: string;
+    subject?: string;
+  }): Promise<Article[]> => {
+    const response = await apiClient.get('/knowledge/articles/', { params });
+    return response.data.results || response.data;
+  },
+
+  getArticle: async (id: number): Promise<Article> => {
+    const response = await apiClient.get(`/knowledge/articles/${id}/`);
+    return response.data;
+  },
+
+  createArticle: async (formData: FormData): Promise<Article> => {
+    const response = await apiClient.post('/knowledge/articles/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  deleteArticle: async (id: number): Promise<void> => {
+    await apiClient.delete(`/knowledge/articles/${id}/`);
+  },
+};
+
 export const knowledgeApi = {
   getCategories: async (): Promise<Category[]> => {
     const response = await apiClient.get('/catalog/categories/');

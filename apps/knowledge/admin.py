@@ -1,5 +1,20 @@
 from django.contrib import admin
-from .models import Question, QuestionTag, Answer, AnswerLike, QuestionView
+from .models import Question, QuestionTag, Answer, AnswerLike, QuestionView, Article, ArticleFile
+
+
+class ArticleFileInline(admin.TabularInline):
+    model = ArticleFile
+    extra = 0
+    readonly_fields = ['uploaded_at']
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ['title', 'work_type', 'subject', 'author', 'views_count', 'created_at']
+    list_filter = ['work_type', 'subject', 'created_at']
+    search_fields = ['title', 'description']
+    readonly_fields = ['views_count', 'created_at', 'updated_at']
+    inlines = [ArticleFileInline]
 
 
 class QuestionTagInline(admin.TabularInline):

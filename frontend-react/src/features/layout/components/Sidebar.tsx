@@ -127,6 +127,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       navigate('/knowledge');
       return;
     }
+    if (key === 'knowledge-base') {
+      navigate('/knowledge-base');
+      return;
+    }
     if (key === 'logout') {
       onLogout();
       return;
@@ -294,8 +298,13 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       label: 'Мои друзья',
     },
     {
-      key: 'knowledge',
+      key: 'knowledge-base',
       icon: <BookOutlined />,
+      label: 'База Знаний',
+    },
+    {
+      key: 'knowledge',
+      icon: <QuestionCircleOutlined />,
       label: 'Око Ответы',
     },
     {

@@ -6,6 +6,7 @@ import {
   ShoppingOutlined,
   StopOutlined,
   AuditOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -57,6 +58,11 @@ export const menuItems: MenuItem[] = [
     icon: MessageOutlined,
     label: 'Коммуникация',
   },
+  {
+    key: 'knowledge_base',
+    icon: BookOutlined,
+    label: 'База Знаний',
+  },
 ];
 
 export const titleMap: Record<MenuKey, string> = {
@@ -81,6 +87,7 @@ export const titleMap: Record<MenuKey, string> = {
   completed_claims: 'Завершенные заявки',
   pending_approval: 'Ожидают подтверждения',
   user_conversations: 'Диалоги пользователей',
+  knowledge_base: 'База Знаний',
 };
 
 export const getParentMenuKey = (_menuKey: MenuKey): MenuKey | null => {

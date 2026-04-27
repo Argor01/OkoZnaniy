@@ -1,5 +1,60 @@
 from rest_framework import serializers
-from .models import Question, QuestionTag, Answer, AnswerLike
+from .models import Question, QuestionTag, Answer, AnswerLike, Article, ArticleFile
+
+
+class ArticleFileSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ArticleFile
+        fields = ['id', 'file_url', 'original_name', 'file_size', 'uploaded_at']
+
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        if obj.file and request:
+            return request.build_absolute_uri(obj.file.url)
+        return None
+
+
+class ArticleAuthorSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    role = serializers.CharField()
+
+
+class ArticleListSerializer(serializers.ModelSerializer):
+    author = ArticleAuthorSerializer(read_only=True)
+    files_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Article
+        fields = [
+            'id', 'title', 'description', 'work_type', 'subject',
+            'author', 'views_count', 'files_count', 'created_at',
+        ]
+
+    def get_files_count(self, obj):
+        return obj.files.count()
+
+
+class ArticleDetailSerializer(serializers.ModelSerializer):
+    author = ArticleAuthorSerializer(read_only=True)
+    files = ArticleFileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Article
+        fields = [
+            'id', 'title', 'description', 'work_type', 'subject',
+            'author', 'views_count', 'files', 'created_at', 'updated_at',
+        ]
+
+
+class ArticleCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ['title', 'description', 'work_type', 'subject']
 
 
 class QuestionTagSerializer(serializers.ModelSerializer):
