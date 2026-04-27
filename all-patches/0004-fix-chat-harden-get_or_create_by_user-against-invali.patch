@@ -1,0 +1,138 @@
+From abf92a2571634a1b747781947a8f2424b40909d0 Mon Sep 17 00:00:00 2001
+From: Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 21:32:34 +0000
+Subject: [PATCH 4/8] fix(chat): harden get_or_create_by_user against
+ invalid/self user_id
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The endpoint previously fell into a 404 path (User.DoesNotExist) or bubbled
+ValueError as a 500 when the frontend sent non-integer user_id, and the
+self-chat check happened *after* the DB lookup — so self-chats raced other
+error paths. Validate the id up-front: reject empty/non-int values with a
+clear 400 message, and block self-chats before hitting the DB.
+
+Frontend: UserProfile.handleWriteMessage now guards against self-chat and
+invalid ids locally, and surfaces DRF field errors instead of a generic
+toast.
+
+Co-Authored-By: Егор Брайт (Светлый) <brait.2005@gmail.com>
+---
+ apps/chat/views.py                            | 25 ++++++++++-------
+ .../src/features/user/pages/UserProfile.tsx   | 27 +++++++++++++------
+ 2 files changed, 35 insertions(+), 17 deletions(-)
+
+diff --git a/apps/chat/views.py b/apps/chat/views.py
+index bd31395..3ea6447 100644
+--- a/apps/chat/views.py
++++ b/apps/chat/views.py
+@@ -1064,26 +1064,33 @@ class ChatViewSet(viewsets.ModelViewSet):
+         context_title = request.data.get('context_title')
+         if context_title is not None:
+             context_title = str(context_title).strip()[:255] or None
+-        if not user_id:
++        if user_id in (None, '', 0, '0'):
+             return Response(
+                 {'detail': 'user_id обязателен'},
+                 status=status.HTTP_400_BAD_REQUEST
+             )
+-        
++
+         try:
+-            other_user = User.objects.get(id=user_id)
+-        except User.DoesNotExist:
++            user_id_int = int(user_id)
++        except (TypeError, ValueError):
+             return Response(
+-                {'detail': 'Пользователь не найден'},
+-                status=status.HTTP_404_NOT_FOUND
++                {'detail': 'user_id должен быть числом'},
++                status=status.HTTP_400_BAD_REQUEST
+             )
+-        
+-        # Нельзя создать чат с самим собой
+-        if other_user.id == request.user.id:
++
++        if user_id_int == request.user.id:
+             return Response(
+                 {'detail': 'Нельзя создать чат с самим собой'},
+                 status=status.HTTP_400_BAD_REQUEST
+             )
++
++        try:
++            other_user = User.objects.get(id=user_id_int)
++        except User.DoesNotExist:
++            return Response(
++                {'detail': 'Пользователь не найден'},
++                status=status.HTTP_404_NOT_FOUND
++            )
+         
+         # Определяем client/expert по ID (меньший ID = client), чтобы constraint работал корректно
+         user_ids = sorted([request.user.id, other_user.id])
+diff --git a/frontend-react/src/features/user/pages/UserProfile.tsx b/frontend-react/src/features/user/pages/UserProfile.tsx
+index 3af82ba..5e5ddda 100644
+--- a/frontend-react/src/features/user/pages/UserProfile.tsx
++++ b/frontend-react/src/features/user/pages/UserProfile.tsx
+@@ -6,6 +6,7 @@ import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined }
+ import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
+ import { apiClient } from '@/api/client';
+ import { chatApi } from '@/features/support/api/chat';
++import { useAuth } from '@/features/auth/hooks/useAuth';
+ import dayjs from 'dayjs';
+ import { getMediaUrl } from '@/config/api';
+ import { SectionHeader, SurfaceCard } from '@/features/common';
+@@ -16,6 +17,7 @@ const { Text, Paragraph } = Typography;
+ const UserProfile: FC = () => {
+   const { username } = useParams<{ username: string }>();
+   const navigate = useNavigate();
++  const { user: currentUser } = useAuth();
+ 
+   
+   const { data: userData, isLoading: userLoading, error: userError } = useQuery({
+@@ -87,25 +89,34 @@ const UserProfile: FC = () => {
+       : (Array.isArray(userData?.specializations) ? userData.specializations : []);
+ 
+   const handleWriteMessage = async () => {
+-    if (!userData?.id) {
++    const targetId = Number(userData?.id);
++    if (!Number.isFinite(targetId) || targetId <= 0) {
+       antMessage.error('ID пользователя не найден');
+       return;
+     }
+ 
++    if (currentUser && Number(currentUser.id) === targetId) {
++      antMessage.warning('Нельзя открыть чат с самим собой');
++      return;
++    }
++
+     try {
+-      // Создаем или получаем чат с этим пользователем
+-      const chatData = await chatApi.getOrCreateByUser(Number(userData.id));
+-      
+-      // Открываем модальное окно чата с этим чатом
++      const chatData = await chatApi.getOrCreateByUser(targetId);
++
+       const event = new CustomEvent('openChatById', {
+-        detail: { chatId: chatData.id, userId: Number(userData.id) }
++        detail: { chatId: chatData.id, userId: targetId }
+       });
+       window.dispatchEvent(event);
+-      
++
+       antMessage.success('Чат открыт');
+     } catch (error: any) {
+       console.error('Ошибка создания чата:', error);
+-      antMessage.error(error.response?.data?.detail || 'Не удалось создать чат');
++      const data = error?.response?.data;
++      const backendMessage =
++        data?.detail ||
++        (typeof data === 'string' ? data : undefined) ||
++        (data && typeof data === 'object' ? Object.values(data).flat().join(', ') : undefined);
++      antMessage.error(backendMessage || 'Не удалось создать чат');
+     }
+   };
+ 
+-- 
+2.34.1
+

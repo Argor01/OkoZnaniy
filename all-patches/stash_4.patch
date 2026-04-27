@@ -1,0 +1,6 @@
+diff --git a/create_admin_accounts.sh b/create_admin_accounts.sh
+old mode 100644
+new mode 100755
+diff --git a/update-and-restart.sh b/update-and-restart.sh
+old mode 100644
+new mode 100755

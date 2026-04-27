@@ -1,0 +1,35 @@
+From b1d5648f42897652a5ed4460718efe7697c7fc83 Mon Sep 17 00:00:00 2001
+From: Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 21:30:05 +0000
+Subject: [PATCH 3/8] fix(expert): mark education block as required in
+ application modal
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The Form.Item wrapping the educations Form.List had no required flag, so
+the label showed no asterisk even though onFinish rejects empty lists and
+each row's university/year fields are required. Add required and tooltip
+to the wrapper Form.Item so users see the field is mandatory.
+
+Co-Authored-By: Егор Брайт (Светлый) <brait.2005@gmail.com>
+---
+ frontend-react/src/features/expert/modals/ApplicationModal.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/frontend-react/src/features/expert/modals/ApplicationModal.tsx b/frontend-react/src/features/expert/modals/ApplicationModal.tsx
+index bcb8d7e..7db7c32 100644
+--- a/frontend-react/src/features/expert/modals/ApplicationModal.tsx
++++ b/frontend-react/src/features/expert/modals/ApplicationModal.tsx
+@@ -454,7 +454,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
+           />
+         </Form.Item>
+ 
+-        <Form.Item label="Образование">
++        <Form.Item label="Образование" required tooltip="Добавьте минимум одно образование">
+           <Form.List name="educations">
+             {(fields, { add, remove }) => (
+               <>
+-- 
+2.34.1
+

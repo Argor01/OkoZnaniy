@@ -1,0 +1,30 @@
+From 733fcd039bcc367dcb2c538f34ef387d2729d73d Mon Sep 17 00:00:00 2001
+From: Devin <devin@devin.ai>
+Date: Thu, 23 Apr 2026 23:46:00 +0000
+Subject: [PATCH 5/8] fix(ui): replace default Vite favicon with project logo
+
+Use /assets/logo.svg as primary favicon (modern browsers) and
+/assets/logo.png as apple-touch-icon + PNG fallback. Drops the
+leftover /vite.svg placeholder.
+---
+ frontend-react/index.html | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/frontend-react/index.html b/frontend-react/index.html
+index fe949ff..7a8c0df 100644
+--- a/frontend-react/index.html
++++ b/frontend-react/index.html
+@@ -2,7 +2,9 @@
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
++    <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
++    <link rel="alternate icon" type="image/png" href="/assets/logo.png" />
++    <link rel="apple-touch-icon" href="/assets/logo.png" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <title>ОкоЗнаний</title>
+     <!-- Flaticon Icons -->
+-- 
+2.34.1
+

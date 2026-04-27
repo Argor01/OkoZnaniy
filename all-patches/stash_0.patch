@@ -1,0 +1,968 @@
+diff --git a/apps/admin_panel/views.py b/apps/admin_panel/views.py
+index 1378e5a..86734a6 100644
+--- a/apps/admin_panel/views.py
++++ b/apps/admin_panel/views.py
+@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
+ from django.contrib.auth import get_user_model
+ from django.db.models import Q, Count
+ from django.utils import timezone
++from django.utils.dateparse import parse_datetime
+ 
+ from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
+ from .serializers import (
+@@ -43,6 +44,27 @@ def log_activity(actor, activity_type, text, meta=None, support_request=None, cl
+     )
+ 
+ 
++def _release_expired_blocks():
++    for user in User.objects.filter(is_active=False, unblock_date__isnull=False):
++        user.unblock_if_expired()
++
++
++def _serialize_admin_user(user):
++    data = UserSerializer(user).data
++    block_duration = 'permanent'
++    if data.get('unblock_date'):
++        block_duration = 'temporary'
++    data.update({
++        'is_blocked': not user.is_active,
++        'blocked_at': user.blocked_at,
++        'block_reason': user.block_reason or '',
++        'unblock_date': user.unblock_date,
++        'block_duration': block_duration,
++        'violation_count': getattr(user, 'contact_violations_count', 0),
++    })
++    return data
++
++
+ class IsAdminUser(IsAuthenticated):
+     """Проверка прав администратора"""
+     def has_permission(self, request, view):
+@@ -55,18 +77,18 @@ class IsAdminUser(IsAuthenticated):
+ @permission_classes([IsAdminUser])
+ def get_all_users(request):
+     """Получить всех пользователей"""
++    _release_expired_blocks()
+     users = User.objects.all().order_by('-date_joined')
+-    serializer = UserSerializer(users, many=True)
+-    return Response(serializer.data)
++    return Response([_serialize_admin_user(user) for user in users])
+ 
+ 
+ @api_view(['GET'])
+ @permission_classes([IsAdminUser])
+ def get_blocked_users(request):
+     """Получить заблокированных пользователей"""
++    _release_expired_blocks()
+     users = User.objects.filter(is_active=False).order_by('-date_joined')
+-    serializer = UserSerializer(users, many=True)
+-    return Response(serializer.data)
++    return Response([_serialize_admin_user(user) for user in users])
+ 
+ 
+ @api_view(['POST'])
+@@ -75,9 +97,23 @@ def block_user(request, user_id):
+     """Заблокировать пользователя"""
+     try:
+         user = User.objects.get(id=user_id)
++        unblock_date = None
++        unblock_date_raw = request.data.get('unblock_date')
++        if isinstance(unblock_date_raw, str) and unblock_date_raw.strip():
++            unblock_date = parse_datetime(unblock_date_raw.strip())
++            if unblock_date is None:
++                return Response({'error': 'Некорректная дата разблокировки'}, status=400)
++            if timezone.is_naive(unblock_date):
++                unblock_date = timezone.make_aware(unblock_date, timezone.get_current_timezone())
++            if unblock_date <= timezone.now():
++                return Response({'error': 'Дата разблокировки должна быть в будущем'}, status=400)
+         user.is_active = False
+-        user.save()
+-        return Response({'message': 'Пользователь заблокирован'})
++        user.blocked_at = timezone.now()
++        user.block_reason = (request.data.get('reason') or '').strip()
++        user.unblock_date = unblock_date
++        user.blocked_by = request.user
++        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
++        return Response({'message': 'Пользователь заблокирован', 'user': _serialize_admin_user(user)})
+     except User.DoesNotExist:
+         return Response({'error': 'Пользователь не найден'}, status=404)
+ 
+@@ -89,8 +125,12 @@ def unblock_user(request, user_id):
+     try:
+         user = User.objects.get(id=user_id)
+         user.is_active = True
+-        user.save()
+-        return Response({'message': 'Пользователь разблокирован'})
++        user.blocked_at = None
++        user.block_reason = ''
++        user.unblock_date = None
++        user.blocked_by = None
++        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
++        return Response({'message': 'Пользователь разблокирован', 'user': _serialize_admin_user(user)})
+     except User.DoesNotExist:
+         return Response({'error': 'Пользователь не найден'}, status=404)
+ 
+diff --git a/apps/chat/serializers.py b/apps/chat/serializers.py
+index 861e47b..c87a054 100644
+--- a/apps/chat/serializers.py
++++ b/apps/chat/serializers.py
+@@ -24,6 +24,7 @@ class ChatListSerializer(serializers.ModelSerializer):
+     client = UserSerializer(read_only=True)
+     expert = UserSerializer(read_only=True)
+     participants = UserSerializer(many=True, read_only=True)
++    order_id = serializers.IntegerField(read_only=True)
+     last_message = serializers.SerializerMethodField()
+     unread_count = serializers.SerializerMethodField()
+     other_user = serializers.SerializerMethodField()
+@@ -33,7 +34,7 @@ class ChatListSerializer(serializers.ModelSerializer):
+     
+     class Meta:
+         model = Chat
+-        fields = ['id', 'order', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
++        fields = ['id', 'order', 'order_id', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
+                   'frozen_reason', 'last_message', 'unread_count', 'other_user', 'is_pinned']
+     
+     def get_other_user(self, obj):
+@@ -98,14 +99,16 @@ class ChatDetailSerializer(serializers.ModelSerializer):
+     expert = UserSerializer(read_only=True)
+     participants = UserSerializer(many=True, read_only=True)
+     messages = MessageSerializer(many=True, read_only=True)
++    order_id = serializers.IntegerField(read_only=True)
++    unread_count = serializers.SerializerMethodField()
+     other_user = serializers.SerializerMethodField()
+     is_frozen = serializers.SerializerMethodField()
+     frozen_reason = serializers.SerializerMethodField()
+     
+     class Meta:
+         model = Chat
+-        fields = ['id', 'order', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
+-                  'frozen_reason', 'frozen_at', 'messages', 'other_user']
++        fields = ['id', 'order', 'order_id', 'client', 'expert', 'participants', 'context_title', 'is_frozen', 
++                  'frozen_reason', 'frozen_at', 'messages', 'other_user', 'unread_count']
+ 
+     def get_other_user(self, obj):
+         request = self.context.get('request')
+@@ -139,6 +142,12 @@ class ChatDetailSerializer(serializers.ModelSerializer):
+             return other.contact_ban_reason or 'Собеседник находится на проверке правил безопасности.'
+         return obj.frozen_reason
+ 
++    def get_unread_count(self, obj):
++        request = self.context.get('request')
++        if request and request.user:
++            return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
++        return 0
++
+ 
+ class SupportMessageSerializer(serializers.ModelSerializer):
+     sender = UserSerializer(read_only=True)
+diff --git a/apps/orders/serializers.py b/apps/orders/serializers.py
+index bd08eda..552c578 100644
+--- a/apps/orders/serializers.py
++++ b/apps/orders/serializers.py
+@@ -7,6 +7,8 @@ from apps.users.serializers import UserSerializer
+ from django.utils import timezone
+ from rest_framework.reverse import reverse
+ 
++MAX_ORDER_BUDGET = 99_999_999.99
++
+ class OrderFileSerializer(serializers.ModelSerializer):
+     uploaded_by = UserSerializer(read_only=True)
+     file_type_display = serializers.CharField(source='get_file_type_display', read_only=True)
+@@ -223,6 +225,10 @@ class OrderSerializer(serializers.ModelSerializer):
+             raise serializers.ValidationError({
+                 'budget': 'Цена должна быть больше 0'
+             })
++        elif budget is not None and budget > MAX_ORDER_BUDGET:
++            raise serializers.ValidationError({
++                'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
++            })
+         
+         return data
+ 
+@@ -294,6 +300,10 @@ class OrderSerializer(serializers.ModelSerializer):
+             raise serializers.ValidationError({
+                 'budget': 'Цена должна быть больше 0'
+             })
++        if budget is not None and budget > MAX_ORDER_BUDGET:
++            raise serializers.ValidationError({
++                'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
++            })
+         
+                                         
+         # Создаем заказ
+diff --git a/apps/users/models.py b/apps/users/models.py
+index d8e0682..3a63a83 100644
+--- a/apps/users/models.py
++++ b/apps/users/models.py
+@@ -1,6 +1,7 @@
+ # apps/users/models.py
+ from django.contrib.auth.models import AbstractUser
+ from django.db import models
++from django.utils import timezone
+ 
+ class Roles(models.TextChoices):
+     CLIENT = 'client'
+@@ -62,6 +63,10 @@ class User(AbstractUser):
+     contact_ban_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата бана за контакты")
+     contact_violations_count = models.PositiveIntegerField(default=0, verbose_name="Количество нарушений")
+     banned_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='banned_users', verbose_name="Кто забанил")
++    blocked_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата блокировки")
++    block_reason = models.TextField(blank=True, null=True, verbose_name="Причина блокировки")
++    unblock_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата разблокировки")
++    blocked_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='blocked_users_by_admin', verbose_name="Кто заблокировал")
+     
+     def save(self, *args, **kwargs):
+         # Генерируем реферальный код для партнеров
+@@ -70,6 +75,20 @@ class User(AbstractUser):
+             self.referral_code = str(uuid.uuid4())[:8].upper()
+         super().save(*args, **kwargs)
+ 
++    def is_temporary_block_active(self):
++        return bool(not self.is_active and self.unblock_date and self.unblock_date > timezone.now())
++
++    def unblock_if_expired(self):
++        if self.is_active or not self.unblock_date or self.unblock_date > timezone.now():
++            return False
++        self.is_active = True
++        self.blocked_at = None
++        self.block_reason = ''
++        self.unblock_date = None
++        self.blocked_by = None
++        self.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
++        return True
++
+ 
+ class PartnerEarning(models.Model):
+     """Модель для отслеживания доходов партнера"""
+diff --git a/apps/users/serializers.py b/apps/users/serializers.py
+index 2ef3fa2..a860a21 100644
+--- a/apps/users/serializers.py
++++ b/apps/users/serializers.py
+@@ -129,6 +129,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
+ 
+ class UserSerializer(serializers.ModelSerializer):
+     """Serializer для модели User"""
++    is_blocked = serializers.SerializerMethodField()
+     
+     class Meta:
+         model = User
+@@ -139,14 +140,21 @@ class UserSerializer(serializers.ModelSerializer):
+             'education', 'skills', 'portfolio_url', 'is_verified',
+             'referral_code', 'partner_commission_rate',
+             'total_referrals', 'active_referrals', 'total_earnings',
+-            'city', 'email_verified'
++            'city', 'email_verified', 'is_active', 'is_blocked',
++            'date_joined', 'last_login', 'blocked_at', 'block_reason',
++            'unblock_date', 'contact_violations_count'
+         ]
+         read_only_fields = [
+             'id', 'balance', 'frozen_balance', 'is_verified',
+             'referral_code', 'total_referrals', 'active_referrals',
+-            'total_earnings', 'email_verified'
++            'total_earnings', 'email_verified', 'is_blocked',
++            'date_joined', 'last_login', 'blocked_at', 'block_reason',
++            'unblock_date', 'contact_violations_count'
+         ]
+ 
++    def get_is_blocked(self, obj):
++        return not obj.is_active
++
+ 
+ class UserCreateSerializer(serializers.ModelSerializer):
+     """Serializer для создания пользователя"""
+diff --git a/apps/users/views.py b/apps/users/views.py
+index 0dc7ca4..ca930e3 100644
+--- a/apps/users/views.py
++++ b/apps/users/views.py
+@@ -19,6 +19,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+ from django.contrib.auth.tokens import default_token_generator
+ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+ from django.utils.encoding import force_bytes, force_str
++from django.utils.dateparse import parse_datetime
+ 
+ logger = logging.getLogger(__name__)
+ from apps.orders.models import Order, Transaction
+@@ -56,6 +57,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
+                 if username:
+                     try:
+                         user = User.objects.get(username=username)
++                        user.unblock_if_expired()
+                         user.last_login = timezone.now()
+                         user.save(update_fields=['last_login'])
+                         if settings.DEBUG:
+@@ -919,8 +921,23 @@ class UserViewSet(viewsets.ModelViewSet):
+                 status=status.HTTP_404_NOT_FOUND
+             )
+ 
++        unblock_date = None
++        unblock_date_raw = request.data.get('unblock_date')
++        if isinstance(unblock_date_raw, str) and unblock_date_raw.strip():
++            unblock_date = parse_datetime(unblock_date_raw.strip())
++            if unblock_date is None:
++                return Response({'error': 'Некорректная дата разблокировки'}, status=status.HTTP_400_BAD_REQUEST)
++            if timezone.is_naive(unblock_date):
++                unblock_date = timezone.make_aware(unblock_date, timezone.get_current_timezone())
++            if unblock_date <= timezone.now():
++                return Response({'error': 'Дата разблокировки должна быть в будущем'}, status=status.HTTP_400_BAD_REQUEST)
++
+         user.is_active = False
+-        user.save()
++        user.blocked_at = timezone.now()
++        user.block_reason = (request.data.get('reason') or '').strip()
++        user.unblock_date = unblock_date
++        user.blocked_by = request.user
++        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+         
+         return Response({
+             'message': f'Пользователь {user.username} заблокирован',
+@@ -946,7 +963,11 @@ class UserViewSet(viewsets.ModelViewSet):
+             )
+ 
+         user.is_active = True
+-        user.save()
++        user.blocked_at = None
++        user.block_reason = ''
++        user.unblock_date = None
++        user.blocked_by = None
++        user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+         
+         return Response({
+             'message': f'Пользователь {user.username} разблокирован',
+diff --git a/docker/postgres/init-password.sh b/docker/postgres/init-password.sh
+old mode 100644
+new mode 100755
+diff --git a/frontend-react/src/features/admin/api/users.ts b/frontend-react/src/features/admin/api/users.ts
+index 95f99fc..d605d76 100644
+--- a/frontend-react/src/features/admin/api/users.ts
++++ b/frontend-react/src/features/admin/api/users.ts
+@@ -22,8 +22,11 @@ export const usersApi = {
+     return [];
+   },
+ 
+-  blockUser: async (userId: number): Promise<void> => {
+-    await apiClient.post(API_ENDPOINTS.admin.users.block(userId));
++  blockUser: async (
++    userId: number,
++    payload?: { reason?: string; unblock_date?: string | null }
++  ): Promise<void> => {
++    await apiClient.post(API_ENDPOINTS.admin.users.block(userId), payload ?? {});
+   },
+ 
+   unblockUser: async (userId: number): Promise<void> => {
+diff --git a/frontend-react/src/features/admin/components/Sections/AllOrdersSection.tsx b/frontend-react/src/features/admin/components/Sections/AllOrdersSection.tsx
+index d30d4ed..7cae790 100644
+--- a/frontend-react/src/features/admin/components/Sections/AllOrdersSection.tsx
++++ b/frontend-react/src/features/admin/components/Sections/AllOrdersSection.tsx
+@@ -15,7 +15,6 @@ import {
+   Row,
+   Col,
+   Descriptions,
+-  Divider,
+   Tabs,
+   List,
+   Avatar,
+@@ -71,28 +70,42 @@ interface ChatMessage {
+   message_type: string;
+ }
+ 
++interface OrderChatParticipant {
++  id: number;
++  username: string;
++  first_name: string;
++  last_name: string;
++  email?: string;
++  role?: string;
++}
++
++interface OrderChatThread {
++  id: number;
++  order_id: number | null;
++  participants?: OrderChatParticipant[];
++  messages?: ChatMessage[];
++}
++
+ interface OrderChatProps {
+   orderId: number;
+ }
+ 
+ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
+-  const { data: messages = [], isLoading } = useQuery<ChatMessage[]>({
++  const { data: orderChats = [], isLoading } = useQuery<OrderChatThread[]>({
+     queryKey: ['order-chat', orderId],
+     queryFn: async () => {
+       try {
+-        // Сначала получаем чат по заказу
+-        const chatResponse = await apiClient.get(`/chat/chats/?order_id=${orderId}`);
+-        const chats = chatResponse.data.results || chatResponse.data;
+-        
+-        if (!chats || chats.length === 0) {
+-          return [];
+-        }
+-        
+-        const chat = chats[0];
+-        
+-        // Затем получаем сообщения из чата
+-        const messagesResponse = await apiClient.get(`/chat/chats/${chat.id}/messages/`);
+-        return messagesResponse.data.results || messagesResponse.data || [];
++        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
++        const payload = chatResponse.data;
++        const chats = Array.isArray(payload)
++          ? payload
++          : Array.isArray(payload?.results)
++            ? payload.results
++            : Array.isArray(payload?.data)
++              ? payload.data
++              : [];
++
++        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(orderId));
+       } catch (error) {
+         console.error('Error loading chat:', error);
+         return [];
+@@ -101,6 +114,10 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
+     enabled: !!orderId,
+   });
+ 
++  const messages = orderChats
++    .flatMap((chat) => chat.messages || [])
++    .sort((a, b) => dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf());
++
+   if (isLoading) {
+     return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка переписки...</div>;
+   }
+@@ -141,6 +158,77 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
+   );
+ };
+ 
++interface OrderParticipantsProps {
++  order: Order;
++}
++
++const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
++  const { data: orderChats = [], isLoading } = useQuery<OrderChatThread[]>({
++    queryKey: ['order-chat-participants', order.id],
++    queryFn: async () => {
++      try {
++        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
++        const payload = chatResponse.data;
++        const chats = Array.isArray(payload)
++          ? payload
++          : Array.isArray(payload?.results)
++            ? payload.results
++            : Array.isArray(payload?.data)
++              ? payload.data
++              : [];
++
++        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(order.id));
++      } catch (error) {
++        console.error('Error loading order participants:', error);
++        return [];
++      }
++    },
++    enabled: !!order.id,
++  });
++
++  const participantsMap = new Map<number, OrderChatParticipant>();
++
++  if (order.client?.id) {
++    participantsMap.set(order.client.id, { ...order.client, role: 'client' });
++  }
++
++  if (order.expert?.id) {
++    participantsMap.set(order.expert.id, { ...order.expert, role: 'expert' });
++  }
++
++  orderChats.forEach((chat) => {
++    (chat.participants || []).forEach((participant) => {
++      if (!participant?.id) return;
++      participantsMap.set(participant.id, participant);
++    });
++  });
++
++  const participants = Array.from(participantsMap.values());
++
++  if (isLoading) {
++    return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка участников...</div>;
++  }
++
++  if (participants.length === 0) {
++    return <Empty description="Участники не найдены" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
++  }
++
++  return (
++    <Descriptions column={1} bordered size="small">
++      {participants.map((participant) => (
++        <Descriptions.Item
++          key={participant.id}
++          label={`${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.username}
++        >
++          <div><strong>Username:</strong> @{participant.username}</div>
++          <div><strong>Email:</strong> {participant.email || '-'}</div>
++          <div><strong>Роль:</strong> {participant.role || '-'}</div>
++        </Descriptions.Item>
++      ))}
++    </Descriptions>
++  );
++};
++
+ interface AllOrdersTableProps {
+   orders?: Order[];
+   loading?: boolean;
+@@ -490,42 +578,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
+               {
+                 key: 'participants',
+                 label: 'Участники',
+-                children: (
+-                  <div>
+-                    <Divider orientation="left">Клиент</Divider>
+-                    <Descriptions column={1} bordered size="small">
+-                      <Descriptions.Item label="Имя">
+-                        {selectedOrder.client.first_name} {selectedOrder.client.last_name}
+-                      </Descriptions.Item>
+-                      <Descriptions.Item label="Username">
+-                        @{selectedOrder.client.username}
+-                      </Descriptions.Item>
+-                      <Descriptions.Item label="Email">
+-                        {selectedOrder.client.email}
+-                      </Descriptions.Item>
+-                    </Descriptions>
+-
+-                    <Divider orientation="left">Эксперт</Divider>
+-                    {selectedOrder.expert ? (
+-                      <Descriptions column={1} bordered size="small">
+-                        <Descriptions.Item label="Имя">
+-                          {selectedOrder.expert.first_name} {selectedOrder.expert.last_name}
+-                        </Descriptions.Item>
+-                        <Descriptions.Item label="Username">
+-                          @{selectedOrder.expert.username}
+-                        </Descriptions.Item>
+-                        <Descriptions.Item label="Email">
+-                          {selectedOrder.expert.email}
+-                        </Descriptions.Item>
+-                      </Descriptions>
+-                    ) : (
+-                      <Empty 
+-                        description="Эксперт не назначен"
+-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+-                      />
+-                    )}
+-                  </div>
+-                ),
++                children: <OrderParticipants order={selectedOrder} />,
+               },
+               {
+                 key: 'chat',
+diff --git a/frontend-react/src/features/admin/components/Sections/BlockingSection.tsx b/frontend-react/src/features/admin/components/Sections/BlockingSection.tsx
+index 50bf7b3..fa75dd5 100644
+--- a/frontend-react/src/features/admin/components/Sections/BlockingSection.tsx
++++ b/frontend-react/src/features/admin/components/Sections/BlockingSection.tsx
+@@ -1,5 +1,5 @@
+ import React, { useState } from 'react';
+-import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography } from 'antd';
++import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography, DatePicker } from 'antd';
+ import { LockOutlined, UnlockOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons';
+ import dayjs from 'dayjs';
+ import { useUsers, useUserActions } from '@/features/admin/hooks';
+@@ -12,7 +12,7 @@ const { Search } = Input;
+ interface BlockingTableProps {
+   users?: AdminUser[];
+   loading?: boolean;
+-  onBlockUser?: (userId: number) => Promise<void>;
++  onBlockUser?: (userId: number, payload?: { reason?: string; unblock_date?: string | null }) => Promise<void>;
+   onUnblockUser?: (userId: number) => Promise<void>;
+ }
+ 
+@@ -32,11 +32,6 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
+   const dataSource = users;
+ 
+   const filteredData = dataSource.filter(user => {
+-    // Исключаем директоров из списка - администратор не может их блокировать
+-    if (user.role === 'director') {
+-      return false;
+-    }
+-    
+     const searchLower = searchText.toLowerCase();
+     const matchesSearch = 
+       (user.username || '').toLowerCase().includes(searchLower) ||
+@@ -68,7 +63,10 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
+     try {
+       const values = await form.validateFields();
+       if (actionType === 'block' && onBlockUser) {
+-        await onBlockUser(selectedUser.id);
++        await onBlockUser(selectedUser.id, {
++          reason: values.reason?.trim(),
++          unblock_date: values.unblock_date ? values.unblock_date.toISOString() : null,
++        });
+         message.success(`Пользователь ${selectedUser.username} заблокирован`);
+       } else if (actionType === 'unblock' && onUnblockUser) {
+         await onUnblockUser(selectedUser.id);
+@@ -212,6 +210,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
+           >
+             <Option value="all">Все роли</Option>
+             <Option value="admin">Администраторы</Option>
++            <Option value="director">Директоры</Option>
+             <Option value="expert">Эксперты</Option>
+             <Option value="client">Клиенты</Option>
+             <Option value="partner">Партнеры</Option>
+@@ -292,6 +291,20 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
+               }
+             />
+           </Form.Item>
++          {actionType === 'block' && (
++            <Form.Item
++              name="unblock_date"
++              label="Разблокировать автоматически"
++              extra="Оставьте пустым для постоянной блокировки"
++            >
++              <DatePicker
++                showTime
++                format="DD.MM.YYYY HH:mm"
++                className="blockedUsersSearch"
++                disabledDate={(current) => !!current && current < dayjs().startOf('day')}
++              />
++            </Form.Item>
++          )}
+         </Form>
+       </Modal>
+     </div>
+diff --git a/frontend-react/src/features/admin/hooks/useAdminUsers.ts b/frontend-react/src/features/admin/hooks/useAdminUsers.ts
+index 377eef4..74e24bd 100644
+--- a/frontend-react/src/features/admin/hooks/useAdminUsers.ts
++++ b/frontend-react/src/features/admin/hooks/useAdminUsers.ts
+@@ -86,7 +86,8 @@ export const useUserActions = () => {
+   });
+ 
+   const { mutateAsync: blockUser, isPending: blockingUser } = useMutation({
+-    mutationFn: (userId: number) => adminPanelApi.blockUser(userId),
++    mutationFn: ({ userId, payload }: { userId: number; payload?: { reason?: string; unblock_date?: string | null } }) =>
++      adminPanelApi.blockUser(userId, payload),
+     onSuccess: () => {
+       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_USERS });
+       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_BLOCKED_USERS });
+@@ -108,7 +109,8 @@ export const useUserActions = () => {
+   return {
+     changeRole,
+     changeUserRole: (userId: number, role: string) => changeRole({ userId, role }), // Compatibility alias
+-    blockUser,
++    blockUser: (userId: number, payload?: { reason?: string; unblock_date?: string | null }) =>
++      blockUser({ userId, payload }),
+     unblockUser,
+     changingRole,
+     blockingUser,
+diff --git a/frontend-react/src/features/auth/components/PasswordResetModal.tsx b/frontend-react/src/features/auth/components/PasswordResetModal.tsx
+index cfdf4d0..9187d49 100644
+--- a/frontend-react/src/features/auth/components/PasswordResetModal.tsx
++++ b/frontend-react/src/features/auth/components/PasswordResetModal.tsx
+@@ -1,6 +1,7 @@
+ import React from 'react';
+ import { Modal, Input, Button } from 'antd';
+ import { MailOutlined, LockOutlined } from '@ant-design/icons';
++import styles from './PasswordResetModal.module.css';
+ 
+ interface PasswordResetModalProps {
+   open: boolean;
+@@ -40,7 +41,6 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+   onResetPassword,
+   onBackToEmail,
+   onBackToCode,
+-  onGoToCodeStep,
+   onCancel,
+ }) => {
+   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+@@ -59,12 +59,14 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+       onCancel={onCancel}
+       footer={null}
+       centered
+-      width={500}
+-      wrapClassName="password-reset-modal"
++      style={{ width: '100%', maxWidth: 500 }}
++      className={styles.modal}
++      maskClosable={false}
++      destroyOnHidden
+     >
+       {step === 'email' ? (
+         <div>
+-          <p className="text-muted passwordResetHint">
++          <p className={styles.passwordResetHint}>
+             Введите email для получения кода восстановления
+           </p>
+           <Input
+@@ -82,19 +84,18 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+             onClick={onRequestCode}
+             size="large"
+             block
+-            className="passwordResetPrimaryAction"
++            className={styles.passwordResetPrimaryAction}
+           >
+             Отправить код
+           </Button>
+         </div>
+       ) : step === 'code' ? (
+         <div>
+-          <p className="text-muted mb-3">
++          <p className={styles.passwordResetHint}>
+             Введите 6-значный код из email
+           </p>
+           
+-          
+-          <div className="resetCodeRow">
++          <div className={styles.resetCodeRow}>
+             {code.map((digit, index) => (
+               <input
+                 key={index}
+@@ -106,13 +107,12 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+                 onChange={(e) => onCodeChange(index, e.target.value)}
+                 onKeyDown={(e) => handleKeyDown(index, e)}
+                 disabled={loading}
+-                className="resetCodeInput"
++                className={styles.resetCodeInput}
+               />
+             ))}
+           </div>
+-
+           
+-          <div className="resetActionsRow">
++          <div className={styles.resetActionsRow}>
+             <Button onClick={onBackToEmail} disabled={loading}>
+               ← Назад
+             </Button>
+@@ -120,7 +120,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+               type="primary"
+               loading={loading}
+               onClick={onVerifyCode}
+-              className="resetActionGrow"
++              className={styles.resetActionGrow}
+               size="large"
+             >
+               Подтвердить код
+@@ -129,7 +129,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+         </div>
+       ) : (
+         <div>
+-          <p className="text-muted passwordResetHint">
++          <p className={styles.passwordResetHint}>
+             Введите новый пароль
+           </p>
+ 
+@@ -140,7 +140,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+             onChange={(e) => onNewPasswordChange(e.target.value)}
+             size="large"
+             disabled={loading}
+-            className="passwordResetInput"
++            className={styles.passwordResetInput}
+           />
+           <Input.Password
+             prefix={<LockOutlined />}
+@@ -152,7 +152,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+             disabled={loading}
+           />
+ 
+-          <div className="resetActionsRow">
++          <div className={styles.resetActionsRow}>
+             <Button onClick={onBackToCode} disabled={loading}>
+               ← Назад
+             </Button>
+@@ -160,7 +160,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+               type="primary"
+               loading={loading}
+               onClick={onResetPassword}
+-              className="resetActionGrow"
++              className={styles.resetActionGrow}
+               size="large"
+             >
+               Сбросить пароль
+@@ -172,4 +172,4 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
+   );
+ };
+ 
+-export default PasswordResetModal;
++export default PasswordResetModal;
+\ No newline at end of file
+diff --git a/frontend-react/src/features/director/components/ContactBannedUsers/ContactBannedUsers.tsx b/frontend-react/src/features/director/components/ContactBannedUsers/ContactBannedUsers.tsx
+index 3b6f2e9..a5d9fe2 100644
+--- a/frontend-react/src/features/director/components/ContactBannedUsers/ContactBannedUsers.tsx
++++ b/frontend-react/src/features/director/components/ContactBannedUsers/ContactBannedUsers.tsx
+@@ -49,6 +49,29 @@ interface ContactBannedUser {
+   telegram_id: number | null;
+ }
+ 
++const normalizeBannedUsers = (payload: unknown): ContactBannedUser[] => {
++  if (Array.isArray(payload)) {
++    return payload as ContactBannedUser[];
++  }
++
++  if (payload && typeof payload === 'object') {
++    const candidate = payload as { results?: unknown; data?: unknown };
++    if (Array.isArray(candidate.results)) {
++      return candidate.results as ContactBannedUser[];
++    }
++    if (Array.isArray(candidate.data)) {
++      return candidate.data as ContactBannedUser[];
++    }
++  }
++
++  return [];
++};
++
++const isSystemBanSource = (value?: string | null): boolean => {
++  const normalized = String(value || '').trim().toLowerCase();
++  return normalized === 'system' || normalized === 'система' || normalized.includes('система');
++};
++
+ const ContactBannedUsers: React.FC = () => {
+   const queryClient = useQueryClient();
+   const debugEnabled =
+@@ -72,16 +95,19 @@ const ContactBannedUsers: React.FC = () => {
+     queryFn: async () => {
+       if (debugEnabled) console.log('🔄 Загрузка забаненных пользователей...');
+       const response = await apiClient.get('/users/contact_banned_users/');
++      const normalizedUsers = normalizeBannedUsers(response.data);
+       if (debugEnabled) {
+         console.log('📦 Получены данные:', response.data);
+-        console.log('📊 Количество пользователей:', response.data?.length || 0);
++        console.log('📊 Количество пользователей:', normalizedUsers.length);
+       }
+-      return response.data;
++      return normalizedUsers;
+     },
+     staleTime: 0, // Данные сразу считаются устаревшими
+-    refetchInterval: 30000, // Автообновление каждые 30 секунд
++    refetchInterval: 10000, // Автообновление каждые 10 секунд
++    refetchIntervalInBackground: true,
+     refetchOnWindowFocus: true, // Обновление при фокусе окна
+     refetchOnMount: true, // Обновление при монтировании
++    refetchOnReconnect: true,
+   });
+ 
+   // Логируем ошибки и данные
+@@ -205,7 +231,7 @@ const ContactBannedUsers: React.FC = () => {
+     
+     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+     
+-    const isSystemBan = user.banned_by === 'system' || user.banned_by === 'Система' || user.banned_by.toLowerCase().includes('система');
++    const isSystemBan = isSystemBanSource(user.banned_by);
+     const matchesBanSource = 
+       banSourceFilter === 'all' || 
+       (banSourceFilter === 'system' && isSystemBan) ||
+@@ -281,7 +307,7 @@ const ContactBannedUsers: React.FC = () => {
+       key: 'banned_by',
+       width: 150,
+       render: (bannedBy: string) => {
+-        const isSystemBan = bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
++        const isSystemBan = isSystemBanSource(bannedBy);
+         return (
+           <Space>
+             {isSystemBan ? (
+@@ -382,14 +408,12 @@ const ContactBannedUsers: React.FC = () => {
+           </Tag>
+           <Tag color="purple">
+             Системой: {filteredData.filter(u => {
+-              const bannedBy = u.banned_by || '';
+-              return bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система');
++              return isSystemBanSource(u.banned_by);
+             }).length}
+           </Tag>
+           <Tag color="blue">
+             Вручную: {filteredData.filter(u => {
+-              const bannedBy = u.banned_by || '';
+-              return !(bannedBy === 'system' || bannedBy === 'Система' || bannedBy.toLowerCase().includes('система'));
++              return !isSystemBanSource(u.banned_by);
+             }).length}
+           </Tag>
+           <Tag color="orange">
+diff --git a/frontend-react/src/features/expert/modals/MessageModalNew.tsx b/frontend-react/src/features/expert/modals/MessageModalNew.tsx
+index 1ef08fb..0f4c0a8 100644
+--- a/frontend-react/src/features/expert/modals/MessageModalNew.tsx
++++ b/frontend-react/src/features/expert/modals/MessageModalNew.tsx
+@@ -51,6 +51,7 @@ import styles from './MessageModalNew.module.css';
+ import '../../../styles/messages.css';
+ import '../../../styles/avatar.css';
+ import { useChatWebSocket } from '@/hooks/useChatWebSocket';
++import { useWebSocket } from '@/hooks/useWebSocket';
+ 
+ const { Text } = Typography;
+ interface MessageModalProps {
+@@ -616,6 +617,50 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
+       }
+     }, []);
+ 
++  const handleNotificationEvent = useCallback((event: { data?: { chat_id?: number; text?: string; created_at?: string } }) => {
++    const chatId = event.data?.chat_id;
++    if (!chatId) return;
++    if (selectedChat?.id === chatId) {
++      void loadChats(true);
++      return;
++    }
++
++    setChatList((prev) => {
++      let found = false;
++      const next = prev.map((chat) => {
++        if (chat.id !== chatId) return chat;
++        found = true;
++        return {
++          ...chat,
++          unread_count: (chat.unread_count || 0) + 1,
++          last_message: {
++            text: event.data?.text || chat.last_message?.text || '',
++            sender_id: chat.last_message?.sender_id || 0,
++            created_at: event.data?.created_at || new Date().toISOString(),
++            file_name: chat.last_message?.file_name ?? null,
++            file_url: chat.last_message?.file_url ?? null,
++          },
++          last_message_time: event.data?.created_at || new Date().toISOString(),
++        };
++      });
++
++      if (!found) return prev;
++      return [...next].sort((a, b) => {
++        const aPinned = a.is_pinned ? 1 : 0;
++        const bPinned = b.is_pinned ? 1 : 0;
++        if (aPinned !== bPinned) return bPinned - aPinned;
++        return new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime();
++      });
++    });
++
++    void loadChats(true);
++  }, [loadChats, selectedChat?.id]);
++
++  useWebSocket({
++    enabled: visible,
++    onNotification: handleNotificationEvent,
++  });
++
+   const syncChatListItemFromDetail = useCallback((detail: ChatDetail) => {
+     const lastMessage = Array.isArray(detail.messages) && detail.messages.length > 0
+       ? detail.messages[detail.messages.length - 1]
+diff --git a/frontend-react/src/features/orders/pages/CreateOrder/index.tsx b/frontend-react/src/features/orders/pages/CreateOrder/index.tsx
+index a9ca40f..12c283e 100644
+--- a/frontend-react/src/features/orders/pages/CreateOrder/index.tsx
++++ b/frontend-react/src/features/orders/pages/CreateOrder/index.tsx
+@@ -45,6 +45,8 @@ const ALLOWED_FILE_EXTENSIONS = [
+   'zip', 'rar', '7z',
+ ];
+ 
++const MAX_ORDER_BUDGET = 99_999_999.99;
++
+ const CreateOrder: React.FC = () => {
+   const navigate = useNavigate();
+   const queryClient = useQueryClient();
+@@ -488,6 +490,9 @@ const CreateOrder: React.FC = () => {
+                     if (value !== undefined && value !== null && Number(value) <= 0) {
+                       return Promise.reject(new Error('Стоимость должна быть больше 0'));
+                     }
++                    if (value !== undefined && value !== null && Number(value) > MAX_ORDER_BUDGET) {
++                      return Promise.reject(new Error(`Стоимость не может превышать ${MAX_ORDER_BUDGET.toLocaleString('ru-RU')} ₽`));
++                    }
+                     return Promise.resolve();
+                   }
+                 }
+@@ -496,6 +501,7 @@ const CreateOrder: React.FC = () => {
+               <AppInput.Number
+                 placeholder="Стоимость (необязательно)"
+                 min={1}
++                max={MAX_ORDER_BUDGET}
+                 className={`${styles.priceInput} ${styles.fullWidth}`}
+               />
+             </Form.Item>
+diff --git a/update-and-restart.sh b/update-and-restart.sh
+old mode 100644
+new mode 100755

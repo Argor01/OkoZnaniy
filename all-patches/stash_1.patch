@@ -1,0 +1,442 @@
+diff --git a/docker-compose.dev.yml b/docker-compose.dev.yml
+index 3fded21..20631f6 100644
+--- a/docker-compose.dev.yml
++++ b/docker-compose.dev.yml
+@@ -34,11 +34,16 @@ services:
+     ports:
+       - "8000:8000"
+     
+-  # Отключаем nginx для разработки
++  # Переопределяем nginx для подключения к dev frontend
+   nginx:
+-    profiles:
+-      - production
+-  
++    volumes:
++      - ./docker/nginx/conf.d:/etc/nginx/conf.d
++    depends_on:
++      - backend
++      - frontend
++    networks:
++      - app_network
++
+   # Отключаем telegram-bot для разработки
+   telegram-bot:
+     profiles:
+diff --git a/docker/nginx/conf.d/default.conf b/docker/nginx/conf.d/default.conf
+index 7200475..07f436f 100644
+--- a/docker/nginx/conf.d/default.conf
++++ b/docker/nginx/conf.d/default.conf
+@@ -23,7 +23,7 @@ server {
+ 
+     # Docker internal DNS resolver — позволяет стартовать без upstream блоков
+     resolver 127.0.0.11 valid=10s ipv6=off;
+-    set $frontend_host "frontend:80";
++    set $frontend_host "frontend:5173";
+     set $backend_host  "backend:8000";
+ 
+     # SSL
+diff --git a/frontend-react/src/features/admin/components/Sections/AdminChatsSection.tsx b/frontend-react/src/features/admin/components/Sections/AdminChatsSection.tsx
+index db9d2e2..fcd369d 100644
+--- a/frontend-react/src/features/admin/components/Sections/AdminChatsSection.tsx
++++ b/frontend-react/src/features/admin/components/Sections/AdminChatsSection.tsx
+@@ -1,6 +1,6 @@
+ import React, { useState, useRef, useEffect } from 'react';
+ import {
+-  Card, Button, Input, Avatar, Space, Typography, Badge, Spin, Empty,
++  Card, Button, Input, Avatar, Space, Typography, Badge, Spin, Empty, Tag,
+   Modal, Form, Select, Tabs, message as antMessage, List,
+ } from 'antd';
+ import { SendOutlined, PlusOutlined, UserOutlined, TeamOutlined, MessageOutlined, SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+@@ -36,20 +36,47 @@ const api = {
+ const MsgList: React.FC<{ msgs: any[]; uid: number }> = ({ msgs, uid }) => {
+   const endRef = useRef<HTMLDivElement>(null);
+   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
+-  if (!msgs.length) return <Empty description="Нет сообщений" style={{ padding: 32 }} />;
++  if (!msgs.length) return <Empty description="Нет сообщений" style={{ padding: 48, color: '#bfbfbf' }} />;
++  
++  const getAvatarColor = (sender: any) => {
++    if (!sender) return '#bfbfbf';
++    const role = sender.role;
++    if (!role) return '#bfbfbf';
++    if (role === 'admin') return '#1890ff';
++    if (role === 'director') return '#722ed1';
++    if (role === 'expert') return '#52c41a';
++    if (role === 'partner') return '#fa8c16';
++    return '#bfbfbf';
++  };
++  
+   return (
+-    <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
++    <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+       {msgs.map((m: any) => {
+         const mine = m.is_mine || m.sender?.id === uid;
+-        const name = `${m.sender?.first_name ?? ''} ${m.sender?.last_name ?? ''}`.trim();
++        const name = `${m.sender?.first_name ?? ''} ${m.sender?.last_name ?? ''}`.trim() || m.sender?.username || 'Пользователь';
+         const text = m.message ?? m.text ?? '';
++        const avatarColor = mine ? '#1890ff' : getAvatarColor(m.sender);
++        
+         return (
+-          <div key={m.id} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end' }}>
+-            <Avatar size={28} icon={<UserOutlined />} style={{ background: mine ? '#1890ff' : '#52c41a', flexShrink: 0 }} />
+-            <div style={{ maxWidth: '70%' }}>
+-              <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 2, textAlign: mine ? 'right' : 'left' }}>{name}</div>
+-              <div style={{ background: mine ? '#1890ff' : '#f0f0f0', color: mine ? '#fff' : '#000', padding: '8px 12px', borderRadius: mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px', fontSize: 14, wordBreak: 'break-word' }}>{text}</div>
+-              <div style={{ fontSize: 11, color: '#bfbfbf', marginTop: 2, textAlign: mine ? 'right' : 'left' }}>{fmt(m.created_at ?? '')}</div>
++          <div key={m.id} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 10, alignItems: 'flex-start' }}>
++            <Avatar
++              size={32}
++              icon={<UserOutlined />}
++              style={{ background: avatarColor, flexShrink: 0, marginTop: 2 }}
++            />
++            <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
++              <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 4 }}>{name}</div>
++              <div style={{
++                background: mine ? '#1890ff' : '#f0f0f0',
++                color: mine ? '#fff' : '#000',
++                padding: '10px 14px',
++                borderRadius: mine ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
++                fontSize: 14,
++                lineHeight: 1.5,
++                wordBreak: 'break-word',
++                boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
++              }}>{text}</div>
++              <div style={{ fontSize: 11, color: '#bfbfbf', marginTop: 4 }}>{fmt(m.created_at ?? '')}</div>
+             </div>
+           </div>
+         );
+@@ -68,10 +95,25 @@ const Composer: React.FC<{ onSend: (t: string) => Promise<void> }> = ({ onSend }
+     try { await onSend(text.trim()); setText(''); } finally { setBusy(false); }
+   };
+   return (
+-    <div style={{ borderTop: '1px solid #f0f0f0', padding: '10px 16px', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+-      <TextArea value={text} onChange={e => setText(e.target.value)} placeholder="Написать... (Enter)" autoSize={{ minRows: 1, maxRows: 4 }} style={{ flex: 1 }}
+-        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+-      <Button type="primary" icon={<SendOutlined />} onClick={send} loading={busy} disabled={!text.trim()} />
++    <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 16px', display: 'flex', gap: 10, alignItems: 'center' }}>
++      <Input
++        value={text}
++        onChange={e => setText(e.target.value)}
++        placeholder="Написать сообщение... (Enter)"
++        style={{ flex: 1, borderRadius: 20 }}
++        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
++        size="large"
++        bordered
++      />
++      <Button
++        type="primary"
++        icon={<SendOutlined />}
++        onClick={send}
++        loading={busy}
++        disabled={!text.trim()}
++        size="large"
++        style={{ borderRadius: 20, minWidth: 44, height: 40 }}
++      />
+     </div>
+   );
+ };
+@@ -172,25 +214,41 @@ const DirectTab: React.FC<{ uid: number }> = ({ uid }) => {
+ 
+ const ChatListItem: React.FC<{ id: number; name: string; subtitle: string; time?: string; active: boolean; onClick: () => void }> = ({ name, subtitle, time, active, onClick }) => (
+   <div onClick={onClick}
+-    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', display: 'flex', alignItems: 'center', gap: 12, background: active ? '#e6f7ff' : '' }}
+-    onMouseEnter={e => !active && (e.currentTarget.style.background = '#f5f5f5')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
++    style={{
++      padding: '10px 12px',
++      cursor: 'pointer',
++      borderBottom: '1px solid #f5f5f5',
++      display: 'flex',
++      alignItems: 'center',
++      gap: 10,
++      background: active ? '#e6f7ff' : '#fff'
++    }}
++    onMouseEnter={e => !active && (e.currentTarget.style.background = '#f5f5f5')}
++    onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
+     <Avatar icon={<TeamOutlined />} style={{ background: '#1890ff', flexShrink: 0 }} />
+     <div style={{ flex: 1, minWidth: 0 }}>
+-      <div style={{ fontWeight: 600 }}>{name}</div>
+-      <div style={{ fontSize: 12, color: '#8c8c8c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
++      <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 2 }}>{name}</div>
++      <div style={{ fontSize: 11, color: '#8c8c8c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
+     </div>
+-    {time && <div style={{ fontSize: 11, color: '#bfbfbf', flexShrink: 0 }}>{time}</div>}
++    {time && <div style={{ fontSize: 10, color: '#bfbfbf', flexShrink: 0, marginLeft: 6 }}>{time}</div>}
+   </div>
+ );
+ 
+ const ChatHeader: React.FC<{ name: string; sub: string; icon: React.ReactNode; onBack?: () => void; extra?: React.ReactNode }> = ({ name, sub, icon, onBack, extra }) => (
+-  <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+-    <Space>
+-      {onBack && <Button size="small" onClick={onBack}>←</Button>}
+-      <Avatar icon={icon} style={{ background: '#1890ff' }} />
++  <div style={{
++    padding: '12px 16px',
++    borderBottom: '1px solid #f0f0f0',
++    display: 'flex',
++    alignItems: 'center',
++    justifyContent: 'space-between',
++    background: '#fafafa'
++  }}>
++    <Space size={8}>
++      {onBack && <Button size="small" shape="circle" icon="←" onClick={onBack} />}
++      <Avatar icon={icon} size={32} style={{ background: '#1890ff' }} />
+       <div>
+-        <div style={{ fontWeight: 600 }}>{name}</div>
+-        <div style={{ fontSize: 12, color: '#8c8c8c' }}>{sub}</div>
++        <div style={{ fontWeight: 500, fontSize: 14 }}>{name}</div>
++        <div style={{ fontSize: 11, color: '#8c8c8c' }}>{sub}</div>
+       </div>
+     </Space>
+     {extra}
+@@ -235,13 +293,24 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
+   const showChat = !isMobile || !!selId;
+ 
+   const listPanel = (
+-    <div style={{ width: isMobile ? "100%" : 300, borderRight: isMobile ? "none" : "1px solid #f0f0f0", display: "flex", flexDirection: "column", flexShrink: 0, height: "100%" }}>
+-      <div style={{ padding: "10px 12px", borderBottom: "1px solid #f0f0f0" }}>
+-        <Input prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />} placeholder="Поиск чатов..." value={search} onChange={e => setSearch(e.target.value)} style={{ borderRadius: 20 }} />
++    <div style={{ width: isMobile ? "100%" : 280, borderRight: isMobile ? "none" : "1px solid #f0f0f0", display: "flex", flexDirection: "column", flexShrink: 0, height: "100%", background: "#fff" }}>
++      <div style={{ padding: "12px", borderBottom: "1px solid #f0f0f0" }}>
++        <Input
++          prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
++          placeholder="Поиск..."
++          value={search}
++          onChange={e => setSearch(e.target.value)}
++          style={{
++            borderRadius: 8,
++            background: '#f5f5f5',
++            border: 'none'
++          }}
++          size="small"
++        />
+       </div>
+       <div style={{ flex: 1, overflowY: "auto" }}>
+         {rLoad ? <div style={{ padding: 32, textAlign: "center" }}><Spin /></div> :
+-          !filtered.length ? <Empty description="Нет чатов" style={{ padding: 32 }} /> :
++          !filtered.length ? <Empty description="Нет чатов" style={{ padding: 32 }} imageStyle={{ height: 60 }} /> :
+           filtered.map((r: any) => {
+             const lastMsg = r.messages?.[r.messages.length - 1];
+             return <ChatListItem key={r.id} id={r.id} name={String(r.name ?? "Чат")}
+@@ -252,8 +321,19 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
+           })
+         }
+       </div>
+-      <div style={{ padding: "10px 12px", borderTop: "1px solid #f0f0f0" }}>
+-        <Button type="primary" block icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>Создать чат</Button>
++      <div style={{ padding: "12px", borderTop: "1px solid #f0f0f0" }}>
++        <Button
++          type="primary"
++          block
++          icon={<PlusOutlined />}
++          onClick={() => setCreateOpen(true)}
++          style={{
++            borderRadius: 8,
++            height: 38
++          }}
++        >
++          Создать чат
++        </Button>
+       </div>
+     </div>
+   );
+@@ -263,9 +343,23 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
+       <ChatHeader name={String(selRoom.name ?? "")} sub={`${selRoom.members?.length ?? 0} участников`}
+         icon={<TeamOutlined />} onBack={isMobile ? () => setSelId(null) : undefined}
+         extra={
+-          <Space>
+-            <Button size="small" icon={<UsergroupAddOutlined />} onClick={() => setMembersOpen(true)}>Участники</Button>
+-            <Button size="small" icon={<PlusOutlined />} onClick={() => setInviteOpen(true)}>Добавить</Button>
++          <Space size={8}>
++            <Button
++              size="small"
++              icon={<UsergroupAddOutlined />}
++              onClick={() => setMembersOpen(true)}
++              style={{ borderRadius: 6 }}
++            >
++              Участники
++            </Button>
++            <Button
++              size="small"
++              icon={<PlusOutlined />}
++              onClick={() => setInviteOpen(true)}
++              style={{ borderRadius: 6 }}
++            >
++              Добавить
++            </Button>
+           </Space>
+         } />
+       {mLoad ? <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}><Spin /></div> : <MsgList msgs={msgs as any[]} uid={uid} />}
+@@ -273,9 +367,8 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
+     </div>
+   ) : !isMobile ? (
+     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "#bfbfbf" }}>
+-      <TeamOutlined style={{ fontSize: 48 }} />
++      <TeamOutlined style={{ fontSize: 48, marginBottom: 8 }} />
+       <div style={{ fontSize: 16 }}>Выберите чат</div>
+-      <div style={{ fontSize: 13 }}>или создайте новый групповой чат</div>
+     </div>
+   ) : null;
+ 
+@@ -283,37 +376,92 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
+     <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+       {showList && listPanel}
+       {showChat && chatPanel}
+-      <Modal title="Создать групповой чат" open={createOpen} onCancel={() => { setCreateOpen(false); form.resetFields(); }}
+-        onOk={() => form.validateFields().then(v => createMut.mutate(v))} okText="Создать" cancelText="Отмена">
+-        <Form form={form} layout="vertical">
+-          <Form.Item name="name" label="Название" rules={[{ required: true, message: "Введите название" }]}><Input placeholder="Например: Отдел поддержки" /></Form.Item>
+-          <Form.Item name="description" label="Описание"><Input.TextArea placeholder="О чём этот чат?" /></Form.Item>
++      <Modal
++        title={<span><TeamOutlined style={{ marginRight: 8, color: '#1890ff' }} />Создать групповой чат</span>}
++        open={createOpen}
++        onCancel={() => { setCreateOpen(false); form.resetFields(); }}
++        onOk={() => form.validateFields().then(v => createMut.mutate(v))}
++        okText="Создать"
++        cancelText="Отмена"
++        okButtonProps={{ style: { borderRadius: 8 } }}
++        cancelButtonProps={{ style: { borderRadius: 8 } }}
++      >
++        <Form form={form} layout="vertical" size="large">
++          <Form.Item name="name" label="Название" rules={[{ required: true, message: "Введите название" }]}>
++            <Input placeholder="Например: Отдел поддержки" style={{ borderRadius: 8 }} />
++          </Form.Item>
++          <Form.Item name="description" label="Описание">
++            <Input.TextArea placeholder="О чём этот чат?" rows={3} style={{ borderRadius: 8 }} />
++          </Form.Item>
+         </Form>
+       </Modal>
+-      <Modal title="Добавить участника" open={inviteOpen} onCancel={() => setInviteOpen(false)}
+-        onOk={() => invForm.validateFields().then(v => invMut.mutate(v.uid))} okText="Добавить" cancelText="Отмена">
+-        <Form form={invForm} layout="vertical">
++      <Modal
++        title={<span><UsergroupAddOutlined style={{ marginRight: 8, color: '#52c41a' }} />Добавить участника</span>}
++        open={inviteOpen}
++        onCancel={() => setInviteOpen(false)}
++        onOk={() => invForm.validateFields().then(v => invMut.mutate(v.uid))}
++        okText="Добавить"
++        cancelText="Отмена"
++        okButtonProps={{ style: { borderRadius: 8 } }}
++        cancelButtonProps={{ style: { borderRadius: 8 } }}
++      >
++        <Form form={invForm} layout="vertical" size="large">
+           <Form.Item name="uid" label="Пользователь" rules={[{ required: true }]}>
+-            <Select showSearch optionFilterProp="children" placeholder="Выберите пользователя">
+-              {(users as any[]).map((u: any) => <Option key={u.id} value={u.id}>{String(u.first_name ?? "")} {String(u.last_name ?? "")} ({String(u.email ?? "")})</Option>)}
++            <Select
++              showSearch
++              optionFilterProp="children"
++              placeholder="Выберите пользователя"
++              style={{ borderRadius: 8 }}
++            >
++              {(users as any[]).map((u: any) => (
++                <Option key={u.id} value={u.id}>
++                  {String(u.first_name ?? "")} {String(u.last_name ?? "")} — {String(u.email ?? "")}
++                </Option>
++              ))}
+             </Select>
+           </Form.Item>
+         </Form>
+       </Modal>
+-      <Modal title="Участники чата" open={membersOpen} onCancel={() => setMembersOpen(false)} footer={[<Button key="close" onClick={() => setMembersOpen(false)}>Закрыть</Button>]}>
++      <Modal
++        title={<span><UserOutlined style={{ marginRight: 8, color: '#1890ff' }} />Участники чата</span>}
++        open={membersOpen}
++        onCancel={() => setMembersOpen(false)}
++        footer={[<Button key="close" onClick={() => setMembersOpen(false)} style={{ borderRadius: 8 }}>Закрыть</Button>]}
++        width={500}
++      >
+         <List
+           dataSource={selRoom?.members ?? []}
+           renderItem={(member: any) => (
+-            <List.Item>
++            <List.Item style={{ padding: '12px 0' }}>
+               <List.Item.Meta
+-                avatar={<Avatar icon={<UserOutlined />} style={{ background: member.role === 'admin' ? '#1890ff' : member.role === 'director' ? '#722ed1' : '#52c41a' }} />}
+-                title={`${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || member.username}
++                avatar={
++                  <Avatar
++                    icon={<UserOutlined />}
++                    style={{
++                      background: member.role === 'admin' ? '#1890ff' : member.role === 'director' ? '#722ed1' : member.role === 'expert' ? '#52c41a' : member.role === 'partner' ? '#fa8c16' : '#bfbfbf',
++                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
++                    }}
++                  />
++                }
++                title={
++                  <div style={{ fontWeight: 500 }}>
++                    {`${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || member.username}
++                  </div>
++                }
+                 description={
+-                  <Space direction="vertical" size={0}>
+-                    <span>{member.email}</span>
+-                    <span style={{ fontSize: 12, color: '#8c8c8c' }}>
+-                      {member.role === 'admin' ? 'Администратор' : member.role === 'director' ? 'Директор' : member.role === 'expert' ? 'Эксперт' : member.role === 'partner' ? 'Партнер' : 'Клиент'}
+-                    </span>
++                  <Space direction="vertical" size={4} style={{ marginTop: 4 }}>
++                    <span style={{ color: '#595959' }}>{member.email}</span>
++                    <Tag color={
++                      member.role === 'admin' ? 'blue' :
++                      member.role === 'director' ? 'purple' :
++                      member.role === 'expert' ? 'green' :
++                      member.role === 'partner' ? 'orange' : 'default'
++                    }>
++                      {member.role === 'admin' ? 'Администратор' :
++                       member.role === 'director' ? 'Директор' :
++                       member.role === 'expert' ? 'Эксперт' :
++                       member.role === 'partner' ? 'Партнер' : 'Клиент'}
++                    </Tag>
+                   </Space>
+                 }
+               />
+@@ -331,12 +479,45 @@ export const AdminChatsSection: React.FC = () => {
+   const isMobile = useIsMobile();
+ 
+   return (
+-    <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: isMobile ? "calc(100vh - 120px)" : "calc(100vh - 180px)", display: "flex", flexDirection: "column" }}>
+-      <Tabs defaultActiveKey="rooms" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
+-        tabBarStyle={{ padding: "0 16px", marginBottom: 0, borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}
++    <div style={{
++      background: "#fff",
++      borderRadius: isMobile ? 0 : 16,
++      boxShadow: isMobile ? "none" : "0 4px 20px rgba(0,0,0,0.08)",
++      overflow: "hidden",
++      height: isMobile ? "calc(100vh - 120px)" : "calc(100vh - 180px)",
++      display: "flex",
++      flexDirection: "column"
++    }}>
++      <Tabs
++        defaultActiveKey="rooms"
++        style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}
++        tabBarStyle={{
++          padding: "12px 20px 0",
++          marginBottom: 0,
++          borderBottom: "1px solid #f0f0f0",
++          background: "#fafafa"
++        }}
+         items={[
+-          { key: "direct", label: <span><MessageOutlined style={{ marginRight: 4 }} />{isMobile ? "Личные" : "Личные сообщения"}</span>, children: <div style={{ height: "100%", overflow: "hidden" }}><DirectTab uid={uid} /></div> },
+-          { key: "rooms", label: <span><TeamOutlined style={{ marginRight: 4 }} />{isMobile ? "Группы" : "Групповые чаты"}</span>, children: <div style={{ height: "100%", overflow: "hidden" }}><RoomsTab uid={uid} /></div> },
++          {
++            key: "direct",
++            label: (
++              <span style={{ fontSize: 14, fontWeight: 500 }}>
++                <MessageOutlined style={{ marginRight: 6 }} />
++                {isMobile ? "Личные" : "Личные сообщения"}
++              </span>
++            ),
++            children: <div style={{ height: "100%", overflow: "hidden" }}><DirectTab uid={uid} /></div>
++          },
++          {
++            key: "rooms",
++            label: (
++              <span style={{ fontSize: 14, fontWeight: 500 }}>
++                <TeamOutlined style={{ marginRight: 6 }} />
++                {isMobile ? "Группы" : "Групповые чаты"}
++              </span>
++            ),
++            children: <div style={{ height: "100%", overflow: "hidden" }}><RoomsTab uid={uid} /></div>
++          },
+         ]}
+       />
+     </div>

@@ -1,0 +1,75 @@
+From d469da7d425f998b379fb0241badf0ccb663f95f Mon Sep 17 00:00:00 2001
+From: Devin <devin@devin.ai>
+Date: Thu, 23 Apr 2026 23:59:45 +0000
+Subject: [PATCH 7/8] fix(users): ensure username stays globally unique after
+ archive
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Previous patch checked username uniqueness only among active users,
+which was correct for the business check but still let the code
+generate a candidate that collided with an archived user at DB level
+(username has a DB UNIQUE constraint), triggering IntegrityError.
+
+- Director register: username-generation loop now iterates ALL users,
+  but explicit 'Имя занято' is still shown only for active collisions;
+  archived name collisions get a dedicated message.
+- CustomRegisterSerializer: public signup username generator also
+  iterates all users to pick a globally unique suffix.
+---
+ apps/director/views.py    | 12 ++++++++++--
+ apps/users/serializers.py |  4 +++-
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/apps/director/views.py b/apps/director/views.py
+index 4ede97e..7e7e18c 100644
+--- a/apps/director/views.py
++++ b/apps/director/views.py
+@@ -454,18 +454,26 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
+         if phone and User.objects.filter(phone=phone, is_active=True).exists():
+             return Response({'detail': 'Пользователь с таким телефоном уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+ 
+-        # Генерация/проверка username — также по активным, чтобы архивированные не держали имя.
++        # Генерация/проверка username.
++        # Нам нужна глобальная уникальность (на уровне БД username UNIQUE),
++        # но бизнес-ошибку «занято» показываем только если username держит активный
++        # пользователь — архивированный держит имя, но новому подберём суффикс автоматически.
+         if not username:
+             base_username = (email.split('@')[0] if email else (phone or 'user'))
+             candidate = base_username
+             suffix = 1
+-            while User.objects.filter(username=candidate, is_active=True).exists():
++            while User.objects.filter(username=candidate).exists():
+                 candidate = f"{base_username}{suffix}"
+                 suffix += 1
+             username = candidate
+         else:
+             if User.objects.filter(username=username, is_active=True).exists():
+                 return Response({'detail': 'Имя пользователя занято'}, status=status.HTTP_400_BAD_REQUEST)
++            if User.objects.filter(username=username).exclude(is_active=True).exists():
++                return Response(
++                    {'detail': 'Имя пользователя занято архивированным сотрудником — укажите другое'},
++                    status=status.HTTP_400_BAD_REQUEST,
++                )
+ 
+         user = User.objects.create_user(
+             username=username,
+diff --git a/apps/users/serializers.py b/apps/users/serializers.py
+index 9ad4f0f..83e4f7d 100644
+--- a/apps/users/serializers.py
++++ b/apps/users/serializers.py
+@@ -65,7 +65,9 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
+                 base_username = email.split('@')[0]
+                 username = base_username
+                 counter = 1
+-                while User.objects.filter(username=username, is_active=True).exists():
++                # Глобальная уникальность — архивированные пользователи держат username
++                # на уровне БД, поэтому суффикс прибавляем пока есть ЛЮБОЕ совпадение.
++                while User.objects.filter(username=username).exists():
+                     username = f"{base_username}{counter}"
+                     counter += 1
+                 validated_data['username'] = username
+-- 
+2.34.1
+

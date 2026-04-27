@@ -1,0 +1,114 @@
+From da77efb9527d82c16362e9f6a6a3b5e029d71e6f Mon Sep 17 00:00:00 2001
+From: Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 21:29:56 +0000
+Subject: [PATCH 1/8] fix(users): scope email/username uniqueness checks to
+ active users
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Archived/deactivated employees kept blocking new registrations with the
+same email/username. Restrict uniqueness probes to is_active=True so that
+after archiving a staff member, the same email can be reused. Applies to
+both director-side employee creation and public registration/signup.
+
+Co-Authored-By: Егор Брайт (Светлый) <brait.2005@gmail.com>
+---
+ apps/director/views.py    | 13 +++++++------
+ apps/users/serializers.py |  2 +-
+ apps/users/views.py       | 17 +++++++----------
+ 3 files changed, 15 insertions(+), 17 deletions(-)
+
+diff --git a/apps/director/views.py b/apps/director/views.py
+index ac8298f..4ede97e 100644
+--- a/apps/director/views.py
++++ b/apps/director/views.py
+@@ -447,23 +447,24 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
+         if role not in allowed_roles:
+             return Response({'detail': 'Недопустимая роль'}, status=status.HTTP_400_BAD_REQUEST)
+ 
+-        # Уникальность email/телефона
+-        if email and User.objects.filter(email=email).exists():
++        # Уникальность email/телефона — проверяем только среди активных пользователей,
++        # чтобы архивированные сотрудники не блокировали регистрацию с тем же контактом.
++        if email and User.objects.filter(email=email, is_active=True).exists():
+             return Response({'detail': 'Пользователь с таким email уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+-        if phone and User.objects.filter(phone=phone).exists():
++        if phone and User.objects.filter(phone=phone, is_active=True).exists():
+             return Response({'detail': 'Пользователь с таким телефоном уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+ 
+-        # Генерация/проверка username
++        # Генерация/проверка username — также по активным, чтобы архивированные не держали имя.
+         if not username:
+             base_username = (email.split('@')[0] if email else (phone or 'user'))
+             candidate = base_username
+             suffix = 1
+-            while User.objects.filter(username=candidate).exists():
++            while User.objects.filter(username=candidate, is_active=True).exists():
+                 candidate = f"{base_username}{suffix}"
+                 suffix += 1
+             username = candidate
+         else:
+-            if User.objects.filter(username=username).exists():
++            if User.objects.filter(username=username, is_active=True).exists():
+                 return Response({'detail': 'Имя пользователя занято'}, status=status.HTTP_400_BAD_REQUEST)
+ 
+         user = User.objects.create_user(
+diff --git a/apps/users/serializers.py b/apps/users/serializers.py
+index a860a21..9ad4f0f 100644
+--- a/apps/users/serializers.py
++++ b/apps/users/serializers.py
+@@ -65,7 +65,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
+                 base_username = email.split('@')[0]
+                 username = base_username
+                 counter = 1
+-                while User.objects.filter(username=username).exists():
++                while User.objects.filter(username=username, is_active=True).exists():
+                     username = f"{base_username}{counter}"
+                     counter += 1
+                 validated_data['username'] = username
+diff --git a/apps/users/views.py b/apps/users/views.py
+index 3303f6b..c7ae238 100644
+--- a/apps/users/views.py
++++ b/apps/users/views.py
+@@ -120,30 +120,27 @@ class UserViewSet(viewsets.ModelViewSet):
+ 
+     def create(self, request, *args, **kwargs):
+         email = request.data.get('email')
+-        
+-        # Проверяем, существует ли пользователь с таким email
++
++        # Проверяем только среди активных пользователей — архивированные/деактивированные
++        # сотрудники не должны блокировать повторную регистрацию с тем же email.
+         if email:
+-            try:
+-                existing_user = User.objects.get(email=email)
+-                
++            existing_user = User.objects.filter(email=email, is_active=True).first()
++            if existing_user:
+                 # Если email не подтвержден, отправляем код повторно
+                 if not existing_user.email_verified:
+                     verification_code = create_verification_code(existing_user)
+                     send_verification_code(existing_user.email, verification_code.code)
+-                    
++
+                     response_data = UserSerializer(existing_user).data
+                     response_data['message'] = 'Код подтверждения отправлен повторно на ваш email.'
+                     response_data['email_verification_required'] = True
+-                    
++
+                     return Response(response_data, status=status.HTTP_200_OK)
+                 else:
+-                    # Email уже подтвержден
+                     return Response(
+                         {'email': ['Пользователь с таким email уже существует и подтвержден.']},
+                         status=status.HTTP_400_BAD_REQUEST
+                     )
+-            except User.DoesNotExist:
+-                pass  # Пользователь не существует, продолжаем регистрацию
+         
+         serializer = self.get_serializer(data=request.data)
+         
+-- 
+2.34.1
+
