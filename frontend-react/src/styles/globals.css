@@ -76,6 +76,18 @@ a {
   width: 100%;
 }
 
+@media (max-width: 840px) {
+  .ant-layout-content {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-layout-content {
+    padding: 8px;
+  }
+}
+
 .ant-tag {
   font-weight: 300;
 }

@@ -199,12 +199,47 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 840px) {
   .container {
-    padding: 0 24px 0 40px;
+    padding: 0 16px;
   }
 
   .columnsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .columnItem {
+    max-width: none;
+    padding-block: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .columnsGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .heading {
+    font-size: 13px;
+  }
+
+  .link {
+    font-size: 11px;
+  }
+
+  .copyright {
+    font-size: 10px;
+  }
+
+  .contactButton,
+  .becomeExpertButton {
+    width: 100%;
+    text-align: center;
   }
 }

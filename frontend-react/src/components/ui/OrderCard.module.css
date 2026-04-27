@@ -357,6 +357,40 @@
   color: var(--primary-blue);
 }
 
+@media (max-width: 840px) {
+  .orderCharacteristicsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .orderCharacteristicItem {
+    padding: 8px;
+  }
+
+  .orderCharacteristicIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .orderTitle {
+    font-size: 17px !important;
+  }
+
+  .orderBudget {
+    font-size: 18px;
+  }
+
+  .orderDescription {
+    font-size: 14px;
+  }
+
+  .fileTile {
+    width: 100px;
+    min-height: 96px;
+  }
+}
+
 @media (max-width: 600px) {
   .orderCardHeader {
     flex-direction: column;
@@ -380,6 +414,38 @@
   
   .orderBidButton {
     width: 100%;
+  }
+
+  .orderTitle {
+    font-size: 16px !important;
+  }
+
+  .orderBudget {
+    font-size: 16px;
+  }
+
+  .orderCharacteristicLabel {
+    font-size: 9px;
+  }
+
+  .orderCharacteristicValue {
+    font-size: 12px;
+  }
+
+  .filesGrid {
+    gap: 6px;
+  }
+
+  .fileTile {
+    width: 80px;
+    min-height: 80px;
+    padding: 8px 6px;
+  }
+
+  .fileTileIconWrap {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
 }
 

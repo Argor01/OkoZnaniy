@@ -66,3 +66,35 @@
 .bodyPaddingXxl :global(.ant-card-body) {
   padding: 48px;
 }
+
+@media (max-width: 840px) {
+  .bodyPaddingLg :global(.ant-card-body) {
+    padding: 16px;
+  }
+
+  .bodyPaddingXl :global(.ant-card-body) {
+    padding: 20px;
+  }
+
+  .bodyPaddingXxl :global(.ant-card-body) {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bodyPaddingMd :global(.ant-card-body) {
+    padding: 12px;
+  }
+
+  .bodyPaddingLg :global(.ant-card-body) {
+    padding: 12px;
+  }
+
+  .bodyPaddingXl :global(.ant-card-body) {
+    padding: 16px;
+  }
+
+  .bodyPaddingXxl :global(.ant-card-body) {
+    padding: 16px;
+  }
+}

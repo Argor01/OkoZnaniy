@@ -235,11 +235,22 @@
 }
 
 .contentPaddingMobile {
-  padding: 16px;
+  padding: 12px 8px;
 }
 
 .contentPaddingDesktop {
   padding: 24px;
+}
+
+@media (max-width: 480px) {
+  .contentPaddingMobile {
+    padding: 8px 4px;
+  }
+
+  .dashboardLayoutHeader {
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
 }
 
 @media (max-width: 840px) {
@@ -256,6 +267,24 @@
 
   .mainContent {
     height: auto;
+  }
+
+  .mainLayoutContent {
+    margin: 0 8px;
+  }
+
+  .dashboardLayout {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainLayoutContent {
+    margin: 0 4px;
+  }
+
+  .dashboardLayout {
+    padding: 0 4px;
   }
 }
 

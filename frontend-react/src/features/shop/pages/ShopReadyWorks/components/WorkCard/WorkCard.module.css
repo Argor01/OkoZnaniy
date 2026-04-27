@@ -130,3 +130,43 @@
   color: var(--primary-blue);
   font-weight: 600;
 }
+
+@media (max-width: 840px) {
+  .card {
+    height: auto;
+    min-height: 0;
+  }
+
+  .preview,
+  .noPreview {
+    height: 160px;
+  }
+
+  .currentPrice {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    height: auto;
+  }
+
+  .preview,
+  .noPreview {
+    height: 140px;
+  }
+
+  .card :global(.ant-card-body) {
+    padding: 12px;
+  }
+
+  .description {
+    -webkit-line-clamp: 2;
+    min-height: 3em;
+  }
+
+  .currentPrice {
+    font-size: 18px;
+  }
+}
