@@ -33,6 +33,37 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from rest_framework_simplejwt.tokens import RefreshToken
 
+RU_TO_LAT = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh",
+    "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o",
+    "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "kh", "ц": "ts",
+    "ч": "ch", "ш": "sh", "щ": "shch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu",
+    "я": "ya",
+}
+
+
+def _transliterate(text: str) -> str:
+    out = []
+    for ch in text.lower():
+        out.append(RU_TO_LAT.get(ch, ch))
+    return "".join(out)
+
+
+def _make_username(first_name: str, last_name: str, email: str | None, vk_user_id: str) -> str:
+    parts = [p for p in (first_name, last_name) if p]
+    if parts:
+        raw = "_".join(parts)
+        base = _transliterate(raw)
+        base = "".join(ch for ch in base if ch.isalnum() or ch in "_-").strip("_-")
+        if base:
+            return base
+    if email:
+        base = email.split("@")[0]
+        base = "".join(ch for ch in base if ch.isalnum() or ch in "_-")
+        if base:
+            return base
+    return f"vk_{vk_user_id}"
+
 logger = logging.getLogger(__name__)
 
 VK_AUTHORIZE_URL = "https://id.vk.com/authorize"
@@ -174,8 +205,7 @@ def vkid_callback(request):
         if email:
             user = User.objects.filter(email__iexact=email).first()
         if user is None:
-            base_username = email.split("@")[0] if email else f"vk_{vk_user_id}"
-            base_username = "".join(ch for ch in base_username if ch.isalnum() or ch in "_-") or f"vk_{vk_user_id}"
+            base_username = _make_username(first_name, last_name, email, vk_user_id)
             username = base_username
             counter = 1
             while User.objects.filter(username=username).exists():

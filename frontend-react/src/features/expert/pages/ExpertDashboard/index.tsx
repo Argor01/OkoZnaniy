@@ -201,11 +201,13 @@ const ExpertDashboard: FC = () => {
       });
     }
 
-    list.push({
-      key: 'orders',
-      label: 'Заказы',
-      children: <OrdersTab isMobile={isMobile} />,
-    });
+    if (userProfile?.role !== 'expert') {
+      list.push({
+        key: 'orders',
+        label: 'Заказы',
+        children: <OrdersTab isMobile={isMobile} />,
+      });
+    }
 
     if (userProfile?.role === 'expert') {
       list.push({

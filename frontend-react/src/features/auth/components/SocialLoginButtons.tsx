@@ -97,8 +97,11 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
         <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
           <img src="/assets/telegram.png" alt="telegram-login" className="socialLoginIcon" />
         </a>
-        <a href={vkHref} aria-label="VK ID">
-          <img src="/assets/vk.svg" alt="vk-id-login" className="socialLoginIcon" />
+        <a href={vkHref} aria-label="VK">
+          <img src="/assets/vk.svg" alt="vk-login" className="socialLoginIcon" />
+        </a>
+        <a href={vkHref} aria-label="MAX">
+          <img src="/assets/max.svg" alt="max-login" className="socialLoginIcon" />
         </a>
       </div>
     </div>

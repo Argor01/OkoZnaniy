@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Question, QuestionTag, Answer, AnswerLike, Article, ArticleFile
+from .models import Question, QuestionTag, Answer, AnswerLike, Article, ArticleFile, ArticleComplaint, ArticleDeletion
 
 
 class ArticleFileSerializer(serializers.ModelSerializer):
@@ -54,7 +54,40 @@ class ArticleDetailSerializer(serializers.ModelSerializer):
 class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['title', 'description', 'work_type', 'subject']
+        fields = ['id', 'title', 'description', 'work_type', 'subject']
+        read_only_fields = ['id']
+
+
+class ArticleComplaintCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArticleComplaint
+        fields = ['article', 'reason', 'description']
+
+
+class ArticleComplaintSerializer(serializers.ModelSerializer):
+    complainant = ArticleAuthorSerializer(read_only=True)
+
+    class Meta:
+        model = ArticleComplaint
+        fields = [
+            'id', 'article', 'article_title', 'complainant', 'reason',
+            'description', 'status', 'admin_response', 'claim',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ArticleDeletionSerializer(serializers.ModelSerializer):
+    author = ArticleAuthorSerializer(read_only=True)
+
+    class Meta:
+        model = ArticleDeletion
+        fields = [
+            'id', 'article_title', 'article_description', 'article_work_type',
+            'article_subject', 'author', 'reason', 'status',
+            'dispute_message', 'admin_final_response', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class QuestionTagSerializer(serializers.ModelSerializer):

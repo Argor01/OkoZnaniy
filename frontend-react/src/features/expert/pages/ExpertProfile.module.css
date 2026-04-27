@@ -194,3 +194,72 @@
   margin: 0;
   font-size: 14px;
 }
+
+/* Knowledge stats section */
+.knowledgeStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.knowledgeStatItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-primary, #fff);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05));
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.knowledgeStatIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.knowledgeStatIconBlue {
+  background: color-mix(in srgb, var(--color-brand-blue-100, #d6ecfe) 70%, #ffffff 30%);
+  color: var(--color-brand-blue-700, #0f7fda);
+  border: 1px solid var(--color-brand-blue-200, #a5d5fc);
+}
+
+.knowledgeStatIconGreen {
+  background: color-mix(in srgb, #bbf7d0 68%, #ffffff 32%);
+  color: #15803d;
+  border: 1px solid color-mix(in srgb, #86efac 72%, #ffffff 28%);
+}
+
+.knowledgeStatIconPurple {
+  background: color-mix(in srgb, var(--color-brand-purple-500, #9b4aff) 18%, #ffffff 82%);
+  color: var(--color-brand-purple-700, #431b73);
+  border: 1px solid color-mix(in srgb, var(--color-brand-purple-500, #9b4aff) 28%, #ffffff 72%);
+}
+
+.knowledgeStatIconOrange {
+  background: color-mix(in srgb, var(--color-brand-orange-400, #ffc87d) 34%, #ffffff 66%);
+  color: var(--color-brand-orange-600, #ffa831);
+  border: 1px solid color-mix(in srgb, var(--color-brand-orange-500, #ffb34a) 38%, #ffffff 62%);
+}
+
+.knowledgeStatLabel {
+  font-size: 12px;
+  color: var(--text-tertiary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.knowledgeStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  line-height: 1.2;
+}

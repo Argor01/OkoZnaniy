@@ -1,5 +1,4 @@
-import apiClient from '@/api/client';
-import { API_URL } from '@/config/api';
+import { apiClient } from '@/api/client';
 
 export interface Category {
   id: number;
@@ -108,7 +107,7 @@ export const knowledgeApi = {
     const response = await apiClient.get('/catalog/categories/');
     return response.data;
   },
-  
+
   getQuestions: async (params?: {
     category?: string;
     status?: string;
@@ -117,12 +116,12 @@ export const knowledgeApi = {
     const response = await apiClient.get('/knowledge/questions/', { params });
     return response.data;
   },
-  
+
   getQuestion: async (id: number): Promise<Question> => {
     const response = await apiClient.get(`/knowledge/questions/${id}/`);
     return response.data;
   },
-  
+
   createQuestion: async (data: {
     title: string;
     description: string;
@@ -132,7 +131,7 @@ export const knowledgeApi = {
     const response = await apiClient.post('/knowledge/questions/', data);
     return response.data;
   },
-  
+
   addAnswer: async (questionId: number, content: string): Promise<Answer> => {
     const response = await apiClient.post(
       `/knowledge/questions/${questionId}/add_answer/`,
@@ -140,17 +139,27 @@ export const knowledgeApi = {
     );
     return response.data;
   },
-  
+
   toggleLike: async (answerId: number): Promise<{ liked: boolean; likes_count: number }> => {
     const response = await apiClient.post(`/knowledge/answers/${answerId}/toggle_like/`);
     return response.data;
   },
-  
+
   deleteAnswer: async (answerId: number): Promise<void> => {
     await apiClient.delete(`/knowledge/answers/${answerId}/`);
   },
-  
+
   deleteQuestion: async (questionId: number): Promise<void> => {
     await apiClient.delete(`/knowledge/questions/${questionId}/`);
+  },
+
+  getUserKnowledgeStats: async (userId: number): Promise<{
+    answers_count: number;
+    questions_count: number;
+    total_likes: number;
+    best_answers: number;
+  }> => {
+    const response = await apiClient.get(`/knowledge/user-stats/${userId}/`);
+    return response.data;
   },
 };

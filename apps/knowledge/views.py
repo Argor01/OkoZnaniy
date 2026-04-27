@@ -1,86 +1,18 @@
-from rest_framework import viewsets, status, parsers
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from django.db import models
 from django.db.models import Count, Q
-from .models import Question, Answer, AnswerLike, QuestionView, Article, ArticleFile
+from .models import Question, Answer, AnswerLike, QuestionView
 from .serializers import (
     QuestionListSerializer,
     QuestionDetailSerializer,
     QuestionCreateSerializer,
     AnswerSerializer,
-    AnswerCreateSerializer,
-    ArticleListSerializer,
-    ArticleDetailSerializer,
-    ArticleCreateSerializer,
+    AnswerCreateSerializer
 )
 from apps.notifications.services import NotificationService
-
-
-class ArticleViewSet(viewsets.ModelViewSet):
-    """ViewSet для статей Базы Знаний"""
-    permission_classes = [IsAuthenticated]
-    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
-
-    def get_queryset(self):
-        queryset = Article.objects.select_related('author').prefetch_related('files')
-
-        search = self.request.query_params.get('search')
-        if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search)
-                | Q(description__icontains=search)
-                | Q(subject__icontains=search)
-            )
-
-        work_type = self.request.query_params.get('work_type')
-        if work_type:
-            queryset = queryset.filter(work_type__icontains=work_type)
-
-        subject = self.request.query_params.get('subject')
-        if subject:
-            queryset = queryset.filter(subject__icontains=subject)
-
-        return queryset.order_by('-created_at')
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return ArticleListSerializer
-        if self.action == 'create':
-            return ArticleCreateSerializer
-        return ArticleDetailSerializer
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        if user.role not in ('expert', 'admin'):
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied('Только эксперты и администраторы могут создавать статьи')
-        article = serializer.save(author=user)
-        files = self.request.FILES.getlist('files')
-        for f in files:
-            ArticleFile.objects.create(
-                article=article,
-                file=f,
-                original_name=f.name,
-                file_size=f.size,
-            )
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.views_count += 1
-        instance.save(update_fields=['views_count'])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        article = self.get_object()
-        user = request.user
-        if user.role == 'admin' or article.author == user:
-            return super().destroy(request, *args, **kwargs)
-        return Response(
-            {'error': 'Нет прав для удаления этой статьи'},
-            status=status.HTTP_403_FORBIDDEN,
-        )
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -214,6 +146,26 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
 
 
+class UserKnowledgeStatsView(viewsets.ViewSet):
+    """Статистика пользователя по базе знаний"""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get'], url_path='(?P<user_id>[0-9]+)')
+    def user_stats(self, request, user_id=None):
+        answers_count = Answer.objects.filter(author_id=user_id).count()
+        questions_count = Question.objects.filter(author_id=user_id).count()
+        total_likes = Answer.objects.filter(author_id=user_id).aggregate(
+            total=models.Sum('likes_count')
+        )['total'] or 0
+        best_answers = Answer.objects.filter(author_id=user_id, is_best_answer=True).count()
+        return Response({
+            'answers_count': answers_count,
+            'questions_count': questions_count,
+            'total_likes': total_likes,
+            'best_answers': best_answers,
+        })
+
+
 class AnswerViewSet(viewsets.ModelViewSet):
     """ViewSet для ответов"""
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -255,3 +207,76 @@ class AnswerViewSet(viewsets.ModelViewSet):
             )
         
         return super().destroy(request, *args, **kwargs)
+
+from .models import Article, ArticleFile
+from .serializers import (
+    ArticleListSerializer,
+    ArticleDetailSerializer,
+    ArticleCreateSerializer,
+    ArticleFileSerializer,
+)
+from rest_framework.parsers import MultiPartParser, FormParser
+
+
+class ArticleViewSet(viewsets.ModelViewSet):
+    """ViewSet для статей в Базе Знаний"""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]
+    pagination_class = None
+
+    def get_queryset(self):
+        queryset = Article.objects.select_related("author").prefetch_related("files")
+
+        search = self.request.query_params.get("search")
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(description__icontains=search)
+            )
+
+        work_type = self.request.query_params.get("work_type")
+        if work_type:
+            queryset = queryset.filter(work_type=work_type)
+
+        subject = self.request.query_params.get("subject")
+        if subject:
+            queryset = queryset.filter(subject=subject)
+
+        author_id = self.request.query_params.get("author_id")
+        if author_id:
+            queryset = queryset.filter(author_id=author_id)
+
+        return queryset.order_by("-created_at")
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ArticleListSerializer
+        elif self.action == "create":
+            return ArticleCreateSerializer
+        return ArticleDetailSerializer
+
+    def perform_create(self, serializer):
+        article = serializer.save(author=self.request.user)
+        files = self.request.FILES.getlist("files")
+        for f in files:
+            ArticleFile.objects.create(
+                article=article,
+                file=f,
+                original_name=f.name,
+                file_size=f.size,
+            )
+
+    def destroy(self, request, *args, **kwargs):
+        article = self.get_object()
+        if article.author != request.user and not request.user.is_staff:
+            return Response(
+                {"error": "Вы можете удалять только свои статьи"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.views_count += 1
+        instance.save(update_fields=["views_count"])
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)

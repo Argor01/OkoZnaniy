@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Card, 
-  List, 
   Tag, 
-  Space, 
   Typography, 
   Input,
   Select,
@@ -20,7 +18,10 @@ import {
   ClockCircleOutlined,
   EyeOutlined,
   MessageOutlined,
-  FilterOutlined
+  FilterOutlined,
+  QuestionCircleOutlined,
+  CheckCircleOutlined,
+  BookOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -49,7 +50,6 @@ export const KnowledgePortal: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   
-  // Загрузка данных с сервера
   useEffect(() => {
     loadData();
   }, [selectedCategory, selectedStatus, searchText]);
@@ -85,11 +85,18 @@ export const KnowledgePortal: React.FC = () => {
 
   const handleQuestionCreated = (newQuestion: Question) => {
     setIsModalVisible(false);
-    loadData(); // Перезагружаем список вопросов
+    loadData();
     message.success('Вопрос успешно создан!');
   };
   
   const filteredQuestions = questions;
+
+  const stats = useMemo(() => {
+    const totalQuestions = filteredQuestions.length;
+    const answeredQuestions = filteredQuestions.filter(q => q.status === 'answered').length;
+    const totalAnswers = filteredQuestions.reduce((sum, q) => sum + q.answers_count, 0);
+    return { totalQuestions, answeredQuestions, totalAnswers };
+  }, [filteredQuestions]);
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -115,7 +122,6 @@ export const KnowledgePortal: React.FC = () => {
 
   const handleUserClick = (userId: number, username: string | undefined, event: React.MouseEvent) => {
     event.stopPropagation();
-    // Не переходим на профиль для моковых/несуществующих пользователей
     if (userId === 0 || userId === 999 || !username) {
       return;
     }
@@ -125,14 +131,46 @@ export const KnowledgePortal: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Title level={2}>Око Ответы</Title>
-        <Paragraph>
+        <Title level={2} className={styles.headerTitle}>Око Ответы</Title>
+        <Text className={styles.headerSubtitle}>
           Задавайте вопросы и получайте ответы от экспертов
-        </Paragraph>
+        </Text>
       </div>
 
+      {/* Stats bar */}
+      <div className={styles.statsBar}>
+        <div className={styles.statItem}>
+          <div className={`${styles.statIcon} ${styles.statIconBlue}`}>
+            <QuestionCircleOutlined />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Вопросов</div>
+            <div className={styles.statValue}>{stats.totalQuestions}</div>
+          </div>
+        </div>
+        <div className={styles.statItem}>
+          <div className={`${styles.statIcon} ${styles.statIconGreen}`}>
+            <CheckCircleOutlined />
+          </div>
+          <div>
+            <div className={styles.statLabel}>С ответами</div>
+            <div className={styles.statValue}>{stats.answeredQuestions}</div>
+          </div>
+        </div>
+        <div className={styles.statItem}>
+          <div className={`${styles.statIcon} ${styles.statIconPurple}`}>
+            <MessageOutlined />
+          </div>
+          <div>
+            <div className={styles.statLabel}>Ответов</div>
+            <div className={styles.statValue}>{stats.totalAnswers}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
       <Card className={styles.filtersCard}>
-        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <div className={styles.filtersRow}>
           <Search
             placeholder="Поиск по вопросам..."
             allowClear
@@ -143,77 +181,93 @@ export const KnowledgePortal: React.FC = () => {
             className={styles.searchInput}
           />
           
-          <Space wrap>
-            <Select
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              style={{ width: 200 }}
-              suffixIcon={<FilterOutlined />}
-              loading={loading}
-            >
-              <Option value="all">Все категории</Option>
-              {categories.map(cat => (
-                <Option key={cat.id} value={cat.name}>{cat.name}</Option>
-              ))}
-            </Select>
+          <Select
+            value={selectedCategory}
+            onChange={setSelectedCategory}
+            style={{ width: 200 }}
+            suffixIcon={<FilterOutlined />}
+            loading={loading}
+            size="large"
+          >
+            <Option value="all">Все категории</Option>
+            {categories.map(cat => (
+              <Option key={cat.id} value={cat.name}>{cat.name}</Option>
+            ))}
+          </Select>
 
-            <Select
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-              style={{ width: 150 }}
-            >
-              <Option value="all">Все статусы</Option>
-              <Option value="open">Открытые</Option>
-              <Option value="answered">С ответами</Option>
-            </Select>
+          <Select
+            value={selectedStatus}
+            onChange={setSelectedStatus}
+            style={{ width: 170 }}
+            size="large"
+          >
+            <Option value="all">Все статусы</Option>
+            <Option value="open">Открытые</Option>
+            <Option value="answered">С ответами</Option>
+          </Select>
 
-            <Button type="primary" icon={<MessageOutlined />} onClick={handleCreateQuestion}>
-              Задать вопрос
-            </Button>
-          </Space>
-        </Space>
+          <Button 
+            type="primary" 
+            icon={<MessageOutlined />} 
+            onClick={handleCreateQuestion}
+            className={styles.askButton}
+            size="large"
+          >
+            Задать вопрос
+          </Button>
+        </div>
       </Card>
 
+      {/* Questions list */}
       <div className={styles.questionsList}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ textAlign: 'center', padding: '60px' }}>
             <Spin size="large" />
           </div>
         ) : filteredQuestions.length === 0 ? (
-          <Empty description="Вопросы не найдены" />
+          <div className={styles.emptyState}>
+            <Empty description="Вопросы не найдены" />
+          </div>
         ) : (
-          <List
-            dataSource={filteredQuestions}
-            renderItem={(question) => (
-              <Card 
-                key={question.id}
-                className={styles.questionCard}
-                hoverable
-                onClick={() => handleQuestionClick(question.id)}
-              >
-                <div className={styles.questionHeader}>
-                  <Space 
-                    style={{ cursor: 'pointer' }}
+          filteredQuestions.map((question) => (
+            <div 
+              key={question.id}
+              className={styles.questionCard}
+              onClick={() => handleQuestionClick(question.id)}
+            >
+              <div className={styles.questionCardInner}>
+                {/* Author row */}
+                <div className={styles.authorRow}>
+                  <div 
+                    className={styles.authorInfo}
                     onClick={(e) => handleUserClick(question.author.id, question.author.username, e)}
                   >
-                    <Avatar icon={<UserOutlined />} />
-                    <div>
-                      <Text strong>{question.author.name}</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Avatar 
+                      size={40} 
+                      icon={<UserOutlined />}
+                      src={question.author.avatar}
+                      className={styles.authorAvatar}
+                    />
+                    <div className={styles.authorMeta}>
+                      <span className={styles.authorName}>{question.author.name}</span>
+                      <span className={styles.authorTime}>
                         <ClockCircleOutlined /> {dayjs(question.created_at).fromNow()}
-                      </Text>
+                      </span>
                     </div>
-                  </Space>
-                  <Tag color={getStatusColor(question.status)}>
+                  </div>
+                  <Tag 
+                    color={getStatusColor(question.status)}
+                    className={styles.statusTag}
+                  >
                     {getStatusText(question.status)}
                   </Tag>
                 </div>
 
+                {/* Content */}
                 <div className={styles.questionContent}>
-                  <Title level={4} className={styles.questionTitle}>
+                  <div className={styles.questionTitle}>
                     {question.title}
-                  </Title>
+                  </div>
                   <Paragraph 
                     ellipsis={{ rows: 2 }}
                     className={styles.questionDescription}
@@ -222,32 +276,32 @@ export const KnowledgePortal: React.FC = () => {
                   </Paragraph>
                 </div>
 
-                <div className={styles.questionFooter}>
-                  <Space wrap>
-                    <Tag color="blue">{question.category}</Tag>
-                    {question.tags.map(tag => (
-                      <Tag key={tag}>{tag}</Tag>
-                    ))}
-                  </Space>
-
-                  <Space>
-                    <Tooltip title="Просмотры">
-                      <Space size={4}>
-                        <EyeOutlined />
-                        <Text type="secondary">{question.views_count}</Text>
-                      </Space>
-                    </Tooltip>
-                    <Tooltip title="Ответы">
-                      <Space size={4}>
-                        <MessageOutlined />
-                        <Text type="secondary">{question.answers_count}</Text>
-                      </Space>
-                    </Tooltip>
-                  </Space>
+                {/* Info chips */}
+                <div className={styles.infoGrid}>
+                  <span className={styles.infoChip}>
+                    <EyeOutlined className={styles.infoChipIcon} />
+                    {question.views_count} просмотров
+                  </span>
+                  <span className={styles.infoChip}>
+                    <MessageOutlined className={styles.infoChipIcon} />
+                    {question.answers_count} ответов
+                  </span>
                 </div>
-              </Card>
-            )}
-          />
+
+                {/* Footer */}
+                <div className={styles.questionFooter}>
+                  <div className={styles.tagsRow}>
+                    <Tag color="blue" className={styles.categoryTag}>
+                      <BookOutlined /> {question.category}
+                    </Tag>
+                    {question.tags.map(tag => (
+                      <Tag key={tag} className={styles.regularTag}>{tag}</Tag>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
 

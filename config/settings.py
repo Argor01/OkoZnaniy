@@ -170,6 +170,8 @@ SOCIALACCOUNT_EMAIL_REQUIRED = True
 # Отключаем CSRF для API в режиме разработки
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = [
+        'https://45.12.239.226',
+        'http://45.12.239.226',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'http://localhost:3001',
@@ -192,6 +194,8 @@ else:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
+        'https://45.12.239.226',
+        'http://45.12.239.226',
         'https://okoznaniy.ru',
         'https://www.okoznaniy.ru',
     ]
@@ -397,6 +401,8 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
     CSRF_TRUSTED_ORIGINS = [
+        'https://45.12.239.226',
+        'http://45.12.239.226',
         'https://okoznaniy.ru',
         'https://www.okoznaniy.ru',
     ]

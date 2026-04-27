@@ -2,8 +2,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Tag, Spin, Alert, Rate, Divider, Avatar } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined, QuestionCircleOutlined, LikeOutlined, TrophyOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertStatistics, type ExpertReview } from '@/features/expert/api/experts';
+import { knowledgeApi } from '@/features/knowledge/api/knowledgeApi';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import styles from './ExpertProfile.module.css';
@@ -47,6 +48,12 @@ const ExpertProfile: React.FC = () => {
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
+  });
+
+  const { data: knowledgeStats } = useQuery({
+    queryKey: ['expert-knowledge-stats', expertId],
+    queryFn: () => knowledgeApi.getUserKnowledgeStats(Number(expertId)),
+    enabled: !!expertId,
   });
 
   React.useEffect(() => {
@@ -158,6 +165,51 @@ const ExpertProfile: React.FC = () => {
               </AppButton>
             </AppCard>
           )}
+
+          <AppCard title="Статьи в Базе Знаний" className={styles.cardSpacing}>
+            {knowledgeStats ? (
+              <div className={styles.knowledgeStatsGrid}>
+                <div className={styles.knowledgeStatItem}>
+                  <div className={`${styles.knowledgeStatIcon} ${styles.knowledgeStatIconBlue}`}>
+                    <MessageOutlined />
+                  </div>
+                  <div>
+                    <div className={styles.knowledgeStatLabel}>Ответов</div>
+                    <div className={styles.knowledgeStatValue}>{knowledgeStats.answers_count}</div>
+                  </div>
+                </div>
+                <div className={styles.knowledgeStatItem}>
+                  <div className={`${styles.knowledgeStatIcon} ${styles.knowledgeStatIconPurple}`}>
+                    <QuestionCircleOutlined />
+                  </div>
+                  <div>
+                    <div className={styles.knowledgeStatLabel}>Вопросов</div>
+                    <div className={styles.knowledgeStatValue}>{knowledgeStats.questions_count}</div>
+                  </div>
+                </div>
+                <div className={styles.knowledgeStatItem}>
+                  <div className={`${styles.knowledgeStatIcon} ${styles.knowledgeStatIconGreen}`}>
+                    <LikeOutlined />
+                  </div>
+                  <div>
+                    <div className={styles.knowledgeStatLabel}>Лайков</div>
+                    <div className={styles.knowledgeStatValue}>{knowledgeStats.total_likes}</div>
+                  </div>
+                </div>
+                <div className={styles.knowledgeStatItem}>
+                  <div className={`${styles.knowledgeStatIcon} ${styles.knowledgeStatIconOrange}`}>
+                    <TrophyOutlined />
+                  </div>
+                  <div>
+                    <div className={styles.knowledgeStatLabel}>Лучших ответов</div>
+                    <div className={styles.knowledgeStatValue}>{knowledgeStats.best_answers}</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Spin size="small" />
+            )}
+          </AppCard>
         </div>
 
         <div>

@@ -8,12 +8,13 @@ import {
   Empty,
   Spin,
   Button,
-  Popconfirm,
   Upload,
+  Modal,
+  Tabs,
+  Badge,
   message,
 } from 'antd';
 import {
-  SearchOutlined,
   PlusOutlined,
   EyeOutlined,
   ClockCircleOutlined,
@@ -22,11 +23,15 @@ import {
   DeleteOutlined,
   UploadOutlined,
   ArrowLeftOutlined,
+  WarningOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   articlesApi,
   type Article,
+  type ArticleComplaint,
+  type ArticleDeletion,
 } from '@/features/knowledge/api/knowledgeApi';
 import {
   catalogApi,
@@ -44,11 +49,34 @@ const { Title, Text } = Typography;
 const { Search } = Input;
 const { TextArea } = Input;
 
-type View = 'list' | 'create' | 'detail';
+type View = 'list' | 'create' | 'detail' | 'complaints' | 'deletions';
+
+const REASON_LABELS: Record<string, string> = {
+  spam: 'Спам',
+  inappropriate: 'Неприемлемый контент',
+  copyright: 'Нарушение авторских прав',
+  misinformation: 'Недостоверная информация',
+  other: 'Другое',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'На рассмотрении',
+  reviewed: 'Рассмотрена',
+  rejected: 'Отклонена',
+  article_deleted: 'Статья удалена',
+};
+
+const DELETION_STATUS_LABELS: Record<string, string> = {
+  deleted: 'Удалена',
+  disputed: 'Оспаривается',
+  upheld: 'Подтверждено',
+  restored: 'Восстановлена',
+};
 
 export const KnowledgeBaseSection: React.FC = () => {
   const queryClient = useQueryClient();
   const [view, setView] = useState<View>('list');
+  const [activeTab, setActiveTab] = useState('articles');
   const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
   const [searchText, setSearchText] = useState('');
   const [selectedWorkType, setSelectedWorkType] = useState<string | undefined>();
@@ -60,6 +88,18 @@ export const KnowledgeBaseSection: React.FC = () => {
   const [formSubject, setFormSubject] = useState<string | undefined>();
   const [formFiles, setFormFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleteArticleId, setDeleteArticleId] = useState<number | null>(null);
+  const [deleteComplaintId, setDeleteComplaintId] = useState<number | undefined>();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [resolveModalOpen, setResolveModalOpen] = useState(false);
+  const [resolveDeletionId, setResolveDeletionId] = useState<number | null>(null);
+  const [resolveDecision, setResolveDecision] = useState<string>('upheld');
+  const [resolveResponse, setResolveResponse] = useState('');
+  const [resolveLoading, setResolveLoading] = useState(false);
 
   const { data: workTypes = [] } = useQuery<WorkType[]>({
     queryKey: ['work-types'],
@@ -79,7 +119,6 @@ export const KnowledgeBaseSection: React.FC = () => {
         work_type: selectedWorkType,
         subject: selectedSubject,
       }),
-    enabled: view === 'list',
   });
 
   const { data: articleDetail, isLoading: detailLoading } = useQuery<Article>({
@@ -88,14 +127,64 @@ export const KnowledgeBaseSection: React.FC = () => {
     enabled: view === 'detail' && !!selectedArticleId,
   });
 
-  const handleDelete = async (id: number) => {
+  const { data: complaints = [] } = useQuery<ArticleComplaint[]>({
+    queryKey: ['article-complaints'],
+    queryFn: () => articlesApi.getComplaints(),
+  });
+
+  const { data: deletions = [] } = useQuery<ArticleDeletion[]>({
+    queryKey: ['article-deletions'],
+    queryFn: () => articlesApi.getDeletions(),
+  });
+
+  const pendingComplaints = complaints.filter((c) => c.status === 'pending');
+  const disputedDeletions = deletions.filter((d) => d.status === 'disputed');
+
+  const handleDeleteWithReason = async () => {
+    if (!deleteArticleId || !deleteReason.trim()) {
+      message.error('Укажите причину удаления');
+      return;
+    }
+    setDeleteLoading(true);
     try {
-      await articlesApi.deleteArticle(id);
-      message.success('Статья удалена');
+      await articlesApi.deleteWithReason(deleteArticleId, {
+        reason: deleteReason,
+        complaint_id: deleteComplaintId,
+      });
+      message.success('Статья удалена, уведомление отправлено автору');
       queryClient.invalidateQueries({ queryKey: ['knowledge-articles'] });
-      setView('list');
+      queryClient.invalidateQueries({ queryKey: ['article-complaints'] });
+      queryClient.invalidateQueries({ queryKey: ['article-deletions'] });
+      setDeleteModalOpen(false);
+      setDeleteReason('');
+      setDeleteArticleId(null);
+      setDeleteComplaintId(undefined);
+      if (view === 'detail') setView('list');
     } catch {
-      message.error('Не удалось удалить статью');
+      message.error('Ошибка удаления статьи');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleResolveDispute = async () => {
+    if (!resolveDeletionId) return;
+    setResolveLoading(true);
+    try {
+      await articlesApi.resolveDispute(resolveDeletionId, {
+        decision: resolveDecision,
+        response: resolveResponse,
+      });
+      message.success(resolveDecision === 'restored' ? 'Статья восстановлена' : 'Удаление подтверждено');
+      queryClient.invalidateQueries({ queryKey: ['article-deletions'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-articles'] });
+      setResolveModalOpen(false);
+      setResolveResponse('');
+      setResolveDeletionId(null);
+    } catch {
+      message.error('Ошибка обработки');
+    } finally {
+      setResolveLoading(false);
     }
   };
 
@@ -291,15 +380,16 @@ export const KnowledgeBaseSection: React.FC = () => {
             <Title level={3} style={{ marginBottom: 0 }}>
               {articleDetail.title}
             </Title>
-            <Popconfirm
-              title="Удалить статью?"
-              onConfirm={() => handleDelete(articleDetail.id)}
-              okText="Удалить"
-              cancelText="Отмена"
-              okButtonProps={{ danger: true }}
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setDeleteArticleId(articleDetail.id);
+                setDeleteModalOpen(true);
+              }}
             >
-              <Button danger icon={<DeleteOutlined />}>Удалить</Button>
-            </Popconfirm>
+              Удалить с причиной
+            </Button>
           </div>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16, color: '#888' }}>
             <span><UserOutlined /> {getAuthorName(articleDetail.author)}</span>
@@ -330,10 +420,10 @@ export const KnowledgeBaseSection: React.FC = () => {
     );
   }
 
-  return (
+  const renderArticlesList = () => (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <Title level={3} style={{ marginBottom: 0 }}>База Знаний</Title>
+        <Title level={4} style={{ marginBottom: 0 }}>Статьи</Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setView('create')}>
           Написать статью
         </Button>
@@ -406,25 +496,217 @@ export const KnowledgeBaseSection: React.FC = () => {
                   {article.subject && <Tag color="green">{article.subject}</Tag>}
                 </div>
               </div>
-              <Popconfirm
-                title="Удалить?"
-                onConfirm={(e) => { e?.stopPropagation(); handleDelete(article.id); }}
-                onCancel={(e) => e?.stopPropagation()}
-                okText="Да"
-                cancelText="Нет"
-                okButtonProps={{ danger: true }}
-              >
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </Popconfirm>
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteArticleId(article.id);
+                  setDeleteModalOpen(true);
+                }}
+              />
             </div>
           </Card>
         ))
       )}
+    </div>
+  );
+
+  const renderComplaintsList = () => (
+    <div>
+      <Title level={4}>Жалобы на статьи</Title>
+      {complaints.length === 0 ? (
+        <Empty description="Жалоб нет" />
+      ) : (
+        complaints.map((complaint) => (
+          <Card key={complaint.id} style={{ marginBottom: 12, borderRadius: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <Tag color={complaint.status === 'pending' ? 'orange' : complaint.status === 'article_deleted' ? 'red' : 'green'}>
+                    {STATUS_LABELS[complaint.status] || complaint.status}
+                  </Tag>
+                  <Tag>{REASON_LABELS[complaint.reason] || complaint.reason}</Tag>
+                </div>
+                <Title level={5} style={{ marginBottom: 4 }}>
+                  <WarningOutlined style={{ color: '#faad14', marginRight: 8 }} />
+                  Жалоба на: {complaint.article_title}
+                </Title>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
+                  <UserOutlined /> {getAuthorName(complaint.complainant)} &bull; {dayjs(complaint.created_at).format('D MMMM YYYY, HH:mm')}
+                </Text>
+                <Text>{complaint.description}</Text>
+              </div>
+              {complaint.status === 'pending' && complaint.article && (
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => {
+                    setDeleteArticleId(complaint.article!);
+                    setDeleteComplaintId(complaint.id);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  Удалить статью
+                </Button>
+              )}
+            </div>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+
+  const renderDeletionsList = () => (
+    <div>
+      <Title level={4}>Удалённые статьи / Оспаривания</Title>
+      {deletions.length === 0 ? (
+        <Empty description="Нет удалённых статей" />
+      ) : (
+        deletions.map((deletion) => (
+          <Card key={deletion.id} style={{ marginBottom: 12, borderRadius: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <Tag color={
+                    deletion.status === 'disputed' ? 'orange' :
+                    deletion.status === 'restored' ? 'green' :
+                    deletion.status === 'upheld' ? 'red' : 'default'
+                  }>
+                    {DELETION_STATUS_LABELS[deletion.status] || deletion.status}
+                  </Tag>
+                </div>
+                <Title level={5} style={{ marginBottom: 4 }}>{deletion.article_title}</Title>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>
+                  Автор: {getAuthorName(deletion.author)} &bull; Удалена: {dayjs(deletion.created_at).format('D MMMM YYYY, HH:mm')}
+                </Text>
+                <Text strong>Причина удаления: </Text>
+                <Text>{deletion.reason}</Text>
+                {deletion.dispute_message && (
+                  <div style={{ marginTop: 8, padding: 12, background: '#fff7e6', borderRadius: 6 }}>
+                    <Text strong style={{ color: '#d48806' }}>Оспаривание автора: </Text>
+                    <Text>{deletion.dispute_message}</Text>
+                  </div>
+                )}
+                {deletion.admin_final_response && (
+                  <div style={{ marginTop: 8, padding: 12, background: '#f6ffed', borderRadius: 6 }}>
+                    <Text strong style={{ color: '#389e0d' }}>Решение: </Text>
+                    <Text>{deletion.admin_final_response}</Text>
+                  </div>
+                )}
+              </div>
+              {deletion.status === 'disputed' && (
+                <Button
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => {
+                    setResolveDeletionId(deletion.id);
+                    setResolveModalOpen(true);
+                  }}
+                >
+                  Рассмотреть
+                </Button>
+              )}
+            </div>
+          </Card>
+        ))
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <Title level={3} style={{ marginBottom: 20 }}>База Знаний</Title>
+
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={[
+          {
+            key: 'articles',
+            label: 'Статьи',
+            children: renderArticlesList(),
+          },
+          {
+            key: 'complaints',
+            label: (
+              <Badge count={pendingComplaints.length} offset={[10, 0]}>
+                Жалобы
+              </Badge>
+            ),
+            children: renderComplaintsList(),
+          },
+          {
+            key: 'deletions',
+            label: (
+              <Badge count={disputedDeletions.length} offset={[10, 0]}>
+                Удалённые / Споры
+              </Badge>
+            ),
+            children: renderDeletionsList(),
+          },
+        ]}
+      />
+
+      <Modal
+        title="Удалить статью"
+        open={deleteModalOpen}
+        onCancel={() => { setDeleteModalOpen(false); setDeleteReason(''); setDeleteComplaintId(undefined); }}
+        onOk={handleDeleteWithReason}
+        okText="Удалить"
+        cancelText="Отмена"
+        okButtonProps={{ danger: true }}
+        confirmLoading={deleteLoading}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Text>Автору будет отправлено уведомление с причиной удаления. Автор сможет оспорить удаление.</Text>
+          <div>
+            <Text strong>Причина удаления *</Text>
+            <TextArea
+              rows={4}
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              placeholder="Укажите причину удаления..."
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Рассмотреть оспаривание"
+        open={resolveModalOpen}
+        onCancel={() => { setResolveModalOpen(false); setResolveResponse(''); }}
+        onOk={handleResolveDispute}
+        okText="Принять решение"
+        cancelText="Отмена"
+        confirmLoading={resolveLoading}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text strong>Решение</Text>
+            <Select
+              value={resolveDecision}
+              onChange={setResolveDecision}
+              style={{ width: '100%', marginTop: 4 }}
+            >
+              <Select.Option value="upheld">Подтвердить удаление</Select.Option>
+              <Select.Option value="restored">Восстановить статью</Select.Option>
+            </Select>
+          </div>
+          <div>
+            <Text strong>Комментарий</Text>
+            <TextArea
+              rows={3}
+              value={resolveResponse}
+              onChange={(e) => setResolveResponse(e.target.value)}
+              placeholder="Комментарий к решению..."
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

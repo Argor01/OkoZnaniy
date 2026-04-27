@@ -63,6 +63,111 @@ class ArticleFile(models.Model):
         return self.original_name
 
 
+class ArticleComplaint(models.Model):
+    """Жалоба на статью"""
+    REASON_CHOICES = [
+        ('spam', 'Спам'),
+        ('inappropriate', 'Неприемлемый контент'),
+        ('copyright', 'Нарушение авторских прав'),
+        ('misinformation', 'Недостоверная информация'),
+        ('other', 'Другое'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'На рассмотрении'),
+        ('reviewed', 'Рассмотрена'),
+        ('rejected', 'Отклонена'),
+        ('article_deleted', 'Статья удалена'),
+    ]
+
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='complaints',
+        verbose_name='Статья',
+    )
+    article_title = models.CharField('Название статьи', max_length=300, blank=True, default='')
+    complainant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='article_complaints',
+        verbose_name='Жалобщик',
+    )
+    reason = models.CharField('Причина', max_length=30, choices=REASON_CHOICES, default='other')
+    description = models.TextField('Описание жалобы')
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_response = models.TextField('Ответ администратора', blank=True, default='')
+    claim = models.ForeignKey(
+        'admin_panel.Claim',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='article_complaints',
+        verbose_name='Обращение',
+    )
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Жалоба на статью'
+        verbose_name_plural = 'Жалобы на статьи'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Жалоба на «{self.article_title}» от {self.complainant}"
+
+
+class ArticleDeletion(models.Model):
+    """Удаление статьи админом (для оспаривания)"""
+    STATUS_CHOICES = [
+        ('deleted', 'Удалена'),
+        ('disputed', 'Оспаривается'),
+        ('upheld', 'Подтверждено'),
+        ('restored', 'Восстановлена'),
+    ]
+
+    article_title = models.CharField('Название статьи', max_length=300)
+    article_description = models.TextField('Описание статьи', blank=True, default='')
+    article_work_type = models.CharField('Тип работы', max_length=200, blank=True, default='')
+    article_subject = models.CharField('Предмет', max_length=200, blank=True, default='')
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='deleted_articles',
+        verbose_name='Автор статьи',
+    )
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='articles_deleted_by_me',
+        verbose_name='Удалил',
+    )
+    reason = models.TextField('Причина удаления')
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='deleted')
+    dispute_message = models.TextField('Оспаривание', blank=True, default='')
+    admin_final_response = models.TextField('Итоговый ответ', blank=True, default='')
+    complaint = models.ForeignKey(
+        ArticleComplaint,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='deletion',
+        verbose_name='Жалоба',
+    )
+    created_at = models.DateTimeField('Дата удаления', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Удаление статьи'
+        verbose_name_plural = 'Удаления статей'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Удаление «{self.article_title}»"
+
+
 class Question(models.Model):
     """Вопрос в Портале Знаний"""
     

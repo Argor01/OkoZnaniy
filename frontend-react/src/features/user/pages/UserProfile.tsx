@@ -2,17 +2,23 @@ import type { FC } from 'react';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, Segmented, message as antMessage } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined } from '@ant-design/icons';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, Segmented, Empty, message as antMessage } from 'antd';
+import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined, EyeOutlined, FileOutlined, ClockCircleOutlined, BookOutlined, QuestionCircleOutlined, LikeOutlined, TrophyOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
 import { chatApi } from '@/features/support/api/chat';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { articlesApi, knowledgeApi, type Article } from '@/features/knowledge/api/knowledgeApi';
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ru';
 import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
 import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ru');
 
 const { Text, Paragraph } = Typography;
 
@@ -69,6 +75,18 @@ const UserProfile: FC = () => {
     enabled: !!userData?.id && userData?.role === 'expert',
     refetchOnWindowFocus: true,
     refetchInterval: 20000,
+  });
+
+  const { data: expertArticles = [], isLoading: articlesLoading } = useQuery<Article[]>({
+    queryKey: ['expert-articles', userData?.id],
+    queryFn: () => articlesApi.getArticles({ author_id: Number(userData?.id) }),
+    enabled: !!userData?.id && userData?.role === 'expert',
+  });
+
+  const { data: knowledgeStats } = useQuery({
+    queryKey: ['expert-knowledge-stats', userData?.id],
+    queryFn: () => knowledgeApi.getUserKnowledgeStats(Number(userData?.id)),
+    enabled: !!userData?.id && userData?.role === 'expert',
   });
 
   const { data: liveSpecializations = [] } = useQuery({
@@ -477,6 +495,99 @@ const UserProfile: FC = () => {
                         </Text>
                         <Paragraph className={styles.reviewText}>
                           {review.text || review.comment}
+                        </Paragraph>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {userData.role === 'expert' && knowledgeStats && (
+              <Card
+                title={
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <BookOutlined />
+                    <span>Активность в Базе Знаний</span>
+                  </div>
+                }
+                className={styles.reviewsCard}
+              >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(24, 144, 255, 0.06)' }}>
+                    <MessageOutlined style={{ fontSize: 20, color: '#1890ff' }} />
+                    <div>
+                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Ответов</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.answers_count}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(114, 46, 209, 0.06)' }}>
+                    <QuestionCircleOutlined style={{ fontSize: 20, color: '#722ed1' }} />
+                    <div>
+                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Вопросов</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.questions_count}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(82, 196, 26, 0.06)' }}>
+                    <LikeOutlined style={{ fontSize: 20, color: '#52c41a' }} />
+                    <div>
+                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лайков</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.total_likes}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(250, 173, 20, 0.06)' }}>
+                    <TrophyOutlined style={{ fontSize: 20, color: '#faad14' }} />
+                    <div>
+                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лучших ответов</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.best_answers}</div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {userData.role === 'expert' && (
+              <Card
+                title={
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <BookOutlined />
+                    <span>{`Статьи (${expertArticles.length})`}</span>
+                  </div>
+                }
+                className={styles.reviewsCard}
+              >
+                {articlesLoading ? (
+                  <div className={styles.reviewsLoading}>
+                    <Spin />
+                  </div>
+                ) : expertArticles.length === 0 ? (
+                  <Empty description="Нет опубликованных статей" />
+                ) : (
+                  <div className={styles.reviewsList}>
+                    {expertArticles.map((article: Article) => (
+                      <div
+                        key={article.id}
+                        className={styles.reviewItem}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => navigate(`/knowledge-base/${article.id}`)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') navigate(`/knowledge-base/${article.id}`);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <Text strong style={{ fontSize: 15 }}>{article.title}</Text>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 13, color: '#888', marginTop: 4 }}>
+                          <span><ClockCircleOutlined /> {dayjs(article.created_at).fromNow()}</span>
+                          <span><EyeOutlined /> {article.views_count}</span>
+                          {(article.files_count ?? 0) > 0 && <span><FileOutlined /> {article.files_count}</span>}
+                        </div>
+                        <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
+                          {article.work_type && <Tag color="blue">{article.work_type}</Tag>}
+                          {article.subject && <Tag color="green">{article.subject}</Tag>}
+                        </div>
+                        <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 6, marginBottom: 0 }}>
+                          {article.description}
                         </Paragraph>
                       </div>
                     ))}

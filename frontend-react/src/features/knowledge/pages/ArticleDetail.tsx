@@ -1,13 +1,13 @@
-import React from 'react';
-import { Typography, Card, Tag, Spin, Button, Empty, Popconfirm, message } from 'antd';
+import React, { useState } from 'react';
+import { Typography, Card, Tag, Spin, Button, Empty, Popconfirm, Modal, Input, Select, message } from 'antd';
 import {
   ArrowLeftOutlined,
   UserOutlined,
   ClockCircleOutlined,
-  EyeOutlined,
   FileOutlined,
   DownloadOutlined,
   DeleteOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -47,9 +47,42 @@ const ArticleDetail: React.FC = () => {
     enabled: !!id,
   });
 
+  const [complainModalOpen, setComplainModalOpen] = useState(false);
+  const [complainReason, setComplainReason] = useState('other');
+  const [complainDescription, setComplainDescription] = useState('');
+  const [complainLoading, setComplainLoading] = useState(false);
+
   const canDelete =
     userProfile?.role === 'admin' ||
     (article && userProfile && article.author.id === userProfile.id);
+
+  const canComplain =
+    userProfile &&
+    article &&
+    article.author.id !== userProfile.id &&
+    userProfile.role !== 'admin';
+
+  const handleComplain = async () => {
+    if (!article || !complainDescription.trim()) {
+      message.error('Укажите описание жалобы');
+      return;
+    }
+    setComplainLoading(true);
+    try {
+      await articlesApi.complainArticle(article.id, {
+        reason: complainReason,
+        description: complainDescription,
+      });
+      message.success('Жалоба отправлена');
+      setComplainModalOpen(false);
+      setComplainDescription('');
+      setComplainReason('other');
+    } catch {
+      message.error('Не удалось отправить жалобу');
+    } finally {
+      setComplainLoading(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!article) return;
@@ -105,20 +138,31 @@ const ArticleDetail: React.FC = () => {
           <Title level={3} className={styles.title}>
             {article.title}
           </Title>
-          {canDelete && (
-            <Popconfirm
-              title="Удалить статью?"
-              description="Это действие нельзя отменить"
-              onConfirm={handleDelete}
-              okText="Удалить"
-              cancelText="Отмена"
-              okButtonProps={{ danger: true }}
-            >
-              <Button danger icon={<DeleteOutlined />} size="small">
-                Удалить
+          <div style={{ display: 'flex', gap: 8 }}>
+            {canComplain && (
+              <Button
+                icon={<WarningOutlined />}
+                size="small"
+                onClick={() => setComplainModalOpen(true)}
+              >
+                Пожаловаться
               </Button>
-            </Popconfirm>
-          )}
+            )}
+            {canDelete && (
+              <Popconfirm
+                title="Удалить статью?"
+                description="Это действие нельзя отменить"
+                onConfirm={handleDelete}
+                okText="Удалить"
+                cancelText="Отмена"
+                okButtonProps={{ danger: true }}
+              >
+                <Button danger icon={<DeleteOutlined />} size="small">
+                  Удалить
+                </Button>
+              </Popconfirm>
+            )}
+          </div>
         </div>
 
         <div className={styles.meta}>
@@ -128,9 +172,6 @@ const ArticleDetail: React.FC = () => {
           <span className={styles.metaItem}>
             <ClockCircleOutlined />{' '}
             {dayjs(article.created_at).format('D MMMM YYYY, HH:mm')}
-          </span>
-          <span className={styles.metaItem}>
-            <EyeOutlined /> {article.views_count} просмотров
           </span>
         </div>
 
@@ -167,6 +208,43 @@ const ArticleDetail: React.FC = () => {
           </div>
         )}
       </Card>
+
+      <Modal
+        title="Пожаловаться на статью"
+        open={complainModalOpen}
+        onCancel={() => setComplainModalOpen(false)}
+        onOk={handleComplain}
+        okText="Отправить жалобу"
+        cancelText="Отмена"
+        confirmLoading={complainLoading}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text strong>Причина</Text>
+            <Select
+              value={complainReason}
+              onChange={setComplainReason}
+              style={{ width: '100%', marginTop: 4 }}
+            >
+              <Select.Option value="spam">Спам</Select.Option>
+              <Select.Option value="inappropriate">Неприемлемый контент</Select.Option>
+              <Select.Option value="copyright">Нарушение авторских прав</Select.Option>
+              <Select.Option value="misinformation">Недостоверная информация</Select.Option>
+              <Select.Option value="other">Другое</Select.Option>
+            </Select>
+          </div>
+          <div>
+            <Text strong>Описание жалобы *</Text>
+            <Input.TextArea
+              rows={4}
+              value={complainDescription}
+              onChange={(e) => setComplainDescription(e.target.value)}
+              placeholder="Опишите причину жалобы..."
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
