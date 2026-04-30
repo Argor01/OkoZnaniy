@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
 import { authApi } from '@/features/auth/api/auth';
 import { partnersApi, type PartnerDashboardData, type Referral, type PartnerEarning } from '@/features/partner/api/partners';
+import { useTheme } from '@/contexts/ThemeContext';
 import { PartnerProgram } from './PartnerProgram';
 import { PartnerChatsSection } from '../components/InternalCommunication/PartnerChatsSection';
 import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
@@ -43,6 +44,7 @@ const StatisticsPanel: React.FC<{
   dateRange: [Dayjs, Dayjs] | null;
   onDateRangeChange: (dates: [Dayjs, Dayjs] | null) => void;
 }> = ({ data, dateRange, onDateRangeChange }) => {
+  const { isDark } = useTheme();
   const partnerInfo = data.partner_info;
 
   
@@ -101,7 +103,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #2b9fe6',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #1a2740 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)'
             }}
           >
             <Statistic
@@ -116,7 +118,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #52c41a',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #1a2e1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)'
             }}
           >
             <Statistic
@@ -131,7 +133,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #faad14',
-              background: 'linear-gradient(135deg, #ffffff 0%, #fffbe6 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #2e2a1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fffbe6 100%)'
             }}
           >
             <Statistic
@@ -147,7 +149,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #722ed1',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f9f0ff 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #251a35 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f9f0ff 100%)'
             }}
           >
             <Statistic

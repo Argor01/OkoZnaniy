@@ -399,7 +399,7 @@ const PartnersMap: React.FC = () => {
                       onClick={() => handleMarkerClick(partner)}
                       hoverable
                     >
-                      <div className={styles.partnerInfo} style={{ background: '#ffffff', padding: '16px' }}>
+                      <div className={styles.partnerInfo} style={{ padding: '16px' }}>
                         <Title 
                           level={5} 
                           className={styles.partnerName}
