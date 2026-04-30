@@ -1,13 +1,13 @@
 
 .disputeModal :global(.ant-modal-header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 20px 24px;
 }
 
 .disputeModal :global(.ant-modal-title) {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .disputeModal :global(.ant-modal-body) {
@@ -17,7 +17,7 @@
 }
 
 .disputeModal :global(.ant-modal-footer) {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 16px 24px;
 }
 
@@ -50,7 +50,7 @@
 
 .section h4 {
   margin-bottom: 16px;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   font-weight: 600;
 }
 
@@ -59,24 +59,26 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px;
-  background: #fafafa;
+  background: var(--color-bg-spotlight, #fafafa);
   border-radius: 6px;
   border-left: 3px solid #2b9fe6;
 }
 
 .infoItem span:first-child {
   font-size: 12px;
+  color: var(--color-text-secondary, inherit);
 }
 
 .infoItem span:last-child {
   font-size: 14px;
+  color: var(--color-text-heading, inherit);
 }
 
 .participantCard {
   padding: 16px;
-  background: #f0f9ff;
+  background: var(--color-bg-spotlight, #f0f9ff);
   border-radius: 8px;
-  border: 1px solid #e6f7ff;
+  border: 1px solid var(--color-border-secondary, #e6f7ff);
 }
 
 .participantHeader {
@@ -103,22 +105,22 @@
 
 .reasonContainer {
   padding: 16px;
-  background: #fff2e8;
+  background: var(--color-info-box-orange-bg, #fff2e8);
   border-radius: 8px;
   border-left: 4px solid #faad14;
 }
 
 .reasonText {
   margin: 0;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   line-height: 1.6;
 }
 
 .arbitratorCard {
   padding: 16px;
-  background: #f6ffed;
+  background: var(--color-info-box-green-bg, #f6ffed);
   border-radius: 8px;
-  border: 1px solid #d9f7be;
+  border: 1px solid var(--color-info-box-green-border, #d9f7be);
 }
 
 .arbitratorInfo {
@@ -134,14 +136,14 @@
 
 .resultContainer {
   padding: 16px;
-  background: #f6ffed;
+  background: var(--color-info-box-green-bg, #f6ffed);
   border-radius: 8px;
   border-left: 4px solid #52c41a;
 }
 
 .resultText {
   margin: 0;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   line-height: 1.6;
 }
 
@@ -154,7 +156,7 @@
 }
 
 .timeline :global(.ant-timeline-item-tail) {
-  border-left: 2px solid #f0f0f0;
+  border-left: 2px solid var(--color-border-secondary, #f0f0f0);
 }
 
 

@@ -30,7 +30,7 @@
 
 .chatListHeader {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
 }
 
 .chatListHeaderRow {
@@ -62,11 +62,11 @@
 }
 
 .chatRoomItem:hover {
-  background-color: #f5f5f5;
+  background-color: var(--color-chat-item-hover, #f5f5f5);
 }
 
 .chatRoomItemActive {
-  background-color: #f0f8ff;
+  background-color: var(--color-chat-item-active, #f0f8ff);
   border-left: 3px solid #2b9fe6;
 }
 
@@ -114,7 +114,7 @@
 
 .chatRoomLastMessage {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .chatRoomLastMessageUnread {
@@ -123,7 +123,7 @@
 
 .chatRoomMeta {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-tertiary, #999);
   margin-top: 2px;
 }
 
@@ -142,11 +142,11 @@
 
 .chatHeader {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--color-chat-header-bg, #fff);
 }
 
 .chatHeaderInfo {
@@ -179,8 +179,8 @@
 
 .chatParticipantsBar {
   padding: 8px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #fff;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
+  background-color: var(--color-chat-header-bg, #fff);
   overflow-x: auto;
   white-space: nowrap;
   display: flex;
@@ -217,12 +217,12 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-hover, #f0f0f0);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   flex-shrink: 0;
 }
 
@@ -230,7 +230,7 @@
   flex: 1;
   overflow: auto;
   padding: 16px;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-layout, #f5f5f5);
 }
 
 .messageRow {
@@ -299,11 +299,11 @@
 
 .messageBubble {
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  background-color: #fff;
+  box-shadow: 0 1px 3px var(--color-shadow, rgba(0, 0, 0, 0.08));
+  background-color: var(--color-bg-container, #fff);
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--color-border-base, #e8e8e8);
   position: relative;
   max-width: 100%;
   word-break: break-word;
@@ -330,11 +330,11 @@
 }
 
 .messageReportButton:hover {
-  background-color: #fff1f0;
+  background-color: var(--color-bg-hover, #fff1f0);
 }
 
 .messageBubbleSystem {
-  background-color: #f6f6f6;
+  background-color: var(--color-bg-spotlight, #f6f6f6);
 }
 
 .messageBubblePinned {
@@ -348,13 +348,13 @@
 
 .messageTextSystem {
   font-style: italic;
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .chatComposer {
   padding: 16px;
-  border-top: 1px solid #f0f0f0;
-  background-color: #fff;
+  border-top: 1px solid var(--color-border-secondary, #f0f0f0);
+  background-color: var(--color-bg-container, #fff);
 }
 
 .chatComposerRow {
@@ -371,7 +371,7 @@
 
 .chatInput {
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-base, #e5e7eb);
   font-size: 15px;
   padding: 10px 14px;
   resize: none;
@@ -388,7 +388,7 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-base, #e5e7eb);
   display: flex;
   align-items: center;
   justify-content: center;

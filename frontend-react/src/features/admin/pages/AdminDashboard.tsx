@@ -42,6 +42,7 @@ const KnowledgeBaseSection = lazy(() => import('@/features/admin/components/Sect
 const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
 const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
 const SupportRequestModal = lazy(() => import('@/features/admin/components/Modals/SupportRequestModal').then(m => ({ default: m.SupportRequestModal })));
+const AdminFaqModal = lazy(() => import('@/features/admin/components/Modals/AdminFaqModal'));
 
 const { Content } = Layout;
 
@@ -114,7 +115,10 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     selectedPartner,
     selectedDispute,
     closePartnerModals,
-    closeDisputeModals
+    closeDisputeModals,
+    faqModalVisible,
+    closeFaqModal,
+    isMobile,
   } = useAdminUI();
   
   const { 
@@ -303,6 +307,12 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           onTakeRequest={async (requestId: number) => {  return true; }}
           onCompleteRequest={async (requestId: number) => {  return true; }}
           onSendMessage={async (requestId: number, message: string) => {  return true; }}
+        />
+        
+        <AdminFaqModal
+          visible={faqModalVisible}
+          onClose={closeFaqModal}
+          isMobile={isMobile ?? false}
         />
       </Suspense>
     </AdminLayout>

@@ -24,7 +24,7 @@
 
 .header {
   border-radius: 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
 }
 
 .requestInfo {
@@ -61,14 +61,14 @@
 
 .requestTitle {
   margin: 16px 0 12px 0;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   font-size: 18px;
   line-height: 1.4;
 }
 
 .requestDescription {
   margin-bottom: 16px;
-  color: #595959;
+  color: var(--color-text-secondary, #595959);
   line-height: 1.6;
 }
 
@@ -86,7 +86,7 @@
 .messages {
   border-radius: 0;
   border-top: none;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   max-height: 400px;
   overflow-y: auto;
 }
@@ -136,7 +136,7 @@
 }
 
 .messageContent {
-  background: #f5f5f5;
+  background: var(--color-summary-bg, #f5f5f5);
   padding: 12px 16px;
   border-radius: 12px;
   line-height: 1.5;
@@ -150,8 +150,8 @@
 }
 
 .customerMessage .messageContent {
-  background: #f5f5f5;
-  color: #262626;
+  background: var(--color-summary-bg, #f5f5f5);
+  color: var(--color-text-heading, #262626);
   border-radius: 12px 12px 12px 4px;
 }
 
@@ -167,7 +167,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--color-bg-hover, rgba(0, 0, 0, 0.05));
   border-radius: 6px;
   font-size: 13px;
 }
@@ -348,17 +348,17 @@
 }
 
 .messages::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-scrollbar-track, #f1f1f1);
   border-radius: 3px;
 }
 
 .messages::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--color-scrollbar-thumb, #c1c1c1);
   border-radius: 3px;
 }
 
 .messages::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--color-scrollbar-thumb-hover, #a8a8a8);
 }
 
 

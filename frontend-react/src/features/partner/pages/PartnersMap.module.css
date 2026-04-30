@@ -1,7 +1,7 @@
 /* ===== ОСНОВНЫЕ КОНТЕЙНЕРЫ ===== */
 .container {
   padding: var(--spacing-lg);
-  background: var(--color-grey-100);
+  background: var(--color-bg-page, #f0f2f5);
   font-family: var(--font-family-sans);
   min-height: 100vh;
 }
@@ -12,7 +12,7 @@
   align-items: center;
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-lg);
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   flex-wrap: wrap;
@@ -47,7 +47,7 @@
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-grey-300);
   overflow: hidden;
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
 }
 
 .mapCard .ant-card-body {
@@ -60,7 +60,7 @@
 .mapWrapper {
   flex: 1;
   position: relative;
-  background: linear-gradient(135deg, #f8faff 0%, var(--color-grey-100) 100%);
+  background: linear-gradient(135deg, var(--color-bg-container, #f8faff) 0%, var(--color-grey-100) 100%);
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--color-grey-300);
@@ -76,7 +76,7 @@
   width: 100%;
   height: 100%;
   cursor: grab;
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   display: block;
 }
 
@@ -122,7 +122,7 @@
   transform: translate(-50%, -50%);
   width: 6px;
   height: 6px;
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   border-radius: 50%;
 }
 
@@ -181,7 +181,7 @@
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-grey-300);
   overflow: hidden;
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
 }
 
 .partnersCard .ant-card-body {
@@ -220,13 +220,13 @@
 
 /* Отладочные стили для видимости карточек */
 .partnersList .partnerCard {
-  background: #ffffff !important;
+  background: var(--color-bg-container, #ffffff) !important;
   border: 2px solid var(--color-brand-blue-500) !important;
   min-height: 120px !important;
 }
 
 .partnersList .partnerInfo {
-  background: #ffffff !important;
+  background: var(--color-bg-container, #ffffff) !important;
   padding: var(--spacing-md) !important;
 }
 
@@ -235,7 +235,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--color-grey-300);
   border-radius: var(--radius-md);
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
@@ -249,7 +249,7 @@
   border-color: var(--color-brand-blue-500);
   transform: translateX(4px);
   box-shadow: 0 8px 25px rgba(43, 159, 230, 0.15);
-  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  background: var(--gradient-card, linear-gradient(135deg, #ffffff 0%, #f8faff 100%));
 }
 
 .partnerCard:active {
@@ -262,7 +262,7 @@
 
 .partnerInfo {
   padding: var(--spacing-md);
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
 }
 
 .partnerName {
@@ -305,7 +305,7 @@
   content: '';
   width: 8px;
   height: 8px;
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
@@ -389,7 +389,7 @@
   padding: var(--spacing-2xl) var(--spacing-lg);
   text-align: center;
   color: var(--color-grey-600);
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-grey-300);
   margin: var(--spacing-sm);
@@ -420,7 +420,7 @@
   justify-content: center;
   height: 400px;
   gap: var(--spacing-md);
-  background: #ffffff;
+  background: var(--color-bg-container, #ffffff);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }

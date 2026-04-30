@@ -1,13 +1,13 @@
 
 .partnerModal :global(.ant-modal-header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 20px 24px;
 }
 
 .partnerModal :global(.ant-modal-title) {
   font-size: 18px;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .partnerModal :global(.ant-modal-body) {
@@ -17,7 +17,7 @@
 }
 
 .partnerModal :global(.ant-modal-footer) {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 16px 24px;
 }
 
@@ -35,7 +35,7 @@
 
 .section h4 {
   margin-bottom: 16px;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   font-weight: 600;
 }
 
@@ -44,17 +44,19 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px;
-  background: #fafafa;
+  background: var(--color-bg-spotlight, #fafafa);
   border-radius: 6px;
   border-left: 3px solid #2b9fe6;
 }
 
 .infoItem span:first-child {
   font-size: 12px;
+  color: var(--color-text-secondary, inherit);
 }
 
 .infoItem span:last-child {
   font-size: 14px;
+  color: var(--color-text-heading, inherit);
 }
 
 .referralCode {
@@ -67,14 +69,14 @@
 .statItem {
   text-align: center;
   padding: 16px;
-  background: #f0f9ff;
+  background: var(--color-bg-spotlight, #f0f9ff);
   border-radius: 8px;
-  border: 1px solid #e6f7ff;
+  border: 1px solid var(--color-border-secondary, #e6f7ff);
 }
 
 .statItem span {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   display: block;
   margin-bottom: 8px;
 }
@@ -99,7 +101,7 @@
 
 .form :global(.ant-form-item-label > label) {
   font-weight: 500;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .fullWidthInput {

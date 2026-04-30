@@ -34,8 +34,8 @@
 }
 
 .statLabel {
-  font-size: 12px;
-  color: #666;
+  font-size: 14px;
+  color: var(--color-text-base, #e2e8f0);
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -43,7 +43,7 @@
 .statValue {
   font-size: 20px;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .paidValue {
@@ -74,11 +74,11 @@
 
 .partnerName {
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .referralName {
-  color: #666;
+  color: var(--color-text-secondary, #666);
 }
 
 .amount {
@@ -107,7 +107,7 @@
 
 .timeInfo {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-tertiary, #999);
 }
 
 .payButton {
@@ -119,18 +119,18 @@
 
 
 .earningsTable :global(.ant-table-thead > tr > th) {
-  background: #fafafa;
+  background: var(--color-table-header-bg, #fafafa) !important;
   font-weight: 600;
-  color: #262626;
-  border-bottom: 2px solid #f0f0f0;
+  color: var(--color-text-heading, #262626);
+  border-bottom: 2px solid var(--color-table-row-border, #f0f0f0);
 }
 
 .earningsTable :global(.ant-table-tbody > tr:hover > td) {
-  background: #f0f9ff;
+  background: var(--color-chat-item-hover, #f0f9ff);
 }
 
 .earningsTable :global(.ant-table-tbody > tr > td) {
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--color-table-row-border, #f5f5f5);
   padding: 12px 16px;
 }
 

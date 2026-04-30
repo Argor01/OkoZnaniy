@@ -78,7 +78,6 @@
   padding-bottom: 16px;
 }
 
-/* Мобильная версия контента */
 @media (max-width: 768px) {
   .faqModalContent {
     padding-top: 12px;
@@ -138,14 +137,11 @@
   line-height: 1.6;
 }
 
-
-/* Дополнительные стили для мобильной прокрутки */
 .faqModalWrapMobile :global(.ant-modal-close) {
   top: 12px;
   right: 12px;
 }
 
-/* Улучшение прокрутки для iOS */
 @supports (-webkit-touch-callout: none) {
   .faqModalWrapMobile :global(.ant-modal-body) {
     overflow-y: scroll !important;
@@ -153,7 +149,6 @@
   }
 }
 
-/* Стили для коллапса в мобильной версии */
 @media (max-width: 768px) {
   .faqModalTitle {
     font-size: 20px;

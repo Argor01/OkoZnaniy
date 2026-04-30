@@ -1,6 +1,6 @@
 
 .confirmModal :global(.ant-modal-header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 20px 24px;
 }
 
@@ -9,7 +9,7 @@
 }
 
 .confirmModal :global(.ant-modal-footer) {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border-secondary, #f0f0f0);
   padding: 16px 24px;
 }
 
@@ -22,7 +22,7 @@
 .titleText {
   font-size: 16px;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .modalContent {
@@ -36,7 +36,7 @@
 }
 
 .contentAlert :global(.ant-alert-message) {
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -64,23 +64,23 @@
 
 
 .confirmModal.info :global(.ant-modal-header) {
-  background: #f0f9ff;
-  border-bottom-color: #e6f7ff;
+  background: var(--color-bg-spotlight, #f0f9ff);
+  border-bottom-color: var(--color-border-secondary, #e6f7ff);
 }
 
 .confirmModal.success :global(.ant-modal-header) {
-  background: #f6ffed;
-  border-bottom-color: #d9f7be;
+  background: var(--color-info-box-green-bg, #f6ffed);
+  border-bottom-color: var(--color-info-box-green-border, #d9f7be);
 }
 
 .confirmModal.warning :global(.ant-modal-header) {
-  background: #fffbe6;
-  border-bottom-color: #fff1b8;
+  background: var(--color-info-box-orange-bg, #fffbe6);
+  border-bottom-color: var(--color-info-box-orange-border, #fff1b8);
 }
 
 .confirmModal.error :global(.ant-modal-header) {
-  background: #fff2f0;
-  border-bottom-color: #ffccc7;
+  background: var(--color-bg-spotlight, #fff2f0);
+  border-bottom-color: var(--color-border-secondary, #ffccc7);
 }
 
 

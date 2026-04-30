@@ -2,7 +2,7 @@
 
 .container {
   padding: 24px;
-  background: #f5f5f5;
+  background: var(--color-bg-layout, #f5f5f5);
   min-height: 100vh;
 }
 
@@ -68,14 +68,14 @@
 
 .requestItem {
   padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
 
 .requestItem:hover {
-  background-color: #fafafa;
+  background-color: var(--color-chat-item-hover, #fafafa);
   transform: translateX(4px);
 }
 
@@ -110,7 +110,7 @@
 .titleText {
   font-weight: 600;
   font-size: 16px;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
   flex: 1;
   line-height: 1.4;
 }
@@ -127,7 +127,7 @@
 }
 
 .descriptionText {
-  color: #595959;
+  color: var(--color-text-secondary, #595959);
   line-height: 1.5;
   margin-bottom: 12px;
 }

@@ -4,6 +4,7 @@ import {
   LogoutOutlined, 
   MenuOutlined
 } from '@ant-design/icons';
+import { ThemeToggle } from '@/components/ui';
 import { titleMap } from '@/features/admin/constants';
 import type { User } from '@/features/auth/api/auth';
 import type { MenuKey } from '@/features/admin/types';
@@ -64,6 +65,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className={styles.rightSection}>
+        <ThemeToggle size={isMobile ? 'small' : 'middle'} />
 
         <Dropdown
           menu={{ items: userMenuItems }}

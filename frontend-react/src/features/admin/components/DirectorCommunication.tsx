@@ -157,7 +157,7 @@ const DirectorCommunication: React.FC = () => {
                               maxHeight: '400px',
                               overflowY: 'auto',
                               padding: '8px',
-                              backgroundColor: '#fafafa',
+                              backgroundColor: 'var(--color-bg-spotlight, #fafafa)',
                               borderRadius: '8px',
                             }}
                           >
@@ -170,9 +170,9 @@ const DirectorCommunication: React.FC = () => {
                                     key={msg.id}
                                     style={{
                                       padding: '10px',
-                                      background: msg.author.role === 'director' ? '#e6f7ff' : '#fff',
+                                      background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #e6f7ff)' : 'var(--color-bg-container, #fff)',
                                       borderRadius: '8px',
-                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : '#d9d9d9'}`,
+                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : 'var(--color-border-secondary, #d9d9d9)'}`,
                                     }}
                                   >
                                     <div style={{ marginBottom: 6 }}>
@@ -203,9 +203,9 @@ const DirectorCommunication: React.FC = () => {
                             <div
                               style={{
                                 padding: '10px',
-                                background: '#f6ffed',
+                                background: 'var(--color-info-box-green-bg, #f6ffed)',
                                 borderRadius: '8px',
-                                border: '1px solid #b7eb8f',
+                                border: '1px solid var(--color-info-box-green-border, #b7eb8f)',
                               }}
                             >
                               <Text strong style={{ display: 'block', marginBottom: 6, fontSize: '12px' }}>
@@ -256,8 +256,8 @@ const DirectorCommunication: React.FC = () => {
                                     right: 50,
                                     width: 32,
                                     height: 32,
-                                    border: '1px solid #d1d5db',
-                                    background: '#fff',
+                                    border: '1px solid var(--color-border-base, #d1d5db)',
+                                    background: 'var(--color-bg-container, #fff)',
                                     zIndex: 1,
                                   }}
                                 />
@@ -282,7 +282,7 @@ const DirectorCommunication: React.FC = () => {
       <Card>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <div style={{ display: 'flex', gap: '16px' }}>
-            <div style={{ width: '350px', borderRight: '1px solid #f0f0f0', paddingRight: '16px' }}>
+            <div style={{ width: '350px', borderRight: '1px solid var(--color-border-secondary, #f0f0f0)', paddingRight: '16px' }}>
               <Title level={5}>Обсуждения ({communications.length})</Title>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
                 {communications.map((comm) => (
@@ -363,7 +363,7 @@ const DirectorCommunication: React.FC = () => {
                       maxHeight: '400px',
                       overflowY: 'auto',
                       padding: '8px',
-                      backgroundColor: '#fafafa',
+                      backgroundColor: 'var(--color-bg-spotlight, #fafafa)',
                       borderRadius: '8px',
                     }}
                   >
@@ -376,9 +376,9 @@ const DirectorCommunication: React.FC = () => {
                             key={msg.id}
                             style={{
                               padding: '12px',
-                              background: msg.author.role === 'director' ? '#e6f7ff' : '#fff',
+                              background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #e6f7ff)' : 'var(--color-bg-container, #fff)',
                               borderRadius: '8px',
-                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : '#d9d9d9'}`,
+                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : 'var(--color-border-secondary, #d9d9d9)'}`,
                             }}
                           >
                             <div
@@ -416,9 +416,9 @@ const DirectorCommunication: React.FC = () => {
                     <div
                       style={{
                         padding: '12px',
-                        background: '#f6ffed',
+                        background: 'var(--color-info-box-green-bg, #f6ffed)',
                         borderRadius: '8px',
-                        border: '1px solid #b7eb8f',
+                        border: '1px solid var(--color-info-box-green-border, #b7eb8f)',
                       }}
                     >
                       <Text strong style={{ display: 'block', marginBottom: 8 }}>
@@ -473,8 +473,8 @@ const DirectorCommunication: React.FC = () => {
                               right: 100,
                               width: 40,
                               height: 40,
-                              border: '1px solid #d1d5db',
-                              background: '#fff',
+                              border: '1px solid var(--color-border-base, #d1d5db)',
+                              background: 'var(--color-bg-container, #fff)',
                               zIndex: 1,
                             }}
                           />

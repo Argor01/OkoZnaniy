@@ -13,7 +13,7 @@
 
 .card {
   border-radius: 12px !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid var(--color-border-base, #e2e8f0) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.25s ease;
   height: 100%;
@@ -33,9 +33,9 @@
 }
 
 .card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 16px var(--color-shadow, rgba(0, 0, 0, 0.1)) !important;
   transform: translateY(-2px);
-  border-color: #cbd5e1 !important;
+  border-color: var(--color-border-base, #cbd5e1) !important;
 }
 
 .card :global(.ant-card-body) {
@@ -50,7 +50,7 @@
 
 .card :global(.ant-statistic-title) {
   font-size: 13px;
-  color: #64748b;
+  color: var(--color-text-secondary, #64748b);
   margin-bottom: 10px;
   font-weight: 500;
   text-transform: uppercase;
