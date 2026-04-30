@@ -513,13 +513,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .pendingApprovalMetaSummary {
   margin-top: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   text-align: center;
 }
 
@@ -680,7 +680,7 @@
 .openRequestsRelatedOrderBox {
   margin-top: 8px;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 6px;
 }
 
@@ -696,13 +696,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .openRequestsMetaSummary {
   margin-top: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   text-align: center;
 }
 
@@ -798,7 +798,7 @@
   gap: 8px;
   margin-bottom: 16px;
   padding: 12px;
-  background: #f5f5f5;
+  background: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 8px;
 }
 
@@ -1172,13 +1172,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .inProgressClaimsMetaSummary {
   margin-top: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .completedClaimsTitle {
@@ -1241,7 +1241,7 @@
 
 .completedClaimsRatingValue {
   font-size: 10px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .completedClaimsRatingEmpty {
@@ -1345,7 +1345,7 @@
 .completedClaimsFeedback {
   margin-top: 8px;
   font-style: italic;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .completedClaimsAttachmentsRow {
@@ -1356,13 +1356,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .completedClaimsMetaSummary {
   margin-top: 8px;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   text-align: center;
 }
 
@@ -1463,7 +1463,7 @@
 }
 
 .completedRequestsResolutionBox {
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-spotlight, #f5f5f5);
   padding: 12px;
   border-radius: 4px;
   margin-bottom: 12px;
@@ -1537,7 +1537,7 @@
 
 .inProgressRequestsProgressMeta {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .inProgressRequestsResponsesCell {
@@ -1561,7 +1561,7 @@
 
 .inProgressRequestsDeadlineDate {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .inProgressRequestsDeadlineOverdue {
@@ -1664,7 +1664,7 @@
 .inProgressRequestsRelatedOrder {
   margin-top: 8px;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 6px;
 }
 
@@ -1688,7 +1688,7 @@
 
 .inProgressRequestsTimelineMeta {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   margin-top: 4px;
 }
 
@@ -1702,7 +1702,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .newClaimsTitle {
@@ -1796,7 +1796,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimsProcessingNumber {
@@ -1837,7 +1837,7 @@
 
 .claimsProcessingStatusMeta {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   margin-top: 4px;
 }
 
@@ -1856,7 +1856,7 @@
 
 .claimsProcessingDeadlineDate {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimsProcessingDeadlineDateOverdue {
@@ -1958,7 +1958,7 @@
 .claimsProcessingOrderBox {
   margin-top: 8px;
   padding: 12px;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 6px;
 }
 
@@ -1966,12 +1966,12 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimsProcessingActionMeta {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
   margin-top: 4px;
 }
 
@@ -1983,7 +1983,7 @@
 
 .claimsProcessingEvidenceMeta {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimsProcessingEvidenceVerified {
@@ -2041,8 +2041,9 @@
 .blockedUsersModalInfoBox {
   margin-top: 8px;
   padding: 12px;
-  background: #f5f5f5;
+  background: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 6px;
+  color: var(--color-text-base, inherit);
 }
 
 .blockedUsersModalField {
@@ -2050,28 +2051,28 @@
 }
 
 .overdue-row {
-  background-color: #fff2f0 !important;
+  background-color: var(--color-bg-spotlight, #fff2f0) !important;
 }
 
 .hold-row {
-  background-color: #f5f5f5 !important;
+  background-color: var(--color-bg-spotlight, #f5f5f5) !important;
 }
 
 .claimUserEmail {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimMessageItem {
   margin-bottom: 8px;
   padding: 8px;
-  background: #f5f5f5;
+  background: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 4px;
 }
 
 .claimMessageMeta {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .claimInternalTag {
@@ -2252,7 +2253,7 @@
 .userRolesModalUserSummary {
   margin-bottom: 16px;
   padding: 12px;
-  background: #f5f5f5;
+  background: var(--color-bg-spotlight, #f5f5f5);
   border-radius: 4px;
 }
 

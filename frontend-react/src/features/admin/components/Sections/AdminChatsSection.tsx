@@ -47,9 +47,9 @@ const MsgList: React.FC<{ msgs: any[]; uid: number }> = ({ msgs, uid }) => {
               <div key={m.id} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end' }}>
                 <Avatar size={28} icon={<UserOutlined />} style={{ background: mine ? '#2b9fe6' : '#52c41a', flexShrink: 0 }} />
                 <div style={{ maxWidth: '70%' }}>
-                  <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 2, textAlign: mine ? 'right' : 'left' }}>{name}</div>
-                  <div style={{ background: mine ? '#2b9fe6' : '#f0f0f0', color: mine ? '#fff' : '#000', padding: '8px 12px', borderRadius: mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px', fontSize: 14, wordBreak: 'break-word' }}>{text}</div>
-                  <div style={{ fontSize: 11, color: '#bfbfbf', marginTop: 2, textAlign: mine ? 'right' : 'left' }}>{fmt(m.created_at ?? '')}</div>
+                  <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #8c8c8c)', marginBottom: 2, textAlign: mine ? 'right' : 'left' }}>{name}</div>
+                  <div style={{ background: mine ? '#2b9fe6' : 'var(--color-bg-spotlight, #f0f0f0)', color: mine ? '#fff' : 'var(--color-text-base, #000)', padding: '8px 12px', borderRadius: mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px', fontSize: 14, wordBreak: 'break-word' }}>{text}</div>
+                  <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #bfbfbf)', marginTop: 2, textAlign: mine ? 'right' : 'left' }}>{fmt(m.created_at ?? '')}</div>
                 </div>
               </div>
             );
@@ -70,7 +70,7 @@ const Composer: React.FC<{ onSend: (t: string) => Promise<void> }> = ({ onSend }
     try { await onSend(text.trim()); setText(''); } finally { setBusy(false); }
   };
   return (
-    <div style={{ borderTop: '1px solid #f0f0f0', padding: '10px 16px', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+    <div style={{ borderTop: '1px solid var(--color-border-secondary, #f0f0f0)', padding: '10px 16px', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
       <TextArea value={text} onChange={e => setText(e.target.value)} placeholder="Написать... (Enter)" autoSize={{ minRows: 1, maxRows: 4 }} style={{ flex: 1 }}
         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
       <Button type="primary" icon={<SendOutlined />} onClick={send} loading={busy} disabled={!text.trim()} />
@@ -80,25 +80,25 @@ const Composer: React.FC<{ onSend: (t: string) => Promise<void> }> = ({ onSend }
 
 const ChatListItem: React.FC<{ id: number; name: string; subtitle: string; time?: string; active: boolean; onClick: () => void }> = ({ name, subtitle, time, active, onClick }) => (
   <div onClick={onClick}
-    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f5f5f5', display: 'flex', alignItems: 'center', gap: 12, background: active ? '#e6f7ff' : '' }}
-    onMouseEnter={e => !active && (e.currentTarget.style.background = '#f5f5f5')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
+    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--color-border-secondary, #f5f5f5)', display: 'flex', alignItems: 'center', gap: 12, background: active ? 'var(--color-chat-item-active, #e6f7ff)' : '' }}
+    onMouseEnter={e => !active && (e.currentTarget.style.background = 'var(--color-chat-item-hover, #f5f5f5)')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
     <Avatar icon={<TeamOutlined />} style={{ background: '#2b9fe6', flexShrink: 0 }} />
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ fontWeight: 600 }}>{name}</div>
-      <div style={{ fontSize: 12, color: '#8c8c8c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
+      <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
     </div>
-    {time && <div style={{ fontSize: 11, color: '#bfbfbf', flexShrink: 0 }}>{time}</div>}
+    {time && <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #bfbfbf)', flexShrink: 0 }}>{time}</div>}
   </div>
 );
 
 const ChatHeader: React.FC<{ name: string; sub: string; icon: React.ReactNode; onBack?: () => void; extra?: React.ReactNode }> = ({ name, sub, icon, onBack, extra }) => (
-  <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+  <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--color-border-secondary, #f0f0f0)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
     <Space>
       {onBack && <Button size="small" onClick={onBack}>←</Button>}
       <Avatar icon={icon} style={{ background: '#2b9fe6' }} />
       <div>
         <div style={{ fontWeight: 600 }}>{name}</div>
-        <div style={{ fontSize: 12, color: '#8c8c8c' }}>{sub}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)' }}>{sub}</div>
       </div>
     </Space>
     {extra}
@@ -143,9 +143,9 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
   const showChat = !isMobile || !!selId;
 
   const listPanel = (
-    <div style={{ width: isMobile ? "100%" : 300, borderRight: isMobile ? "none" : "1px solid #f0f0f0", display: "flex", flexDirection: "column", flexShrink: 0, height: "100%", minHeight: 0 }}>
-      <div style={{ padding: "10px 12px", borderBottom: "1px solid #f0f0f0", flexShrink: 0 }}>
-        <Input prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />} placeholder="Поиск чатов..." value={search} onChange={e => setSearch(e.target.value)} style={{ borderRadius: 20 }} />
+    <div style={{ width: isMobile ? "100%" : 300, borderRight: isMobile ? "none" : "1px solid var(--color-border-secondary, #f0f0f0)", display: "flex", flexDirection: "column", flexShrink: 0, height: "100%", minHeight: 0 }}>
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--color-border-secondary, #f0f0f0)", flexShrink: 0 }}>
+        <Input prefix={<SearchOutlined style={{ color: "var(--color-text-tertiary, #bfbfbf)" }} />} placeholder="Поиск чатов..." value={search} onChange={e => setSearch(e.target.value)} style={{ borderRadius: 20 }} />
       </div>
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {rLoad ? <div style={{ padding: 32, textAlign: "center" }}><Spin /></div> :
@@ -160,7 +160,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
           })
         }
       </div>
-      <div style={{ padding: "10px 12px", borderTop: "1px solid #f0f0f0", flexShrink: 0 }}>
+      <div style={{ padding: "10px 12px", borderTop: "1px solid var(--color-border-secondary, #f0f0f0)", flexShrink: 0 }}>
         <Button type="primary" block icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>Создать чат</Button>
       </div>
     </div>
@@ -179,7 +179,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
       <div style={{ flexShrink: 0 }}><Composer onSend={t => sendMut.mutateAsync(t)} /></div>
     </div>
   ) : !isMobile ? (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "#bfbfbf" }}>
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "var(--color-text-tertiary, #bfbfbf)" }}>
       <TeamOutlined style={{ fontSize: 48 }} />
       <div style={{ fontSize: 16 }}>Выберите чат</div>
       <div style={{ fontSize: 13 }}>или создайте новый групповой чат</div>
@@ -256,7 +256,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
                 description={
                   <Space direction="vertical" size={0}>
                     <span>{member.email}</span>
-                    <span style={{ fontSize: 12, color: '#8c8c8c' }}>
+                    <span style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)' }}>
                       {member.role === 'admin' ? 'Администратор' : member.role === 'director' ? 'Директор' : member.role === 'expert' ? 'Эксперт' : member.role === 'partner' ? 'Партнер' : 'Клиент'}
                     </span>
                   </Space>
