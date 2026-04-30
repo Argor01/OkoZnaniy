@@ -27,6 +27,9 @@ export const useAdminUI = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   
+  const [faqModalVisible, setFaqModalVisible] = useState(false);
+
+  
   const [partnerEditModalVisible, setPartnerEditModalVisible] = useState(false);
   const [partnerViewModalVisible, setPartnerViewModalVisible] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -73,6 +76,14 @@ export const useAdminUI = () => {
 
   
   const handleMenuClick = useCallback((key: MenuKey) => {
+    if (key === 'faq') {
+      setFaqModalVisible(true);
+      if (isMobile) {
+        setDrawerVisible(false);
+      }
+      return;
+    }
+
     setSelectedMenu(key);
     
     
@@ -358,6 +369,9 @@ export const useAdminUI = () => {
     internalCommModalVisible,
     openInternalCommModal,
     closeInternalCommModal,
+
+    faqModalVisible,
+    closeFaqModal: () => setFaqModalVisible(false),
 
     handlePartnerSave,
     handlePartnerApprove,

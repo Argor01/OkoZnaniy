@@ -11,6 +11,15 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-thin-straight/css/uicons-thin-straight.css'>
   </head>
   <body>
+    <script>
+      (function() {
+        var t = localStorage.getItem('oko-theme-mode');
+        if (t === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.body.style.backgroundColor = '#0f1117';
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

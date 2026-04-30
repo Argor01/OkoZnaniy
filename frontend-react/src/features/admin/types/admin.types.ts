@@ -87,7 +87,8 @@ export type MenuKey =
   | 'completed_claims'
   | 'pending_approval'
   | 'user_conversations'
-  | 'knowledge_base';
+  | 'knowledge_base'
+  | 'faq';
 
 
 export interface TableColumn {

@@ -7,6 +7,7 @@ import {
   StopOutlined,
   AuditOutlined,
   BookOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -63,6 +64,11 @@ export const menuItems: MenuItem[] = [
     icon: BookOutlined,
     label: 'База Знаний',
   },
+  {
+    key: 'faq',
+    icon: QuestionCircleOutlined,
+    label: 'FAQ',
+  },
 ];
 
 export const titleMap: Record<MenuKey, string> = {
@@ -88,6 +94,7 @@ export const titleMap: Record<MenuKey, string> = {
   pending_approval: 'Ожидают подтверждения',
   user_conversations: 'Диалоги пользователей',
   knowledge_base: 'База Знаний',
+  faq: 'FAQ по ЛК',
 };
 
 export const getParentMenuKey = (_menuKey: MenuKey): MenuKey | null => {

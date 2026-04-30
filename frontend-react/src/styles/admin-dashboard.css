@@ -265,11 +265,11 @@
 }
 
 .critical-row {
-  background-color: #fff2f0 !important;
+  background-color: var(--color-bg-spotlight, #fff2f0) !important;
 }
 
 .high-priority-row {
-  background-color: #fff7e6 !important;
+  background-color: var(--color-bg-spotlight, #fff7e6) !important;
 }
 
 .tariffsSettingsTariffName {
@@ -309,7 +309,7 @@
 
 .worksModerationMetaSubtext {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .worksModerationAuthorName {
@@ -319,7 +319,7 @@
 
 .worksModerationAuthorMeta {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .worksModerationDate {
@@ -327,7 +327,7 @@
 }
 
 .worksModerationDateTime {
-  color: #666;
+  color: var(--color-text-tertiary, #666);
 }
 
 .worksModerationSectionHeader {
