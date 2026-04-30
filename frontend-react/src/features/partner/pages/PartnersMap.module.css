@@ -1,7 +1,7 @@
 /* ===== ОСНОВНЫЕ КОНТЕЙНЕРЫ ===== */
 .container {
   padding: var(--spacing-lg);
-  background: var(--color-grey-100);
+  background: var(--color-bg-page, #f0f2f5);
   font-family: var(--font-family-sans);
   min-height: 100vh;
 }

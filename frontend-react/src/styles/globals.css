@@ -134,3 +134,27 @@ a {
   z-index: 9999;
   background-color: var(--color-bg-container, #fff);
 }
+
+/* Dark theme scrollbar for modals and scrollable areas */
+[data-theme="dark"] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, #1a1d27);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, #3d4455);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover, #4d5567);
+}
+
+[data-theme="dark"] * {
+  scrollbar-color: var(--color-scrollbar-thumb, #3d4455) var(--color-scrollbar-track, #1a1d27);
+}

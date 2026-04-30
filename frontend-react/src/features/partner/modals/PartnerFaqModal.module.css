@@ -76,6 +76,13 @@
   font-family: var(--font-family-display);
 }
 
+:global([data-theme="dark"]) .faqModalTitle {
+  background: linear-gradient(135deg, #5bb8f0 0%, #7ccbff 50%, #a0dcff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .faqModalContent {
   padding-top: 16px;
   padding-bottom: 16px;
@@ -91,7 +98,7 @@
 
 .faqModalIntro {
   font-size: 15px;
-  color: var(--color-grey-600);
+  color: var(--color-text-secondary, #6b7280);
   display: block;
   margin-bottom: 24px;
 }
@@ -102,7 +109,7 @@
 
 .faqModalSectionTitle {
   font-size: 18px;
-  color: var(--color-grey-900);
+  color: var(--color-text-heading, #1f2937);
   display: block;
   margin-bottom: 16px;
   font-family: var(--font-family-display);
@@ -132,12 +139,12 @@
 
 .faqModalItemTitle {
   font-size: 15px;
-  color: var(--color-grey-900);
+  color: var(--color-text-heading, #1f2937);
 }
 
 .faqModalItemText {
   font-size: 14px;
-  color: var(--color-grey-600);
+  color: var(--color-text-secondary, #6b7280);
   line-height: 1.6;
 }
 
