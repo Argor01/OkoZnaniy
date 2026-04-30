@@ -29,6 +29,7 @@ import { PromoMaterials } from '../components/PromoMaterials/PromoMaterials';
 import PartnersMap from './PartnersMap';
 import PartnerFaqModal from '../modals/PartnerFaqModal';
 import { AppFooter } from '@/components/layout/AppFooter';
+import { ThemeToggle } from '@/components/ui';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -730,12 +731,15 @@ const PartnerDashboard: React.FC = () => {
             )}
           </div>
 
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            Выйти
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ThemeToggle size={isMobile ? 'small' : 'middle'} />
+            <Button
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+            >
+              Выйти
+            </Button>
+          </div>
         </Header>
         <Content
           className={`partnerDashboardContent ${isMobile ? 'partnerDashboardContentMobile' : ''}`}

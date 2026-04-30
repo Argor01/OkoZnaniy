@@ -8,6 +8,7 @@ import { AppDatePicker } from './AppDatePicker';
 import { AppUpload } from './AppUpload';
 import { OrderCard } from './OrderCard';
 import { CookieConsent } from './CookieConsent';
+import { ThemeToggle } from './ThemeToggle';
 
 export {
   AppButton,
@@ -20,4 +21,5 @@ export {
   AppUpload,
   OrderCard,
   CookieConsent,
+  ThemeToggle,
 };

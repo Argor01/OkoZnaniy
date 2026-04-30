@@ -23,6 +23,7 @@ import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
 import ImprovementRecommendations from '../components/ImprovementRecommendations/ImprovementRecommendations';
 import DirectorFaqModal from '../modals/DirectorFaqModal';
+import { ThemeToggle } from '@/components/ui';
 import '@/styles/modals.css';
 import '@/styles/director.css';
 
@@ -333,16 +334,19 @@ const DirectorDashboard: React.FC = () => {
               ? currentMenuItem?.label?.split(' ')[0] || 'Директор'
               : currentMenuItem?.label || 'Личный кабинет директора'}
           </Title>
-          <Button
-            type="default"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            size={isMobile ? 'small' : 'middle'}
-            className={isMobile ? 'directorDashboardLogoutButtonMobile' : undefined}
-          >
-            {!isMobile && 'Выйти'}
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ThemeToggle size={isMobile ? 'small' : 'middle'} />
+            <Button
+              type="default"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              size={isMobile ? 'small' : 'middle'}
+              className={isMobile ? 'directorDashboardLogoutButtonMobile' : undefined}
+            >
+              {!isMobile && 'Выйти'}
+            </Button>
+          </div>
         </Header>
         <Content
           className={[
