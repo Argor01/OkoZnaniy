@@ -60,7 +60,7 @@
 .mapWrapper {
   flex: 1;
   position: relative;
-  background: linear-gradient(135deg, #f8faff 0%, var(--color-grey-100) 100%);
+  background: linear-gradient(135deg, var(--color-bg-container, #f8faff) 0%, var(--color-grey-100) 100%);
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--color-grey-300);

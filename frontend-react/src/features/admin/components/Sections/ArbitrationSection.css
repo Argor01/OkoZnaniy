@@ -9,7 +9,7 @@
 
 .arbitration-section .ant-statistic-title {
   font-size: 14px;
-  color: #8c8c8c;
+  color: var(--color-text-secondary, #8c8c8c);
   margin-bottom: 8px;
 }
 
@@ -19,13 +19,13 @@
 }
 
 .arbitration-section .ant-table-thead > tr > th {
-  background: #fafafa;
+  background: var(--color-table-header-bg, #fafafa) !important;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .arbitration-section .ant-table-tbody > tr:hover {
-  background: #f5f5f5;
+  background: var(--color-chat-item-hover, #f5f5f5);
   cursor: pointer;
 }
 

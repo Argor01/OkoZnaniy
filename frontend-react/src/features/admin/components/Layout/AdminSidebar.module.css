@@ -162,7 +162,7 @@
 }
 
 .menu :global(.ant-menu-item-selected) {
-  background-color: #e6f7ff;
+  background-color: var(--color-chat-item-active, #e6f7ff);
   color: #2b9fe6;
   font-weight: 600;
 }
@@ -249,7 +249,7 @@
   
   .menu :global(.ant-menu-item):active,
   .menu :global(.ant-menu-submenu-title):active {
-    background-color: #e6f7ff;
+    background-color: var(--color-chat-item-active, #e6f7ff);
     transform: scale(0.98);
   }
 }
@@ -289,9 +289,9 @@
 
 /* Активные состояния для лучшего UX */
 .menu :global(.ant-menu-item-active) {
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-hover, #f0f0f0);
 }
 
 .menu :global(.ant-menu-submenu-active) > :global(.ant-menu-submenu-title) {
-  background-color: #f0f0f0;
+  background-color: var(--color-bg-hover, #f0f0f0);
 }

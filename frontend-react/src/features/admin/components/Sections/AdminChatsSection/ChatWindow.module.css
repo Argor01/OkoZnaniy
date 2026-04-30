@@ -15,11 +15,11 @@
 
 .chatHeader {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
+  background-color: var(--color-chat-header-bg, #fff);
 }
 
 .chatHeaderInfo {
@@ -52,8 +52,8 @@
 
 .chatParticipantsBar {
   padding: 8px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #fff;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
+  background-color: var(--color-chat-header-bg, #fff);
   overflow-x: auto;
   white-space: nowrap;
   display: flex;

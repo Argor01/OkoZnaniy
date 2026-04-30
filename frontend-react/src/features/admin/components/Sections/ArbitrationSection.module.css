@@ -11,7 +11,7 @@
 
 .arbitrationSection :global(.ant-statistic-title) {
   font-size: 14px;
-  color: #8c8c8c;
+  color: var(--color-text-secondary, #8c8c8c);
   margin-bottom: 8px;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .arbitrationSection :global(.ant-table-thead > tr > th) {
-  background: #fafafa;
+  background: var(--color-table-header-bg, #fafafa) !important;
   font-weight: 600;
-  color: #262626;
+  color: var(--color-text-heading, #262626);
 }
 
 .arbitrationSection :global(.ant-table-tbody > tr:hover) {
-  background: #f5f5f5;
+  background: var(--color-chat-item-hover, #f5f5f5);
   cursor: pointer;
 }
 
@@ -231,7 +231,7 @@
   }
   
   .arbitrationSection :global(.ant-table-tbody > tr:active) {
-    background-color: #f0f0f0;
+    background-color: var(--color-bg-hover, #f0f0f0);
   }
 }
 
@@ -254,15 +254,15 @@
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-scrollbar-track, #f1f1f1);
   border-radius: 3px;
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--color-scrollbar-thumb, #c1c1c1);
   border-radius: 3px;
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--color-scrollbar-thumb-hover, #a8a8a8);
 }
