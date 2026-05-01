@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Typography, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Typography,
   Input,
   Select,
   Modal,
@@ -20,7 +20,7 @@ import {
   Avatar,
   Empty
 } from 'antd';
-import { 
+import {
   EyeOutlined,
   SearchOutlined,
   MessageOutlined,
@@ -31,9 +31,9 @@ import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { AdminOrder as Order } from '@/features/orders/types/orders';
 import { useAllOrders, useOrderActions } from '@/features/admin/hooks/useAdminOrders';
-import { 
-  ORDER_STATUSES, 
-  ORDER_STATUS_LABELS, 
+import {
+  ORDER_STATUSES,
+  ORDER_STATUS_LABELS,
   ORDER_STATUS_COLORS,
   ORDER_PRIORITY_LABELS,
   ORDER_PRIORITY_COLORS,
@@ -95,7 +95,7 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
     queryKey: ['order-chat', orderId],
     queryFn: async () => {
       try {
-        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
+        const chatResponse = await apiClient.get(`/admin-panel/user-chats/?order_id=${orderId}`);
         const payload = chatResponse.data;
         const chats = Array.isArray(payload)
           ? payload
@@ -105,7 +105,7 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
               ? payload.data
               : [];
 
-        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(orderId));
+        return chats;
       } catch (error) {
         console.error('Error loading chat:', error);
         return [];
@@ -124,7 +124,7 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
 
   if (messages.length === 0) {
     return (
-      <Empty 
+      <Empty
         description="Переписка отсутствует"
         image={Empty.PRESENTED_IMAGE_SIMPLE}
       />
@@ -167,7 +167,7 @@ const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
     queryKey: ['order-chat-participants', order.id],
     queryFn: async () => {
       try {
-        const chatResponse = await apiClient.get('/admin-panel/user-chats/');
+        const chatResponse = await apiClient.get(`/admin-panel/user-chats/?order_id=${order.id}`);
         const payload = chatResponse.data;
         const chats = Array.isArray(payload)
           ? payload
@@ -177,7 +177,7 @@ const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
               ? payload.data
               : [];
 
-        return chats.filter((chat: OrderChatThread) => Number(chat.order_id) === Number(order.id));
+        return chats;
       } catch (error) {
         console.error('Error loading order participants:', error);
         return [];
@@ -249,7 +249,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
   const dataSource = orders;
 
-  
+
   const filteredData = dataSource.filter(order => {
     const searchLower = searchText.toLowerCase();
     const matchesSearch =
@@ -258,16 +258,16 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       (order.client?.username || '').toLowerCase().includes(searchLower) ||
       (order.client?.first_name || '').toLowerCase().includes(searchLower) ||
       (order.client?.last_name || '').toLowerCase().includes(searchLower);
-    
+
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const matchesSubject = subjectFilter === 'all' || getEntityLabel(order.subject) === subjectFilter;
-    
+
     let matchesDate = true;
     if (dateRange) {
       const orderDate = dayjs(order.created_at);
       matchesDate = orderDate.isAfter(dateRange[0]) && orderDate.isBefore(dateRange[1]);
     }
-    
+
     return matchesSearch && matchesStatus && matchesSubject && matchesDate;
   });
 
@@ -292,7 +292,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     return ORDER_PRIORITY_COLORS[priority] || 'default';
   };
 
-  
+
   const stats = {
     total: filteredData.length,
     new: filteredData.filter(o => o.status === ORDER_STATUSES.NEW).length,
@@ -394,7 +394,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
         const deadlineDate = dayjs(deadline);
         const isOverdue = deadlineDate.isBefore(dayjs());
         const isNearDeadline = deadlineDate.diff(dayjs(), 'days') <= 3;
-        
+
         return (
           <div className={isOverdue ? styles.allOrdersDeadlineOverdue : isNearDeadline ? styles.allOrdersDeadlineNear : styles.allOrdersDeadline}>
             <div className={styles.allOrdersDeadlineDate}>
@@ -415,8 +415,8 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       width: 80,
       render: (record: Order) => (
         <Tooltip title="Подробно">
-          <Button 
-            size="small" 
+          <Button
+            size="small"
             icon={<EyeOutlined />}
             onClick={() => handleViewOrder(record)}
           />
@@ -445,9 +445,9 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             <Statistic title="Отменены" value={stats.cancelled} />
           </Col>
           <Col span={4}>
-            <Statistic 
-              title="Общий бюджет" 
-              value={stats.totalBudget} 
+            <Statistic
+              title="Общий бюджет"
+              value={stats.totalBudget}
               suffix="₽"
               formatter={(value) => `${Number(value).toLocaleString()}`}
             />
@@ -463,7 +463,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
           />
-          
+
           <Select
             placeholder="Статус"
             className={styles.allOrdersSelectStatus}
@@ -506,11 +506,11 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
           dataSource={filteredData}
           rowKey="id"
           loading={loading}
-          pagination={{ 
+          pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) => 
+            showTotal: (total, range) =>
               `${range[0]}-${range[1]} из ${total} заказов`
           }}
           locale={{ emptyText: 'Заказы не найдены' }}
@@ -519,7 +519,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
         />
       </Card>
 
-      
+
       <Modal
         title={`Заказ #${selectedOrder?.id}`}
         open={orderModalVisible}

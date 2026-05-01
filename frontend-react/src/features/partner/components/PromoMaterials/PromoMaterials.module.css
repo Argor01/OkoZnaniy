@@ -567,7 +567,7 @@
   border-color: var(--primary-blue, #3b82f6);
   box-shadow: var(--shadow-focus, 0 0 0 3px rgba(59, 130, 246, 0.1));
 }
-/* 
+/*
 Стили для реферальной карточки */
 .referralCard {
   border-radius: var(--radius-lg, 20px);
@@ -622,4 +622,24 @@
 
 .statsBox .ant-card-body {
   padding: var(--spacing-lg, 24px) !important;
+}
+
+@media (max-width: 768px) {
+  .statsBox .ant-card-body {
+    padding: var(--spacing-md, 16px) !important;
+  }
+
+  .referralCard .ant-card-body {
+    padding: var(--spacing-md, 16px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsBox .ant-card-body {
+    padding: var(--spacing-sm, 8px) !important;
+  }
+
+  .referralCard .ant-card-body {
+    padding: var(--spacing-sm, 8px) !important;
+  }
 }

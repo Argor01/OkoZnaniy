@@ -11,7 +11,7 @@
 
 .arbitrationSection :global(.ant-statistic-title) {
   font-size: 14px;
-  color: var(--color-text-secondary, #8c8c8c);
+  color: #8c8c8c;
   margin-bottom: 8px;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .arbitrationSection :global(.ant-table-thead > tr > th) {
-  background: var(--color-table-header-bg, #fafafa) !important;
+  background: #fafafa;
   font-weight: 600;
-  color: var(--color-text-heading, #262626);
+  color: #262626;
 }
 
 .arbitrationSection :global(.ant-table-tbody > tr:hover) {
-  background: var(--color-chat-item-hover, #f5f5f5);
+  background: #f5f5f5;
   cursor: pointer;
 }
 
@@ -57,14 +57,19 @@
 .searchInput {
   min-width: 250px;
   max-width: 350px;
+  flex: 1 1 250px;
 }
 
 .statusSelect {
-  min-width: 150px;
+  min-width: 250px;
+  max-width: 350px;
+  flex: 1 1 250px;
 }
 
 .prioritySelect {
-  min-width: 120px;
+  min-width: 250px;
+  max-width: 350px;
+  flex: 1 1 250px;
 }
 
 /* Адаптивность для планшетов */
@@ -72,14 +77,14 @@
   .arbitrationSection {
     padding: 16px;
   }
-  
+
   .filtersContainer :global(.ant-space) {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .searchInput,
   .statusSelect,
   .prioritySelect {
@@ -87,11 +92,11 @@
     min-width: 0;
     max-width: 100%;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-title) {
     font-size: 13px;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-content) {
     font-size: 20px;
   }
@@ -102,81 +107,81 @@
   .arbitrationSection {
     padding: 12px;
   }
-  
+
   /* Статистика - 2 колонки */
   .arbitrationSection :global(.ant-row) {
     display: flex !important;
     flex-wrap: wrap !important;
     margin: 0 -4px !important;
   }
-  
+
   .arbitrationSection :global(.ant-col) {
     flex: 0 0 50% !important;
     max-width: 50% !important;
     padding: 0 4px !important;
     margin-bottom: 8px !important;
   }
-  
+
   .arbitrationSection :global(.ant-statistic) {
     text-align: center;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-title) {
     font-size: 12px !important;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-content) {
     font-size: 18px !important;
   }
-  
+
   /* Фильтры */
   .filtersContainer {
     padding: 12px;
   }
-  
+
   .filtersContainer :global(.ant-space) {
     gap: 6px !important;
   }
-  
+
   .searchInput,
   .statusSelect,
   .prioritySelect {
     box-sizing: border-box;
   }
-  
+
   .searchInput :global(.ant-input) {
     font-size: 16px; /* Предотвращает зум на iOS */
   }
-  
+
   /* Таблица */
   .arbitrationSection :global(.ant-table-wrapper) {
     overflow-x: auto;
   }
-  
+
   .arbitrationSection :global(.ant-table) {
     min-width: 1000px;
   }
-  
+
   .arbitrationSection :global(.ant-table-thead > tr > th) {
     padding: 8px 4px !important;
     font-size: 12px !important;
   }
-  
+
   .arbitrationSection :global(.ant-table-tbody > tr > td) {
     padding: 8px 4px !important;
     font-size: 12px !important;
   }
-  
+
   /* Пагинация */
   .arbitrationSection :global(.ant-pagination) {
     text-align: center;
     margin-top: 16px;
   }
-  
+
   .arbitrationSection :global(.ant-pagination-options) {
     display: none !important;
   }
-  
+
   .arbitrationSection :global(.ant-pagination-total-text) {
     display: none !important;
   }
@@ -187,32 +192,32 @@
   .arbitrationSection {
     padding: 8px;
   }
-  
+
   /* Статистика - 3 колонки на очень маленьких экранах */
   .arbitrationSection :global(.ant-col) {
     flex: 0 0 33.333% !important;
     max-width: 33.333% !important;
     padding: 0 2px !important;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-title) {
     font-size: 10px !important;
   }
-  
+
   .arbitrationSection :global(.ant-statistic-content) {
     font-size: 14px !important;
   }
-  
+
   /* Фильтры */
   .filtersContainer {
     padding: 8px;
   }
-  
+
   .arbitrationSection :global(.ant-table-thead > tr > th) {
     padding: 6px 2px !important;
     font-size: 11px !important;
   }
-  
+
   .arbitrationSection :global(.ant-table-tbody > tr > td) {
     padding: 6px 2px !important;
     font-size: 11px !important;
@@ -225,13 +230,13 @@
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   .arbitrationSection :global(.ant-table-tbody > tr) {
     cursor: pointer;
   }
-  
+
   .arbitrationSection :global(.ant-table-tbody > tr:active) {
-    background-color: var(--color-bg-hover, #f0f0f0);
+    background-color: #f0f0f0;
   }
 }
 
@@ -254,15 +259,15 @@
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-track {
-  background: var(--color-scrollbar-track, #f1f1f1);
+  background: #f1f1f1;
   border-radius: 3px;
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb {
-  background: var(--color-scrollbar-thumb, #c1c1c1);
+  background: #c1c1c1;
   border-radius: 3px;
 }
 
 .arbitrationSection :global(.ant-table-body)::-webkit-scrollbar-thumb:hover {
-  background: var(--color-scrollbar-thumb-hover, #a8a8a8);
+  background: #a8a8a8;
 }

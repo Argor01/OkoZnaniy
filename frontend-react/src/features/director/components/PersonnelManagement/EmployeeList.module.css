@@ -4,8 +4,8 @@
   height: 40px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid var(--color-border-base, #d9d9d9);
-  background: var(--color-bg-container, #fff);
+  border: 1px solid #d9d9d9;
+  background: #fff;
 }
 
 .customSearchContainer:focus-within {
@@ -25,7 +25,7 @@
 }
 
 .customSearchInput::placeholder {
-  color: var(--color-text-placeholder, #bfbfbf);
+  color: #bfbfbf;
   font-size: 15px;
 }
 
@@ -33,18 +33,18 @@
   width: 40px;
   height: 40px;
   border: none;
-  background: var(--color-table-header-bg, #fafafa);
+  background: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-text-secondary, #666);
+  color: #666;
   font-size: 16px;
   transition: background-color 0.2s;
 }
 
 .customSearchButton:hover {
-  background: var(--color-bg-hover, #f0f0f0);
+  background: #f0f0f0;
 }
 
 .customSearchButton:active {
@@ -57,11 +57,11 @@
     width: 32px;
     font-size: 14px;
   }
-  
+
   .customSearchInput {
     font-size: 14px;
   }
-  
+
   .customSearchInput::placeholder {
     font-size: 14px;
   }
@@ -72,12 +72,12 @@
     width: 28px;
     font-size: 12px;
   }
-  
+
   .customSearchInput {
     font-size: 13px;
     padding: 8px 10px;
   }
-  
+
   .customSearchInput::placeholder {
     font-size: 13px;
   }
@@ -101,7 +101,7 @@
 .employeeCard {
   border-radius: 12px;
   border: none;
-  background: var(--color-table-header-bg, #fafafa);
+  background: #fff;
 }
 
 .employeeCardMobile {
@@ -111,7 +111,7 @@
 .pageTitle {
   margin-bottom: 24px;
   font-size: 20px;
-  color: var(--color-text-heading, #1f2937);
+  color: #1f2937;
 }
 
 .pageTitleMobile {
@@ -125,9 +125,9 @@
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px;
-  background: var(--color-bg-container, #fff);
+  background: #fff;
   border-radius: 12px;
-  border: 1px solid var(--color-border-base, #e5e7eb);
+  border: 1px solid #e5e7eb;
 }
 
 .filtersContainerMobile {
@@ -168,9 +168,9 @@
 .tableWrapper {
   overflow-x: auto;
   width: 100%;
-  background: var(--color-bg-container, #fff);
+  background: #fff;
   border-radius: 12px;
-  border: 1px solid var(--color-border-base, #e5e7eb);
+  border: 1px solid #e5e7eb;
 }
 
 .employeeTable {
@@ -178,8 +178,8 @@
 }
 
 .employeeTable :global(.ant-table-thead > tr > th) {
-  border-right: 2px solid var(--color-table-border, #e5e7eb);
-  background: var(--color-table-header-bg, #fafafa) !important;
+  border-right: 2px solid #e5e7eb;
+  background: #fafafa;
 }
 
 .employeeTable :global(.ant-table-thead > tr > th:last-child) {
@@ -187,7 +187,7 @@
 }
 
 .employeeTable :global(.ant-table-tbody > tr > td) {
-  border-right: 2px solid var(--color-table-row-border, #f0f0f0);
+  border-right: 2px solid #f0f0f0;
 }
 
 .employeeTable :global(.ant-table-tbody > tr > td:last-child) {
@@ -195,7 +195,7 @@
 }
 
 .employeeTable :global(.ant-table-tbody > tr:hover > td) {
-  border-right-color: var(--color-table-border, #e5e7eb);
+  border-right-color: #e5e7eb;
 }
 
 .tablePagination {

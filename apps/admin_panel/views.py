@@ -191,7 +191,7 @@ def get_all_orders(request):
 def get_problem_orders(request):
     """Получить проблемные заказы"""
     problem_orders = Order.objects.filter(
-        Q(status='disputed') | 
+        Q(status='disputed') |
         Q(status='cancelled') |
         Q(has_issues=True)
     ).select_related('client', 'expert').order_by('-created_at')
@@ -220,7 +220,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     queryset = SupportRequest.objects.all()
     serializer_class = SupportRequestSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_permissions(self):
         if self.action in ['create', 'list', 'retrieve', 'send_message']:
             return [IsAuthenticated()]
@@ -237,7 +237,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
     def take_request(self, request, pk=None):
         """Взять запрос в работу"""
@@ -348,10 +348,10 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     def transfer_to_arbitration(self, request, pk=None):
         """Передать обращение в арбитраж (создать арбитражное дело)"""
         support_request = self.get_object()
-        
+
         from apps.arbitration.models import ArbitrationCase
         from apps.arbitration.serializers import ArbitrationCaseSerializer
-        
+
         # Создаём арбитражное дело на основе обращения
         case_data = {
             'plaintiff_id': support_request.user_id,
@@ -360,25 +360,25 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
             'reason': 'other',
             'priority': support_request.priority,
         }
-        
+
         serializer = ArbitrationCaseSerializer(data=case_data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         arbitration_case = serializer.save()
-        
+
         # Автоматически подаём дело
         arbitration_case.submit()
-        
+
         # Удаляем обращение после успешной передачи в арбитраж
         support_request_id = support_request.id
         support_request.delete()
-        
+
         log_activity(
             request.user,
             'transferred_to_arbitration',
             f'Обращение #{support_request.ticket_number} передано в арбитраж',
             meta={'support_request_id': support_request_id, 'case_id': arbitration_case.id}
         )
-        
+
         return Response({
             'message': 'Обращение передано в арбитраж',
             'case': ArbitrationCaseSerializer(arbitration_case).data
@@ -412,7 +412,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
     queryset = Claim.objects.all()
     serializer_class = ClaimSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_permissions(self):
         """
         Разные права для разных действий:
@@ -428,26 +428,26 @@ class ClaimViewSet(viewsets.ModelViewSet):
         else:
             # Для всех остальных действий (update, delete, actions) - только админы
             return [IsAdminUser()]
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        
+
         # Администраторы видят все претензии
         if user.role == 'admin':
             status_filter = self.request.query_params.get('status')
             if status_filter:
                 queryset = queryset.filter(status=status_filter)
             return queryset
-        
+
         # Обычные пользователи видят только свои претензии
         queryset = queryset.filter(user=user)
         return queryset
-    
+
     def perform_create(self, serializer):
         """При создании претензии автоматически устанавливаем пользователя"""
         serializer.save(user=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
     def take_in_work(self, request, pk=None):
         """Взять обращение в работу"""
@@ -458,7 +458,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
         log_activity(request.user, 'status_change', 'Статус изменён на «В работе»',
                      meta={'new': 'in_progress'}, claim=claim)
         return Response({'message': 'Обращение взято в работу'})
-    
+
     @action(detail=True, methods=['post'])
     def complete_claim(self, request, pk=None):
         """Завершить обращение"""
@@ -469,14 +469,14 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.save()
         log_activity(request.user, 'completed', 'Обращение завершено', claim=claim)
         return Response({'message': 'Обращение завершено'})
-    
+
     @action(detail=True, methods=['post'])
     def process_refund(self, request, pk=None):
         """Обработка возврата средств по претензии"""
         claim = self.get_object()
         refund_percentage = request.data.get('refund_percentage', 0)
         refund_amount = request.data.get('refund_amount')
-        
+
         # Сохраняем информацию о возврате
         claim.refund_percentage = refund_percentage
         if refund_amount:
@@ -484,7 +484,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.status = 'completed'
         claim.completed_at = timezone.now()
         claim.save()
-        
+
         log_activity(
             request.user,
             'completed',
@@ -493,7 +493,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
             claim=claim
         )
         return Response({'message': f'Возврат {refund_percentage}% оформлен'})
-    
+
     @action(detail=True, methods=['post'])
     def reject_claim(self, request, pk=None):
         """Отклонить обращение"""
@@ -505,7 +505,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
         claim.save()
         log_activity(request.user, 'completed', f'Обращение отклонено: {reason}', claim=claim)
         return Response({'message': 'Обращение отклонено'})
-    
+
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         """Отправить сообщение в претензию"""
@@ -536,55 +536,55 @@ class ClaimViewSet(viewsets.ModelViewSet):
             )
         serializer = ClaimMessageSerializer(msg)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['post'])
     def assign_users(self, request, pk=None):
         """Назначить пользователей на претензию"""
         claim = self.get_object()
         user_ids = request.data.get('user_ids', [])
-        
+
         if not isinstance(user_ids, list):
             return Response({'error': 'user_ids должен быть списком'}, status=400)
-        
+
         users = User.objects.filter(id__in=user_ids)
         if len(users) != len(user_ids):
             return Response({'error': 'Некоторые пользователи не найдены'}, status=400)
-        
+
         claim.assigned_users.set(users)
         names = ', '.join(f'{u.first_name} {u.last_name}'.strip() or u.username for u in users)
         log_activity(request.user, 'observer_added',
                      f'Назначены наблюдатели: {names}' if names else 'Наблюдатели обновлены',
                      meta={'user_ids': user_ids}, claim=claim)
         return Response({'message': f'Назначено {len(users)} пользователей'})
-    
+
     @action(detail=True, methods=['post'])
     def add_tag(self, request, pk=None):
         """Добавить тег к претензии"""
         claim = self.get_object()
         tag = request.data.get('tag', '').strip()
-        
+
         if not tag:
             return Response({'error': 'Тег не может быть пустым'}, status=400)
-        
+
         claim.add_tag(tag)
         log_activity(request.user, 'tag_added', f'Добавлен тег {tag}',
                      meta={'tag': tag}, claim=claim)
         return Response({'message': f'Тег {tag} добавлен', 'tags': claim.get_tags_list()})
-    
+
     @action(detail=True, methods=['post'])
     def remove_tag(self, request, pk=None):
         """Удалить тег из претензии"""
         claim = self.get_object()
         tag = request.data.get('tag', '').strip()
-        
+
         if not tag:
             return Response({'error': 'Тег не может быть пустым'}, status=400)
-        
+
         claim.remove_tag(tag)
         log_activity(request.user, 'tag_removed', f'Удалён тег {tag}',
                      meta={'tag': tag}, claim=claim)
         return Response({'message': f'Тег {tag} удален', 'tags': claim.get_tags_list()})
-    
+
     @action(detail=True, methods=['post'])
     def update_tags(self, request, pk=None):
         """Обновить все теги претензии"""
@@ -647,20 +647,20 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
                 # Вызываем исключение, чтобы остановить создание нового чата
                 from rest_framework.exceptions import ValidationError
                 raise ValidationError({'name': 'Чат с таким названием уже существует'})
-        
+
         room = serializer.save(created_by=self.request.user)
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.set(staff)
-    
+
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
         """Отправить сообщение в чат"""
         room = self.get_object()
         message_text = request.data.get('message')
-        
+
         if not message_text:
             return Response({'error': 'message обязателен'}, status=400)
-        
+
         message = DirectorChatMessage.objects.create(
             room=room,
             sender=request.user,
@@ -668,7 +668,7 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         )
         serializer = DirectorChatMessageSerializer(message)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['post'])
     def join_room(self, request, pk=None):
         """Присоединиться к чату"""
@@ -683,7 +683,7 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.add(*staff)
         return Response({'message': f'Добавлено {staff.count()} сотрудников'})
-    
+
     @action(detail=True, methods=['post'])
     def leave_room(self, request, pk=None):
         """Покинуть чат"""
@@ -699,12 +699,12 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
             msgs = room.messages.select_related('sender').order_by('created_at')
             serializer = DirectorChatMessageSerializer(msgs, many=True)
             return Response(serializer.data)
-        
+
         # POST
         msg_text = request.data.get('message', '').strip()
         if not msg_text:
             return Response({'error': 'Сообщение не может быть пустым'}, status=400)
-        
+
         # Автоматически добавляем отправителя в участники
         room.members.add(request.user)
         msg = DirectorChatMessage.objects.create(room=room, sender=request.user, message=msg_text)
@@ -722,7 +722,7 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({'error': 'Пользователь не найден'}, status=404)
-        
+
         room.members.add(user)
         return Response({'message': f'{user.first_name} {user.last_name} добавлен в чат'})
 
@@ -872,7 +872,7 @@ def get_admin_stats(request):
 def get_support_chats(request):
     """Получить все чаты с техподдержкой"""
     from apps.chat.models import Chat, Message
-    
+
     # Находим пользователя техподдержки (та же логика, что в apps/users/views.py)
     qs = User.objects.filter(is_active=True)
     support_user = qs.filter(is_staff=True, username__iexact='support').first()
@@ -882,15 +882,15 @@ def get_support_chats(request):
         ).first()
     if not support_user:
         support_user = qs.filter(is_staff=True).order_by('id').first()
-    
+
     if not support_user:
         return Response({'error': 'Пользователь техподдержки не найден'}, status=404)
-    
+
     # Получаем все чаты с участием техподдержки
     chats = Chat.objects.filter(participants=support_user).prefetch_related(
         'participants', 'messages', 'messages__sender'
     ).order_by('-id')
-    
+
     # Формируем ответ в формате, совместимом с SupportChatsSection
     result = []
     for chat in chats:
@@ -898,10 +898,10 @@ def get_support_chats(request):
         client = chat.participants.exclude(id=support_user.id).first()
         if not client:
             continue
-            
+
         last_message = chat.messages.last()
         unread_count = chat.messages.filter(is_read=False).exclude(sender=request.user).count()
-        
+
         # Получаем все сообщения чата
         messages = []
         for msg in chat.messages.all():
@@ -918,7 +918,7 @@ def get_support_chats(request):
                 'created_at': msg.created_at.isoformat(),
                 'is_mine': msg.sender == request.user,
             })
-        
+
         result.append({
             'id': chat.id,
             'client': {
@@ -947,7 +947,7 @@ def get_support_chats(request):
             'created_at': chat.messages.first().created_at.isoformat() if chat.messages.exists() else '',
             'updated_at': last_message.created_at.isoformat() if last_message else '',
         })
-    
+
     return Response(result)
 
 
@@ -956,16 +956,16 @@ def get_support_chats(request):
 def send_support_chat_message(request, chat_id):
     """Отправить сообщение в чат техподдержки"""
     from apps.chat.models import Chat, Message
-    
+
     try:
         chat = Chat.objects.get(id=chat_id)
     except Chat.DoesNotExist:
         return Response({'error': 'Чат не найден'}, status=404)
-    
+
     message_text = request.data.get('message', '')
     if not message_text:
         return Response({'error': 'Сообщение не может быть пустым'}, status=400)
-    
+
     # Создаем сообщение
     message = Message.objects.create(
         chat=chat,
@@ -973,7 +973,7 @@ def send_support_chat_message(request, chat_id):
         text=message_text,
         message_type='text'
     )
-    
+
     return Response({
         'id': message.id,
         'text': message.text,
@@ -997,7 +997,10 @@ def get_user_chats(request):
     """Получить все переписки пользователей на платформе"""
     from apps.chat.models import Chat, Message
     from django.db.models import Max, Count, Q
-    
+
+    # Фильтрация по order_id (если указан)
+    order_id = request.GET.get('order_id')
+
     # Получаем все чаты с аннотациями
     chats = Chat.objects.annotate(
         last_message_time=Max('messages__created_at'),
@@ -1009,7 +1012,10 @@ def get_user_chats(request):
     ).prefetch_related(
         'participants', 'messages', 'messages__sender'
     ).order_by('-last_message_time')
-    
+
+    if order_id:
+        chats = chats.filter(order_id=order_id)
+
     # Формируем ответ
     result = []
     for chat in chats:
@@ -1025,9 +1031,9 @@ def get_user_chats(request):
                 'avatar': None,
                 'online': False,  # Можно добавить логику определения онлайн-статуса
             })
-        
+
         last_message = chat.messages.last()
-        
+
         # Получаем все сообщения чата
         messages = []
         for msg in chat.messages.all():
@@ -1048,7 +1054,7 @@ def get_user_chats(request):
                 'is_read': msg.is_read,
                 'created_at': msg.created_at.isoformat(),
             })
-        
+
         chat_data = {
             'id': chat.id,
             'order_id': chat.order.id if chat.order else None,
@@ -1082,9 +1088,9 @@ def get_user_chats(request):
             'created_at': chat.messages.first().created_at.isoformat() if chat.messages.exists() else '',
             'updated_at': last_message.created_at.isoformat() if last_message else '',
         }
-        
+
         result.append(chat_data)
-    
+
     return Response(result)
 
 
@@ -1142,16 +1148,16 @@ def get_user_history(request, user_id):
 def report_message(request, message_id):
     """Создать жалобу на сообщение"""
     from apps.chat.models import Message, ContactViolationLog
-    
+
     try:
         message = Message.objects.select_related('chat', 'sender').get(id=message_id)
     except Message.DoesNotExist:
         return Response({'error': 'Сообщение не найдено'}, status=404)
-    
+
     reason = request.data.get('reason', 'Жалоба от администратора')
     action = request.data.get('action', 'warning')  # warning, ban, message_blocked
     notes = request.data.get('notes', '')
-    
+
     # Создаем лог нарушения
     violation = ContactViolationLog.objects.create(
         user=message.sender,
@@ -1161,12 +1167,12 @@ def report_message(request, message_id):
         action_taken=action,
         notes=f"{reason}. {notes}".strip()
     )
-    
+
     # Если действие - бан, блокируем пользователя
     if action == 'ban':
         message.sender.is_active = False
         message.sender.save()
-    
+
     return Response({
         'status': 'success',
         'violation_id': violation.id,

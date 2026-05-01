@@ -31,10 +31,12 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
   const currentYear = new Date().getFullYear();
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-  
+
   const agreementLink = userRole === 'expert' || userRole === 'partner'
     ? '/docs/user_agreement_expert.pdf'
     : '/docs/user_agreement_client.pdf';
+
+  const hideContactAndExpert = userRole === 'partner' || userRole === 'director' || userRole === 'admin';
 
   const handleSupportClick = React.useCallback(() => {
     // Перенаправляем на форму подачи жалобы
@@ -90,7 +92,9 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             <a href="tel:88005007857" className={styles.contactPhone}>8 (800) 500-78-57</a>
             <a href="mailto:support@okoznaniy.ru" className={styles.contactEmail}>support@okoznaniy.ru</a>
             <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
-            <a href="/support" className={styles.contactButton}>Написать нам</a>
+            {!hideContactAndExpert && (
+              <a href="/support" className={styles.contactButton}>Написать нам</a>
+            )}
           </div>
 
           <div className={styles.columnItem}>
@@ -121,16 +125,18 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             </div>
           </div>
 
-          <div className={styles.columnItem}>
-            <h3 className={styles.heading}>Вакансии</h3>
-            <button 
-              onClick={handleBecomeExpertClick}
-              disabled={isCheckingAuth}
-              className={styles.becomeExpertButton}
-            >
-              Стать экспертом
-            </button>
-          </div>
+          {!hideContactAndExpert && (
+            <div className={styles.columnItem}>
+              <h3 className={styles.heading}>Вакансии</h3>
+              <button
+                onClick={handleBecomeExpertClick}
+                disabled={isCheckingAuth}
+                className={styles.becomeExpertButton}
+              >
+                Стать экспертом
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.copyright}>

@@ -60,7 +60,7 @@
     height: 36px;
   }
 
-  
+
   .ant-form-item {
     margin-bottom: 16px;
   }
@@ -85,7 +85,7 @@
 
 
 @media (max-width: 575px) {
-  
+
   body .ant-modal-root .ant-modal-wrap {
     overflow: hidden;
     height: 100dvh;
@@ -96,14 +96,14 @@
     bottom: 0;
     right: 0;
     pointer-events: auto;
-    
-    
-    
+
+
+
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  
+
   body .ant-modal-root .ant-modal-mask {
     z-index: 1999;
     height: 100dvh;
@@ -113,13 +113,13 @@
     bottom: 0;
     right: 0;
     touch-action: none;
-    
+
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(0, 0, 0, 0.45); 
+    background: rgba(0, 0, 0, 0.45);
   }
 
-  
+
   body .ant-modal-root .ant-modal-wrap .ant-modal {
     position: fixed;
     top: 0;
@@ -128,16 +128,16 @@
     bottom: 0;
     width: 100%;
     height: 100%;
-    height: 100dvh; 
+    height: 100dvh;
     margin: 0;
     padding: 0;
     max-width: none;
     pointer-events: auto;
-    transform: none; 
+    transform: none;
     padding-bottom: 0;
   }
 
-  
+
   body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content {
     height: 100%;
     width: 100%;
@@ -149,27 +149,29 @@
     z-index: 2002;
     position: static;
     pointer-events: auto;
+    background: #fff;
   }
 
-  
+
   body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-header,
   body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer {
     flex-shrink: 0;
   }
 
-  
+
   body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-body {
     padding: 12px 16px;
-    flex: 1 1 auto; 
+    flex: 1 1 auto;
     overflow-y: auto;
-    min-height: 0; 
+    min-height: 0;
     max-height: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    transform: translate3d(0,0,0); 
+    transform: translate3d(0,0,0);
+    background: #fff;
   }
 
-  
+
   .ant-modal .ant-input,
   .ant-modal .ant-input-number-input,
   .ant-modal .ant-input-textarea textarea,
@@ -179,17 +181,18 @@
     padding-bottom: 8px;
     line-height: 1.5;
     height: auto;
-    touch-action: pan-y; 
+    touch-action: pan-y;
   }
 
   .ant-modal-footer {
     padding: 12px 16px;
     border-radius: 0;
     flex-shrink: 0;
-    border-top: 1px solid var(--color-border-secondary, #f0f0f0);
+    border-top: 1px solid #f0f0f0;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: #fff;
   }
 
   .ant-modal-footer .ant-btn {
@@ -199,7 +202,7 @@
     margin: 0;
   }
 
-  
+
   .ant-modal .ant-form-item {
     margin-bottom: 12px;
     padding: 0 10px;
@@ -217,7 +220,7 @@
     height: auto;
   }
 
-  
+
   :where(.ant-modal) .ant-form-item .ant-input,
   :where(.ant-modal) .ant-form-item .ant-input-number,
   :where(.ant-modal) .ant-form-item .ant-select-selector,
@@ -230,23 +233,23 @@
     padding-bottom: 8px;
   }
 
-  
+
   :where(.ant-modal) .ant-form-item .ant-input-number-input {
-    
-    
-    
-    
+
+
+
+
     height: auto;
     line-height: 1.5;
     padding: 8px 11px;
   }
-  
-  
+
+
   :where(.ant-modal) .ant-form-item .ant-input {
      padding-top: 0;
-     padding-bottom: 8px; 
-     align-items: flex-start; 
-     line-height: 32px; 
+     padding-bottom: 8px;
+     align-items: flex-start;
+     line-height: 32px;
   }
 
   .ant-input-textarea textarea {
@@ -263,7 +266,7 @@
     max-width: 95vw;
   }
 
-  
+
   .ant-tabs-nav {
     margin-bottom: 12px;
   }
@@ -273,7 +276,7 @@
     font-size: 13px;
   }
 
-  
+
   .ant-table {
     font-size: 12px;
   }
@@ -288,12 +291,12 @@
     font-size: 12px;
   }
 
-  
+
   .ant-upload-list-item {
     font-size: 12px;
   }
 
-  
+
   .ant-steps-item-title {
     font-size: 13px;
   }
@@ -302,7 +305,7 @@
     font-size: 11px;
   }
 
-  
+
   .ant-collapse-header {
     padding: 10px 12px;
     font-size: 13px;
@@ -312,7 +315,7 @@
     padding: 12px;
   }
 
-  
+
   .ant-descriptions-item-label {
     font-size: 12px;
   }
@@ -321,12 +324,12 @@
     font-size: 13px;
   }
 
-  
+
   .ant-timeline-item-content {
     font-size: 13px;
   }
 
-  
+
   .ant-card {
     font-size: 13px;
   }
@@ -340,7 +343,7 @@
     padding: 12px;
   }
 
-  
+
   .ant-list-item {
     padding: 10px 0;
   }
@@ -353,51 +356,51 @@
     font-size: 12px;
   }
 
-  
+
   .ant-divider {
     margin: 12px 0;
   }
 
-  
+
   .ant-alert {
     padding: 8px 12px;
     font-size: 13px;
   }
 
-  
+
   .ant-badge {
     font-size: 11px;
   }
 
-  
+
   .ant-tag {
     font-size: 11px;
     padding: 2px 6px;
   }
 
-  
+
   .ant-radio-wrapper,
   .ant-checkbox-wrapper {
     font-size: 13px;
   }
 
-  
+
   .ant-switch {
     min-width: 40px;
     height: 20px;
   }
 
-  
+
   .ant-slider {
     margin: 8px 0;
   }
 
-  
+
   .ant-rate {
     font-size: 18px;
   }
 
-  
+
   .ant-pagination-item {
     min-width: 28px;
     height: 28px;

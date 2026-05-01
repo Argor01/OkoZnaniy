@@ -53,7 +53,7 @@ const PartnerList: React.FC = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [commissionModalVisible, setCommissionModalVisible] = useState(false);
   const [referralsModalVisible, setReferralsModalVisible] = useState(false);
-  
+
   const isMobile = window.innerWidth <= 840;
 
   const [commissionForm] = Form.useForm();
@@ -62,7 +62,7 @@ const PartnerList: React.FC = () => {
     queryKey: ['director-partners'],
     queryFn: getPartners,
   });
-  
+
   useEffect(() => {
     if (partnersError) {
       message.error('Ошибка при загрузке списка партнёров');
@@ -185,13 +185,6 @@ const PartnerList: React.FC = () => {
       key: 'email',
       width: 180,
       ellipsis: true,
-    },
-    {
-      title: 'Телефон',
-      dataIndex: 'phone',
-      key: 'phone',
-      width: 130,
-      render: (phone) => phone || '-',
     },
     {
       title: 'Дата регистрации',
@@ -351,7 +344,7 @@ const PartnerList: React.FC = () => {
 
   return (
     <div>
-      
+
       <Row gutter={[16, isMobile ? 12 : 16]} className={styles.statsRow}>
         <Col xs={24} sm={12} md={8}>
           <Card
@@ -410,15 +403,15 @@ const PartnerList: React.FC = () => {
         </Col>
       </Row>
 
-      
+
       <Card
         className={[
           styles.filtersCard,
           isMobile ? styles.filtersCardMobile : '',
         ].filter(Boolean).join(' ')}
       >
-        <Space 
-          direction="vertical" 
+        <Space
+          direction="vertical"
           className={styles.filtersSpace}
           size={isMobile ? "middle" : "large"}
         >
@@ -449,7 +442,7 @@ const PartnerList: React.FC = () => {
                   </Select>
                 </Col>
                 <Col span={12}>
-                  <Button 
+                  <Button
                     onClick={() => {
                       setSearchText('');
                       setStatusFilter('all');
@@ -512,7 +505,7 @@ const PartnerList: React.FC = () => {
         </Space>
       </Card>
 
-      
+
       <Card
         className={[
           styles.tableCard,
@@ -537,14 +530,14 @@ const PartnerList: React.FC = () => {
         </Spin>
       </Card>
 
-      
+
       <Modal
         title="Детальная информация о партнёре"
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         footer={[
-          <Button 
-            key="close" 
+          <Button
+            key="close"
             onClick={() => setDetailModalVisible(false)}
             size={isMobile ? 'large' : 'middle'}
             className={isMobile ? styles.modalButtonFull : undefined}
@@ -556,8 +549,8 @@ const PartnerList: React.FC = () => {
         className={isMobile ? styles.detailModalMobile : undefined}
       >
         {selectedPartner && (
-          <Descriptions 
-            bordered 
+          <Descriptions
+            bordered
             column={isMobile ? 1 : 2}
             size={isMobile ? 'middle' : 'default'}
           >
@@ -568,7 +561,6 @@ const PartnerList: React.FC = () => {
               {selectedPartner.lastName || selectedPartner.last_name}
             </Descriptions.Item>
             <Descriptions.Item label="Email">{selectedPartner.email}</Descriptions.Item>
-            <Descriptions.Item label="Телефон">{selectedPartner.phone || '-'}</Descriptions.Item>
             <Descriptions.Item label="Дата регистрации">
               {dayjs(selectedPartner.dateJoined || selectedPartner.date_joined).format('DD.MM.YYYY HH:mm')}
             </Descriptions.Item>
@@ -596,7 +588,7 @@ const PartnerList: React.FC = () => {
         )}
       </Modal>
 
-      
+
       <Modal
         title="Изменить процент комиссии"
         open={commissionModalVisible}
@@ -645,14 +637,14 @@ const PartnerList: React.FC = () => {
         </Form>
       </Modal>
 
-      
+
       <Modal
         title="Список рефералов"
         open={referralsModalVisible}
         onCancel={() => setReferralsModalVisible(false)}
         footer={[
-          <Button 
-            key="close" 
+          <Button
+            key="close"
             onClick={() => setReferralsModalVisible(false)}
             size={isMobile ? 'large' : 'middle'}
             className={isMobile ? styles.modalButtonFull : undefined}

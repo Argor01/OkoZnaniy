@@ -108,15 +108,15 @@ const convertGeoToSvg = (lat: number, lon: number): { x: number; y: number } => 
   const maxLat = 81.9;
   const minLon = 19.6;
   const maxLon = 169.0;
-  
+
   // Размеры SVG viewBox
   const svgWidth = 1000;
   const svgHeight = 600;
-  
+
   // Конвертация координат
   const x = ((lon - minLon) / (maxLon - minLon)) * svgWidth;
   const y = svgHeight - ((lat - minLat) / (maxLat - minLat)) * svgHeight;
-  
+
   return { x: Math.max(0, Math.min(svgWidth, x)), y: Math.max(0, Math.min(svgHeight, y)) };
 };
 
@@ -164,7 +164,7 @@ const PartnersMap: React.FC = () => {
   useEffect(() => {
     if (partners && partners.length > 0) {
       const results: PartnerWithCoords[] = [];
-      
+
       partners.forEach(partner => {
         if (!partner.city) {
           results.push({ ...partner, error: 'Город не указан' });
@@ -187,7 +187,7 @@ const PartnersMap: React.FC = () => {
           });
         }
       });
-      
+
       setPartnersWithCoords(results);
     } else {
       // Если нет данных от API, очищаем список
@@ -195,7 +195,7 @@ const PartnersMap: React.FC = () => {
     }
   }, [partners, isLoading, error]);
 
-  const filteredPartners = selectedCity 
+  const filteredPartners = selectedCity
     ? partnersWithCoords.filter(partner => partner.city === selectedCity)
     : partnersWithCoords;
 
@@ -223,8 +223,8 @@ const PartnersMap: React.FC = () => {
       <Alert
         message="Ошибка загрузки"
         description={
-          mapError || (error instanceof Error 
-            ? `Не удалось загрузить список партнеров: ${error.message}` 
+          mapError || (error instanceof Error
+            ? `Не удалось загрузить список партнеров: ${error.message}`
             : "Не удалось загрузить список партнеров")
         }
         type="error"
@@ -266,15 +266,7 @@ const PartnersMap: React.FC = () => {
         </div>
       </div>
 
-      {partnersWithCoords.length === 0 ? (
-        <Alert
-          message="Нет данных"
-          description="В системе пока нет партнеров с указанными городами"
-          type="info"
-          showIcon
-        />
-      ) : (
-        <div className={styles.content}>
+      <div className={styles.content}>
           <div className={styles.mapContainer}>
             <Card className={styles.mapCard}>
               <div className={styles.mapWrapper}>
@@ -287,20 +279,20 @@ const PartnersMap: React.FC = () => {
                     <defs>
                       <style>
                         {`
-                          .region { 
-                            fill: #e8f4f8; 
-                            stroke: #2c3e50; 
-                            stroke-width: 0.3; 
-                            transition: all 0.3s ease; 
+                          .region {
+                            fill: #e8f4f8;
+                            stroke: #2c3e50;
+                            stroke-width: 0.3;
+                            transition: all 0.3s ease;
                           }
-                          .region:hover { 
-                            fill: #d4edda; 
-                            stroke-width: 0.5; 
+                          .region:hover {
+                            fill: #d4edda;
+                            stroke-width: 0.5;
                           }
                         `}
                       </style>
                     </defs>
-                    
+
                     {/* Настоящая карта России из JSON */}
                     <g id="russia-regions">
                       {mapData?.features ? (
@@ -311,7 +303,7 @@ const PartnersMap: React.FC = () => {
                               const svgCoord = convertGeoToSvg(coord[1], coord[0]);
                               return `${i === 0 ? 'M' : 'L'} ${svgCoord.x} ${svgCoord.y}`;
                             }).join(' ') + ' Z';
-                            
+
                             return (
                               <path
                                 key={`${index}-${polygonIndex}`}
@@ -324,7 +316,7 @@ const PartnersMap: React.FC = () => {
                           if (feature.geometry.type === 'Polygon') {
                             return renderPolygon(feature.geometry.coordinates[0] as number[][]);
                           } else if (feature.geometry.type === 'MultiPolygon') {
-                            return (feature.geometry.coordinates as number[][][][]).map((polygon, polygonIndex) => 
+                            return (feature.geometry.coordinates as number[][][][]).map((polygon, polygonIndex) =>
                               renderPolygon(polygon[0], polygonIndex)
                             );
                           }
@@ -341,12 +333,12 @@ const PartnersMap: React.FC = () => {
                       )}
                     </g>
                   </svg>
-                  
+
                   {/* Маркеры партнеров */}
                   <div className={styles.markersOverlay}>
                     {filteredPartners.map(partner => {
                       if (!partner.svgCoords) return null;
-                      
+
                       return (
                         <div
                           key={partner.id}
@@ -378,13 +370,13 @@ const PartnersMap: React.FC = () => {
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>⚠</div>
                     <Text className={styles.emptyStateText}>
-                      {selectedCity 
-                        ? `Нет партнеров в городе ${selectedCity}` 
+                      {selectedCity
+                        ? `Нет партнеров в городе ${selectedCity}`
                         : 'Нет партнеров для отображения'
                       }
                     </Text>
                     <Text className={styles.emptyStateSubtext}>
-                      {selectedCity 
+                      {selectedCity
                         ? 'Попробуйте выбрать другой город или сбросить фильтр'
                         : 'Партнеры появятся здесь после регистрации'
                       }
@@ -399,22 +391,22 @@ const PartnersMap: React.FC = () => {
                       onClick={() => handleMarkerClick(partner)}
                       hoverable
                     >
-                      <div className={styles.partnerInfo} style={{ padding: '16px' }}>
-                        <Title 
-                          level={5} 
+                      <div className={styles.partnerInfo} style={{ background: '#ffffff', padding: '16px' }}>
+                        <Title
+                          level={5}
                           className={styles.partnerName}
-                          style={{ 
-                            color: '#1f2937 !important', 
-                            fontWeight: 600, 
+                          style={{
+                            color: '#1f2937 !important',
+                            fontWeight: 600,
                             fontSize: '16px',
                             marginBottom: '8px'
                           }}
                         >
                           {partner.username}
                         </Title>
-                        <div 
+                        <div
                           className={styles.partnerCity}
-                          style={{ 
+                          style={{
                             color: '#ffffff !important',
                             background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
                             padding: '4px 8px',
@@ -432,7 +424,7 @@ const PartnersMap: React.FC = () => {
                               <UserOutlined />
                             </span>
                             <span style={{ color: '#374151' }}>Рефералов: </span>
-                            <span 
+                            <span
                               className={styles.partnerStatValue}
                               style={{ color: '#1f2937', fontWeight: 600 }}
                             >
@@ -444,16 +436,16 @@ const PartnersMap: React.FC = () => {
                               <UserOutlined />
                             </span>
                             <span style={{ color: '#374151' }}>Активных: </span>
-                            <span 
+                            <span
                               className={styles.partnerStatValue}
                               style={{ color: '#1f2937', fontWeight: 600 }}
                             >
                               {partner.active_referrals}
                             </span>
                           </div>
-                          <div 
+                          <div
                             className={styles.partnerEarnings}
-                            style={{ 
+                            style={{
                               color: '#ffffff !important',
                               background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
                               padding: '8px 16px',
@@ -478,7 +470,6 @@ const PartnersMap: React.FC = () => {
             </Card>
           </div>
         </div>
-      )}
 
       {/* Модальное окно с информацией о партнере */}
       <Modal

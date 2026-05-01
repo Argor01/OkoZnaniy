@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  Typography, 
-  Row, 
-  Col, 
-  Button, 
-  Radio, 
-  Space, 
-  Tabs, 
+import {
+  Card,
+  Typography,
+  Row,
+  Col,
+  Button,
+  Radio,
+  Space,
+  Tabs,
   message,
   Tooltip,
   Tag,
   Input
 } from 'antd';
-import { 
-  DownloadOutlined, 
+import {
+  DownloadOutlined,
   FileImageOutlined,
   CopyOutlined,
   LinkOutlined
@@ -49,9 +49,9 @@ export const PromoMaterials: React.FC = () => {
   const [selectedDesign, setSelectedDesign] = useState(1);
 
   const currentConfig = bannerConfigs.find(config => config.id === selectedBannerType);
-  
+
   // Генерируем партнерскую ссылку
-  const referralLink = user?.referral_code 
+  const referralLink = user?.referral_code
     ? `${window.location.origin}/login?ref=${user.referral_code}`
     : '';
 
@@ -82,15 +82,15 @@ export const PromoMaterials: React.FC = () => {
 
   const renderBannerPreview = () => {
     const bannerUrl = generateBannerUrl();
-    
+
     return (
       <div className={styles.bannerPreview}>
-        <img 
-          src={bannerUrl} 
+        <img
+          src={bannerUrl}
           alt={`Баннер дизайн ${selectedDesign}`}
           className={styles.bannerImage}
-          style={{ 
-            width: '100%', 
+          style={{
+            width: '100%',
             height: 'auto',
             borderRadius: '8px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -113,7 +113,7 @@ export const PromoMaterials: React.FC = () => {
                   <LinkOutlined /> Ваша партнерская ссылка
                 </Title>
                 <Paragraph type="secondary">
-                  Делитесь этой ссылкой с потенциальными клиентами и исполнителями. 
+                  Делитесь этой ссылкой с потенциальными клиентами и исполнителями.
                   При регистрации по вашей ссылке реферальный код будет автоматически применен.
                 </Paragraph>
               </div>
@@ -169,8 +169,8 @@ export const PromoMaterials: React.FC = () => {
               </div>
 
               <div className={styles.statsBox}>
-                <Row gutter={16}>
-                  <Col span={8}>
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} sm={8}>
                     <Card>
                       <div style={{ textAlign: 'center' }}>
                         <Title level={3} style={{ margin: 0 }}>
@@ -180,7 +180,7 @@ export const PromoMaterials: React.FC = () => {
                       </div>
                     </Card>
                   </Col>
-                  <Col span={8}>
+                  <Col xs={24} sm={8}>
                     <Card>
                       <div style={{ textAlign: 'center' }}>
                         <Title level={3} style={{ margin: 0 }}>
@@ -190,7 +190,7 @@ export const PromoMaterials: React.FC = () => {
                       </div>
                     </Card>
                   </Col>
-                  <Col span={8}>
+                  <Col xs={24} sm={8}>
                     <Card>
                       <div style={{ textAlign: 'center' }}>
                         <Title level={3} style={{ margin: 0 }}>
@@ -219,8 +219,8 @@ export const PromoMaterials: React.FC = () => {
                   {/* Дизайн */}
                   <div className={styles.configSection}>
                     <Text strong>Дизайн:</Text>
-                    <Radio.Group 
-                      value={selectedDesign} 
+                    <Radio.Group
+                      value={selectedDesign}
                       onChange={(e) => setSelectedDesign(e.target.value)}
                     >
                       <Radio value={1}>Дизайн 1 (Клиент)</Radio>
@@ -234,10 +234,10 @@ export const PromoMaterials: React.FC = () => {
             <Col xs={24} lg={12}>
               <Card title="Предварительный просмотр" className={styles.previewCard}>
                 {renderBannerPreview()}
-                
+
                 <div style={{ marginTop: 16 }}>
-                  <Button 
-                    type="primary" 
+                  <Button
+                    type="primary"
                     icon={<DownloadOutlined />}
                     onClick={handleDownload}
                   >
@@ -259,12 +259,12 @@ export const PromoMaterials: React.FC = () => {
           <FileImageOutlined /> Промоматериалы
         </Title>
         <Paragraph>
-          Используйте готовые баннеры для продвижения ОкоЗнаний 
+          Используйте готовые баннеры для продвижения ОкоЗнаний
           и увеличения количества рефералов
         </Paragraph>
       </div>
 
-      <Tabs 
+      <Tabs
         items={tabItems}
         size="large"
         className={styles.promoTabs}

@@ -9,8 +9,7 @@
 .partnerProgramCard {
   margin-bottom: 24px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px var(--color-shadow, rgba(0, 0, 0, 0.1));
-  background: var(--color-bg-container, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .partnerProgramTitle {
@@ -22,7 +21,7 @@
 .partnerProgramDescription {
   font-size: 16px;
   text-align: center;
-  color: var(--color-text-secondary, #666);
+  color: #666;
   margin-bottom: 0;
 }
 
@@ -37,11 +36,10 @@
   flex: 1;
   min-width: 300px;
   padding: 12px;
-  background: var(--color-bg-spotlight, #f5f5f5);
+  background: #f5f5f5;
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   word-break: break-all;
-  color: var(--color-text-base, inherit);
 }
 
 .promotionMethod {
@@ -87,30 +85,31 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 24px;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .paymentTableHeader {
-  border-bottom: 2px solid var(--color-border-secondary, #f0f0f0);
+  border-bottom: 2px solid #f0f0f0;
 }
 
 .paymentTableHeaderCell {
   padding: 12px;
   text-align: left;
   font-weight: bold;
-  background: var(--color-table-header-bg, #fafafa);
-  color: var(--color-text-heading, inherit);
+  background: #fafafa;
 }
 
 .paymentTableHeaderCellCenter {
   padding: 12px;
   text-align: center;
   font-weight: bold;
-  background: var(--color-table-header-bg, #fafafa);
-  color: var(--color-text-heading, inherit);
+  background: #fafafa;
 }
 
 .paymentTableRow {
-  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .paymentTableCell {
@@ -138,13 +137,13 @@
 }
 
 .infoBoxGreen {
-  background: var(--color-info-box-green-bg, #f6ffed);
-  border: 1px solid var(--color-info-box-green-border, #b7eb8f);
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
 }
 
 .infoBoxOrange {
-  background: var(--color-info-box-orange-bg, #fff7e6);
-  border: 1px solid var(--color-info-box-orange-border, #ffd591);
+  background: #fff7e6;
+  border: 1px solid #ffd591;
 }
 
 /* Адаптивность */
@@ -152,23 +151,23 @@
   .partnerProgramContainer {
     padding: 16px;
   }
-  
+
   .referralLinkContainer {
     flex-direction: column;
   }
-  
+
   .referralLinkBox {
     min-width: auto;
   }
-  
+
   .promotionMethod {
     padding: 12px;
   }
-  
+
   .promotionIcon {
     font-size: 24px;
   }
-  
+
   .paymentTableHeaderCell,
   .paymentTableHeaderCellCenter,
   .paymentTableCell,
@@ -182,7 +181,7 @@
   .paymentTable {
     font-size: 12px;
   }
-  
+
   .paymentTableHeaderCell,
   .paymentTableHeaderCellCenter,
   .paymentTableCell,
