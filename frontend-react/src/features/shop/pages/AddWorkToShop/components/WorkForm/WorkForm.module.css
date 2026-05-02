@@ -264,3 +264,36 @@
     height: 150px;
   }
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .card {
+  background: var(--color-card-bg, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .input {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--color-border-base, #2d3348) !important;
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+:global([data-theme="dark"]) .select :global(.ant-select-selector) {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--color-border-base, #2d3348) !important;
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+:global([data-theme="dark"]) .uploadArea {
+  background: var(--color-bg-input, #1e2230);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .cancelButton {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .actions {
+  border-color: var(--color-border-base, #2d3348);
+}

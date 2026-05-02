@@ -122,3 +122,22 @@
   font-size: 36px;
   margin-bottom: 12px;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatMessages {
+  background: var(--color-bg-page, #0f1117);
+}
+
+:global([data-theme="dark"]) .chatIntroBubble {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .chatEmptyState {
+  color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .chatEmptyStateIcon {
+  color: var(--color-text-tertiary, #64748b);
+}

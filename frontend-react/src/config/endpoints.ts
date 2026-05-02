@@ -16,6 +16,10 @@ export const API_ENDPOINTS = {
   },
   users: {
     recent: '/users/recent_users/',
+    allUsers: '/users/all_users/',
+    myFriends: '/users/my_friends/',
+    addFriend: (id: number) => `/users/${id}/add_friend/`,
+    removeFriend: (id: number) => `/users/${id}/remove_friend/`,
     publicStats: '/public/stats/',
     supportUser: '/users/support_user/',
     updateProfile: '/users/update_me/',

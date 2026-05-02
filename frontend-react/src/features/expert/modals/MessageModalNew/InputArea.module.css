@@ -193,3 +193,35 @@
   height: 40px;
   font-size: 16px;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatInputContainer {
+  background: var(--color-bg-container, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatEmojiButton {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .chatAttachButton {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .chatInput {
+  border-color: var(--color-border-base, #2d3348);
+  background: var(--color-bg-input, #1e2230);
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .claimCarouselWrapper {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .claimCarouselButton {
+  background: var(--color-bg-elevated, #22262f);
+}

@@ -288,3 +288,32 @@
   }
 }
 
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .sidebar {
+  background: var(--color-sidebar-bg, #161922);
+  border-color: var(--color-border-base, #2d3348);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .sidebarProfile {
+  background: var(--color-sidebar-bg, #161922);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item:hover) {
+  background: var(--color-bg-hover, #262a35);
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item-selected) {
+  background: var(--color-bg-hover, #262a35);
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item .anticon) {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-sub .ant-menu-item),
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-sub .ant-menu-item .ant-menu-title-content) {
+  color: var(--color-text-secondary, #94a3b8);
+}
+

@@ -2,8 +2,8 @@
 
 .orderTabsHeader {
   padding: 8px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-primary, #ffffff);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,8 +29,8 @@
 
 .orderPanel {
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-secondary, #f9fafb);
 }
 
 .orderPanelMobile {
@@ -76,8 +76,8 @@
 }
 
 .orderSummaryContainer {
-  background: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--bg-primary, #ffffff);
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
   position: relative;
   z-index: 5;
 }
@@ -88,18 +88,18 @@
   justify-content: space-between;
   padding: 12px 16px;
   cursor: pointer;
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   transition: background-color 0.2s;
   user-select: none;
 }
 
 .orderSummaryHeader:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg-hover, #f9fafb);
 }
 
 .orderSummaryHeaderOpen {
-  background-color: #f9fafb;
-  border-bottom: 1px solid #f0f0f0;
+  background-color: var(--color-bg-hover, #f9fafb);
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
 }
 
 .orderSummaryLeft {
@@ -110,7 +110,7 @@
 
 .orderSummaryId {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   font-size: 14px;
 }
 
@@ -119,8 +119,8 @@
   padding: 4px 10px;
   border-radius: 14px;
   font-weight: 600;
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--bg-tertiary, #f3f4f6);
+  color: var(--text-secondary, #4b5563);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -165,7 +165,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
 }
 
 .iconWarning {
@@ -192,21 +192,21 @@
 .orderSummaryPrice {
   font-weight: 700;
   font-size: 15px;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
 }
 
 .orderToggleIcon {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-tertiary, #9ca3af);
   display: flex;
   align-items: center;
 }
 
 .orderSummaryDetails {
   padding: 20px;
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
 }
 
 @keyframes slideDown {
@@ -232,10 +232,10 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--color-border-secondary, rgba(0, 0, 0, 0.03));
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -270,7 +270,7 @@
 
 .gridLabel {
   font-size: 10px;
-  color: #9ca3af;
+  color: var(--text-tertiary, #9ca3af);
   margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -280,7 +280,7 @@
 .gridValue {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   line-height: 1.3;
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, message } from 'antd';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
@@ -22,9 +22,7 @@ const ShopReadyWorks: React.FC = () => {
   const { data: apiWorks, isLoading } = useQuery({
     queryKey: ['shop-works', filters.sortBy],
     queryFn: async () => {
-      const data = await shopApi.getWorks({
-        is_favorite: filters.sortBy === 'favorites' ? true : undefined
-      });
+      const data = await shopApi.getWorks();
       return data;
     },
   });
@@ -108,40 +106,7 @@ const ShopReadyWorks: React.FC = () => {
     }
   };
 
-  const toggleFavoriteMutation = useMutation({
-    mutationFn: (id: number) => shopApi.toggleFavorite(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['shop-works', filters.sortBy] });
-      const previousWorks = queryClient.getQueryData<Work[]>(['shop-works', filters.sortBy]);
 
-      queryClient.setQueryData<Work[]>(['shop-works', filters.sortBy], (old) => {
-        if (!old) return [];
-        return old.map(w => w.id === id ? { ...w, is_favorite: !w.is_favorite } : w);
-      });
-
-      return { previousWorks };
-    },
-    onError: (err, id, context) => {
-      if (context?.previousWorks) {
-        queryClient.setQueryData(['shop-works', filters.sortBy], context.previousWorks);
-      }
-      message.error('Не удалось обновить избранное');
-    },
-    onSuccess: (data, id) => {
-      message.success(data.is_favorite ? 'Добавлено в избранное' : 'Удалено из избранного');
-      queryClient.setQueryData<Work[]>(['shop-works', filters.sortBy], (old) => {
-        if (!old) return [];
-        if (filters.sortBy === 'favorites' && !data.is_favorite) {
-          return old.filter(w => w.id !== id);
-        }
-        return old.map(w => w.id === id ? { ...w, is_favorite: data.is_favorite } : w);
-      });
-    },
-  });
-
-  const handleFavorite = (id: number) => {
-    toggleFavoriteMutation.mutate(id);
-  };
 
   const handleDownload = (id: number) => {
     const purchase = (Array.isArray(purchases) ? purchases : []).find((p) => p.work === id);
@@ -215,10 +180,6 @@ const ShopReadyWorks: React.FC = () => {
       case 'popular':
         result.sort((a, b) => b.viewsCount - a.viewsCount);
         break;
-      case 'favorites':
-        // Сортировка по умолчанию (например, по новизне)
-        result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-        break;
       case 'newness':
       default:
         result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
@@ -250,7 +211,6 @@ const ShopReadyWorks: React.FC = () => {
         works={filteredWorks}
         loading={isLoading}
         onWorkClick={(id) => navigate(`/shop/works/${id}`)}
-        onFavorite={handleFavorite}
         onPurchase={handlePurchase}
         onDownload={handleDownload}
         purchasesByWorkId={purchasesByWorkId}

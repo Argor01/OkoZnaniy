@@ -25,7 +25,7 @@
 }
 
 .secondary {
-  background-color: #fff;
+  background-color: var(--bg-primary, #fff);
   border-color: var(--border-color, #e5e7eb);
   color: var(--text-primary, #1f2937);
 }

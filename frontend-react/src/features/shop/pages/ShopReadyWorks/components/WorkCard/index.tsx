@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tag, Space, Typography, Rate, Popconfirm, Avatar } from 'antd';
-import { EyeOutlined, ShoppingCartOutlined, HeartOutlined, HeartFilled, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
+import { EyeOutlined, ShoppingCartOutlined, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Work } from '@/features/shop/types';
 import { AppCard } from '@/components/ui/AppCard';
@@ -12,7 +12,6 @@ const { Text, Title } = Typography;
 interface WorkCardProps {
   work: Work;
   onView: (id: number) => void;
-  onFavorite: (id: number) => void;
   onPurchase: (id: number) => void;
   onDownload?: (id: number) => void;
   isPurchased?: boolean;
@@ -21,7 +20,7 @@ interface WorkCardProps {
   allowDelete?: boolean;
 }
 
-const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchase, onDownload, isPurchased, canDownload, onDelete, allowDelete }) => {
+const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onPurchase, onDownload, isPurchased, canDownload, onDelete, allowDelete }) => {
   const [imageError, setImageError] = React.useState(false);
   const navigate = useNavigate();
 
@@ -47,14 +46,6 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onFavorite, onPurchas
       <div className={styles.header}>
         <Tag color="blue">{work.category}</Tag>
         <Space size={4}>
-          <AppButton
-            variant="text"
-            icon={work.is_favorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavorite(work.id);
-            }}
-          />
           {allowDelete && onDelete && (
             <Popconfirm
               title="Удалить работу?"

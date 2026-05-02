@@ -8,7 +8,7 @@
   border-radius: 24px;
   padding: 0;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
@@ -115,13 +115,13 @@
 
 .friendProfileSectionTitle {
   font-size: 18px;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .friendProfileSectionText {
   font-size: 15px;
-  color: #4b5563;
+  color: var(--text-secondary, #4b5563);
   line-height: 1.6;
 }
 
@@ -135,8 +135,8 @@
   padding: 6px 16px;
   font-size: 14px;
   border-radius: 20px;
-  border: 1px solid #e0e7ff;
-  background: #f5f7ff;
+  border: 1px solid var(--border-color, #e0e7ff);
+  background: var(--bg-secondary, #f5f7ff);
   color: #667eea;
 }
 
@@ -144,7 +144,7 @@
   display: flex;
   gap: 12px;
   padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
 .friendProfilePrimaryButton {

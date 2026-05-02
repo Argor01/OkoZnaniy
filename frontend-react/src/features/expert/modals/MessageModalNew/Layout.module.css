@@ -81,3 +81,16 @@
 .chatPanelHidden {
   display: none;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatModalWrap :global(.ant-modal-content) {
+  background: var(--color-bg-container, #1a1d27) !important;
+}
+
+:global([data-theme="dark"]) .chatModalWrap :global(.ant-modal-body) {
+  background: var(--color-bg-container, #1a1d27) !important;
+}
+
+:global([data-theme="dark"]) .chatPanel {
+  background: var(--color-bg-container, #1a1d27);
+}

@@ -26,14 +26,14 @@
 }
 
 .title {
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   font-weight: 600;
   margin: 0;
 }
 
 .pageTitle {
   margin: 0 0 24px 0;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   font-weight: 600;
   font-size: 20px;
   font-family: 'Jost-SemiBold';
@@ -41,10 +41,10 @@
 
 
 .workCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   transition: all 0.3s ease;
   margin-bottom: 16px;
 }
@@ -57,10 +57,10 @@
 
 
 .filterCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   margin-bottom: 24px;
   padding: 24px;
 }
@@ -69,7 +69,7 @@
 .emptyState {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
 }
 
 
@@ -82,10 +82,10 @@
 
 
 .statsCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.05));
   transition: all 0.3s ease;
   margin-bottom: 16px;
 }

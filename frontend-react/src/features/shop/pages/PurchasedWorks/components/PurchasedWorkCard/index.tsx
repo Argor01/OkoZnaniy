@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tag, Space, Typography, Rate, Badge } from 'antd';
-import { EyeOutlined, DownloadOutlined, HeartOutlined, HeartFilled, CheckOutlined, CalendarOutlined } from '@ant-design/icons';
+import { EyeOutlined, DownloadOutlined, CheckOutlined, CalendarOutlined } from '@ant-design/icons';
 import { PurchasedWork } from '@/features/shop/types';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
@@ -12,14 +12,12 @@ const { Text, Title } = Typography;
 interface PurchasedWorkCardProps {
   work: PurchasedWork;
   onDownload: (id: number) => void;
-  onFavorite?: (id: number) => void;
   onView?: (workId: number) => void;
 }
 
 const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
   work,
   onDownload,
-  onFavorite,
   onView,
 }) => {
   const [imageError, setImageError] = React.useState(false);
@@ -61,14 +59,6 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
             />
           )}
         </div>
-        <AppButton
-          variant="text"
-          icon={work.isFavorite ? <HeartFilled className={styles.favoriteIcon} /> : <HeartOutlined />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onFavorite?.(work.id);
-          }}
-        />
       </div>
 
       <Title level={5} className={styles.title}>

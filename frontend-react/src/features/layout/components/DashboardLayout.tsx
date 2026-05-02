@@ -20,7 +20,6 @@ const MessageModal = lazy(() => import('@/features/expert/modals/MessageModalNew
 const NotificationsModal = lazy(() => import('@/features/expert/modals/NotificationsModalNew'));
 const ArbitrationModal = lazy(() => import('@/features/expert/modals/ArbitrationModal'));
 const FinanceModal = lazy(() => import('@/features/expert/modals/FinanceModal'));
-const FriendsModal = lazy(() => import('@/features/expert/modals/FriendsModal'));
 const FaqModal = lazy(() => import('@/features/expert/modals/FaqModal'));
 const FriendProfileModal = lazy(() => import('@/features/expert/modals/FriendProfileModal'));
 
@@ -42,7 +41,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [financeModalVisible, setFinanceModalVisible] = useState(false);
-  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   
@@ -187,7 +185,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setNotificationsModalVisible(false);
     setArbitrationModalVisible(false);
     setFinanceModalVisible(false);
-    setFriendsModalVisible(false);
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
     setSelectedUserIdForChat(undefined);
@@ -264,10 +261,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setFinanceModalVisible(true);
   }, [closeAllModals]);
 
-  const handleFriendsClick = useCallback(() => {
-    closeAllModals();
-    setFriendsModalVisible(true);
-  }, [closeAllModals]);
 
   const handleFaqClick = useCallback(() => {
     closeAllModals();
@@ -351,7 +344,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
     openArbitrationModal: () => { closeAllModals(); setArbitrationModalVisible(true); },
     openFinanceModal: () => { closeAllModals(); setFinanceModalVisible(true); },
-    openFriendsModal: () => { closeAllModals(); setFriendsModalVisible(true); },
     openFaqModal: () => { closeAllModals(); setFaqModalVisible(true); },
     openFriendProfileModal: (friend: User) => {
         closeAllModals();
@@ -518,7 +510,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onNotificationsClick={handleNotificationsClick}
             onArbitrationClick={handleArbitrationClick}
             onFinanceClick={handleFinanceClick}
-            onFriendsClick={handleFriendsClick}
             onFaqClick={handleFaqClick}
             onImprovementsClick={handleImprovementsClick}
             mobileDrawerOpen={mobileMenuVisible}
@@ -597,21 +588,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           profile={userProfile}
           isMobile={isMobile}
         />
-        <FriendsModal 
-          visible={friendsModalVisible} 
-          onClose={() => setFriendsModalVisible(false)}
-          isMobile={isMobile}
-          onOpenChat={(friend) => {
-              setFriendsModalVisible(false);
-              setSelectedUserIdForChat(friend.id);
-              setMessageModalVisible(true);
-          }}
-          onOpenProfile={(friend) => {
-              setFriendsModalVisible(false);
-              setSelectedFriend(friend);
-              setFriendProfileModalVisible(true);
-          }}
-        />
+
         <FaqModal 
           visible={faqModalVisible} 
           onClose={() => setFaqModalVisible(false)}

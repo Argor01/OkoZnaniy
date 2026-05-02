@@ -154,3 +154,45 @@
 .chatBadge {
   margin-right: 8px;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatListItem {
+  background: var(--color-bg-container, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatListItem:hover {
+  background: var(--color-bg-hover, #262a35);
+}
+
+:global([data-theme="dark"]) .chatListItemSelected {
+  background: var(--color-bg-spotlight, #1e2230);
+}
+
+:global([data-theme="dark"]) .chatListItemSelected:hover {
+  background: var(--color-bg-spotlight, #1e2230);
+}
+
+:global([data-theme="dark"]) .chatListItemUnread {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+:global([data-theme="dark"]) .chatListItemPinned {
+  background: rgba(251, 191, 36, 0.08);
+}
+
+:global([data-theme="dark"]) .chatListName {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .chatListTime {
+  color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .chatListPreview {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .chatListPreviewUnread {
+  color: #34d399;
+}

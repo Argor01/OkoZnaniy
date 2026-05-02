@@ -156,3 +156,54 @@
     display: none !important;
   }
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .rightSidebar {
+  background: var(--color-sidebar-bg, #161922);
+  border-color: var(--color-border-base, #2d3348);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .rightSidebar:global(.ant-layout-sider-children) {
+  background: var(--color-sidebar-bg, #161922);
+}
+
+:global([data-theme="dark"]) .mainTitle {
+  color: var(--color-text-heading, #e2e8f0) !important;
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .questionCard {
+  background: var(--color-bg-container, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .questionCard:hover {
+  border-color: var(--color-brand-blue-500, #2b9fe6);
+  box-shadow: 0 4px 12px rgba(43, 159, 230, 0.15);
+}
+
+:global([data-theme="dark"]) .authorName {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .authorName:hover {
+  color: var(--color-brand-blue-500, #2b9fe6);
+}
+
+:global([data-theme="dark"]) .questionText {
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .dateText {
+  color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .answersBlock {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .avatar {
+  background-color: var(--color-bg-spotlight, #1e2230);
+  color: var(--color-text-secondary, #94a3b8);
+}

@@ -2,6 +2,7 @@ import React, { memo, useMemo } from 'react';
 import { Badge, Button, Dropdown, Layout, Space, Typography, message } from 'antd';
 import {
   UserOutlined,
+  EditOutlined,
   MessageOutlined,
   BellOutlined,
   LogoutOutlined,
@@ -16,9 +17,12 @@ import {
   CopyOutlined,
   DownOutlined,
   AppstoreOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '@/contexts/ThemeContext';
 import styles from './DashboardHeader.module.css';
 import { ROUTES } from '@/utils/constants';
 
@@ -55,6 +59,7 @@ interface DashboardHeaderProps {
   isMobile?: boolean;
 }
 
+
 const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   userProfile,
   unreadMessages = 0,
@@ -70,6 +75,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDark, toggleTheme } = useTheme();
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
 
@@ -349,15 +355,44 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
               
               <Button
                 type="text"
-                className={styles.profileSection}
-                onClick={() => {
-                  navigate(ROUTES.expert.root);
+                className={styles.themeToggle}
+                icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+                onClick={toggleTheme}
+                title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+              />
+
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'edit-profile',
+                      label: 'Редактировать профиль',
+                      icon: <EditOutlined />,
+                      onClick: onProfileClick,
+                    },
+                    { type: 'divider' },
+                    {
+                      key: 'logout',
+                      label: 'Выход',
+                      icon: <LogoutOutlined />,
+                      danger: true,
+                      onClick: onLogout,
+                    },
+                  ],
                 }}
+                placement="bottomRight"
+                trigger={['click']}
               >
-                <Text className={styles.username}>
-                  {userProfile?.username || 'Пользователь'}
-                </Text>
-              </Button>
+                <Button
+                  type="text"
+                  className={styles.profileSection}
+                >
+                  <Text className={styles.username}>
+                    {userProfile?.username || 'Пользователь'}
+                  </Text>
+                  <DownOutlined style={{ fontSize: 10, color: 'white', marginLeft: 4 }} />
+                </Button>
+              </Dropdown>
             </>
           )}
           

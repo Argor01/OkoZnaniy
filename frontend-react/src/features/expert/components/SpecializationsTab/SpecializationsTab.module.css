@@ -70,14 +70,22 @@
   flex: 1;
 }
 
+.specTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .specTitle {
-  margin-bottom: 10px ;
+  margin-bottom: 0 !important;
   font-size: 20px !important;
   font-weight: 600 !important;
   display: flex;
   align-items: center;
-  margin-bottom: 8px !important;
   font-family: 'Jost-SemiBold', sans-serif;
+  flex: 1;
 }
 
 .verifiedIcon {
@@ -123,16 +131,10 @@
   border-color: #16a34a;
 }
 
-.specCardActions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
 .specCardActionsRow {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .specHourlyRate {
@@ -264,25 +266,19 @@
   .specCardHeader {
     margin-bottom: 12px !important;
     gap: 10px !important;
-    flex-direction: column;
-    align-items: stretch;
   }
   
   .specCardHeaderInfo {
     text-align: center;
   }
   
-  .specCardActions {
-    align-items: center;
-    flex-direction: row;
+  .specTitleRow {
     justify-content: center;
   }
   
   .specTitle {
     font-size: 18px !important;
-    margin-bottom: 6px !important;
-    text-align: center;
-    justify-content: center;
+    flex: unset;
   }
   
   .verifiedIcon {
@@ -358,4 +354,47 @@
   .emptyState {
     padding: 24px 16px !important;
   }
+}
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .sectionCard {
+  background: rgba(26, 29, 39, 0.95);
+  border-color: var(--color-border-base, #2d3348);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .sectionCardHeader {
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+:global([data-theme="dark"]) .sectionTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .specCard {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .specCard:hover {
+  border-color: var(--color-brand-blue-500, #2b9fe6);
+}
+
+:global([data-theme="dark"]) .specDescription {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .skillsBlock {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .specMetaRow {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .specMetaIcon {
+  color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .emptyState {
+  color: var(--color-text-secondary, #94a3b8);
 }

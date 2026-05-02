@@ -51,12 +51,37 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
             <AppCard key={spec.id} className={styles.specCard}>
               <div className={styles.specCardHeader}>
                 <div className={styles.specCardHeaderInfo}>
-                  <Title level={4} className={styles.specTitle}>
-                    {spec.custom_name || spec.subject?.name || 'Специализация'}
-                    {spec.is_verified && (
-                      <CheckCircleOutlined className={styles.verifiedIcon} />
-                    )}
-                  </Title>
+                  <div className={styles.specTitleRow}>
+                    <Title level={4} className={styles.specTitle}>
+                      {spec.custom_name || spec.subject?.name || 'Специализация'}
+                      {spec.is_verified && (
+                        <CheckCircleOutlined className={styles.verifiedIcon} />
+                      )}
+                    </Title>
+                    <div className={styles.specCardActionsRow}>
+                      <Tooltip title="Редактировать">
+                        <AppButton
+                          variant="text"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={() => onEdit(spec)}
+                        />
+                      </Tooltip>
+                      <Popconfirm
+                        title="Удалить специализацию?"
+                        okText="Удалить"
+                        cancelText="Отмена"
+                        onConfirm={() => onDelete(spec)}
+                      >
+                        <AppButton
+                          variant="text"
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
+                        />
+                      </Popconfirm>
+                    </div>
+                  </div>
                   <Space size={10} wrap className={styles.specTags}>
                     <Tag className={`${styles.metaTag} ${styles.metaTagExperience}`}>
                       <ClockCircleOutlined className={styles.metaTagIcon} />
@@ -73,32 +98,6 @@ const SpecializationsTab: React.FC<SpecializationsTabProps> = ({
                       </Tag>
                     )}
                   </Space>
-                </div>
-                
-                <div className={styles.specCardActions}>
-                  <div className={styles.specCardActionsRow}>
-                    <Tooltip title="Редактировать">
-                      <AppButton
-                        variant="text"
-                        size="small"
-                        icon={<EditOutlined />}
-                        onClick={() => onEdit(spec)}
-                      />
-                    </Tooltip>
-                    <Popconfirm
-                      title="Удалить специализацию?"
-                      okText="Удалить"
-                      cancelText="Отмена"
-                      onConfirm={() => onDelete(spec)}
-                    >
-                      <AppButton
-                        variant="text"
-                        size="small"
-                        danger
-                        icon={<DeleteOutlined />}
-                      />
-                    </Popconfirm>
-                  </div>
                 </div>
               </div>
 

@@ -47,8 +47,8 @@
 }
 
 .messageFileBlockOther {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
 }
 
 .messageFileBlock:hover {
@@ -56,13 +56,13 @@
 }
 
 .messageFileBlockOther:hover {
-  background: #f3f4f6;
+  background: var(--bg-tertiary, #f3f4f6);
 }
 
 .messageFileIconBox {
   width: 48px;
   height: 48px;
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -91,13 +91,13 @@
 }
 
 .messageFileNameOther {
-  color: #374151;
+  color: var(--text-primary, #374151);
 }
 
 .attachedFiles {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color, #e5e7eb);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

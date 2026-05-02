@@ -116,3 +116,17 @@
   align-items: center;
   padding: 0;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatSidebar {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatSearchHeader {
+  background: var(--color-bg-container, #1a1d27);
+}
+
+:global([data-theme="dark"]) .chatSearchIcon {
+  color: var(--color-text-tertiary, #64748b);
+}

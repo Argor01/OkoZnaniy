@@ -1,9 +1,9 @@
 .orderCard {
-  background: #f9fafb;
+  background: var(--bg-secondary, #f9fafb);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 16px;
-  border: 1px solid rgba(102, 126, 234, 0.1);
+  border: 1px solid var(--border-color, rgba(102, 126, 234, 0.1));
   transition: all 0.3s ease;
 }
 
@@ -217,36 +217,36 @@
 .reviewOrderLine {
   margin-top: 10px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
 }
 
 .reviewText {
   margin-top: 12px;
-  color: #4b5563;
+  color: var(--text-secondary, #4b5563);
   line-height: 1.6;
   font-size: 17px;
 }
 
 .sectionCard {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 32px;
   margin-bottom: 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-md, 0 8px 32px rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
 }
 
 .sectionCardHeader {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  border-bottom: 1px solid var(--border-color, rgba(102, 126, 234, 0.1));
 }
 
 .sectionTitle {
   font-size: 26px;
   font-weight: 600;
   margin: 0;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   font-family: 'Jost-SemiBold', sans-serif;
 }

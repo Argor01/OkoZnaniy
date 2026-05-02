@@ -158,3 +158,252 @@ a {
 [data-theme="dark"] * {
   scrollbar-color: var(--color-scrollbar-thumb, #3d4455) var(--color-scrollbar-track, #1a1d27);
 }
+
+/* Dark theme: Ant Design modal overrides */
+[data-theme="dark"] .ant-modal-content {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ant-modal-header {
+  background: var(--bg-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-modal-title {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-modal-close-x {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .ant-modal-body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ant-modal-footer {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Dark theme: Ant Design tabs in modals */
+[data-theme="dark"] .ant-tabs-tab {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--primary-blue) !important;
+}
+
+[data-theme="dark"] .ant-tabs-nav::before {
+  border-bottom-color: var(--border-color) !important;
+}
+
+/* Dark theme: Ant Design card overrides */
+[data-theme="dark"] .ant-card {
+  background: var(--bg-primary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-card-body {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-card-head {
+  background: var(--bg-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-card-head-title {
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design picker / date inputs */
+[data-theme="dark"] .ant-picker {
+  background: var(--color-bg-input, var(--bg-primary)) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-picker-input > input {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-picker-panel-container {
+  background: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .ant-picker-header {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-picker-content th {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .ant-picker-cell {
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design textarea */
+[data-theme="dark"] .ant-input-textarea textarea,
+[data-theme="dark"] textarea.ant-input {
+  background: var(--color-bg-input, var(--bg-primary)) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] textarea.ant-input::placeholder {
+  color: var(--color-text-placeholder) !important;
+}
+
+/* Dark theme: Ant Design upload */
+[data-theme="dark"] .ant-upload-drag {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Dark theme: Ant Design tooltip */
+[data-theme="dark"] .ant-tooltip-inner {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design popover */
+[data-theme="dark"] .ant-popover-inner {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design alert/info boxes */
+[data-theme="dark"] .ant-alert {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-alert-info {
+  background: var(--color-bg-spotlight) !important;
+}
+
+/* Dark theme: Ant Design table overrides */
+[data-theme="dark"] .ant-table {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ant-table-thead > tr > th {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-table-tbody > tr > td {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ant-table-tbody > tr:hover > td {
+  background: var(--color-bg-hover) !important;
+}
+
+/* Dark theme: Ant Design input overrides */
+[data-theme="dark"] .ant-input,
+[data-theme="dark"] .ant-input-affix-wrapper,
+[data-theme="dark"] .ant-select-selector,
+[data-theme="dark"] .ant-input-number {
+  background: var(--color-bg-input, var(--bg-primary)) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-input::placeholder,
+[data-theme="dark"] .ant-input-number-input::placeholder {
+  color: var(--color-text-placeholder) !important;
+}
+
+/* Dark theme: Ant Design select dropdown */
+[data-theme="dark"] .ant-select-dropdown {
+  background: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .ant-select-item {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-select-item-option-active {
+  background: var(--color-bg-hover) !important;
+}
+
+[data-theme="dark"] .ant-select-item-option-selected {
+  background: var(--color-bg-spotlight) !important;
+}
+
+/* Dark theme: Ant Design typography */
+[data-theme="dark"] .ant-typography {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ant-typography.ant-typography-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* Dark theme: Ant Design empty */
+[data-theme="dark"] .ant-empty-description {
+  color: var(--text-secondary);
+}
+
+/* Dark theme: Ant Design divider */
+[data-theme="dark"] .ant-divider {
+  border-color: var(--border-color);
+}
+
+/* Dark theme: Ant Design switch label text */
+[data-theme="dark"] .ant-form-item-label > label {
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design pagination */
+[data-theme="dark"] .ant-pagination-item {
+  background: var(--bg-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-pagination-item a {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-pagination-prev .ant-pagination-item-link,
+[data-theme="dark"] .ant-pagination-next .ant-pagination-item-link {
+  background: var(--bg-primary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design collapse (FAQ accordion) */
+[data-theme="dark"] .ant-collapse {
+  background: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-collapse-item {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ant-collapse-header {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-collapse-content {
+  background: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ant-collapse-content-box {
+  color: var(--text-secondary) !important;
+}

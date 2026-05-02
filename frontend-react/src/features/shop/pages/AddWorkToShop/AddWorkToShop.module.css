@@ -88,14 +88,14 @@
 
 .formField .ant-form-item-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary, #374151);
 }
 
 .formField .ant-input,
 .formField .ant-select-selector,
 .formField .ant-input-number {
   border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color, #d1d5db);
   transition: all 0.3s ease;
 }
 

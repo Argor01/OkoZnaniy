@@ -23,15 +23,15 @@
 
 .chatList {
   width: 320px;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border-color, #e5e7eb);
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-primary, #fff);
 }
 
 .chatListHeader {
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 .chatListHeaderTitle {
   font-size: 18px;
@@ -39,7 +39,7 @@
 
 .searchBox {
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 
 .chatListContent {
@@ -53,7 +53,7 @@
   padding: 12px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border-secondary, #f3f4f6);
   position: relative;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .chatItem:hover {
-  background: #f9fafb;
+  background: var(--color-bg-hover, #f9fafb);
 }
 
 .chatItem.active {
@@ -112,7 +112,7 @@
 
 .chatItemMessage .unread {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
 }
 .unreadDot :global(.ant-badge-dot) {
   background-color: var(--color-brand-blue-500, #2b9fe6);
@@ -122,7 +122,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f9fafb;
+  background: var(--bg-secondary, #f9fafb);
 }
 
 .chatWindowHeader {
@@ -130,8 +130,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-primary, #fff);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 
 .chatWindowHeaderInfo {
@@ -186,8 +186,8 @@
 }
 
 .message.theirs .messageContent {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #e5e7eb);
   border-bottom-left-radius: 4px;
 }
 
@@ -225,8 +225,8 @@
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
+  background: var(--bg-primary, #fff);
+  border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
 .chatWindowInput textarea {

@@ -54,9 +54,9 @@
 
 .messageBubbleOther {
   border-radius: 16px 16px 16px 4px;
-  background: #ffffff;
-  color: #1f2937;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1f2937);
+  border: 1px solid var(--border-color, #e5e7eb);
 }
 
 .messageText {
@@ -75,7 +75,7 @@
 }
 
 .messageTextOther {
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
 }
 
 .messageTime {
@@ -91,7 +91,7 @@
 }
 
 .messageTimeOther {
-  color: #9ca3af;
+  color: var(--text-tertiary, #9ca3af);
 }
 
 .messageReadStatus {

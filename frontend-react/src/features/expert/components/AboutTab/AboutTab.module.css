@@ -306,3 +306,31 @@
     padding: 2px 6px;
   }
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .sectionCard {
+  background: rgba(26, 29, 39, 0.95);
+  border-color: var(--color-border-base, #2d3348);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .sectionCardHeader {
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+:global([data-theme="dark"]) .sectionTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .aboutBio,
+:global([data-theme="dark"]) .aboutSectionText {
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .aboutHighlightText {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .aboutSectionTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}

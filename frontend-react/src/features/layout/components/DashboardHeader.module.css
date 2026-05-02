@@ -336,6 +336,26 @@
   transform: scale(1.1);
 }
 
+.themeToggle {
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: none !important;
+}
+
+.themeToggle:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  transform: scale(1.1);
+}
+
 @media (max-width: 840px) {
   .dashboardHeader {
     padding: 0 12px;
@@ -495,4 +515,30 @@
     background: rgba(255, 255, 255, 0.9) !important;
     border-radius: 50% !important;
   }
+}
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .navItemActive {
+  color: #a5d5fc !important;
+  background-color: rgba(43, 159, 230, 0.2) !important;
+}
+
+:global([data-theme="dark"]) .supportRow {
+  background: var(--color-bg-spotlight, #1e2230);
+}
+
+:global([data-theme="dark"]) .supportRow:hover {
+  background: var(--color-bg-hover, #262a35);
+}
+
+:global([data-theme="dark"]) .supportRowText {
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .supportSchedule {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .supportScheduleText {
+  color: var(--color-text-secondary, #94a3b8);
 }

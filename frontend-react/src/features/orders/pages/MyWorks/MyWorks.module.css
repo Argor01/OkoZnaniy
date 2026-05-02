@@ -117,10 +117,10 @@
 }
 
 .statsCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.05));
   transition: all 0.3s ease;
   margin-bottom: 16px;
 }
@@ -136,10 +136,10 @@
 }
 
 .workCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   transition: all 0.3s ease;
   overflow: hidden;
   margin-bottom: 16px;
@@ -164,15 +164,15 @@
 }
 
 .workCardActions {
-  background: rgba(248, 250, 252, 0.8);
-  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  background: var(--bg-secondary, rgba(248, 250, 252, 0.8));
+  border-top: 1px solid var(--border-color, rgba(226, 232, 240, 0.5));
   padding: 12px 20px;
 }
 
 .progressBar {
   width: 100%;
   height: 8px;
-  background: rgba(243, 244, 246, 0.8);
+  background: var(--bg-tertiary, rgba(243, 244, 246, 0.8));
   border-radius: 4px;
   overflow: hidden;
   margin-top: 8px;
@@ -186,19 +186,19 @@
 }
 
 .filterCard {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   margin-bottom: 32px;
   padding: 24px;
 }
 
 .tabsContainer {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
   overflow: hidden;
   padding: 32px;
 }
@@ -229,7 +229,7 @@
 .emptyState {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
 }
 
 .emptyState .ant-empty-image {
@@ -283,12 +283,12 @@
 
 .clientText {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
 }
 
 .dateText {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-tertiary, #9ca3af);
 }
 
 
@@ -363,8 +363,8 @@
 
 .searchInput {
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid var(--border-color, #d1d5db);
+  background: var(--bg-primary, #ffffff);
   transition: all 0.3s ease;
   min-width: 200px;
 }
@@ -394,8 +394,8 @@
 
 .filterSelect .ant-select-selector {
   border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid var(--border-color, #d1d5db);
+  background: var(--bg-primary, #ffffff);
 }
 
 .filterSelect:hover .ant-select-selector {
@@ -463,7 +463,7 @@
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary, #111827);
 }
 
 .controlsRow {
@@ -486,12 +486,12 @@
 /* Test HMR update */
 .tabButton {
   appearance: none;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-primary, #ffffff);
   border-radius: 10px;
   padding: 8px 12px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary, #111827);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -604,15 +604,15 @@
 }
 
 .table :global(.ant-table) {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .table :global(.ant-table-thead > tr > th) {
-  background: #ffffff;
+  background: var(--bg-primary, #ffffff);
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary, #111827);
 }
 
 .table :global(.ant-table-tbody > tr > td) {
@@ -664,18 +664,18 @@
 
 .titleText {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary, #111827);
   word-break: break-word;
 }
 
 .titleMeta {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
   word-break: break-word;
 }
 
 .muted {
-  color: #9ca3af;
+  color: var(--text-tertiary, #9ca3af);
 }
 
 /* Mobile title cell */

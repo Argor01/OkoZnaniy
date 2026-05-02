@@ -52,6 +52,26 @@ export const authApi = {
     return response.data;
   },
 
+  getAllUsers: async (search?: string): Promise<(User & { is_friend?: boolean })[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.users.allUsers, { params: search ? { search } : {} });
+    return response.data;
+  },
+
+  getMyFriends: async (): Promise<(User & { is_friend?: boolean })[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.users.myFriends);
+    return response.data;
+  },
+
+  addFriend: async (userId: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(API_ENDPOINTS.users.addFriend(userId));
+    return response.data;
+  },
+
+  removeFriend: async (userId: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(API_ENDPOINTS.users.removeFriend(userId));
+    return response.data;
+  },
+
   
   refreshToken: async (): Promise<{ access: string }> => {
     const refresh = localStorage.getItem('refresh_token');

@@ -352,3 +352,59 @@
   }
 }
 
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .sidebar {
+  background: var(--color-sidebar-bg, #161922);
+  border-color: var(--color-border-base, #2d3348);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .sidebar {
+  --sidebar-content-bg: var(--color-sidebar-bg, #161922);
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item) .anticon,
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-submenu-title) .anticon {
+  color: var(--color-text-secondary, #94a3b8) !important;
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item),
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-submenu-title) {
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item:hover),
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-submenu-title:hover) {
+  background: var(--color-bg-hover, #262a35) !important;
+  color: var(--color-brand-blue-200, #a5d5fc) !important;
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item),
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item) :global(.ant-menu-title-content) {
+  color: var(--color-text-secondary, #94a3b8) !important;
+}
+
+:global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-submenu-open)
+  :global(.ant-menu-sub)
+  :global(.ant-menu-item)
+  .anticon {
+  color: var(--color-text-secondary, #94a3b8) !important;
+}
+
+:global([data-theme="dark"]) .mobileMenu {
+  background: var(--color-sidebar-bg, #161922) !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .mobileMenuHeader {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .closeButton {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .closeButton:hover {
+  color: var(--color-text-heading, #e2e8f0);
+}
+

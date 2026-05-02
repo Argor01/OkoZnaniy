@@ -10,7 +10,6 @@ interface WorksListProps {
   works: Work[];
   loading?: boolean;
   onWorkClick: (id: number) => void;
-  onFavorite: (id: number) => void;
   onPurchase: (id: number) => void;
   onDownload?: (id: number) => void;
   purchasesByWorkId?: Record<number, Purchase>;
@@ -22,7 +21,6 @@ const WorksList: React.FC<WorksListProps> = ({
   works,
   loading,
   onWorkClick,
-  onFavorite,
   onPurchase,
   onDownload,
   purchasesByWorkId,
@@ -58,7 +56,6 @@ const WorksList: React.FC<WorksListProps> = ({
           <WorkCard
             work={work}
             onView={onWorkClick}
-            onFavorite={onFavorite}
             onPurchase={onPurchase}
             onDownload={onDownload}
             isPurchased={isPurchased}

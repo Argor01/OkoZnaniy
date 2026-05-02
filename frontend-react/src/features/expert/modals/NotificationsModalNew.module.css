@@ -604,3 +604,92 @@
     font-size: 12px !important;
   }
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .notificationsModalWrap :global(.ant-modal-content) {
+  background: var(--color-bg-container, #1a1d27) !important;
+}
+
+:global([data-theme="dark"]) .notificationsModalWrap :global(.ant-modal-body) {
+  background: var(--color-bg-container, #1a1d27) !important;
+}
+
+:global([data-theme="dark"]) .notificationsModalTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .notificationsModalTabs {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .notificationsModalTabActive {
+  background: var(--color-bg-container, #1a1d27);
+}
+
+:global([data-theme="dark"]) .notificationsModalTabLabelActive {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .notificationsModalTabLabelInactive {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .notificationsModalTabIconInactive {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .notificationsModalItem {
+  background: var(--color-bg-elevated, #22262f);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .notificationsModalItem:hover {
+  background: var(--color-bg-hover, #262a35);
+  border-color: #3b82f6;
+}
+
+:global([data-theme="dark"]) .notificationsModalItemUnread {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemUnread:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemRead {
+  background: var(--color-bg-elevated, #22262f);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemTitleUnread {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemTitleRead {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemText {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemTime {
+  color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemIconUnread {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+:global([data-theme="dark"]) .notificationsModalItemIconRead {
+  background: var(--color-bg-spotlight, #1e2230);
+}
+
+:global([data-theme="dark"]) .notificationsModalEmptyIcon {
+  color: var(--color-text-tertiary, #64748b);
+}

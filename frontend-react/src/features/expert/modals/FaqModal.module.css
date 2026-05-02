@@ -5,7 +5,7 @@
 }
 
 .faqModalWrap :global(.ant-modal-content) {
-  background: #ffffff;
+  background: var(--color-modal-bg, #ffffff);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   padding: 32px;
   height: calc(100vh - 80px);
@@ -41,7 +41,7 @@
   padding: 0;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db #f3f4f6;
+  scrollbar-color: var(--text-tertiary, #d1d5db) var(--bg-tertiary, #f3f4f6);
 }
 
 .faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar {
@@ -49,17 +49,17 @@
 }
 
 .faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: var(--bg-tertiary, #f3f4f6);
   border-radius: 3px;
 }
 
 .faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--text-tertiary, #d1d5db);
   border-radius: 3px;
 }
 
 .faqModalWrap :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--text-secondary, #9ca3af);
 }
 
 .faqModalWrapMobile :global(.ant-modal-body) {
@@ -71,7 +71,7 @@
 .faqModalTitle {
   font-size: 24px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   margin-bottom: 8px;
   font-family: 'Jost-SemiBold', sans-serif;
 }
@@ -82,7 +82,7 @@
 
 .faqModalIntro {
   font-size: 15px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
   display: block;
   margin-bottom: 24px;
 }
@@ -93,7 +93,7 @@
 
 .faqModalSectionTitle {
   font-size: 18px;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   display: block;
   margin-bottom: 16px;
   font-family: 'Jost-SemiBold', sans-serif;
@@ -118,17 +118,17 @@
   background: transparent;
   border-radius: 12px;
   margin-bottom: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color, #e5e7eb);
 }
 
 .faqModalItemTitle {
   font-size: 15px;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
 }
 
 .faqModalItemText {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-secondary, #6b7280);
   line-height: 1.6;
 }
 

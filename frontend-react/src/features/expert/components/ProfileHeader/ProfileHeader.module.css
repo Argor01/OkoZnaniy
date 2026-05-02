@@ -4,7 +4,7 @@
   backdrop-filter: blur(10px);
   border-radius: 0;
   padding: 28px 32px;
-  margin-top: 0;
+  margin-top: 16px;
   margin-bottom: 20px;
   box-shadow: none;
   border: none;
@@ -67,6 +67,18 @@
 .profileOnlineText {
   font-size: 14px;
   color: #6b7280;
+}
+
+.editProfileButton {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
 }
 
 .profileStatsRow {
@@ -364,4 +376,41 @@
     font-size: 12px;
     line-height: 1.2;
   }
+}
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .profileBlock {
+  background: rgba(26, 29, 39, 0.95);
+}
+
+:global([data-theme="dark"]) .profileNameTitle {
+  color: var(--color-text-heading, #e2e8f0) !important;
+}
+
+:global([data-theme="dark"]) .profileAvatar {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .profileOnlineText {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .profileStatLabel {
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .profileStatsLine {
+  color: var(--color-text-base, #cbd5e1);
+}
+
+:global([data-theme="dark"]) .profileStatsMeta {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .statsNumber,
+:global([data-theme="dark"]) .statsNumberCompleted,
+:global([data-theme="dark"]) .statsNumberSuccess,
+:global([data-theme="dark"]) .statsNumberEarnings,
+:global([data-theme="dark"]) .statsNumberPoints {
+  color: var(--color-text-heading, #e2e8f0);
 }

@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 24px;
   min-height: 100vh;
-  background: white;
+  background: var(--bg-primary, #ffffff);
 }
 
 /* Header section */
@@ -264,9 +264,9 @@
 .regularTag {
   border-radius: 8px !important;
   font-size: 12px;
-  background: #f3f4f6 !important;
-  border-color: #e5e7eb !important;
-  color: #4b5563 !important;
+  background: var(--bg-tertiary, #f3f4f6) !important;
+  border-color: var(--border-color, #e5e7eb) !important;
+  color: var(--text-secondary, #4b5563) !important;
 }
 
 .statsRow {

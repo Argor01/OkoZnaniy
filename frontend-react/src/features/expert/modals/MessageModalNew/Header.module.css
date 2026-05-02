@@ -94,3 +94,30 @@
 .chatHeaderEmptyTextMobile {
   font-size: 12px;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatHeaderActive {
+  background: var(--color-bg-container, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatHeaderEmpty {
+  background: var(--color-bg-spotlight, #1e2230);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatHeader {
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatHeaderTitle {
+  color: var(--color-text-heading, #e2e8f0);
+}
+
+:global([data-theme="dark"]) .chatHeaderSubtitle {
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .chatHeaderEmptyText {
+  color: var(--color-text-secondary, #94a3b8);
+}

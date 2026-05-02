@@ -37,7 +37,8 @@ import {
   EyeOutlined,
 } from '@ant-design/icons';
 import { SmileOutlined } from '@ant-design/icons';
-import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
+import EmojiPicker, { type EmojiClickData, Theme as EmojiTheme } from 'emoji-picker-react';
+import { useTheme } from '@/contexts/ThemeContext';
 import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message, ChatFrozenError } from '@/features/support/api/chat';
 import { formatDistanceToNow } from 'date-fns';
@@ -246,6 +247,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isDark } = useTheme();
 
   const [messageText, setMessageText] = useState<string>('');
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -3438,6 +3440,7 @@ const handleOverdueComplaint = async () => {
                         width={isMobile ? 280 : 320}
                         height={380}
                         emojiVersion={emojiVersion as any}
+                        theme={isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
                       />
                     }
                     trigger="click"

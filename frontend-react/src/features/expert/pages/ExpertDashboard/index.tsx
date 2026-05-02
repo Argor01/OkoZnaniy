@@ -17,7 +17,7 @@ const SpecializationsTab = React.lazy(() => import('../../components/Specializat
 const ReviewsTab = React.lazy(() => import('../../components/ReviewsTab'));
 const OrdersTab = React.lazy(() => import('../../components/OrdersTab'));
 const WorksTab = React.lazy(() => import('../../components/WorksTab'));
-const FriendsTab = React.lazy(() => import('../../components/FriendsTab'));
+
 
 
 const ProfileModal = React.lazy(() => import('../../modals/ProfileModal'));
@@ -28,7 +28,7 @@ const MessageModal = React.lazy(() => import('../../modals/MessageModalNew'));
 const NotificationsModal = React.lazy(() => import('../../modals/NotificationsModalNew'));
 const ArbitrationModal = React.lazy(() => import('../../modals/ArbitrationModal'));
 const FinanceModal = React.lazy(() => import('../../modals/FinanceModal'));
-const FriendsModal = React.lazy(() => import('../../modals/FriendsModal'));
+
 const FaqModal = React.lazy(() => import('../../modals/FaqModal'));
 const FriendProfileModal = React.lazy(() => import('../../modals/FriendProfileModal'));
 
@@ -48,7 +48,7 @@ const ExpertDashboard: FC = () => {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [financeModalVisible, setFinanceModalVisible] = useState(false);
-  const [friendsModalVisible, setFriendsModalVisible] = useState(false);
+
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
@@ -72,7 +72,6 @@ const ExpertDashboard: FC = () => {
     setNotificationsModalVisible(false);
     setArbitrationModalVisible(false);
     setFinanceModalVisible(false);
-    setFriendsModalVisible(false);
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
     setSelectedUserIdForChat(undefined);
@@ -222,26 +221,6 @@ const ExpertDashboard: FC = () => {
       });
     }
 
-    list.push({
-      key: 'friends',
-      label: 'Мои друзья',
-      children: (
-        <FriendsTab 
-          isMobile={isMobile}
-          onOpenChat={(friend) => {
-            closeAllModals();
-            setSelectedUserIdForChat(friend.id);
-            setMessageModalVisible(true);
-          }}
-          onOpenProfile={(friend) => {
-            closeAllModals();
-            setSelectedFriend(friend);
-            setFriendProfileModalVisible(true);
-          }}
-        />
-      ),
-    });
-
     return list;
   }, [userProfile, isMobile, specializations, specializationsLoading, closeAllModals, deleteSpecializationMutation, handleEditProfile]);
 
@@ -353,23 +332,6 @@ const ExpertDashboard: FC = () => {
           />
         )}
         
-        {friendsModalVisible && (
-          <FriendsModal
-            visible={friendsModalVisible}
-            onClose={() => setFriendsModalVisible(false)}
-            isMobile={isMobile}
-            onOpenChat={(friend) => {
-              setFriendsModalVisible(false);
-              setSelectedUserIdForChat(friend.id);
-              setMessageModalVisible(true);
-            }}
-            onOpenProfile={(friend) => {
-              setFriendsModalVisible(false);
-              setSelectedFriend(friend);
-              setFriendProfileModalVisible(true);
-            }}
-          />
-        )}
         
         {faqModalVisible && (
           <FaqModal

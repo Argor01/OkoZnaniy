@@ -1,12 +1,12 @@
 import React from 'react';
 import { Modal, Avatar, Typography, Button, Tag, Rate } from 'antd';
-import { 
-  MessageOutlined, 
-  HeartOutlined, 
-  UserOutlined, 
-  TrophyOutlined, 
-  ClockCircleOutlined, 
-  StarFilled 
+import {
+  MessageOutlined,
+  UserAddOutlined,
+  UserOutlined,
+  TrophyOutlined,
+  ClockCircleOutlined,
+  StarFilled
 } from '@ant-design/icons';
 import type { User } from '@/features/auth/api/auth';
 import styles from './FriendProfileModal.module.css';
@@ -52,7 +52,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
       setIsMobile(window.innerWidth <= 480);
       setIsTablet(window.innerWidth <= 840 && window.innerWidth > 480);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -86,21 +86,21 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
       <div>
         <div className={styles.friendProfileHeader}>
           <div className={styles.friendProfileHeaderRow}>
-            <Avatar 
-              size={avatarSize} 
+            <Avatar
+              size={avatarSize}
               src={friend.avatar || undefined}
               className={`${styles.friendProfileAvatar} ${avatarColorClasses[friend.id % avatarColorClasses.length]}`}
             >
               {!friend.avatar && getInitials(friend.first_name, friend.last_name, friend.username)}
             </Avatar>
             <div className={styles.friendProfileHeaderInfo}>
-              <Text 
-                strong 
+              <Text
+                strong
                 className={styles.friendProfileName}
               >
                 {name}
               </Text>
-              <Text 
+              <Text
                 className={styles.friendProfileRole}
               >
                 {friend.role === 'expert' ? 'Эксперт' : friend.role === 'client' ? 'Клиент' : friend.role}
@@ -112,9 +112,9 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
           </div>
         </div>
 
-        
+
         <div className={styles.friendProfileContent}>
-          
+
           {friend.bio && (
             <div className={styles.friendProfileSection}>
               <div className={styles.friendProfileSectionHeader}>
@@ -167,7 +167,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
               </div>
               <div className={styles.friendProfileTags}>
                 {skills.map((skill: string, index: number) => (
-                  <Tag 
+                  <Tag
                     key={index}
                     className={styles.friendProfileTag}
                   >
@@ -178,10 +178,10 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             </div>
           )}
 
-          
+
           <div className={styles.friendProfileActions}>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               size="large"
               icon={<MessageOutlined />}
               className={styles.friendProfilePrimaryButton}
@@ -192,12 +192,12 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
             >
               Написать сообщение
             </Button>
-            <Button 
+            <Button
               size="large"
-              icon={<HeartOutlined />}
+              icon={<UserAddOutlined />}
               className={styles.friendProfileSecondaryButton}
             >
-              В избранное
+              Добавить в друзья
             </Button>
           </div>
         </div>

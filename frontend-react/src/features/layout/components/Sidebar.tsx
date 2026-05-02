@@ -48,7 +48,6 @@ interface SidebarProps {
   onNotificationsClick?: () => void;
   onArbitrationClick?: () => void;
   onFinanceClick?: () => void;
-  onFriendsClick?: () => void;
   onFaqClick?: () => void;
   onImprovementsClick?: () => void;
   mobileDrawerOpen?: boolean;
@@ -68,7 +67,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   onNotificationsClick,
   onArbitrationClick,
   onFinanceClick,
-  onFriendsClick,
   onFaqClick,
   onImprovementsClick,
   mobileDrawerOpen = false,
@@ -109,10 +107,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
     if (key === 'arbitration') {
       onArbitrationClick?.();
-      return;
-    }
-    if (key === 'friends') {
-      onFriendsClick?.();
       return;
     }
     if (key === 'faq') {
@@ -207,7 +201,6 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     onMessagesClick,
     onNotificationsClick,
     onArbitrationClick,
-    onFriendsClick,
     onFaqClick,
     onImprovementsClick,
     onLogout,
@@ -292,11 +285,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <ShoppingOutlined />,
       label: 'Мои заказы',
     } : null,
-    {
-      key: 'friends',
-      icon: <TeamOutlined />,
-      label: 'Мои друзья',
-    },
+
     {
       key: 'knowledge-base',
       icon: <BookOutlined />,

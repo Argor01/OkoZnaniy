@@ -209,3 +209,18 @@ class ImprovementSuggestion(models.Model):
         return f'{self.user.username} | {self.get_area_display()}'
 
 
+class Friendship(models.Model):
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_sent')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friendships_received')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Дружба'
+        verbose_name_plural = 'Дружба'
+        unique_together = ('from_user', 'to_user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.from_user.username} -> {self.to_user.username}'
+
+

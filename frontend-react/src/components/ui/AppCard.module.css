@@ -37,3 +37,18 @@
 .fullHeight :global(.ant-card-body) {
   flex: 1;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .default {
+  background: var(--color-card-bg, #1a1d27);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .elevated {
+  background: var(--color-card-bg, #1a1d27);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+:global([data-theme="dark"]) .gradient {
+  background: var(--gradient-card);
+}

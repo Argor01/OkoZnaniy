@@ -890,8 +890,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def recent_users(self, request):
         """Получение последних активных пользователей для раздела 'Мои друзья'"""
-        # Получаем последних 20 пользователей, которые заходили на сайт
-        # Исключаем текущего пользователя и показываем только активных
         recent = User.objects.filter(
             is_active=True,
             last_login__isnull=False
@@ -901,6 +899,62 @@ class UserViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(recent, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def all_users(self, request):
+        """Список всех пользователей на платформе"""
+        from apps.users.models import Friendship
+        search = request.query_params.get('search', '').strip()
+        users = User.objects.filter(is_active=True).exclude(id=request.user.id)
+        if search:
+            users = users.filter(
+                models.Q(username__icontains=search) |
+                models.Q(first_name__icontains=search) |
+                models.Q(last_name__icontains=search)
+            )
+        users = users.order_by('-last_login')[:50]
+        serializer = self.get_serializer(users, many=True)
+        friend_ids = set(Friendship.objects.filter(from_user=request.user).values_list('to_user_id', flat=True))
+        data = serializer.data
+        for item in data:
+            item['is_friend'] = item['id'] in friend_ids
+        return Response(data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def my_friends(self, request):
+        """Список друзей текущего пользователя"""
+        from apps.users.models import Friendship
+        friend_ids = Friendship.objects.filter(from_user=request.user).values_list('to_user_id', flat=True)
+        friends = User.objects.filter(id__in=friend_ids, is_active=True).order_by('-last_login')
+        serializer = self.get_serializer(friends, many=True)
+        data = serializer.data
+        for item in data:
+            item['is_friend'] = True
+        return Response(data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def add_friend(self, request, pk=None):
+        """Добавить пользователя в друзья"""
+        from apps.users.models import Friendship
+        try:
+            target = User.objects.get(pk=pk, is_active=True)
+        except User.DoesNotExist:
+            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
+        if target == request.user:
+            return Response({'error': 'Нельзя добавить себя в друзья'}, status=status.HTTP_400_BAD_REQUEST)
+        _, created = Friendship.objects.get_or_create(from_user=request.user, to_user=target)
+        if not created:
+            return Response({'status': 'already_friends'})
+        return Response({'status': 'added'}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def remove_friend(self, request, pk=None):
+        """Удалить пользователя из друзей"""
+        from apps.users.models import Friendship
+        deleted, _ = Friendship.objects.filter(from_user=request.user, to_user_id=pk).delete()
+        if deleted:
+            return Response({'status': 'removed'})
+        return Response({'status': 'not_friends'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def submit_expert_application(self, request):
