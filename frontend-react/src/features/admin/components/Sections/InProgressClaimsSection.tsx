@@ -7,6 +7,7 @@ import {
   Space, 
   Typography, 
   Input,
+  InputNumber,
   Modal,
   message,
   Tooltip,
@@ -591,7 +592,7 @@ export const InProgressClaimsSection: React.FC = () => {
             label="Прогресс выполнения (%)"
             rules={[{ required: true, message: 'Укажите прогресс' }]}
           >
-            <Input type="number" min={0} max={100} />
+            <InputNumber style={{ width: '100%' }} min={0} max={100} />
           </Form.Item>
         </Form>
       </Modal>

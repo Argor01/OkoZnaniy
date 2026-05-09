@@ -455,3 +455,66 @@
   color: var(--color-grey-700);
   line-height: 1.6;
 }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .expert-page,
+[data-theme="dark"] .partner-page {
+  background-color: #0f1117;
+}
+
+[data-theme="dark"] .partner-benefits-section {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .partner-benefits-section__card {
+  background: #1a1d27;
+  border-color: #2d3348;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .partner-benefits-section__card:hover {
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.1);
+}
+
+[data-theme="dark"] .partner-benefits-section__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .partner-benefits-section__card-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .partner-benefits-section__subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .partner-steps-section {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .partner-steps-section__card {
+  background: #1a1d27;
+  border-color: #2d3348;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .partner-steps-section__card:hover {
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.1);
+}
+
+[data-theme="dark"] .partner-steps-section__card-num {
+  color: #2d3348;
+}
+
+[data-theme="dark"] .partner-steps-section__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .partner-steps-section__card-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .expert-first-screen__stat-label,
+[data-theme="dark"] .partner-first-screen__stat-label {
+  color: rgba(255, 255, 255, 0.8);
+}

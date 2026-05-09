@@ -3634,6 +3634,8 @@ const handleOverdueComplaint = async () => {
                 label: category,
                 value: category
               }))}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              dropdownStyle={{ zIndex: 10001 }}
             />
           </div>
           
@@ -3654,6 +3656,8 @@ const handleOverdueComplaint = async () => {
                     { label: 'Заказ актуален', value: 'Заказ актуален' },
                     { label: 'Заказ не актуален', value: 'Заказ не актуален' }
                   ]}
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  dropdownStyle={{ zIndex: 10001 }}
                 />
               </div>
               
@@ -3672,6 +3676,8 @@ const handleOverdueComplaint = async () => {
                     { label: 'Возврат предоплаты и неустойка', value: 'Возврат предоплаты и неустойка' },
                     { label: 'Возврат средств не требуется', value: 'Возврат средств не требуется' }
                   ]}
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  dropdownStyle={{ zIndex: 10001 }}
                 />
               </div>
             </>

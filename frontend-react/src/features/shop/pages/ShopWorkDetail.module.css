@@ -237,3 +237,32 @@
     min-width: 100%;
   }
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .page {
+  background: var(--color-bg-page, #0f1117) !important;
+}
+
+:global([data-theme="dark"]) .subjectValue {
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .mutedValue {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .mutedIcon {
+  color: #64748b;
+}
+
+:global([data-theme="dark"]) .createdValue {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .createdIcon {
+  color: #64748b;
+}
+
+:global([data-theme="dark"]) .ratingCount {
+  color: #64748b;
+}

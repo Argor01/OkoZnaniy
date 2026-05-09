@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, Segmented, Empty, message as antMessage } from 'antd';
+import { Card, Typography, Spin, Alert, Button, Rate, Tag, Space, Avatar, Segmented, Empty, Tooltip, message as antMessage } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined, EyeOutlined, FileOutlined, ClockCircleOutlined, BookOutlined, QuestionCircleOutlined, LikeOutlined, TrophyOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
@@ -514,34 +514,42 @@ const UserProfile: FC = () => {
                 className={styles.reviewsCard}
               >
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(24, 144, 255, 0.06)' }}>
-                    <MessageOutlined style={{ fontSize: 20, color: '#1890ff' }} />
-                    <div>
-                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Ответов</div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.answers_count}</div>
+                  <Tooltip title="Количество ответов, которые эксперт дал на вопросы в Базе Знаний">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(24, 144, 255, 0.06)', cursor: 'help' }}>
+                      <MessageOutlined style={{ fontSize: 20, color: '#1890ff' }} />
+                      <div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c' }}>Ответов</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.answers_count}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(114, 46, 209, 0.06)' }}>
-                    <QuestionCircleOutlined style={{ fontSize: 20, color: '#722ed1' }} />
-                    <div>
-                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Вопросов</div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.questions_count}</div>
+                  </Tooltip>
+                  <Tooltip title="Количество вопросов, заданных экспертом в Базе Знаний">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(114, 46, 209, 0.06)', cursor: 'help' }}>
+                      <QuestionCircleOutlined style={{ fontSize: 20, color: '#722ed1' }} />
+                      <div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c' }}>Вопросов</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.questions_count}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(82, 196, 26, 0.06)' }}>
-                    <LikeOutlined style={{ fontSize: 20, color: '#52c41a' }} />
-                    <div>
-                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лайков</div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.total_likes}</div>
+                  </Tooltip>
+                  <Tooltip title="Общее количество лайков, полученных за ответы в Базе Знаний">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(82, 196, 26, 0.06)', cursor: 'help' }}>
+                      <LikeOutlined style={{ fontSize: 20, color: '#52c41a' }} />
+                      <div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лайков</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.total_likes}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(250, 173, 20, 0.06)' }}>
-                    <TrophyOutlined style={{ fontSize: 20, color: '#faad14' }} />
-                    <div>
-                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лучших ответов</div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.best_answers}</div>
+                  </Tooltip>
+                  <Tooltip title="Количество ответов, отмеченных как лучшие (набравших наибольшее количество лайков)">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(250, 173, 20, 0.06)', cursor: 'help' }}>
+                      <TrophyOutlined style={{ fontSize: 20, color: '#faad14' }} />
+                      <div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c' }}>Лучших ответов</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.best_answers}</div>
+                      </div>
                     </div>
-                  </div>
+                  </Tooltip>
                 </div>
               </Card>
             )}

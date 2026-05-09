@@ -150,7 +150,15 @@ const ShopWorkDetail: React.FC = () => {
 
             <div className={styles.sectionStack}>
               <div className={styles.clientInfo}>
-                <Space size={12}>
+                <Space 
+                  size={12}
+                  style={{ cursor: work.author?.username ? 'pointer' : 'default' }}
+                  onClick={() => {
+                    if (work.author?.username) {
+                      navigate(`/user/${work.author.username}`);
+                    }
+                  }}
+                >
                   <Avatar 
                     size={48} 
                     src={work.author?.avatar || work.author_avatar} 
@@ -158,7 +166,7 @@ const ShopWorkDetail: React.FC = () => {
                     className={styles.clientAvatar}
                   />
                   <div>
-                    <Text strong className={styles.clientName}>
+                    <Text strong className={styles.clientName} style={{ cursor: work.author?.username ? 'pointer' : 'default' }}>
                       {work.author_name || work.author?.name || work.author?.username || 'Автор'}
                     </Text>
                     <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>

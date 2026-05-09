@@ -103,3 +103,47 @@
   }
 }
 
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .editor {
+  border-color: var(--border-color, #2d3348) !important;
+  background: var(--color-bg-input, #1e2230) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+:global([data-theme="dark"]) .editor:hover {
+  border-color: #3d4455;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+:global([data-theme="dark"]) .editor:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+:global([data-theme="dark"]) .toolbar {
+  border-bottom-color: var(--border-color, #2d3348) !important;
+  background: linear-gradient(to bottom, #22262f 0%, #1e2230 100%) !important;
+}
+
+:global([data-theme="dark"]) .toolbarButton {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .toolbarButton:hover {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+:global([data-theme="dark"]) .divider {
+  background: linear-gradient(to bottom, transparent, #2d3348, transparent);
+}
+
+:global([data-theme="dark"]) .textarea {
+  background: var(--color-bg-input, #1e2230) !important;
+  color: var(--text-primary, #e2e8f0) !important;
+}
+
+:global([data-theme="dark"]) .textarea:empty:before {
+  color: #475569;
+}
+

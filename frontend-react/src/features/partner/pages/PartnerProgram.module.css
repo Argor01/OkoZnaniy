@@ -189,3 +189,35 @@
     padding: 6px;
   }
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.partnerProgramContainer {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.partnerProgramCard {
+  animation: fadeInUp 0.4s ease-out both;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.partnerProgramCard:nth-child(1) { animation-delay: 0.05s; }
+.partnerProgramCard:nth-child(2) { animation-delay: 0.12s; }
+.partnerProgramCard:nth-child(3) { animation-delay: 0.19s; }
+
+.partnerProgramCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.promotionMethod {
+  transition: transform 0.25s ease;
+}
+
+.promotionMethod:hover {
+  transform: translateY(-4px);
+}

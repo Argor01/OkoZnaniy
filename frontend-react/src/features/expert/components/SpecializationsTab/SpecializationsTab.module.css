@@ -398,3 +398,34 @@
 :global([data-theme="dark"]) .emptyState {
   color: var(--color-text-secondary, #94a3b8);
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sectionCard {
+  animation: fadeInUp 0.45s ease-out;
+}
+
+.specCard {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.specCard:nth-child(1) { animation-delay: 0.1s; }
+.specCard:nth-child(2) { animation-delay: 0.18s; }
+.specCard:nth-child(3) { animation-delay: 0.26s; }
+.specCard:nth-child(4) { animation-delay: 0.34s; }
+
+.specCard:hover {
+  transform: translateY(-3px);
+}
+
+.metaTag {
+  transition: transform 0.2s ease;
+}
+
+.metaTag:hover {
+  transform: scale(1.05);
+}

@@ -49,6 +49,7 @@ const FinanceModal: React.FC<FinanceModalProps> = ({ visible, onClose, profile, 
               className={`${styles.financeModalSelect} ${isMobile ? styles.financeModalSelectMobile : styles.financeModalSelectDesktop}`}
               suffixIcon={<DownOutlined />}
               size={isMobile ? 'middle' : 'middle'}
+              getPopupContainer={() => document.body}
             >
               <Select.Option value="all">Все операции</Select.Option>
               <Select.Option value="income">Поступления</Select.Option>

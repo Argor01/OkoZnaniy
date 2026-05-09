@@ -49,7 +49,7 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile, userProfile }) => {
           <Button 
             type="primary" 
             style={{ marginTop: 16 }}
-            href="/shop/add"
+            onClick={() => navigate(ROUTES.shop.addWork)}
           >
             Разместить работу
           </Button>

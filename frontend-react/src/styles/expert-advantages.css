@@ -115,3 +115,30 @@
   color: var(--color-grey-700);
   line-height: 1.6;
 }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .expert-advantages {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .expert-advantages__subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .expert-advantages__card {
+  background: #1a1d27;
+  border-color: #2d3348;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .expert-advantages__card:hover {
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.1);
+}
+
+[data-theme="dark"] .expert-advantages__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .expert-advantages__card-text {
+  color: #94a3b8;
+}

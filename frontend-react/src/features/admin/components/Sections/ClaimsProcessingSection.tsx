@@ -7,6 +7,7 @@ import {
   Space, 
   Typography, 
   Input,
+  InputNumber,
   Modal,
   message,
   Tooltip,
@@ -943,7 +944,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             name="amount"
             label="Сумма возврата (если применимо)"
           >
-            <Input type="number" placeholder="Введите сумму в рублях" />
+            <InputNumber style={{ width: '100%' }} min={0} placeholder="Введите сумму в рублях" />
           </Form.Item>
 
           <Form.Item

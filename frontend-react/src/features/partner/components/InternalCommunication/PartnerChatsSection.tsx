@@ -7,6 +7,7 @@ import {
   Space, 
   Typography, 
   Input,
+  InputNumber,
   Modal,
   message,
   Tooltip,
@@ -584,7 +585,7 @@ export const PartnerChatsSection: React.FC = () => {
             label="ID Пользователя"
             rules={[{ required: true, message: 'Введите ID пользователя' }]}
           >
-            <Input type="number" placeholder="ID" />
+            <InputNumber style={{ width: '100%' }} min={1} placeholder="ID" />
           </Form.Item>
         </Form>
       </Modal>

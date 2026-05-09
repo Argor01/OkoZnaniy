@@ -409,6 +409,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                   filterOption={(input, option) =>
                     String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
                   }
+                  getPopupContainer={() => document.body}
                   popupRender={(menu) => (
                     <>
                       {menu}
@@ -447,6 +448,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                   filterOption={(input, option) =>
                     String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
                   }
+                  getPopupContainer={() => document.body}
                   popupRender={(menu) => (
                     <>
                       {menu}
@@ -505,6 +507,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                       value={deadlineTime.hours}
                       onChange={(value) => handleTimeChange('hours', value)}
                       className={styles.timeSelect}
+                      getPopupContainer={() => document.body}
                     >
                       {Array.from({ length: 24 }, (_, i) => (
                         <AppSelect.Option key={i} value={i}>
@@ -522,6 +525,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                       value={deadlineTime.minutes}
                       onChange={(value) => handleTimeChange('minutes', value)}
                       className={styles.timeSelect}
+                      getPopupContainer={() => document.body}
                     >
                       {Array.from({ length: 60 }, (_, i) => (
                         <AppSelect.Option key={i} value={i}>

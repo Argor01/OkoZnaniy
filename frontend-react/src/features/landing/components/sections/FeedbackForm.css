@@ -139,3 +139,38 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .feedback-form-section {
+  background: #0f1117 !important;
+}
+
+[data-theme="dark"] .feedback-form-desc {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .feedback-form-input {
+  background: #1e2230;
+  border-color: #2d3348;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .feedback-form-input::placeholder {
+  color: #64748b;
+}
+
+[data-theme="dark"] .feedback-form-legal {
+  color: #64748b;
+}
+
+[data-theme="dark"] .feedback-form-success {
+  background: rgba(21, 87, 36, 0.2);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="dark"] .feedback-form-error {
+  background: rgba(114, 28, 36, 0.2);
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.3);
+}

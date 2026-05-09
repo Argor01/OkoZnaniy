@@ -271,3 +271,41 @@
   border-color: rgba(102, 126, 234, 0.3);
   color: #667eea;
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .applicationModalTitle {
+  color: #ffffff;
+}
+
+:global([data-theme="dark"]) .modalEducationRow {
+  background: var(--color-bg-input, #1e2230);
+  border-color: var(--color-border-base, #2d3348);
+}
+
+:global([data-theme="dark"]) .modalEducationRow:hover {
+  background: var(--color-bg-input, #1e2230);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+:global([data-theme="dark"]) .inputField {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--color-border-base, #2d3348) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .textareaField {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--color-border-base, #2d3348) !important;
+  color: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .buttonSecondary {
+  background: var(--color-bg-input, #1e2230);
+  border-color: var(--color-border-base, #2d3348);
+  color: #cbd5e1;
+}
+
+:global([data-theme="dark"]) .applicationModalAddButton {
+  border-color: rgba(102, 126, 234, 0.4);
+  color: #93a8ff;
+}

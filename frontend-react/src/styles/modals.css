@@ -260,6 +260,9 @@
 
   .ant-select-dropdown {
     max-height: 50vh;
+    z-index: 2050 !important;
+    pointer-events: auto;
+    touch-action: pan-y;
   }
 
   .ant-picker-dropdown {

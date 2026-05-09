@@ -185,16 +185,30 @@ class AnswerViewSet(viewsets.ModelViewSet):
         )
         
         if not created:
-            # Убираем лайк
             like.delete()
             answer.likes_count = max(0, answer.likes_count - 1)
             answer.save(update_fields=['likes_count'])
-            return Response({'liked': False, 'likes_count': answer.likes_count})
         else:
-            # Добавляем лайк
             answer.likes_count += 1
             answer.save(update_fields=['likes_count'])
-            return Response({'liked': True, 'likes_count': answer.likes_count})
+        
+        self._update_best_answer(answer.question)
+        answer.refresh_from_db()
+        
+        return Response({
+            'liked': created,
+            'likes_count': answer.likes_count,
+            'is_best_answer': answer.is_best_answer,
+        })
+    
+    def _update_best_answer(self, question):
+        """Автоматически отмечает ответ с наибольшим количеством лайков как лучший."""
+        answers = Answer.objects.filter(question=question)
+        answers.update(is_best_answer=False)
+        top_answer = answers.filter(likes_count__gt=0).order_by('-likes_count').first()
+        if top_answer:
+            top_answer.is_best_answer = True
+            top_answer.save(update_fields=['is_best_answer'])
     
     def destroy(self, request, *args, **kwargs):
         """Удалить ответ (только автор)"""

@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { UserOutlined } from '@ant-design/icons';
+import { UserOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { useTheme } from '@/contexts/ThemeContext';
 import '@/styles/logo.css';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDark, toggleTheme } = useTheme();
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const toggleMenu = useCallback(() => setIsMenuOpen((v) => !v), []);
@@ -105,6 +107,14 @@ const Header: React.FC = () => {
                 ) : (
                   <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>
                 )}
+                <button
+                  className="header__theme-toggle"
+                  onClick={toggleTheme}
+                  aria-label={isDark ? 'Светлая тема' : 'Тёмная тема'}
+                  title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+                >
+                  {isDark ? <SunOutlined /> : <MoonOutlined />}
+                </button>
               </div>
             </div>
           </nav>
@@ -140,6 +150,14 @@ const Header: React.FC = () => {
             ) : (
               <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>
             )}
+            <button
+              className="header__theme-toggle"
+              onClick={toggleTheme}
+              aria-label={isDark ? 'Светлая тема' : 'Тёмная тема'}
+              title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+            >
+              {isDark ? <SunOutlined /> : <MoonOutlined />}
+            </button>
           </div>
 
           <div className="header__burger">

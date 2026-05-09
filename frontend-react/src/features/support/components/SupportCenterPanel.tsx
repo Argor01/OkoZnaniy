@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { supportRequestsApi } from '@/features/support/api/requests';
+import styles from './SupportCenterPanel.module.css';
 import type {
   SupportActivityResponse,
   SupportConversation,
@@ -253,8 +254,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
 
   return (
     <>
-      <div style={{ display: 'grid', gap: 16, height: '100%', overflow: 'auto', padding: compact ? 12 : 24 }}>
-        <Card>
+      <div className={`${styles.container} ${compact ? styles.containerCompact : ''}`}>
+        <Card className={styles.headerCard}>
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
             <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
               <Space direction="vertical" size={4}>
@@ -298,6 +299,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                     <List.Item style={{ padding: 0, border: 'none', marginBottom: 12 }}>
                       <Card
                         hoverable
+                        className={styles.listCard}
                         style={{ width: '100%', borderRadius: 12 }}
                         styles={{ body: { padding: 16 } }}
                         onClick={() => openDetails(item)}

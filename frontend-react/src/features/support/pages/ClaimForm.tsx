@@ -18,6 +18,7 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { DashboardLayout } from '@/features/layout';
+import claimStyles from './ClaimForm.module.css';
 import { ordersApi } from '@/features/orders/api/orders';
 import { supportRequestsApi } from '@/features/support/api/requests';
 
@@ -114,7 +115,7 @@ const ClaimForm: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '24px 16px' }}>
+      <div className={claimStyles.container}>
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}

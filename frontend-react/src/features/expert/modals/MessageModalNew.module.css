@@ -2629,3 +2629,64 @@
   visibility: visible;
 }
 
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .chatHeader {
+  border-bottom-color: var(--border-color, #2d3348) !important;
+}
+
+:global([data-theme="dark"]) .chatHeaderActive {
+  background: var(--bg-primary, #1a1d27) !important;
+}
+
+:global([data-theme="dark"]) .chatHeaderEmpty {
+  background: var(--color-bg-elevated, #22262f) !important;
+  border-bottom-color: var(--border-color, #2d3348) !important;
+}
+
+:global([data-theme="dark"]) .chatHeaderEmptyText {
+  color: var(--text-secondary, #94a3b8) !important;
+}
+
+:global([data-theme="dark"]) .chatListItemPinned {
+  background: rgba(251, 191, 36, 0.08);
+  border-left-color: #fbbf24;
+}
+
+:global([data-theme="dark"]) .chatListPreviewUnread {
+  color: #34d399;
+}
+
+:global([data-theme="dark"]) .chatMessagesDragOver {
+  background: rgba(59, 130, 246, 0.08);
+  outline-color: #3b82f6;
+}
+
+:global([data-theme="dark"]) .chatMessagesDragOver::after {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+:global([data-theme="dark"]) .chatFrozenNotice {
+  border-color: #7f1d1d;
+  background: rgba(127, 29, 29, 0.15);
+}
+
+:global([data-theme="dark"]) .chatFrozenTitle {
+  color: #fca5a5;
+}
+
+:global([data-theme="dark"]) .chatFrozenReason {
+  color: #fecaca;
+}
+
+:global([data-theme="dark"]) .claimCarouselButton {
+  border-color: #ef4444;
+  background: var(--bg-primary, #1a1d27);
+  color: #ef4444;
+}
+
+:global([data-theme="dark"]) .claimCarouselButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+

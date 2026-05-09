@@ -671,3 +671,30 @@
     padding: 6px 4px !important;
   }
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.partnerDashboardSection {
+  animation: fadeInUp 0.45s ease-out;
+}
+
+.partnerDashboardStatsRow .ant-card {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.partnerDashboardStatsRow .ant-col:nth-child(1) .ant-card { animation-delay: 0.05s; }
+.partnerDashboardStatsRow .ant-col:nth-child(2) .ant-card { animation-delay: 0.12s; }
+.partnerDashboardStatsRow .ant-col:nth-child(3) .ant-card { animation-delay: 0.19s; }
+.partnerDashboardStatsRow .ant-col:nth-child(4) .ant-card { animation-delay: 0.26s; }
+
+.partnerDashboardWalletCard {
+  animation: fadeInUp 0.4s ease-out 0.15s both;
+}
+
+.partnerDashboardCardSpacing {
+  animation: fadeInUp 0.4s ease-out 0.1s both;
+}

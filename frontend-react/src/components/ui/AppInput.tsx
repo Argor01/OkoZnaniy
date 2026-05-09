@@ -17,12 +17,39 @@ const getClasses = (className: string = '', variant: string = 'default') => {
     ].filter(Boolean).join(' ');
 };
 
+const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (
+    e.key === 'e' || e.key === 'E' ||
+    e.key === '+' || e.key === '-' ||
+    e.key === '.' || e.key === ','
+  ) {
+    e.preventDefault();
+  }
+};
+
+const filterNonNumericPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const paste = e.clipboardData.getData('text');
+  if (!/^\d+$/.test(paste)) {
+    e.preventDefault();
+  }
+};
+
 const AppInputComponent: React.FC<AppInputProps> = ({ 
   className = '', 
-  variant = 'default', 
+  variant = 'default',
+  onKeyDown,
+  onPaste,
   ...props 
 }) => {
-  return <Input className={getClasses(className, variant)} {...props} />;
+  const isNumeric = props.type === 'number';
+  return (
+    <Input
+      className={getClasses(className, variant)}
+      onKeyDown={isNumeric ? (e) => { blockNonNumericKeys(e); onKeyDown?.(e); } : onKeyDown}
+      onPaste={isNumeric ? (e) => { filterNonNumericPaste(e); onPaste?.(e); } : onPaste}
+      {...props}
+    />
+  );
 };
 
 const AppTextArea: React.FC<Omit<TextAreaProps, 'variant'> & { variant?: 'default' | 'filled' }> = ({
@@ -52,9 +79,19 @@ const AppSearch: React.FC<Omit<SearchProps, 'variant'> & { variant?: 'default' |
 const AppInputNumber: React.FC<Omit<InputNumberProps, 'variant'> & { variant?: 'default' | 'filled' }> = ({
     className = '',
     variant = 'default',
+    onKeyDown,
     ...props
 }) => {
-    return <InputNumber className={getClasses(className, variant)} {...props} />;
+    return (
+        <InputNumber
+            className={getClasses(className, variant)}
+            onKeyDown={(e) => {
+                blockNonNumericKeys(e);
+                onKeyDown?.(e);
+            }}
+            {...props}
+        />
+    );
 };
 
 type AppInputType = typeof AppInputComponent & {

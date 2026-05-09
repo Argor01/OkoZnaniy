@@ -171,11 +171,15 @@ const QuestionDetail: React.FC = () => {
   const handleLikeAnswer = async (answerId: number) => {
     try {
       const result = await knowledgeApi.toggleLike(answerId);
-      setAnswers(answers.map(a => 
-        a.id === answerId 
-          ? { ...a, likes_count: result.likes_count, is_liked: result.liked }
-          : a
-      ));
+      setAnswers(prevAnswers => prevAnswers.map(a => {
+        if (a.id === answerId) {
+          return { ...a, likes_count: result.likes_count, is_liked: result.liked, is_best_answer: result.is_best_answer ?? a.is_best_answer };
+        }
+        if (result.is_best_answer) {
+          return { ...a, is_best_answer: false };
+        }
+        return a;
+      }));
     } catch (error) {
       console.error('Failed to toggle like:', error);
       message.error('Не удалось поставить лайк');

@@ -776,4 +776,146 @@
   }
 }
 
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .login-page {
+  background: linear-gradient(135deg, #0f1117 50%, #1a2744 100%);
+}
+
+[data-theme="dark"] .auth-card {
+  background: rgba(26, 29, 39, 0.95);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .auth-left {
+  background: linear-gradient(135deg, #1a3a6b 0%, #0d3a5c 100%);
+}
+
+[data-theme="dark"] .bubble {
+  background: rgba(30, 34, 48, 0.96);
+  color: #e2e8f0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .bubble-left::after {
+  border-right-color: rgba(30, 34, 48, 0.96);
+}
+
+[data-theme="dark"] .bubble-right::after {
+  border-left-color: rgba(30, 34, 48, 0.96);
+}
+
+[data-theme="dark"] .auth-right {
+  background: #1a1d27 !important;
+}
+
+[data-theme="dark"] .auth-panel {
+  background: #1a1d27 !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-form-item-label > label) {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input) {
+  background: #1e2230 !important;
+  border-color: #2d3348 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input::placeholder) {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-password) {
+  background: #1e2230 !important;
+  border-color: #2d3348 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-password .ant-input) {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-password .ant-input-suffix) {
+  color: #64748b;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input:focus),
+[data-theme="dark"] .auth-panel :global(.ant-input-focused) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-password:focus-within) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-checkbox-wrapper) {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-checkbox-wrapper a) {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-tabs-tab) {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-tabs-nav::before) {
+  border-bottom-color: #2d3348 !important;
+}
+
+[data-theme="dark"] .role-switch {
+  background: #1e2230;
+  border-color: #2d3348;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .role-option {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .role-option.active {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .tab-btn {
+  background: #1e2230;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  background: #1e2a3a;
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .panel-body {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .switch-link {
+  color: #f472b6;
+}
+
+[data-theme="dark"] .right-footer {
+  color: #64748b;
+}
+
+[data-theme="dark"] .resetCodeInput {
+  background: #1e2230;
+  border-color: #2d3348;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .bottom-wave path {
+  fill: #1a1d27;
+}
+
 

@@ -261,7 +261,7 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             placeholder="Выберите категорию"
             className={styles.categorySelect}
             size="large"
-            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            getPopupContainer={() => document.body}
             dropdownStyle={{ zIndex: 10001 }}
           >
             {categories.map(cat => (
@@ -289,7 +289,7 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
             style={{ width: '100%' }}
             className={styles.tagsSelect}
             size="large"
-            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            getPopupContainer={() => document.body}
             dropdownStyle={{ zIndex: 10001 }}
           >
             {AVAILABLE_TAGS.map(tag => (

@@ -182,14 +182,19 @@
 
 .uploadArea {
   border-radius: 12px;
-  border: 2px dashed var(--border-color);
+  border: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: var(--bg-secondary);
+  overflow: hidden;
 }
 
-.uploadArea:hover {
-  border-color: var(--primary-blue);
-  background: var(--bg-secondary);
+.uploadArea :global(.ant-upload-drag) {
+  border-radius: 12px !important;
+  background: var(--bg-secondary) !important;
+}
+
+.uploadArea:hover :global(.ant-upload-drag) {
+  border-color: var(--primary-blue) !important;
 }
 
 .uploadArea :global(.ant-upload-drag-icon) {

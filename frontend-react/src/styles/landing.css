@@ -455,6 +455,29 @@ img {
   }
 }
 
+.header__theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.header__theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
 .main {
   overflow-x: hidden;
 }
@@ -2808,5 +2831,272 @@ img {
   height: 56px;
   font-size: 17px;
   border-radius: 12px;
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] body {
+  background-color: #0f1117;
+}
+
+/* Orange buttons — black text in dark theme */
+[data-theme="dark"] .button {
+  color: #000 !important;
+}
+
+[data-theme="dark"] .first-screen {
+  background: linear-gradient(135deg, #0d2847 0%, #1a3a6b 100%);
+}
+
+[data-theme="dark"] .first-screen::before {
+  opacity: 0.3;
+}
+
+/* Place task section */
+[data-theme="dark"] .place-task {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .place-task__title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .place-task__description {
+  color: #94a3b8;
+}
+
+/* Advantages cards */
+[data-theme="dark"] .advantages__card {
+  background: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .advantages__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .advantages__card-text {
+  color: #94a3b8;
+}
+
+/* Prices section */
+[data-theme="dark"] .prices__details-description {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .prices__main-card {
+  background: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .prices__main-card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .prices__main-card-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .prices__main-card-price {
+  color: #e2e8f0;
+}
+
+/* Only Pro section */
+[data-theme="dark"] .only-pro__logos-item {
+  background: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .only-pro__logos-item-image {
+  filter: invert(1) hue-rotate(180deg);
+  opacity: 0.85;
+}
+
+/* Reviews section */
+[data-theme="dark"] .reviews__slider .swiper-slide {
+  background-color: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .reviews__slider-slide-name {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .reviews__slider-slide-type {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .reviews__slider-slide-text {
+  color: #cbd5e1;
+}
+
+/* FAQ section */
+[data-theme="dark"] .faq__item {
+  background-color: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .faq__item-toggler-question {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .faq__item-toggler::after {
+  color: #cbd5e1;
+  background-color: #1e2230;
+}
+
+[data-theme="dark"] .faq__item-toggler:hover::after {
+  background-color: #2d3348;
+}
+
+[data-theme="dark"] .faq__item-panel-answer {
+  color: #cbd5e1;
+  border-top-color: #2d3348;
+}
+
+/* About section */
+[data-theme="dark"] .about {
+  background-color: #0f1117 !important;
+}
+
+[data-theme="dark"] .about__title {
+  color: var(--color-brand-blue-500);
+}
+
+[data-theme="dark"] .about__mission-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .about__mission-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .about__value-item {
+  background-color: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .about__value-text {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .about__team-member {
+  background-color: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .about__team-name {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .about__team-description {
+  color: #94a3b8;
+}
+
+/* Place task info section */
+[data-theme="dark"] .place-task-info__wrapper {
+  background: linear-gradient(146deg, #1a3a6b 0%, #0d2847 100%) !important;
+}
+
+[data-theme="dark"] .place-task-info__card {
+  background: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .place-task-info__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .place-task-info__card-text {
+  color: #94a3b8;
+}
+
+/* Leave order section */
+[data-theme="dark"] .leave-order__steps-item-text {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .leave-order__content {
+  color: #e2e8f0;
+}
+
+/* Footer */
+[data-theme="dark"] .footer {
+  background: #0a0c12;
+}
+
+/* Partner benefits section */
+[data-theme="dark"] .partner-benefits-section {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .partner-benefits-section__subtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .partner-benefits-section__card {
+  background: #1a1d27;
+  border-color: #2d3348;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .partner-benefits-section__card:hover {
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.1);
+}
+
+[data-theme="dark"] .partner-benefits-section__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .partner-benefits-section__card-text {
+  color: #94a3b8;
+}
+
+/* Partner steps promo */
+[data-theme="dark"] .partner-steps__promo {
+  background-color: #2e2a1a;
+  border-color: #b86e00;
+}
+
+[data-theme="dark"] .partner-steps__promo-text {
+  color: #cbd5e1;
+}
+
+/* Partner form */
+[data-theme="dark"] .partner-form__wrapper,
+[data-theme="dark"] .expert-form__wrapper {
+  background: #1a1d27;
+  box-shadow: 0 8px 19px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .partner-form__title,
+[data-theme="dark"] .expert-form__title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .partner-form__input,
+[data-theme="dark"] .partner-form__textarea,
+[data-theme="dark"] .expert-form__input,
+[data-theme="dark"] .expert-form__textarea {
+  background: #1e2230 !important;
+  border-color: #2d3348 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Partner/Expert steps section */
+[data-theme="dark"] .partner-steps__card,
+[data-theme="dark"] .expert-advantages__card {
+  background: #1a1d27;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  border-color: #2d3348;
+}
+
+[data-theme="dark"] .partner-steps__card-title,
+[data-theme="dark"] .expert-advantages__card-title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .partner-steps__card-text,
+[data-theme="dark"] .expert-advantages__card-text {
+  color: #94a3b8;
 }
 

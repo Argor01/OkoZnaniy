@@ -414,3 +414,43 @@
 :global([data-theme="dark"]) .statsNumberPoints {
   color: var(--color-text-heading, #e2e8f0);
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.profileBlock {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.profileAvatar {
+  animation: fadeIn 0.6s ease-out 0.1s both;
+}
+
+.profileStatColumn {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.profileStatColumn:nth-child(1) { animation-delay: 0.15s; }
+.profileStatColumn:nth-child(2) { animation-delay: 0.25s; }
+.profileStatColumn:nth-child(3) { animation-delay: 0.35s; }
+.profileStatColumn:nth-child(4) { animation-delay: 0.45s; }
+
+.editProfileButton {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editProfileButton:hover {
+  transform: scale(1.1);
+}
+
+.editProfileButton:active {
+  transform: scale(0.95);
+}

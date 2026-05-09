@@ -191,6 +191,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               value: subject.id,
               label: subject.name,
             }))}
+            getPopupContainer={() => document.body}
+            virtual={!isMobile}
           />
         </Form.Item>
         
@@ -278,6 +280,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             placeholder="Начните писать навык"
             valueType="name"
             mode="tags"
+            getPopupContainer={() => document.body}
           />
         </Form.Item>
         <Form.Item

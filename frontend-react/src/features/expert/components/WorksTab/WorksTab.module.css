@@ -9,7 +9,15 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 0.4s ease-out both;
 }
+
+.workCard:nth-child(1) { animation-delay: 0.05s; }
+.workCard:nth-child(2) { animation-delay: 0.12s; }
+.workCard:nth-child(3) { animation-delay: 0.19s; }
+.workCard:nth-child(4) { animation-delay: 0.26s; }
+.workCard:nth-child(5) { animation-delay: 0.33s; }
+.workCard:nth-child(6) { animation-delay: 0.4s; }
 
 .workCard:hover {
   transform: translateY(-4px);
@@ -191,4 +199,22 @@
   .workCardImage {
     height: 160px;
   }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sectionCard {
+  animation: fadeInUp 0.45s ease-out;
+}
+
+.workCardImage {
+  transition: transform 0.4s ease;
+}
+
+.workCard:hover .workCardImage {
+  transform: scale(1.03);
 }

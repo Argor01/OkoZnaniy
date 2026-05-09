@@ -762,3 +762,44 @@
 .budgetInput {
   width: 130px;
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.worksHeader {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.sidePanel {
+  animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+.statsCard {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.statsCard:nth-child(1) { animation-delay: 0.05s; }
+.statsCard:nth-child(2) { animation-delay: 0.12s; }
+.statsCard:nth-child(3) { animation-delay: 0.19s; }
+.statsCard:nth-child(4) { animation-delay: 0.26s; }
+
+.workCard {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.workCard:nth-child(1) { animation-delay: 0.05s; }
+.workCard:nth-child(2) { animation-delay: 0.1s; }
+.workCard:nth-child(3) { animation-delay: 0.15s; }
+.workCard:nth-child(4) { animation-delay: 0.2s; }
+.workCard:nth-child(5) { animation-delay: 0.25s; }
+
+.createOrderButton {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.createOrderButton:active {
+  transform: scale(0.97);
+}

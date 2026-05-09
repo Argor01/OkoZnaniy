@@ -254,3 +254,20 @@
     transform: scale(1);
   }
 }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .expert-page .leave-order__form {
+  background: rgba(26, 29, 39, 0.98);
+}
+
+[data-theme="dark"] .expert-page .leave-order__form .ant-input,
+[data-theme="dark"] .expert-page .leave-order__form .ant-input-textarea textarea {
+  background: #1e2230;
+  border-color: #2d3348;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .expert-page .leave-order__form .ant-input::placeholder,
+[data-theme="dark"] .expert-page .leave-order__form .ant-input-textarea textarea::placeholder {
+  color: #64748b;
+}

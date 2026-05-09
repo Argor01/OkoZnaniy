@@ -13,6 +13,7 @@ interface SkillsSelectNewProps {
   disabled?: boolean;
   valueType?: 'id' | 'name';
   mode?: 'multiple' | 'tags';
+  getPopupContainer?: (triggerNode: HTMLElement) => HTMLElement;
 }
 
 const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
@@ -23,7 +24,8 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
   className,
   disabled,
   valueType = 'name',
-  mode = 'tags'
+  mode = 'tags',
+  getPopupContainer,
 }) => {
   const queryClient = useQueryClient();
   const selectClassName = [className, 'fullWidthSelect'].filter(Boolean).join(' ');
@@ -80,6 +82,7 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
         filterOption={(input, option) =>
           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
         }
+        getPopupContainer={getPopupContainer}
         popupRender={(menu) => (
           <>
             {menu}

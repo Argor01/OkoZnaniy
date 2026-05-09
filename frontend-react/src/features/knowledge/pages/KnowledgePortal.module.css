@@ -316,7 +316,30 @@
   }
 
   .statsBar {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .statItem {
+    padding: 10px 8px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .statIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .statLabel {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .statValue {
+    font-size: 16px;
   }
 
   .filtersRow {
@@ -368,15 +391,27 @@
   }
 
   .statsBar {
-    gap: 8px;
+    gap: 6px;
   }
 
   .statItem {
-    padding: 12px;
+    padding: 8px 6px;
+    gap: 6px;
+  }
+
+  .statIcon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .statLabel {
+    font-size: 9px;
   }
 
   .statValue {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .questionCardInner {

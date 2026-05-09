@@ -1,0 +1,58 @@
+.container {
+  display: grid;
+  gap: 16px;
+  height: 100%;
+  overflow: auto;
+  padding: 24px;
+}
+
+.containerCompact {
+  padding: 12px;
+}
+
+/* Мобильная адаптация — уменьшаем отступы */
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .containerCompact {
+    padding: 6px;
+  }
+
+  .headerCard {
+    border-radius: 10px !important;
+  }
+
+  .headerCard :global(.ant-card-body) {
+    padding: 12px !important;
+  }
+
+  .listCard {
+    border-radius: 8px !important;
+  }
+
+  .listCard :global(.ant-card-body) {
+    padding: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 4px;
+    gap: 8px;
+  }
+
+  .containerCompact {
+    padding: 2px;
+  }
+
+  .headerCard :global(.ant-card-body) {
+    padding: 8px !important;
+  }
+
+  .listCard :global(.ant-card-body) {
+    padding: 8px !important;
+  }
+}
