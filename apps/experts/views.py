@@ -15,6 +15,7 @@ from .serializers import (
     ExpertApplicationSerializer, ExpertApplicationCreateSerializer
 )
 from apps.notifications.services import NotificationService
+from apps.core.safe_notify import safe_call
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import ExpertMatchingService
 from apps.orders.models import Order, Transaction
@@ -72,7 +73,7 @@ class SpecializationViewSet(viewsets.ModelViewSet):
         specialization.verified_by = request.user
         specialization.save()
         
-        NotificationService.notify_specialization_verified(specialization)
+        safe_call(NotificationService.notify_specialization_verified, specialization)
         
         return Response(SpecializationSerializer(specialization).data)
 
@@ -95,7 +96,7 @@ class ExpertDocumentViewSet(viewsets.ModelViewSet):
                 'Только эксперты могут загружать документы'
             )
         document = serializer.save(expert=self.request.user)
-        NotificationService.notify_document_uploaded(document)
+        safe_call(NotificationService.notify_document_uploaded, document)
 
     @action(detail=True, methods=['post'])
     def verify(self, request, pk=None):
@@ -110,7 +111,7 @@ class ExpertDocumentViewSet(viewsets.ModelViewSet):
         document.verified_by = request.user
         document.save()
         
-        NotificationService.notify_document_verified(document)
+        safe_call(NotificationService.notify_document_verified, document)
         
         return Response(ExpertDocumentSerializer(document, context={'request': request}).data)
 
@@ -244,14 +245,13 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
             auto_created=True,
             tags='#review-appeal, #отзывы',
         )
-        NotificationService.create_notification(
+        safe_call(NotificationService.create_notification,
             recipient=review.client,
             type=NotificationType.REVIEW_APPEAL,
             title=f"Обращение #{ticket.ticket_number}",
             message=(
                 f"Эксперт {expert_name} обжаловал ваш отзыв. "
-                f"Ваше обращение зарегистрировано — администратор рассмотрит дело."
-            ),
+                f"Ваше обращение зарегистрировано — администратор рассмотрит дело."),
             related_object_id=ticket.id,
             related_object_type='support_request',
             data={
@@ -649,7 +649,7 @@ class ExpertMatchingViewSet(viewsets.ViewSet):
             )
 
         # Отправляем уведомление эксперту
-        NotificationService.notify_expert_invitation(order, expert)
+        safe_call(NotificationService.notify_expert_invitation, order, expert)
 
         return Response({
             'detail': 'Приглашение отправлено',
@@ -1277,7 +1277,10 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                     Education.objects.create(application=existing_application, **education_data)
                 
                 # Создаем уведомление о повторной подаче анкеты
-                NotificationService.notify_application_submitted(existing_application)
+                try:
+                    NotificationService.notify_application_submitted(existing_application)
+                except Exception as notify_err:
+                    logger.warning(f"Failed to send notification for resubmitted application: {notify_err}")
                 
                 return existing_application
             else:
@@ -1326,7 +1329,10 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
                 Education.objects.create(application=application, **education_data)
             
             # Создаем уведомление о подаче анкеты
-            NotificationService.notify_application_submitted(application)
+            try:
+                NotificationService.notify_application_submitted(application)
+            except Exception as notify_err:
+                logger.warning(f"Failed to send notification for new application: {notify_err}")
             
             # Возвращаем созданную анкету
             return application
@@ -1367,10 +1373,20 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        application = self.perform_create(serializer)
+        try:
+            application = self.perform_create(serializer)
+        except Exception as e:
+            logger.error(f"[ExpertApplicationViewSet.create] Error for user {request.user.id}: {e}", exc_info=True)
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+            if isinstance(e, DRFValidationError):
+                raise
+            return Response(
+                {'detail': 'Ошибка при подаче анкеты. Пожалуйста, попробуйте снова.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        # Возвращаем сериализованную анкету
-        output_serializer = ExpertApplicationSerializer(application)
+        # Возвращаем сериализованную анкету (передаём context с request)
+        output_serializer = ExpertApplicationSerializer(application, context={'request': request})
         headers = self.get_success_headers(output_serializer.data)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -1398,7 +1414,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         
         # Уведомляем эксперта
         from apps.notifications.services import NotificationService
-        NotificationService.notify_application_approved(application)
+        safe_call(NotificationService.notify_application_approved, application)
         
         return Response(ExpertApplicationSerializer(application).data)
 
@@ -1422,7 +1438,7 @@ class ExpertApplicationViewSet(viewsets.ModelViewSet):
         
         # Уведомляем эксперта
         from apps.notifications.services import NotificationService
-        NotificationService.notify_application_rejected(application)
+        safe_call(NotificationService.notify_application_rejected, application)
         
         return Response(ExpertApplicationSerializer(application).data)
 

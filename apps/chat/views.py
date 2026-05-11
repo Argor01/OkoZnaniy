@@ -13,6 +13,7 @@ from .websocket_utils import notify_chat_message, notify_typing
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
+from apps.core.safe_notify import safe_call
 from decimal import Decimal, InvalidOperation
 
 class ChatViewSet(viewsets.ModelViewSet):
@@ -340,7 +341,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     offer_cost = offer_payload.get('cost')
                     cost_suffix = f" Сумма: {offer_cost} ₽." if offer_cost not in [None, ''] else ''
                     target_label = f"по заказу №{chat.order.id}" if getattr(chat, 'order', None) else "в чате"
-                    NotificationService.create_notification(
+                    safe_call(NotificationService.create_notification,
                         recipient=recipient,
                         type=NotificationType.NEW_BID,
                         title=f"Индивидуальное предложение{f': {offer_title}' if offer_title else ''}",
@@ -350,8 +351,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                         data={
                             'chat_id': chat.id,
                             'message_id': message.id
-                        }
-                    )
+                        })
             except Exception:
                 pass
 
@@ -810,7 +810,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 chat.save(update_fields=['order'])
 
             try:
-                NotificationService.create_notification(
+                safe_call(NotificationService.create_notification,
                     recipient=expert_user,
                     type=NotificationType.ORDER_ASSIGNED,
                     title="Индивидуальное предложение принято",
@@ -821,15 +821,26 @@ class ChatViewSet(viewsets.ModelViewSet):
                         'order_id': order.id,
                         'chat_id': chat.id,
                         'offer_message_id': message.id
-                    }
-                )
+                    })
             except Exception:
                 pass
                 
             return Response({'status': 'success', 'order_id': order.id})
             
         except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"[accept_offer] Error accepting offer in chat {pk}: {e}", exc_info=True)
+            from django.db import IntegrityError
+            if isinstance(e, IntegrityError):
+                return Response(
+                    {'detail': 'Ошибка при создании заказа. Проверьте корректность данных предложения.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {'detail': f'Ошибка при принятии предложения: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=True, methods=['post'])
     def reject_offer(self, request, pk=None):

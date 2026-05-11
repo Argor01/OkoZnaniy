@@ -251,14 +251,18 @@ class ChatModerationService:
         admins = User.objects.filter(role='admin')
         
         for admin in admins:
-            NotificationService.create_notification(
-                recipient=admin,
-                type='chat_violation',
-                title='Обнаружен обмен контактами в чате',
-                message=f'Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}',
-                related_object_id=violation.id,
-                related_object_type='contact_violation'
-            )
+            try:
+                NotificationService.create_notification(
+                    recipient=admin,
+                    type='chat_violation',
+                    title='Обнаружен обмен контактами в чате',
+                    message=f'Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}',
+                    related_object_id=violation.id,
+                    related_object_type='contact_violation'
+                )
+            except Exception:
+                import logging
+                logging.getLogger('oko.safe_notify').error('Notification failed in _notify_admins', exc_info=True)
     
     @staticmethod
     def _freeze_expert_scope_if_needed(chat, message, violation):
@@ -286,15 +290,19 @@ class ChatModerationService:
         for order in active_orders:
             if not order.client_id:
                 continue
-            NotificationService.create_notification(
-                recipient=order.client,
-                type=NotificationType.EXPERT_VIOLATION,
-                title='Эксперт нарушил правила платформы',
-                message=f"Эксперт по заказу #{order.id} временно отстранен. Сроки заказа заморожены до решения администратора.",
-                related_object_id=order.id,
-                related_object_type='order',
-                data={'order_id': order.id, 'expert_id': expert.id}
-            )
+            try:
+                NotificationService.create_notification(
+                    recipient=order.client,
+                    type=NotificationType.EXPERT_VIOLATION,
+                    title='Эксперт нарушил правила платформы',
+                    message=f"Эксперт по заказу #{order.id} временно отстранен. Сроки заказа заморожены до решения администратора.",
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={'order_id': order.id, 'expert_id': expert.id}
+                )
+            except Exception:
+                import logging
+                logging.getLogger('oko.safe_notify').error('Notification failed in _freeze_expert_scope', exc_info=True)
 
     @staticmethod
     def _get_violation_expert(chat, message):

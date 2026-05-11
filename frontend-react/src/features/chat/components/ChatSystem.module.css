@@ -42,6 +42,25 @@
   border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 
+.searchBox :global(.ant-input-affix-wrapper) {
+  display: flex !important;
+  align-items: center !important;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.searchBox :global(.ant-input-prefix) {
+  display: flex !important;
+  align-items: center !important;
+  margin-inline-end: 8px;
+}
+
+.searchBox :global(.ant-input) {
+  line-height: 28px !important;
+  padding: 0 !important;
+  height: auto !important;
+}
+
 .chatListContent {
   flex: 1;
   overflow-y: auto;

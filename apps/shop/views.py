@@ -27,7 +27,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        queryset = ReadyWork.objects.filter(is_active=True).order_by('-created_at')
+        queryset = ReadyWork.objects.filter(is_active=True).select_related('subject', 'work_type', 'author').order_by('-created_at')
         user = self.request.user
 
         # Аннотация избранного
@@ -85,14 +85,14 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
     
     def create(self, request, *args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info('[ReadyWorkViewSet.create] Data keys: %s, FILES keys: %s',
+                     list(request.data.keys()), list(request.FILES.keys()))
+        
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            try:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning('[ReadyWorkViewSet.create] Validation errors: %s', serializer.errors)
-            except Exception:
-                pass
+            logger.warning('[ReadyWorkViewSet.create] Validation errors: %s', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         # Обрабатываем множественные файлы

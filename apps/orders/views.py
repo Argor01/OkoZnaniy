@@ -4,13 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from apps.notifications.services import NotificationService
+from apps.core.safe_notify import safe_call
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse
 import mimetypes
@@ -143,11 +144,28 @@ class OrderViewSet(viewsets.ModelViewSet):
             return AvailableOrderSerializer
         return super().get_serializer_class()
 
+    def destroy(self, request, *args, **kwargs):
+        """Запрет удаления заказов. Используйте cancel_overdue вместо DELETE."""
+        return Response(
+            {'detail': 'Удаление заказов запрещено. Используйте отмену.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
     def create(self, request, *args, **kwargs):
         blocked = _ensure_not_banned_for_contacts(request.user, 'Создание заказа')
         if blocked is not None:
             return blocked
-        return super().create(request, *args, **kwargs)
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"[OrderViewSet.create] Unhandled error for user {request.user.id}: {e}", exc_info=True)
+            from rest_framework.exceptions import ValidationError as DRFValidationError
+            if isinstance(e, DRFValidationError):
+                raise
+            return Response(
+                {'detail': 'Ошибка при создании заказа. Пожалуйста, попробуйте снова.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     def perform_create(self, serializer):
         # Дополнительная валидация дедлайна
@@ -228,9 +246,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'У заказа уже есть назначенный эксперт.'}, status=status.HTTP_400_BAD_REQUEST)
         if order.status != 'new':
             return Response({'detail': 'Взять можно только заказ в статусе new.'}, status=status.HTTP_400_BAD_REQUEST)
-        order.expert = user
-        order.status = 'in_progress'
-        order.save(update_fields=['expert', 'status', 'updated_at'])
+        with transaction.atomic():
+            order.expert = user
+            order.status = 'in_progress'
+            order.save(update_fields=['expert', 'status', 'updated_at'])
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -245,8 +264,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Вы не являетесь исполнителем этого заказа.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'in_progress':
             return Response({'detail': 'Завершить можно только заказ в работе.'}, status=status.HTTP_400_BAD_REQUEST)
-        order.status = 'completed'
-        order.save(update_fields=['status', 'updated_at'])
+        with transaction.atomic():
+            order.status = 'completed'
+            order.save(update_fields=['status', 'updated_at'])
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -264,8 +284,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Отправить на проверку можно только из статусов in_progress или revision.'}, status=status.HTTP_400_BAD_REQUEST)
         if order.deadline and order.deadline <= timezone.now():
             return Response({'detail': 'Срок сдачи истёк.'}, status=status.HTTP_400_BAD_REQUEST)
-        order.status = 'review'
-        order.save(update_fields=['status', 'updated_at'])
+        with transaction.atomic():
+            order.status = 'review'
+            order.save(update_fields=['status', 'updated_at'])
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -297,15 +318,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save(update_fields=['deadline', 'status', 'updated_at'])
 
         if order.expert_id:
-            NotificationService.create_notification(
+            safe_call(NotificationService.create_notification,
                 recipient=order.expert,
                 type='status_changed',
                 title='Дедлайн продлён',
                 message=f"Клиент продлил дедлайн по заказу №{order.id} до {timezone.localtime(order.deadline).strftime('%d.%m.%Y %H:%M')}",
                 related_object_id=order.id,
                 related_object_type='order',
-                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
-            )
+                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status})
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -327,15 +347,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save(update_fields=['status', 'updated_at'])
 
         if order.expert_id:
-            NotificationService.create_notification(
+            safe_call(NotificationService.create_notification,
                 recipient=order.expert,
                 type='status_changed',
                 title='Заказ отменён',
                 message=f"Клиент отменил заказ №{order.id} из‑за просрочки.",
                 related_object_id=order.id,
                 related_object_type='order',
-                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status}
-            )
+                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status})
             from apps.experts.services import ExpertStatisticsService
             ExpertStatisticsService.update_expert_statistics(order.expert)
 
@@ -370,9 +389,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         except Bid.DoesNotExist:
             return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Назначаем эксперта и согласованную цену
-        order.expert = bid.expert
-        order.budget = bid.amount
+        # Назначаем эксперта и согласованную цену (в транзакции для целостности)
+        with transaction.atomic():
+            order.expert = bid.expert
+            order.budget = bid.amount
         
         # Переводим заказ в in_progress, если он был в одном из допустимых статусов
         old_status = order.status
@@ -447,16 +467,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         # Уведомляем эксперта о назначении на заказ
         try:
-            NotificationService.create_notification(
+            safe_call(NotificationService.create_notification,
                 recipient=bid.expert,
                 type='new_bid',  # Используем существующий тип
                 title=f'Вас назначили исполнителем по заказу {order.id}',
                 message=f'Вы назначены исполнителем заказа №{order.id}. Подробности в деталях заказа.',
                 related_object_id=order.id,
-                related_object_type='order'
-            )
+                related_object_type='order')
             # Уведомляем клиента о том, что эксперт назначен
-            NotificationService.notify_new_bid(order, bid, bid.expert, is_updated=False)
+            safe_call(NotificationService.notify_new_bid, order, bid, bid.expert, is_updated=False)
         except Exception as e:
             logger.error(f"Ошибка при отправке уведомлений: {str(e)}")
         
@@ -588,7 +607,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = 'cancelled'
         order.save(update_fields=['status', 'updated_at'])
         if order.expert_id:
-            NotificationService.notify_status_changed(order, old_status)
+            safe_call(NotificationService.notify_status_changed, order, old_status)
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'])
@@ -613,8 +632,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = 'in_progress'
         order.save()
         
-        NotificationService.notify_order_taken(order)
-        NotificationService.notify_status_changed(order, old_status)
+        safe_call(NotificationService.notify_order_taken, order)
+        safe_call(NotificationService.notify_status_changed, order, old_status)
         
         return Response(OrderSerializer(order).data)
 
@@ -636,7 +655,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = 'completed'
         order.save()
         
-        NotificationService.notify_status_changed(order, old_status)
+        safe_call(NotificationService.notify_status_changed, order, old_status)
         try:
             NotificationService.notify_order_completed(order)
         except Exception:
@@ -692,7 +711,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         # Отправляем уведомление администраторам
         from apps.notifications.services import NotificationService
-        NotificationService.notify_dispute_created(dispute)
+        safe_call(NotificationService.notify_dispute_created, dispute)
         
         serializer = DisputeSerializer(dispute)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -877,7 +896,7 @@ class DisputeViewSet(viewsets.ModelViewSet):
         
         # Уведомляем участников о решении спора
         from apps.notifications.services import NotificationService
-        NotificationService.notify_dispute_resolved(dispute)
+        safe_call(NotificationService.notify_dispute_resolved, dispute)
         
         return Response(DisputeSerializer(dispute).data)
 
@@ -914,7 +933,7 @@ class DisputeViewSet(viewsets.ModelViewSet):
         
         # Отправляем уведомление арбитру
         from apps.notifications.services import NotificationService
-        NotificationService.notify_arbitrator_assigned(dispute)
+        safe_call(NotificationService.notify_arbitrator_assigned, dispute)
         
         serializer = DisputeSerializer(dispute)
         return Response(serializer.data)
@@ -978,7 +997,7 @@ class OrderFileViewSet(viewsets.ModelViewSet):
             order_id=self.kwargs['order_pk'],
             uploaded_by=self.request.user
         )
-        NotificationService.notify_file_uploaded(order_file)
+        safe_call(NotificationService.notify_file_uploaded, order_file)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -1067,7 +1086,7 @@ class OrderCommentViewSet(viewsets.ModelViewSet):
             order_id=self.kwargs['order_pk'],
             author=self.request.user
         )
-        NotificationService.notify_new_comment(comment)
+        safe_call(NotificationService.notify_new_comment, comment)
 
 class BidViewSet(viewsets.ModelViewSet):
     serializer_class = BidSerializer
@@ -1148,12 +1167,11 @@ class BidViewSet(viewsets.ModelViewSet):
             bid.save()
 
         try:
-            NotificationService.notify_new_bid(
+            safe_call(NotificationService.notify_new_bid,
                 order=order,
                 bid=bid,
                 expert=user,
-                is_updated=not created
-            )
+                is_updated=not created)
         except Exception:
             logger.exception("Не удалось создать уведомление о новом отклике", extra={"order_id": order.id, "bid_id": bid.id, "expert_id": user.id})
         

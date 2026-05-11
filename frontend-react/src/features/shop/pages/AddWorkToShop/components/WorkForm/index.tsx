@@ -79,8 +79,16 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   });
 
   const handleSubmit = () => {
+    const plainDescription = (formData.description || '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim();
     if (!formData.title || !formData.price || !formData.workType || !formData.subject) {
       message.error('Заполните все обязательные поля');
+      return;
+    }
+    if (!plainDescription) {
+      message.error('Добавьте описание работы');
       return;
     }
     onSave(formData);

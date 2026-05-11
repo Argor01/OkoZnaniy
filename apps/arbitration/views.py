@@ -26,6 +26,7 @@ from apps.chat.websocket_utils import (
 )
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
+from apps.core.safe_notify import safe_call
 
 User = get_user_model()
 
@@ -96,8 +97,7 @@ def notify_case_participants(case, *, title, message_text, exclude_user_ids=None
             recipients.append(user)
 
     for recipient in recipients:
-        NotificationService.create_notification(
-            recipient=recipient,
+        safe_call(NotificationService.create_notification, recipient=recipient,
             type=notification_type,
             title=title,
             message=message_text,
@@ -108,8 +108,7 @@ def notify_case_participants(case, *, title, message_text, exclude_user_ids=None
                 'case_id': case.id,
                 'case_number': case.case_number,
                 'order_id': case.order_id,
-            }
-        )
+            })
 
 
 def build_order_chat_feed(case):
@@ -185,7 +184,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related('order', 'order__client', 'order__expert', 'arbitrator')
         user = self.request.user
         
         # Администраторы видят все дела

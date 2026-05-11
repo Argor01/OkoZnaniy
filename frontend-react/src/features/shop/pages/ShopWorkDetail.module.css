@@ -78,16 +78,16 @@
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
 }
 
 .infoCard {
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .infoCard :global(.ant-card-body) {
-  padding: 16px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,9 +97,9 @@
 }
 
 .infoLabel {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   display: block;
 }
 
@@ -109,10 +109,10 @@
 }
 
 .statLabel {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .centeredRow {
@@ -230,39 +230,15 @@
   }
 
   .infoGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .infoCard :global(.ant-card-body) {
+    padding: 8px 10px;
   }
 
   .actionButton {
     min-width: 100%;
   }
-}
-
-/* ===== DARK THEME ===== */
-:global([data-theme="dark"]) .page {
-  background: var(--color-bg-page, #0f1117) !important;
-}
-
-:global([data-theme="dark"]) .subjectValue {
-  color: #e2e8f0;
-}
-
-:global([data-theme="dark"]) .mutedValue {
-  color: #94a3b8;
-}
-
-:global([data-theme="dark"]) .mutedIcon {
-  color: #64748b;
-}
-
-:global([data-theme="dark"]) .createdValue {
-  color: #94a3b8;
-}
-
-:global([data-theme="dark"]) .createdIcon {
-  color: #64748b;
-}
-
-:global([data-theme="dark"]) .ratingCount {
-  color: #64748b;
 }

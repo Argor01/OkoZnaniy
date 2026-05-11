@@ -10,7 +10,11 @@ from .serializers import (
     QuestionDetailSerializer,
     QuestionCreateSerializer,
     AnswerSerializer,
-    AnswerCreateSerializer
+    AnswerCreateSerializer,
+    ArticleListSerializer,
+    ArticleDetailSerializer,
+    ArticleCreateSerializer,
+    ArticleFileSerializer,
 )
 from apps.notifications.services import NotificationService
 
@@ -223,12 +227,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 from .models import Article, ArticleFile
-from .serializers import (
-    ArticleListSerializer,
-    ArticleDetailSerializer,
-    ArticleCreateSerializer,
-    ArticleFileSerializer,
-)
+# Article serializers imported at top of file
 from rest_framework.parsers import MultiPartParser, FormParser
 
 

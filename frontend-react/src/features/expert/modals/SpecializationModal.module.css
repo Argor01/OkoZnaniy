@@ -156,6 +156,8 @@
   margin: 8px;
   max-width: calc(100% - 16px);
   max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
+  max-height: calc(var(--app-vh, 100dvh) - 16px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -165,6 +167,8 @@
   border-radius: 24px;
   max-width: 600px;
   max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  max-height: calc(var(--app-vh, 100dvh) - 40px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -182,8 +186,12 @@
     margin: 0;
     max-width: 100%;
     max-height: 100vh;
+    max-height: 100dvh;
+    max-height: var(--app-vh, 100dvh);
     border-radius: 0;
     height: 100vh;
+    height: 100dvh;
+    height: var(--app-vh, 100dvh);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -215,6 +223,8 @@
   background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   overflow-y: auto;
   max-height: calc(100vh - 200px);
+  max-height: calc(100dvh - 200px);
+  max-height: calc(var(--app-vh, 100dvh) - 200px);
 }
 
 .specializationModalWrap :global(.ant-form-item-label > label) {
@@ -226,12 +236,16 @@
   overflow-y: auto;
   flex: 1;
   max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  max-height: calc(var(--app-vh, 100dvh) - 140px);
 }
 
 /* Desktop scrolling */
 @media (min-width: 769px) {
   .specializationModalWrapDesktop :global(.ant-modal-body) {
     max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
+    max-height: calc(var(--app-vh, 100dvh) - 200px);
     overflow-y: auto;
   }
 }
@@ -243,6 +257,8 @@
     overflow-y: auto;
     flex: 1;
     max-height: calc(100vh - 120px);
+    max-height: calc(100dvh - 120px);
+    max-height: calc(var(--app-vh, 100dvh) - 120px);
   }
 }
 

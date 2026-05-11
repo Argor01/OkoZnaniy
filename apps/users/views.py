@@ -1449,7 +1449,7 @@ def public_stats_view(request):
 
 # Telegram Auth Status Check
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+# AllowAny imported at top of file
 from django.core.cache import cache
 
 @api_view(['GET'])

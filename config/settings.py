@@ -84,9 +84,12 @@ INSTALLED_APPS = [
     'apps.admin_panel',
     'apps.arbitration',
     'apps.knowledge',
+    'apps.payments',
+    'apps.regression_tests',
 ]
 
 MIDDLEWARE = [
+    'apps.core.error_middleware.ErrorLoggingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -192,7 +195,12 @@ else:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
     CSRF_TRUSTED_ORIGINS = [
         'https://45.12.239.226',
         'http://45.12.239.226',
@@ -345,6 +353,7 @@ REST_FRAMEWORK = {
         'email_verify': '10/hour',
         'send_email': '5/hour',
     },
+    'EXCEPTION_HANDLER': 'apps.core.exception_handler.global_exception_handler',
 }
 
 # JWT settings
@@ -394,22 +403,8 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # Production security settings
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    CSRF_COOKIE_SECURE = True
-    CSRF_COOKIE_HTTPONLY = True
-    CSRF_TRUSTED_ORIGINS = [
-        'https://45.12.239.226',
-        'http://45.12.239.226',
-        'https://okoznaniy.ru',
-        'https://www.okoznaniy.ru',
-    ]
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+# Security settings consolidated in the main if/else block above
+X_FRAME_OPTIONS = 'DENY'
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -513,6 +508,26 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
+        },
+        'oko': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'oko.exception_handler': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'oko.safe_notify': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'oko.error_middleware': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
         },
     },
 }

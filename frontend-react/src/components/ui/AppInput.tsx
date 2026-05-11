@@ -17,14 +17,26 @@ const getClasses = (className: string = '', variant: string = 'default') => {
     ].filter(Boolean).join(' ');
 };
 
+const ALLOWED_NUMERIC_CONTROL_KEYS = new Set([
+  'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+  'Home', 'End', 'PageUp', 'PageDown',
+]);
+
 const blockNonNumericKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (
-    e.key === 'e' || e.key === 'E' ||
-    e.key === '+' || e.key === '-' ||
-    e.key === '.' || e.key === ','
-  ) {
-    e.preventDefault();
+  // Always allow Ctrl/Cmd combinations (copy, paste, select all, undo, etc.)
+  if (e.ctrlKey || e.metaKey || e.altKey) {
+    return;
   }
+  if (ALLOWED_NUMERIC_CONTROL_KEYS.has(e.key)) {
+    return;
+  }
+  // Allow exactly one digit character; block everything else
+  // (letters, punctuation, scientific notation, whitespace, etc.).
+  if (e.key.length === 1 && /^[0-9]$/.test(e.key)) {
+    return;
+  }
+  e.preventDefault();
 };
 
 const filterNonNumericPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -80,14 +92,19 @@ const AppInputNumber: React.FC<Omit<InputNumberProps, 'variant'> & { variant?: '
     className = '',
     variant = 'default',
     onKeyDown,
+    onPaste,
     ...props
 }) => {
     return (
         <InputNumber
             className={getClasses(className, variant)}
             onKeyDown={(e) => {
-                blockNonNumericKeys(e);
+                blockNonNumericKeys(e as React.KeyboardEvent<HTMLInputElement>);
                 onKeyDown?.(e);
+            }}
+            onPaste={(e) => {
+                filterNonNumericPaste(e as React.ClipboardEvent<HTMLInputElement>);
+                onPaste?.(e);
             }}
             {...props}
         />

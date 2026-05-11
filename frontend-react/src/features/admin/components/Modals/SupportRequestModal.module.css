@@ -234,12 +234,16 @@
   
   .modal .ant-modal-content {
     height: 100vh;
+    height: 100dvh;
+    height: var(--app-vh, 100dvh);
     border-radius: 0;
   }
   
   .modal .ant-modal-body {
     max-height: none;
     height: calc(100vh - 55px);
+    height: calc(100dvh - 55px);
+    height: calc(var(--app-vh, 100dvh) - 55px);
   }
   
   .container {

@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -284,3 +284,81 @@ class ExpertRatingPermissionsTest(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ExpertApplicationSubmissionRegressionTests(TestCase):
+    """Regression for the 500 returned by ``POST /api/experts/applications/``.
+
+    The bug: ``NotificationService.notify_application_submitted`` was defined
+    *outside* the ``NotificationService`` class (in ``EmailService``), so when
+    the view called ``NotificationService.notify_application_submitted(...)``
+    an ``AttributeError`` was raised after the application had been created.
+    """
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.specialization = Subject.objects.create(
+            name='Регрессия — Анкета',
+            is_active=True,
+        )
+        self.expert_user = User.objects.create_user(
+            username='application_regression_expert',
+            email='application_regression@example.com',
+            password='pwd',
+            role='expert',
+        )
+
+    def test_notify_application_submitted_is_class_method(self):
+        """The helper must live on ``NotificationService`` so calling
+        ``NotificationService.notify_application_submitted`` works."""
+        from apps.notifications.services import NotificationService, EmailService
+        self.assertTrue(
+            hasattr(NotificationService, 'notify_application_submitted'),
+            'notify_application_submitted must be defined on NotificationService',
+        )
+        self.assertFalse(
+            hasattr(EmailService, 'notify_application_submitted'),
+            'notify_application_submitted should not leak onto EmailService',
+        )
+
+    def test_post_application_returns_201_and_creates_notification(self):
+        self.api_client.force_authenticate(user=self.expert_user)
+        payload = {
+            'full_name': 'Иван Иванов',
+            'work_experience_years': 5,
+            'phone': '+79991112233',
+            'biography': 'Опыт работы в науке',
+            'portfolio_url': '',
+            'specialization_ids': [self.specialization.id],
+            'educations': [
+                {
+                    'university': 'МГУ',
+                    'start_year': 2010,
+                    'end_year': 2015,
+                    'degree': 'Магистр',
+                }
+            ],
+        }
+        response = self.api_client.post(
+            '/api/experts/applications/', payload, format='json'
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+            f'unexpected status={response.status_code} body={response.content[:300]!r}',
+        )
+        body = response.json()
+        self.assertEqual(body['full_name'], 'Иван Иванов')
+        self.assertEqual(len(body['educations']), 1)
+
+        # A confirmation notification should have been sent to the expert.
+        from apps.notifications.models import Notification
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.expert_user,
+                related_object_id=body['id'],
+                related_object_type='application',
+            ).exists(),
+            'Submitting an application must create an APPLICATION_SUBMITTED notification',
+        )

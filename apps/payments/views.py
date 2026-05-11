@@ -1,3 +1,5 @@
+import logging
+from django.db import transaction
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -7,8 +9,14 @@ from django.http import HttpResponse
 from .models import Payment, PaymentMethod
 from .serializers import PaymentSerializer
 from .services import PaymentService
-from .utils import generate_qr_code
+try:
+    from .utils import generate_qr_code
+except ImportError:
+    def generate_qr_code(payment):
+        raise NotImplementedError("QR code generation not configured")
 from apps.orders.models import Order
+
+logger = logging.getLogger('oko.payments')
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -19,14 +27,11 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return self.queryset
-        return self.queryset.filter(order__client=user)
+            return self.queryset.select_related('order', 'order__client')
+        return self.queryset.filter(order__client=user).select_related('order')
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
-        """
-        Создает новый платеж для заказа
-        """
         order_id = request.data.get('order_id')
         payment_method = request.data.get('payment_method')
 
@@ -50,8 +55,16 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        payment = PaymentService.create_payment(order, payment_method)
-        payment_link = PaymentService.get_payment_link(payment)
+        try:
+            with transaction.atomic():
+                payment = PaymentService.create_payment(order, payment_method)
+            payment_link = PaymentService.get_payment_link(payment)
+        except Exception as e:
+            logger.error("Payment creation failed for order %s: %s", order_id, e, exc_info=True)
+            return Response(
+                {'error': 'Ошибка создания платежа. Попробуйте снова.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         return Response({
             'payment': PaymentSerializer(payment).data,
@@ -60,30 +73,29 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def qr_code(self, request, pk=None):
-        """
-        Возвращает QR-код для платежа
-        """
         payment = self.get_object()
-        
         try:
             qr_code = generate_qr_code(payment)
             return HttpResponse(qr_code, content_type='image/png')
-        except ValueError as e:
+        except Exception as e:
+            logger.error("QR code generation failed for payment %s: %s", pk, e, exc_info=True)
             return Response(
-                {'error': str(e)},
+                {'error': 'Ошибка генерации QR-кода'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
     @action(detail=True, methods=['post'])
     def process_callback(self, request, pk=None):
-        """
-        Обрабатывает callback от платежной системы
-        """
         payment = self.get_object()
-        success = PaymentService.process_payment_callback(
-            payment.payment_id,
-            request.data
-        )
+        try:
+            with transaction.atomic():
+                success = PaymentService.process_payment_callback(
+                    payment.payment_id,
+                    request.data
+                )
+        except Exception as e:
+            logger.error("Payment callback failed for %s: %s", pk, e, exc_info=True)
+            return Response({'status': 'failed'}, status=status.HTTP_400_BAD_REQUEST)
 
         if success:
             return Response({'status': 'success'})

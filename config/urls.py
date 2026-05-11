@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/admin-panel/', include('apps.admin_panel.urls')),
     path('api/arbitration/', include('apps.arbitration.urls')),
     path('api/knowledge/', include('apps.knowledge.urls')),
+    path('api/payments/', include('apps.payments.urls')),
     path("api/accounts/", include("allauth.urls")),
 ]
 

@@ -81,20 +81,20 @@
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
 }
 
 .infoCard {
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .infoCard :global(.ant-card-body) {
-  padding: 12px 16px;
+  padding: 8px 12px;
 }
 
 .infoLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -190,7 +190,12 @@
   }
 
   .infoGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .infoCard :global(.ant-card-body) {
+    padding: 6px 8px;
   }
 }
 

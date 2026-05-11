@@ -56,8 +56,24 @@
   width: 100%;
 }
 
+.chatSearchInput :global(.ant-input-affix-wrapper) {
+  display: flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 8px;
+}
+
+.chatSearchInput :global(.ant-input-prefix) {
+  display: flex;
+  align-items: center;
+  margin-inline-end: 8px;
+}
+
 .chatSearchInput :global(.ant-input) {
   font-size: 14px;
+  line-height: 1.5;
+  padding: 0;
+  background: transparent;
 }
 
 .chatSearchInput :global(.ant-input-search) {

@@ -342,11 +342,15 @@ class OrderSerializer(serializers.ModelSerializer):
         # Добавляем разбивку цены (упрощенная версия без сложности)
         if instance.work_type and instance.deadline:
             try:
-                base_price = float(instance.work_type.base_price)
-                urgency_multiplier = float(PricingService._calculate_urgency_multiplier(
-                    instance.work_type.estimated_time,
-                    instance.deadline
-                ))
+                base_price = float(instance.work_type.base_price or 0)
+                estimated_time = getattr(instance.work_type, 'estimated_time', None)
+                if estimated_time and estimated_time > 0:
+                    urgency_multiplier = float(PricingService._calculate_urgency_multiplier(
+                        estimated_time,
+                        instance.deadline
+                    ))
+                else:
+                    urgency_multiplier = 1.0
                 final_price = base_price * urgency_multiplier
                 
                 data['price_breakdown'] = {
@@ -357,9 +361,12 @@ class OrderSerializer(serializers.ModelSerializer):
                     'discount_amount': 0.0,
                     'final_price': final_price
                 }
-            except ValueError as e:
-                # Если дедлайн в прошлом, показываем базовую цену без срочности
-                base_price = float(instance.work_type.base_price)
+            except Exception:
+                # Если расчет цены не удался — показываем базовую цену
+                try:
+                    base_price = float(instance.work_type.base_price or 0)
+                except Exception:
+                    base_price = 0.0
                 data['price_breakdown'] = {
                     'base_price': base_price,
                     'complexity_adjustment': 0.0,

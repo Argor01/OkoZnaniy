@@ -306,6 +306,67 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const dragDepthRef = useRef(0);
   const hasCachedChatsRef = useRef(false);
 
+  // Адаптив: фиксируем модалку при открытии клавиатуры на мобильных
+  useEffect(() => {
+    if (!isMobile || !visible) return;
+
+    // Сохраняем позицию скролла и блокируем body
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const html = document.documentElement;
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+
+    const updateVh = () => {
+      const vh = window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight;
+      html.style.setProperty('--app-vh', `${vh}px`);
+    };
+
+    updateVh();
+
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener('resize', updateVh);
+      vv.addEventListener('scroll', updateVh);
+    } else {
+      window.addEventListener('resize', updateVh);
+    }
+
+    // Предотвращаем скролл на window при фокусе (iOS keyboard fix)
+    const preventWindowScroll = () => {
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('scroll', preventWindowScroll, { passive: false });
+
+    return () => {
+      if (vv) {
+        vv.removeEventListener('resize', updateVh);
+        vv.removeEventListener('scroll', updateVh);
+      } else {
+        window.removeEventListener('resize', updateVh);
+      }
+      window.removeEventListener('scroll', preventWindowScroll);
+      html.style.removeProperty('--app-vh');
+
+      // Восстанавливаем скролл
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.width = '';
+      body.style.overflow = '';
+      html.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobile, visible]);
+
   // WebSocket для real-time обновлений чата
   const handleNewMessage = useCallback((wsMessage: any) => {
     if (!selectedChat) return;
@@ -3634,8 +3695,6 @@ const handleOverdueComplaint = async () => {
                 label: category,
                 value: category
               }))}
-              getPopupContainer={(trigger) => trigger.parentElement || document.body}
-              dropdownStyle={{ zIndex: 10001 }}
             />
           </div>
           
@@ -3656,8 +3715,6 @@ const handleOverdueComplaint = async () => {
                     { label: 'Заказ актуален', value: 'Заказ актуален' },
                     { label: 'Заказ не актуален', value: 'Заказ не актуален' }
                   ]}
-                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
-                  dropdownStyle={{ zIndex: 10001 }}
                 />
               </div>
               
@@ -3676,8 +3733,6 @@ const handleOverdueComplaint = async () => {
                     { label: 'Возврат предоплаты и неустойка', value: 'Возврат предоплаты и неустойка' },
                     { label: 'Возврат средств не требуется', value: 'Возврат средств не требуется' }
                   ]}
-                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
-                  dropdownStyle={{ zIndex: 10001 }}
                 />
               </div>
             </>

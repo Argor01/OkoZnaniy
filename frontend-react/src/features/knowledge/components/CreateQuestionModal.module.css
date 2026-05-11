@@ -89,7 +89,11 @@
   :global(.ant-modal-wrap) .questionModal :global(.ant-modal-content) {
     border-radius: 0 !important;
     height: 100vh !important;
+    height: 100dvh !important;
+    height: var(--app-vh, 100dvh) !important;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
+    max-height: var(--app-vh, 100dvh) !important;
     display: flex !important;
     flex-direction: column !important;
   }
@@ -315,7 +319,11 @@
   /* Ensure modal takes full height */
   :global(.ant-modal-root) :global(.ant-modal-wrap) .questionModal :global(.ant-modal-content) {
     height: 100vh !important;
+    height: 100dvh !important;
+    height: var(--app-vh, 100dvh) !important;
     max-height: 100vh !important;
+    max-height: 100dvh !important;
+    max-height: var(--app-vh, 100dvh) !important;
     border-radius: 0 !important;
   }
 
