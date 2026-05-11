@@ -472,6 +472,11 @@ PAYMENT_ENCRYPTION_KEY = os.getenv('PAYMENT_ENCRYPTION_KEY', Fernet.generate_key
 # Telegram Bot settings
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 
+# VK Bot settings
+VK_BOT_TOKEN = os.getenv('VK_BOT_TOKEN', '')
+VK_GROUP_ID = os.getenv('VK_GROUP_ID', '')
+VK_API_VERSION = os.getenv('VK_API_VERSION', '5.199')
+
 # Support chat settings
 # ID пользователя технической поддержки (для исключения из обычных чатов)
 SUPPORT_USER_ID = os.getenv('SUPPORT_USER_ID', None)

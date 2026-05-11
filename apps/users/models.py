@@ -26,6 +26,14 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CLIENT)
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
     telegram_id = models.BigIntegerField(null=True, blank=True)
+    vk_id = models.BigIntegerField(
+        null=True, blank=True, unique=True,
+        verbose_name="VK ID"
+    )
+    vk_notifications_enabled = models.BooleanField(
+        default=True,
+        verbose_name="VK уведомления включены"
+    )
     partner = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals', verbose_name="Партнер")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     frozen_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
