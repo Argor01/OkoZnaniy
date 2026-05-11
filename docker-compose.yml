@@ -131,6 +131,32 @@ services:
     networks:
       - app_network
 
+  vk-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.vkbot
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      VK_BOT_TOKEN: ${VK_BOT_TOKEN}
+      VK_GROUP_ID: ${VK_GROUP_ID}
+      VK_SERVICE_KEY: ${VK_SERVICE_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      DEBUG: ${DEBUG:-False}
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: config.settings
+    networks:
+      - app_network
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped
