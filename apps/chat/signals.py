@@ -61,6 +61,42 @@ def sync_message_to_support_request(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=Message)
+def notify_vk_on_new_message(sender, instance, created, **kwargs):
+    """Send VK push notification when a new chat message is created."""
+    if not created or not instance.text:
+        return
+    if getattr(instance, 'message_type', '') == 'system':
+        return
+
+    try:
+        chat = instance.chat
+        sender_user = instance.sender
+        order_id = getattr(chat, 'order_id', None)
+
+        recipients = set()
+        if chat.client_id and chat.client_id != sender_user.id:
+            recipients.add(chat.client_id)
+        if chat.expert_id and chat.expert_id != sender_user.id:
+            recipients.add(chat.expert_id)
+        for participant in chat.participants.exclude(id=sender_user.id).values_list('id', flat=True):
+            recipients.add(participant)
+
+        if recipients:
+            from vk_bot.tasks import send_vk_chat_notification
+            sender_name = sender_user.get_full_name() or sender_user.username
+            for recipient_id in recipients:
+                send_vk_chat_notification.delay(
+                    recipient_id=recipient_id,
+                    sender_name=sender_name,
+                    chat_id=chat.id,
+                    message_preview=instance.text,
+                    order_id=order_id,
+                )
+    except Exception:
+        pass
+
+
+@receiver(post_save, sender=Message)
 def check_message_for_contacts(sender, instance, created, **kwargs):
     """
     Проверяет сообщения на наличие контактных данных
