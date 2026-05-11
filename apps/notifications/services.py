@@ -47,7 +47,20 @@ class NotificationService:
             )
         except Exception:
             pass
-            
+
+        # VK уведомление
+        try:
+            from vk_bot.tasks import send_vk_notification
+            send_vk_notification.delay(
+                user_id=recipient.id,
+                notification_type=type,
+                title=title,
+                message=message,
+                data=data,
+            )
+        except Exception:
+            pass
+
         return notification
 
     @staticmethod
