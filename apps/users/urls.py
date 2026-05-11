@@ -54,7 +54,14 @@ urlpatterns = [
     path('directors/', views.UserViewSet.as_view({'get': 'directors'}), name='directors'),
     path('contact_banned_users/', views.UserViewSet.as_view({'get': 'contact_banned_users'}), name='contact_banned_users'),
     path('me/', views.UserViewSet.as_view({'get': 'me'}), name='user_me'),
-    
+
+    # VK bot endpoints
+    path('vk/link/', views.UserViewSet.as_view({'post': 'vk_link'}), name='vk_link'),
+    path('vk/unlink/', views.UserViewSet.as_view({'delete': 'vk_unlink'}), name='vk_unlink'),
+    path('vk/status/', views.UserViewSet.as_view({'get': 'vk_status'}), name='vk_status'),
+    path('notifications/vk/', views.UserViewSet.as_view({'patch': 'vk_notifications_settings'}), name='vk_notifications_settings'),
+    path('vk_auth_status/<str:auth_id>/', views.vk_auth_status, name='vk_auth_status'),
+
     # Общие маршруты router должны идти в конце
     path('', include(router.urls)),
 ]

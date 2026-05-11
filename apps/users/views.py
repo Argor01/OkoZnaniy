@@ -1359,7 +1359,66 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': self.get_serializer(user).data
         })
 
+    # --- VK Bot endpoints ---
 
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def vk_link(self, request):
+        """Link a VK account to the current user."""
+        vk_id = request.data.get('vk_id')
+        if not vk_id:
+            return Response({'error': 'vk_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            vk_id = int(vk_id)
+        except (ValueError, TypeError):
+            return Response({'error': 'vk_id должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(vk_id=vk_id).exclude(id=request.user.id).exists():
+            return Response({'error': 'Этот VK аккаунт уже привязан к другому пользователю'}, status=status.HTTP_409_CONFLICT)
+
+        request.user.vk_id = vk_id
+        request.user.save(update_fields=['vk_id'])
+        return Response({'message': 'VK аккаунт привязан', 'vk_id': vk_id})
+
+    @action(detail=False, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
+    def vk_unlink(self, request):
+        """Unlink VK account from the current user."""
+        request.user.vk_id = None
+        request.user.vk_notifications_enabled = False
+        request.user.save(update_fields=['vk_id', 'vk_notifications_enabled'])
+        return Response({'message': 'VK аккаунт отвязан'})
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def vk_status(self, request):
+        """Get VK link status for the current user."""
+        return Response({
+            'linked': request.user.vk_id is not None,
+            'vk_id': request.user.vk_id,
+            'notifications_enabled': request.user.vk_notifications_enabled,
+        })
+
+    @action(detail=False, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def vk_notifications_settings(self, request):
+        """Update VK notification preferences."""
+        enabled = request.data.get('enabled')
+        if enabled is None:
+            return Response({'error': 'Параметр enabled обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.vk_notifications_enabled = bool(enabled)
+        request.user.save(update_fields=['vk_notifications_enabled'])
+        return Response({
+            'vk_notifications_enabled': request.user.vk_notifications_enabled,
+        })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def vk_auth_status(request, auth_id):
+    """Check VK bot authorization status (analogous to telegram_auth_status)."""
+    clean_auth_id = auth_id.replace('auth_', '', 1) if auth_id.startswith('auth_') else auth_id
+    cache_key = f'vk_auth_{clean_auth_id}'
+    auth_data = cache.get(cache_key)
+    if auth_data:
+        return Response(auth_data, status=status.HTTP_200_OK)
+    return Response({'authenticated': False}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
