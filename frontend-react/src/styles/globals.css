@@ -356,6 +356,30 @@ a {
   color: var(--text-primary) !important;
 }
 
+[data-theme="dark"] .ant-input-affix-wrapper .ant-input-prefix,
+[data-theme="dark"] .ant-input-affix-wrapper .ant-input-suffix {
+  color: var(--color-text-tertiary) !important;
+}
+
+[data-theme="dark"] .ant-input-affix-wrapper .ant-input::placeholder {
+  color: var(--color-text-placeholder) !important;
+}
+
+/* Dark theme: form item help/error text */
+[data-theme="dark"] .ant-form-item-explain-error {
+  color: #f87171 !important;
+}
+
+/* Dark theme: Ant Design checkbox */
+[data-theme="dark"] .ant-checkbox-wrapper {
+  color: var(--text-primary) !important;
+}
+
+/* Dark theme: Ant Design radio */
+[data-theme="dark"] .ant-radio-wrapper {
+  color: var(--text-primary) !important;
+}
+
 [data-theme="dark"] .ant-select-selection-item {
   color: var(--text-primary) !important;
 }

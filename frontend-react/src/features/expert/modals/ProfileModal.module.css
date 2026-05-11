@@ -291,3 +291,51 @@
 .profileModalWrap :global(.ant-tabs-tab-btn) {
   font-family: 'Jost-SemiBold', sans-serif !important;
 }
+
+/* Dark theme overrides for profile modal */
+:global([data-theme="dark"]) .inputField {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--border-color, #2d3348) !important;
+  color: var(--text-primary, #e2e8f0) !important;
+}
+
+:global([data-theme="dark"]) .textareaField {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--border-color, #2d3348) !important;
+  color: var(--text-primary, #e2e8f0) !important;
+}
+
+:global([data-theme="dark"]) .inputNumberField {
+  background: var(--color-bg-input, #1e2230) !important;
+  border-color: var(--border-color, #2d3348) !important;
+  color: var(--text-primary, #e2e8f0) !important;
+}
+
+:global([data-theme="dark"]) .profileModalWrap :global(.ant-upload-drag) {
+  background: var(--bg-secondary, #161922) !important;
+  border-color: var(--border-color, #2d3348) !important;
+}
+
+:global([data-theme="dark"]) .profileModalWrap :global(.ant-upload-text),
+:global([data-theme="dark"]) .profileModalWrap :global(.ant-upload-hint) {
+  color: var(--text-secondary, #94a3b8) !important;
+}
+
+:global([data-theme="dark"]) .profileModalExpertInfo {
+  background-color: var(--color-bg-spotlight, #1e2230);
+  border-color: #1e4d6b;
+}
+
+:global([data-theme="dark"]) .profileModalExpertText {
+  color: #60a5fa;
+}
+
+:global([data-theme="dark"]) .profileModalExpertTitle {
+  color: #60a5fa;
+}
+
+:global([data-theme="dark"]) .buttonSecondary {
+  background: var(--bg-secondary, #161922);
+  border-color: var(--border-color, #2d3348);
+  color: var(--text-secondary, #94a3b8);
+}

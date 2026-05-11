@@ -3508,6 +3508,8 @@ const handleOverdueComplaint = async () => {
                     open={emojiPickerOpen}
                     onOpenChange={setEmojiPickerOpen}
                     placement="topRight"
+                    getPopupContainer={(triggerNode) => triggerNode.closest('.ant-modal-body') || document.body}
+                    zIndex={1060}
                   >
                     <Button
                       type="default"

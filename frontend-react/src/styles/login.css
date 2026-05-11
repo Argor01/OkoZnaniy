@@ -823,6 +823,30 @@
   color: #e2e8f0 !important;
 }
 
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper) {
+  background: #1e2230 !important;
+  border-color: #2d3348 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper .ant-input) {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper .ant-input-prefix),
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper .ant-input-suffix) {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper:focus),
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper-focused),
+[data-theme="dark"] .auth-panel :global(.ant-input-affix-wrapper:hover) {
+  background: #1e2230 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
 [data-theme="dark"] .auth-panel :global(.ant-input::placeholder) {
   color: #64748b !important;
 }

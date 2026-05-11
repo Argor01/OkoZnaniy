@@ -61,15 +61,38 @@
 }
 
 @media (max-width: 768px) {
+  .orderActionsSection {
+    margin-top: 4px;
+  }
+
   .orderActionsRow {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
   }
   
   .orderActionsRow > button,
   .orderActionsRow > div > button {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     justify-content: center;
+    font-size: 13px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderActionsRow {
+    gap: 6px;
+  }
+
+  .orderActionsRow > button,
+  .orderActionsRow > div > button {
+    font-size: 12px;
+    padding: 4px 10px;
+    height: 34px;
   }
 }
 
