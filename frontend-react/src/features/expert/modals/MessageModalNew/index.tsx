@@ -43,197 +43,30 @@ import dayjs, { type Dayjs } from 'dayjs';
 import { chatApi, ChatListItem, ChatDetail, Message, ChatFrozenError } from '@/features/support/api/chat';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { getMediaUrl } from '../../../config/api';
+import { getMediaUrl } from '../../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
 import { supportRequestsApi } from '@/features/support/api/requests';
 import { ROUTES } from '@/utils/constants';
-import styles from './MessageModalNew.module.css';
-import '../../../styles/messages.css';
-import '../../../styles/avatar.css';
+import styles from '../MessageModalNew.module.css';
+import '../../../../styles/messages.css';
+import '../../../../styles/avatar.css';
+import ChatSidebar from './ChatSidebar';
+import ChatHeader from './ChatHeader';
+import ChatActions from './ChatActions';
+import MessageList from './MessageList';
+import MessageInput from './MessageInput';
+import { truncateFileName, getFileIconByName } from './utils/fileHelpers';
+import { normalizeMessageText, hasVisibleMessageContent, getErrorDetail, parseContextTitle, formatRemaining, isDeadlineExpired, formatOrderStatus, formatTimestamp, formatMessageTime } from './utils/messageHelpers';
+import { detectDeviceEmojiFamily, resolveEmojiVersionByDevice } from './utils/emojiHelpers';
+import type { MessageModalProps, OfferData, WorkOfferData, OrderForChat, DeviceEmojiFamily, EmojiVersionLevel, GroupedMessage } from './types';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { logger } from '@/utils/logger';
 
 const { Text } = Typography;
-interface MessageModalProps {
-  visible: boolean;
-  onClose: () => void;
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
-  selectedUserId?: number;
-  selectedOrderId?: number;
-  chatContextTitle?: string;
-  supportUserId?: number;
-  userProfile?: { role?: string };
-}
-
-type OfferData = {
-  description?: string;
-  work_type?: string;
-  subject?: string;
-  cost?: number;
-  prepayment_percent?: number;
-  deadline?: string | null;
-  status?: 'new' | 'accepted' | 'rejected';
-  order_id?: number;
-} & Record<string, unknown>;
-
-type WorkOfferData = {
-  title?: string;
-  description?: string;
-  cost?: number;
-  status?: 'new' | 'accepted' | 'rejected';
-  delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
-  delivered_message_id?: number;
-} & Record<string, unknown>;
-
-type OrderForChat = {
-  id: number;
-  title?: string | null;
-  description?: string | null;
-  budget?: string | number | null;
-  deadline?: string | null;
-  status?: string | null;
-  is_overdue?: boolean | null;
-  is_frozen?: boolean | null;
-  frozen_reason?: string | null;
-  frozen_at?: string | null;
-  client?: { id?: number | null } | null;
-  client_id?: number | null;
-  expert?: { id?: number | null } | null;
-  expert_id?: number | null;
-  subject?: { name?: string | null } | null;
-  work_type?: { name?: string | null } | null;
-  custom_subject?: string | null;
-  custom_work_type?: string | null;
-  files?: Array<{ id: number; file_name: string; file_url: string; file_type?: string }>;
-};
-
-const getErrorDetail = (error: unknown): string | undefined => {
-  if (typeof error !== 'object' || error === null) return undefined;
-  if (!('response' in error)) return undefined;
-  const resp = (error as { response?: { data?: { detail?: string } } }).response;
-  return resp?.data?.detail;
-};
-
-const parseContextTitle = (raw?: string | null): { title: string; workId?: number } => {
-  const value = typeof raw === 'string' ? raw.trim() : '';
-  if (!value) return { title: '' };
-  const match = value.match(/work:(\d+)/);
-  const workIdRaw = match?.[1] ? Number(match[1]) : NaN;
-  const workId = Number.isFinite(workIdRaw) && workIdRaw > 0 ? workIdRaw : undefined;
-  const title = value.replace(/\s*\|\s*work:\d+\s*$/, '').trim();
-  return { title, workId };
-};
-
-const truncateFileName = (name: string, maxLength: number = 20) => {
-  if (name.length <= maxLength) return name;
-  const extIndex = name.lastIndexOf('.');
-  if (extIndex === -1) return name.substring(0, maxLength) + '...';
-  
-  const ext = name.substring(extIndex);
-  const nameWithoutExt = name.substring(0, extIndex);
-  
-  // Reserve space for extension and ellipsis
-  const availableLength = maxLength - ext.length - 3; 
-  if (availableLength <= 0) return name.substring(0, maxLength) + '...';
-  
-  return nameWithoutExt.substring(0, availableLength) + '...' + ext;
-};
-
-const getFileIconByName = (fileName?: string | null) => {
-  const value = String(fileName || '').toLowerCase();
-  if (!value) return <FileOutlined />;
-  if (value.endsWith('.pdf')) return <FilePdfOutlined />;
-  if (value.endsWith('.doc') || value.endsWith('.docx')) return <FileWordOutlined />;
-  if (value.endsWith('.jpg') || value.endsWith('.jpeg') || value.endsWith('.png') || value.endsWith('.webp') || value.endsWith('.gif')) return <FileImageOutlined />;
-  if (value.endsWith('.zip') || value.endsWith('.rar') || value.endsWith('.7z')) return <FileZipOutlined />;
-  return <FileOutlined />;
-};
-
-const normalizeMessageText = (value: string): string => value.normalize('NFC');
-
-const hasVisibleMessageContent = (value: string): boolean => {
-  const normalized = normalizeMessageText(value);
-  const stripped = normalized
-    .replace(/\s+/gu, '')
-    .replace(/\u200B|\u200C|\u200D/gu, '')
-    .replace(/\uFE0E/gu, '')
-    .replace(/\uFE0F/gu, '')
-    .replace(/\p{Emoji_Modifier}/gu, '')
-    .replace(/\u20E3/gu, '');
-  return stripped.length > 0;
-};
-
-type DeviceEmojiFamily = 'ios' | 'android' | 'windows' | 'mac' | 'linux' | 'other';
-type EmojiVersionLevel = '12.0' | '13.0' | '14.0' | '15.0';
-
-const detectDeviceEmojiFamily = (): DeviceEmojiFamily => {
-  if (typeof navigator === 'undefined') return 'other';
-  const ua = navigator.userAgent || '';
-  if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
-  if (/Android/i.test(ua)) return 'android';
-  if (/Windows/i.test(ua)) return 'windows';
-  if (/Macintosh|Mac OS X/i.test(ua)) return 'mac';
-  if (/Linux/i.test(ua)) return 'linux';
-  return 'other';
-};
-
-const emojiVersionRank: Record<EmojiVersionLevel, number> = {
-  '12.0': 12,
-  '13.0': 13,
-  '14.0': 14,
-  '15.0': 15,
-};
-
-const clampEmojiVersion = (target: EmojiVersionLevel, detected: EmojiVersionLevel): EmojiVersionLevel =>
-  emojiVersionRank[detected] <= emojiVersionRank[target] ? detected : target;
-
-const isEmojiRenderable = (emoji: string): boolean => {
-  if (typeof document === 'undefined') return true;
-  const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return true;
-
-  const render = (symbol: string): Uint8ClampedArray => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.textBaseline = 'top';
-    ctx.font = '28px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
-    ctx.fillText(symbol, 0, 0);
-    return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-  };
-
-  const sample = render(emoji);
-  const fallback = render('\uFFFD');
-
-  for (let i = 0; i < sample.length; i += 1) {
-    if (sample[i] !== fallback[i]) return true;
-  }
-  return false;
-};
-
-const resolveEmojiVersionByDevice = (family: DeviceEmojiFamily): EmojiVersionLevel => {
-  const targetByFamily: Record<DeviceEmojiFamily, EmojiVersionLevel> = {
-    ios: '15.0',
-    android: '14.0',
-    windows: '13.0',
-    mac: '15.0',
-    linux: '13.0',
-    other: '13.0',
-  };
-
-  const target = targetByFamily[family];
-  if (isEmojiRenderable('🩷')) return clampEmojiVersion(target, '15.0');
-  if (isEmojiRenderable('🫶')) return clampEmojiVersion(target, '14.0');
-  if (isEmojiRenderable('🥲')) return clampEmojiVersion(target, '13.0');
-  return '12.0';
-};
 
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
