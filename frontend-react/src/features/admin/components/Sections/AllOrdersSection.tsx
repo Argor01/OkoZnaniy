@@ -125,7 +125,7 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
   if (messages.length === 0) {
     return (
       <Empty
-        description="Переписка отсутствует"
+        description="Сообщений в переписке нет"
         image={Empty.PRESENTED_IMAGE_SIMPLE}
       />
     );
