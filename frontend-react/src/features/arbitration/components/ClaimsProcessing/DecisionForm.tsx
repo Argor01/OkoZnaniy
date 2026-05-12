@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Form, Select, Input, Button, Space, message, Checkbox, Upload, InputNumber, Radio, Slider } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { DecisionRequest } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { DecisionRequest } from '@/features/arbitration/api/types';
 
 const { TextArea } = Input;
 const { Option } = Select;

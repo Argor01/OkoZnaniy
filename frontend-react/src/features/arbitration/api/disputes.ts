@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client';
-import { AssignArbitratorRequest, CreateDisputeRequest, Dispute, ResolveDisputeRequest } from '@/features/arbitrator/types/disputes';
+import { AssignArbitratorRequest, CreateDisputeRequest, Dispute, ResolveDisputeRequest } from '@/features/arbitration/types/disputes';
 
 export type { AssignArbitratorRequest, CreateDisputeRequest, Dispute, ResolveDisputeRequest };
 

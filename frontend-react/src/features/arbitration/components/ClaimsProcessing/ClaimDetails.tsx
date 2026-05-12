@@ -29,8 +29,8 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, RequestInfoRequest, SendForApprovalRequest } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, RequestInfoRequest, SendForApprovalRequest } from '@/features/arbitration/api/types';
 import DecisionForm from './DecisionForm';
 import styles from './ClaimDetails.module.css';
 

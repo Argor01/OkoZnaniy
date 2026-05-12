@@ -14,27 +14,30 @@ import {
   Row,
   Col,
   Empty,
+  Modal,
   Tooltip,
 } from 'antd';
 import {
   SearchOutlined,
   EyeOutlined,
   ReloadOutlined,
-  SendOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, GetClaimsParams } from '@/features/arbitrator/api/types';
-import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
+import ClaimDetails from '@/features/arbitration/components/ClaimsProcessing/ClaimDetails';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const InProgress: React.FC = () => {
+const PendingApproval: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
+  const [approvalStatusFilter, setApprovalStatusFilter] = useState<string | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,17 +45,21 @@ const InProgress: React.FC = () => {
 
   
   const params: GetClaimsParams = {
-    status: 'in_progress',
+    status: 'pending_approval',
     type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
     page: currentPage,
     page_size: pageSize,
     search: searchText || undefined,
+    date_from: dateRange?.[0]?.format('YYYY-MM-DD'),
+    date_to: dateRange?.[1]?.format('YYYY-MM-DD'),
   };
 
   
   const { data: claimsData, isLoading, refetch } = useQuery({
-    queryKey: ['arbitrator-claims', 'in_progress', params],
+    queryKey: ['arbitrator-claims', 'pending_approval', params],
     queryFn: () => arbitratorApi.getClaims(params),
+    retry: false,
+    retryOnMount: false,
     select: (data) => {
       if (data?.results) return data;
       return { count: 0, next: null, previous: null, results: [] };
@@ -60,50 +67,31 @@ const InProgress: React.FC = () => {
   });
 
   
-  const sendForApprovalMutation = useMutation({
-    mutationFn: ({ id, message }: { id: number; message: string }) =>
-      arbitratorApi.sendForApproval(id, { message }),
-    onMutate: async (variables) => {
-      const { id: claimId } = variables;
+  const cancelApprovalMutation = useMutation({
+    mutationFn: (id: number) => {
       
-      await queryClient.cancelQueries({ queryKey: ['arbitrator-claims'] });
-
-      
-      const previousInProgressData = queryClient.getQueryData(['arbitrator-claims', 'in_progress', params]);
-      const previousPendingApprovalData = queryClient.getQueryData(['arbitrator-claims', 'pending_approval']);
-
-      
-      queryClient.setQueryData(['arbitrator-claims', 'in_progress', params], (old: any) => {
-        if (!old?.results) return old;
-        return {
-          ...old,
-          count: Math.max(0, old.count - 1),
-          results: old.results.filter((claim: Claim) => claim.id !== claimId),
-        };
-      });
-
-      return { previousInProgressData, previousPendingApprovalData };
+      return Promise.resolve();
     },
     onSuccess: () => {
-      message.success('Обращение отправлено на согласование');
-      
-      queryClient.invalidateQueries({ queryKey: ['arbitrator-claims', 'pending_approval'] });
-      
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['arbitrator-claims'] });
-      }, 500);
+      message.success('Запрос на согласование отменён');
+      queryClient.invalidateQueries({ queryKey: ['arbitrator-claims'] });
+      refetch();
     },
-    onError: (error: any, variables, context) => {
-      
-      if (context?.previousInProgressData) {
-        queryClient.setQueryData(['arbitrator-claims', 'in_progress', params], context.previousInProgressData);
-      }
-      message.error(error?.response?.data?.detail || error?.message || 'Ошибка при отправке на согласование');
+    onError: (error: any) => {
+      message.error(error?.response?.data?.detail || 'Ошибка при отмене запроса');
     },
   });
 
-  const claims = claimsData?.results || [];
-  const total = claimsData?.count || 0;
+  let claims = claimsData?.results || [];
+  
+  
+  if (approvalStatusFilter) {
+    claims = claims.filter((claim) => 
+      claim.decision?.approval_status === approvalStatusFilter
+    );
+  }
+  
+  const total = approvalStatusFilter ? claims.length : (claimsData?.count || 0);
 
   
   const handleSearch = () => {
@@ -114,6 +102,8 @@ const InProgress: React.FC = () => {
   const handleResetFilters = () => {
     setSearchText('');
     setTypeFilter(undefined);
+    setApprovalStatusFilter(undefined);
+    setDateRange(null);
     setCurrentPage(1);
   };
 
@@ -122,31 +112,25 @@ const InProgress: React.FC = () => {
     setDetailsVisible(true);
   };
 
-  const handleSendForApproval = (claim: Claim) => {
-    
-    sendForApprovalMutation.mutate({
-      id: claim.id,
-      message: 'Отправлено на согласование дирекции',
+  const handleCancelApproval = (claim: Claim) => {
+    Modal.confirm({
+      title: 'Отменить запрос на согласование?',
+      content: 'Вы уверены, что хотите отменить запрос на согласование этого обращения?',
+      okText: 'Отменить запрос',
+      cancelText: 'Закрыть',
+      maskStyle: {
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+      },
+      onOk: () => {
+        cancelApprovalMutation.mutate(claim.id);
+      },
     });
   };
 
   const handleDetailsClose = () => {
     setDetailsVisible(false);
     setSelectedClaim(null);
-  };
-
-  
-  const getTimeInWork = (claim: Claim) => {
-    if (!claim.taken_at) return 'Не указано';
-    const now = dayjs();
-    const taken = dayjs(claim.taken_at);
-    const diff = now.diff(taken, 'hour');
-    if (diff < 24) {
-      return `${diff} ч.`;
-    }
-    const days = Math.floor(diff / 24);
-    const hours = diff % 24;
-    return `${days} дн. ${hours} ч.`;
   };
 
   
@@ -174,6 +158,34 @@ const InProgress: React.FC = () => {
         return 'Конфликт';
       default:
         return type;
+    }
+  };
+
+  
+  const getApprovalStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'orange';
+      case 'approved':
+        return 'green';
+      case 'rejected':
+        return 'red';
+      default:
+        return 'default';
+    }
+  };
+
+  
+  const getApprovalStatusText = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Ожидает решения';
+      case 'approved':
+        return 'Согласовано';
+      case 'rejected':
+        return 'Отклонено';
+      default:
+        return status;
     }
   };
 
@@ -237,21 +249,41 @@ const InProgress: React.FC = () => {
         ),
     },
     {
-      title: 'Время в работе',
-      key: 'time_in_work',
-      width: 110,
-      render: (record: Claim) => <Text className="arbitratorTextXs">{getTimeInWork(record)}</Text>,
-    },
-    {
-      title: 'Последнее действие',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
+      title: 'Дата отправки',
+      dataIndex: 'created_at',
+      key: 'created_at',
       width: 110,
       render: (date: string) => (
         <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
           <span className="arbitratorTextXs">
             {dayjs(date).format('DD.MM.YYYY')}
           </span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: 'Статус',
+      key: 'approval_status',
+      width: 130,
+      render: (record: Claim) =>
+        record.decision?.approval_status ? (
+          <Tag color={getApprovalStatusColor(record.decision.approval_status)} className="arbitratorTagNoMargin">
+            {getApprovalStatusText(record.decision.approval_status)}
+          </Tag>
+        ) : (
+          <Tag color="orange" className="arbitratorTagNoMargin">Ожидает решения</Tag>
+        ),
+    },
+    {
+      title: 'Комментарий',
+      key: 'approval_comment',
+      width: 150,
+      ellipsis: true,
+      render: (record: Claim) => (
+        <Tooltip title={record.decision?.approval_comment || '-'}>
+          <Text className="arbitratorTextXs">
+            {record.decision?.approval_comment || '-'}
+          </Text>
         </Tooltip>
       ),
     },
@@ -269,14 +301,17 @@ const InProgress: React.FC = () => {
               onClick={() => handleViewDetails(record)}
             />
           </Tooltip>
-          <Tooltip title="На согласование">
-            <Button
-              size="small"
-              icon={<SendOutlined />}
-              onClick={() => handleSendForApproval(record)}
-              loading={sendForApprovalMutation.isPending}
-            />
-          </Tooltip>
+          {record.decision?.approval_status === 'pending' && (
+            <Tooltip title="Отменить запрос">
+              <Button
+                size="small"
+                danger
+                icon={<CloseCircleOutlined />}
+                onClick={() => handleCancelApproval(record)}
+                loading={cancelApprovalMutation.isPending}
+              />
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -285,13 +320,13 @@ const InProgress: React.FC = () => {
   return (
     <div>
       <Card className="arbitratorCard">
-        <Title level={4} className="arbitratorSectionTitle">В работе</Title>
+        <Title level={4} className="arbitratorSectionTitle">Ожидают решения</Title>
         <Text type="secondary" className="arbitratorSectionSubtitle">
-          Список обращений, находящихся в обработке
+          Обращения, отправленные на согласование дирекции
         </Text>
 
         <Row gutter={[12, 12]} className="arbitratorFiltersRow">
-          <Col xs={24} sm={12} md={8} lg={8}>
+          <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
               prefix={<SearchOutlined />}
@@ -313,6 +348,28 @@ const InProgress: React.FC = () => {
               <Option value="dispute">Арбитраж</Option>
               <Option value="conflict">Конфликт</Option>
             </Select>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={4}>
+            <Select
+              placeholder="Статус согласования"
+              className="arbitratorSelectFull"
+              value={approvalStatusFilter}
+              onChange={setApprovalStatusFilter}
+              allowClear
+            >
+              <Option value="pending">Ожидает решения</Option>
+              <Option value="approved">Согласовано</Option>
+              <Option value="rejected">Отклонено</Option>
+            </Select>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <RangePicker
+              className="arbitratorSelectFull"
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates)}
+              format="DD.MM.YYYY"
+              placeholder={['Дата от', 'Дата до']}
+            />
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
             <Space>
@@ -348,7 +405,7 @@ const InProgress: React.FC = () => {
             locale={{
               emptyText: (
                 <Empty
-                  description="Обращения в работе не найдены"
+                  description="Обращения, ожидающие решения, не найдены"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ),
@@ -369,4 +426,4 @@ const InProgress: React.FC = () => {
   );
 };
 
-export default InProgress;
+export default PendingApproval;

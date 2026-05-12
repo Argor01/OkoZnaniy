@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { message } from 'antd';
 import { adminPanelApi } from '@/features/admin/api';
-import { disputesApi } from '@/features/arbitrator/api/disputes';
+import { disputesApi } from '@/features/arbitration/api/disputes';
 import { QUERY_KEYS, QUERY_CONFIG } from '@/features/admin/constants';
 import type { Partner, PartnerEarning, Arbitrator } from '@/features/admin/types/admin';
 import type { Dispute, AdminStats } from '@/features/admin/types';

@@ -10,9 +10,9 @@ import {
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import DirectorChat from './DirectorChat';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim } from '@/features/arbitrator/api/types';
-import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim } from '@/features/arbitration/api/types';
+import ClaimDetails from '@/features/arbitration/components/ClaimsProcessing/ClaimDetails';
 
 type InternalCommunicationTab = 'chat' | 'approvals';
 

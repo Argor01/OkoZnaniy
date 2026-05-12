@@ -14,29 +14,27 @@ import {
   Row,
   Col,
   Empty,
-  InputNumber,
   Tooltip,
 } from 'antd';
 import {
   SearchOutlined,
   EyeOutlined,
   ReloadOutlined,
-  DollarOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, GetClaimsParams } from '@/features/arbitrator/api/types';
-import ClaimDetails from './ClaimDetails';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
+import ClaimDetails from '@/features/arbitration/components/ClaimsProcessing/ClaimDetails';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const RefundRequests: React.FC = () => {
+const Completed: React.FC = () => {
   const [searchText, setSearchText] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
-  const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
-  const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
+  const [decisionTypeFilter, setDecisionTypeFilter] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -45,7 +43,8 @@ const RefundRequests: React.FC = () => {
 
   
   const params: GetClaimsParams = {
-    type: 'refund',
+    status: 'completed',
+    type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
     page: currentPage,
     page_size: pageSize,
     search: searchText || undefined,
@@ -55,7 +54,7 @@ const RefundRequests: React.FC = () => {
 
   
   const { data: claimsData, isLoading, refetch } = useQuery({
-    queryKey: ['arbitrator-claims', 'refund', params],
+    queryKey: ['arbitrator-claims', 'completed', params],
     queryFn: () => arbitratorApi.getClaims(params),
     retry: false,
     retryOnMount: false,
@@ -66,25 +65,15 @@ const RefundRequests: React.FC = () => {
   });
 
   let claims = claimsData?.results || [];
-
   
-  if (statusFilter) {
-    claims = claims.filter((claim) => claim.status === statusFilter);
-  }
-
   
-  if (minAmount !== undefined || maxAmount !== undefined) {
-    claims = claims.filter((claim) => {
-      const amount = claim.order.amount;
-      if (minAmount !== undefined && amount < minAmount) return false;
-      if (maxAmount !== undefined && amount > maxAmount) return false;
-      return true;
-    });
+  if (decisionTypeFilter) {
+    claims = claims.filter((claim) => 
+      claim.decision?.decision_type === decisionTypeFilter
+    );
   }
-
-  const total = (statusFilter || minAmount !== undefined || maxAmount !== undefined)
-    ? claims.length
-    : (claimsData?.count || 0);
+  
+  const total = decisionTypeFilter ? claims.length : (claimsData?.count || 0);
 
   
   const handleSearch = () => {
@@ -94,9 +83,8 @@ const RefundRequests: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchText('');
-    setStatusFilter(undefined);
-    setMinAmount(undefined);
-    setMaxAmount(undefined);
+    setTypeFilter(undefined);
+    setDecisionTypeFilter(undefined);
     setDateRange(null);
     setCurrentPage(1);
   };
@@ -106,49 +94,76 @@ const RefundRequests: React.FC = () => {
     setDetailsVisible(true);
   };
 
+  const handleExport = () => {
+    message.info('Функция экспорта будет реализована на этапе 5');
+    
+  };
+
   const handleDetailsClose = () => {
     setDetailsVisible(false);
     setSelectedClaim(null);
   };
 
   
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new':
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'refund':
         return 'blue';
-      case 'in_progress':
+      case 'dispute':
         return 'orange';
-      case 'completed':
-        return 'green';
-      case 'pending_approval':
-        return 'purple';
+      case 'conflict':
+        return 'red';
       default:
         return 'default';
     }
   };
 
   
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'Новая';
-      case 'in_progress':
-        return 'В рассмотрении';
-      case 'completed':
-        return 'Завершена';
-      case 'pending_approval':
-        return 'Ожидает согласования';
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'refund':
+        return 'Возврат средств';
+      case 'dispute':
+        return 'Арбитраж';
+      case 'conflict':
+        return 'Конфликт';
       default:
-        return status;
+        return type;
     }
   };
 
   
-  const getRequestedAmount = (claim: Claim) => {
-    if ('requested_amount' in claim) {
-      return (claim as any).requested_amount;
+  const getDecisionText = (decisionType: string) => {
+    switch (decisionType) {
+      case 'full_refund':
+        return 'Полный возврат';
+      case 'partial_refund':
+        return 'Частичный возврат';
+      case 'no_refund':
+        return 'Отказ в возврате';
+      case 'revision':
+        return 'Возврат на доработку';
+      case 'other':
+        return 'Другое';
+      default:
+        return decisionType;
     }
-    return claim.order.amount;
+  };
+
+  
+  const getDecisionColor = (decisionType: string) => {
+    switch (decisionType) {
+      case 'full_refund':
+        return 'green';
+      case 'partial_refund':
+        return 'blue';
+      case 'no_refund':
+        return 'red';
+      case 'revision':
+        return 'orange';
+      default:
+        return 'default';
+    }
   };
 
   
@@ -161,13 +176,13 @@ const RefundRequests: React.FC = () => {
       render: (id: number) => <Text strong>#{id}</Text>,
     },
     {
-      title: 'Статус',
-      dataIndex: 'status',
-      key: 'status',
-      width: 130,
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)} className="arbitratorTagNoMargin">
-          {getStatusText(status)}
+      title: 'Тип',
+      dataIndex: 'type',
+      key: 'type',
+      width: 110,
+      render: (type: string) => (
+        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
+          {getTypeText(type)}
         </Tag>
       ),
     },
@@ -211,38 +226,50 @@ const RefundRequests: React.FC = () => {
         ),
     },
     {
-      title: 'Сумма заказа',
-      key: 'order_amount',
-      width: 100,
-      align: 'right' as const,
-      render: (record: Claim) => (
-        <Text className="arbitratorAmountText">{record.order.amount.toLocaleString()} ₽</Text>
-      ),
+      title: 'Решение',
+      key: 'decision',
+      width: 130,
+      render: (record: Claim) =>
+        record.decision ? (
+          <Tag color={getDecisionColor(record.decision.decision_type)} className="arbitratorTagNoMargin">
+            {getDecisionText(record.decision.decision_type)}
+          </Tag>
+        ) : (
+          <Text type="secondary" className="arbitratorTextXs">Не указано</Text>
+        ),
     },
     {
-      title: 'Запрошено',
-      key: 'requested_amount',
-      width: 100,
-      align: 'right' as const,
-      render: (record: Claim) => (
-        <Text strong className="arbitratorAmountHighlight">
-          {getRequestedAmount(record).toLocaleString()} ₽
-        </Text>
-      ),
-    },
-    {
-      title: 'Дата',
-      dataIndex: 'created_at',
-      key: 'created_at',
+      title: 'Дата завершения',
+      dataIndex: 'completed_at',
+      key: 'completed_at',
       width: 110,
-      render: (date: string) => (
-        <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
-          <span className="arbitratorTextXs">
-            {dayjs(date).format('DD.MM.YYYY')}
-          </span>
-        </Tooltip>
-      ),
+      render: (date: string) =>
+        date ? (
+          <Tooltip title={dayjs(date).format('DD.MM.YYYY HH:mm')}>
+            <span className="arbitratorTextXs">
+              {dayjs(date).format('DD.MM.YYYY')}
+            </span>
+          </Tooltip>
+        ) : (
+          <Text type="secondary">-</Text>
+        ),
       sorter: true,
+    },
+    {
+      title: 'Арбитр',
+      key: 'arbitrator',
+      width: 110,
+      ellipsis: true,
+      render: (record: Claim) =>
+        record.arbitrator ? (
+          <Tooltip title={record.arbitrator.username}>
+            <Text className="arbitratorTextEllipsisXs">
+              {record.arbitrator.username}
+            </Text>
+          </Tooltip>
+        ) : (
+          <Text type="secondary" className="arbitratorTextXs">Не указан</Text>
+        ),
     },
     {
       title: 'Действия',
@@ -264,14 +291,23 @@ const RefundRequests: React.FC = () => {
   return (
     <div>
       <Card className="arbitratorCard">
-        <Title level={4} className="arbitratorSectionTitle">
-          <DollarOutlined /> Заявки на возврат средств
-        </Title>
-        <Text type="secondary" className="arbitratorSectionSubtitle">
-          Список заявок на возврат средств от клиентов
-        </Text>
+        <div className="arbitratorHeaderRow">
+          <div>
+            <Title level={4} className="arbitratorSectionTitleCompact">Завершённые</Title>
+            <Text type="secondary" className="arbitratorSectionSubtitle">
+              Архив завершённых обращений
+            </Text>
+          </div>
+          <Tooltip title="Экспорт данных">
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={handleExport}
+            />
+          </Tooltip>
+        </div>
 
-        <Row gutter={[12, 12]} className="arbitratorFiltersRow">
+        <Row gutter={[12, 12]} className="arbitratorFiltersRowCompact">
           <Col xs={24} sm={12} md={8} lg={6}>
             <Input
               placeholder="Поиск по номеру, клиенту, эксперту..."
@@ -284,39 +320,31 @@ const RefundRequests: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
-              placeholder="Статус"
+              placeholder="Тип обращения"
               className="arbitratorSelectFull"
-              value={statusFilter}
-              onChange={setStatusFilter}
+              value={typeFilter}
+              onChange={setTypeFilter}
               allowClear
             >
-              <Option value="new">Новая</Option>
-              <Option value="in_progress">В рассмотрении</Option>
-              <Option value="completed">Завершена</Option>
-              <Option value="pending_approval">Ожидает согласования</Option>
+              <Option value="refund">Возврат средств</Option>
+              <Option value="dispute">Арбитраж</Option>
+              <Option value="conflict">Конфликт</Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={8} lg={3}>
-            <InputNumber
-              placeholder="Сумма от"
+          <Col xs={24} sm={12} md={8} lg={4}>
+            <Select
+              placeholder="Тип решения"
               className="arbitratorSelectFull"
-              value={minAmount}
-              onChange={(value) => setMinAmount(value || undefined)}
-              min={0}
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={3}>
-            <InputNumber
-              placeholder="Сумма до"
-              className="arbitratorSelectFull"
-              value={maxAmount}
-              onChange={(value) => setMaxAmount(value || undefined)}
-              min={0}
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
-              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
-            />
+              value={decisionTypeFilter}
+              onChange={setDecisionTypeFilter}
+              allowClear
+            >
+              <Option value="full_refund">Полный возврат</Option>
+              <Option value="partial_refund">Частичный возврат</Option>
+              <Option value="no_refund">Отказ в возврате</Option>
+              <Option value="revision">Возврат на доработку</Option>
+              <Option value="other">Другое</Option>
+            </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
@@ -327,7 +355,7 @@ const RefundRequests: React.FC = () => {
               placeholder={['Дата от', 'Дата до']}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={2}>
+          <Col xs={24} sm={12} md={8} lg={4}>
             <Space>
               <Tooltip title="Поиск">
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch} />
@@ -351,7 +379,7 @@ const RefundRequests: React.FC = () => {
               pageSize: pageSize,
               total: total,
               showSizeChanger: true,
-              showTotal: (total) => `Всего ${total} заявок`,
+              showTotal: (total) => `Всего ${total} обращений`,
               onChange: (page, size) => {
                 setCurrentPage(page);
                 setPageSize(size);
@@ -361,7 +389,7 @@ const RefundRequests: React.FC = () => {
             locale={{
               emptyText: (
                 <Empty
-                  description="Заявки на возврат средств не найдены"
+                  description="Завершённые обращения не найдены"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ),
@@ -376,12 +404,10 @@ const RefundRequests: React.FC = () => {
           claim={selectedClaim}
           visible={detailsVisible}
           onClose={handleDetailsClose}
-          showDecisionForm={true}
         />
       )}
     </div>
   );
 };
 
-export default RefundRequests;
-
+export default Completed;

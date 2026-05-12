@@ -16,11 +16,11 @@ import {
   SearchOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { GetMessagesParams, InternalMessage, Claim } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { GetMessagesParams, InternalMessage, Claim } from '@/features/arbitration/api/types';
 import MessageList from './MessageList';
 import MessageForm from './MessageForm';
-import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
+import ClaimDetails from '@/features/arbitration/components/ClaimsProcessing/ClaimDetails';
 import { authApi } from '@/features/auth/api/auth';
 import { logger } from '@/utils/logger';
 
