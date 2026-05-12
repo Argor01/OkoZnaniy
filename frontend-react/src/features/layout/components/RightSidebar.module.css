@@ -207,3 +207,13 @@
   background-color: var(--color-bg-spotlight, #1e2230);
   color: var(--color-text-secondary, #94a3b8);
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.rightSidebar {
+  animation: slideInRight 0.4s ease-out 0.2s both;
+}

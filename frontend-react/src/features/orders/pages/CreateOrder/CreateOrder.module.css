@@ -508,3 +508,21 @@
     font-size: 11px !important;
   }
 }
+
+/* ===== ANIMATIONS ===== */
+.container {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.card {
+  animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+.orderSection {
+  animation: fadeInUp 0.35s ease-out 0.15s both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}

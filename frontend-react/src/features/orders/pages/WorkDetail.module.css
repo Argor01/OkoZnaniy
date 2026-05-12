@@ -215,3 +215,13 @@
 :global([data-theme="dark"]) .ratingComment {
   background: var(--color-bg-elevated, #22262f);
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page {
+  animation: fadeInUp 0.4s ease-out;
+}

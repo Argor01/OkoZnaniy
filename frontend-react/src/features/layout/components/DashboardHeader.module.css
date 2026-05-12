@@ -542,3 +542,16 @@
 :global([data-theme="dark"]) .supportScheduleText {
   color: var(--color-text-secondary, #94a3b8);
 }
+
+/* ===== ANIMATIONS ===== */
+.navItem {
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.navItem:hover {
+  transform: translateY(-1px);
+}
+
+.navItem:active {
+  transform: translateY(0);
+}
