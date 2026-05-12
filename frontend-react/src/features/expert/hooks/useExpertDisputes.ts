@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { disputesApi, Dispute } from '@/features/arbitrator/api/disputes';
+import { disputesApi, Dispute } from '@/features/arbitration/api/disputes';
 import { ArbitrationCase } from '../types';
 import dayjs from 'dayjs';
 

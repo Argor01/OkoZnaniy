@@ -3,8 +3,8 @@ import { Form, Input, Select, Button, Upload, Space, message, Popover } from 'an
 import { UploadOutlined, SendOutlined, SmileOutlined, PaperClipOutlined } from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { SendMessageRequest } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { SendMessageRequest } from '@/features/arbitration/api/types';
 
 const { TextArea } = Input;
 const { Option } = Select;

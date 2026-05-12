@@ -25,7 +25,7 @@ const TicketDetailPage = lazy(() => import('@/features/admin/pages/TicketDetailP
 const ArbitrationDetailPage = lazy(() => import('@/features/admin/pages/ArbitrationDetailPage'));
 const ArbitrationCaseDetailPage = lazy(() => import('@/features/admin/pages/ArbitrationCaseDetailPage'));
 const DirectorDashboard = lazy(() => import('@/features/director/pages/DirectorDashboard'));
-const ArbitratorDashboard = lazy(() => import('@/features/arbitrator/pages/ArbitratorDashboard'));
+const ArbitratorDashboard = lazy(() => import('@/features/arbitration/pages/ArbitratorDashboard'));
 const ShopReadyWorks = lazy(() => import('@/features/shop/pages/ShopReadyWorks'));
 const AddWorkToShop = lazy(() => import('@/features/shop/pages/AddWorkToShop'));
 const MyWorks = lazy(() => import('@/features/orders/pages/MyWorks'));

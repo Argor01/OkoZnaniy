@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Table,
   Card,
@@ -14,7 +14,6 @@ import {
   Row,
   Col,
   Empty,
-  Modal,
   Tooltip,
 } from 'antd';
 import {
@@ -24,19 +23,18 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, GetClaimsParams } from '@/features/arbitrator/api/types';
-import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
+import ClaimDetails from './ClaimDetails';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const PendingApproval: React.FC = () => {
-  const queryClient = useQueryClient();
+const CancelledOrders: React.FC = () => {
   const [searchText, setSearchText] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
-  const [approvalStatusFilter, setApprovalStatusFilter] = useState<string | undefined>(undefined);
+  const [conflictTypeFilter, setConflictTypeFilter] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -45,8 +43,7 @@ const PendingApproval: React.FC = () => {
 
   
   const params: GetClaimsParams = {
-    status: 'pending_approval',
-    type: typeFilter as 'refund' | 'dispute' | 'conflict' | undefined,
+    type: 'conflict',
     page: currentPage,
     page_size: pageSize,
     search: searchText || undefined,
@@ -56,7 +53,7 @@ const PendingApproval: React.FC = () => {
 
   
   const { data: claimsData, isLoading, refetch } = useQuery({
-    queryKey: ['arbitrator-claims', 'pending_approval', params],
+    queryKey: ['arbitrator-claims', 'conflict', params],
     queryFn: () => arbitratorApi.getClaims(params),
     retry: false,
     retryOnMount: false,
@@ -66,32 +63,26 @@ const PendingApproval: React.FC = () => {
     },
   });
 
-  
-  const cancelApprovalMutation = useMutation({
-    mutationFn: (id: number) => {
-      
-      return Promise.resolve();
-    },
-    onSuccess: () => {
-      message.success('Запрос на согласование отменён');
-      queryClient.invalidateQueries({ queryKey: ['arbitrator-claims'] });
-      refetch();
-    },
-    onError: (error: any) => {
-      message.error(error?.response?.data?.detail || 'Ошибка при отмене запроса');
-    },
-  });
-
   let claims = claimsData?.results || [];
+
   
-  
-  if (approvalStatusFilter) {
-    claims = claims.filter((claim) => 
-      claim.decision?.approval_status === approvalStatusFilter
-    );
+  if (conflictTypeFilter) {
+    claims = claims.filter((claim) => {
+      if ('conflict_type' in claim) {
+        return (claim as any).conflict_type === conflictTypeFilter;
+      }
+      return false;
+    });
   }
+
   
-  const total = approvalStatusFilter ? claims.length : (claimsData?.count || 0);
+  if (statusFilter) {
+    claims = claims.filter((claim) => claim.status === statusFilter);
+  }
+
+  const total = (conflictTypeFilter || statusFilter)
+    ? claims.length
+    : (claimsData?.count || 0);
 
   
   const handleSearch = () => {
@@ -101,8 +92,8 @@ const PendingApproval: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchText('');
-    setTypeFilter(undefined);
-    setApprovalStatusFilter(undefined);
+    setConflictTypeFilter(undefined);
+    setStatusFilter(undefined);
     setDateRange(null);
     setCurrentPage(1);
   };
@@ -112,78 +103,62 @@ const PendingApproval: React.FC = () => {
     setDetailsVisible(true);
   };
 
-  const handleCancelApproval = (claim: Claim) => {
-    Modal.confirm({
-      title: 'Отменить запрос на согласование?',
-      content: 'Вы уверены, что хотите отменить запрос на согласование этого обращения?',
-      okText: 'Отменить запрос',
-      cancelText: 'Закрыть',
-      maskStyle: {
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-      },
-      onOk: () => {
-        cancelApprovalMutation.mutate(claim.id);
-      },
-    });
-  };
-
   const handleDetailsClose = () => {
     setDetailsVisible(false);
     setSelectedClaim(null);
   };
 
   
-  const getTypeColor = (type: string) => {
+  const getConflictTypeColor = (type: string) => {
     switch (type) {
-      case 'refund':
-        return 'blue';
-      case 'dispute':
-        return 'orange';
-      case 'conflict':
+      case 'quality':
         return 'red';
+      case 'deadline':
+        return 'orange';
+      case 'other':
+        return 'default';
       default:
         return 'default';
     }
   };
 
   
-  const getTypeText = (type: string) => {
+  const getConflictTypeText = (type: string) => {
     switch (type) {
-      case 'refund':
-        return 'Возврат средств';
-      case 'dispute':
-        return 'Арбитраж';
-      case 'conflict':
-        return 'Конфликт';
+      case 'quality':
+        return 'Качество работы';
+      case 'deadline':
+        return 'Нарушение сроков';
+      case 'other':
+        return 'Другие';
       default:
         return type;
     }
   };
 
   
-  const getApprovalStatusColor = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'new':
+        return 'blue';
+      case 'in_progress':
         return 'orange';
-      case 'approved':
+      case 'completed':
         return 'green';
-      case 'rejected':
-        return 'red';
       default:
         return 'default';
     }
   };
 
   
-  const getApprovalStatusText = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'Ожидает решения';
-      case 'approved':
-        return 'Согласовано';
-      case 'rejected':
-        return 'Отклонено';
+      case 'new':
+        return 'Новая';
+      case 'in_progress':
+        return 'В рассмотрении';
+      case 'completed':
+        return 'Решена';
       default:
         return status;
     }
@@ -199,13 +174,29 @@ const PendingApproval: React.FC = () => {
       render: (id: number) => <Text strong>#{id}</Text>,
     },
     {
-      title: 'Тип',
-      dataIndex: 'type',
-      key: 'type',
-      width: 110,
-      render: (type: string) => (
-        <Tag color={getTypeColor(type)} className="arbitratorTagNoMargin">
-          {getTypeText(type)}
+      title: 'Тип конфликта',
+      key: 'conflict_type',
+      width: 130,
+      render: (record: Claim) => {
+        if ('conflict_type' in record) {
+          const conflictType = (record as any).conflict_type;
+          return (
+            <Tag color={getConflictTypeColor(conflictType)} className="arbitratorTagNoMargin">
+              {getConflictTypeText(conflictType)}
+            </Tag>
+          );
+        }
+        return <Text type="secondary" className="arbitratorTextXs">-</Text>;
+      },
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)} className="arbitratorTagNoMargin">
+          {getStatusText(status)}
         </Tag>
       ),
     },
@@ -249,7 +240,16 @@ const PendingApproval: React.FC = () => {
         ),
     },
     {
-      title: 'Дата отправки',
+      title: 'Сумма заказа',
+      key: 'order_amount',
+      width: 100,
+      align: 'right' as const,
+      render: (record: Claim) => (
+        <Text className="arbitratorAmountText">{record.order.amount.toLocaleString()} ₽</Text>
+      ),
+    },
+    {
+      title: 'Дата отмены',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 110,
@@ -260,59 +260,21 @@ const PendingApproval: React.FC = () => {
           </span>
         </Tooltip>
       ),
-    },
-    {
-      title: 'Статус',
-      key: 'approval_status',
-      width: 130,
-      render: (record: Claim) =>
-        record.decision?.approval_status ? (
-          <Tag color={getApprovalStatusColor(record.decision.approval_status)} className="arbitratorTagNoMargin">
-            {getApprovalStatusText(record.decision.approval_status)}
-          </Tag>
-        ) : (
-          <Tag color="orange" className="arbitratorTagNoMargin">Ожидает решения</Tag>
-        ),
-    },
-    {
-      title: 'Комментарий',
-      key: 'approval_comment',
-      width: 150,
-      ellipsis: true,
-      render: (record: Claim) => (
-        <Tooltip title={record.decision?.approval_comment || '-'}>
-          <Text className="arbitratorTextXs">
-            {record.decision?.approval_comment || '-'}
-          </Text>
-        </Tooltip>
-      ),
+      sorter: true,
     },
     {
       title: 'Действия',
       key: 'actions',
-      width: 90,
+      width: 60,
       fixed: 'right' as const,
       render: (record: Claim) => (
-        <Space size="small">
-          <Tooltip title="Просмотр">
-            <Button
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetails(record)}
-            />
-          </Tooltip>
-          {record.decision?.approval_status === 'pending' && (
-            <Tooltip title="Отменить запрос">
-              <Button
-                size="small"
-                danger
-                icon={<CloseCircleOutlined />}
-                onClick={() => handleCancelApproval(record)}
-                loading={cancelApprovalMutation.isPending}
-              />
-            </Tooltip>
-          )}
-        </Space>
+        <Tooltip title="Просмотр">
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetails(record)}
+          />
+        </Tooltip>
       ),
     },
   ];
@@ -320,9 +282,11 @@ const PendingApproval: React.FC = () => {
   return (
     <div>
       <Card className="arbitratorCard">
-        <Title level={4} className="arbitratorSectionTitle">Ожидают решения</Title>
+        <Title level={4} className="arbitratorSectionTitle">
+          <CloseCircleOutlined /> Отменённые обращения
+        </Title>
         <Text type="secondary" className="arbitratorSectionSubtitle">
-          Обращения, отправленные на согласование дирекции
+          Список отменённых заказов, требующих арбитража
         </Text>
 
         <Row gutter={[12, 12]} className="arbitratorFiltersRow">
@@ -338,28 +302,28 @@ const PendingApproval: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
-              placeholder="Тип обращения"
+              placeholder="Тип конфликта"
               className="arbitratorSelectFull"
-              value={typeFilter}
-              onChange={setTypeFilter}
+              value={conflictTypeFilter}
+              onChange={setConflictTypeFilter}
               allowClear
             >
-              <Option value="refund">Возврат средств</Option>
-              <Option value="dispute">Арбитраж</Option>
-              <Option value="conflict">Конфликт</Option>
+              <Option value="quality">Качество работы</Option>
+              <Option value="deadline">Нарушение сроков</Option>
+              <Option value="other">Другие</Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
-              placeholder="Статус согласования"
+              placeholder="Статус"
               className="arbitratorSelectFull"
-              value={approvalStatusFilter}
-              onChange={setApprovalStatusFilter}
+              value={statusFilter}
+              onChange={setStatusFilter}
               allowClear
             >
-              <Option value="pending">Ожидает решения</Option>
-              <Option value="approved">Согласовано</Option>
-              <Option value="rejected">Отклонено</Option>
+              <Option value="new">Новая</Option>
+              <Option value="in_progress">В рассмотрении</Option>
+              <Option value="completed">Решена</Option>
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
@@ -405,7 +369,7 @@ const PendingApproval: React.FC = () => {
             locale={{
               emptyText: (
                 <Empty
-                  description="Обращения, ожидающие решения, не найдены"
+                  description="Отменённые обращения не найдены"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ),
@@ -420,10 +384,12 @@ const PendingApproval: React.FC = () => {
           claim={selectedClaim}
           visible={detailsVisible}
           onClose={handleDetailsClose}
+          showDecisionForm={true}
         />
       )}
     </div>
   );
 };
 
-export default PendingApproval;
+export default CancelledOrders;
+

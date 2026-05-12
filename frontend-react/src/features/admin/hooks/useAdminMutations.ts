@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { adminPanelApi } from '@/features/admin/api';
-import { disputesApi } from '@/features/arbitrator/api/disputes';
+import { disputesApi } from '@/features/arbitration/api/disputes';
 import { QUERY_KEYS } from '@/features/admin/constants';
 import type { UpdatePartnerRequest, PartnerEarning } from '@/features/admin/types/admin';
 import type { Dispute } from '@/features/admin/types';

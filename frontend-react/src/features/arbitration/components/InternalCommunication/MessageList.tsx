@@ -10,8 +10,8 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { InternalMessage } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { InternalMessage } from '@/features/arbitration/api/types';
 
 const { Text, Paragraph } = Typography;
 

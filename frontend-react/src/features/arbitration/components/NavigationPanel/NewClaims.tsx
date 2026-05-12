@@ -24,9 +24,9 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, GetClaimsParams } from '@/features/arbitrator/api/types';
-import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
+import ClaimDetails from '@/features/arbitration/components/ClaimsProcessing/ClaimDetails';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;

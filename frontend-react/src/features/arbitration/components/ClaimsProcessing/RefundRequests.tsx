@@ -14,27 +14,29 @@ import {
   Row,
   Col,
   Empty,
+  InputNumber,
   Tooltip,
 } from 'antd';
 import {
   SearchOutlined,
   EyeOutlined,
   ReloadOutlined,
-  CloseCircleOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
-import { arbitratorApi } from '@/features/arbitrator/api/arbitratorApi';
-import type { Claim, GetClaimsParams } from '@/features/arbitrator/api/types';
+import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
+import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
 import ClaimDetails from './ClaimDetails';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const CancelledOrders: React.FC = () => {
+const RefundRequests: React.FC = () => {
   const [searchText, setSearchText] = useState('');
-  const [conflictTypeFilter, setConflictTypeFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
+  const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -43,7 +45,7 @@ const CancelledOrders: React.FC = () => {
 
   
   const params: GetClaimsParams = {
-    type: 'conflict',
+    type: 'refund',
     page: currentPage,
     page_size: pageSize,
     search: searchText || undefined,
@@ -53,7 +55,7 @@ const CancelledOrders: React.FC = () => {
 
   
   const { data: claimsData, isLoading, refetch } = useQuery({
-    queryKey: ['arbitrator-claims', 'conflict', params],
+    queryKey: ['arbitrator-claims', 'refund', params],
     queryFn: () => arbitratorApi.getClaims(params),
     retry: false,
     retryOnMount: false,
@@ -66,21 +68,21 @@ const CancelledOrders: React.FC = () => {
   let claims = claimsData?.results || [];
 
   
-  if (conflictTypeFilter) {
-    claims = claims.filter((claim) => {
-      if ('conflict_type' in claim) {
-        return (claim as any).conflict_type === conflictTypeFilter;
-      }
-      return false;
-    });
-  }
-
-  
   if (statusFilter) {
     claims = claims.filter((claim) => claim.status === statusFilter);
   }
 
-  const total = (conflictTypeFilter || statusFilter)
+  
+  if (minAmount !== undefined || maxAmount !== undefined) {
+    claims = claims.filter((claim) => {
+      const amount = claim.order.amount;
+      if (minAmount !== undefined && amount < minAmount) return false;
+      if (maxAmount !== undefined && amount > maxAmount) return false;
+      return true;
+    });
+  }
+
+  const total = (statusFilter || minAmount !== undefined || maxAmount !== undefined)
     ? claims.length
     : (claimsData?.count || 0);
 
@@ -92,8 +94,9 @@ const CancelledOrders: React.FC = () => {
 
   const handleResetFilters = () => {
     setSearchText('');
-    setConflictTypeFilter(undefined);
     setStatusFilter(undefined);
+    setMinAmount(undefined);
+    setMaxAmount(undefined);
     setDateRange(null);
     setCurrentPage(1);
   };
@@ -109,34 +112,6 @@ const CancelledOrders: React.FC = () => {
   };
 
   
-  const getConflictTypeColor = (type: string) => {
-    switch (type) {
-      case 'quality':
-        return 'red';
-      case 'deadline':
-        return 'orange';
-      case 'other':
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
-  
-  const getConflictTypeText = (type: string) => {
-    switch (type) {
-      case 'quality':
-        return 'Качество работы';
-      case 'deadline':
-        return 'Нарушение сроков';
-      case 'other':
-        return 'Другие';
-      default:
-        return type;
-    }
-  };
-
-  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new':
@@ -145,6 +120,8 @@ const CancelledOrders: React.FC = () => {
         return 'orange';
       case 'completed':
         return 'green';
+      case 'pending_approval':
+        return 'purple';
       default:
         return 'default';
     }
@@ -158,10 +135,20 @@ const CancelledOrders: React.FC = () => {
       case 'in_progress':
         return 'В рассмотрении';
       case 'completed':
-        return 'Решена';
+        return 'Завершена';
+      case 'pending_approval':
+        return 'Ожидает согласования';
       default:
         return status;
     }
+  };
+
+  
+  const getRequestedAmount = (claim: Claim) => {
+    if ('requested_amount' in claim) {
+      return (claim as any).requested_amount;
+    }
+    return claim.order.amount;
   };
 
   
@@ -174,26 +161,10 @@ const CancelledOrders: React.FC = () => {
       render: (id: number) => <Text strong>#{id}</Text>,
     },
     {
-      title: 'Тип конфликта',
-      key: 'conflict_type',
-      width: 130,
-      render: (record: Claim) => {
-        if ('conflict_type' in record) {
-          const conflictType = (record as any).conflict_type;
-          return (
-            <Tag color={getConflictTypeColor(conflictType)} className="arbitratorTagNoMargin">
-              {getConflictTypeText(conflictType)}
-            </Tag>
-          );
-        }
-        return <Text type="secondary" className="arbitratorTextXs">-</Text>;
-      },
-    },
-    {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      width: 120,
+      width: 130,
       render: (status: string) => (
         <Tag color={getStatusColor(status)} className="arbitratorTagNoMargin">
           {getStatusText(status)}
@@ -249,7 +220,18 @@ const CancelledOrders: React.FC = () => {
       ),
     },
     {
-      title: 'Дата отмены',
+      title: 'Запрошено',
+      key: 'requested_amount',
+      width: 100,
+      align: 'right' as const,
+      render: (record: Claim) => (
+        <Text strong className="arbitratorAmountHighlight">
+          {getRequestedAmount(record).toLocaleString()} ₽
+        </Text>
+      ),
+    },
+    {
+      title: 'Дата',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 110,
@@ -283,10 +265,10 @@ const CancelledOrders: React.FC = () => {
     <div>
       <Card className="arbitratorCard">
         <Title level={4} className="arbitratorSectionTitle">
-          <CloseCircleOutlined /> Отменённые обращения
+          <DollarOutlined /> Заявки на возврат средств
         </Title>
         <Text type="secondary" className="arbitratorSectionSubtitle">
-          Список отменённых заказов, требующих арбитража
+          Список заявок на возврат средств от клиентов
         </Text>
 
         <Row gutter={[12, 12]} className="arbitratorFiltersRow">
@@ -302,19 +284,6 @@ const CancelledOrders: React.FC = () => {
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
             <Select
-              placeholder="Тип конфликта"
-              className="arbitratorSelectFull"
-              value={conflictTypeFilter}
-              onChange={setConflictTypeFilter}
-              allowClear
-            >
-              <Option value="quality">Качество работы</Option>
-              <Option value="deadline">Нарушение сроков</Option>
-              <Option value="other">Другие</Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
-            <Select
               placeholder="Статус"
               className="arbitratorSelectFull"
               value={statusFilter}
@@ -323,8 +292,31 @@ const CancelledOrders: React.FC = () => {
             >
               <Option value="new">Новая</Option>
               <Option value="in_progress">В рассмотрении</Option>
-              <Option value="completed">Решена</Option>
+              <Option value="completed">Завершена</Option>
+              <Option value="pending_approval">Ожидает согласования</Option>
             </Select>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={3}>
+            <InputNumber
+              placeholder="Сумма от"
+              className="arbitratorSelectFull"
+              value={minAmount}
+              onChange={(value) => setMinAmount(value || undefined)}
+              min={0}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
+            />
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={3}>
+            <InputNumber
+              placeholder="Сумма до"
+              className="arbitratorSelectFull"
+              value={maxAmount}
+              onChange={(value) => setMaxAmount(value || undefined)}
+              min={0}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+              parser={(value) => Number((value ?? '').replace(/\s?/g, ''))}
+            />
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
             <RangePicker
@@ -335,7 +327,7 @@ const CancelledOrders: React.FC = () => {
               placeholder={['Дата от', 'Дата до']}
             />
           </Col>
-          <Col xs={24} sm={12} md={8} lg={4}>
+          <Col xs={24} sm={12} md={8} lg={2}>
             <Space>
               <Tooltip title="Поиск">
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch} />
@@ -359,7 +351,7 @@ const CancelledOrders: React.FC = () => {
               pageSize: pageSize,
               total: total,
               showSizeChanger: true,
-              showTotal: (total) => `Всего ${total} обращений`,
+              showTotal: (total) => `Всего ${total} заявок`,
               onChange: (page, size) => {
                 setCurrentPage(page);
                 setPageSize(size);
@@ -369,7 +361,7 @@ const CancelledOrders: React.FC = () => {
             locale={{
               emptyText: (
                 <Empty
-                  description="Отменённые обращения не найдены"
+                  description="Заявки на возврат средств не найдены"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ),
@@ -391,5 +383,5 @@ const CancelledOrders: React.FC = () => {
   );
 };
 
-export default CancelledOrders;
+export default RefundRequests;
 
