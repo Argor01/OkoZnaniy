@@ -13,7 +13,8 @@ import { DashboardContext } from '@/contexts/DashboardContext';
 import { AppFooter } from '@/components/layout/AppFooter';
 import RightSidebar from './RightSidebar';
 import styles from './DashboardLayout.module.css';
-import '@/styles/modals.css';
+import '@/styles/modal-overrides.css';
+import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 
 
 const ProfileModal = lazy(() => import('@/features/expert/modals/ProfileModal'));
@@ -612,23 +613,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         centered
         width={400}
         closable={false}
-        className="logout-modal"
+        className={logoutStyles.logoutModal}
       >
-        <div className="logout-modal-body">
-          <div className="logout-modal-icon">
+        <div className={logoutStyles.logoutModalBody}>
+          <div className={logoutStyles.logoutModalIcon}>
             <LogoutOutlined />
           </div>
-          <h3 className="logout-modal-title">Выход из системы</h3>
-          <p className="logout-modal-text">Вы уверены, что хотите выйти из аккаунта?</p>
-          <div className="logout-modal-actions">
+          <h3 className={logoutStyles.logoutModalTitle}>Выход из системы</h3>
+          <p className={logoutStyles.logoutModalText}>Вы уверены, что хотите выйти из аккаунта?</p>
+          <div className={logoutStyles.logoutModalActions}>
             <button
-              className="logout-modal-btn logout-modal-btn-cancel"
+              className={`${logoutStyles.logoutModalBtn} ${logoutStyles.logoutModalBtnCancel}`}
               onClick={() => setLogoutModalVisible(false)}
             >
               Отмена
             </button>
             <button
-              className="logout-modal-btn logout-modal-btn-confirm"
+              className={`${logoutStyles.logoutModalBtn} ${logoutStyles.logoutModalBtnConfirm}`}
               onClick={confirmLogout}
             >
               Выйти

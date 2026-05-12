@@ -32,8 +32,9 @@ import PartnerFaqModal from '../modals/PartnerFaqModal';
 import { AppFooter } from '@/components/layout/AppFooter';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
-import '@/styles/modals.css';
+import '@/styles/modal-overrides.css';
 import './PartnerDashboard.css';
+import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -768,17 +769,17 @@ const PartnerDashboard: React.FC = () => {
         centered
         width={400}
         closable={false}
-        className="logout-modal"
+        className={logoutStyles.logoutModal}
       >
-        <div className="logout-modal-body">
-          <div className="logout-modal-icon">
+        <div className={logoutStyles.logoutModalBody}>
+          <div className={logoutStyles.logoutModalIcon}>
             <LogoutOutlined />
           </div>
-          <h3 className="logout-modal-title">Выход из системы</h3>
-          <p className="logout-modal-text">Вы уверены, что хотите выйти из аккаунта?</p>
-          <div className="logout-modal-actions">
-            <button className="logout-modal-btn logout-modal-btn-cancel" onClick={() => setLogoutModalVisible(false)}>Отмена</button>
-            <button className="logout-modal-btn logout-modal-btn-confirm" onClick={confirmLogout}>Выйти</button>
+          <h3 className={logoutStyles.logoutModalTitle}>Выход из системы</h3>
+          <p className={logoutStyles.logoutModalText}>Вы уверены, что хотите выйти из аккаунта?</p>
+          <div className={logoutStyles.logoutModalActions}>
+            <button className={`${logoutStyles.logoutModalBtn} ${logoutStyles.logoutModalBtnCancel}`} onClick={() => setLogoutModalVisible(false)}>Отмена</button>
+            <button className={`${logoutStyles.logoutModalBtn} ${logoutStyles.logoutModalBtnConfirm}`} onClick={confirmLogout}>Выйти</button>
           </div>
         </div>
       </Modal>
