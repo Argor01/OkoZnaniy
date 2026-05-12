@@ -538,6 +538,34 @@ a {
   transition: all 0.2s ease;
 }
 
+/* Smooth input focus transition */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease !important;
+}
+
+/* Smooth button active press */
+.ant-btn:active {
+  transform: scale(0.98);
+}
+
+.ant-btn {
+  transition: all 0.2s ease !important;
+}
+
+/* Smooth badge pulse */
+.ant-badge-count {
+  transition: all 0.3s ease;
+}
+
+/* Smooth avatar hover */
+.ant-avatar {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -263,3 +263,13 @@
   color: var(--text-primary, #1f2937);
   line-height: 1.2;
 }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pageContainer {
+  animation: fadeInUp 0.4s ease-out;
+}
