@@ -31,6 +31,7 @@ import PartnersMap from './PartnersMap';
 import PartnerFaqModal from '../modals/PartnerFaqModal';
 import { AppFooter } from '@/components/layout/AppFooter';
 import { ThemeToggle } from '@/components/ui';
+import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modals.css';
 import './PartnerDashboard.css';
 
@@ -548,55 +549,59 @@ const PartnerDashboard: React.FC = () => {
       icon: <InfoCircleOutlined />,
       label: 'Партнерская программа',
       component: (
-        <PartnerProgram 
-          referralLink={`https://okoznaniy.ru/ref/${data.partner_info.referral_code}`}
-        />
+        <ErrorBoundary>
+          <PartnerProgram 
+            referralLink={`https://okoznaniy.ru/ref/${data.partner_info.referral_code}`}
+          />
+        </ErrorBoundary>
       ),
     },
     {
       key: 'map',
       icon: <EnvironmentOutlined />,
       label: 'Карта партнеров',
-      component: <PartnersMap />,
+      component: <ErrorBoundary><PartnersMap /></ErrorBoundary>,
     },
     {
       key: 'promo',
       icon: <FileImageOutlined />,
       label: 'Промоматериалы',
-      component: <PromoMaterials />,
+      component: <ErrorBoundary><PromoMaterials /></ErrorBoundary>,
     },
     {
       key: 'chats',
       icon: <MessageOutlined />,
       label: 'Внутренняя коммуникация',
-      component: <PartnerChatsSection />,
+      component: <ErrorBoundary><PartnerChatsSection /></ErrorBoundary>,
     },
     {
       key: 'statistics',
       icon: <DollarOutlined />,
       label: 'Статистика',
       component: (
-        <div>
-          <StatisticsPanel 
-            data={data} 
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-          />
-          <OrdersStatisticsTable data={data} />
-        </div>
+        <ErrorBoundary>
+          <div>
+            <StatisticsPanel 
+              data={data} 
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+            />
+            <OrdersStatisticsTable data={data} />
+          </div>
+        </ErrorBoundary>
       ),
     },
     {
       key: 'referrals',
       icon: <TeamOutlined />,
       label: 'Мои рефералы',
-      component: <ReferralsList data={data} />,
+      component: <ErrorBoundary><ReferralsList data={data} /></ErrorBoundary>,
     },
     {
       key: 'earnings',
       icon: <FileTextOutlined />,
       label: 'История начислений',
-      component: <EarningsHistory data={data} />,
+      component: <ErrorBoundary><EarningsHistory data={data} /></ErrorBoundary>,
     },
     {
       key: 'faq',

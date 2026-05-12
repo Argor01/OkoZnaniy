@@ -24,6 +24,7 @@ import ContactBannedUsers from '../components/ContactBannedUsers';
 import ImprovementRecommendations from '../components/ImprovementRecommendations/ImprovementRecommendations';
 import DirectorFaqModal from '../modals/DirectorFaqModal';
 import { ThemeToggle } from '@/components/ui';
+import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modals.css';
 import '@/styles/director.css';
 
@@ -129,43 +130,43 @@ const DirectorDashboard: React.FC = () => {
       key: 'personnel',
       icon: <TeamOutlined />,
       label: 'Управление персоналом',
-      component: <PersonnelManagement />,
+      component: <ErrorBoundary><PersonnelManagement /></ErrorBoundary>,
     },
     {
       key: 'finance',
       icon: <DollarOutlined />,
       label: 'Финансовая статистика',
-      component: <FinancialStatistics />,
+      component: <ErrorBoundary><FinancialStatistics /></ErrorBoundary>,
     },
     {
       key: 'partners',
       icon: <UserAddOutlined />,
       label: 'Панель партнёров',
-      component: <PartnerPanel />,
+      component: <ErrorBoundary><PartnerPanel /></ErrorBoundary>,
     },
     {
       key: 'statistics',
       icon: <BarChartOutlined />,
       label: 'Общая статистика',
-      component: <GeneralStatistics />,
+      component: <ErrorBoundary><GeneralStatistics /></ErrorBoundary>,
     },
     {
       key: 'internal-communication',
       icon: <MessageOutlined />,
       label: 'Внутренняя коммуникация',
-      component: <DirectorChatsSection />,
+      component: <ErrorBoundary><DirectorChatsSection /></ErrorBoundary>,
     },
     {
       key: 'contact-bans',
       icon: <StopOutlined />,
       label: 'Баны за обмен контактами',
-      component: <ContactBannedUsers />,
+      component: <ErrorBoundary><ContactBannedUsers /></ErrorBoundary>,
     },
     {
       key: 'improvement-recommendations',
       icon: <BulbOutlined />,
       label: 'Рекомендации по улучшению',
-      component: <ImprovementRecommendations />,
+      component: <ErrorBoundary><ImprovementRecommendations /></ErrorBoundary>,
     },
   ];
 

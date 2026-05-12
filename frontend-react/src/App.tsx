@@ -13,6 +13,7 @@ import { AppRoutes } from '@/routes/AppRoutes';
 import { CookieConsent } from '@/components/ui';
 import { ScrollToTop } from '@/features/common';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 
 dayjs.locale('ru');
 
@@ -95,17 +96,19 @@ const ThemedApp: React.FC = () => {
       <AntApp>
         <Router>
           <ScrollToTop />
-          <Suspense fallback={
-            <div className="fullScreenCenter">
-              <Spin size="large" />
-            </div>
-          }>
-            <div className="App">
-              <AppRoutes />
-              <SupportButton />
-              <CookieConsent />
-            </div>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={
+              <div className="fullScreenCenter">
+                <Spin size="large" />
+              </div>
+            }>
+              <div className="App">
+                <AppRoutes />
+                <SupportButton />
+                <CookieConsent />
+              </div>
+            </Suspense>
+          </ErrorBoundary>
         </Router>
       </AntApp>
     </ConfigProvider>

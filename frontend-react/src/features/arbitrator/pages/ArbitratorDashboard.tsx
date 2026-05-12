@@ -21,6 +21,7 @@ import Completed from '../components/NavigationPanel/Completed';
 import PendingApproval from '../components/NavigationPanel/PendingApproval';
 import ClaimsProcessing from '../components/ClaimsProcessing/ClaimsProcessing';
 import InternalCommunication from '../components/InternalCommunication/InternalCommunication';
+import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modals.css';
 import '@/styles/arbitrator.css';
 
@@ -153,22 +154,22 @@ const ArbitratorDashboard: React.FC = () => {
     if (mainSection === 'navigation') {
       switch (selectedTab) {
         case 'new':
-          return <NewClaims />;
+          return <ErrorBoundary><NewClaims /></ErrorBoundary>;
         case 'in_progress':
-          return <InProgress />;
+          return <ErrorBoundary><InProgress /></ErrorBoundary>;
         case 'completed':
-          return <Completed />;
+          return <ErrorBoundary><Completed /></ErrorBoundary>;
         case 'pending_approval':
-          return <PendingApproval />;
+          return <ErrorBoundary><PendingApproval /></ErrorBoundary>;
         default:
-          return <NewClaims />;
+          return <ErrorBoundary><NewClaims /></ErrorBoundary>;
       }
     } else if (mainSection === 'claims') {
-      return <ClaimsProcessing />;
+      return <ErrorBoundary><ClaimsProcessing /></ErrorBoundary>;
     } else if (mainSection === 'communication') {
-      return <InternalCommunication />;
+      return <ErrorBoundary><InternalCommunication /></ErrorBoundary>;
     }
-    return <NewClaims />;
+    return <ErrorBoundary><NewClaims /></ErrorBoundary>;
   };
 
   
