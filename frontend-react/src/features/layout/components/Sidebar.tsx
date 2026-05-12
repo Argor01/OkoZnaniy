@@ -17,7 +17,7 @@ import {
   BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/utils/constants';
+import { BREAKPOINTS, ROUTES } from '@/utils/constants';
 import styles from './Sidebar.module.css';
 
 const { Sider } = Layout;
@@ -75,12 +75,12 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   orderCounts,
 }) => {
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.TABLET);
   const [openKeys, setOpenKeys] = useState<string[]>(['orders', 'expert-client-orders']);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 840);
+      setIsMobile(window.innerWidth <= BREAKPOINTS.TABLET);
     };
 
     window.addEventListener('resize', handleResize);

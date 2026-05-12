@@ -4,7 +4,7 @@
   padding: 0 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
   height: 64px;
   position: fixed;
@@ -15,7 +15,7 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 840px) {
+@media (max-width: 1024px) {
   .dashboardHeader {
     left: 0;
   }
@@ -24,7 +24,7 @@
 .headerLeft {
   display: flex;
   align-items: center;
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -63,13 +63,17 @@
 }
 
 .headerLogo {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 12px;
   height: 100%;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1120px) {
+  .headerLogo {
+    display: none;
+  }
 }
 
 .logoImage {
@@ -86,6 +90,7 @@
   border-radius: 50%;
   background: white;
   padding: 4px;
+  margin-right: 0;
   box-sizing: border-box;
 }
 
@@ -99,16 +104,34 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1380px) {
   .logoText {
     display: none;
+  }
+}
+
+@media (max-width: 1380px) and (min-width: 1121px) {
+  .dashboardHeader {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    justify-content: initial;
+  }
+
+  .headerLogo {
+    justify-self: center;
+  }
+
+  .headerRight {
+    justify-self: end;
   }
 }
 
 .headerRight {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .menuButton {
@@ -356,7 +379,7 @@
   transform: scale(1.1);
 }
 
-@media (max-width: 840px) {
+@media (max-width: 1024px) {
   .dashboardHeader {
     padding: 0 12px;
   }

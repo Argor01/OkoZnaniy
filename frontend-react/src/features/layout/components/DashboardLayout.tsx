@@ -16,6 +16,7 @@ import styles from './DashboardLayout.module.css';
 import '@/styles/modal-overrides.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 import { CURRENT_USER_KEY } from '@/hooks/queries';
+import { BREAKPOINTS } from '@/utils/constants';
 
 
 const ProfileModal = lazy(() => import('@/features/expert/modals/ProfileModal'));
@@ -157,7 +158,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   }, [navigate]);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.TABLET);
   const [isChatMobile, setIsChatMobile] = useState(window.innerWidth <= 768);
   const [isChatTablet, setIsChatTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
   const [isChatDesktop, setIsChatDesktop] = useState(window.innerWidth > 1024);
@@ -170,7 +171,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   React.useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
-      setIsMobile(w <= 840);
+      setIsMobile(w <= BREAKPOINTS.TABLET);
       setIsCompact(w <= 1400);
       setIsChatMobile(w <= 768);
       setIsChatTablet(w > 768 && w <= 1024);

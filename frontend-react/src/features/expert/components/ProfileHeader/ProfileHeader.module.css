@@ -2,7 +2,7 @@
   position: relative;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-radius: 0;
+  border-radius: 16px;
   padding: 28px 32px;
   margin-top: 16px;
   margin-bottom: 20px;
@@ -70,15 +70,16 @@
 }
 
 .editProfileButton {
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  border-radius: 10%;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 4px;
+  margin-bottom: 10px;
 }
 
 .profileStatsRow {
@@ -220,7 +221,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) and (min-width: 841px) {
   .profileBlock {
     padding: 24px 28px;
     margin-bottom: 18px;
@@ -228,14 +229,33 @@
   
   .profileBlockContent {
     gap: 20px;
+    flex-wrap: wrap;
   }
   
   .profileLeft {
     gap: 18px;
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .profileInfo {
+    position: relative;
+    width: 100%;
+  }
+
+  .profileNameRow {
+    padding-right: 44px;
   }
   
   .profileNameTitle {
     font-size: 23px !important;
+  }
+
+  .editProfileButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-left: 0;
   }
   
   .profileStatsRow {
@@ -257,6 +277,37 @@
   
   .profileStatSubtext {
     font-size: 15px;
+  }
+
+  .profileRight {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .profileStats {
+    width: 100%;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .profileStatsMeta,
+  .profileStatsLine {
+    text-align: left;
+  }
+
+  .profileStatsMeta {
+    order: 2;
+    margin-bottom: 0;
+    margin-left: auto;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .profileStatsBlock {
+    order: 1;
   }
 }
 
@@ -320,11 +371,13 @@
   
   .profileRight {
     width: 100%;
+    padding-left: 0;
     align-items: center;
     text-align: center;
   }
   
   .profileStats {
+    flex-direction: column;
     align-items: center;
     width: 100%;
   }

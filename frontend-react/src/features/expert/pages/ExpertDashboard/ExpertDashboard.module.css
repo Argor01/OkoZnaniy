@@ -39,7 +39,7 @@
 }
 
 /* Планшеты в портрете */
-@media (max-width: 840px) {
+@media (max-width: 1024px) {
   .expertContentContainer {
     width: 100%;
     max-width: 100%;
@@ -123,14 +123,4 @@
   .expertContentContainer :global(.ant-tabs-tab-btn) {
     font-size: 13px;
   }
-}
-
-/* ===== ANIMATIONS ===== */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.expertContentContainer {
-  animation: fadeInUp 0.4s ease-out;
 }

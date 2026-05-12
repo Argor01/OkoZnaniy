@@ -121,7 +121,7 @@ const ExpertProfile: React.FC = () => {
                 {expert.first_name} {expert.last_name}
                 {expert.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
               </Title>
-              <Text type="secondary">@{expert.username}</Text>
+              <Text type="secondary">{expert.username}</Text>
             </div>
           </div>
         </div>

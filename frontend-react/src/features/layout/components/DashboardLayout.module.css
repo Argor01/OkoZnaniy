@@ -181,7 +181,7 @@
   flex: 1;
 }
 
-@media (max-width: 840px) {
+@media (max-width: 1024px) {
   .dashboardLayout {
     padding: 0 16px;
   }
@@ -253,7 +253,7 @@
   }
 }
 
-@media (max-width: 840px) {
+@media (max-width: 1024px) {
   .desktopSidebarOverlay {
     display: none;
   }
