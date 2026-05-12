@@ -17,6 +17,7 @@ import {
   Switch,
   Popconfirm
 } from 'antd';
+import { logger } from '@/utils/logger';
 import { 
   PlusOutlined,
   EditOutlined,
@@ -150,7 +151,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       setCategoryModalVisible(false);
       categoryForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -187,7 +188,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       setSubjectModalVisible(false);
       subjectForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -224,7 +225,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       setWorkTypeModalVisible(false);
       workTypeForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

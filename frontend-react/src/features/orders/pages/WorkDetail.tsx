@@ -9,6 +9,7 @@ import { authApi } from '@/features/auth/api/auth';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './WorkDetail.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -123,7 +124,7 @@ const WorkDetail: React.FC = () => {
                           if (work.client?.username) {
                             navigate(`/user/${work.client.username}`);
                           } else {
-                            console.error('Client username is not available');
+                            logger.error('Client username is not available');
                           }
                         }}
                         className={styles.clientLink}

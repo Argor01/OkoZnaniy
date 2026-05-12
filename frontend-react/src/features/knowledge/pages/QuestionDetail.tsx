@@ -31,6 +31,7 @@ import 'dayjs/locale/ru';
 import styles from './QuestionDetail.module.css';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { knowledgeApi, Question, Answer } from '../api/knowledgeApi';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -65,7 +66,7 @@ const QuestionDetail: React.FC = () => {
       setQuestion(data);
       setAnswers(data.answers || []);
     } catch (error: any) {
-      console.error('Failed to load question:', error);
+      logger.error('Failed to load question:', error);
       if (error.response?.status === 404) {
         message.error('Вопрос не найден');
         navigate('/knowledge');
@@ -104,7 +105,7 @@ const QuestionDetail: React.FC = () => {
       message.success('Вопрос успешно удален');
       navigate('/knowledge');
     } catch (error) {
-      console.error('Failed to delete question:', error);
+      logger.error('Failed to delete question:', error);
       message.error('Не удалось удалить вопрос');
     }
   };
@@ -121,7 +122,7 @@ const QuestionDetail: React.FC = () => {
       }
       message.success('Ответ успешно удален');
     } catch (error) {
-      console.error('Failed to delete answer:', error);
+      logger.error('Failed to delete answer:', error);
       message.error('Не удалось удалить ответ');
     }
   };
@@ -163,7 +164,7 @@ const QuestionDetail: React.FC = () => {
       setNewAnswer('');
       message.success('Ответ успешно добавлен');
     } catch (error: any) {
-      console.error('Failed to add answer:', error);
+      logger.error('Failed to add answer:', error);
       message.error(error.response?.data?.error || 'Не удалось добавить ответ');
     }
   };
@@ -181,7 +182,7 @@ const QuestionDetail: React.FC = () => {
         return a;
       }));
     } catch (error) {
-      console.error('Failed to toggle like:', error);
+      logger.error('Failed to toggle like:', error);
       message.error('Не удалось поставить лайк');
     }
   };

@@ -9,6 +9,7 @@ import SocialLoginButtons from '../components/SocialLoginButtons';
 import { ordersApi } from '@/features/orders/api/orders';
 import { ROUTES } from '@/utils/constants';
 import '@/styles/login.css';
+import { logger } from '@/utils/logger';
 
 
 
@@ -177,7 +178,7 @@ const Login: React.FC = () => {
       const orders = ordersData?.results || ordersData || [];
       return orders.length > 0;
     } catch (error) {
-      if (debugEnabled) console.error('Ошибка при проверке заказов:', error);
+      if (debugEnabled) logger.error('Ошибка при проверке заказов:', error);
       return false;
     }
   };
@@ -264,7 +265,7 @@ const Login: React.FC = () => {
       } as RegisterRequest;
       
       if (debugEnabled) {
-        console.log('[Registration] Sending data:', cleanValues);
+        logger.log('[Registration] Sending data:', cleanValues);
       }
       
       await authApi.register(cleanValues);
@@ -285,7 +286,7 @@ const Login: React.FC = () => {
         await onLogin(loginData);
       }
     } catch (error: any) {
-      if (debugEnabled) console.error('Registration error:', error);
+      if (debugEnabled) logger.error('Registration error:', error);
       const errorData = error?.response?.data;
       if (errorData && typeof errorData === 'object') {
         const entries = Object.entries(errorData as Record<string, any>);

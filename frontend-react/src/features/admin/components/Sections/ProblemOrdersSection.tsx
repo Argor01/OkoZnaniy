@@ -36,6 +36,7 @@ import dayjs from 'dayjs';
 import { ProblemOrder } from '@/features/orders/types/orders';
 import { useProblemOrders, useOrderActions } from '@/features/admin/hooks/useAdminOrders';
 import styles from './ProblemOrdersSection.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -119,7 +120,7 @@ const ProblemOrdersTable: React.FC<ProblemOrdersTableProps> = ({
       setSelectedOrder(null);
       resolveForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -133,7 +134,7 @@ const ProblemOrdersTable: React.FC<ProblemOrdersTableProps> = ({
       setSelectedOrder(null);
       escalateForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -655,14 +656,14 @@ export const ProblemOrdersSection: React.FC = () => {
   const handleResolveIssue = (orderId: number, resolution: string) => {
     // Implement API call for resolution
     // For now we might just log or call changeStatus if applicable
-    console.log('Resolving issue', orderId, resolution);
+    logger.log('Resolving issue', orderId, resolution);
     // Ideally: adminPanelApi.resolveIssue(orderId, resolution)
     // Fallback to message for now as we don't have a specific endpoint
     message.success(`Решение по заказу #${orderId} сохранено`);
   };
 
   const handleEscalateIssue = (orderId: number, escalationNote: string) => {
-    console.log('Escalating issue', orderId, escalationNote);
+    logger.log('Escalating issue', orderId, escalationNote);
     message.success(`Проблема заказа #${orderId} эскалирована`);
   };
 

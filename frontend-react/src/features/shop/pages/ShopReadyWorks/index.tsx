@@ -10,6 +10,7 @@ import { Filters as FiltersType, Work } from '@/features/shop/types';
 import { shopApi } from '@/features/shop/api/shop';
 import { useDashboard } from '@/contexts/DashboardContext';
 import styles from './ShopReadyWorks.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title } = Typography;
 
@@ -140,7 +141,7 @@ const ShopReadyWorks: React.FC = () => {
         return oldData.filter(w => w.id !== id);
       });
     } catch (error) {
-      console.error('Error deleting work:', error);
+      logger.error('Error deleting work:', error);
     }
   };
 

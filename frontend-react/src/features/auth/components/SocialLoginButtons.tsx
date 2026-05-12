@@ -3,6 +3,7 @@ import { API_URL } from '@/config/api';
 import { ROUTES } from '@/utils/constants';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import { authApi } from '@/features/auth/api/auth';
+import { logger } from '@/utils/logger';
 
 interface SocialLoginButtonsProps {
   onTelegramAuth?: (user: any) => void;
@@ -39,24 +40,24 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     let attempts = 0;
     const maxAttempts = 150; 
     
-    if (debugEnabled) console.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
+    if (debugEnabled) logger.log(`🔍 Начинаем проверку авторизации для ID: ${authId}`);
     
     const checkInterval = setInterval(async () => {
       attempts++;
-      if (debugEnabled) console.log(`🔄 Попытка ${attempts}/${maxAttempts}: Проверяем статус авторизации...`);
+      if (debugEnabled) logger.log(`🔄 Попытка ${attempts}/${maxAttempts}: Проверяем статус авторизации...`);
       
       try {
         const data = await authApi.checkTelegramAuthStatus(authId);
-        if (debugEnabled) console.log(`📦 Данные:`, data);
+        if (debugEnabled) logger.log(`📦 Данные:`, data);
         
         if (data.authenticated) {
-          if (debugEnabled) console.log(`✅ Авторизация подтверждена!`);
+          if (debugEnabled) logger.log(`✅ Авторизация подтверждена!`);
           clearInterval(checkInterval);
 
           localStorage.setItem('access_token', data.access);
           localStorage.setItem('refresh_token', data.refresh);
           localStorage.setItem('user', JSON.stringify(data.user));
-          if (debugEnabled) console.log(`💾 Токены сохранены`);
+          if (debugEnabled) logger.log(`💾 Токены сохранены`);
 
           const user = data.user;
             let redirectUrl: string = ROUTES.dashboard;
@@ -73,19 +74,19 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
               redirectUrl = ROUTES.arbitrator.root;
             }
             
-            if (debugEnabled) console.log(`🚀 Перенаправляем на: ${redirectUrl}`);
+            if (debugEnabled) logger.log(`🚀 Перенаправляем на: ${redirectUrl}`);
 
             window.location.href = redirectUrl;
           } else {
-            if (debugEnabled) console.log(`⏳ Ожидаем подтверждения...`);
+            if (debugEnabled) logger.log(`⏳ Ожидаем подтверждения...`);
           }
       } catch (error) {
-        if (debugEnabled) console.error('❌ Ошибка проверки статуса:', error);
+        if (debugEnabled) logger.error('❌ Ошибка проверки статуса:', error);
       }
 
       if (attempts >= maxAttempts) {
         clearInterval(checkInterval);
-        if (debugEnabled) console.log('⏱️ Время ожидания авторизации истекло');
+        if (debugEnabled) logger.log('⏱️ Время ожидания авторизации истекло');
       }
     }, 2000);
   };

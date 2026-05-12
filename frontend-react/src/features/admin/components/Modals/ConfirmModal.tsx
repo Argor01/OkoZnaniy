@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { MODAL_CONSTANTS } from '@/features/admin/constants';
 import styles from './ConfirmModal.module.css';
+import { logger } from '@/utils/logger';
 
 export type ConfirmType = 'info' | 'success' | 'warning' | 'error';
 
@@ -67,7 +68,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     try {
       await onOk();
     } catch (error) {
-      console.error('Error in confirm action:', error);
+      logger.error('Error in confirm action:', error);
     }
   };
 

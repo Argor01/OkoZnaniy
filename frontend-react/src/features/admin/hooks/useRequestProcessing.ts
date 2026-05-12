@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { requestsApi } from '@/features/admin/utils/requestsApi';
 import { requestNotifications } from '@/features/admin/utils/notificationHelpers';
+import { logger } from '@/utils/logger';
 import type { 
   CustomerRequest, 
   RequestMessage, 
@@ -82,7 +83,7 @@ export const useRequestProcessing = () => {
       requestNotifications.takeSuccess();
     },
     onError: (error: any) => {
-      console.error('Error taking request:', error);
+      logger.error('Error taking request:', error);
       requestNotifications.takeError(error?.response?.data?.message);
     },
   });
@@ -109,7 +110,7 @@ export const useRequestProcessing = () => {
       requestNotifications.messageSuccess();
     },
     onError: (error: any) => {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       requestNotifications.messageError(error?.response?.data?.message);
     },
   });
@@ -129,7 +130,7 @@ export const useRequestProcessing = () => {
       requestNotifications.completeSuccess();
     },
     onError: (error: any) => {
-      console.error('Error completing request:', error);
+      logger.error('Error completing request:', error);
       requestNotifications.completeError(error?.response?.data?.message);
     },
   });
@@ -150,7 +151,7 @@ export const useRequestProcessing = () => {
       requestNotifications.updateSuccess();
     },
     onError: (error: any) => {
-      console.error('Error updating request:', error);
+      logger.error('Error updating request:', error);
       requestNotifications.updateError(error?.response?.data?.message);
     },
   });
@@ -172,7 +173,7 @@ export const useRequestProcessing = () => {
       requestNotifications.assignSuccess(adminName);
     },
     onError: (error: any) => {
-      console.error('Error assigning request:', error);
+      logger.error('Error assigning request:', error);
       requestNotifications.assignError(error?.response?.data?.message);
     },
   });
@@ -227,7 +228,7 @@ export const useRequestProcessing = () => {
       const response = await requestsApi.searchRequests(query, filters);
       return response.results || [];
     } catch (error) {
-      console.error('Error searching requests:', error);
+      logger.error('Error searching requests:', error);
       return [];
     }
   }, []);
@@ -249,7 +250,7 @@ export const useRequestProcessing = () => {
       
       requestNotifications.fileUploadSuccess(`requests_export.${format}`);
     } catch (error) {
-      console.error('Error exporting requests:', error);
+      logger.error('Error exporting requests:', error);
       requestNotifications.fileUploadError('export', 'Ошибка при экспорте данных');
     }
   }, []);
@@ -265,7 +266,7 @@ export const useRequestProcessing = () => {
       requestNotifications.fileUploadSuccess(file.name);
       return result;
     } catch (error) {
-      console.error('Error uploading file:', error);
+      logger.error('Error uploading file:', error);
       requestNotifications.fileUploadError(file.name, 'Ошибка при загрузке файла');
       throw error;
     }

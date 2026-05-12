@@ -1,5 +1,6 @@
 import { ordersApi } from '@/features/orders/api/orders';
 import { ROUTES } from '@/utils/constants';
+import { logger } from '@/utils/logger';
 
 
 export const redirectByRole = async (
@@ -26,7 +27,7 @@ export const redirectByRole = async (
           import.meta.env.DEV &&
           typeof window !== 'undefined' &&
           window.localStorage?.getItem('debug_api') === '1';
-        if (debugEnabled) console.error('Error checking client orders:', error);
+        if (debugEnabled) logger.error('Error checking client orders:', error);
         navigate(ROUTES.dashboard);
       }
       break;

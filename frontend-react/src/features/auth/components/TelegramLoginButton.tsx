@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { apiClient } from '@/api/client';
+import { logger } from '@/utils/logger';
 
 interface TelegramUser {
   id: number;
@@ -40,17 +41,17 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
       typeof window !== 'undefined' &&
       window.localStorage?.getItem('debug_auth') === '1';
 
-    if (debugEnabled) console.log('[TelegramLoginButton] Initializing with botName:', botName);
+    if (debugEnabled) logger.log('[TelegramLoginButton] Initializing with botName:', botName);
     
     
     (window as any).onTelegramAuth = async (user: TelegramUser) => {
-      if (debugEnabled) console.log('[TelegramLoginButton] Telegram auth callback received:', user);
+      if (debugEnabled) logger.log('[TelegramLoginButton] Telegram auth callback received:', user);
       
       try {
         
         const response = await apiClient.post('/users/telegram_auth/', user);
         
-        if (debugEnabled) console.log('[TelegramLoginButton] Backend response:', response.data);
+        if (debugEnabled) logger.log('[TelegramLoginButton] Backend response:', response.data);
 
         
         const { access, refresh, user: userData } = response.data;
@@ -58,14 +59,14 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
         localStorage.setItem('refresh_token', refresh);
         localStorage.setItem('user', JSON.stringify(userData));
         
-        if (debugEnabled) console.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
+        if (debugEnabled) logger.log('[TelegramLoginButton] Tokens saved, calling onAuth callback');
 
         
         onAuth(userData);
       } catch (error: any) {
         if (debugEnabled) {
-          console.error('[TelegramLoginButton] Telegram auth error:', error);
-          console.error('[TelegramLoginButton] Error response:', error.response?.data);
+          logger.error('[TelegramLoginButton] Telegram auth error:', error);
+          logger.error('[TelegramLoginButton] Error response:', error.response?.data);
         }
         const errorMessage = error.response?.data?.error || 'Ошибка авторизации через Telegram';
         if (onError) {
@@ -89,18 +90,18 @@ const TelegramLoginButton: React.FC<TelegramLoginButtonProps> = ({
     script.async = true;
     
     script.onload = () => {
-      if (debugEnabled) console.log('[TelegramLoginButton] Telegram widget script loaded successfully');
+      if (debugEnabled) logger.log('[TelegramLoginButton] Telegram widget script loaded successfully');
     };
     
     script.onerror = (error) => {
-      if (debugEnabled) console.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
+      if (debugEnabled) logger.error('[TelegramLoginButton] Failed to load Telegram widget script:', error);
     };
 
     const container = containerRef.current;
     if (container) {
       container.innerHTML = '';
       container.appendChild(script);
-      if (debugEnabled) console.log('[TelegramLoginButton] Widget script added to DOM');
+      if (debugEnabled) logger.log('[TelegramLoginButton] Widget script added to DOM');
     }
 
     

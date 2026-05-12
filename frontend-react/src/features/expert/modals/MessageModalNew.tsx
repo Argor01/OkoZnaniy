@@ -55,6 +55,7 @@ import '../../../styles/messages.css';
 import '../../../styles/avatar.css';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { logger } from '@/utils/logger';
 
 const { Text } = Typography;
 interface MessageModalProps {
@@ -989,17 +990,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [hydrateClosedOrdersForChat, loadChats]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
-    console.log('🔧 loadOrCreateChatWithUser called with userId:', userId, 'chatContextTitle:', chatContextTitle);
+    logger.log('🔧 loadOrCreateChatWithUser called with userId:', userId, 'chatContextTitle:', chatContextTitle);
     setLoading(true);
     try {
       const chatData = await chatApi.getOrCreateByUser(userId, chatContextTitle);
-      console.log('🔧 Chat data received:', chatData);
+      logger.log('🔧 Chat data received:', chatData);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
-      console.log('🔧 Selected chat set to:', chatData);
+      logger.log('🔧 Selected chat set to:', chatData);
       await loadChats();
     } catch (error: unknown) {
-      console.error('🔧 Error in loadOrCreateChatWithUser:', error);
+      logger.error('🔧 Error in loadOrCreateChatWithUser:', error);
       antMessage.error('Не удалось открыть чат с пользователем');
     } finally {
       setLoading(false);
@@ -1064,7 +1065,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const chatId = customEvent.detail?.chatId;
       const userId = customEvent.detail?.userId;
     
-      console.log('🔧 handleOpenChatById triggered, visible:', visible, 'chatId:', chatId, 'userId:', userId);
+      logger.log('🔧 handleOpenChatById triggered, visible:', visible, 'chatId:', chatId, 'userId:', userId);
     
       // Если передан chatId, используем его
       if (chatId) {
@@ -1073,7 +1074,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           const chatData = await chatApi.getById(chatId);
           await hydrateClosedOrdersForChat(chatData);
           setSelectedChat(chatData);
-          console.log('🔧 Chat loaded by ID:', chatData);
+          logger.log('🔧 Chat loaded by ID:', chatData);
           await loadChats();
           
           // Извлекаем order_id из сообщений с принятым оффером и открываем панель заказа
@@ -1091,12 +1092,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           })();
           
           if (orderIdFromAcceptedOffer) {
-            console.log('🔧 Found order_id from accepted offer:', orderIdFromAcceptedOffer);
+            logger.log('🔧 Found order_id from accepted offer:', orderIdFromAcceptedOffer);
             setActiveOrderId(orderIdFromAcceptedOffer);
             setOrderPanelOpen(true);
           }
         } catch (error: unknown) {
-          console.error('🔧 Error in handleOpenChatById (by chatId):', error);
+          logger.error('🔧 Error in handleOpenChatById (by chatId):', error);
           antMessage.error('Не удалось открыть чат');
         } finally {
           setLoading(false);
@@ -1109,9 +1110,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         try {
           setLoading(true);
           await loadOrCreateChatWithUser(userId);
-          console.log('🔧 Chat opened with userId:', userId);
+          logger.log('🔧 Chat opened with userId:', userId);
         } catch (error: unknown) {
-          console.error('🔧 Error in handleOpenChatById (by userId):', error);
+          logger.error('🔧 Error in handleOpenChatById (by userId):', error);
           antMessage.error('Не удалось открыть чат');
         } finally {
           setLoading(false);
@@ -1119,7 +1120,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         return;
       }
     
-      console.error('🔧 No chatId or userId provided to handleOpenChatById');
+      logger.error('🔧 No chatId or userId provided to handleOpenChatById');
     };
 
     window.addEventListener('messageModalOpenChatById', handleOpenChatById);
@@ -1990,7 +1991,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         antMessage.success('Сообщение отправлено');
       }
     } catch (error: unknown) {
-      console.error('Ошибка отправки сообщения:', error);
+      logger.error('Ошибка отправки сообщения:', error);
       
       // Обновляем данные чата в любом случае
       try {
@@ -1998,7 +1999,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           loadChatDetail(selectedChat.id)
         ]);
       } catch (updateError) {
-        console.error('Ошибка обновления данных чата:', updateError);
+        logger.error('Ошибка обновления данных чата:', updateError);
       }
       
       // Проверяем, если это ошибка заморозки чата
@@ -2210,7 +2211,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       // Перезагружаем список для синхронизации с сервером (silent mode)
       await loadChats(true);
     } catch (error) {
-      console.error('Ошибка закрепления чата:', error);
+      logger.error('Ошибка закрепления чата:', error);
       // Откатываем изменение при ошибке
       setChatList((prev) =>
         prev.map((chat) =>
@@ -2253,7 +2254,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         // Перезагружаем список для синхронизации с сервером
         await loadChats(true);
       } catch (error) {
-        console.error('Ошибка изменения статуса прочтения:', error);
+        logger.error('Ошибка изменения статуса прочтения:', error);
         antMessage.error('Не удалось изменить статус чата');
         // Откатываем изменение при ошибке
         setChatList((prev) =>

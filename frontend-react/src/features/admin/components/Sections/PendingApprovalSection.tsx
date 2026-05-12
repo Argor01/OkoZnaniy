@@ -45,6 +45,7 @@ const { Step } = Steps;
 
 import { ApprovalRequest, Claim } from '@/features/support/types/support';
 import { useClaims, useClaimActions } from '@/features/admin/hooks';
+import { logger } from '@/utils/logger';
 
 export const PendingApprovalSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('pending_approval', true);
@@ -111,7 +112,7 @@ export const PendingApprovalSection: React.FC = () => {
         setApproveModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -130,7 +131,7 @@ export const PendingApprovalSection: React.FC = () => {
         setRejectModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -155,7 +156,7 @@ export const PendingApprovalSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

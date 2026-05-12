@@ -5,6 +5,7 @@ import { disputesApi } from '@/features/arbitrator/api/disputes';
 import { QUERY_KEYS } from '@/features/admin/constants';
 import type { UpdatePartnerRequest, PartnerEarning } from '@/features/admin/types/admin';
 import type { Dispute } from '@/features/admin/types';
+import { logger } from '@/utils/logger';
 
 
 export const useAdminMutations = () => {
@@ -41,7 +42,7 @@ export const useAdminMutations = () => {
       if (context?.previousEarnings) {
         queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, context.previousEarnings);
       }
-      console.error('Error marking earning as paid:', error);
+      logger.error('Error marking earning as paid:', error);
       message.error(error?.message || 'Ошибка при отметке начисления');
     },
   });
@@ -56,7 +57,7 @@ export const useAdminMutations = () => {
       queryClient.refetchQueries({ queryKey: QUERY_KEYS.ADMIN_PARTNERS });
     },
     onError: (error: any) => {
-      console.error('Error updating partner:', error);
+      logger.error('Error updating partner:', error);
       message.error(error?.response?.data?.message || 'Ошибка обновления партнера');
     },
   });
@@ -70,7 +71,7 @@ export const useAdminMutations = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_DISPUTES });
     },
     onError: (error: any) => {
-      console.error('Error assigning arbitrator:', error);
+      logger.error('Error assigning arbitrator:', error);
       message.error(error?.response?.data?.error || 'Не удалось назначить арбитра');
     },
   });

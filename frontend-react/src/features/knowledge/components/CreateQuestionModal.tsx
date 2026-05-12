@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, Tag, message } from 'antd';
 import { knowledgeApi, Category } from '../api/knowledgeApi';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import styles from './CreateQuestionModal.module.css';
+import { logger } from '@/utils/logger';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -127,7 +128,7 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         const data = await knowledgeApi.getCategories();
         setCategories(data);
       } catch (error) {
-        console.error('Failed to load categories:', error);
+        logger.error('Failed to load categories:', error);
       }
     };
 
@@ -173,7 +174,7 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
       setTags([]);
       onSuccess(newQuestion);
     } catch (error: any) {
-      console.error('Failed to create question:', error);
+      logger.error('Failed to create question:', error);
       const backendError =
         error?.response?.data?.detail ||
         (typeof error?.response?.data === 'string' ? error.response.data : undefined) ||

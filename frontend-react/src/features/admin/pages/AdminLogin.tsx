@@ -14,6 +14,7 @@ import { DEV_ACCOUNTS, type DevAccount } from '@/config/devAccounts';
 import { redirectByRole } from '@/utils/roleRedirect';
 import { ROUTES } from '@/utils/constants';
 import '@/styles/admin-login.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Paragraph } = Typography;
 
@@ -147,7 +148,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       const errorMessage = handleError(error);
       message.error(errorMessage);
       if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
       }
     } finally {
       setLoading(false);
@@ -199,7 +200,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
       const errorMessage = handleError(error);
       message.error(`Ошибка входа как ${account.label}: ${errorMessage}`);
       if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
-        console.error(`Quick login error for ${account.label}:`, error);
+        logger.error(`Quick login error for ${account.label}:`, error);
       }
     } finally {
       setLoading(false);

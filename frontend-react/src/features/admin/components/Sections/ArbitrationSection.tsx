@@ -37,6 +37,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { arbitrationApi } from '@/features/admin/api/arbitration';
 import styles from './ArbitrationSection.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
@@ -223,7 +224,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       refundForm.resetFields();
       setRefundPercentage(50);
     } catch (error) {
-      console.error('Refund error:', error);
+      logger.error('Refund error:', error);
       message.error('Не удалось оформить возврат');
     } finally {
       setRefundProcessing(false);

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminPanelApi } from '@/features/admin/api';
 import { QUERY_KEYS } from '@/features/admin/constants/adminConstants';
 import { message } from 'antd';
+import { logger } from '@/utils/logger';
 
 export const useOrders = (enabled: boolean = true) => {
   const { data: orders = [], isLoading: loading, refetch } = useQuery({
@@ -61,7 +62,7 @@ export const useOrderActions = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PROBLEM_ORDERS });
     },
     onError: (error) => {
-      console.error('Failed to change order status:', error);
+      logger.error('Failed to change order status:', error);
       message.error('Не удалось изменить статус заказа');
     },
   });

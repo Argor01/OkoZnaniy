@@ -16,6 +16,7 @@ import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
 import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -147,7 +148,7 @@ const UserProfile: FC = () => {
 
       antMessage.success('Чат открыт');
     } catch (error: any) {
-      console.error('Ошибка создания чата:', error);
+      logger.error('Ошибка создания чата:', error);
       const data = error?.response?.data;
       const backendMessage =
         data?.detail ||

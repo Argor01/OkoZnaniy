@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import TelegramLoginButton from '../components/TelegramLoginButton';
+import { logger } from '@/utils/logger';
 
 const TelegramAuthExample: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const TelegramAuthExample: React.FC = () => {
   };
 
   const handleTelegramError = (error: string) => {
-    console.error('Ошибка авторизации:', error);
+    logger.error('Ошибка авторизации:', error);
     alert(`Ошибка: ${error}`);
   };
 

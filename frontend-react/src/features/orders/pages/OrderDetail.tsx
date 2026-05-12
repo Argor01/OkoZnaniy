@@ -15,6 +15,7 @@ import { formatCurrency } from '@/utils/formatters';
 import styles from './OrderDetail.module.css';
 import { ROUTES } from '@/utils/constants';
 import { AppButton, AppCard } from '@/components/ui';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -574,7 +575,7 @@ const OrderDetail: React.FC = () => {
                         if (username) {
                           navigate(`/user/${username}`);
                         } else {
-                          console.error('Client username not available:', order.client);
+                          logger.error('Client username not available:', order.client);
                           message.error('Не удалось открыть профиль пользователя');
                         }
                       }}
@@ -1055,7 +1056,7 @@ const OrderDetail: React.FC = () => {
                                   if (username) {
                                     navigate(`/user/${username}`);
                                   } else {
-                                    console.error('Expert username not available:', bid.expert);
+                                    logger.error('Expert username not available:', bid.expert);
                                     message.error('Не удалось открыть профиль эксперта');
                                   }
                                 }}
@@ -1071,7 +1072,7 @@ const OrderDetail: React.FC = () => {
                                       if (username) {
                                         navigate(`/user/${username}`);
                                       } else {
-                                        console.error('Expert username not available:', bid.expert);
+                                        logger.error('Expert username not available:', bid.expert);
                                         message.error('Не удалось открыть профиль эксперта');
                                       }
                                     }}
@@ -1144,7 +1145,7 @@ const OrderDetail: React.FC = () => {
                         if (username) {
                           navigate(`/user/${username}`);
                         } else {
-                          console.error('Expert username not available:', order.expert);
+                          logger.error('Expert username not available:', order.expert);
                           message.error('Не удалось открыть профиль эксперта');
                         }
                       }}

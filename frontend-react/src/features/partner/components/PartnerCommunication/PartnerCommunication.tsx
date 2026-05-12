@@ -19,6 +19,7 @@ import {
 import dayjs from 'dayjs';
 import apiClient from '@/api/client';
 import styles from './PartnerCommunication.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -78,7 +79,7 @@ export const PartnerCommunication: React.FC = () => {
         setSelectedDirector(response.data[0]);
       }
     } catch (error) {
-      console.error('Ошибка загрузки директоров:', error);
+      logger.error('Ошибка загрузки директоров:', error);
       message.error('Не удалось загрузить список директоров');
     } finally {
       setLoading(false);
@@ -90,7 +91,7 @@ export const PartnerCommunication: React.FC = () => {
       const response = await apiClient.get(`/chat/partner-director/${directorId}/`);
       setMessages(response.data);
     } catch (error) {
-      console.error('Ошибка загрузки сообщений:', error);
+      logger.error('Ошибка загрузки сообщений:', error);
     }
   };
 
@@ -106,7 +107,7 @@ export const PartnerCommunication: React.FC = () => {
       await loadMessages(selectedDirector.id);
       message.success('Сообщение отправлено');
     } catch (error) {
-      console.error('Ошибка отправки сообщения:', error);
+      logger.error('Ошибка отправки сообщения:', error);
       message.error('Не удалось отправить сообщение');
     } finally {
       setSending(false);

@@ -31,6 +31,7 @@ import {
 import dayjs from 'dayjs';
 import { AdminUser, AdminRole, AdminPermission } from '@/features/admin/types/admin';
 import { useUsers, useRoles, usePermissions, useUserActions, useRoleActions } from '@/features/admin/hooks/useAdminUsers';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -106,7 +107,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       setSelectedUser(null);
       roleForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -127,7 +128,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       setSelectedRole(null);
       permissionForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -139,7 +140,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       setCreateRoleModalVisible(false);
       createRoleForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

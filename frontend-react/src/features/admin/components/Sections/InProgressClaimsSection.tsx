@@ -86,6 +86,7 @@ interface Claim {
 }
 
 import { useClaims, useClaimActions, useTicketActions } from '@/features/admin/hooks';
+import { logger } from '@/utils/logger';
 
 export const InProgressClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('in_progress', true);
@@ -146,7 +147,7 @@ export const InProgressClaimsSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -166,7 +167,7 @@ export const InProgressClaimsSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -186,7 +187,7 @@ export const InProgressClaimsSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

@@ -16,6 +16,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
 import styles from './EditOrderModal.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title } = Typography;
 
@@ -179,7 +180,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
       onClose();
     },
     onError: (error: Error) => {
-      console.error('Ошибка обновления заказа:', error);
+      logger.error('Ошибка обновления заказа:', error);
       message.error('Ошибка при обновлении заказа. Попробуйте еще раз.');
     },
   });
@@ -270,7 +271,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
             completed++;
             message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
           } catch (error) {
-            console.error('Ошибка загрузки файла:', error);
+            logger.error('Ошибка загрузки файла:', error);
             const errMsg = (error as any)?.response?.data?.detail || (error as Error)?.message;
             message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: `uploadErr-${item.uid}` });
           }
@@ -289,7 +290,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
       await queryClient.invalidateQueries({ queryKey: ['order', String(order.id)] });
     } catch (error) {
-      console.error('❌ Ошибка при обновлении заказа:', error);
+      logger.error('❌ Ошибка при обновлении заказа:', error);
       const errMsg =
         (error as any)?.response?.data?.detail ||
         (error as any)?.response?.data?.deadline?.[0] ||

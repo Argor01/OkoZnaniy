@@ -29,6 +29,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './PartnerChatsSection.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -128,7 +129,7 @@ export const PartnerChatsSection: React.FC = () => {
         setSelectedRoom(directorChats[0]);
       }
     } catch (error) {
-      console.error('Error loading directors:', error);
+      logger.error('Error loading directors:', error);
       message.error('Ошибка загрузки списка директоров');
       setChatRooms([]);
     } finally {
@@ -167,7 +168,7 @@ export const PartnerChatsSection: React.FC = () => {
       const response = await apiClient.get(`/chat/partner-director/${directorId}/`);
       setMessages(response.data || []);
     } catch (error) {
-      console.error('Error loading messages:', error);
+      logger.error('Error loading messages:', error);
       setMessages([]);
     }
   };
@@ -184,7 +185,7 @@ export const PartnerChatsSection: React.FC = () => {
       setMessageText('');
       await loadMessages(selectedRoom.id);
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       message.error('Ошибка отправки сообщения');
     }
   };
@@ -204,7 +205,7 @@ export const PartnerChatsSection: React.FC = () => {
       // Перезагружаем список чатов
       await loadChatRooms();
     } catch (error) {
-      console.error('Error creating partner room:', error);
+      logger.error('Error creating partner room:', error);
       message.error('Ошибка создания чата');
     }
   };
@@ -218,7 +219,7 @@ export const PartnerChatsSection: React.FC = () => {
       setInviteUserModalVisible(false);
       inviteUserForm.resetFields();
     } catch (error) {
-      console.error('Error inviting user:', error);
+      logger.error('Error inviting user:', error);
       message.error('Ошибка приглашения пользователя');
     }
   };

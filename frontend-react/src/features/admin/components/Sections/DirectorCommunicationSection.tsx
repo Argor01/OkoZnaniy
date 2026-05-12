@@ -51,6 +51,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
@@ -193,7 +194,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       messageForm.resetFields();
       message.success('Сообщение отправлено директору');
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -208,7 +209,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
         message.success('Ответ отправлен');
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -220,7 +221,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       meetingForm.resetFields();
       message.success('Запрос на встречу отправлен');
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

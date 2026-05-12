@@ -5,6 +5,7 @@ import { FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircle
 import { authApi } from '@/features/auth/api/auth';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -57,7 +58,7 @@ const ExpertApplication: React.FC = () => {
       
       setWelcomeModalVisible(true);
     } catch (error: any) {
-      console.error('Error submitting application:', error);
+      logger.error('Error submitting application:', error);
       const errorMessage = error?.response?.data?.detail || 
                           error?.response?.data?.error ||
                           'Не удалось подать анкету';

@@ -27,6 +27,7 @@ import {
 } from '@ant-design/icons';
 import { ServiceTariff, CommissionSettings } from '@/features/admin/types/admin';
 import { useTariffs, useTariffActions, useCommissions, useCommissionActions } from '@/features/admin/hooks';
+import { logger } from '@/utils/logger';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -56,7 +57,7 @@ export const TariffsSettingsSection: React.FC = () => {
       tariffForm.resetFields();
       message.success('Тариф создан');
     } catch (error) {
-      console.error('Failed to create tariff:', error);
+      logger.error('Failed to create tariff:', error);
       message.error('Ошибка при создании тарифа');
     }
   };
@@ -72,7 +73,7 @@ export const TariffsSettingsSection: React.FC = () => {
         message.success('Тариф обновлен');
       }
     } catch (error) {
-      console.error('Failed to update tariff:', error);
+      logger.error('Failed to update tariff:', error);
       message.error('Ошибка при обновлении тарифа');
     }
   };
@@ -88,7 +89,7 @@ export const TariffsSettingsSection: React.FC = () => {
       await deleteTariff(tariffId);
       message.success('Тариф удален');
     } catch (error) {
-      console.error('Failed to delete tariff:', error);
+      logger.error('Failed to delete tariff:', error);
       message.error('Ошибка при удалении тарифа');
     }
   };
@@ -101,7 +102,7 @@ export const TariffsSettingsSection: React.FC = () => {
       commissionForm.resetFields();
       message.success('Комиссия создана');
     } catch (error) {
-      console.error('Failed to create commission:', error);
+      logger.error('Failed to create commission:', error);
       message.error('Ошибка при создании комиссии');
     }
   };
@@ -117,7 +118,7 @@ export const TariffsSettingsSection: React.FC = () => {
         message.success('Комиссия обновлена');
       }
     } catch (error) {
-      console.error('Failed to update commission:', error);
+      logger.error('Failed to update commission:', error);
       message.error('Ошибка при обновлении комиссии');
     }
   };
@@ -133,7 +134,7 @@ export const TariffsSettingsSection: React.FC = () => {
       await deleteCommission(commissionId);
       message.success('Комиссия удалена');
     } catch (error) {
-      console.error('Failed to delete commission:', error);
+      logger.error('Failed to delete commission:', error);
       message.error('Ошибка при удалении комиссии');
     }
   };

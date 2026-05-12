@@ -11,6 +11,7 @@ import { AppButton, AppCard } from '@/components/ui';
 import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutlined, ClockCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { formatCurrency } from '@/utils/formatters';
 import styles from './ComplaintForm.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -162,7 +163,7 @@ const ComplaintForm: React.FC = () => {
         }, 1000);
       } else {
         message.error(errorMsg);
-        console.error('[ComplaintForm] submit failed:', data);
+        logger.error('[ComplaintForm] submit failed:', data);
       }
     } finally {
       setIsSubmitting(false);

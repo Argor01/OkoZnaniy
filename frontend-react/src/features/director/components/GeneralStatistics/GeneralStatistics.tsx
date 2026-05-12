@@ -22,6 +22,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import { getKPI, exportFinancialData } from '@/features/director/api/directorApi';
 import styles from './GeneralStatistics.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -303,7 +304,7 @@ const GeneralStatistics: React.FC = () => {
         message.success({ content: 'PDF успешно сгенерирован!', key: 'export', duration: 2 });
       }
     } catch (error) {
-      console.error('Ошибка экспорта:', error);
+      logger.error('Ошибка экспорта:', error);
       message.error({ content: 'Ошибка при экспорте данных', key: 'export', duration: 2 });
     }
   };

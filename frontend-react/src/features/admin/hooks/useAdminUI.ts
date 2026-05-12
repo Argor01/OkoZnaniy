@@ -3,6 +3,7 @@ import { Grid } from 'antd';
 import type { MenuKey, Partner, Dispute } from '@/features/admin/types';
 import type { CustomerRequest, AdminChatGroup } from '@/features/admin/types/requests.types'; 
 import { useConfirmModal } from './useConfirmModal';
+import { logger } from '@/utils/logger';
 
 const { useBreakpoint } = Grid;
 
@@ -90,7 +91,7 @@ export const useAdminUI = () => {
     try {
       localStorage.setItem('adminDashboard_selectedMenu', key);
     } catch (error) {
-      console.error('Failed to save menu selection:', error);
+      logger.error('Failed to save menu selection:', error);
     }
     
     
@@ -140,10 +141,10 @@ export const useAdminUI = () => {
   const handlePartnerSave = useCallback(async (data: Partial<Partner>) => {
     try {
       
-      console.log('Saving partner:', data);
+      logger.log('Saving partner:', data);
       closePartnerModal();
     } catch (error) {
-      console.error('Error saving partner:', error);
+      logger.error('Error saving partner:', error);
     }
   }, [closePartnerModal]);
 
@@ -157,10 +158,10 @@ export const useAdminUI = () => {
     if (confirmed) {
       try {
         
-        console.log('Approving partner:', partnerId);
+        logger.log('Approving partner:', partnerId);
         closePartnerModal();
       } catch (error) {
-        console.error('Error approving partner:', error);
+        logger.error('Error approving partner:', error);
       }
     }
   }, [confirmModal, closePartnerModal]);
@@ -175,10 +176,10 @@ export const useAdminUI = () => {
     if (confirmed) {
       try {
         
-        console.log('Rejecting partner:', partnerId, reason);
+        logger.log('Rejecting partner:', partnerId, reason);
         closePartnerModal();
       } catch (error) {
-        console.error('Error rejecting partner:', error);
+        logger.error('Error rejecting partner:', error);
       }
     }
   }, [confirmModal, closePartnerModal]);
@@ -193,10 +194,10 @@ export const useAdminUI = () => {
     if (confirmed) {
       try {
         
-        console.log('Blocking partner:', partnerId);
+        logger.log('Blocking partner:', partnerId);
         closePartnerModal();
       } catch (error) {
-        console.error('Error blocking partner:', error);
+        logger.error('Error blocking partner:', error);
       }
     }
   }, [confirmModal, closePartnerModal]);
@@ -223,9 +224,9 @@ export const useAdminUI = () => {
   const handleAssignArbitrator = useCallback(async (disputeId: number, arbitratorId: number) => {
     try {
       
-      console.log('Assigning arbitrator:', disputeId, arbitratorId);
+      logger.log('Assigning arbitrator:', disputeId, arbitratorId);
     } catch (error) {
-      console.error('Error assigning arbitrator:', error);
+      logger.error('Error assigning arbitrator:', error);
     }
   }, []);
 
@@ -239,10 +240,10 @@ export const useAdminUI = () => {
     if (confirmed) {
       try {
 
-        console.log('Resolving dispute:', disputeId, resolution, winner);
+        logger.log('Resolving dispute:', disputeId, resolution, winner);
         closeDisputeModal();
       } catch (error) {
-        console.error('Error resolving dispute:', error);
+        logger.error('Error resolving dispute:', error);
       }
     }
   }, [confirmModal, closeDisputeModal]);
@@ -250,9 +251,9 @@ export const useAdminUI = () => {
   const handleAddDisputeComment = useCallback(async (disputeId: number, comment: string) => {
     try {
 
-      console.log('Adding comment to dispute:', disputeId, comment);
+      logger.log('Adding comment to dispute:', disputeId, comment);
     } catch (error) {
-      console.error('Error adding comment:', error);
+      logger.error('Error adding comment:', error);
     }
   }, []);
 

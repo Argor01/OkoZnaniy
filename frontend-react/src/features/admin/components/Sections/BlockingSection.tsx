@@ -4,6 +4,7 @@ import { LockOutlined, UnlockOutlined, EyeOutlined, SearchOutlined } from '@ant-
 import dayjs from 'dayjs';
 import { useUsers, useUserActions } from '@/features/admin/hooks';
 import { AdminUser } from '@/features/admin/types/admin';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -82,7 +83,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
       setActionType(null);
       form.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

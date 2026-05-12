@@ -4,6 +4,7 @@ import { StopOutlined, CheckCircleOutlined, InfoCircleOutlined, ClockCircleOutli
 import dayjs from 'dayjs';
 import { useBlockedUsers, useUserActions } from '@/features/admin/hooks';
 import { BlockedUser } from '@/features/admin/types/admin';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -62,7 +63,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
       setSelectedUser(null);
       unblockForm.resetFields();
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

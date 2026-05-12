@@ -30,6 +30,7 @@ import 'dayjs/locale/ru';
 import styles from './KnowledgePortal.module.css';
 import { knowledgeApi, Category, Question } from '../api/knowledgeApi';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -68,7 +69,7 @@ export const KnowledgePortal: React.FC = () => {
       setCategories(categoriesData);
       setQuestions(questionsData);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      logger.error('Failed to load data:', error);
       message.error('Не удалось загрузить данные');
     } finally {
       setLoading(false);

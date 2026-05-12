@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
 import { internalCommunicationApi, InternalMessage, MeetingRequest } from '@/features/admin/api/internalCommunication';
 import { QUERY_KEYS, QUERY_CONFIG } from '@/features/admin/constants/adminConstants';
+import { logger } from '@/utils/logger';
 
 export const useInternalCommunication = () => {
   const queryClient = useQueryClient();
@@ -43,7 +44,7 @@ export const useInternalCommunication = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTERNAL_UNREAD_COUNT });
     },
     onError: (error) => {
-      console.error('Ошибка отправки сообщения:', error);
+      logger.error('Ошибка отправки сообщения:', error);
       message.error('Не удалось отправить сообщение');
     },
   });
@@ -55,7 +56,7 @@ export const useInternalCommunication = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTERNAL_UNREAD_COUNT });
     },
     onError: (error) => {
-      console.error('Ошибка отметки сообщения:', error);
+      logger.error('Ошибка отметки сообщения:', error);
       message.error('Не удалось отметить сообщение');
     },
   });
@@ -67,7 +68,7 @@ export const useInternalCommunication = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTERNAL_MESSAGES(false) });
     },
     onError: (error) => {
-      console.error('Ошибка архивирования:', error);
+      logger.error('Ошибка архивирования:', error);
       message.error('Не удалось архивировать сообщение');
     },
   });

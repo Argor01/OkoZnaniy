@@ -7,6 +7,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import axios from 'axios';
 import styles from './RightSidebar.module.css';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -55,7 +56,7 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
         const recentQuestions = (allQuestions as Question[]).slice(-5);
         setQuestions(Array.isArray(recentQuestions) ? recentQuestions : []);
       } catch (error) {
-        console.error('Failed to load questions:', error);
+        logger.error('Failed to load questions:', error);
         setQuestions([]);
       }
     };

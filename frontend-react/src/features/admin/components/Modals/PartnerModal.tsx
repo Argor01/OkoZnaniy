@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import type { Partner, UpdatePartnerRequest } from '@/features/admin/types';
 import { MODAL_CONSTANTS } from '@/features/admin/constants';
 import styles from './PartnerModal.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 
@@ -43,7 +44,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
       const values = await form.validateFields();
       onUpdate(partner.id, values);
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

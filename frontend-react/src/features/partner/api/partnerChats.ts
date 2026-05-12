@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { logger } from '@/utils/logger';
 
 // Chat Rooms API для партнеров
 export const getChatRooms = async (): Promise<any[]> => {
@@ -6,7 +7,7 @@ export const getChatRooms = async (): Promise<any[]> => {
     const response = await apiClient.get('/partner/chat-rooms/');
     return response.data;
   } catch (error) {
-    console.error('Error fetching partner chat rooms:', error);
+    logger.error('Error fetching partner chat rooms:', error);
     throw error;
   }
 };
@@ -20,7 +21,7 @@ export const createChatRoom = async (data: { name: string; description?: string;
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating partner chat room:', error);
+    logger.error('Error creating partner chat room:', error);
     throw error;
   }
 };
@@ -30,7 +31,7 @@ export const getChatRoomMessages = async (roomId: number): Promise<any[]> => {
     const response = await apiClient.get(`/partner/chat-rooms/${roomId}/messages/`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching partner chat room messages:', error);
+    logger.error('Error fetching partner chat room messages:', error);
     throw error;
   }
 };
@@ -42,7 +43,7 @@ export const sendChatRoomMessage = async (roomId: number, message: string): Prom
     });
     return response.data;
   } catch (error) {
-    console.error('Error sending partner message:', error);
+    logger.error('Error sending partner message:', error);
     throw error;
   }
 };
@@ -51,7 +52,7 @@ export const joinChatRoom = async (roomId: number): Promise<void> => {
   try {
     await apiClient.post(`/partner/chat-rooms/${roomId}/join_room/`);
   } catch (error) {
-    console.error('Error joining partner chat room:', error);
+    logger.error('Error joining partner chat room:', error);
     throw error;
   }
 };
@@ -60,7 +61,7 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
   try {
     await apiClient.post(`/partner/chat-rooms/${roomId}/leave_room/`);
   } catch (error) {
-    console.error('Error leaving partner chat room:', error);
+    logger.error('Error leaving partner chat room:', error);
     throw error;
   }
 };
@@ -71,7 +72,7 @@ export const inviteToChatRoom = async (roomId: number, userId: number): Promise<
       user_id: userId,
     });
   } catch (error) {
-    console.error('Error inviting user to partner chat:', error);
+    logger.error('Error inviting user to partner chat:', error);
     throw error;
   }
 };
@@ -87,7 +88,7 @@ export const uploadChatRoomFile = async (roomId: number, file: File): Promise<an
     });
     return response.data;
   } catch (error) {
-    console.error('Error uploading file to partner chat:', error);
+    logger.error('Error uploading file to partner chat:', error);
     throw error;
   }
 };

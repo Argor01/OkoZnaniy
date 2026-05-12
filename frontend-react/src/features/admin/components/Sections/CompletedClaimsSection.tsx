@@ -85,6 +85,7 @@ interface Claim {
 }
 
 import { useClaims, useClaimActions } from '@/features/admin/hooks';
+import { logger } from '@/utils/logger';
 
 export const CompletedClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('completed', true);
@@ -165,7 +166,7 @@ export const CompletedClaimsSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getIncomeDetail, getExpenseDetail, addIncome, addExpense } from '@/features/director/api/directorApi';
 import apiClient from '@/api/client';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
+import { logger } from '@/utils/logger';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -141,7 +142,7 @@ const IncomeExpenseDetail: React.FC = () => {
       setAddModalVisible(false);
       form.resetFields();
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      logger.error('Error adding transaction:', error);
       message.error('Ошибка при добавлении записи');
     }
   };
@@ -177,7 +178,7 @@ const IncomeExpenseDetail: React.FC = () => {
       setDetailModalVisible(false);
       setSelectedRecord(null);
     } catch (error) {
-      console.error('Error deleting transaction:', error);
+      logger.error('Error deleting transaction:', error);
       message.error('Ошибка при удалении записи');
     }
   };

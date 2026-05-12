@@ -18,6 +18,7 @@ import { AppDatePicker } from '@/components/ui/AppDatePicker';
 import { AppUpload } from '@/components/ui/AppUpload';
 
 import styles from './CreateOrder.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title } = Typography;
 
@@ -136,7 +137,7 @@ const CreateOrder: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
     },
     onError: (error: Error) => {
-      console.error('Ошибка создания заказа:', error);
+      logger.error('Ошибка создания заказа:', error);
       message.error('Ошибка при создании заказа. Попробуйте еще раз.');
     },
   });
@@ -180,7 +181,7 @@ const CreateOrder: React.FC = () => {
         setIsUploading(true);
       
         // Логируем данные для отладки
-        console.log('📦 Отправляемые данные заказа:', values);
+        logger.log('📦 Отправляемые данные заказа:', values);
       
         // Объединяем дату и время
         const deadlineWithTime = values.deadline
@@ -234,7 +235,7 @@ const CreateOrder: React.FC = () => {
               completed++;
               message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
             } catch (error) {
-              console.error('Ошибка загрузки файла:', error);
+              logger.error('Ошибка загрузки файла:', error);
               const errMsg = (error as any)?.response?.data?.detail || (error as any)?.response?.data?.file?.[0] || (error as Error)?.message;
               message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: `uploadErr-${item.uid}` });
             }
@@ -253,8 +254,8 @@ const CreateOrder: React.FC = () => {
         })();
       }
         } catch (error) {
-      console.error('❌ Ошибка при создании заказа:', error);
-      console.error('📄 Response data:', (error as any)?.response?.data);
+      logger.error('❌ Ошибка при создании заказа:', error);
+      logger.error('📄 Response data:', (error as any)?.response?.data);
       const errMsg =
         (error as any)?.response?.data?.detail ||
         (error as any)?.response?.data?.deadline?.[0] ||

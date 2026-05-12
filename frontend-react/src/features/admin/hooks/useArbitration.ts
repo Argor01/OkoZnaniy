@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
 import { arbitrationApi, ArbitrationCase, ArbitrationStats } from '@/features/admin/api/arbitration';
+import { logger } from '@/utils/logger';
 
 export const useArbitration = (autoFetch = true) => {
   const [cases, setCases] = useState<ArbitrationCase[]>([]);
@@ -20,7 +21,7 @@ export const useArbitration = (autoFetch = true) => {
       const data = await arbitrationApi.getCases();
       setCases(data);
     } catch (error) {
-      console.error('Error fetching arbitration cases:', error);
+      logger.error('Error fetching arbitration cases:', error);
       message.error('Ошибка при загрузке дел');
     } finally {
       setLoading(false);
@@ -32,7 +33,7 @@ export const useArbitration = (autoFetch = true) => {
       const data = await arbitrationApi.getStats();
       setStats(data);
     } catch (error) {
-      console.error('Error fetching arbitration stats:', error);
+      logger.error('Error fetching arbitration stats:', error);
     }
   };
 

@@ -16,6 +16,7 @@ import { useAdminAuth } from '@/features/admin/hooks';
 import { apiClient } from '@/api/client';
 import type { MenuKey } from '@/features/admin/types';
 import './ArbitrationCaseDetailPage.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -151,7 +152,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       setFeed(feedResponse.data.feed || []);
     } catch (error) {
       message.error('Ошибка при загрузке данных');
-      console.error(error);
+      logger.error(error);
     } finally {
       setLoading(false);
     }
@@ -224,7 +225,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
       fetchCaseData();
     } catch (error) {
       message.error('Ошибка при оформлении возврата');
-      console.error(error);
+      logger.error(error);
     } finally {
       setProcessingRefund(false);
     }

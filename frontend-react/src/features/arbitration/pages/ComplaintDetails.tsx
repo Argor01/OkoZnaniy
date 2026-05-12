@@ -17,6 +17,7 @@ import { ordersApi } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { AppButton, AppCard } from '@/components/ui';
 import { formatCurrency } from '@/utils/formatters';
+import { logger } from '@/utils/logger';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -88,12 +89,12 @@ const ComplaintDetails: React.FC = () => {
     queryFn: async () => {
       try {
         const result = await complaintsApi.getById(Number(complaintId));
-        console.log('Complaint loaded:', result);
+        logger.log('Complaint loaded:', result);
         return result;
       } catch (err: any) {
-        console.error('Error loading complaint:', err);
-        console.error('Error status:', err?.response?.status);
-        console.error('Error data:', err?.response?.data);
+        logger.error('Error loading complaint:', err);
+        logger.error('Error status:', err?.response?.status);
+        logger.error('Error data:', err?.response?.data);
         throw err;
       }
     },

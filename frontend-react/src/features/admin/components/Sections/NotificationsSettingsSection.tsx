@@ -36,6 +36,7 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -132,7 +133,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
       templateForm.resetFields();
       message.success('Шаблон создан');
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -147,7 +148,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         message.success('Шаблон обновлен');
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -179,7 +180,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         message.success('Тестовое уведомление отправлено');
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -394,7 +395,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                             checked={setting.setting_value}
                             onChange={(checked) => {
 
-                              console.log('Update setting:', setting.setting_key, checked);
+                              logger.log('Update setting:', setting.setting_key, checked);
                             }}
                           />
                         ) : (
@@ -403,7 +404,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                             className="notificationsSettingInput"
                             onChange={(e) => {
                               
-                              console.log('Update setting:', setting.setting_key, e.target.value);
+                              logger.log('Update setting:', setting.setting_key, e.target.value);
                             }}
                           />
                         )}

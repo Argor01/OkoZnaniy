@@ -30,12 +30,13 @@ import {
   SettingOutlined as SettingsIcon
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@/utils/logger';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
 const NewAdminDashboard: React.FC = () => {
-  console.log('🚀 NEW ADMIN DASHBOARD LOADED!!!');
+  logger.log('🚀 NEW ADMIN DASHBOARD LOADED!!!');
   
   const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = useState('overview');

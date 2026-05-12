@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_URL } from '@/config/api';
 import { ROUTES } from '@/utils/constants';
 import { API_ENDPOINTS } from '@/config/endpoints';
+import { logger } from '@/utils/logger';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -35,7 +36,7 @@ apiClient.interceptors.request.use((config) => {
 
   // Логирование для public/stats
   if (url.includes('/public/stats/')) {
-    console.log('[API Client] public/stats request:', {
+    logger.log('[API Client] public/stats request:', {
       url,
       method,
       hasToken: !!token,
@@ -55,7 +56,7 @@ apiClient.interceptors.request.use((config) => {
   if (token && !isAuthEndpoint) {
     config.headers.Authorization = `Bearer ${token}`;
     if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
-      console.log('🔑 Отправка запроса с токеном:', {
+      logger.log('🔑 Отправка запроса с токеном:', {
         url: config.url,
         hasToken: !!token,
         tokenPreview: token ? `${token.substring(0, 8)}…` : 'нет токена',
@@ -64,7 +65,7 @@ apiClient.interceptors.request.use((config) => {
     }
   } else if (!token && !isAuthEndpoint) {
     if (import.meta.env.DEV && localStorage.getItem('debug_api') === '1') {
-      console.warn('⚠️ Запрос без токена:', config.url);
+      logger.warn('⚠️ Запрос без токена:', config.url);
     }
   }
   return config;

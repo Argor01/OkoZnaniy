@@ -21,6 +21,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import { apiClient } from '@/api/client';
 import styles from './UserConversationsSection.module.css';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -121,10 +122,10 @@ export const UserConversationsSection: React.FC = () => {
         setChats(data.data);
       } else {
         setChats([]);
-        console.error('Unexpected data format for chats:', data);
+        logger.error('Unexpected data format for chats:', data);
       }
     } catch (error) {
-      console.error('Ошибка загрузки чатов:', error);
+      logger.error('Ошибка загрузки чатов:', error);
       antMessage.error('Не удалось загрузить переписки');
       setChats([]);
     } finally {

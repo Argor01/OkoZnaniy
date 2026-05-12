@@ -2,6 +2,7 @@
 
 import { notification } from 'antd';
 import type { NotificationPlacement } from 'antd/es/notification/interface';
+import { logger } from '@/utils/logger';
 
 
 const NOTIFICATION_CONFIG = {
@@ -237,7 +238,7 @@ export const fileNotifications = {
   uploadProgress: (fileName: string, progress: number) => {
 
 
-    console.log(`Upload progress for ${fileName}: ${progress}%`);
+    logger.log(`Upload progress for ${fileName}: ${progress}%`);
   },
   
   uploadSuccess: (fileName: string) => showSuccessNotification(

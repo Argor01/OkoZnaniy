@@ -12,6 +12,7 @@ import 'dayjs/locale/ru';
 import styles from './OrdersTab.module.css';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -159,7 +160,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
       link.click();
       link.parentNode?.removeChild(link);
     } catch (error) {
-      console.error('Ошибка при скачивании файла:', error);
+      logger.error('Ошибка при скачивании файла:', error);
       message.error('Не удалось скачать файл');
     }
   };

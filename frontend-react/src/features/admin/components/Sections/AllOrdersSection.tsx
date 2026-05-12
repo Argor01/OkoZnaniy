@@ -40,6 +40,7 @@ import {
   ORDER_PRIORITIES
 } from '@/utils/constants';
 import styles from './AllOrdersSection.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text } = Typography;
 const { Search } = Input;
@@ -107,7 +108,7 @@ const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
 
         return chats;
       } catch (error) {
-        console.error('Error loading chat:', error);
+        logger.error('Error loading chat:', error);
         return [];
       }
     },
@@ -179,7 +180,7 @@ const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
 
         return chats;
       } catch (error) {
-        console.error('Error loading order participants:', error);
+        logger.error('Error loading order participants:', error);
         return [];
       }
     },
@@ -302,7 +303,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     totalBudget: filteredData.reduce((sum, o) => {
       const budget = Number(o.budget) || 0;
       if (isNaN(budget)) {
-        console.warn('Invalid budget value:', o.budget, 'for order:', o.id);
+        logger.warn('Invalid budget value:', o.budget, 'for order:', o.id);
         return sum;
       }
       return sum + budget;

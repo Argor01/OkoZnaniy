@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useClaims, useClaimActions } from '@/features/admin/hooks';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -132,7 +133,7 @@ export const NewClaimsSection: React.FC = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

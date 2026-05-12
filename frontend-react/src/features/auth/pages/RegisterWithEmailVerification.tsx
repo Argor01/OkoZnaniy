@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import EmailVerificationForm from '../components/EmailVerificationForm';
 import { apiClient } from '@/api/client';
+import { logger } from '@/utils/logger';
 
 const RegisterWithEmailVerification: React.FC = () => {
   const navigate = useNavigate();
@@ -103,7 +104,7 @@ const RegisterWithEmailVerification: React.FC = () => {
         navigate('/login');
       }
     } catch (err: unknown) {
-      if (debugEnabled) console.error('Registration error:', err);
+      if (debugEnabled) logger.error('Registration error:', err);
       const errorMessage = (() => {
         const data = (err as { response?: { data?: unknown } })?.response?.data as
           | { email?: string[]; password?: string[]; detail?: string }
@@ -129,7 +130,7 @@ const RegisterWithEmailVerification: React.FC = () => {
             email={email}
             onSuccess={handleVerificationSuccess}
             onError={(error) => {
-              if (debugEnabled) console.error('Verification error:', error);
+              if (debugEnabled) logger.error('Verification error:', error);
             }}
           />
           

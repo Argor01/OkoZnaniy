@@ -41,6 +41,7 @@ import {
   BellOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -200,7 +201,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         setResponseModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -219,7 +220,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         setEscalateModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -238,7 +239,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         setAssignModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -257,7 +258,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         setCallModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

@@ -4,6 +4,7 @@ import { UserOutlined, MailOutlined, PhoneOutlined, LockOutlined, PlusOutlined, 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { registerEmployee } from '@/features/director/api/directorApi';
 import type { RegisterEmployeeRequest } from '@/features/director/api/types';
+import { logger } from '@/utils/logger';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -75,7 +76,7 @@ const EmployeeRegistration: React.FC = () => {
       ...(values.role === 'partner' && values.city ? { city: values.city } : {}), // Добавляем город только если роль партнер и город указан
     };
 
-    console.log('Отправляемые данные:', data); // Для отладки
+    logger.log('Отправляемые данные:', data); // Для отладки
     registerMutation.mutate(data);
   };
 

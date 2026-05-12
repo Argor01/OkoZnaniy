@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationsApi, Notification as ApiNotification } from '@/features/common/api/notifications';
 import { Notification } from '@/features/notifications';
+import { logger } from '@/utils/logger';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -64,7 +65,7 @@ export const useNotifications = () => {
       setNotifications(formatted);
       setUnreadCount(formatted.filter(n => !n.isRead).length);
     } catch (error) {
-      console.error('Ошибка загрузки уведомлений:', error);
+      logger.error('Ошибка загрузки уведомлений:', error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +79,7 @@ export const useNotifications = () => {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Ошибка отметки уведомления:', error);
+      logger.error('Ошибка отметки уведомления:', error);
     }
   };
 
@@ -88,7 +89,7 @@ export const useNotifications = () => {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Ошибка отметки всех уведомлений:', error);
+      logger.error('Ошибка отметки всех уведомлений:', error);
     }
   };
 

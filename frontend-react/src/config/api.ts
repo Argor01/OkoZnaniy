@@ -9,8 +9,8 @@ const getApiBaseUrl = () => {
     window.localStorage?.getItem('debug_api') === '1';
 
   if (debugEnabled) {
-    console.log('🔍 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
-    console.log('🔍 DEV mode:', import.meta.env.DEV);
+    logger.log('🔍 VITE_API_URL from env:', import.meta.env.VITE_API_URL);
+    logger.log('🔍 DEV mode:', import.meta.env.DEV);
   }
 
   const envUrl = import.meta.env.VITE_API_URL;

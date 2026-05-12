@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { logger } from '@/utils/logger';
 
 // Типы событий
 export type WSEventType =
@@ -121,7 +122,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     const ws = new WebSocket(url);
 
     ws.onopen = () => {
-      console.log('[WS] Connected');
+      logger.log('[WS] Connected');
       setIsConnected(true);
       reconnectAttempts.current = 0;
       onConnect?.();
@@ -138,12 +139,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         const data = JSON.parse(event.data);
         handleEvent(data);
       } catch (e) {
-        console.error('[WS] Error parsing message:', e);
+        logger.error('[WS] Error parsing message:', e);
       }
     };
 
     ws.onclose = (event) => {
-      console.log('[WS] Disconnected', event.code, event.reason);
+      logger.log('[WS] Disconnected', event.code, event.reason);
       setIsConnected(false);
       onDisconnect?.();
 
@@ -151,7 +152,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       if (event.code !== 4001) { // Не переподключаемся при ошибке аутентификации
         const delay = getReconnectDelay(reconnectAttempts.current);
         reconnectAttempts.current += 1;
-        console.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
+        logger.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
         
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
@@ -160,7 +161,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     };
 
     ws.onerror = (error) => {
-      console.error('[WS] Error:', error);
+      logger.error('[WS] Error:', error);
       onError?.(error);
     };
 

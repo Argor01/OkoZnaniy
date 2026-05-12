@@ -24,6 +24,7 @@ import InternalCommunication from '../components/InternalCommunication/InternalC
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modals.css';
 import '@/styles/arbitrator.css';
+import { logger } from '@/utils/logger';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -74,7 +75,7 @@ const ArbitratorDashboard: React.FC = () => {
         return;
       }
     } catch (error) {
-      console.error('Auth error:', error);
+      logger.error('Auth error:', error);
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       setUser(null);

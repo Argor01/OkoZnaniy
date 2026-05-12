@@ -4,6 +4,7 @@ import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { partnersApi, MapPartner } from '../api/partners';
 import styles from './PartnersMap.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -141,7 +142,7 @@ const PartnersMap: React.FC = () => {
         const data = await response.json();
         setMapData(data);
       } catch (error) {
-        console.error('Ошибка загрузки карты:', error);
+        logger.error('Ошибка загрузки карты:', error);
         setMapError('Не удалось загрузить карту России');
       } finally {
         setMapLoading(false);
@@ -218,7 +219,7 @@ const PartnersMap: React.FC = () => {
   }
 
   if (error || mapError) {
-    console.error('Ошибка загрузки партнеров:', error);
+    logger.error('Ошибка загрузки партнеров:', error);
     return (
       <Alert
         message="Ошибка загрузки"

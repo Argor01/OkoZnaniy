@@ -1,6 +1,7 @@
 import apiClient from '@/api/client';
 import { Bid, CreateOrderRequest, Order, OrderComment, OrderFile } from '@/features/orders/types/orders';
 import { API_ENDPOINTS } from '@/config/endpoints';
+import { logger } from '@/utils/logger';
 
 const isDebugEnabled = () =>
   import.meta.env.DEV &&
@@ -145,7 +146,7 @@ export const ordersApi = {
     options?: { file_type?: 'task' | 'solution' | 'revision'; description?: string }
   ) => {
     if (isDebugEnabled()) {
-      console.log('📤 uploadOrderFile вызван:', {
+      logger.log('📤 uploadOrderFile вызван:', {
         orderId,
         fileName: file.name,
         fileSize: file.size,
@@ -159,14 +160,14 @@ export const ordersApi = {
     form.append('file_type', options?.file_type || 'solution');
     if (options?.description) form.append('description', options.description);
     
-    if (isDebugEnabled()) console.log('📦 FormData подготовлена, отправляем на сервер...');
+    if (isDebugEnabled()) logger.log('📦 FormData подготовлена, отправляем на сервер...');
     
     const response = await apiClient.post(
       API_ENDPOINTS.orders.uploadFile(orderId),
       form
     );
     
-    if (isDebugEnabled()) console.log('✅ Файл успешно загружен на сервер:', response.data);
+    if (isDebugEnabled()) logger.log('✅ Файл успешно загружен на сервер:', response.data);
     return response.data;
   },
 

@@ -1,5 +1,6 @@
 ﻿import apiClient from '@/api/client';
 import { Complexity, Skill, Subject, Topic, WorkType } from '@/features/common/types/catalog';
+import { logger } from '@/utils/logger';
 
 export type { Complexity, Skill, Subject, Topic, WorkType };
 
@@ -20,7 +21,7 @@ export const catalogApi = {
       const response = await apiClient.get('/catalog/subjects/');
       return response.data.results || response.data;
     } catch (error) {
-      console.error('❌ Ошибка получения предметов:', error);
+      logger.error('❌ Ошибка получения предметов:', error);
       throw error;
     }
   },
@@ -38,7 +39,7 @@ export const catalogApi = {
       const response = await apiClient.get('/catalog/work-types/');
       return response.data.results || response.data;
     } catch (error) {
-      console.error('❌ Ошибка получения типов работ:', error);
+      logger.error('❌ Ошибка получения типов работ:', error);
       throw error;
     }
   },
@@ -70,7 +71,7 @@ export const catalogApi = {
         }
       }
 
-      console.error('❌ Ошибка создания предмета:', error);
+      logger.error('❌ Ошибка создания предмета:', error);
       if (responseData?.detail) {
         throw new Error(responseData.detail);
       }
@@ -93,7 +94,7 @@ export const catalogApi = {
       });
       return response.data;
     } catch (error) {
-      console.error('❌ Ошибка создания типа работы:', error);
+      logger.error('❌ Ошибка создания типа работы:', error);
       throw error;
     }
   },

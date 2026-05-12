@@ -1,5 +1,6 @@
 import { apiClient } from '@/api/client';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 import type {
   Employee,
   ExpertApplication,
@@ -45,7 +46,7 @@ export const getPersonnel = async (): Promise<Employee[]> => {
     
     return allEmployees;
   } catch (error) {
-    console.error('Error fetching personnel:', error);
+    logger.error('Error fetching personnel:', error);
     throw error;
   }
 };
@@ -70,7 +71,7 @@ export const registerEmployee = async (data: RegisterEmployeeRequest): Promise<E
     const response = await apiClient.post('/director/personnel/register/', requestData);
     return response.data;
   } catch (error) {
-    console.error('Error registering employee:', error);
+    logger.error('Error registering employee:', error);
     throw error;
   }
 };
@@ -114,7 +115,7 @@ export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
       } as ExpertApplication;
     });
   } catch (error) {
-    console.error('Error fetching expert applications:', error);
+    logger.error('Error fetching expert applications:', error);
     throw error;
   }
 };
@@ -124,7 +125,7 @@ export const approveApplication = async (id: number): Promise<ExpertApplication>
     const response = await apiClient.post(`/director/personnel/expert-applications/${id}/approve/`);
     return response.data;
   } catch (error) {
-    console.error('Error approving application:', error);
+    logger.error('Error approving application:', error);
     throw error;
   }
 };
@@ -134,7 +135,7 @@ export const rejectApplication = async (id: number, reason: string): Promise<Exp
     const response = await apiClient.post(`/director/personnel/expert-applications/${id}/reject/`, { reason });
     return response.data;
   } catch (error) {
-    console.error('Error rejecting application:', error);
+    logger.error('Error rejecting application:', error);
     throw error;
   }
 };
@@ -144,7 +145,7 @@ export const sendForRework = async (id: number, comment: string): Promise<Expert
     const response = await apiClient.post(`/director/personnel/expert-applications/${id}/rework/`, { comment });
     return response.data;
   } catch (error) {
-    console.error('Error sending application for rework:', error);
+    logger.error('Error sending application for rework:', error);
     throw error;
   }
 };
@@ -154,7 +155,7 @@ export const deactivateEmployee = async (id: number): Promise<Employee> => {
     const response = await apiClient.post(`/director/personnel/${id}/deactivate/`);
     return response.data;
   } catch (error) {
-    console.error('Error deactivating employee:', error);
+    logger.error('Error deactivating employee:', error);
     throw error;
   }
 };
@@ -164,7 +165,7 @@ export const activateEmployee = async (id: number): Promise<Employee> => {
     const response = await apiClient.post(`/director/personnel/${id}/activate/`);
     return response.data;
   } catch (error) {
-    console.error('Error activating employee:', error);
+    logger.error('Error activating employee:', error);
     throw error;
   }
 };
@@ -174,7 +175,7 @@ export const archiveEmployee = async (id: number): Promise<Employee> => {
     const response = await apiClient.post(`/director/personnel/${id}/archive/`);
     return response.data;
   } catch (error) {
-    console.error('Error archiving employee:', error);
+    logger.error('Error archiving employee:', error);
     throw error;
   }
 };
@@ -184,7 +185,7 @@ export const getArchivedEmployees = async (): Promise<Employee[]> => {
     const response = await apiClient.get('/director/personnel/archive/');
     return response.data;
   } catch (error) {
-    console.error('Error fetching archived employees:', error);
+    logger.error('Error fetching archived employees:', error);
     throw error;
   }
 };
@@ -194,7 +195,7 @@ export const restoreEmployee = async (id: number): Promise<Employee> => {
     const response = await apiClient.post(`/director/personnel/${id}/restore/`);
     return response.data;
   } catch (error) {
-    console.error('Error restoring employee:', error);
+    logger.error('Error restoring employee:', error);
     throw error;
   }
 };
@@ -203,7 +204,7 @@ export const deleteEmployee = async (id: number): Promise<void> => {
   try {
     await apiClient.delete(`/director/personnel/${id}/`);
   } catch (error) {
-    console.error('Error deleting employee:', error);
+    logger.error('Error deleting employee:', error);
     throw error;
   }
 };
@@ -215,7 +216,7 @@ export const getMonthlyTurnover = async (period?: string): Promise<MonthlyTurnov
     const response = await apiClient.get('/director/finance/turnover/', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching monthly turnover:', error);
+    logger.error('Error fetching monthly turnover:', error);
     throw error;
   }
 };
@@ -227,7 +228,7 @@ export const getNetProfit = async (startDate: string, endDate: string): Promise<
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching net profit:', error);
+    logger.error('Error fetching net profit:', error);
     throw error;
   }
 };
@@ -239,7 +240,7 @@ export const getIncomeDetail = async (startDate: string, endDate: string): Promi
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching income detail:', error);
+    logger.error('Error fetching income detail:', error);
     throw error;
   }
 };
@@ -251,7 +252,7 @@ export const getExpenseDetail = async (startDate: string, endDate: string): Prom
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching expense detail:', error);
+    logger.error('Error fetching expense detail:', error);
     throw error;
   }
 };
@@ -261,7 +262,7 @@ export const addIncome = async (data: { date: string; description: string; amoun
     const response = await apiClient.post('/director/finance/income/', data);
     return response.data;
   } catch (error) {
-    console.error('Error adding income:', error);
+    logger.error('Error adding income:', error);
     throw error;
   }
 };
@@ -271,7 +272,7 @@ export const addExpense = async (data: { date: string; description: string; amou
     const response = await apiClient.post('/director/finance/expense/', data);
     return response.data;
   } catch (error) {
-    console.error('Error adding expense:', error);
+    logger.error('Error adding expense:', error);
     throw error;
   }
 };
@@ -288,7 +289,7 @@ export const exportFinancialData = async (
     });
     return response.data;
   } catch (error) {
-    console.error('Error exporting financial data:', error);
+    logger.error('Error exporting financial data:', error);
     throw error;
   }
 };
@@ -299,7 +300,7 @@ export const getPartners = async (): Promise<Partner[]> => {
     const response = await apiClient.get('/director/partners/');
     return response.data;
   } catch (error) {
-    console.error('Error fetching partners:', error);
+    logger.error('Error fetching partners:', error);
     throw error;
   }
 };
@@ -315,7 +316,7 @@ export const getPartnerTurnover = async (
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching partner turnover:', error);
+    logger.error('Error fetching partner turnover:', error);
     throw error;
   }
 };
@@ -338,7 +339,7 @@ export const getAllPartnersTurnover = async (
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching all partners turnover:', error);
+    logger.error('Error fetching all partners turnover:', error);
     throw error;
   }
 };
@@ -353,7 +354,7 @@ export const updatePartnerCommission = async (
     });
     return response.data;
   } catch (error) {
-    console.error('Error updating partner commission:', error);
+    logger.error('Error updating partner commission:', error);
     throw error;
   }
 };
@@ -363,7 +364,7 @@ export const togglePartnerStatus = async (partnerId: number): Promise<Partner> =
     const response = await apiClient.post(`/director/partners/${partnerId}/toggle-status/`);
     return response.data;
   } catch (error) {
-    console.error('Error toggling partner status:', error);
+    logger.error('Error toggling partner status:', error);
     throw error;
   }
 };
@@ -376,7 +377,7 @@ export const getKPI = async (startDate: string, endDate: string): Promise<KPI> =
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching KPI:', error);
+    logger.error('Error fetching KPI:', error);
     throw error;
   }
 };
@@ -391,7 +392,7 @@ export const getStatisticsSummary = async (
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching statistics summary:', error);
+    logger.error('Error fetching statistics summary:', error);
     throw error;
   }
 };
@@ -419,7 +420,7 @@ export const exportStatisticsReport = async (
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Error exporting statistics report:', error);
+    logger.error('Error exporting statistics report:', error);
     throw error;
   }
 };
@@ -447,7 +448,7 @@ export const getMessages = async (params?: GetMessagesParams): Promise<Paginated
     const response = await apiClient.get(`/director/messages/?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching messages:', error);
+    logger.error('Error fetching messages:', error);
     throw error;
   }
 };
@@ -478,7 +479,7 @@ export const sendMessage = async (data: SendMessageRequest): Promise<InternalMes
     });
     return response.data;
   } catch (error) {
-    console.error('Error sending message:', error);
+    logger.error('Error sending message:', error);
     throw error;
   }
 };
@@ -492,7 +493,7 @@ export const markMessageAsRead = async (id: number): Promise<void> => {
   try {
     await apiClient.post(`/director/messages/${id}/mark_as_read/`);
   } catch (error) {
-    console.error('Error marking message as read:', error);
+    logger.error('Error marking message as read:', error);
     throw error;
   }
 };
@@ -501,7 +502,7 @@ export const deleteMessage = async (id: number): Promise<void> => {
   try {
     await apiClient.delete(`/director/messages/${id}/`);
   } catch (error) {
-    console.error('Error deleting message:', error);
+    logger.error('Error deleting message:', error);
     throw error;
   }
 };
@@ -553,7 +554,7 @@ export const getChatRooms = async (): Promise<any[]> => {
     const data = response.data;
     return data.results || data || [];
   } catch (error) {
-    console.error('Error fetching chat rooms:', error);
+    logger.error('Error fetching chat rooms:', error);
     throw error;
   }
 };
@@ -567,7 +568,7 @@ export const createChatRoom = async (data: { name: string; description?: string;
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating chat room:', error);
+    logger.error('Error creating chat room:', error);
     throw error;
   }
 };
@@ -577,7 +578,7 @@ export const getChatRoomMessages = async (roomId: number): Promise<any[]> => {
     const response = await apiClient.get(`/director/chat-rooms/${roomId}/messages/`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching chat room messages:', error);
+    logger.error('Error fetching chat room messages:', error);
     throw error;
   }
 };
@@ -589,7 +590,7 @@ export const sendChatRoomMessage = async (roomId: number, message: string): Prom
     });
     return response.data;
   } catch (error) {
-    console.error('Error sending message:', error);
+    logger.error('Error sending message:', error);
     throw error;
   }
 };
@@ -598,7 +599,7 @@ export const joinChatRoom = async (roomId: number): Promise<void> => {
   try {
     await apiClient.post(`/director/chat-rooms/${roomId}/join_room/`);
   } catch (error) {
-    console.error('Error joining chat room:', error);
+    logger.error('Error joining chat room:', error);
     throw error;
   }
 };
@@ -607,7 +608,7 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
   try {
     await apiClient.post(`/director/chat-rooms/${roomId}/leave_room/`);
   } catch (error) {
-    console.error('Error leaving chat room:', error);
+    logger.error('Error leaving chat room:', error);
     throw error;
   }
 };
@@ -618,7 +619,7 @@ export const inviteToChatRoom = async (roomId: number, userId: number): Promise<
       user_id: userId,
     });
   } catch (error) {
-    console.error('Error inviting user:', error);
+    logger.error('Error inviting user:', error);
     throw error;
   }
 };
@@ -634,7 +635,7 @@ export const uploadChatRoomFile = async (roomId: number, file: File): Promise<an
     });
     return response.data;
   } catch (error) {
-    console.error('Error uploading file:', error);
+    logger.error('Error uploading file:', error);
     throw error;
   }
 };

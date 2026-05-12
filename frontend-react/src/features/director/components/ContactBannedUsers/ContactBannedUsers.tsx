@@ -29,6 +29,7 @@ import dayjs from 'dayjs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import styles from './ContactBannedUsers.module.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -95,12 +96,12 @@ const ContactBannedUsers: React.FC = () => {
   const { data: users = [], isLoading: loading, error } = useQuery<ContactBannedUser[]>({
     queryKey: CONTACT_BANNED_USERS_QUERY_KEY,
     queryFn: async () => {
-      if (debugEnabled) console.log('🔄 Загрузка забаненных пользователей...');
+      if (debugEnabled) logger.log('🔄 Загрузка забаненных пользователей...');
       const response = await apiClient.get('/users/contact_banned_users/');
       const normalizedUsers = normalizeBannedUsers(response.data);
       if (debugEnabled) {
-        console.log('📦 Получены данные:', response.data);
-        console.log('📊 Количество пользователей:', normalizedUsers.length);
+        logger.log('📦 Получены данные:', response.data);
+        logger.log('📊 Количество пользователей:', normalizedUsers.length);
       }
       return normalizedUsers;
     },
@@ -115,9 +116,9 @@ const ContactBannedUsers: React.FC = () => {
   // Логируем ошибки и данные
   React.useEffect(() => {
     if (debugEnabled) {
-      console.log('👥 Пользователи в состоянии:', users);
-      console.log('⏳ Загрузка:', loading);
-      console.log('❌ Ошибка:', error);
+      logger.log('👥 Пользователи в состоянии:', users);
+      logger.log('⏳ Загрузка:', loading);
+      logger.log('❌ Ошибка:', error);
     }
   }, [users, loading, error, debugEnabled]);
 
@@ -140,7 +141,7 @@ const ContactBannedUsers: React.FC = () => {
       await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
     },
     onError: (error) => {
-      if (debugEnabled) console.error('Ошибка блокировки:', error);
+      if (debugEnabled) logger.error('Ошибка блокировки:', error);
       message.error('Не удалось заблокировать пользователя');
     },
   });
@@ -161,7 +162,7 @@ const ContactBannedUsers: React.FC = () => {
       await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
     },
     onError: (error) => {
-      if (debugEnabled) console.error('Ошибка разбана:', error);
+      if (debugEnabled) logger.error('Ошибка разбана:', error);
       message.error('Не удалось разбанить пользователя');
     },
   });
@@ -174,7 +175,7 @@ const ContactBannedUsers: React.FC = () => {
   // Мутация для разморозки чатов пользователя
   const unfreezeChatsMutation = useMutation({
     mutationFn: async (userId: number) => {
-      if (debugEnabled) console.log('🔓 Размораживаем чаты пользователя:', userId);
+      if (debugEnabled) logger.log('🔓 Размораживаем чаты пользователя:', userId);
       const response = await apiClient.post(`/users/${userId}/unfreeze_chats/`);
       return response.data;
     },
@@ -185,7 +186,7 @@ const ContactBannedUsers: React.FC = () => {
       await queryClient.refetchQueries({ queryKey: CONTACT_BANNED_USERS_QUERY_KEY });
     },
     onError: (error) => {
-      if (debugEnabled) console.error('Ошибка разморозки чатов:', error);
+      if (debugEnabled) logger.error('Ошибка разморозки чатов:', error);
       message.error('Не удалось разморозить чаты');
     },
   });
@@ -225,7 +226,7 @@ const ContactBannedUsers: React.FC = () => {
         reason: values.reason,
       });
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

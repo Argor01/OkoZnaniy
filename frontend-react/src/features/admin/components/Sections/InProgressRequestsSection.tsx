@@ -42,6 +42,7 @@ import {
   PlayCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -211,7 +212,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         setProgressModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -230,7 +231,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         setResponseModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -249,7 +250,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         setCompleteModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -268,7 +269,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         setPauseModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -292,7 +293,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
         setNoteModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

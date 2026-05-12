@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { API_BASE_URL } from '@/config/api';
+import { logger } from '@/utils/logger';
 
 export interface WSMessage {
   id: number;
@@ -51,7 +52,7 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
           onNewMessage?.(data.data);
         }
       } catch (e) {
-        console.error('[ChatWS] Error parsing message:', e);
+        logger.error('[ChatWS] Error parsing message:', e);
       }
     };
 
@@ -66,7 +67,7 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
     };
 
     ws.onerror = (error) => {
-      console.error('[ChatWS] Error:', error);
+      logger.error('[ChatWS] Error:', error);
     };
 
     wsRef.current = ws;

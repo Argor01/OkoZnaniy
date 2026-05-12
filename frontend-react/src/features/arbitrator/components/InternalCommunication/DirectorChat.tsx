@@ -22,6 +22,7 @@ import MessageList from './MessageList';
 import MessageForm from './MessageForm';
 import ClaimDetails from '@/features/arbitrator/components/ClaimsProcessing/ClaimDetails';
 import { authApi } from '@/features/auth/api/auth';
+import { logger } from '@/utils/logger';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -50,7 +51,7 @@ const DirectorChat: React.FC<DirectorChatProps> = ({ claimId }) => {
         const user = await authApi.getCurrentUser();
         setCurrentUser(user);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        logger.error('Error fetching user:', error);
       }
     };
     fetchUser();

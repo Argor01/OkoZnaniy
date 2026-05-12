@@ -4,6 +4,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { message, Modal } from 'antd';
 import { authApi, type User } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
+import { logger } from '@/utils/logger';
 
 export const useAdminAuth = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export const useAdminAuth = () => {
         await authApi.logout();
       } catch (error) {
         // Ignore logout errors, just clear local state
-        console.error('Logout error', error);
+        logger.error('Logout error', error);
       }
     },
     onSettled: () => {

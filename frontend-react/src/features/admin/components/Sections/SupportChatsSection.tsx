@@ -41,6 +41,7 @@ import styles from './SupportChatsSection.module.css';
 import { useSupportChats, useSupportActions } from '@/features/admin/hooks';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import '@/styles/support.css';
+import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -139,7 +140,7 @@ export const SupportChatsSection: React.FC = () => {
       antMessage.success('Сообщение отправлено');
       refetch(); // Refresh chats to show new message
     } catch (error) {
-      console.error('Ошибка отправки сообщения:', error);
+      logger.error('Ошибка отправки сообщения:', error);
       antMessage.error('Не удалось отправить сообщение');
     } finally {
       setSending(false);

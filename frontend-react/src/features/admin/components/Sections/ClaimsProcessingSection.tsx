@@ -51,6 +51,7 @@ import {
   DownloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -238,7 +239,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         setActionModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -257,7 +258,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         setResolveModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -277,7 +278,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         setMessageModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 
@@ -296,7 +297,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         setCallModalVisible(false);
       }
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed:', error);
     }
   };
 

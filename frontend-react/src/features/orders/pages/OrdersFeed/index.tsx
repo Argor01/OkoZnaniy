@@ -15,6 +15,7 @@ import { formatCurrency } from '@/utils/formatters';
 import BidModal from '../../components/BidModal';
 import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty, OrderCard } from '@/components/ui';
 import { AppSelect } from '@/components/ui/AppSelect';
+import { logger } from '@/utils/logger';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -95,9 +96,9 @@ const OrdersFeed: React.FC = () => {
     queryKey: ['orders-feed', userProfile?.id, userProfile?.role],
     queryFn: async () => {
   if (debugEnabled) {
-    console.log('🔄 Загрузка заказов из API...');
-    console.log('👤 Текущий пользователь:', userProfile);
-    console.log('🎭 Роль пользователя:', userProfile?.role);
+    logger.log('🔄 Загрузка заказов из API...');
+    logger.log('👤 Текущий пользователь:', userProfile);
+    logger.log('🎭 Роль пользователя:', userProfile?.role);
   }
   const normalizeOrders = (raw: unknown): OrdersFeedOrder[] => {
     if (Array.isArray(raw)) return raw as OrdersFeedOrder[];
@@ -126,21 +127,21 @@ const OrdersFeed: React.FC = () => {
       });
       const data = Array.from(byId.values());
       if (debugEnabled) {
-        console.log('📦 Получены заказы:', data);
-        console.log('📊 Количество заказов:', data.length);
+        logger.log('📦 Получены заказы:', data);
+        logger.log('📊 Количество заказов:', data.length);
       }
       if (data.length === 0) {
-        if (debugEnabled) console.warn('⚠️ Заказов нет! Возможные причины:');
+        if (debugEnabled) logger.warn('⚠️ Заказов нет! Возможные причины:');
         if (userProfile?.role === 'client') {
           if (debugEnabled) {
-            console.warn('   У клиента не вернулись заказы из API');
+            logger.warn('   У клиента не вернулись заказы из API');
 
           }
         } else {
           if (debugEnabled) {
-            console.warn('   1. Все заказы уже взяты в работу');
-            console.warn('   2. Нет заказов в статусе "new"');
-            console.warn('   3. Нет заказов от других клиентов');
+            logger.warn('   1. Все заказы уже взяты в работу');
+            logger.warn('   2. Нет заказов в статусе "new"');
+            logger.warn('   3. Нет заказов от других клиентов');
           }
         }
       }
@@ -542,7 +543,7 @@ const OrdersFeed: React.FC = () => {
 
             if (order.files) {
               if (debugEnabled) {
-                console.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
+                logger.log(`Заказ #${order.id} имеет ${order.files.length} файлов:`, order.files);
               }
             }
 

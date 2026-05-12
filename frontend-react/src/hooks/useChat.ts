@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { chatApi, ChatListItem, Message, ChatFrozenError } from '@/features/support/api/chat';
+import { logger } from '@/utils/logger';
 
 export const useChat = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
@@ -15,7 +16,7 @@ export const useChat = () => {
       const totalUnread = apiChats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0);
       setUnreadCount(totalUnread);
     } catch (error) {
-      console.error('Ошибка загрузки чатов:', error);
+      logger.error('Ошибка загрузки чатов:', error);
     } finally {
       setLoading(false);
     }

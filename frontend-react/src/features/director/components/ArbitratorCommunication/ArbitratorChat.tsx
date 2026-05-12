@@ -22,6 +22,7 @@ import ArbitratorMessageList from './ArbitratorMessageList';
 import ArbitratorMessageForm from './ArbitratorMessageForm';
 import { authApi } from '@/features/auth/api/auth';
 import styles from './ArbitratorChat.module.css';
+import { logger } from '@/utils/logger';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -47,7 +48,7 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
         const user = await authApi.getCurrentUser();
         setCurrentUser(user);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        logger.error('Error fetching user:', error);
       }
     };
     fetchUser();
