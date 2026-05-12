@@ -473,8 +473,8 @@ const ProblemOrdersTable: React.FC<ProblemOrdersTableProps> = ({
           scroll={{ x: 1300 }}
           size="small"
           rowClassName={(record) => 
-            record.problem_severity === 'critical' ? 'critical-row' : 
-            record.problem_severity === 'high' ? 'high-priority-row' : ''
+            record.problem_severity === 'critical' ? 'criticalRow' : 
+            record.problem_severity === 'high' ? 'highPriorityRow' : ''
           }
         />
       </Card>

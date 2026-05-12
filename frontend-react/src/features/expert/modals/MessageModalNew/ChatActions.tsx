@@ -113,7 +113,7 @@ const ChatActions: React.FC<ChatActionsProps> = ({
               >
                 <div className={styles.orderSummaryLeft}>
                   <div className={styles.orderSummaryId}>#{order.id}</div>
-                  <div className={`${styles.orderSummaryStatus} ${styles[`status-${order.status}`] || ''}`}>
+                  <div className={`${styles.orderSummaryStatus} ${({'new': styles.statusNew, 'auction': styles.statusAuction, 'in_progress': styles.statusInProgress, 'review': styles.statusReview, 'revision': styles.statusRevision, 'completed': styles.statusCompleted, 'canceled': styles.statusCanceled} as Record<string, string>)[order.status] || ''}`}>
                     {formatOrderStatus(order.status)}
                   </div>
                 </div>

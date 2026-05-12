@@ -1680,37 +1680,37 @@
   letter-spacing: 0.5px;
 }
 
-.status-new {
+.statusNew {
   background: #eff6ff;
   color: #2563eb;
 }
 
-.status-auction {
+.statusAuction {
   background: #fff7ed;
   color: #ea580c;
 }
 
-.status-in_progress {
+.statusInProgress {
   background: #ecfdf5;
   color: #059669;
 }
 
-.status-review {
+.statusReview {
   background: #fdf4ff;
   color: #c026d3;
 }
 
-.status-revision {
+.statusRevision {
   background: #fff7ed;
   color: var(--color-brand-orange-500);
 }
 
-.status-completed {
+.statusCompleted {
   background: #f0fdf4;
   color: #16a34a;
 }
 
-.status-canceled {
+.statusCanceled {
   background: #fef2f2;
   color: #dc2626;
 }

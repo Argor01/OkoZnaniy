@@ -509,7 +509,7 @@ export const PendingApprovalSection: React.FC = () => {
           locale={{ emptyText: 'Обращения, ожидающие решения, не найдены' }}
           size="small"
           rowClassName={(record) => 
-            record.waiting_time_hours > 48 ? 'urgent-row' : 
+            record.waiting_time_hours > 48 ? styles.urgentRow : 
             record.waiting_time_hours > 24 ? 'warning-row' : ''
           }
         />
@@ -713,7 +713,7 @@ export const PendingApprovalSection: React.FC = () => {
       </Modal>
 
       <style>{`
-        .urgent-row {
+        .urgentRow {
           background-color: #fff2f0 !important;
         }
         .warning-row {

@@ -675,7 +675,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           locale={{ emptyText: 'Претензии не найдены' }}
           size="small"
           rowClassName={(record) => 
-            dayjs().isAfter(dayjs(record.deadline)) ? 'overdue-row' : ''
+            dayjs().isAfter(dayjs(record.deadline)) ? styles.overdueRow : ''
           }
         />
       </Card>

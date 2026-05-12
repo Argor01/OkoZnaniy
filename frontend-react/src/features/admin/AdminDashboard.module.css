@@ -264,11 +264,11 @@
   margin-bottom: 16px;
 }
 
-.critical-row {
+.criticalRow {
   background-color: #fff2f0 !important;
 }
 
-.high-priority-row {
+.highPriorityRow {
   background-color: #fff7e6 !important;
 }
 
@@ -710,11 +710,11 @@
   width: 100%;
 }
 
-.overdue-row {
+.overdueRow {
   background-color: #fff2f0 !important;
 }
 
-.urgent-row {
+.urgentRow {
   background-color: #fff7e6 !important;
 }
 
@@ -2049,11 +2049,11 @@
   width: 100%;
 }
 
-.overdue-row {
+.overdueRow {
   background-color: #fff2f0 !important;
 }
 
-.hold-row {
+.holdRow {
   background-color: #f5f5f5 !important;
 }
 

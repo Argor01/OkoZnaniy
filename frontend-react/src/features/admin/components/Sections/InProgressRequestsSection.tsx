@@ -682,8 +682,8 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
           locale={{ emptyText: 'Запросы в процессе решения не найдены' }}
           size="small"
           rowClassName={(record) => 
-            record.is_overdue ? 'overdue-row' : 
-            record.status === 'on_hold' ? 'hold-row' : ''
+            record.is_overdue ? styles.overdueRow : 
+            record.status === 'on_hold' ? styles.holdRow : ''
           }
         />
       </Card> 

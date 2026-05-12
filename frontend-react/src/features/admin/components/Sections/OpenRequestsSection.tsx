@@ -669,8 +669,8 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           locale={{ emptyText: 'Открытые запросы не найдены' }}
           size="small"
           rowClassName={(record) => 
-            record.is_overdue ? 'overdue-row' : 
-            record.priority === 'urgent' ? 'urgent-row' : ''
+            record.is_overdue ? styles.overdueRow : 
+            record.priority === 'urgent' ? styles.urgentRow : ''
           }
         />
       </Card>
