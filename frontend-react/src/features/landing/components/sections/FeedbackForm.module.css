@@ -1,0 +1,177 @@
+.feedbackFormSection {
+  padding: 80px 0 100px;
+  background: #f8f9fa;
+}
+
+@media (max-width: 576px) {
+  .feedbackFormSection {
+    padding: 60px 0 80px;
+  }
+}
+
+.feedbackFormInner {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.feedbackFormTitle {
+  margin: 0 0 16px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: var(--color-brand-blue-500);
+}
+
+@media (max-width: 768px) {
+  .feedbackFormTitle {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .feedbackFormTitle {
+    font-size: 28px;
+  }
+}
+
+.feedbackFormDesc {
+  margin: 0 0 40px;
+  font-size: 18px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
+}
+
+@media (max-width: 576px) {
+  .feedbackFormDesc {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+}
+
+.feedbackFormWrapper {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 576px) {
+  .feedbackFormWrapper {
+    flex-direction: column;
+  }
+}
+
+.feedbackFormInput {
+  flex: 1;
+  padding: 18px 24px;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-xl);
+  font-family: var(--font-family-sans);
+  font-size: 16px;
+  color: var(--color-grey-900);
+  background: #fff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.feedbackFormInput:focus {
+  border-color: var(--color-brand-blue-500);
+}
+
+.feedbackFormInput::placeholder {
+  color: #a0aec0;
+}
+
+.feedbackFormButton {
+  flex-shrink: 0;
+  padding: 18px 36px;
+  font-size: 16px;
+}
+
+@media (max-width: 576px) {
+  .feedbackFormButton {
+    width: 100%;
+  }
+}
+
+.feedbackFormLegal {
+  margin: 0;
+  font-size: 13px;
+  color: #a0aec0;
+  line-height: 1.5;
+}
+
+.feedbackFormLegal a {
+  color: var(--color-brand-blue-500);
+  text-decoration: underline;
+}
+
+
+.feedbackFormSuccess {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.feedbackFormError {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.feedbackFormButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedbackFormInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .feedbackFormSection {
+  background: #0f1117 !important;
+}
+
+[data-theme="dark"] .feedbackFormDesc {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .feedbackFormInput {
+  background: #1e2230;
+  border-color: #2d3348;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .feedbackFormInput::placeholder {
+  color: #64748b;
+}
+
+[data-theme="dark"] .feedbackFormLegal {
+  color: #64748b;
+}
+
+[data-theme="dark"] .feedbackFormSuccess {
+  background: rgba(21, 87, 36, 0.2);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="dark"] .feedbackFormError {
+  background: rgba(114, 28, 36, 0.2);
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.3);
+}
+

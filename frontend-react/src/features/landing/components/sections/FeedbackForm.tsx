@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import apiClient from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
-import './FeedbackForm.css';
+import styles from './FeedbackForm.module.css';
+import landingStyles from '@/features/landing/Landing.module.css';
 
 interface FeedbackFormProps {
   buttonText: string;
@@ -49,33 +50,33 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ buttonText, type = 'registr
   };
 
   return (
-    <section className="feedback-form-section">
-      <div className="mcontainer">
-        <form className="feedback-form-inner" onSubmit={handleSubmit}>
-          <div className="feedback-form-text-block">
-            <h2 className="feedback-form-title">Готов начать зарабатывать?</h2>
-            <p className="feedback-form-desc">Оставь email — мы пришлём инструкцию по регистрации и первые доступные заказы</p>
+    <section className={styles.feedbackFormSection}>
+      <div className={landingStyles.mcontainer}>
+        <form className={styles.feedbackFormInner} onSubmit={handleSubmit}>
+          <div className={styles.feedbackFormTextBlock}>
+            <h2 className={styles.feedbackFormTitle}>Готов начать зарабатывать?</h2>
+            <p className={styles.feedbackFormDesc}>Оставь email — мы пришлём инструкцию по регистрации и первые доступные заказы</p>
           </div>
-          <div className="feedback-form-wrapper">
+          <div className={styles.feedbackFormWrapper}>
             <input
               type="email"
               placeholder="Ваш E-mail"
-              className="feedback-form-input"
+              className={styles.feedbackFormInput}
               value={email}
               onChange={e => setEmail(e.target.value)}
               disabled={loading}
             />
             <button 
               type="submit" 
-              className="feedback-form-button button"
+              className={`${styles.feedbackFormButton} ${landingStyles.button}`}
               disabled={loading}
             >
               {loading ? 'Отправка...' : buttonText}
             </button>
           </div>
-          {message && <p className="feedback-form-success">{message}</p>}
-          {error && <p className="feedback-form-error">{error}</p>}
-          <p className="feedback-form-legal">
+          {message && <p className={styles.feedbackFormSuccess}>{message}</p>}
+          {error && <p className={styles.feedbackFormError}>{error}</p>}
+          <p className={styles.feedbackFormLegal}>
             Нажимая «{buttonText}», вы принимаете условия{' '}
             <a href="#">Пользовательского соглашения</a> и{' '}
             <a href="#">Политики конфиденциальности</a>

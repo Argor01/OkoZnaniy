@@ -1,46 +1,48 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './FirstScreen.module.css';
 
 const PartnerFirstScreen: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <section className="first-screen partner-first-screen">
-      <div className="mcontainer">
-        <div className="first-screen__wrapper">
-          <div className="first-screen__content">
-            <h1 className="first-screen__content-title">
+    <section className={`${styles.firstScreen} ${styles.partnerFirstScreen}`}>
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.firstScreenWrapper}>
+          <div className={styles.firstScreenContent}>
+            <h1 className={styles.firstScreenContentTitle}>
               Бизнес с Око Знаний — это просто!
             </h1>
-            <div className="first-screen__content-descripton">
+            <div className={styles.firstScreenContentDescripton}>
               Станьте партнером и развивайте свой бизнес вместе с нами
             </div>
-            <div className="first-screen__content-buttons">
+            <div className={styles.firstScreenContentButtons}>
               <button
-                className="first-screen__content-buttons-task button"
+                className={`${styles.firstScreenContentButtonsTask} ${landingStyles.button}`}
                 onClick={() => navigate('/become-partner#feedback')}
               >
                 Стать партнёром
               </button>
             </div>
-            <div className="partner-first-screen__stats">
-              <div className="partner-first-screen__stat">
-                <span className="partner-first-screen__stat-value">25%</span>
-                <span className="partner-first-screen__stat-label">от каждого заказа</span>
+            <div className={styles.partnerFirstScreenStats}>
+              <div className={styles.partnerFirstScreenStat}>
+                <span className={styles.partnerFirstScreenStatValue}>25%</span>
+                <span className={styles.partnerFirstScreenStatLabel}>от каждого заказа</span>
               </div>
-              <div className="partner-first-screen__stat">
-                <span className="partner-first-screen__stat-value">1 млн ₽</span>
-                <span className="partner-first-screen__stat-label">оборот за 2 месяца</span>
+              <div className={styles.partnerFirstScreenStat}>
+                <span className={styles.partnerFirstScreenStatValue}>1 млн ₽</span>
+                <span className={styles.partnerFirstScreenStatLabel}>оборот за 2 месяца</span>
               </div>
-              <div className="partner-first-screen__stat">
-                <span className="partner-first-screen__stat-value">7 дней</span>
-                <span className="partner-first-screen__stat-label">до первой прибыли</span>
+              <div className={styles.partnerFirstScreenStat}>
+                <span className={styles.partnerFirstScreenStatValue}>7 дней</span>
+                <span className={styles.partnerFirstScreenStatLabel}>до первой прибыли</span>
               </div>
             </div>
           </div>
 
-          <figure className="first-screen__figure">
+          <figure className={styles.firstScreenFigure}>
             <img
-              className="first-screen__figure-image"
+              className={styles.firstScreenFigureImage}
               src="/assets/first-screen/first-screen-part.png"
               alt="partner"
               width={416}

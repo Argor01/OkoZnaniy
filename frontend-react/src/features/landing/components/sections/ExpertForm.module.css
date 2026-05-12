@@ -1,0 +1,274 @@
+
+
+.expertPage .leaveOrder {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding: 100px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.expertPage .leaveOrder::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.expertPage .leaveOrder::after {
+  content: '';
+  position: absolute;
+  bottom: -150px;
+  right: -150px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 6s ease-in-out infinite reverse;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.expertPage .leaveOrderWrapper {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.expertPage .leaveOrderContent {
+  text-align: center;
+  margin-bottom: 50px;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.expertPage .leaveOrderContentTitle {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 15px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .expertPage .leaveOrderContentTitle {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertPage .leaveOrderContentTitle {
+    font-size: 28px;
+  }
+}
+
+.expertPage .leaveOrderContentDescription {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 20px;
+  font-weight: 400;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 576px) {
+  .expertPage .leaveOrderContentDescription {
+    font-size: 16px;
+  }
+}
+
+.expertPage .leaveOrderForm {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 50px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.8s ease-out 0.3s backwards;
+}
+
+@media (max-width: 768px) {
+  .expertPage .leaveOrderForm {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertPage .leaveOrderForm {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+}
+
+.expertPage .leaveOrderForm .antFormItem {
+  margin-bottom: 25px;
+}
+
+.expertPage .leaveOrderForm .antInput,
+.expertPage .leaveOrderForm .antInputTextarea textarea {
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  padding: 14px 18px;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+}
+
+.expertPage .leaveOrderForm .antInput:hover,
+.expertPage .leaveOrderForm .antInputTextarea textarea:hover {
+  border-color: #f093fb;
+  box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.1);
+}
+
+.expertPage .leaveOrderForm .antInput:focus,
+.expertPage .leaveOrderForm .antInputTextarea textarea:focus {
+  border-color: #f093fb;
+  box-shadow: 0 0 0 4px rgba(240, 147, 251, 0.2);
+  transform: translateY(-2px);
+}
+
+.expertPage .leaveOrderForm .antBtn {
+  height: 56px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.expertPage .leaveOrderForm .antBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.expertPage .leaveOrderForm .antBtn:hover::before {
+  left: 100%;
+}
+
+.expertPage .leaveOrderForm .antBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(245, 87, 108, 0.5);
+}
+
+.expertPage .leaveOrderForm .antBtn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(245, 87, 108, 0.4);
+}
+
+
+.expertPage .leaveOrderForm .antFormItem {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.expertPage .leaveOrderForm .antFormItem:nth-child(1) { animation-delay: 0.4s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(2) { animation-delay: 0.5s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(3) { animation-delay: 0.6s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(4) { animation-delay: 0.7s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(5) { animation-delay: 0.8s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(6) { animation-delay: 0.9s; }
+.expertPage .leaveOrderForm .antFormItem:nth-child(7) { animation-delay: 1s; }
+
+
+.expertPage .leaveOrderForm .antInput::placeholder,
+.expertPage .leaveOrderForm .antInputTextarea textarea::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+
+.expertPage .leaveOrderForm .antFormItemHasError .antInput,
+.expertPage .leaveOrderForm .antFormItemHasError .antInputTextarea textarea {
+  border-color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+}
+
+.expertPage .leaveOrderForm .antFormItemExplainError {
+  color: #f5576c;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+
+@media (max-width: 1024px) {
+  .expertPage .leaveOrder {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertPage .leaveOrder {
+    padding: 60px 0;
+  }
+}
+
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .expertPage .leaveOrderForm {
+  background: rgba(26, 29, 39, 0.98);
+}
+
+[data-theme="dark"] .expertPage .leaveOrderForm .antInput,
+[data-theme="dark"] .expertPage .leaveOrderForm .antInputTextarea textarea {
+  background: #1e2230;
+  border-color: #2d3348;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .expert-page .leave-order__form .ant-input::placeholder,
+[data-theme="dark"] .expertPage .leaveOrderForm .antInputTextarea textarea::placeholder {
+  color: #64748b;
+}
+

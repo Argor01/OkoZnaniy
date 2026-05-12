@@ -15,7 +15,7 @@ import {
   PlaceTaskInfo,
   Footer
 } from '@/features/landing';
-import '@/styles/landing.css';
+import landingStyles from '@/features/landing/Landing.module.css';
 import '@/styles/page-transitions.css';
 
 const Home: React.FC = () => {
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
     }
   }, [searchParams, navigate]);
   return (
-    <div className="page-wrapper landing-page">
+    <div className={`page-wrapper ${landingStyles.landingPage}`}>
       <SEO 
         title="Око Знаний - Онлайн сервис помощи студентам | Курсовые, Дипломы, Рефераты"
         description="Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене. Экономьте время: разместите задание и эксперт быстро поможет с консультацией. Курсовые, дипломы, рефераты, контрольные работы."
@@ -57,7 +57,7 @@ const Home: React.FC = () => {
         canonical="https://okoznaniy.ru"
       />
       <Header />
-      <main className="main">
+      <main className={landingStyles.main}>
         <FirstScreen />
         <PlaceTask />
         <Advantages />

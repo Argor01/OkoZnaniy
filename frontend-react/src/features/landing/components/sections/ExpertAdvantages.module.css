@@ -1,0 +1,145 @@
+/* Expert advantages section */
+.expertAdvantages {
+  padding: 100px 0;
+  background: #fff;
+}
+
+@media (max-width: 1024px) {
+  .expertAdvantages {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertAdvantages {
+    padding: 60px 0;
+  }
+}
+
+.expertAdvantagesTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-blue-500);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .expertAdvantagesTitle {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertAdvantagesTitle {
+    font-size: 32px;
+  }
+}
+
+.expertAdvantagesSubtitle {
+  margin: 0 0 60px;
+  font-size: 20px;
+  color: var(--color-grey-700);
+  text-align: center;
+  font-weight: 400;
+}
+
+@media (max-width: 576px) {
+  .expertAdvantagesSubtitle {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+.expertAdvantagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .expertAdvantagesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .expertAdvantagesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.expertAdvantagesCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f2f5;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.expertAdvantagesCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.15);
+}
+
+.expertAdvantagesCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.expertAdvantagesCardTitle {
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 18px;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+.expertAdvantagesCardText {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .expertAdvantages {
+  background: #0f1117;
+}
+
+[data-theme="dark"] .expertAdvantagesSubtitle {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .expertAdvantagesCard {
+  background: #1a1d27;
+  border-color: #2d3348;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .expertAdvantagesCard:hover {
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.1);
+}
+
+[data-theme="dark"] .expertAdvantagesCardTitle {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .expertAdvantagesCardText {
+  color: #94a3b8;
+}
+

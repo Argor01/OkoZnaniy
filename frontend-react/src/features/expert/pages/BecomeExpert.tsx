@@ -7,13 +7,13 @@ import {
   FeedbackForm,
   Footer
 } from '@/features/landing';
-import '@/styles/landing.css';
+import landingStyles from '@/features/landing/Landing.module.css';
 import '@/styles/become-pages.css';
 import '@/styles/page-transitions.css';
 
 const BecomeExpert: React.FC = () => {
   return (
-    <div className="page-wrapper expert-page">
+    <div className={`page-wrapper ${landingStyles.landingPage}`}>
       <SEO 
         title="Стать экспертом - Око Знаний | Зарабатывай от 100 000 ₽ в месяц"
         description="Стань автором студенческих работ и зарабатывай от 100 000 ₽ в месяц. Большой поток заказов, гибкий график, удаленная работа. Начни работать прямо сейчас!"
@@ -24,7 +24,7 @@ const BecomeExpert: React.FC = () => {
         canonical="https://okoznaniy.ru/become-expert"
       />
       <Header />
-      <main className="main">
+      <main className={landingStyles.main}>
         <ExpertFirstScreen />
         <ExpertAdvantages />
         <FeedbackForm buttonText="Отправить" />

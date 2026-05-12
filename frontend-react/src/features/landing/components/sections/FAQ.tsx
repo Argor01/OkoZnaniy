@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './FAQ.module.css';
 
 
 interface FAQItem {
@@ -60,26 +62,26 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="faq" id="faq">
-      <div className="mcontainer">
-        <div className="faq__wrapper">
-          <figure className="faq__photo">
-            <img className="faq__photo-image" src="/assets/faq/faq-image.png" alt="faq" width={1344} height={600} />
+    <section className={styles.faq} id="faq">
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.faqWrapper}>
+          <figure className={styles.faqPhoto}>
+            <img className={styles.faqPhotoImage} src="/assets/faq/faq-image.png" alt="faq" width={1344} height={600} />
           </figure>
 
-          <div className="faq__content">
-            <h2 className="faq__title">Часто спрашивают 🤔</h2>
+          <div className={styles.faqContent}>
+            <h2 className={styles.faqTitle}>Часто спрашивают 🤔</h2>
 
             {faqData.map((item) => (
               <div 
                 key={item.id} 
-                className={`faq__item ${activeItems.has(item.id) ? 'active' : ''}`}
+                className={`${styles.faqItem} ${activeItems.has(item.id) ? styles.active : ''}`}
               >
                 <div 
-                  className="faq__item-toggler"
+                  className={styles.faqItemToggler}
                   onClick={() => toggleItem(item.id)}
                 >
-                  <div className="faq__item-toggler-question">{item.question}</div>
+                  <div className={styles.faqItemTogglerQuestion}>{item.question}</div>
                 </div>
 
                 <div
@@ -92,9 +94,9 @@ const FAQ: React.FC = () => {
                         : '0px';
                     }
                   }}
-                  className="faq__item-panel"
+                  className={styles.faqItemPanel}
                 >
-                  <div className="faq__item-panel-answer">
+                  <div className={styles.faqItemPanelAnswer}>
                     {item.answer}
                   </div>
                 </div>

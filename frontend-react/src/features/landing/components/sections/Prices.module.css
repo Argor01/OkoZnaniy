@@ -1,0 +1,306 @@
+.prices {
+  padding: 130px 0 110px;
+}
+
+@media (max-width: 1024px) {
+  .prices {
+    padding: 100px 0;
+  }
+}
+
+.pricesWrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  gap: 30px;
+}
+
+@media (max-width: 1024px) {
+  .pricesWrapper {
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+  }
+}
+
+.pricesDetails {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 1 516px;
+          flex: 0 1 516px;
+}
+
+@media (max-width: 1024px) {
+  .pricesDetails {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+  }
+}
+
+.pricesDetailsTitle {
+  margin: 0 0 10px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-purple-500);
+}
+
+@media (max-width: 1024px) {
+  .pricesDetailsTitle {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .pricesDetailsTitle {
+    font-size: 32px;
+  }
+}
+
+.pricesDetailsDescription {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--color-grey-700);
+}
+
+@media (max-width: 1024px) {
+  .pricesDetailsDescription {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .pricesDetailsDescription {
+    font-size: 16px;
+  }
+}
+
+.pricesMain {
+  position: relative;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 1 711px;
+          flex: 0 1 711px;
+}
+
+@media (max-width: 1024px) {
+  .pricesMain {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+  }
+}
+
+.pricesMain::before {
+  content: "";
+  position: absolute;
+  top: -145px;
+  left: 290px;
+  display: block;
+  width: 764px;
+  aspect-ratio: 1/1;
+  background: url(/assets/prices/prices-bg.png) center/cover no-repeat;
+}
+
+@media (max-width: 1024px) {
+  .pricesMain::before {
+    display: none;
+  }
+}
+
+.pricesMainVisible, .pricesMainHidden {
+  position: relative;
+  z-index: 20;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pricesMainHidden {
+  max-height: 0px;
+  overflow: hidden;
+  -webkit-transition: max-height ease-out 0.4s;
+  transition: max-height ease-out 0.4s;
+}
+
+.pricesMainHidden::before {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 100%;
+}
+
+.pricesMain.active .pricesMainHidden {
+  overflow: visible;
+}
+
+.pricesMainCard {
+  display: block;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 100%;
+          flex: 1 1 100%;
+  padding: 30px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  border-radius: 10px;
+  -webkit-box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+          box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+}
+
+@media (max-width: 576px) {
+  .pricesMainCard {
+    padding: 20px;
+  }
+}
+
+.pricesMainCardWrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  gap: 40px;
+}
+
+@media (max-width: 576px) {
+  .pricesMainCardWrapper {
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    gap: 24px;
+  }
+}
+
+.pricesMainCardDetails {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+}
+
+@media (max-width: 576px) {
+  .pricesMainCardDetails {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+  }
+}
+
+.pricesMainCardDetailsTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--color-grey-700);
+}
+
+@media (max-width: 576px) {
+  .pricesMainCardDetailsTitle {
+    font-size: 28px;
+  }
+}
+
+.pricesMainCardDetailsInfo {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 4px 40px;
+}
+
+.pricesMainCardDetailsInfoItem {
+  font-family: var(--font-family-sans);
+}
+
+.pricesMainCardDetailsInfoItemTitle {
+  font-weight: 400;
+  font-size: 20px;
+  color: var(--color-grey-700);
+}
+
+@media (max-width: 576px) {
+  .pricesMainCardDetailsInfoItemTitle {
+    font-size: 16px;
+  }
+}
+
+.pricesMainCardDetailsInfoItemValue {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-brand-blue-500);
+}
+
+@media (max-width: 576px) {
+  .pricesMainCardDetailsInfoItemValue {
+    font-size: 20px;
+  }
+}
+
+.pricesMainCardMore {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+
+.pricesMainCardMoreButton {
+  padding: 13px 36px;
+  background-color: var(--color-brand-orange-500);
+}
+
+.pricesMainCardMoreButton:hover {
+  background-color: var(--color-brand-orange-400);
+}
+
+.pricesMainCardMoreButton:active {
+  background-color: var(--color-brand-orange-600);
+}
+
+.pricesMainMore {
+  position: absolute;
+  left: -36px;
+  right: -36px;
+  bottom: -22px;
+  z-index: 30;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 118px 22px 22px;
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), color-stop(60.58%, rgba(255, 255, 255, 0.8)), to(#fff));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 60.58%, #fff 100%);
+}
+
+.pricesMainMoreButton {
+  padding: 21px 88px;
+  color: #fff;
+  background-color: var(--color-brand-purple-500);
+}
+
+.pricesMainMoreButton:hover {
+  background-color: #b77dff;
+}
+
+.pricesMainMoreButton:active {
+  background-color: #8d31ff;
+}
+
+.pricesMain.active .pricesMainMore {
+  display: none;
+}

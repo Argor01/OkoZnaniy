@@ -1,5 +1,6 @@
 import React from 'react';
-import '@/styles/expert-advantages.css';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './ExpertAdvantages.module.css';
 
 const advantages = [
   {
@@ -60,16 +61,16 @@ const advantages = [
 
 const ExpertAdvantages: React.FC = () => {
   return (
-    <section className="expert-advantages">
-      <div className="mcontainer">
-        <h2 className="expert-advantages__title">Почему выбирают нас</h2>
-        <p className="expert-advantages__subtitle">Всё что нужно для комфортной удалённой работы</p>
-        <div className="expert-advantages__grid">
+    <section className={styles.expertAdvantages}>
+      <div className={landingStyles.mcontainer}>
+        <h2 className={styles.expertAdvantagesTitle}>Почему выбирают нас</h2>
+        <p className={styles.expertAdvantagesSubtitle}>Всё что нужно для комфортной удалённой работы</p>
+        <div className={styles.expertAdvantagesGrid}>
           {advantages.map((item, i) => (
-            <div className="expert-advantages__card" key={i}>
-              <div className="expert-advantages__card-icon">{item.icon}</div>
-              <div className="expert-advantages__card-title">{item.title}</div>
-              <div className="expert-advantages__card-text">{item.text}</div>
+            <div className={styles.expertAdvantagesCard} key={i}>
+              <div className={styles.expertAdvantagesCardIcon}>{item.icon}</div>
+              <div className={styles.expertAdvantagesCardTitle}>{item.title}</div>
+              <div className={styles.expertAdvantagesCardText}>{item.text}</div>
             </div>
           ))}
         </div>

@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { UserOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useTheme } from '@/contexts/ThemeContext';
-import '@/styles/logo.css';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './Header.module.css';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,65 +51,65 @@ const Header: React.FC = () => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <header className="header">
-      <div className="mcontainer">
-        <div className="header__wrapper">
-          <div className="header__logo">
-            <div className="header__logo-link">
-              <div className="header__logo-circle">
-                <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+    <header className={styles.header}>
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.headerWrapper}>
+          <div className={styles.headerLogo}>
+            <div className={styles.headerLogoLink}>
+              <div className={styles.headerLogoCircle}>
+                <img className={styles.headerLogoLinkImage} src="/assets/logo.png" alt="logo" width={120} height={36} />
               </div>
-              <div className="header__logo-link-text">Око Знаний</div>
+              <div className={styles.headerLogoLinkText}>Око Знаний</div>
             </div>
           </div>
 
-          <nav className={`header__nav ${isMenuOpen ? 'active' : ''}`}>
-            <div className="header__nav-wrapper">
-              <div className="header__logo">
-                <div className="header__logo-link">
-                  <div className="header__logo-circle">
-                    <img className="header__logo-link-image" src="/assets/logo.png" alt="logo" width={120} height={36} />
+          <nav className={`${styles.headerNav} ${isMenuOpen ? styles.active : ''}`}>
+            <div className={styles.headerNavWrapper}>
+              <div className={styles.headerLogo}>
+                <div className={styles.headerLogoLink}>
+                  <div className={styles.headerLogoCircle}>
+                    <img className={styles.headerLogoLinkImage} src="/assets/logo.png" alt="logo" width={120} height={36} />
                   </div>
-                  <div className="header__logo-link-text">Око Знаний</div>
+                  <div className={styles.headerLogoLinkText}>Око Знаний</div>
                 </div>
               </div>
 
-              <div className="header__close">
-                <button className="header__close-button" onClick={closeMenu} aria-label="Закрыть меню"></button>
+              <div className={styles.headerClose}>
+                <button className={styles.headerCloseButton} onClick={closeMenu} aria-label="Закрыть меню"></button>
               </div>
 
-              <ul className="header__nav-menu" onClick={onMenuLinkClick}>
-                <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#services" : "/#services"}>Услуги</a>
+              <ul className={styles.headerNavMenu} onClick={onMenuLinkClick}>
+                <li className={styles.headerNavMenuItem}>
+                  <a className={styles.headerNavMenuItemLink} href={isHomePage ? "#services" : "/#services"}>Услуги</a>
                 </li>
-                <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#orders" : "/#orders"}>Заказы</a>
+                <li className={styles.headerNavMenuItem}>
+                  <a className={styles.headerNavMenuItemLink} href={isHomePage ? "#orders" : "/#orders"}>Заказы</a>
                 </li>
-                <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#experts" : "/#experts"}>Эксперты</a>
+                <li className={styles.headerNavMenuItem}>
+                  <a className={styles.headerNavMenuItemLink} href={isHomePage ? "#experts" : "/#experts"}>Эксперты</a>
                 </li>
-                <li className="header__nav-menu-item">
-                  <a className="header__nav-menu-item-link" href={isHomePage ? "#faq" : "/#faq"}>FAQ</a>
+                <li className={styles.headerNavMenuItem}>
+                  <a className={styles.headerNavMenuItemLink} href={isHomePage ? "#faq" : "/#faq"}>FAQ</a>
                 </li>
-                <li className="header__nav-menu-item">
-                  <Link className="header__nav-menu-item-link" to="/become-expert">Стать экспертом</Link>
+                <li className={styles.headerNavMenuItem}>
+                  <Link className={styles.headerNavMenuItemLink} to="/become-expert">Стать экспертом</Link>
                 </li>
-                <li className="header__nav-menu-item">
-                  <Link className="header__nav-menu-item-link" to="/become-partner">Стать партнером</Link>
+                <li className={styles.headerNavMenuItem}>
+                  <Link className={styles.headerNavMenuItemLink} to="/become-partner">Стать партнером</Link>
                 </li>
               </ul>
 
-              <div className="header__cabinet">
+              <div className={styles.headerCabinet}>
                 {localStorage.getItem('access_token') ? (
                   <>
-                    <button className="header__cabinet-button button" onClick={goToCabinet}>Личный кабинет</button>
-                    <button className="header__cabinet-button header__cabinet-button--spaced button" onClick={handleLogout}>Выйти</button>
+                    <button className={`${styles.headerCabinetButton} ${landingStyles.button}`} onClick={goToCabinet}>Личный кабинет</button>
+                    <button className={`${styles.headerCabinetButton} ${styles.headerCabinetButtonSpaced} ${landingStyles.button}`} onClick={handleLogout}>Выйти</button>
                   </>
                 ) : (
-                  <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>
+                  <button className={`${styles.headerCabinetButton} ${landingStyles.button}`} onClick={goToCabinet}>Войти</button>
                 )}
                 <button
-                  className="header__theme-toggle"
+                  className={styles.headerThemeToggle}
                   onClick={toggleTheme}
                   aria-label={isDark ? 'Светлая тема' : 'Тёмная тема'}
                   title={isDark ? 'Светлая тема' : 'Тёмная тема'}
@@ -119,11 +120,11 @@ const Header: React.FC = () => {
             </div>
           </nav>
 
-          <div className="header__cabinet">
+          <div className={styles.headerCabinet}>
             {localStorage.getItem('access_token') ? (
               <>
                 <button 
-                  className="header__cabinet-icon-button" 
+                  className={styles.headerCabinetIconButton} 
                   onClick={goToCabinet}
                   aria-label="Личный кабинет"
                   title="Личный кабинет"
@@ -144,14 +145,14 @@ const Header: React.FC = () => {
                 >
                   <UserOutlined style={{ fontSize: '24px', color: '#333' }} />
                 </button>
-                <button className="header__cabinet-button button" onClick={goToCabinet}>Создать заказ</button>
-                <button className="header__cabinet-button header__cabinet-button--spaced button" onClick={handleLogout}>Выйти</button>
+                <button className={`${styles.headerCabinetButton} ${landingStyles.button}`} onClick={goToCabinet}>Создать заказ</button>
+                <button className={`${styles.headerCabinetButton} ${styles.headerCabinetButtonSpaced} ${landingStyles.button}`} onClick={handleLogout}>Выйти</button>
               </>
             ) : (
-              <button className="header__cabinet-button button" onClick={goToCabinet}>Войти</button>
+              <button className={`${styles.headerCabinetButton} ${landingStyles.button}`} onClick={goToCabinet}>Войти</button>
             )}
             <button
-              className="header__theme-toggle"
+              className={styles.headerThemeToggle}
               onClick={toggleTheme}
               aria-label={isDark ? 'Светлая тема' : 'Тёмная тема'}
               title={isDark ? 'Светлая тема' : 'Тёмная тема'}
@@ -160,8 +161,8 @@ const Header: React.FC = () => {
             </button>
           </div>
 
-          <div className="header__burger">
-            <button className="header__burger-button" onClick={toggleMenu} aria-label="Открыть меню"></button>
+          <div className={styles.headerBurger}>
+            <button className={styles.headerBurgerButton} onClick={toggleMenu} aria-label="Открыть меню"></button>
           </div>
         </div>
       </div>

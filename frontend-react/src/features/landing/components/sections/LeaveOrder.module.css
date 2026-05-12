@@ -1,0 +1,200 @@
+.leaveOrder {
+  padding: 0 0 120px;
+  margin-bottom: 100px;
+}
+
+@media (max-width: 1024px) {
+  .leaveOrder {
+    padding-bottom: 90px;
+    margin-bottom: 80px;
+  }
+}
+
+@media (max-width: 576px) {
+  .leaveOrder {
+    padding-bottom: 70px;
+    margin-bottom: 60px;
+  }
+}
+
+.leaveOrderTitle {
+  margin: 0 0 30px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  text-align: center;
+  color: var(--color-brand-purple-500);
+}
+
+@media (max-width: 1024px) {
+  .leaveOrderTitle {
+    font-size: 40px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .leaveOrderTitle {
+    font-size: 32px;
+  }
+}
+
+.leaveOrderSteps {
+  position: relative;
+}
+
+.leaveOrderSteps::before {
+  content: "";
+  position: absolute;
+  top: 102px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: block;
+  width: 100%;
+  height: 10px;
+  border-radius: 90px;
+  background: linear-gradient(147deg, var(--color-brand-blue-500) 0%, #b9e0ff 100%);
+}
+
+@media (max-width: 1024px) {
+  .leaveOrderSteps::before {
+    top: 0;
+    left: 50%;
+    right: auto;
+    bottom: 0;
+    width: 10px;
+    height: auto;
+    opacity: 0.25;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+  }
+}
+
+.leaveOrderStepsWrapper {
+  position: relative;
+  z-index: 20;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  gap: 30px;
+  max-width: 1064px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .leaveOrderStepsWrapper {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    padding: 40px 0;
+  }
+}
+
+.leaveOrderStepsItem {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 1 300px;
+          flex: 0 1 300px;
+}
+
+@media (max-width: 1024px) {
+  .leaveOrderStepsItem {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    max-width: 400px;
+  }
+}
+
+.leaveOrderStepsItemTitle {
+  margin: 0 0 15px;
+  font-family: var(--font-family-sans);
+  font-weight: 600;
+  font-size: 24px;
+  text-align: center;
+  color: var(--color-grey-700);
+}
+
+.leaveOrderStepsItemIcon {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 114px;
+  margin: 0 0 15px;
+  padding: 24px;
+  aspect-ratio: 1;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  border-radius: 100px;
+  background-color: #fff;
+  -webkit-box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+          box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+}
+
+.leaveOrderStepsItemIconImage {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.leaveOrderStepsItemText {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 20px;
+  text-align: center;
+  color: #000;
+}
+
+.leaveOrderOrder {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin: 50px 0 0;
+}
+
+.leaveOrderOrderButton {
+  max-width: 277px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .leaveOrderOrderButton {
+    display: none;
+  }
+}

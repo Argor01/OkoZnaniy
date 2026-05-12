@@ -8,13 +8,13 @@ import {
   FeedbackForm,
   Footer
 } from '@/features/landing';
-import '@/styles/landing.css';
+import landingStyles from '@/features/landing/Landing.module.css';
 import '@/styles/become-pages.css';
 import '@/styles/page-transitions.css';
 
 const BecomePartner: React.FC = () => {
   return (
-    <div className="page-wrapper partner-page">
+    <div className={`page-wrapper ${landingStyles.landingPage}`}>
       <SEO 
         title="Стать партнером - Око Знаний | Гарантируем 1 000 000 ₽ оборот"
         description="Бизнес с Око Знаний - это просто! Гарантируем 1 000 000 ₽ оборот вашего агентства через 2 месяца. Персональная поддержка от директора биржи. Получай 25% от заказа."
@@ -25,7 +25,7 @@ const BecomePartner: React.FC = () => {
         canonical="https://okoznaniy.ru/become-partner"
       />
       <Header />
-      <main className="main">
+      <main className={landingStyles.main}>
         <PartnerFirstScreen />
         <PartnerBenefits />
         <PartnerSteps />

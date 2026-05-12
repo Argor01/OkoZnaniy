@@ -1,0 +1,309 @@
+.firstScreen {
+  position: relative;
+  background: linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%);
+}
+
+.firstScreen::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: block;
+  height: 176px;
+  background: url(/assets/first-screen/first-screen-divider.svg) top center/cover no-repeat;
+}
+
+@media (max-width: 1320px) {
+  .firstScreen::before {
+    height: 124px;
+  }
+}
+
+@media (max-width: 576px) {
+  .firstScreen::before {
+    height: 80px;
+  }
+}
+
+.firstScreen::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -144px;
+  z-index: 20;
+  display: block;
+  width: 416px;
+  aspect-ratio: 416/540;
+  background: url(/assets/first-screen/first-screen-hat.png) top center/cover no-repeat;
+  pointer-events: none;
+}
+
+@media (max-width: 1600px) {
+  .firstScreen::after {
+    bottom: -100px;
+    width: 320px;
+  }
+}
+
+@media (max-width: 1320px) {
+  .firstScreen::after {
+    bottom: -70px;
+    width: 240px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .firstScreen::after {
+    display: none;
+  }
+}
+
+.firstScreenWrapper {
+  position: relative;
+  z-index: 10;
+  padding: 222px 0 283px;
+}
+
+@media (max-width: 1320px) {
+  .firstScreenWrapper {
+    padding: 200px 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .firstScreenWrapper {
+    padding: 100px 0 0;
+  }
+}
+
+.firstScreenContent {
+  position: relative;
+  z-index: 11;
+  max-width: 650px;
+}
+
+@media (max-width: 1320px) {
+  .firstScreenContent {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .firstScreenContent {
+    max-width: none;
+    margin: 0 0 20px;
+  }
+}
+
+.firstScreenContentTitle {
+  margin: 0 0 20px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 52px;
+  color: #fff;
+}
+
+@media (max-width: 1320px) {
+  .firstScreenContentTitle {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .firstScreenContentTitle {
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .firstScreenContentTitle {
+    font-size: 32px;
+  }
+}
+
+.firstScreenContentDescripton {
+  margin: 0 0 60px;
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 32px;
+  color: #fff;
+}
+
+@media (max-width: 1024px) {
+  .firstScreenContentDescripton {
+    margin-bottom: 40px;
+    font-size: 24px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .firstScreenContentDescripton {
+    margin-bottom: 20px;
+  }
+}
+
+.firstScreenContentButtons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 10px 20px;
+}
+
+@media (max-width: 1024px) {
+  .firstScreenContentButtons {
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+  }
+}
+
+.firstScreenContentButtonsTask, .firstScreenContentButtonsExpert {
+  min-width: 240px;
+}
+
+@media (max-width: 576px) {
+  .firstScreenContentButtonsTask, .firstScreenContentButtonsExpert {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+  }
+}
+
+.firstScreenContentButtonsTask {
+  background-color: var(--color-brand-orange-500);
+}
+
+.firstScreenContentButtonsTask:hover {
+  background-color: var(--color-brand-orange-400);
+}
+
+.firstScreenContentButtonsTask:active {
+  background-color: var(--color-brand-orange-600);
+}
+
+.firstScreenContentButtonsExpert {
+  background-color: #a5d5fc;
+}
+
+.firstScreenContentButtonsExpert:hover {
+  background-color: #d6ecfe;
+}
+
+.firstScreenContentButtonsExpert:active {
+  background-color: #8cc9fb;
+}
+
+ .firstScreenFigure {
+  position: absolute;
+  top: 110px;
+  left: 598px;
+  right: -129px;
+  bottom: 0;
+  z-index: 10;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  margin: 0;
+  overflow: hidden;
+ }
+
+ @media (max-width: 1320px) {
+  .firstScreenFigure {
+    top: 64px;
+    left: 480px;
+  }
+ }
+
+@media (max-width: 1024px) {
+  .firstScreenFigure {
+    position: static;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+}
+
+.firstScreenFigureImage {
+  display: block;
+  max-width: none;
+  height: 100%;
+  width: 100%;
+  aspect-ratio: 811/879;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+@media (max-width: 1024px) {
+  .firstScreenFigureImage {
+    max-width: 100%;
+    width: 680px;
+    height: auto;
+  }
+}
+
+
+/* Expert/Partner first screen stats */
+.expertFirstScreenStats,
+
+.partnerFirstScreenStats {
+  display: flex;
+  gap: 40px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.expertFirstScreenStat,
+
+.partnerFirstScreenStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.expertFirstScreenStatValue,
+
+.partnerFirstScreenStatValue {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--color-brand-orange-500);
+  line-height: 1;
+}
+
+.expertFirstScreenStatLabel,
+
+.partnerFirstScreenStatLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
+
+@media (max-width: 1024px) {
+  .expertFirstScreenStats,
+  .partnerFirstScreenStats {
+    justify-content: center;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .expertFirstScreenStats,
+  .partnerFirstScreenStats {
+    gap: 20px;
+  }
+  .expertFirstScreenStatValue,
+  .partnerFirstScreenStatValue {
+    font-size: 26px;
+  }
+}

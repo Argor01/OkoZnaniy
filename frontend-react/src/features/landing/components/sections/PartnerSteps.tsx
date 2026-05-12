@@ -1,4 +1,6 @@
 import React from 'react';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './PartnerSteps.module.css';
 
 const steps = [
   {
@@ -35,21 +37,21 @@ const steps = [
 
 const PartnerSteps: React.FC = () => {
   return (
-    <section className="partner-steps-section">
-      <div className="mcontainer">
-        <div className="partner-steps-section__promo">
-          <div className="partner-steps-section__promo-badge">Гарантия</div>
-          <h2 className="partner-steps-section__promo-title">
+    <section className={styles.partnerStepsSection}>
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.partnerStepsSectionPromo}>
+          <div className={styles.partnerStepsSectionPromoBadge}>Гарантия</div>
+          <h2 className={styles.partnerStepsSectionPromoTitle}>
             1 000 000 ₽ оборот вашего агентства через 2 месяца
           </h2>
-          <div className="partner-steps-section__promo-items">
-            <div className="partner-steps-section__promo-item">
+          <div className={styles.partnerStepsSectionPromoItems}>
+            <div className={styles.partnerStepsSectionPromoItem}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
               Персональная поддержка от директора биржи на протяжении 1 месяца
             </div>
-            <div className="partner-steps-section__promo-item">
+            <div className={styles.partnerStepsSectionPromoItem}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
@@ -58,14 +60,14 @@ const PartnerSteps: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="partner-steps-section__heading">Как проходит работа</h2>
+        <h2 className={styles.partnerStepsSectionHeading}>Как проходит работа</h2>
 
-        <div className="partner-steps-section__grid">
+        <div className={styles.partnerStepsSectionGrid}>
           {steps.map((step) => (
-            <div className="partner-steps-section__card" key={step.num}>
-              <div className="partner-steps-section__card-num">{step.num}</div>
-              <div className="partner-steps-section__card-title">{step.title}</div>
-              <div className="partner-steps-section__card-text">{step.text}</div>
+            <div className={styles.partnerStepsSectionCard} key={step.num}>
+              <div className={styles.partnerStepsSectionCardNum}>{step.num}</div>
+              <div className={styles.partnerStepsSectionCardTitle}>{step.title}</div>
+              <div className={styles.partnerStepsSectionCardText}>{step.text}</div>
             </div>
           ))}
         </div>

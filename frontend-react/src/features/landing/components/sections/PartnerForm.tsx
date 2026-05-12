@@ -1,5 +1,7 @@
 import React from 'react';
 import { Form, Input, Button } from 'antd';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './PartnerForm.module.css';
 
 const PartnerForm: React.FC = () => {
   const [form] = Form.useForm();
@@ -9,22 +11,22 @@ const PartnerForm: React.FC = () => {
   };
 
   return (
-    <section className="leave-order" id="partner-form">
-      <div className="mcontainer">
-        <div className="leave-order__wrapper">
-          <div className="leave-order__content">
-            <h2 className="leave-order__content-title">Панель отправления заявки</h2>
-            <p className="leave-order__content-description">
+    <section className={styles.leaveOrder} id="partner-form">
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.leaveOrderWrapper}>
+          <div className={styles.leaveOrderContent}>
+            <h2 className={styles.leaveOrderContentTitle}>Панель отправления заявки</h2>
+            <p className={styles.leaveOrderContentDescription}>
               Заполните форму, и наш менеджер свяжется с вами по телефону для обсуждения всех деталей партнерства
             </p>
           </div>
 
-          <div className="leave-order__form">
+          <div className={styles.leaveOrderForm}>
             <Form
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              className="leave-order__form-wrapper"
+              className={styles.leaveOrderFormWrapper}
             >
               <Form.Item
                 name="fullName"
@@ -33,7 +35,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="ФИО" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -47,7 +49,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Email" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -58,7 +60,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Телефон" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -69,7 +71,7 @@ const PartnerForm: React.FC = () => {
                 <Input 
                   placeholder="Город" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -77,7 +79,7 @@ const PartnerForm: React.FC = () => {
                 <Input.TextArea 
                   rows={4} 
                   placeholder="Расскажите о вашем опыте в бизнесе или образовательной сфере"
-                  className="partner-form__textarea"
+                  className={styles.partnerFormTextarea}
                 />
               </Form.Item>
 
@@ -85,7 +87,7 @@ const PartnerForm: React.FC = () => {
                 <Input.TextArea 
                   rows={3} 
                   placeholder="Есть ли у вас офис? Планируете работать онлайн или офлайн?"
-                  className="partner-form__textarea"
+                  className={styles.partnerFormTextarea}
                 />
               </Form.Item>
 
@@ -95,7 +97,7 @@ const PartnerForm: React.FC = () => {
                   htmlType="submit" 
                   size="large"
                   block
-                  className="button partner-form__submit"
+                  className={`${landingStyles.button} ${styles.partnerFormSubmit}`}
                 >
                   Отправить заявку
                 </Button>

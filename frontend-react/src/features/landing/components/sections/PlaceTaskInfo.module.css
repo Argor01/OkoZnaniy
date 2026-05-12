@@ -1,0 +1,215 @@
+.placeTaskInfo {
+  margin-top: 80px;
+  margin-bottom: 100px;
+  padding: 120px 0 180px;
+}
+
+@media (max-width: 1024px) {
+  .placeTaskInfo {
+    margin-top: 60px;
+    margin-bottom: 70px;
+    padding: 70px 0 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .placeTaskInfo {
+    margin-top: 40px;
+    margin-bottom: 50px;
+    padding: 10px 0 80px;
+  }
+}
+
+.placeTaskInfoWrapper {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  height: 444px;
+  padding: 40px 30px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  border-radius: 20px;
+  background: linear-gradient(146deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+}
+
+@media (max-width: 768px) {
+  .placeTaskInfoWrapper {
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    gap: 20px;
+    height: auto;
+    padding: 30px 20px 0;
+  }
+}
+
+.placeTaskInfoClient, .placeTaskInfoExpert {
+  position: relative;
+  z-index: 20;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .placeTaskInfoClient, .placeTaskInfoExpert {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 calc(50% - 10px);
+            flex: 0 0 calc(50% - 10px);
+  }
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoClient, .placeTaskInfoExpert {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+  }
+}
+
+.placeTaskInfoClientTitle, .placeTaskInfoExpertTitle {
+  margin: 0 0 15px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: #fff;
+}
+
+@media (max-width: 1024px) {
+  .placeTaskInfoClientTitle, .placeTaskInfoExpertTitle {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoClientTitle, .placeTaskInfoExpertTitle {
+    font-size: 32px;
+  }
+}
+
+.placeTaskInfoClientButton, .placeTaskInfoExpertButton {
+  max-width: 238px;
+  width: 100%;
+  padding: 18px 32px;
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoClientButton, .placeTaskInfoExpertButton {
+    max-width: 320px;
+  }
+}
+
+.placeTaskInfoClient {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoClient {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+}
+
+.placeTaskInfoClientTitle {
+  text-align: left;
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoClientTitle {
+    text-align: center;
+  }
+}
+
+.placeTaskInfoExpert {
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoExpert {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+}
+
+.placeTaskInfoExpertTitle {
+  text-align: right;
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoExpertTitle {
+    text-align: center;
+  }
+}
+
+.placeTaskInfoPhoto {
+  position: absolute;
+  top: -193px;
+  left: 50%;
+  bottom: 0;
+  z-index: 10;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  width: 695px;
+  margin: 0;
+  -webkit-transform: translateX(calc(-50% + 50px));
+          transform: translateX(calc(-50% + 50px));
+}
+
+@media (max-width: 1024px) {
+  .placeTaskInfoPhoto {
+    width: 560px;
+  }
+}
+
+@media (max-width: 768px) {
+  .placeTaskInfoPhoto {
+    position: static;
+    -webkit-box-align: end;
+        -ms-flex-align: end;
+            align-items: flex-end;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+    width: 100%;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .placeTaskInfoPhoto {
+    margin: 0 -16px;
+  }
+}
+
+.placeTaskInfoPhotoImage {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

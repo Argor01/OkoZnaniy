@@ -1,4 +1,6 @@
 import React from 'react';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './PartnerBenefits.module.css';
 
 const benefits = [
   {
@@ -45,17 +47,17 @@ const benefits = [
 
 const PartnerBenefits: React.FC = () => {
   return (
-    <section className="partner-benefits-section">
-      <div className="mcontainer">
-        <h2 className="partner-benefits-section__title">Преимущества партнёрства</h2>
-        <p className="partner-benefits-section__subtitle">Получайте стабильный доход и развивайте свой бизнес с нашей поддержкой</p>
-        <div className="partner-benefits-section__grid">
+    <section className={styles.partnerBenefitsSection}>
+      <div className={landingStyles.mcontainer}>
+        <h2 className={styles.partnerBenefitsSectionTitle}>Преимущества партнёрства</h2>
+        <p className={styles.partnerBenefitsSectionSubtitle}>Получайте стабильный доход и развивайте свой бизнес с нашей поддержкой</p>
+        <div className={styles.partnerBenefitsSectionGrid}>
           {benefits.map((item, i) => (
-            <div className="partner-benefits-section__card" key={i}>
-              <div className="partner-benefits-section__card-icon">{item.icon}</div>
-              <div className="partner-benefits-section__card-value">{item.value}</div>
-              <div className="partner-benefits-section__card-title">{item.title}</div>
-              <div className="partner-benefits-section__card-text">{item.text}</div>
+            <div className={styles.partnerBenefitsSectionCard} key={i}>
+              <div className={styles.partnerBenefitsSectionCardIcon}>{item.icon}</div>
+              <div className={styles.partnerBenefitsSectionCardValue}>{item.value}</div>
+              <div className={styles.partnerBenefitsSectionCardTitle}>{item.title}</div>
+              <div className={styles.partnerBenefitsSectionCardText}>{item.text}</div>
             </div>
           ))}
         </div>

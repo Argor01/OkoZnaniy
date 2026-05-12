@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form, Input, Button } from 'antd';
-import '@/styles/expert-form.css';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './ExpertForm.module.css';
 
 const ExpertForm: React.FC = () => {
   const [form] = Form.useForm();
@@ -10,22 +11,22 @@ const ExpertForm: React.FC = () => {
   };
 
   return (
-    <section className="leave-order" id="expert-form">
-      <div className="mcontainer">
-        <div className="leave-order__wrapper">
-          <div className="leave-order__content">
-            <h2 className="leave-order__content-title">Панель отправления заявки</h2>
-            <p className="leave-order__content-description">
+    <section className={styles.leaveOrder} id="expert-form">
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.leaveOrderWrapper}>
+          <div className={styles.leaveOrderContent}>
+            <h2 className={styles.leaveOrderContentTitle}>Панель отправления заявки</h2>
+            <p className={styles.leaveOrderContentDescription}>
               Заполните форму, и мы свяжемся с вами в ближайшее время для обсуждения условий сотрудничества
             </p>
           </div>
 
-          <div className="leave-order__form">
+          <div className={styles.leaveOrderForm}>
             <Form
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              className="leave-order__form-wrapper"
+              className={styles.leaveOrderFormWrapper}
             >
               <Form.Item
                 name="fullName"
@@ -34,7 +35,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="ФИО" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -48,7 +49,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Email" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -59,7 +60,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Телефон" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -70,7 +71,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Университет" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -81,7 +82,7 @@ const ExpertForm: React.FC = () => {
                 <Input 
                   placeholder="Специализация" 
                   size="large"
-                  className="partner-form__input"
+                  className={styles.partnerFormInput}
                 />
               </Form.Item>
 
@@ -89,7 +90,7 @@ const ExpertForm: React.FC = () => {
                 <Input.TextArea 
                   rows={4} 
                   placeholder="Расскажите о вашем опыте написания студенческих работ"
-                  className="partner-form__textarea"
+                  className={styles.partnerFormTextarea}
                 />
               </Form.Item>
 
@@ -99,7 +100,7 @@ const ExpertForm: React.FC = () => {
                   htmlType="submit" 
                   size="large"
                   block
-                  className="button partner-form__submit"
+                  className={`${landingStyles.button} ${styles.partnerFormSubmit}`}
                 >
                   Отправить заявку
                 </Button>

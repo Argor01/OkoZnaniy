@@ -1,0 +1,125 @@
+.partnerBenefitsSection {
+  padding: 100px 0;
+  background: #f8f9fa;
+}
+
+@media (max-width: 1024px) {
+  .partnerBenefitsSection {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerBenefitsSection {
+    padding: 60px 0;
+  }
+}
+
+.partnerBenefitsSectionTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-blue-500);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .partnerBenefitsSectionTitle {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerBenefitsSectionTitle {
+    font-size: 32px;
+  }
+}
+
+.partnerBenefitsSectionSubtitle {
+  margin: 0 0 60px;
+  font-size: 20px;
+  color: var(--color-grey-700);
+  text-align: center;
+  font-weight: 400;
+}
+
+@media (max-width: 576px) {
+  .partnerBenefitsSectionSubtitle {
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+.partnerBenefitsSectionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .partnerBenefitsSectionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerBenefitsSectionGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.partnerBenefitsSectionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: 1px solid #edf2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partnerBenefitsSectionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.15);
+}
+
+.partnerBenefitsSectionCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  color: #fff;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.partnerBenefitsSectionCardValue {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--color-brand-orange-500);
+  line-height: 1;
+}
+
+.partnerBenefitsSectionCardTitle {
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+.partnerBenefitsSectionCardText {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
+}

@@ -1,46 +1,48 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './FirstScreen.module.css';
 
 const ExpertFirstScreen: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <section className="first-screen expert-first-screen">
-      <div className="mcontainer">
-        <div className="first-screen__wrapper">
-          <div className="first-screen__content">
-            <h1 className="first-screen__content-title">
+    <section className={`${styles.firstScreen} ${styles.expertFirstScreen}`}>
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.firstScreenWrapper}>
+          <div className={styles.firstScreenContent}>
+            <h1 className={styles.firstScreenContentTitle}>
               Стань автором студенческих работ
             </h1>
-            <div className="first-screen__content-descripton">
+            <div className={styles.firstScreenContentDescripton}>
               и зарабатывай от 100 000 ₽ в месяц
             </div>
-            <div className="first-screen__content-buttons">
+            <div className={styles.firstScreenContentButtons}>
               <button
-                className="first-screen__content-buttons-task button"
+                className={`${styles.firstScreenContentButtonsTask} ${landingStyles.button}`}
                 onClick={() => navigate('/expert-application')}
               >
                 Стать экспертом
               </button>
             </div>
-            <div className="expert-first-screen__stats">
-              <div className="expert-first-screen__stat">
-                <span className="expert-first-screen__stat-value">5 000+</span>
-                <span className="expert-first-screen__stat-label">активных заказов</span>
+            <div className={styles.expertFirstScreenStats}>
+              <div className={styles.expertFirstScreenStat}>
+                <span className={styles.expertFirstScreenStatValue}>5 000+</span>
+                <span className={styles.expertFirstScreenStatLabel}>активных заказов</span>
               </div>
-              <div className="expert-first-screen__stat">
-                <span className="expert-first-screen__stat-value">от 500 ₽</span>
-                <span className="expert-first-screen__stat-label">за одну работу</span>
+              <div className={styles.expertFirstScreenStat}>
+                <span className={styles.expertFirstScreenStatValue}>от 500 ₽</span>
+                <span className={styles.expertFirstScreenStatLabel}>за одну работу</span>
               </div>
-              <div className="expert-first-screen__stat">
-                <span className="expert-first-screen__stat-value">24/7</span>
-                <span className="expert-first-screen__stat-label">поддержка</span>
+              <div className={styles.expertFirstScreenStat}>
+                <span className={styles.expertFirstScreenStatValue}>24/7</span>
+                <span className={styles.expertFirstScreenStatLabel}>поддержка</span>
               </div>
             </div>
           </div>
 
-          <figure className="first-screen__figure">
+          <figure className={styles.firstScreenFigure}>
             <img
-              className="first-screen__figure-image"
+              className={styles.firstScreenFigureImage}
               src="/assets/first-screen/first-screen-expert.png"
               alt="expert"
               width={811}

@@ -1,0 +1,181 @@
+.partnerStepsSection {
+  padding: 100px 0;
+  background: #fff;
+}
+
+@media (max-width: 1024px) {
+  .partnerStepsSection {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSection {
+    padding: 60px 0;
+  }
+}
+
+.partnerStepsSectionPromo {
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  border-radius: 20px;
+  padding: 48px 56px;
+  margin-bottom: 80px;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .partnerStepsSectionPromo {
+    padding: 36px 28px;
+    margin-bottom: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSectionPromo {
+    padding: 28px 20px;
+    margin-bottom: 48px;
+  }
+}
+
+.partnerStepsSectionPromoBadge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.partnerStepsSectionPromoTitle {
+  margin: 0 0 24px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: #fff;
+  line-height: 1.2;
+  max-width: 700px;
+}
+
+@media (max-width: 768px) {
+  .partnerStepsSectionPromoTitle {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSectionPromoTitle {
+    font-size: 26px;
+  }
+}
+
+.partnerStepsSectionPromoItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.partnerStepsSectionPromoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.partnerStepsSectionPromoItem svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-brand-orange-500);
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSectionPromoItem {
+    font-size: 15px;
+  }
+}
+
+.partnerStepsSectionHeading {
+  margin: 0 0 48px;
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 48px;
+  color: var(--color-brand-blue-500);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .partnerStepsSectionHeading {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSectionHeading {
+    font-size: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+.partnerStepsSectionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .partnerStepsSectionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .partnerStepsSectionGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.partnerStepsSectionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  border: 1px solid #edf2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partnerStepsSectionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(43, 159, 230, 0.15);
+}
+
+.partnerStepsSectionCardNum {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  font-size: 40px;
+  color: #e8f4fd;
+  line-height: 1;
+}
+
+.partnerStepsSectionCardTitle {
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: #1a202c;
+  line-height: 1.3;
+}
+
+.partnerStepsSectionCardText {
+  font-family: var(--font-family-sans);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--color-grey-700);
+  line-height: 1.6;
+}

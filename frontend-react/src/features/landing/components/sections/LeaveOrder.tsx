@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './LeaveOrder.module.css';
 
 
 const LeaveOrder: React.FC = () => {
@@ -19,64 +21,64 @@ const LeaveOrder: React.FC = () => {
   };
   
   return (
-    <section className="leave-order" id="orders">
-      <div className="mcontainer">
-        <h2 className="leave-order__title">Закажи работу за три шага 🤝</h2>
+    <section className={styles.leaveOrder} id="orders">
+      <div className={landingStyles.mcontainer}>
+        <h2 className={styles.leaveOrderTitle}>Закажи работу за три шага 🤝</h2>
 
-        <div className="leave-order__steps">
-          <div className="leave-order__steps-wrapper">
-            <div className="leave-order__steps-item">
-              <div className="leave-order__steps-item-title">Оставь заявку</div>
-              <figure className="leave-order__steps-item-icon">
+        <div className={styles.leaveOrderSteps}>
+          <div className={styles.leaveOrderStepsWrapper}>
+            <div className={styles.leaveOrderStepsItem}>
+              <div className={styles.leaveOrderStepsItemTitle}>Оставь заявку</div>
+              <figure className={styles.leaveOrderStepsItemIcon}>
                 <img
-                  className="leave-order__steps-item-icon-image"
+                  className={styles.leaveOrderStepsItemIconImage}
                   src="/assets/leave-order/leave-order-icon-1.svg"
                   alt="icons"
                   width={66}
                   height={66}
                 />
               </figure>
-              <div className="leave-order__steps-item-text">
+              <div className={styles.leaveOrderStepsItemText}>
                 Пару минут — и твоя задача уже доступна авторам
               </div>
             </div>
 
-            <div className="leave-order__steps-item">
-              <div className="leave-order__steps-item-title">Выбери профессионала</div>
-              <figure className="leave-order__steps-item-icon">
+            <div className={styles.leaveOrderStepsItem}>
+              <div className={styles.leaveOrderStepsItemTitle}>Выбери профессионала</div>
+              <figure className={styles.leaveOrderStepsItemIcon}>
                 <img
-                  className="leave-order__steps-item-icon-image"
+                  className={styles.leaveOrderStepsItemIconImage}
                   src="/assets/leave-order/leave-order-icon-2.svg"
                   alt="icons"
                   width={66}
                   height={66}
                 />
               </figure>
-              <div className="leave-order__steps-item-text">
+              <div className={styles.leaveOrderStepsItemText}>
                 Оцените анкеты специалистов, их рейтинг и отзывы
               </div>
             </div>
 
-            <div className="leave-order__steps-item">
-              <div className="leave-order__steps-item-title">Забирай результат</div>
-              <figure className="leave-order__steps-item-icon">
+            <div className={styles.leaveOrderStepsItem}>
+              <div className={styles.leaveOrderStepsItemTitle}>Забирай результат</div>
+              <figure className={styles.leaveOrderStepsItemIcon}>
                 <img
-                  className="leave-order__steps-item-icon-image"
+                  className={styles.leaveOrderStepsItemIconImage}
                   src="/assets/leave-order/leave-order-icon-3.svg"
                   alt="icons"
                   width={66}
                   height={66}
                 />
               </figure>
-              <div className="leave-order__steps-item-text">
+              <div className={styles.leaveOrderStepsItemText}>
                 Оплачивай — и скачивай готовую работу в своём личном кабинете
               </div>
             </div>
           </div>
         </div>
 
-        <div className="leave-order__order">
-          <button className="leave-order__order-button button" onClick={handleOrderClick}>Разместить заказ</button>
+        <div className={styles.leaveOrderOrder}>
+          <button className={`${styles.leaveOrderOrderButton} ${landingStyles.button}`} onClick={handleOrderClick}>Разместить заказ</button>
         </div>
       </div>
     </section>

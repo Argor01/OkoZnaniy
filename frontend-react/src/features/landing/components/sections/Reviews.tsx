@@ -5,6 +5,8 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import type { Swiper as SwiperInstance } from 'swiper';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './Reviews.module.css';
 
 interface Review {
   id: number;
@@ -81,14 +83,14 @@ const reviews: Review[] = [
 ];
 
 const ReviewSlide: React.FC<{ review: Review }> = ({ review }) => (
-  <div className="reviews__slider-slide">
-    <div className="reviews__slider-slide-name">{review.name}</div>
-    <div className="reviews__slider-slide-type">{review.workType}</div>
-    <div className="reviews__slider-slide-text">{review.text}</div>
-    <div className="reviews__slider-slide-bottom">
-      <div className="reviews__slider-slide-rating">
+  <div className={styles.reviewsSliderSlide}>
+    <div className={styles.reviewsSliderSlideName}>{review.name}</div>
+    <div className={styles.reviewsSliderSlideType}>{review.workType}</div>
+    <div className={styles.reviewsSliderSlideText}>{review.text}</div>
+    <div className={styles.reviewsSliderSlideBottom}>
+      <div className={styles.reviewsSliderSlideRating}>
         {[...Array(review.rating)].map((_, index) => (
-          <div key={index} className="reviews__slider-slide-rating-star"></div>
+          <div key={index} className={styles.reviewsSliderSlideRatingStar}></div>
         ))}
       </div>
     </div>
@@ -128,17 +130,17 @@ const Reviews: React.FC = () => {
   }, [swiper]);
 
   return (
-    <section className="reviews" id="reviews">
-      <div className="mcontainer">
-        <h2 className="reviews__title">
+    <section className={styles.reviews} id="reviews">
+      <div className={landingStyles.mcontainer}>
+        <h2 className={styles.reviewsTitle}>
           Око знаний открывает новые горизонты в учёбе. В раздумьях, довериться ли нам?
         </h2>
 
-        <div className="reviews__description">
+        <div className={styles.reviewsDescription}>
           Почитай отзывы студентов, которые воспользовались сервисом и решили учится по-новому! 👊🏻
         </div>
 
-        <div className="reviews__slider">
+        <div className={styles.reviewsSlider}>
           <Swiper
             modules={[Pagination, Navigation]}
             spaceBetween={30}
@@ -157,10 +159,10 @@ const Reviews: React.FC = () => {
             ))}
           </Swiper>
 
-          <div className="reviews__slider-controls">
-            <button ref={prevRef} className="reviews__slider-controls-prev" aria-label="Предыдущий отзыв"></button>
-            <div ref={paginationRef} className="reviews__slider-controls-pagination"></div>
-            <button ref={nextRef} className="reviews__slider-controls-next" aria-label="Следующий отзыв"></button>
+          <div className={styles.reviewsSliderControls}>
+            <button ref={prevRef} className={styles.reviewsSliderControlsPrev} aria-label="Предыдущий отзыв"></button>
+            <div ref={paginationRef} className={styles.reviewsSliderControlsPagination}></div>
+            <button ref={nextRef} className={styles.reviewsSliderControlsNext} aria-label="Следующий отзыв"></button>
           </div>
         </div>
       </div>

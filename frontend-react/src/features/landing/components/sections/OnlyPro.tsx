@@ -1,14 +1,16 @@
 import React from 'react';
+import landingStyles from '@/features/landing/Landing.module.css';
+import styles from './OnlyPro.module.css';
 
 
 const OnlyPro: React.FC = () => {
   return (
-    <section className="only-pro" id="be-expert">
-      <div className="mcontainer">
-        <div className="only-pro__wrapper">
-          <figure className="only-pro__teacher">
+    <section className={styles.onlyPro} id="be-expert">
+      <div className={landingStyles.mcontainer}>
+        <div className={styles.onlyProWrapper}>
+          <figure className={styles.onlyProTeacher}>
             <img
-              className="only-pro__teacher-image"
+              className={styles.onlyProTeacherImage}
               src="/assets/only-pro/only-pro-image.png"
               alt="teacher"
               width={952}
@@ -17,14 +19,14 @@ const OnlyPro: React.FC = () => {
             />
           </figure>
 
-          <div className="only-pro__main">
-            <h2 className="only-pro__title">Работают только профи</h2>
-            <div className="only-pro__description">ТОП универы, для нас важен диплом эксперта</div>
+          <div className={styles.onlyProMain}>
+            <h2 className={styles.onlyProTitle}>Работают только профи</h2>
+            <div className={styles.onlyProDescription}>ТОП универы, для нас важен диплом эксперта</div>
 
-            <div className="only-pro__logos">
-              <figure className="only-pro__logos-item">
+            <div className={styles.onlyProLogos}>
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-1.png"
                   alt="icon"
                   width={160}
@@ -32,9 +34,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-2.png"
                   alt="icon"
                   width={160}
@@ -42,9 +44,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-3.jpg"
                   alt="icon"
                   width={160}
@@ -52,9 +54,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-4.jpg"
                   alt="icon"
                   width={160}
@@ -62,9 +64,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-5.jpg"
                   alt="icon"
                   width={160}
@@ -72,9 +74,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-6.png"
                   alt="icon"
                   width={160}
@@ -82,9 +84,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-7.jpg"
                   alt="icon"
                   width={160}
@@ -92,9 +94,9 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
 
-              <figure className="only-pro__logos-item">
+              <figure className={styles.onlyProLogosItem}>
                 <img
-                  className="only-pro__logos-item-image"
+                  className={styles.onlyProLogosItemImage}
                   src="/assets/only-pro/only-pro-icon-8.jpg"
                   alt="icon"
                   width={160}
@@ -102,7 +104,7 @@ const OnlyPro: React.FC = () => {
                 />
               </figure>
             </div>
-            <div className="only-pro__additional-text">и многие другие</div>
+            <div className={styles.onlyProAdditionalText}>и многие другие</div>
           </div>
         </div>
       </div>

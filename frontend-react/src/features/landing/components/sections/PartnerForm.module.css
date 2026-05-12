@@ -1,0 +1,13 @@
+.partnerFormInput {
+  border-radius: 8px;
+}
+
+.partnerFormTextarea {
+  border-radius: 8px;
+}
+
+.partnerFormSubmit {
+  height: 56px;
+  font-size: 17px;
+  border-radius: 12px;
+}
