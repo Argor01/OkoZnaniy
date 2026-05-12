@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
+import { LogoutOutlined } from '@ant-design/icons';
 import { Layout, Modal, message, Spin } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -134,26 +135,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   }, [supportUserId]);
 
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
   const handleLogout = useCallback(() => {
-    Modal.confirm({
-      title: 'Выход из системы',
-      content: 'Вы уверены, что хотите выйти?',
-      okText: 'Выйти',
-      cancelText: 'Отмена',
-      onOk: async () => {
-        try {
-          authApi.logout();
-          message.success('Вы вышли из системы');
-          navigate('/');
-          window.location.reload();
-        } catch (_error) {
-          authApi.logout();
-          message.success('Вы вышли из системы');
-          navigate('/');
-          window.location.reload();
-        }
-      },
-    });
+    setLogoutModalVisible(true);
+  }, []);
+
+  const confirmLogout = useCallback(async () => {
+    try {
+      authApi.logout();
+      message.success('Вы вышли из системы');
+      navigate('/');
+      window.location.reload();
+    } catch (_error) {
+      authApi.logout();
+      message.success('Вы вышли из системы');
+      navigate('/');
+      window.location.reload();
+    }
   }, [navigate]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
@@ -605,6 +604,38 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           }}
         />
       </Suspense>
+
+      <Modal
+        open={logoutModalVisible}
+        onCancel={() => setLogoutModalVisible(false)}
+        footer={null}
+        centered
+        width={400}
+        closable={false}
+        className="logout-modal"
+      >
+        <div className="logout-modal-body">
+          <div className="logout-modal-icon">
+            <LogoutOutlined />
+          </div>
+          <h3 className="logout-modal-title">Выход из системы</h3>
+          <p className="logout-modal-text">Вы уверены, что хотите выйти из аккаунта?</p>
+          <div className="logout-modal-actions">
+            <button
+              className="logout-modal-btn logout-modal-btn-cancel"
+              onClick={() => setLogoutModalVisible(false)}
+            >
+              Отмена
+            </button>
+            <button
+              className="logout-modal-btn logout-modal-btn-confirm"
+              onClick={confirmLogout}
+            >
+              Выйти
+            </button>
+          </div>
+        </div>
+      </Modal>
     </DashboardContext.Provider>
   );
 };

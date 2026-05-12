@@ -86,24 +86,22 @@ const ArbitratorDashboard: React.FC = () => {
     checkAuth();
   }, [checkAuth]);
 
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
   const handleLogout = () => {
-    Modal.confirm({
-      title: 'Выход из системы',
-      content: 'Вы уверены, что хотите выйти?',
-      okText: 'Выйти',
-      cancelText: 'Отмена',
-      onOk: async () => {
-        try {
-          authApi.logout();
-          message.success('Вы вышли из системы');
-          navigate('/administrator');
-        } catch (error) {
-          authApi.logout();
-          message.success('Вы вышли из системы');
-          navigate('/administrator');
-        }
-      },
-    });
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      authApi.logout();
+      message.success('Вы вышли из системы');
+      navigate('/administrator');
+    } catch (error) {
+      authApi.logout();
+      message.success('Вы вышли из системы');
+      navigate('/administrator');
+    }
   };
 
   const handleMenuClick = (key: string) => {
@@ -319,6 +317,28 @@ const ArbitratorDashboard: React.FC = () => {
           Личный кабинет арбитра © {new Date().getFullYear()}
         </Footer>
       </Layout>
+
+      <Modal
+        open={logoutModalVisible}
+        onCancel={() => setLogoutModalVisible(false)}
+        footer={null}
+        centered
+        width={400}
+        closable={false}
+        className="logout-modal"
+      >
+        <div className="logout-modal-body">
+          <div className="logout-modal-icon">
+            <LogoutOutlined />
+          </div>
+          <h3 className="logout-modal-title">Выход из системы</h3>
+          <p className="logout-modal-text">Вы уверены, что хотите выйти из аккаунта?</p>
+          <div className="logout-modal-actions">
+            <button className="logout-modal-btn logout-modal-btn-cancel" onClick={() => setLogoutModalVisible(false)}>Отмена</button>
+            <button className="logout-modal-btn logout-modal-btn-confirm" onClick={confirmLogout}>Выйти</button>
+          </div>
+        </div>
+      </Modal>
     </Layout>
   );
 };

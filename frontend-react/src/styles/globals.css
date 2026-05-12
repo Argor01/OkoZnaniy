@@ -503,9 +503,9 @@ a {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Smooth Ant Design modal appearance */
+/* Smooth Ant Design modal appearance — use Ant Design's built-in zoom transition */
 .ant-modal-wrap .ant-modal {
-  animation: fadeInScale 0.25s ease-out;
+  transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.25s ease-out;
 }
 
 /* Smooth notification appearance */
