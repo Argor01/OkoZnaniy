@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { useUsers, useUserActions } from '@/features/admin/hooks';
 import { AdminUser } from '@/features/admin/types/admin';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -190,7 +191,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
   return (
     <div>
       <Card>
-        <div className="blockedUsersHeader">
+        <div className={styles.blockedUsersHeader}>
           <Title level={4}>Блокировка пользователей</Title>
           <Text type="secondary">
             Управление доступом пользователей системы
@@ -198,11 +199,11 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
         </div>
 
         
-        <div className="blockedUsersFiltersRow">
+        <div className={styles.blockedUsersFiltersRow}>
           <Search
             placeholder="Поиск по имени, email или username"
             allowClear
-            className="blockedUsersSearch"
+            className={styles.blockedUsersSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -210,7 +211,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
           
           <Select
             placeholder="Роль"
-            className="blockedUsersSelectRole"
+            className={styles.blockedUsersSelectRole}
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -222,7 +223,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
           </Select>
         </div>
 
-        <div className="blockedUsersSummaryRow">
+        <div className={styles.blockedUsersSummaryRow}>
           <Tag color="green">
             Активных: {filteredData.filter(u => !u.is_blocked).length}
           </Tag>
@@ -273,9 +274,9 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
         }}
       >
         <Form form={form} layout="vertical">
-          <div className="blockedUsersModalInfo">
+          <div className={styles.blockedUsersModalInfo}>
             <Text strong>Информация о пользователе:</Text>
-            <div className="blockedUsersModalInfoBox">
+            <div className={styles.blockedUsersModalInfoBox}>
               <div><strong>Имя:</strong> {selectedUser?.first_name} {selectedUser?.last_name}</div>
               <div><strong>Email:</strong> {selectedUser?.email}</div>
               <div><strong>Роль:</strong> {getRoleLabel(selectedUser?.role || '')}</div>
@@ -305,7 +306,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
               <DatePicker
                 showTime
                 format="DD.MM.YYYY HH:mm"
-                className="blockedUsersModalField"
+                className={styles.blockedUsersModalField}
                 disabledDate={(current) => !!current && current < dayjs().startOf('day')}
               />
             </Form.Item>

@@ -32,6 +32,7 @@ import dayjs from 'dayjs';
 import { AdminUser, AdminRole, AdminPermission } from '@/features/admin/types/admin';
 import { useUsers, useRoles, usePermissions, useUserActions, useRoleActions } from '@/features/admin/hooks/useAdminUsers';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -215,11 +216,11 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
           <Avatar size={40} src={record.avatar} icon={<UserOutlined />} />
           <div>
             <div><strong>{record.username}</strong></div>
-            <Text type="secondary" className="userRolesMetaText">
+            <Text type="secondary" className={styles.userRolesMetaText}>
               {record.first_name} {record.last_name}
             </Text>
             <br />
-            <Text type="secondary" className="userRolesMetaText">
+            <Text type="secondary" className={styles.userRolesMetaText}>
               {record.email}
             </Text>
           </div>
@@ -290,9 +291,9 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         <div>
           <div>
             <strong>{record.display_name}</strong>
-            {record.is_system && <Tag color="blue" className="userRolesSystemTag">Системная</Tag>}
+            {record.is_system && <Tag color="blue" className={styles.userRolesSystemTag}>Системная</Tag>}
           </div>
-            <Text type="secondary" className="userRolesMetaText">
+            <Text type="secondary" className={styles.userRolesMetaText}>
             {record.description}
           </Text>
         </div>
@@ -353,7 +354,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
   return (
     <div>
       <Card>
-        <div className="userRolesSectionHeader">
+        <div className={styles.userRolesSectionHeader}>
           <Title level={4}>Роли и права пользователей</Title>
           <Text type="secondary">
             Управление ролями пользователей и их правами доступа
@@ -363,11 +364,11 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         <Tabs defaultActiveKey="users">
           <TabPane tab="Пользователи" key="users">
             
-            <div className="userRolesFiltersRow">
+            <div className={styles.userRolesFiltersRow}>
               <Search
                 placeholder="Поиск по имени, email или username"
                 allowClear
-                className="userRolesSearch"
+                className={styles.userRolesSearch}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -375,7 +376,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               
               <Select
                 placeholder="Роль"
-                className="userRolesRoleSelect"
+                className={styles.userRolesRoleSelect}
                 value={roleFilter}
                 onChange={setRoleFilter}
               >
@@ -400,12 +401,12 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               }}
               locale={{ emptyText: 'Пользователи не найдены' }}
               scroll={{ x: 1000 }}
-              className="userRolesUsersTable"
+              className={styles.userRolesUsersTable}
             />
           </TabPane>
 
           <TabPane tab="Роли и права" key="roles">
-            <div className="userRolesActionsRow">
+            <div className={styles.userRolesActionsRow}>
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
@@ -424,7 +425,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               pagination={false}
               locale={{ emptyText: 'Роли не найдены' }}
               scroll={{ x: 800 }}
-              className="userRolesRolesTable"
+              className={styles.userRolesRolesTable}
             />
           </TabPane>
         </Tabs>
@@ -443,7 +444,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         cancelText="Отмена"
       >
         <Form form={roleForm} layout="vertical">
-          <div className="userRolesModalUserSummary">
+          <div className={styles.userRolesModalUserSummary}>
             <Text strong>Пользователь:</Text> {selectedUser?.first_name} {selectedUser?.last_name} ({selectedUser?.email})
           </div>
           
@@ -481,7 +482,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
               message="Полные права"
               description="Эта роль имеет все права в системе"
               type="info"
-              className="userRolesPermissionsAlert"
+              className={styles.userRolesPermissionsAlert}
             />
           ) : (
             <Form.Item
@@ -490,15 +491,15 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
             >
               <div>
                 {Object.entries(getPermissionsByCategory(permissionsData)).map(([category, categoryPermissions]) => (
-                  <div key={category} className="userRolesCategoryGroup">
+                  <div key={category} className={styles.userRolesCategoryGroup}>
                     <Title level={5}>{getCategoryLabel(category)}</Title>
-                    <Checkbox.Group className="userRolesPermissionList">
+                    <Checkbox.Group className={styles.userRolesPermissionList}>
                       {categoryPermissions.map(permission => (
-                        <div key={permission.id} className="userRolesPermissionItem">
+                        <div key={permission.id} className={styles.userRolesPermissionItem}>
                           <Checkbox value={permission.id}>
                             <strong>{permission.display_name}</strong>
                             <br />
-                            <Text type="secondary" className="userRolesMetaText">
+                            <Text type="secondary" className={styles.userRolesMetaText}>
                               {permission.description}
                             </Text>
                           </Checkbox>
@@ -560,16 +561,16 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
             label="Права доступа"
             rules={[{ required: true, message: 'Выберите права для роли' }]}
           >
-            <Checkbox.Group className="userRolesPermissionList">
+            <Checkbox.Group className={styles.userRolesPermissionList}>
               {Object.entries(getPermissionsByCategory(permissionsData)).map(([category, categoryPermissions]) => (
-                <div key={category} className="userRolesCategoryGroup">
+                <div key={category} className={styles.userRolesCategoryGroup}>
                   <Title level={5}>{getCategoryLabel(category)}</Title>
                   {categoryPermissions.map(permission => (
-                    <div key={permission.id} className="userRolesPermissionItem">
+                    <div key={permission.id} className={styles.userRolesPermissionItem}>
                       <Checkbox value={permission.id}>
                         <strong>{permission.display_name}</strong>
                         <br />
-                        <Text type="secondary" className="userRolesMetaText">
+                        <Text type="secondary" className={styles.userRolesMetaText}>
                           {permission.description}
                         </Text>
                       </Checkbox>

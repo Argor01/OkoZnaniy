@@ -41,6 +41,7 @@ import {
   CalendarOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -279,16 +280,16 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       key: 'request',
       render: (record: CompletedRequest) => (
         <div>
-          <div className="completedRequestsTitle">
+          <div className={styles.completedRequestsTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="completedRequestsDescription">
+          <Text type="secondary" className={styles.completedRequestsDescription}>
             {record.description.length > 60 
               ? `${record.description.substring(0, 60)}...` 
               : record.description
             }
           </Text>
-          <div className="completedRequestsTagRow">
+          <div className={styles.completedRequestsTagRow}>
             {record.tags.map(tag => (
               <Tag key={tag}>{tag}</Tag>
             ))}
@@ -301,16 +302,16 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       title: 'Клиент',
       key: 'user',
       render: (record: CompletedRequest) => (
-        <div className="completedRequestsUserRow">
+        <div className={styles.completedRequestsUserRow}>
           <Badge dot={record.user.is_vip} color="gold">
             <Avatar src={record.user.avatar} icon={<UserOutlined />} />
           </Badge>
           <div>
-            <div className="completedRequestsUserName">
+            <div className={styles.completedRequestsUserName}>
               {record.user.first_name} {record.user.last_name}
-              {record.user.is_vip && <Tag color="gold" className="completedRequestsVipTag">VIP</Tag>}
+              {record.user.is_vip && <Tag color="gold" className={styles.completedRequestsVipTag}>VIP</Tag>}
             </div>
-            <Text type="secondary" className="completedRequestsUserMeta">
+            <Text type="secondary" className={styles.completedRequestsUserMeta}>
               {record.user.total_orders} заказов • {record.user.total_spent.toLocaleString()} ₽
             </Text>
           </div>
@@ -327,7 +328,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
             {getTypeText(record.type)}
           </Tag>
           <br />
-          <Tag color={getPriorityColor(record.priority)} className="completedRequestsPriorityTag">
+          <Tag color={getPriorityColor(record.priority)} className={styles.completedRequestsPriorityTag}>
             {getPriorityText(record.priority)}
           </Tag>
         </div>
@@ -338,9 +339,9 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       title: 'Администратор',
       key: 'admin',
       render: (record: CompletedRequest) => (
-        <div className="completedRequestsAdminRow">
+        <div className={styles.completedRequestsAdminRow}>
           <div>
-            <div className="completedRequestsAdminName">
+            <div className={styles.completedRequestsAdminName}>
               {record.assigned_admin.first_name} {record.assigned_admin.last_name}
             </div>
           </div>
@@ -353,10 +354,10 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       key: 'timing',
       render: (record: CompletedRequest) => (
         <div>
-          <div className="completedRequestsTimingLine">
+          <div className={styles.completedRequestsTimingLine}>
             <ClockCircleOutlined /> Ответ: {Math.floor(record.response_time_minutes / 60)}ч {record.response_time_minutes % 60}м
           </div>
-          <div className="completedRequestsTimingLine completedRequestsTimingLineOffset">
+          <div className={`${styles.completedRequestsTimingLine} ${styles.completedRequestsTimingLineOffset}`}>
             <CheckCircleOutlined /> Решение: {Math.floor(record.total_time_minutes / 60)}ч {record.total_time_minutes % 60}м
           </div>
         </div>
@@ -372,12 +373,12 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
             {getResolutionTypeText(record.resolution_type)}
           </Tag>
           {record.satisfaction_rating && (
-            <div className="completedRequestsRatingRow">
-              <Rate disabled value={record.satisfaction_rating} className="completedRequestsRatingStars" />
+            <div className={styles.completedRequestsRatingRow}>
+              <Rate disabled value={record.satisfaction_rating} className={styles.completedRequestsRatingStars} />
             </div>
           )}
           {record.follow_up_required && (
-            <Tag color="orange" className="completedRequestsFollowUpTag">
+            <Tag color="orange" className={styles.completedRequestsFollowUpTag}>
               Требует контроля
             </Tag>
           )}
@@ -392,7 +393,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       render: (date: string) => (
         <div>
           <div>{dayjs(date).format('DD.MM.YYYY')}</div>
-          <Text type="secondary" className="completedRequestsCompletedTime">
+          <Text type="secondary" className={styles.completedRequestsCompletedTime}>
             {dayjs(date).format('HH:mm')}
           </Text>
         </div>
@@ -449,7 +450,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
   return (
     <div>
       
-      <Row gutter={16} className="completedRequestsStatsRow">
+      <Row gutter={16} className={styles.completedRequestsStatsRow}>
         <Col span={6}>
           <Card>
             <Statistic
@@ -465,7 +466,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               title="Успешно решено"
               value={stats.resolved}
               suffix={`/ ${stats.total}`}
-              prefix={<CheckCircleOutlined className="completedRequestsResolvedIcon" />}
+              prefix={<CheckCircleOutlined className={styles.completedRequestsResolvedIcon} />}
             />
           </Card>
         </Col>
@@ -475,7 +476,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               title="Средняя оценка"
               value={stats.avgSatisfaction}
               precision={1}
-              prefix={<StarOutlined className="completedRequestsRatingIcon" />}
+              prefix={<StarOutlined className={styles.completedRequestsRatingIcon} />}
               suffix="/ 5"
             />
           </Card>
@@ -493,14 +494,14 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       </Row>
 
       
-      <Card className="completedRequestsFiltersCard">
+      <Card className={styles.completedRequestsFiltersCard}>
         <Row gutter={16} align="middle">
           <Col span={6}>
             <Search
               placeholder="Поиск по запросам, клиентам..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
             />
           </Col>
           <Col span={4}>
@@ -508,7 +509,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               placeholder="Тип запроса"
               value={selectedType}
               onChange={setSelectedType}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
             >
               <Option value="all">Все типы</Option>
               <Option value="technical">Техническая поддержка</Option>
@@ -525,7 +526,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               placeholder="Приоритет"
               value={selectedPriority}
               onChange={setSelectedPriority}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
             >
               <Option value="all">Все приоритеты</Option>
               <Option value="low">Низкий</Option>
@@ -539,7 +540,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               placeholder="Результат"
               value={selectedResolutionType}
               onChange={setSelectedResolutionType}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
             >
               <Option value="all">Все результаты</Option>
               <Option value="resolved">Решен</Option>
@@ -553,7 +554,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
             <RangePicker
               value={dateRange}
               onChange={setDateRange}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
               placeholder={['Дата от', 'Дата до']}
             />
           </Col>
@@ -562,7 +563,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               type="primary" 
               icon={<ExportOutlined />}
               onClick={handleExport}
-              className="completedRequestsFilterField"
+              className={styles.completedRequestsFilterField}
             >
               Экспорт
             </Button>
@@ -614,7 +615,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
               </Col>
               <Col span={12}>
                 <Title level={5}>Клиент</Title>
-                <div className="completedRequestsModalUserRow">
+                <div className={styles.completedRequestsModalUserRow}>
                   <Avatar src={selectedRequest.user.avatar} icon={<UserOutlined />} />
                   <div>
                     <div><strong>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</strong></div>
@@ -643,7 +644,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
                 <Title level={5}>Результат</Title>
                 <p><strong>Тип решения:</strong> <Tag color={getResolutionTypeColor(selectedRequest.resolution_type)}>{getResolutionTypeText(selectedRequest.resolution_type)}</Tag></p>
                 <p><strong>Описание решения:</strong></p>
-                <div className="completedRequestsResolutionBox">
+                <div className={styles.completedRequestsResolutionBox}>
                   {selectedRequest.resolution}
                 </div>
                 {selectedRequest.satisfaction_rating && (
@@ -651,7 +652,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
                     <p><strong>Оценка клиента:</strong></p>
                     <Rate disabled value={selectedRequest.satisfaction_rating} />
                     {selectedRequest.satisfaction_comment && (
-                      <div className="completedRequestsFeedback">
+                      <div className={styles.completedRequestsFeedback}>
                         "{selectedRequest.satisfaction_comment}"
                       </div>
                     )}
@@ -711,13 +712,13 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
         okText="Запланировать"
         cancelText="Отмена"
       >
-        <div className="completedRequestsFollowUpBlock">
+        <div className={styles.completedRequestsFollowUpBlock}>
           <label>Дата и время контроля:</label>
           <DatePicker
             showTime
             value={followUpDate}
             onChange={setFollowUpDate}
-            className="completedRequestsFollowUpDate"
+            className={styles.completedRequestsFollowUpDate}
             placeholder="Выберите дату и время"
           />
         </div>
@@ -728,7 +729,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
             onChange={(e) => setFollowUpNotes(e.target.value)}
             placeholder="Что нужно проверить или уточнить..."
             rows={4}
-            className="completedRequestsFollowUpNotes"
+            className={styles.completedRequestsFollowUpNotes}
           />
         </div>
       </Modal>

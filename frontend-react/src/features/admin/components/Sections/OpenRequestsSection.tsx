@@ -42,6 +42,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -347,13 +348,13 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'request',
       render: (record: CustomerRequest) => (
         <div>
-          <div className="openRequestsRequestNumber">
+          <div className={styles.openRequestsRequestNumber}>
             {record.request_number}
           </div>
-          <div className="openRequestsTitle">
+          <div className={styles.openRequestsTitle}>
             {record.title}
           </div>
-          <div className="openRequestsTagRow">
+          <div className={styles.openRequestsTagRow}>
             <Tag color={getTypeColor(record.request_type)}>
               {getTypeText(record.request_type)}
             </Tag>
@@ -377,20 +378,20 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'user',
       width: 200,
       render: (record: CustomerRequest) => (
-        <div className="openRequestsUserRow">
+        <div className={styles.openRequestsUserRow}>
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div className="openRequestsUserName">
+            <div className={styles.openRequestsUserName}>
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" className="openRequestsUserHandle">
+            <Text type="secondary" className={styles.openRequestsUserHandle}>
               @{record.user.username}
             </Text>
-            <div className="openRequestsUserTypeRow">
+            <div className={styles.openRequestsUserTypeRow}>
               <Tag color={getUserTypeColor(record.user.user_type)}>
                 {record.user.user_type === 'student' ? 'Студент' : 
                  record.user.user_type === 'expert' ? 'Эксперт' : 'Партнер'}
@@ -405,9 +406,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'source',
       width: 80,
       render: (record: CustomerRequest) => (
-        <div className="openRequestsCenterCell">
+        <div className={styles.openRequestsCenterCell}>
           <Tooltip title={record.source}>
-            <span className="openRequestsSourceIcon">
+            <span className={styles.openRequestsSourceIcon}>
               {getSourceIcon(record.source)}
             </span>
           </Tooltip>
@@ -419,7 +420,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'waiting_time',
       width: 120,
       render: (record: CustomerRequest) => (
-        <div className="openRequestsCenterCell">
+        <div className={styles.openRequestsCenterCell}>
           <div
             className={`openRequestsWaitingTime ${
               record.is_overdue
@@ -431,7 +432,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           >
             {formatWaitingTime(record.waiting_time_hours)}
           </div>
-          <div className="openRequestsSlaMeta">
+          <div className={styles.openRequestsSlaMeta}>
             SLA: {dayjs(record.sla_deadline).format('HH:mm')}
           </div>
           {record.escalation_level > 0 && (
@@ -449,7 +450,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       render: (record: CustomerRequest) => (
         <div>
           {record.tags.slice(0, 2).map(tag => (
-            <Tag key={tag} className="openRequestsTagItem">
+            <Tag key={tag} className={styles.openRequestsTagItem}>
               {tag}
             </Tag>
           ))}
@@ -467,7 +468,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       key: 'created_at',
       width: 100,
       render: (date: string) => (
-        <div className="openRequestsCreatedCell">
+        <div className={styles.openRequestsCreatedCell}>
           <div>{dayjs(date).format('DD.MM')}</div>
           <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
         </div>
@@ -532,7 +533,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
   return (
     <div>
       <Card>
-        <div className="openRequestsSectionHeader">
+        <div className={styles.openRequestsSectionHeader}>
           <Title level={4}>Открытые запросы клиентов</Title>
           <Text type="secondary">
             Новые запросы от пользователей, ожидающие обработки
@@ -540,7 +541,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
         </div>
 
         
-        <Row gutter={16} className="openRequestsStatsRow">
+        <Row gutter={16} className={styles.openRequestsStatsRow}>
           <Col span={6}>
             <Statistic title="Всего запросов" value={stats.total} />
           </Col>
@@ -552,7 +553,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             />
           </Col>
           <Col span={6}>
-            <Statistic title="Срочные" value={stats.urgent} className="openRequestsStatUrgent" />
+            <Statistic title="Срочные" value={stats.urgent} className={styles.openRequestsStatUrgent} />
           </Col>
           <Col span={6}>
             <Statistic 
@@ -568,15 +569,15 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             description={`${stats.overdue} запросов просрочены и требуют немедленного внимания`}
             type="error"
             showIcon
-            className="openRequestsAlert"
+            className={styles.openRequestsAlert}
           />
         )}
 
-        <div className="openRequestsFiltersRow">
+        <div className={styles.openRequestsFiltersRow}>
           <Search
             placeholder="Поиск по запросам"
             allowClear
-            className="openRequestsSearch"
+            className={styles.openRequestsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -584,7 +585,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
           
           <Select
             placeholder="Тип запроса"
-            className="openRequestsSelectType"
+            className={styles.openRequestsSelectType}
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -600,7 +601,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Приоритет"
-            className="openRequestsSelectPriority"
+            className={styles.openRequestsSelectPriority}
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -613,7 +614,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Источник"
-            className="openRequestsSelectSource"
+            className={styles.openRequestsSelectSource}
             value={selectedSource}
             onChange={setSelectedSource}
           >
@@ -627,7 +628,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
           <Select
             placeholder="Тип пользователя"
-            className="openRequestsSelectUserType"
+            className={styles.openRequestsSelectUserType}
             value={selectedUserType}
             onChange={setSelectedUserType}
           >
@@ -649,7 +650,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            className="openRequestsRangePicker"
+            className={styles.openRequestsRangePicker}
           />
         </div>
 
@@ -703,7 +704,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
       >
         {selectedRequest && (
           <div>
-            <div className="openRequestsModalHeader">
+            <div className={styles.openRequestsModalHeader}>
               <Title level={5}>{selectedRequest.title}</Title>
               <Space>
                 <Tag color={getTypeColor(selectedRequest.request_type)}>
@@ -723,18 +724,18 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </Space>
             </div>
 
-            <div className="openRequestsSectionBlock">
+            <div className={styles.openRequestsSectionBlock}>
               <Text strong>Описание:</Text>
-              <Paragraph className="openRequestsParagraphSpacing">
+              <Paragraph className={styles.openRequestsParagraphSpacing}>
                 {selectedRequest.description}
               </Paragraph>
             </div>
 
             <Row gutter={24}>
               <Col span={12}>
-                <div className="openRequestsSectionBlock">
+                <div className={styles.openRequestsSectionBlock}>
                   <Text strong>Пользователь:</Text>
-                  <div className="openRequestsUserInfo">
+                  <div className={styles.openRequestsUserInfo}>
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</div>
@@ -753,15 +754,15 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </Col>
 
               <Col span={12}>
-                <div className="openRequestsSectionBlock">
+                <div className={styles.openRequestsSectionBlock}>
                   <Text strong>Информация о пользователе:</Text>
-                  <div className="openRequestsInfoList">
+                  <div className={styles.openRequestsInfoList}>
                     <div>Тип: {selectedRequest.user.user_type === 'student' ? 'Студент' : 
                                 selectedRequest.user.user_type === 'expert' ? 'Эксперт' : 'Партнер'}</div>
                     <div>Регистрация: {dayjs(selectedRequest.user.registration_date).format('DD.MM.YYYY')}</div>
                     <div>Всего заказов: {selectedRequest.user.total_orders}</div>
                     {selectedRequest.user.is_vip && (
-                      <div className="openRequestsVipText">VIP статус</div>
+                      <div className={styles.openRequestsVipText}>VIP статус</div>
                     )}
                   </div>
                 </div>
@@ -769,9 +770,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             </Row>
 
             {selectedRequest.related_order && (
-              <div className="openRequestsSectionBlock">
+              <div className={styles.openRequestsSectionBlock}>
                 <Text strong>Связанный заказ:</Text>
-                <div className="openRequestsRelatedOrderBox">
+                <div className={styles.openRequestsRelatedOrderBox}>
                   <div>ID: {selectedRequest.related_order.id}</div>
                   <div>Название: {selectedRequest.related_order.title}</div>
                   <div>Сумма: {selectedRequest.related_order.amount.toLocaleString()} ₽</div>
@@ -781,9 +782,9 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             )}
 
             {selectedRequest.attachments && selectedRequest.attachments.length > 0 && (
-              <div className="openRequestsSectionBlock">
+              <div className={styles.openRequestsSectionBlock}>
                 <Text strong>Вложения:</Text>
-                <div className="openRequestsAttachmentsRow">
+                <div className={styles.openRequestsAttachmentsRow}>
                   {selectedRequest.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file.name}</Tag>
                   ))}
@@ -791,22 +792,22 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               </div>
             )}
 
-            <div className="openRequestsSectionBlock">
+            <div className={styles.openRequestsSectionBlock}>
               <Text strong>Теги:</Text>
-              <div className="openRequestsTagsRow">
+              <div className={styles.openRequestsTagsRow}>
                 {selectedRequest.tags.map(tag => (
                   <Tag key={tag}>{tag}</Tag>
                 ))}
               </div>
             </div>
 
-            <div className="openRequestsMetaRow">
+            <div className={styles.openRequestsMetaRow}>
               <span>Создан: {dayjs(selectedRequest.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Источник: {getSourceIcon(selectedRequest.source)} {selectedRequest.source}</span>
               <span>Время ожидания: {formatWaitingTime(selectedRequest.waiting_time_hours)}</span>
             </div>
 
-            <div className="openRequestsMetaSummary">
+            <div className={styles.openRequestsMetaSummary}>
               SLA дедлайн: {dayjs(selectedRequest.sla_deadline).format('DD.MM.YYYY HH:mm')} | 
               Автоответов отправлено: {selectedRequest.auto_responses_sent} |
               Уровень эскалации: {selectedRequest.escalation_level}
@@ -911,7 +912,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             <DatePicker 
               showTime 
               placeholder="Выберите дату и время"
-              className="openRequestsDatePicker"
+              className={styles.openRequestsDatePicker}
             />
           </Form.Item>
         </Form>

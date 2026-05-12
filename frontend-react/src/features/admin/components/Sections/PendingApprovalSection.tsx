@@ -46,6 +46,7 @@ const { Step } = Steps;
 import { ApprovalRequest, Claim } from '@/features/support/types/support';
 import { useClaims, useClaimActions } from '@/features/admin/hooks';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 export const PendingApprovalSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('pending_approval', true);
@@ -246,16 +247,16 @@ export const PendingApprovalSection: React.FC = () => {
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div className="pendingApprovalClaimTitle">
+          <div className={styles.pendingApprovalClaimTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="pendingApprovalDescription">
+          <Text type="secondary" className={styles.pendingApprovalDescription}>
             {record.description.length > 80 
               ? `${record.description.substring(0, 80)}...` 
               : record.description
             }
           </Text>
-          <div className="pendingApprovalTagRow">
+          <div className={styles.pendingApprovalTagRow}>
             <Tag color={getCategoryColor(record.category)}>
               {getCategoryText(record.category)}
             </Tag>
@@ -276,17 +277,17 @@ export const PendingApprovalSection: React.FC = () => {
       key: 'user',
       width: 150,
       render: (record: Claim) => (
-        <div className="pendingApprovalUserRow">
+        <div className={styles.pendingApprovalUserRow}>
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div className="pendingApprovalUserName">
+            <div className={styles.pendingApprovalUserName}>
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" className="pendingApprovalUserHandle">
+            <Text type="secondary" className={styles.pendingApprovalUserHandle}>
               @{record.user.username}
             </Text>
           </div>
@@ -299,10 +300,10 @@ export const PendingApprovalSection: React.FC = () => {
       width: 150,
       render: (record: Claim) => (
         <div>
-          <div className="pendingApprovalUserName">
+          <div className={styles.pendingApprovalUserName}>
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" className="pendingApprovalUserHandle">
+          <Text type="secondary" className={styles.pendingApprovalUserHandle}>
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -313,7 +314,7 @@ export const PendingApprovalSection: React.FC = () => {
       key: 'impact',
       width: 100,
       render: (record: Claim) => (
-        <div className="pendingApprovalCenterCell">
+        <div className={styles.pendingApprovalCenterCell}>
           <Tag color={getImpactColor(record.approval_request.estimated_impact)}>
             {getImpactText(record.approval_request.estimated_impact)}
           </Tag>
@@ -325,7 +326,7 @@ export const PendingApprovalSection: React.FC = () => {
       key: 'waiting_time',
       width: 100,
       render: (record: Claim) => (
-        <div className="pendingApprovalCenterCell">
+        <div className={styles.pendingApprovalCenterCell}>
           <div
             className={`pendingApprovalWaitingTime ${
               record.waiting_time_hours > 48
@@ -351,9 +352,9 @@ export const PendingApprovalSection: React.FC = () => {
       key: 'messages_count',
       width: 80,
       render: (count: number) => (
-        <div className="pendingApprovalCenterCell">
+        <div className={styles.pendingApprovalCenterCell}>
           <Badge count={count} showZero>
-            <MessageOutlined className="pendingApprovalMessageIcon" />
+            <MessageOutlined className={styles.pendingApprovalMessageIcon} />
           </Badge>
         </div>
       ),
@@ -411,7 +412,7 @@ export const PendingApprovalSection: React.FC = () => {
   return (
     <div>
       <Card>
-        <div className="pendingApprovalSectionHeader">
+        <div className={styles.pendingApprovalSectionHeader}>
           <Title level={4}>Ожидают решения</Title>
           <Text type="secondary">
             Обращения, требующие одобрения руководства или принятия решения
@@ -425,15 +426,15 @@ export const PendingApprovalSection: React.FC = () => {
             description={`${filteredClaims.filter(claim => claim.waiting_time_hours > 48).length} обращений ожидают решения более 48 часов`}
             type="warning"
             showIcon
-            className="pendingApprovalAlert"
+            className={styles.pendingApprovalAlert}
           />
         )}
 
-        <div className="pendingApprovalFiltersRow">
+        <div className={styles.pendingApprovalFiltersRow}>
           <Search
             placeholder="Поиск по обращениям"
             allowClear
-            className="pendingApprovalSearch"
+            className={styles.pendingApprovalSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -441,7 +442,7 @@ export const PendingApprovalSection: React.FC = () => {
           
           <Select
             placeholder="Категория"
-            className="pendingApprovalSelectCategory"
+            className={styles.pendingApprovalSelectCategory}
             value={selectedCategory}
             onChange={setSelectedCategory}
           >
@@ -455,7 +456,7 @@ export const PendingApprovalSection: React.FC = () => {
 
           <Select
             placeholder="Тип запроса"
-            className="pendingApprovalSelectType"
+            className={styles.pendingApprovalSelectType}
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -469,7 +470,7 @@ export const PendingApprovalSection: React.FC = () => {
 
           <Select
             placeholder="Влияние"
-            className="pendingApprovalSelectImpact"
+            className={styles.pendingApprovalSelectImpact}
             value={selectedImpact}
             onChange={setSelectedImpact}
           >
@@ -482,7 +483,7 @@ export const PendingApprovalSection: React.FC = () => {
 
           <Select
             placeholder="Эскалация"
-            className="pendingApprovalSelectEscalation"
+            className={styles.pendingApprovalSelectEscalation}
             value={selectedEscalation}
             onChange={setSelectedEscalation}
           >
@@ -541,7 +542,7 @@ export const PendingApprovalSection: React.FC = () => {
       >
         {selectedClaim && (
           <div>
-            <div className="pendingApprovalModalHeader">
+            <div className={styles.pendingApprovalModalHeader}>
               <Title level={5}>{selectedClaim.title}</Title>
               <Space>
                 <Tag color={getCategoryColor(selectedClaim.category)}>
@@ -565,15 +566,15 @@ export const PendingApprovalSection: React.FC = () => {
               message={`Ожидает решения ${formatWaitingTime(selectedClaim.waiting_time_hours)}`}
               type={selectedClaim.waiting_time_hours > 48 ? 'error' : selectedClaim.waiting_time_hours > 24 ? 'warning' : 'info'}
               showIcon
-              className="pendingApprovalModalAlert"
+              className={styles.pendingApprovalModalAlert}
             />
 
             <Divider />
 
-            <div className="pendingApprovalModalUserRow">
-              <div className="pendingApprovalModalColumn">
+            <div className={styles.pendingApprovalModalUserRow}>
+              <div className={styles.pendingApprovalModalColumn}>
                 <Text strong>Пользователь:</Text>
-                <div className="pendingApprovalModalUserInfo">
+                <div className={styles.pendingApprovalModalUserInfo}>
                   <Avatar icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -584,9 +585,9 @@ export const PendingApprovalSection: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pendingApprovalModalColumn">
+              <div className={styles.pendingApprovalModalColumn}>
                 <Text strong>Администратор:</Text>
-                <div className="pendingApprovalModalUserInfo">
+                <div className={styles.pendingApprovalModalUserInfo}>
                   <Avatar icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
@@ -596,31 +597,31 @@ export const PendingApprovalSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="pendingApprovalSectionBlock">
+            <div className={styles.pendingApprovalSectionBlock}>
               <Text strong>Описание проблемы:</Text>
-              <Paragraph className="pendingApprovalParagraphSpacing">
+              <Paragraph className={styles.pendingApprovalParagraphSpacing}>
                 {selectedClaim.description}
               </Paragraph>
             </div>
 
-            <div className="pendingApprovalSectionBlock">
+            <div className={styles.pendingApprovalSectionBlock}>
               <Text strong>Обоснование запроса:</Text>
-              <Paragraph className="pendingApprovalReasonBox">
+              <Paragraph className={styles.pendingApprovalReasonBox}>
                 {selectedClaim.approval_request.reason}
               </Paragraph>
             </div>
 
-            <div className="pendingApprovalSectionBlock">
+            <div className={styles.pendingApprovalSectionBlock}>
               <Text strong>Предлагаемое действие:</Text>
-              <Paragraph className="pendingApprovalActionBox">
+              <Paragraph className={styles.pendingApprovalActionBox}>
                 {selectedClaim.approval_request.proposed_action}
               </Paragraph>
             </div>
 
             {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
-              <div className="pendingApprovalSectionBlock">
+              <div className={styles.pendingApprovalSectionBlock}>
                 <Text strong>Вложения:</Text>
-                <div className="pendingApprovalAttachmentsRow">
+                <div className={styles.pendingApprovalAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file}</Tag>
                   ))}
@@ -628,13 +629,13 @@ export const PendingApprovalSection: React.FC = () => {
               </div>
             )}
 
-            <div className="pendingApprovalMetaRow">
+            <div className={styles.pendingApprovalMetaRow}>
               <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Взято в работу: {dayjs(selectedClaim.taken_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Запрос одобрения: {dayjs(selectedClaim.approval_request.requested_at).format('DD.MM.YYYY HH:mm')}</span>
             </div>
 
-            <div className="pendingApprovalMetaSummary">
+            <div className={styles.pendingApprovalMetaSummary}>
               Уровень эскалации: {selectedClaim.escalation_level} | 
               Сообщений: {selectedClaim.messages_count}
             </div>

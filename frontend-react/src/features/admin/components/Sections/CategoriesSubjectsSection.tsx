@@ -24,6 +24,7 @@ import {
   DeleteOutlined,
   SearchOutlined
 } from '@ant-design/icons';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -240,11 +241,11 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       title: 'Категория',
       key: 'category',
       render: (record: Category) => (
-        <div className="categoriesSubjectsCategoryRow">
-          <span className="categoriesSubjectsCategoryIcon">{record.icon}</span>
+        <div className={styles.categoriesSubjectsCategoryRow}>
+          <span className={styles.categoriesSubjectsCategoryIcon}>{record.icon}</span>
           <div>
-            <div className="categoriesSubjectsCategoryName">{record.name}</div>
-            <Text type="secondary" className="categoriesSubjectsCategoryDescription">
+            <div className={styles.categoriesSubjectsCategoryName}>{record.name}</div>
+            <Text type="secondary" className={styles.categoriesSubjectsCategoryDescription}>
               {record.description}
             </Text>
           </div>
@@ -321,8 +322,8 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       key: 'subject',
       render: (record: Subject) => (
         <div>
-          <div className="categoriesSubjectsSubjectName">{record.name}</div>
-          <Text type="secondary" className="categoriesSubjectsSubjectDescription">
+          <div className={styles.categoriesSubjectsSubjectName}>{record.name}</div>
+          <Text type="secondary" className={styles.categoriesSubjectsSubjectDescription}>
             {record.description}
           </Text>
           <br />
@@ -400,8 +401,8 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       key: 'workType',
       render: (record: WorkType) => (
         <div>
-          <div className="categoriesSubjectsWorkTypeName">{record.name}</div>
-          <Text type="secondary" className="categoriesSubjectsWorkTypeDescription">
+          <div className={styles.categoriesSubjectsWorkTypeName}>{record.name}</div>
+          <Text type="secondary" className={styles.categoriesSubjectsWorkTypeDescription}>
             {record.description}
           </Text>
         </div>
@@ -423,7 +424,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       key: 'price',
       width: 150,
       render: (record: WorkType) => (
-        <div className="categoriesSubjectsWorkTypePrice">
+        <div className={styles.categoriesSubjectsWorkTypePrice}>
           <div>От {record.min_price.toLocaleString()} ₽</div>
           <div>До {record.max_price.toLocaleString()} ₽</div>
         </div>
@@ -486,7 +487,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
   return (
     <div>
       <Card>
-        <div className="categoriesSubjectsHeader">
+        <div className={styles.categoriesSubjectsHeader}>
           <Title level={4}>Категории и предметы</Title>
           <Text type="secondary">
             Управление категориями, предметами и типами работ
@@ -495,7 +496,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
 
         <Tabs defaultActiveKey="categories">
           <TabPane tab="Категории" key="categories">
-            <div className="categoriesSubjectsActionsRow">
+            <div className={styles.categoriesSubjectsActionsRow}>
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />}
@@ -517,7 +518,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
           </TabPane>
 
           <TabPane tab="Предметы" key="subjects">
-                        <div className="categoriesSubjectsFiltersRow">
+                        <div className={styles.categoriesSubjectsFiltersRow}>
               <Button 
                 type="primary" 
                 icon={<PlusOutlined style={{ color: '#52c41a' }}/>}
@@ -529,7 +530,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
               <Search
                 placeholder="Поиск предметов"
                 allowClear
-                className="categoriesSubjectsSearch"
+                className={styles.categoriesSubjectsSearch}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -551,7 +552,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
           </TabPane>
 
           <TabPane tab="Типы работ" key="workTypes">
-                        <div className="categoriesSubjectsActionsRow">
+                        <div className={styles.categoriesSubjectsActionsRow}>
               <Button 
                 type="primary" 
                 icon={<PlusOutlined style={{ color: '#52c41a' }}/>}
@@ -622,7 +623,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             label="Порядок сортировки"
             rules={[{ required: true, message: 'Введите порядок сортировки' }]}
           >
-            <InputNumber min={1} className="categoriesSubjectsNumberInput" />
+            <InputNumber min={1} className={styles.categoriesSubjectsNumberInput} />
           </Form.Item>
 
           <Form.Item
@@ -685,7 +686,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             label="Порядок сортировки"
             rules={[{ required: true, message: 'Введите порядок сортировки' }]}
           >
-            <InputNumber min={1} className="categoriesSubjectsNumberInput" />
+            <InputNumber min={1} className={styles.categoriesSubjectsNumberInput} />
           </Form.Item>
 
           <Form.Item
@@ -729,23 +730,23 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             <Input.TextArea rows={3} placeholder="Подробное описание типа работы" />
           </Form.Item>
 
-          <div className="categoriesSubjectsPriceRow">
+          <div className={styles.categoriesSubjectsPriceRow}>
             <Form.Item
               name="min_price"
               label="Минимальная цена (₽)"
               rules={[{ required: true, message: 'Введите минимальную цену' }]}
-              className="categoriesSubjectsPriceField"
+              className={styles.categoriesSubjectsPriceField}
             >
-              <InputNumber min={0} className="categoriesSubjectsNumberInput" />
+              <InputNumber min={0} className={styles.categoriesSubjectsNumberInput} />
             </Form.Item>
 
             <Form.Item
               name="max_price"
               label="Максимальная цена (₽)"
               rules={[{ required: true, message: 'Введите максимальную цену' }]}
-              className="categoriesSubjectsPriceField"
+              className={styles.categoriesSubjectsPriceField}
             >
-              <InputNumber min={0} className="categoriesSubjectsNumberInput" />
+              <InputNumber min={0} className={styles.categoriesSubjectsNumberInput} />
             </Form.Item>
           </div>
 
@@ -754,7 +755,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             label="Среднее время выполнения (дни)"
             rules={[{ required: true, message: 'Введите среднее время выполнения' }]}
           >
-            <InputNumber min={1} className="categoriesSubjectsNumberInput" />
+            <InputNumber min={1} className={styles.categoriesSubjectsNumberInput} />
           </Form.Item>
 
           <Form.Item
@@ -762,7 +763,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             label="Порядок сортировки"
             rules={[{ required: true, message: 'Введите порядок сортировки' }]}
           >
-            <InputNumber min={1} className="categoriesSubjectsNumberInput" />
+            <InputNumber min={1} className={styles.categoriesSubjectsNumberInput} />
           </Form.Item>
 
           <Form.Item

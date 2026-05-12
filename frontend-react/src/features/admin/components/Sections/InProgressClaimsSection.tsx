@@ -87,6 +87,7 @@ interface Claim {
 
 import { useClaims, useClaimActions, useTicketActions } from '@/features/admin/hooks';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 export const InProgressClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('in_progress', true);
@@ -246,16 +247,16 @@ export const InProgressClaimsSection: React.FC = () => {
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div className="inProgressClaimsTitle">
+          <div className={styles.inProgressClaimsTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="inProgressClaimsDescription">
+          <Text type="secondary" className={styles.inProgressClaimsDescription}>
             {record.description.length > 80 
               ? `${record.description.substring(0, 80)}...` 
               : record.description
             }
           </Text>
-          <div className="inProgressClaimsTagRow">
+          <div className={styles.inProgressClaimsTagRow}>
             <Tag color={getCategoryColor(record.category)}>
               {getCategoryText(record.category)}
             </Tag>
@@ -271,17 +272,17 @@ export const InProgressClaimsSection: React.FC = () => {
       key: 'user',
       width: 150,
       render: (record: Claim) => (
-        <div className="inProgressClaimsUserRow">
+        <div className={styles.inProgressClaimsUserRow}>
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div className="inProgressClaimsUserName">
+            <div className={styles.inProgressClaimsUserName}>
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" className="inProgressClaimsUserHandle">
+            <Text type="secondary" className={styles.inProgressClaimsUserHandle}>
               @{record.user.username}
             </Text>
           </div>
@@ -294,10 +295,10 @@ export const InProgressClaimsSection: React.FC = () => {
       width: 150,
       render: (record: Claim) => (
         <div>
-          <div className="inProgressClaimsAdminName">
+          <div className={styles.inProgressClaimsAdminName}>
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" className="inProgressClaimsAdminHandle">
+          <Text type="secondary" className={styles.inProgressClaimsAdminHandle}>
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -311,7 +312,7 @@ export const InProgressClaimsSection: React.FC = () => {
       width: 80,
       render: (count: number) => (
         <Badge count={count} showZero>
-          <MessageOutlined className="inProgressClaimsMessageIcon" />
+          <MessageOutlined className={styles.inProgressClaimsMessageIcon} />
         </Badge>
       ),
     },
@@ -321,7 +322,7 @@ export const InProgressClaimsSection: React.FC = () => {
       key: 'last_activity',
       width: 100,
       render: (date: string) => (
-        <div className="inProgressClaimsActivityCell">
+        <div className={styles.inProgressClaimsActivityCell}>
           <div>{dayjs(date).format('DD.MM')}</div>
           <Text type="secondary">{dayjs(date).format('HH:mm')}</Text>
         </div>
@@ -370,7 +371,7 @@ export const InProgressClaimsSection: React.FC = () => {
   return (
     <div>
       <Card>
-        <div className="inProgressClaimsHeader">
+        <div className={styles.inProgressClaimsHeader}>
           <Title level={4}>Обращения в работе</Title>
           <Text type="secondary">
             Обращения, которые находятся в процессе обработки
@@ -378,11 +379,11 @@ export const InProgressClaimsSection: React.FC = () => {
         </div>
 
         
-        <div className="inProgressClaimsFiltersRow">
+        <div className={styles.inProgressClaimsFiltersRow}>
           <Search
             placeholder="Поиск по обращениям"
             allowClear
-            className="inProgressClaimsSearch"
+            className={styles.inProgressClaimsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -390,7 +391,7 @@ export const InProgressClaimsSection: React.FC = () => {
           
           <Select
             placeholder="Категория"
-            className="inProgressClaimsSelectCategory"
+            className={styles.inProgressClaimsSelectCategory}
             value={selectedCategory}
             onChange={setSelectedCategory}
           >
@@ -404,7 +405,7 @@ export const InProgressClaimsSection: React.FC = () => {
 
           <Select
             placeholder="Приоритет"
-            className="inProgressClaimsSelectPriority"
+            className={styles.inProgressClaimsSelectPriority}
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -417,7 +418,7 @@ export const InProgressClaimsSection: React.FC = () => {
 
           <Select
             placeholder="Администратор"
-            className="inProgressClaimsSelectAdmin"
+            className={styles.inProgressClaimsSelectAdmin}
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -473,7 +474,7 @@ export const InProgressClaimsSection: React.FC = () => {
       >
         {selectedClaim && (
           <div>
-            <div className="inProgressClaimsModalHeader">
+            <div className={styles.inProgressClaimsModalHeader}>
               <Title level={5}>{selectedClaim.title}</Title>
               <Space>
                 <Tag color={getCategoryColor(selectedClaim.category)}>
@@ -486,21 +487,21 @@ export const InProgressClaimsSection: React.FC = () => {
               </Space>
             </div>
 
-            <div className="inProgressClaimsSectionBlock">
+            <div className={styles.inProgressClaimsSectionBlock}>
               <Text strong>Прогресс выполнения:</Text>
               <Progress 
                 percent={selectedClaim.progress_percentage} 
                 strokeColor={getProgressColor(selectedClaim.progress_percentage)}
-                className="inProgressClaimsProgress"
+                className={styles.inProgressClaimsProgress}
               />
             </div>
 
             <Divider />
 
-            <div className="inProgressClaimsDetailsRow">
-              <div className="inProgressClaimsDetailsColumn">
+            <div className={styles.inProgressClaimsDetailsRow}>
+              <div className={styles.inProgressClaimsDetailsColumn}>
                 <Text strong>Пользователь:</Text>
-                <div className="inProgressClaimsInfoRow">
+                <div className={styles.inProgressClaimsInfoRow}>
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -511,9 +512,9 @@ export const InProgressClaimsSection: React.FC = () => {
                 </div>
               </div>
 
-              <div className="inProgressClaimsDetailsColumn">
+              <div className={styles.inProgressClaimsDetailsColumn}>
                 <Text strong>Администратор:</Text>
-                <div className="inProgressClaimsInfoRow">
+                <div className={styles.inProgressClaimsInfoRow}>
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
@@ -523,17 +524,17 @@ export const InProgressClaimsSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="inProgressClaimsSectionBlock">
+            <div className={styles.inProgressClaimsSectionBlock}>
               <Text strong>Описание:</Text>
-              <Paragraph className="inProgressClaimsParagraph">
+              <Paragraph className={styles.inProgressClaimsParagraph}>
                 {selectedClaim.description}
               </Paragraph>
             </div>
 
             {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
-              <div className="inProgressClaimsSectionBlock">
+              <div className={styles.inProgressClaimsSectionBlock}>
                 <Text strong>Вложения:</Text>
-                <div className="inProgressClaimsAttachmentsRow">
+                <div className={styles.inProgressClaimsAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file}</Tag>
                   ))}
@@ -541,14 +542,14 @@ export const InProgressClaimsSection: React.FC = () => {
               </div>
             )}
 
-            <div className="inProgressClaimsMetaRow">
+            <div className={styles.inProgressClaimsMetaRow}>
               <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Взято в работу: {dayjs(selectedClaim.taken_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Сообщений: {selectedClaim.messages_count}</span>
             </div>
 
             {selectedClaim.estimated_completion && (
-              <div className="inProgressClaimsMetaSummary">
+              <div className={styles.inProgressClaimsMetaSummary}>
                 Планируемое завершение: {dayjs(selectedClaim.estimated_completion).format('DD.MM.YYYY HH:mm')}
               </div>
             )}

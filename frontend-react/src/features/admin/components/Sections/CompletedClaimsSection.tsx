@@ -86,6 +86,7 @@ interface Claim {
 
 import { useClaims, useClaimActions } from '@/features/admin/hooks';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 export const CompletedClaimsSection: React.FC = () => {
   const { claims, loading, refetch } = useClaims('completed', true);
@@ -243,16 +244,16 @@ export const CompletedClaimsSection: React.FC = () => {
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div className="completedClaimsTitle">
+          <div className={styles.completedClaimsTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="completedClaimsDescription">
+          <Text type="secondary" className={styles.completedClaimsDescription}>
             {record.description.length > 80 
               ? `${record.description.substring(0, 80)}...` 
               : record.description
             }
           </Text>
-          <div className="completedClaimsTagRow">
+          <div className={styles.completedClaimsTagRow}>
             <Tag color={getCategoryColor(record.category)}>
               {getCategoryText(record.category)}
             </Tag>
@@ -271,17 +272,17 @@ export const CompletedClaimsSection: React.FC = () => {
       key: 'user',
       width: 150,
       render: (record: Claim) => (
-        <div className="completedClaimsUserRow">
+        <div className={styles.completedClaimsUserRow}>
           <Avatar 
             size="small" 
             icon={<UserOutlined />}
             src={record.user.avatar}
           />
           <div>
-            <div className="completedClaimsUserName">
+            <div className={styles.completedClaimsUserName}>
               {record.user.first_name} {record.user.last_name}
             </div>
-            <Text type="secondary" className="completedClaimsUserHandle">
+            <Text type="secondary" className={styles.completedClaimsUserHandle}>
               @{record.user.username}
             </Text>
           </div>
@@ -294,10 +295,10 @@ export const CompletedClaimsSection: React.FC = () => {
       width: 150,
       render: (record: Claim) => (
         <div>
-          <div className="completedClaimsAdminName">
+          <div className={styles.completedClaimsAdminName}>
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" className="completedClaimsAdminHandle">
+          <Text type="secondary" className={styles.completedClaimsAdminHandle}>
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -308,11 +309,11 @@ export const CompletedClaimsSection: React.FC = () => {
       key: 'resolution_time',
       width: 100,
       render: (record: Claim) => (
-        <div className="completedClaimsResolutionCell">
-          <div className="completedClaimsResolutionValue">
+        <div className={styles.completedClaimsResolutionCell}>
+          <div className={styles.completedClaimsResolutionValue}>
             {formatResolutionTime(record.resolution.resolution_time_hours)}
           </div>
-          <Text type="secondary" className="completedClaimsResolutionDate">
+          <Text type="secondary" className={styles.completedClaimsResolutionDate}>
             {dayjs(record.completed_at).format('DD.MM HH:mm')}
           </Text>
         </div>
@@ -323,20 +324,20 @@ export const CompletedClaimsSection: React.FC = () => {
       key: 'rating',
       width: 100,
       render: (record: Claim) => (
-        <div className="completedClaimsRatingCell">
+        <div className={styles.completedClaimsRatingCell}>
           {record.resolution.user_satisfaction_rating ? (
             <>
               <Rate 
                 disabled 
                 value={record.resolution.user_satisfaction_rating} 
-                className="completedClaimsRatingStars"
+                className={styles.completedClaimsRatingStars}
               />
-              <div className="completedClaimsRatingValue">
+              <div className={styles.completedClaimsRatingValue}>
                 {record.resolution.user_satisfaction_rating}/5
               </div>
             </>
           ) : (
-            <Text type="secondary" className="completedClaimsRatingEmpty">
+            <Text type="secondary" className={styles.completedClaimsRatingEmpty}>
               Нет оценки
             </Text>
           )}
@@ -349,9 +350,9 @@ export const CompletedClaimsSection: React.FC = () => {
       key: 'messages_count',
       width: 80,
       render: (count: number) => (
-        <div className="completedClaimsMessagesCell">
+        <div className={styles.completedClaimsMessagesCell}>
           <Badge count={count} showZero>
-            <MessageOutlined className="completedClaimsMessageIcon" />
+            <MessageOutlined className={styles.completedClaimsMessageIcon} />
           </Badge>
         </div>
       ),
@@ -384,7 +385,7 @@ export const CompletedClaimsSection: React.FC = () => {
   return (
     <div>
       <Card>
-        <div className="completedClaimsHeader">
+        <div className={styles.completedClaimsHeader}>
           <Title level={4}>Завершённые обращения</Title>
           <Text type="secondary">
             Обращения, которые были успешно решены
@@ -392,7 +393,7 @@ export const CompletedClaimsSection: React.FC = () => {
         </div>
 
         
-        <div className="completedClaimsStatsRow">
+        <div className={styles.completedClaimsStatsRow}>
           <Statistic title="Всего" value={stats.total} />
           <Statistic 
             title="Среднее время решения" 
@@ -407,11 +408,11 @@ export const CompletedClaimsSection: React.FC = () => {
         </div>
 
         
-        <div className="completedClaimsFiltersRow">
+        <div className={styles.completedClaimsFiltersRow}>
           <Search
             placeholder="Поиск по обращениям"
             allowClear
-            className="completedClaimsSearch"
+            className={styles.completedClaimsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -419,7 +420,7 @@ export const CompletedClaimsSection: React.FC = () => {
           
           <Select
             placeholder="Категория"
-            className="completedClaimsSelectCategory"
+            className={styles.completedClaimsSelectCategory}
             value={selectedCategory}
             onChange={setSelectedCategory}
           >
@@ -433,7 +434,7 @@ export const CompletedClaimsSection: React.FC = () => {
 
           <Select
             placeholder="Приоритет"
-            className="completedClaimsSelectPriority"
+            className={styles.completedClaimsSelectPriority}
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -446,7 +447,7 @@ export const CompletedClaimsSection: React.FC = () => {
 
           <Select
             placeholder="Администратор"
-            className="completedClaimsSelectAdmin"
+            className={styles.completedClaimsSelectAdmin}
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -460,7 +461,7 @@ export const CompletedClaimsSection: React.FC = () => {
 
           <Select
             placeholder="Оценка"
-            className="completedClaimsSelectRating"
+            className={styles.completedClaimsSelectRating}
             value={selectedRating}
             onChange={setSelectedRating}
           >
@@ -475,7 +476,7 @@ export const CompletedClaimsSection: React.FC = () => {
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            className="completedClaimsDateRange"
+            className={styles.completedClaimsDateRange}
           />
 
           <Button 
@@ -530,7 +531,7 @@ export const CompletedClaimsSection: React.FC = () => {
       >
         {selectedClaim && (
           <div>
-            <div className="completedClaimsModalHeader">
+            <div className={styles.completedClaimsModalHeader}>
               <Title level={5}>{selectedClaim.title}</Title>
               <Space>
                 <Tag color={getCategoryColor(selectedClaim.category)}>
@@ -547,10 +548,10 @@ export const CompletedClaimsSection: React.FC = () => {
 
             <Divider />
 
-            <div className="completedClaimsDetailsRow">
-              <div className="completedClaimsDetailsColumn">
+            <div className={styles.completedClaimsDetailsRow}>
+              <div className={styles.completedClaimsDetailsColumn}>
                 <Text strong>Пользователь:</Text>
-                <div className="completedClaimsInfoRow">
+                <div className={styles.completedClaimsInfoRow}>
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -561,9 +562,9 @@ export const CompletedClaimsSection: React.FC = () => {
                 </div>
               </div>
 
-              <div className="completedClaimsDetailsColumn">
+              <div className={styles.completedClaimsDetailsColumn}>
                 <Text strong>Администратор:</Text>
-                <div className="completedClaimsInfoRow">
+                <div className={styles.completedClaimsInfoRow}>
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
@@ -573,31 +574,31 @@ export const CompletedClaimsSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="completedClaimsSectionBlock">
+            <div className={styles.completedClaimsSectionBlock}>
               <Text strong>Описание проблемы:</Text>
-              <Paragraph className="completedClaimsParagraph">
+              <Paragraph className={styles.completedClaimsParagraph}>
                 {selectedClaim.description}
               </Paragraph>
             </div>
 
-            <div className="completedClaimsSectionBlock">
+            <div className={styles.completedClaimsSectionBlock}>
               <Text strong>Решение:</Text>
-              <Paragraph className="completedClaimsSolution">
+              <Paragraph className={styles.completedClaimsSolution}>
                 {selectedClaim.resolution.resolution_text}
               </Paragraph>
             </div>
 
             {selectedClaim.resolution.user_satisfaction_rating && (
-              <div className="completedClaimsSectionBlock">
+              <div className={styles.completedClaimsSectionBlock}>
                 <Text strong>Оценка пользователя:</Text>
-                <div className="completedClaimsRatingRow">
+                <div className={styles.completedClaimsRatingRow}>
                   <Rate disabled value={selectedClaim.resolution.user_satisfaction_rating} />
-                  <Text className="completedClaimsRatingScore">
+                  <Text className={styles.completedClaimsRatingScore}>
                     {selectedClaim.resolution.user_satisfaction_rating}/5
                   </Text>
                 </div>
                 {selectedClaim.resolution.user_feedback && (
-                  <div className="completedClaimsFeedback">
+                  <div className={styles.completedClaimsFeedback}>
                     "{selectedClaim.resolution.user_feedback}"
                   </div>
                 )}
@@ -605,9 +606,9 @@ export const CompletedClaimsSection: React.FC = () => {
             )}
 
             {selectedClaim.attachments && selectedClaim.attachments.length > 0 && (
-              <div className="completedClaimsSectionBlock">
+              <div className={styles.completedClaimsSectionBlock}>
                 <Text strong>Вложения:</Text>
-                <div className="completedClaimsAttachmentsRow">
+                <div className={styles.completedClaimsAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
                     <Tag key={index} color="blue">📎 {file}</Tag>
                   ))}
@@ -615,13 +616,13 @@ export const CompletedClaimsSection: React.FC = () => {
               </div>
             )}
 
-            <div className="completedClaimsMetaRow">
+            <div className={styles.completedClaimsMetaRow}>
               <span>Создано: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Взято в работу: {dayjs(selectedClaim.taken_at).format('DD.MM.YYYY HH:mm')}</span>
               <span>Завершено: {dayjs(selectedClaim.completed_at).format('DD.MM.YYYY HH:mm')}</span>
             </div>
 
-            <div className="completedClaimsMetaSummary">
+            <div className={styles.completedClaimsMetaSummary}>
               Время решения: {formatResolutionTime(selectedClaim.resolution.resolution_time_hours)} | 
               Сообщений: {selectedClaim.messages_count}
             </div>

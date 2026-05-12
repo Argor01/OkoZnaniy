@@ -52,6 +52,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -378,13 +379,13 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'claim',
       render: (record: Claim) => (
         <div>
-          <div className="claimsProcessingNumber">
+          <div className={styles.claimsProcessingNumber}>
             {record.claim_number}
           </div>
-          <div className="claimsProcessingTitle">
+          <div className={styles.claimsProcessingTitle}>
             {record.title}
           </div>
-          <div className="claimsProcessingTagRow">
+          <div className={styles.claimsProcessingTagRow}>
             <Tag color={getTypeColor(record.claim_type)}>
               {getTypeText(record.claim_type)}
             </Tag>
@@ -406,21 +407,21 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       width: 200,
       render: (record: Claim) => (
         <div>
-          <div className="claimsProcessingParticipantBlock">
-            <Text strong className="claimsProcessingParticipantLabel">Клиент:</Text>
-            <div className="claimsProcessingParticipantRow">
+          <div className={styles.claimsProcessingParticipantBlock}>
+            <Text strong className={styles.claimsProcessingParticipantLabel}>Клиент:</Text>
+            <div className={styles.claimsProcessingParticipantRow}>
               <Avatar size={32} icon={<UserOutlined />} />
-              <span className="claimsProcessingParticipantName">
+              <span className={styles.claimsProcessingParticipantName}>
                 {record.user.first_name} {record.user.last_name}
               </span>
             </div>
           </div>
           {record.expert && (
             <div>
-              <Text strong className="claimsProcessingParticipantLabel">Эксперт:</Text>
-              <div className="claimsProcessingParticipantRow">
+              <Text strong className={styles.claimsProcessingParticipantLabel}>Эксперт:</Text>
+              <div className={styles.claimsProcessingParticipantRow}>
                 <Avatar size={32} icon={<UserOutlined />} />
-                <span className="claimsProcessingParticipantName">
+                <span className={styles.claimsProcessingParticipantName}>
                   {record.expert.first_name} {record.expert.last_name}
                 </span>
               </div>
@@ -434,11 +435,11 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'status',
       width: 120,
       render: (record: Claim) => (
-        <div className="claimsProcessingStatusCell">
+        <div className={styles.claimsProcessingStatusCell}>
           <Tag color={getStatusColor(record.status)}>
             {getStatusText(record.status)}
           </Tag>
-          <div className="claimsProcessingStatusMeta">
+          <div className={styles.claimsProcessingStatusMeta}>
             {record.days_open} дн.
           </div>
         </div>
@@ -450,10 +451,10 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       width: 120,
       render: (record: Claim) => (
         <div>
-          <div className="claimsProcessingAdminName">
+          <div className={styles.claimsProcessingAdminName}>
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
-          <Text type="secondary" className="claimsProcessingAdminHandle">
+          <Text type="secondary" className={styles.claimsProcessingAdminHandle}>
             @{record.assigned_admin.username}
           </Text>
         </div>
@@ -464,11 +465,11 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'deadline',
       width: 100,
       render: (record: Claim) => (
-        <div className="claimsProcessingDeadlineCell">
+        <div className={styles.claimsProcessingDeadlineCell}>
           <div className={dayjs().isAfter(dayjs(record.deadline)) ? 'claimsProcessingDeadlineDate claimsProcessingDeadlineDateOverdue' : 'claimsProcessingDeadlineDate'}>
             {dayjs(record.deadline).format('DD.MM')}
           </div>
-          <div className="claimsProcessingDeadlineTime">
+          <div className={styles.claimsProcessingDeadlineTime}>
             {dayjs(record.deadline).format('HH:mm')}
           </div>
         </div>
@@ -480,9 +481,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       key: 'messages_count',
       width: 80,
       render: (count: number) => (
-        <div className="claimsProcessingMessagesCell">
+        <div className={styles.claimsProcessingMessagesCell}>
           <Badge count={count} showZero>
-            <MessageOutlined className="claimsProcessingMessageIcon" />
+            <MessageOutlined className={styles.claimsProcessingMessageIcon} />
           </Badge>
         </div>
       ),
@@ -548,7 +549,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
   return (
     <div>
       <Card>
-        <div className="claimsProcessingHeader">
+        <div className={styles.claimsProcessingHeader}>
           <Title level={4}>Обработка претензий</Title>
           <Text type="secondary">
             Комплексная система обработки претензий и споров между пользователями
@@ -556,15 +557,15 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         </div>
 
         
-        <Row gutter={16} className="claimsProcessingStatsRow">
+        <Row gutter={16} className={styles.claimsProcessingStatsRow}>
           <Col span={6}>
             <Statistic title="Всего претензий" value={stats.total} />
           </Col>
           <Col span={6}>
-            <Statistic title="Новые" value={stats.new} className="claimsProcessingStatNew" />
+            <Statistic title="Новые" value={stats.new} className={styles.claimsProcessingStatNew} />
           </Col>
           <Col span={6}>
-            <Statistic title="В расследовании" value={stats.investigating} className="claimsProcessingStatInvestigating" />
+            <Statistic title="В расследовании" value={stats.investigating} className={styles.claimsProcessingStatInvestigating} />
           </Col>
           <Col span={6}>
             <Statistic 
@@ -581,15 +582,15 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             description={`${stats.overdue} претензий просрочены и требуют немедленного внимания`}
             type="error"
             showIcon
-            className="claimsProcessingOverdueAlert"
+            className={styles.claimsProcessingOverdueAlert}
           />
         )}
 
-        <div className="claimsProcessingFiltersRow">
+        <div className={styles.claimsProcessingFiltersRow}>
           <Search
             placeholder="Поиск по претензиям"
             allowClear
-            className="claimsProcessingSearch"
+            className={styles.claimsProcessingSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -597,7 +598,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
           
           <Select
             placeholder="Тип претензии"
-            className="claimsProcessingSelectType"
+            className={styles.claimsProcessingSelectType}
             value={selectedType}
             onChange={setSelectedType}
           >
@@ -613,7 +614,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Статус"
-            className="claimsProcessingSelectStatus"
+            className={styles.claimsProcessingSelectStatus}
             value={selectedStatus}
             onChange={setSelectedStatus}
           >
@@ -628,7 +629,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Приоритет"
-            className="claimsProcessingSelectPriority"
+            className={styles.claimsProcessingSelectPriority}
             value={selectedPriority}
             onChange={setSelectedPriority}
           >
@@ -641,7 +642,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
           <Select
             placeholder="Администратор"
-            className="claimsProcessingSelectAdmin"
+            className={styles.claimsProcessingSelectAdmin}
             value={selectedAdmin}
             onChange={setSelectedAdmin}
           >
@@ -655,7 +656,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             placeholder={['От', 'До']}
             value={dateRange}
             onChange={setDateRange}
-            className="claimsProcessingDateRange"
+            className={styles.claimsProcessingDateRange}
           />
         </div>
 
@@ -720,7 +721,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
         {selectedClaim && (
           <Tabs activeKey={activeTab} onChange={setActiveTab}>
             <TabPane tab="Обзор" key="overview">
-              <div className="claimsProcessingModalHeader">
+              <div className={styles.claimsProcessingModalHeader}>
                 <Title level={5}>{selectedClaim.title}</Title>
                 <Space>
                   <Tag color={getTypeColor(selectedClaim.claim_type)}>
@@ -735,18 +736,18 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                 </Space>
               </div>
 
-              <div className="claimsProcessingSectionBlock">
+              <div className={styles.claimsProcessingSectionBlock}>
                 <Text strong>Описание:</Text>
-                <Paragraph className="claimsProcessingParagraph">
+                <Paragraph className={styles.claimsProcessingParagraph}>
                   {selectedClaim.description}
                 </Paragraph>
               </div>
 
               <Row gutter={24}>
                 <Col span={12}>
-                  <div className="claimsProcessingSectionBlock">
+                  <div className={styles.claimsProcessingSectionBlock}>
                     <Text strong>Клиент:</Text>
-                    <div className="claimsProcessingInfoRow">
+                    <div className={styles.claimsProcessingInfoRow}>
                       <Avatar size={32} icon={<UserOutlined />} />
                       <div>
                         <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
@@ -766,9 +767,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
                 <Col span={12}>
                   {selectedClaim.expert && (
-                    <div className="claimsProcessingSectionBlock">
+                    <div className={styles.claimsProcessingSectionBlock}>
                       <Text strong>Эксперт:</Text>
-                      <div className="claimsProcessingInfoRow">
+                      <div className={styles.claimsProcessingInfoRow}>
                         <Avatar size={32} icon={<UserOutlined />} />
                         <div>
                           <div>{selectedClaim.expert.first_name} {selectedClaim.expert.last_name}</div>
@@ -789,9 +790,9 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
               </Row>
 
               {selectedClaim.order && (
-                <div className="claimsProcessingSectionBlock">
+                <div className={styles.claimsProcessingSectionBlock}>
                   <Text strong>Связанный заказ:</Text>
-                  <div className="claimsProcessingOrderBox">
+                  <div className={styles.claimsProcessingOrderBox}>
                     <div>ID: {selectedClaim.order.id}</div>
                     <div>Название: {selectedClaim.order.title}</div>
                     <div>Сумма: {selectedClaim.order.amount.toLocaleString()} ₽</div>
@@ -800,7 +801,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                 </div>
               )}
 
-              <div className="claimsProcessingMetaRow">
+              <div className={styles.claimsProcessingMetaRow}>
                 <span>Создана: {dayjs(selectedClaim.created_at).format('DD.MM.YYYY HH:mm')}</span>
                 <span>Дедлайн: {dayjs(selectedClaim.deadline).format('DD.MM.YYYY HH:mm')}</span>
                 <span>Дней открыта: {selectedClaim.days_open}</span>
@@ -816,12 +817,12 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                   >
                     <div>
                       <Text strong>{action.description}</Text>
-                      <div className="claimsProcessingActionMeta">
+                      <div className={styles.claimsProcessingActionMeta}>
                         {action.performed_by.first_name} {action.performed_by.last_name} • 
                         {dayjs(action.performed_at).format('DD.MM.YYYY HH:mm')}
                       </div>
                       {action.notes && (
-                        <div className="claimsProcessingActionNote">
+                        <div className={styles.claimsProcessingActionNote}>
                           Примечание: {action.notes}
                         </div>
                       )}
@@ -847,13 +848,13 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                       description={
                         <div>
                           <Tag color="blue">{evidence.type}</Tag>
-                          <span className="claimsProcessingEvidenceMeta">
+                          <span className={styles.claimsProcessingEvidenceMeta}>
                             Загружено {evidence.uploaded_by === 'admin' ? 'администратором' : 
                                      evidence.uploaded_by === 'user' ? 'клиентом' : 'экспертом'} • 
                             {dayjs(evidence.uploaded_at).format('DD.MM.YYYY HH:mm')}
                           </span>
                           {evidence.verified && (
-                            <Tag color="green" className="claimsProcessingEvidenceVerified">
+                            <Tag color="green" className={styles.claimsProcessingEvidenceVerified}>
                               Проверено
                             </Tag>
                           )}
@@ -1013,7 +1014,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             <DatePicker 
               showTime 
               placeholder="Выберите дату и время"
-              className="claimsProcessingCallDatePicker"
+              className={styles.claimsProcessingCallDatePicker}
             />
           </Form.Item>
 

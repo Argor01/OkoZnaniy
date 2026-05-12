@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { useBlockedUsers, useUserActions } from '@/features/admin/hooks';
 import { BlockedUser } from '@/features/admin/types/admin';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -104,11 +105,11 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
         <Space>
           <div>
             <div><strong>{record.username}</strong></div>
-            <Text type="secondary" className="blockedUsersUserMeta">
+            <Text type="secondary" className={styles.blockedUsersUserMeta}>
               {record.first_name} {record.last_name}
             </Text>
             <br />
-            <Text type="secondary" className="blockedUsersUserMeta">
+            <Text type="secondary" className={styles.blockedUsersUserMeta}>
               {record.email}
             </Text>
           </div>
@@ -144,7 +145,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
       width: 200,
       render: (reason: string) => (
         <Tooltip title={reason}>
-          <Text ellipsis className="blockedUsersReasonText">
+          <Text ellipsis className={styles.blockedUsersReasonText}>
             {reason}
           </Text>
         </Tooltip>
@@ -209,7 +210,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
   return (
     <div>
       <Card>
-        <div className="blockedUsersHeader">
+        <div className={styles.blockedUsersHeader}>
           <Title level={4}>Заблокированные пользователи</Title>
           <Text type="secondary">
             Управление заблокированными пользователями системы
@@ -217,11 +218,11 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
         </div>
 
         
-        <div className="blockedUsersFiltersRow">
+        <div className={styles.blockedUsersFiltersRow}>
           <Search
             placeholder="Поиск по имени, email или username"
             allowClear
-            className="blockedUsersSearch"
+            className={styles.blockedUsersSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             prefix={<SearchOutlined />}
@@ -229,7 +230,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
           
           <Select
             placeholder="Роль"
-            className="blockedUsersSelectRole"
+            className={styles.blockedUsersSelectRole}
             value={roleFilter}
             onChange={setRoleFilter}
           >
@@ -241,7 +242,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
 
           <Select
             placeholder="Тип блокировки"
-            className="blockedUsersSelectBlockType"
+            className={styles.blockedUsersSelectBlockType}
             value={blockTypeFilter}
             onChange={setBlockTypeFilter}
           >
@@ -251,7 +252,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
           </Select>
         </div>
 
-        <div className="blockedUsersSummaryRow">
+        <div className={styles.blockedUsersSummaryRow}>
           <Tag color="red">
             Всего заблокированных: {filteredData.length}
           </Tag>
@@ -295,9 +296,9 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
         okButtonProps={{ danger: false, type: 'primary' }}
       >
         <Form form={unblockForm} layout="vertical">
-          <div className="blockedUsersModalInfo">
+          <div className={styles.blockedUsersModalInfo}>
             <Text strong>Информация о пользователе:</Text>
-            <div className="blockedUsersModalInfoBox">
+            <div className={styles.blockedUsersModalInfoBox}>
               <div><strong>Имя:</strong> {selectedUser?.first_name} {selectedUser?.last_name}</div>
               <div><strong>Email:</strong> {selectedUser?.email}</div>
               <div><strong>Причина блокировки:</strong> {selectedUser?.block_reason}</div>

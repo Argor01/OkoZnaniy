@@ -28,6 +28,7 @@ import {
 import { ServiceTariff, CommissionSettings } from '@/features/admin/types/admin';
 import { useTariffs, useTariffActions, useCommissions, useCommissionActions } from '@/features/admin/hooks';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -186,8 +187,8 @@ export const TariffsSettingsSection: React.FC = () => {
       key: 'name',
       render: (record: ServiceTariff) => (
         <div>
-          <div className="tariffsSettingsTariffName">{record.name}</div>
-          <Text type="secondary" className="tariffsSettingsTariffDescription">
+          <div className={styles.tariffsSettingsTariffName}>{record.name}</div>
+          <Text type="secondary" className={styles.tariffsSettingsTariffDescription}>
             {record.description}
           </Text>
         </div>
@@ -224,8 +225,8 @@ export const TariffsSettingsSection: React.FC = () => {
       key: 'urgency',
       render: (record: ServiceTariff) => (
         <div>
-          <div className="tariffsSettingsUrgencyText">24ч: ×{record.urgency_multipliers['24h']}</div>
-          <div className="tariffsSettingsUrgencyText">Неделя: ×{record.urgency_multipliers.week}</div>
+          <div className={styles.tariffsSettingsUrgencyText}>24ч: ×{record.urgency_multipliers['24h']}</div>
+          <div className={styles.tariffsSettingsUrgencyText}>Неделя: ×{record.urgency_multipliers.week}</div>
         </div>
       ),
       width: 120,
@@ -349,14 +350,14 @@ export const TariffsSettingsSection: React.FC = () => {
         description="Здесь вы можете управлять тарифами на услуги и настройками комиссий платформы. Изменения влияют на расчет стоимости заказов."
         type="info"
         showIcon
-        className="tariffsSettingsAlert"
+        className={styles.tariffsSettingsAlert}
       />
 
       <Tabs defaultActiveKey="tariffs">
         <TabPane tab="Тарифы услуг" key="tariffs">
           <Card
             title={
-              <div className="tariffsSettingsCardHeader">
+              <div className={styles.tariffsSettingsCardHeader}>
                 <span>Тарифы услуг</span>
                 <Button 
                   type="primary" 
@@ -391,7 +392,7 @@ export const TariffsSettingsSection: React.FC = () => {
         <TabPane tab="Комиссии" key="commissions">
           <Card
             title={
-              <div className="tariffsSettingsCardHeader">
+              <div className={styles.tariffsSettingsCardHeader}>
                 <span>Настройки комиссий</span>
                 <Button 
                   type="primary" 
@@ -483,7 +484,7 @@ export const TariffsSettingsSection: React.FC = () => {
               >
                 <InputNumber 
                   min={0} 
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="500"
                 />
               </Form.Item>
@@ -495,7 +496,7 @@ export const TariffsSettingsSection: React.FC = () => {
               >
                 <InputNumber 
                   min={0} 
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="300"
                 />
               </Form.Item>
@@ -512,7 +513,7 @@ export const TariffsSettingsSection: React.FC = () => {
                 <InputNumber 
                   min={1} 
                   step={0.1}
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="2.0"
                 />
               </Form.Item>
@@ -525,7 +526,7 @@ export const TariffsSettingsSection: React.FC = () => {
                 <InputNumber 
                   min={1} 
                   step={0.1}
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="1.5"
                 />
               </Form.Item>
@@ -538,7 +539,7 @@ export const TariffsSettingsSection: React.FC = () => {
                 <InputNumber 
                   min={0.1} 
                   step={0.1}
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="1.0"
                 />
               </Form.Item>
@@ -600,7 +601,7 @@ export const TariffsSettingsSection: React.FC = () => {
               >
                 <InputNumber 
                   min={0} 
-                  className="tariffsSettingsNumberInput"
+                  className={styles.tariffsSettingsNumberInput}
                   placeholder="15"
                 />
               </Form.Item>

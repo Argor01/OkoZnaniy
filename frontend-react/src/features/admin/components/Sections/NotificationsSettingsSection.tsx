@@ -37,6 +37,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { logger } from '@/utils/logger';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -244,11 +245,11 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
       key: 'name',
       render: (record: NotificationTemplate) => (
         <div>
-          <div className="notificationsTemplateTitleRow">
+          <div className={styles.notificationsTemplateTitleRow}>
             {getTypeIcon(record.type)}
             {record.name}
           </div>
-          <Text type="secondary" className="notificationsTemplateDescription">
+          <Text type="secondary" className={styles.notificationsTemplateDescription}>
             {record.description}
           </Text>
         </div>
@@ -337,14 +338,14 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         description="Управление шаблонами уведомлений, глобальными настройками и расписанием отправки. Изменения влияют на все уведомления системы."
         type="info"
         showIcon
-        className="notificationsAlertSpacing"
+        className={styles.notificationsAlertSpacing}
       />
 
       <Tabs defaultActiveKey="templates">
         <TabPane tab="Шаблоны уведомлений" key="templates">
           <Card
             title={
-              <div className="notificationsCardTitleRow">
+              <div className={styles.notificationsCardTitleRow}>
                 <span>Шаблоны уведомлений</span>
                 <Button 
                   type="primary" 
@@ -380,12 +381,12 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
           <Card title="Глобальные настройки уведомлений">
             <Row gutter={16}>
               {settingsData.map(setting => (
-                <Col span={12} key={setting.id} className="notificationsSettingsCol">
+                <Col span={12} key={setting.id} className={styles.notificationsSettingsCol}>
                   <Card size="small">
-                    <div className="notificationsSettingRow">
+                    <div className={styles.notificationsSettingRow}>
                       <div>
-                        <div className="notificationsSettingName">{setting.setting_name}</div>
-                        <Text type="secondary" className="notificationsSettingDescription">
+                        <div className={styles.notificationsSettingName}>{setting.setting_name}</div>
+                        <Text type="secondary" className={styles.notificationsSettingDescription}>
                           {setting.description}
                         </Text>
                       </div>
@@ -401,7 +402,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
                         ) : (
                           <Input 
                             value={setting.setting_value as string}
-                            className="notificationsSettingInput"
+                            className={styles.notificationsSettingInput}
                             onChange={(e) => {
                               
                               logger.log('Update setting:', setting.setting_key, e.target.value);
@@ -420,7 +421,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
         <TabPane tab="Расписание" key="schedules">
           <Card
             title={
-              <div className="notificationsCardTitleRow">
+              <div className={styles.notificationsCardTitleRow}>
                 <span>Расписание отправки</span>
                 <Button 
                   type="primary" 
@@ -616,7 +617,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
               message={`Тестирование шаблона: ${testingTemplate.name}`}
               description={`Тип: ${getTypeText(testingTemplate.type)}`}
               type="info"
-              className="notificationsTestAlert"
+              className={styles.notificationsTestAlert}
             />
             
             <Form form={testForm} layout="vertical">

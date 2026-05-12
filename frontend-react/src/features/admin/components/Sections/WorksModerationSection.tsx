@@ -28,6 +28,7 @@ import {
 import dayjs from 'dayjs';
 import { useWorks, useWorkActions } from '@/features/admin/hooks';
 import { Work } from '@/features/admin/types/admin';
+import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -98,13 +99,13 @@ export const WorksModerationSection: React.FC = () => {
       width: 300,
       render: (record: Work) => (
         <div>
-          <div className="worksModerationTitle">
+          <div className={styles.worksModerationTitle}>
             {record.title}
           </div>
-          <Text type="secondary" className="worksModerationMetaText">
+          <Text type="secondary" className={styles.worksModerationMetaText}>
             {record.subject} • {record.work_type}
           </Text>
-          <div className="worksModerationMetaSubtext">
+          <div className={styles.worksModerationMetaSubtext}>
             📄 {record.pages_count} стр. • 📝 {record.words_count.toLocaleString()} слов
           </div>
         </div>
@@ -117,10 +118,10 @@ export const WorksModerationSection: React.FC = () => {
       render: (record: Work) => (
         <Space>
           <div>
-            <div className="worksModerationAuthorName">
+            <div className={styles.worksModerationAuthorName}>
               {record.author.first_name} {record.author.last_name}
             </div>
-            <div className="worksModerationAuthorMeta">
+            <div className={styles.worksModerationAuthorMeta}>
               <StarOutlined /> {record.author.rating} • {record.author.works_count} работ
             </div>
           </div>
@@ -153,9 +154,9 @@ export const WorksModerationSection: React.FC = () => {
       key: 'created_at',
       width: 120,
       render: (date: string) => (
-        <div className="worksModerationDate">
+        <div className={styles.worksModerationDate}>
           <div>{dayjs(date).format('DD.MM.YYYY')}</div>
-          <div className="worksModerationDateTime">{dayjs(date).format('HH:mm')}</div>
+          <div className={styles.worksModerationDateTime}>{dayjs(date).format('HH:mm')}</div>
         </div>
       ),
     },
@@ -207,14 +208,14 @@ export const WorksModerationSection: React.FC = () => {
   return (
     <div>
       <Card>
-        <div className="worksModerationSectionHeader">
+        <div className={styles.worksModerationSectionHeader}>
           <Title level={4}>Модерация работ</Title>
           <Text type="secondary">
             Проверка и одобрение работ для публикации в магазине
           </Text>
         </div>
 
-        <Row gutter={16} className="worksModerationStatsRow">
+        <Row gutter={16} className={styles.worksModerationStatsRow}>
           <Col span={6}>
             <Statistic title="Всего работ" value={stats.total} />
           </Col>
@@ -222,21 +223,21 @@ export const WorksModerationSection: React.FC = () => {
             <Statistic 
               title="На модерации" 
               value={stats.pending} 
-              className="worksModerationStatPending"
+              className={styles.worksModerationStatPending}
             />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Одобрено" 
               value={stats.approved} 
-              className="worksModerationStatApproved"
+              className={styles.worksModerationStatApproved}
             />
           </Col>
           <Col span={6}>
             <Statistic 
               title="Отклонено" 
               value={stats.rejected} 
-              className="worksModerationStatRejected"
+              className={styles.worksModerationStatRejected}
             />
           </Col>
         </Row>
@@ -247,7 +248,7 @@ export const WorksModerationSection: React.FC = () => {
             description={`Имеется ${stats.pending} работ, ожидающих проверки. Пожалуйста, рассмотрите их как можно скорее.`}
             type="warning"
             showIcon
-            className="worksModerationAlert"
+            className={styles.worksModerationAlert}
           />
         )}
 
@@ -256,7 +257,7 @@ export const WorksModerationSection: React.FC = () => {
             placeholder="Поиск по названию..."
             allowClear
             onChange={(e) => setSearchText(e.target.value)}
-            className="worksModerationSearch"
+            className={styles.worksModerationSearch}
           />
           <Select
             defaultValue="pending"

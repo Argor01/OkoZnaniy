@@ -18,7 +18,6 @@ import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
 import styles from './AdminDashboard.module.css';
 import '@/styles/modals.css';
-import '@/styles/admin-dashboard.css';
 
 const OverviewSection = lazy(() => import('@/features/admin/components/Sections/OverviewSection').then(m => ({ default: m.OverviewSection })));
 const PartnersSection = lazy(() => import('@/features/admin/components/Sections/PartnersSection').then(m => ({ default: m.PartnersSection })));
