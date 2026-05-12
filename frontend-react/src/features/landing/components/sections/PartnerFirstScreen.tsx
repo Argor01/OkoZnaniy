@@ -40,9 +40,9 @@ const PartnerFirstScreen: React.FC = () => {
             </div>
           </div>
 
-          <figure className={styles.firstScreenFigure}>
+          <figure className={`${styles.firstScreenFigure} ${styles.becomePageFigure}`}>
             <img
-              className={styles.firstScreenFigureImage}
+              className={`${styles.firstScreenFigureImage} ${styles.becomePageFigureImage}`}
               src="/assets/first-screen/first-screen-part.png"
               alt="partner"
               width={416}

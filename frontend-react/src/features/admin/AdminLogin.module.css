@@ -1,0 +1,159 @@
+.adminLoginPage {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%);
+  padding: 40px 20px;
+  overflow: hidden;
+}
+
+.adminLoginSession {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.adminLoginCard {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.adminLoginLoadingCard {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 20px;
+}
+
+.adminLoginDecorBubble {
+  position: absolute;
+  top: 100px;
+  left: 15%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 0;
+}
+
+.adminLoginDecorBubbleAlt {
+  position: absolute;
+  bottom: 150px;
+  right: 20%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(155, 74, 255, 0.15);
+  z-index: 0;
+}
+
+.adminLoginHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.adminLoginIconWrapper {
+  display: inline-block;
+  padding: 16px;
+  background: var(--color-brand-blue-600);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.adminLoginIcon {
+  font-size: 32px;
+  color: #fff;
+}
+
+.adminLoginTitle {
+  margin-bottom: 8px;
+  color: #1a1a1a;
+  font-family: var(--font-family-display);
+}
+
+.adminLoginSubtitle {
+  color: #666;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+.adminLoginLabel {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.adminLoginInput {
+  border-radius: 8px;
+}
+
+.adminLoginSubmit {
+  margin-top: 8px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.adminLoginDivider {
+  margin: 32px 0 20px 0;
+  border-color: #e8e8e8;
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
+
+.adminLoginQuickList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.adminLoginQuickGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.adminLoginQuickSingle {
+  display: flex;
+  justify-content: center;
+}
+
+.adminLoginQuickButton {
+  height: 56px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.adminLoginQuickButton:hover {
+  border-color: var(--color-brand-blue-600);
+  color: var(--color-brand-blue-600);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.adminLoginQuickButtonWide {
+  min-width: 200px;
+}
+
+.adminLoginInputIcon {
+  color: #999;
+}

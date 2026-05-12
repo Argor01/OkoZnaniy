@@ -8,7 +8,7 @@ import {
   Footer
 } from '@/features/landing';
 import landingStyles from '@/features/landing/Landing.module.css';
-import '@/styles/become-pages.css';
+
 import '@/styles/page-transitions.css';
 
 const BecomeExpert: React.FC = () => {

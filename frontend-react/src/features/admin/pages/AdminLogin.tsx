@@ -13,7 +13,7 @@ import { authApi, type LoginRequest, type User } from '@/features/auth/api/auth'
 import { DEV_ACCOUNTS, type DevAccount } from '@/config/devAccounts';
 import { redirectByRole } from '@/utils/roleRedirect';
 import { ROUTES } from '@/utils/constants';
-import '@/styles/admin-login.css';
+import styles from '@/features/admin/AdminLogin.module.css';
 import { logger } from '@/utils/logger';
 
 const { Title, Paragraph } = Typography;
@@ -225,26 +225,26 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
   if (sessionLoading) {
     return (
-      <div className="adminLoginSession">
-        <Card className="adminLoginLoadingCard" loading />
+      <div className={styles.adminLoginSession}>
+        <Card className={styles.adminLoginLoadingCard} loading />
       </div>
     );
   }
 
   return (
-    <div className="adminLoginPage">
-      <div className="adminLoginDecorBubble" />
-      <div className="adminLoginDecorBubbleAlt" />
+    <div className={styles.adminLoginPage}>
+      <div className={styles.adminLoginDecorBubble} />
+      <div className={styles.adminLoginDecorBubbleAlt} />
       
-      <Card className="adminLoginCard">
-        <div className="adminLoginHeader">
-          <div className="adminLoginIconWrapper">
-            <CrownOutlined className="adminLoginIcon" />
+      <Card className={styles.adminLoginCard}>
+        <div className={styles.adminLoginHeader}>
+          <div className={styles.adminLoginIconWrapper}>
+            <CrownOutlined className={styles.adminLoginIcon} />
           </div>
-          <Title level={2} className="adminLoginTitle">
+          <Title level={2} className={styles.adminLoginTitle}>
             Вход в админ-панель
           </Title>
-          <Paragraph className="adminLoginSubtitle">
+          <Paragraph className={styles.adminLoginSubtitle}>
             Введите email и пароль для доступа к админ-панели
           </Paragraph>
         </div>
@@ -257,7 +257,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         >
           <Form.Item
             name="username"
-            label={<span className="adminLoginLabel">Email</span>}
+            label={<span className={styles.adminLoginLabel}>Email</span>}
             rules={[
               { 
                 required: true, 
@@ -279,12 +279,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             validateTrigger="onBlur"
           >
             <Input
-              prefix={<MailOutlined className="adminLoginInputIcon" />}
+              prefix={<MailOutlined className={styles.adminLoginInputIcon} />}
               placeholder="Введите ваш email"
               size="large"
               disabled={loading}
               autoComplete="email"
-              className="adminLoginInput"
+              className={styles.adminLoginInput}
               onPressEnter={() => {
                 form.submit();
               }}
@@ -293,7 +293,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
           <Form.Item
             name="password"
-            label={<span className="adminLoginLabel">Пароль</span>}
+            label={<span className={styles.adminLoginLabel}>Пароль</span>}
             rules={[
               { 
                 required: true, 
@@ -315,12 +315,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             validateTrigger="onBlur"
           >
             <Input.Password
-              prefix={<LockOutlined className="adminLoginInputIcon" />}
+              prefix={<LockOutlined className={styles.adminLoginInputIcon} />}
               placeholder="Введите ваш пароль"
               size="large"
               disabled={loading}
               autoComplete="current-password"
-              className="adminLoginInput"
+              className={styles.adminLoginInput}
               onPressEnter={() => {
                 form.submit();
               }}
@@ -334,7 +334,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
               loading={loading}
               block
               size="large"
-              className="adminLoginSubmit"
+              className={styles.adminLoginSubmit}
             >
               Войти
             </Button>
@@ -342,12 +342,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         </Form>
 
         <>
-          <Divider className="adminLoginDivider">
+          <Divider className={styles.adminLoginDivider}>
             Быстрый вход
           </Divider>
-          <div className="adminLoginQuickList">
+          <div className={styles.adminLoginQuickList}>
             
-            <div className="adminLoginQuickGrid">
+            <div className={styles.adminLoginQuickGrid}>
               {DEV_ACCOUNTS.filter(acc => ['admin', 'partner', 'director'].includes(acc.role)).map((account) => (
                 <Tooltip
                   key={account.email}
@@ -360,7 +360,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
                     loading={loading}
                     disabled={loading}
                     size="large"
-                    className="adminLoginQuickButton"
+                    className={styles.adminLoginQuickButton}
                   >
                     {account.label}
                   </Button>
