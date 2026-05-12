@@ -8,8 +8,8 @@ import { useAuthNavigation } from './hooks/useAuthNavigation';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import ChatBubbles from './ChatBubbles';
-import '@/styles/login.css';
 import { logger } from '@/utils/logger';
+import styles from '@/features/auth/Login.module.css';
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -243,15 +243,15 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-page">
-      <div className="auth-card">
-        <div className="auth-left">
-          <div className="hero">
+    <div className={styles.loginPage}>
+      <div className={styles.authCard}>
+        <div className={styles.authLeft}>
+          <div className={styles.hero}>
             {activeTab === 'register' && <ChatBubbles />}
-            <img className="hero-image" src="/assets/first-screen/first-screen-students.png" alt="hero" />
+            <img className={styles.heroImage} src="/assets/first-screen/first-screen-students.png" alt="hero" />
           </div>
           <svg
-            className="bottom-wave"
+            className={styles.bottomWave}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 1440 140"
             preserveAspectRatio="none"
@@ -263,11 +263,11 @@ const Login: React.FC = () => {
             />
           </svg>
         </div>
-        <div className="auth-right">
-          <div className="auth-panel">
-            <div className="panel-body">
+        <div className={styles.authRight}>
+          <div className={styles.authPanel}>
+            <div className={styles.panelBody}>
               <Tabs
-                className="antd-tabs-clean"
+                className={styles.antdTabsClean}
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key)}
                 items={[

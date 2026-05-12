@@ -3,6 +3,7 @@ import { Form, Input, Button, Checkbox } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import type { RegisterRequest } from '@/features/auth/api/auth';
 import SocialLoginButtons from '../../components/SocialLoginButtons';
+import styles from '@/features/auth/Login.module.css';
 
 interface RegisterFormProps {
   loading: boolean;
@@ -96,7 +97,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           <Input type="hidden" />
         </Form.Item>
         <Form.Item label="Роль">
-          <div className="role-switch" role="group" aria-label="Выбор роли">
+          <div className={styles.roleSwitch} role="group" aria-label="Выбор роли">
             <div className={`role-indicator ${selectedRole === 'expert' ? 'expert' : 'client'}`} />
             <button
               type="button"

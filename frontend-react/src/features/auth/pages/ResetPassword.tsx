@@ -3,6 +3,7 @@ import { Form, Input, Button, Typography, message } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
+import styles from '@/features/auth/Login.module.css';
 
 const { Title, Paragraph } = Typography;
 
@@ -38,14 +39,14 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="login-page loginPageCenter">
-      <div className="auth-card authCardNarrow">
-        <div className="auth-right authRightFull">
-          <div className="auth-panel">
-            <div className="panel-body">
-              <Title level={3} className="resetTitle">Восстановление пароля</Title>
+    <div className={`${styles.loginPage} ${styles.loginPageCenter}`}>
+      <div className={`${styles.authCard} ${styles.authCardNarrow}`}>
+        <div className={`${styles.authRight} ${styles.authRightFull}`}>
+          <div className={styles.authPanel}>
+            <div className={styles.panelBody}>
+              <Title level={3} className={styles.resetTitle}>Восстановление пароля</Title>
               {!isLinkValid && (
-                <Paragraph type="secondary" className="resetDescription">
+                <Paragraph type="secondary" className={styles.resetDescription}>
                   Ссылка недействительна или устарела. Пожалуйста, запросите новую ссылку на странице входа.
                 </Paragraph>
               )}

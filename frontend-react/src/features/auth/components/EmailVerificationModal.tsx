@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Input, Button, Typography } from 'antd';
+import styles from '@/features/auth/Login.module.css';
 
 interface EmailVerificationModalProps {
   open: boolean;
@@ -31,7 +32,7 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       destroyOnClose
       wrapClassName="verification-modal"
     >
-      <div className="verificationModalBody">
+      <div className={styles.verificationModalBody}>
         <Typography.Paragraph>
           На адрес <b>{email}</b> отправлен код подтверждения. Введите его ниже, чтобы завершить регистрацию.
         </Typography.Paragraph>
@@ -41,9 +42,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           onChange={(e) => onChangeCode(e.target.value)}
           maxLength={8}
         />
-        <div className="verificationActions">
+        <div className={styles.verificationActions}>
           <Button onClick={onCancel} disabled={loading}>Отмена</Button>
-          <div className="verificationActionsRight">
+          <div className={styles.verificationActionsRight}>
             {onResend && (
               <Button onClick={onResend} disabled={loading} type="default">Отправить код снова</Button>
             )}

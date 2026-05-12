@@ -4,6 +4,7 @@ import { ROUTES } from '@/utils/constants';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import { authApi } from '@/features/auth/api/auth';
 import { logger } from '@/utils/logger';
+import styles from '@/features/auth/Login.module.css';
 
 interface SocialLoginButtonsProps {
   onTelegramAuth?: (user: any) => void;
@@ -92,17 +93,17 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   };
   
   return (
-    <div className="panel-footer">
-      <div className="socialLoginTitle">или войти через</div>
-      <div className="socialLoginRow">
+    <div className={styles.panelFooter}>
+      <div className={styles.socialLoginTitle}>или войти через</div>
+      <div className={styles.socialLoginRow}>
         <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
-          <img src="/assets/telegram.png" alt="telegram-login" className="socialLoginIcon" />
+          <img src="/assets/telegram.png" alt="telegram-login" className={styles.socialLoginIcon} />
         </a>
         <a href={vkHref} aria-label="VK">
-          <img src="/assets/vk.svg" alt="vk-login" className="socialLoginIcon" />
+          <img src="/assets/vk.svg" alt="vk-login" className={styles.socialLoginIcon} />
         </a>
         <a href={vkHref} aria-label="MAX">
-          <img src="/assets/max.svg" alt="max-login" className="socialLoginIcon" />
+          <img src="/assets/max.svg" alt="max-login" className={styles.socialLoginIcon} />
         </a>
       </div>
     </div>

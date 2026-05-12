@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTypewriter } from './hooks/useTypewriter';
+import styles from '@/features/auth/Login.module.css';
 
 const QUESTION_TEXT = 'Можете сделать курсовую за час?';
 const ANSWER_TEXT = 'Без проблем!';
@@ -33,35 +34,35 @@ const ChatBubbles: React.FC = () => {
   const isAnswerLoading = bubbleAnswer.length === 0;
 
   return (
-    <div className="chat-bubbles">
-      <div className="bubble bubble-left">
-        <span className="bubble-text">{bubbleQuestion}</span>
+    <div className={styles.chatBubbles}>
+      <div className={`${styles.bubble} ${styles.bubbleLeft}`}>
+        <span className={styles.bubbleText}>{bubbleQuestion}</span>
         {isQuestionLoading && (
-          <span className="typing" aria-live="polite">
-            <span className="dot" /><span className="dot" /><span className="dot" />
+          <span className={styles.typing} aria-live="polite">
+            <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
           </span>
         )}
       </div>
-      <div className="send-ellipsis send-ellipsis-delay" aria-hidden="true">
-        <span className="dot" /><span className="dot" /><span className="dot" />
+      <div className={`${styles.sendEllipsis} ${styles.sendEllipsisDelay}`} aria-hidden="true">
+        <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
       </div>
-      <div className="bubble bubble-right bubble-right-delay">
-        <span className="bubble-text">{bubbleAnswer}</span>
+      <div className={`${styles.bubble} ${styles.bubbleRight} ${styles.bubbleRightDelay}`}>
+        <span className={styles.bubbleText}>{bubbleAnswer}</span>
         {isAnswerLoading && (
-          <span className="typing" aria-live="polite">
-            <span className="dot" /><span className="dot" /><span className="dot" />
+          <span className={styles.typing} aria-live="polite">
+            <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
           </span>
         )}
       </div>
-      <div className="bubble bubble-left bubble-left-2 bubble-left-2-delay">
+      <div className={`${styles.bubble} ${styles.bubbleLeft} ${styles.bubbleLeft2} ${styles.bubbleLeft2Delay}`}>
         {thumbStage !== 'emoji' && (
-          <span className="typing" aria-live="polite">
-            <span className="dot" /><span className="dot" /><span className="dot" />
+          <span className={styles.typing} aria-live="polite">
+            <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
           </span>
         )}
         {thumbStage === 'emoji' && (
           <img
-            className="bubble-thumb-img"
+            className={styles.bubbleThumbImg}
             src="https://smileysplanet.ru/smileys/apple/thumbs-up-1328.png"
             alt="thumb up"
             width={22}
