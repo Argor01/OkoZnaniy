@@ -1,1 +1,46 @@
-﻿/* Layout */
+/* Layout */
+
+.sectionCard {
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.sectionCardHeader {
+  margin-bottom: 16px;
+}
+
+.ordersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ordersLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.ordersGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ordersEmpty {
+  padding: 32px 0;
+}
+
+.ordersEmptyText {
+  color: var(--text-secondary);
+  font-size: 15px;
+}

@@ -1,1 +1,204 @@
-﻿/* Cards */
+/* Cards */
+
+.orderCard {
+  width: 100%;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.orderCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-blue-light);
+}
+
+/* Top row: title+status left, actions right */
+.orderCardTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.orderTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.orderTitle {
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 18px !important;
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.statusTag {
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+
+.orderCardActionsRow {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Tags row */
+.orderTagsRow {
+  margin-bottom: 12px;
+}
+
+.subjectTag,
+.workTypeTag,
+.topicTag {
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 2px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.orderDescription {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 12px !important;
+}
+
+/* Files */
+.filesBlock {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.filesLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fileTag {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.fileTag:hover {
+  color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.fileDownloadIcon {
+  font-size: 12px;
+}
+
+.fileIconPdf { color: #dc2626; }
+.fileIconDoc { color: var(--primary-blue-hover); }
+.fileIconImage { color: #16a34a; }
+.fileIconArchive { color: var(--color-brand-purple-700); }
+.fileIconDefault { color: var(--text-secondary); }
+
+/* Bottom row: client+meta left, price right */
+.orderBottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.orderBottomLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.orderBottomRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.clientInfo {
+  display: flex;
+  align-items: center;
+}
+
+.clientAvatar {
+  flex-shrink: 0;
+}
+
+.clientName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.orderMetaIcon {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.orderMetaText {
+  font-size: 13px;
+}
+
+.orderBudget {
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .orderCardTopRow {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .orderCardActionsRow {
+    align-self: flex-end;
+  }
+
+  .orderBottomRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .orderBottomRight {
+    align-self: flex-end;
+  }
+
+  .orderBudget {
+    font-size: 20px;
+  }
+}

@@ -2,7 +2,7 @@
   max-width: min(1200px, 95vw);
   margin: 0 auto;
   padding: 24px;
-  padding-top: 80px;
+  padding-top: 24px;
   min-height: 100vh;
   background: var(--bg-primary, #ffffff);
 }
@@ -15,7 +15,7 @@
 @media (max-width: 840px) {
   .container {
     padding: 16px;
-    padding-top: 76px;
+    padding-top: 16px;
   }
 }
 

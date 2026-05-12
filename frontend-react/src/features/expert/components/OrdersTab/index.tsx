@@ -285,94 +285,86 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                 className={styles.orderCard}
                 onClick={() => navigate(`/orders/${order.id}`)}
               >
-                <div className={styles.orderCardHeader}>
-                  <div className={styles.orderCardHeaderInfo}>
+                {/* Top row: actions in top-right */}
+                <div className={styles.orderCardTopRow}>
+                  <div className={styles.orderTitleRow}>
                     <Text strong className={styles.orderTitle}>
                       {order.title}
                     </Text>
-                    <Space size={8} wrap>
-                      <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
-                        {getStatusText(order.status)}
-                      </Tag>
-                      {(order.custom_subject || order.subject?.name || order.subject_name) && (
-                        <Tag className={styles.subjectTag}>
-                          {order.custom_subject || order.subject?.name || order.subject_name}
-                        </Tag>
-                      )}
-                      {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
-                        <Tag className={styles.workTypeTag}>
-                          {order.custom_work_type || order.work_type?.name || order.work_type_name}
-                        </Tag>
-                      )}
-                      {order.topic?.name && (
-                        <Tag className={styles.topicTag}>
-                          Тема: {order.topic.name}
-                        </Tag>
-                      )}
-                    </Space>
+                    <Tag className={styles.statusTag} color={getStatusColor(order.status)}>
+                      {getStatusText(order.status)}
+                    </Tag>
                   </div>
-                  <div className={styles.orderCardActions}>
-                    <div className={styles.orderCardActionsRow}>
-                      <Tooltip title="Скопировать ссылку на заказ">
+                  <div className={styles.orderCardActionsRow}>
+                    <Tooltip title="Скопировать ссылку на заказ">
+                      <AppButton
+                        variant="text"
+                        size="small"
+                        icon={<ShareAltOutlined />}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/orders/${order.id}`;
+                          try {
+                            await navigator.clipboard.writeText(url);
+                            message.success('Ссылка скопирована');
+                          } catch {
+                            message.error('Не удалось скопировать ссылку');
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                    {effectiveOrderFilter === 'my' && userProfile?.role === 'client' && (
+                      <Popconfirm
+                        title="Удалить заказ?"
+                        okText="Удалить"
+                        cancelText="Отмена"
+                        onConfirm={(e) => {
+                          e?.stopPropagation();
+                          handleDeleteOrder(order.id);
+                        }}
+                      >
                         <AppButton
                           variant="text"
                           size="small"
-                          icon={<ShareAltOutlined />}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const url = `${window.location.origin}/orders/${order.id}`;
-                            try {
-                              await navigator.clipboard.writeText(url);
-                              message.success('Ссылка скопирована');
-                            } catch {
-                              message.error('Не удалось скопировать ссылку');
-                            }
-                          }}
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={(e) => e.stopPropagation()}
                         />
-                      </Tooltip>
-                      {effectiveOrderFilter === 'my' && userProfile?.role === 'client' && (
-                        <Popconfirm
-                          title="Удалить заказ?"
-                          okText="Удалить"
-                          cancelText="Отмена"
-                          onConfirm={(e) => {
-                            e?.stopPropagation();
-                            handleDeleteOrder(order.id);
-                          }}
-                        >
-                          <AppButton
-                            variant="text"
-                            size="small"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </Popconfirm>
-                      )}
-                      {effectiveOrderFilter === 'inactive' && (
-                        <AppButton
-                          variant="primary"
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReactivateOrder(order.id);
-                          }}
-                        >
-                          Активировать
-                        </AppButton>
-                      )}
-                                        </div>
-                    <div className={styles.orderBudget}>
-                      {(() => {
-                        const budgetNum = Number(order.budget);
-                        if (!Number.isFinite(budgetNum) || budgetNum === 0) {
-                          return 'Договорная';
-                        }
-                        return `${budgetNum.toLocaleString('ru-RU')} ₽`;
-                      })()}
-                    </div>
+                      </Popconfirm>
+                    )}
+                    {effectiveOrderFilter === 'inactive' && (
+                      <AppButton
+                        variant="primary"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReactivateOrder(order.id);
+                        }}
+                      >
+                        Активировать
+                      </AppButton>
+                    )}
                   </div>
                 </div>
+
+                {/* Tags row below title */}
+                <Space size={8} wrap className={styles.orderTagsRow}>
+                  {(order.custom_subject || order.subject?.name || order.subject_name) && (
+                    <Tag className={styles.subjectTag}>
+                      {order.custom_subject || order.subject?.name || order.subject_name}
+                    </Tag>
+                  )}
+                  {(order.custom_work_type || order.work_type?.name || order.work_type_name) && (
+                    <Tag className={styles.workTypeTag}>
+                      {order.custom_work_type || order.work_type?.name || order.work_type_name}
+                    </Tag>
+                  )}
+                  {order.topic?.name && (
+                    <Tag className={styles.topicTag}>
+                      Тема: {order.topic.name}
+                    </Tag>
+                  )}
+                </Space>
 
                 {order.description && (
                   <Paragraph 
@@ -422,69 +414,82 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                   </div>
                 )}
 
-                {order.client && (
-                  <div className={styles.clientInfo}>
-                    <Space size={12}>
-                      <Avatar 
-                        src={order.client.avatar} 
-                        icon={<UserOutlined />} 
-                        size={48}
-                        className={styles.clientAvatar}
-                      />
-                      <Text className={styles.clientName}>
-                        {order.client.first_name || order.client.username}
-                      </Text>
+                {/* Bottom row: client info left, price right */}
+                <div className={styles.orderBottomRow}>
+                  <div className={styles.orderBottomLeft}>
+                    {order.client && (
+                      <div className={styles.clientInfo}>
+                        <Space size={12}>
+                          <Avatar 
+                            src={order.client.avatar} 
+                            icon={<UserOutlined />} 
+                            size={40}
+                            className={styles.clientAvatar}
+                          />
+                          <Text className={styles.clientName}>
+                            {order.client.first_name || order.client.username}
+                          </Text>
+                        </Space>
+                      </div>
+                    )}
+                    <Space size={16} wrap>
+                      {order.deadline && (
+                        <Space size={4}>
+                          <ClockCircleOutlined className={styles.orderMetaIcon} />
+                          <Text type="secondary" className={styles.orderMetaText}>
+                            {dayjs(order.deadline).fromNow()}
+                          </Text>
+                        </Space>
+                      )}
+                      {order.responses_count !== undefined && (
+                        <Space size={4}>
+                          <UserOutlined className={styles.orderMetaIcon} />
+                          <Text type="secondary" className={styles.orderMetaText}>
+                            {order.responses_count} откликов
+                          </Text>
+                        </Space>
+                      )}
                     </Space>
                   </div>
-                )}
+                  <div className={styles.orderBottomRight}>
+                    {effectiveOrderFilter === 'available' && userProfile?.role === 'expert' && (
+                      (() => {
+                        const hasMyBid =
+                          typeof (order as unknown as { user_has_bid?: unknown }).user_has_bid === 'boolean'
+                            ? (order as unknown as { user_has_bid: boolean }).user_has_bid
+                            : Array.isArray((order as unknown as { bids?: unknown }).bids) && typeof userProfile?.id === 'number'
+                              ? (order as unknown as { bids: Array<{ expert?: { id?: number } | null }> }).bids.some(
+                                  (bid) => bid?.expert?.id === userProfile.id
+                                )
+                              : false;
 
-                <div className={styles.orderMetaRow}>
-                  <Space size={16} wrap>
-                    {order.deadline && (
-                      <Space size={4}>
-                        <ClockCircleOutlined className={styles.orderMetaIcon} />
-                        <Text type="secondary" className={styles.orderMetaText}>
-                          {dayjs(order.deadline).fromNow()}
-                        </Text>
-                      </Space>
+                        const isMyOrder = order.client?.id === userProfile.id;
+
+                        return (
+                          <AppButton 
+                            variant={hasMyBid || isMyOrder ? 'secondary' : 'success'}
+                            size={isMobile ? 'middle' : 'large'}
+                            disabled={hasMyBid || isMyOrder}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/orders/${order.id}`);
+                            }}
+                          >
+                            {isMyOrder ? 'Ваш заказ' : (hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться')}
+                          </AppButton>
+                        );
+                      })()
                     )}
-                    {order.responses_count !== undefined && (
-                      <Space size={4}>
-                        <UserOutlined className={styles.orderMetaIcon} />
-                        <Text type="secondary" className={styles.orderMetaText}>
-                          {order.responses_count} откликов
-                        </Text>
-                      </Space>
-                    )}
-                  </Space>
-                  {effectiveOrderFilter === 'available' && userProfile?.role === 'expert' && (
-                    (() => {
-                      const hasMyBid =
-                        typeof (order as unknown as { user_has_bid?: unknown }).user_has_bid === 'boolean'
-                          ? (order as unknown as { user_has_bid: boolean }).user_has_bid
-                          : Array.isArray((order as unknown as { bids?: unknown }).bids) && typeof userProfile?.id === 'number'
-                            ? (order as unknown as { bids: Array<{ expert?: { id?: number } | null }> }).bids.some(
-                                (bid) => bid?.expert?.id === userProfile.id
-                              )
-                            : false;
-
-                      const isMyOrder = order.client?.id === userProfile.id;
-
-                      return (
-                        <AppButton 
-                          variant={hasMyBid || isMyOrder ? 'secondary' : 'success'}
-                          size={isMobile ? 'middle' : 'large'}
-                          disabled={hasMyBid || isMyOrder}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/orders/${order.id}`);
-                          }}
-                        >
-                          {isMyOrder ? 'Ваш заказ' : (hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться')}
-                        </AppButton>
-                      );
-                    })()
-                  )}
+                    <div className={styles.orderBudget}>
+                      {(() => {
+                        const budgetNum = Number(order.budget);
+                        if (!Number.isFinite(budgetNum) || budgetNum === 0) {
+                          return 'Договорная';
+                        }
+                        return `${budgetNum.toLocaleString('ru-RU')} ₽`;
+                      })()}
+                    </div>
+                  </div>
                 </div>
               </AppCard>
             ))}

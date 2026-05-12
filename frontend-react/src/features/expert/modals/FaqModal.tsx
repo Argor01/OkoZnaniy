@@ -25,6 +25,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile }) => {
       centered
       onCancel={onClose}
       footer={null}
+      destroyOnClose
       width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
       wrapClassName={`${styles.faqModalWrap} ${isMobile ? styles.faqModalWrapMobile : styles.faqModalWrapDesktop}`}
     >
