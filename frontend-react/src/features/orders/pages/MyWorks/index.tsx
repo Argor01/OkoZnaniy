@@ -13,6 +13,7 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from './MyWorks.module.css';
+import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -87,20 +88,11 @@ const MyWorks: React.FC = () => {
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
 
-  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: fetchedSubjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   const { data: expertStats } = useQuery({
     queryKey: ['expert-statistics', userProfile?.id],

@@ -13,6 +13,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import styles from './ShopWorkDetail.module.css';
+import { useCurrentUser } from '@/hooks/queries';
 
 const { Title, Text } = Typography;
 
@@ -23,10 +24,7 @@ const ShopWorkDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  const { data: userProfile, isLoading: isUserLoading } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile, isLoading: isUserLoading} = useCurrentUser();
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);

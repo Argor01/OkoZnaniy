@@ -16,6 +16,7 @@ import { authApi } from '@/features/auth/api/auth';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from './ArticleDetail.module.css';
+import { useCurrentUser } from '@/hooks/queries';
 
 dayjs.locale('ru');
 
@@ -32,10 +33,7 @@ const ArticleDetail: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   const {
     data: article,

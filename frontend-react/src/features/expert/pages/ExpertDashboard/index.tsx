@@ -13,6 +13,7 @@ import styles from './ExpertDashboard.module.css';
 
 
 import AboutTab from '../../components/AboutTab';
+import { useCurrentUser } from '@/hooks/queries';
 const SpecializationsTab = React.lazy(() => import('../../components/SpecializationsTab'));
 const ReviewsTab = React.lazy(() => import('../../components/ReviewsTab'));
 const OrdersTab = React.lazy(() => import('../../components/OrdersTab'));
@@ -78,13 +79,7 @@ const ExpertDashboard: FC = () => {
   }, []);
 
   
-  const { data: userProfile, isLoading: isProfileLoading } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-    staleTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-  });
+  const {data: userProfile, isLoading: isProfileLoading} = useCurrentUser();
 
   const { data: application, isLoading: applicationLoading } = useQuery({
     queryKey: ['expert-application'],

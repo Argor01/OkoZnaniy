@@ -2,9 +2,9 @@ import React from 'react';
 import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
-import { catalogApi } from '@/features/common/api/catalog';
 import SkillsSelectNew from '../components/inputs/SkillsSelectNew';
 import styles from './SpecializationModal.module.css';
+import { useSubjects } from '@/hooks/queries';
 
 type SpecializationFormValues = {
   subject_id?: number;
@@ -50,10 +50,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
     }
   }, [visible, isMobile]);
 
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: CreateSpecializationRequest) => expertsApi.createSpecialization(data),

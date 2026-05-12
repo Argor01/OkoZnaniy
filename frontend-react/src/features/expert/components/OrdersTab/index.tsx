@@ -13,6 +13,7 @@ import styles from './OrdersTab.module.css';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { logger } from '@/utils/logger';
+import { useCurrentUser } from '@/hooks/queries';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -67,10 +68,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
   const [orderFilter, setOrderFilter] = useState<'my' | 'available' | 'inactive'>('my');
 
   
-  const { data: userProfile, isLoading: userProfileLoading } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile, isLoading: userProfileLoading} = useCurrentUser();
 
   const showAvailableTab = userProfile?.role === 'expert';
 

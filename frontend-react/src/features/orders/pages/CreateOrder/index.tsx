@@ -19,6 +19,7 @@ import { AppUpload } from '@/components/ui/AppUpload';
 
 import styles from './CreateOrder.module.css';
 import { logger } from '@/utils/logger';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -73,15 +74,9 @@ const CreateOrder: React.FC = () => {
   };
 
   
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   const sortedSubjects = [...subjects].sort((a, b) =>
     (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })

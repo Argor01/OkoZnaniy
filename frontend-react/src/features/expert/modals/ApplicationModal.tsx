@@ -4,6 +4,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type Education, type ExpertApplication } from '@/features/expert/api/experts';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import styles from './ApplicationModal.module.css';
 
@@ -159,7 +160,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       message.success('Анкета успешно обновлена!');
       applicationForm.resetFields();
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: [...CURRENT_USER_KEY] });
       queryClient.invalidateQueries({ queryKey: ['expert-application'] });
     },
     onError: (error: unknown) => {
@@ -177,7 +178,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       });
       applicationForm.resetFields();
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: [...CURRENT_USER_KEY] });
       queryClient.invalidateQueries({ queryKey: ['expert-application'] });
     },
     onError: (error: unknown) => {

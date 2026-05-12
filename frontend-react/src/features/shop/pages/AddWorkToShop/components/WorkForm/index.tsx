@@ -12,6 +12,7 @@ import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { AppUpload } from '@/components/ui/AppUpload';
 import styles from './WorkForm.module.css';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Text } = Typography;
 const { Option } = AppSelect;
@@ -41,15 +42,9 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   const [newSubjectName, setNewSubjectName] = useState('');
 
   
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   
   const createWorkTypeMutation = useMutation({

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { articlesApi } from '../api/knowledgeApi';
 import { catalogApi, type WorkType, type Subject } from '@/features/common/api/catalog';
 import styles from './CreateArticle.module.css';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -26,15 +27,9 @@ const CreateArticle: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
   const handleFileSelect = (file: File) => {
     setFiles((prev) => [...prev, file]);

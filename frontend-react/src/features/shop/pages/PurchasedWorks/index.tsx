@@ -6,10 +6,10 @@ import Filters from './components/Filters';
 import WorksList from './components/WorksList';
 import EmptyState from './components/EmptyState';
 import { authApi } from '@/features/auth/api/auth';
-import { catalogApi } from '@/features/common/api/catalog';
 import { FiltersState, PurchasedWork } from '@/features/shop/types';
 import { shopApi, type Purchase } from '@/features/shop/api/shop';
 import styles from './PurchasedWorks.module.css';
+import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -18,21 +18,12 @@ const PurchasedWorks: React.FC = () => {
   const [filters, setFilters] = useState<FiltersState>({ sortBy: 'date' });
 
   
-  const { data: _profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: _profile} = useCurrentUser();
 
   
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   
   const { data: purchasedWorks = [], isLoading } = useQuery({

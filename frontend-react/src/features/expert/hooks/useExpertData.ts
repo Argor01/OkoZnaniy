@@ -4,11 +4,12 @@ import { authApi } from '@/features/auth/api/auth';
 import { ordersApi } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
 import { ORDER_STATUSES } from '@/utils/constants';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 
 export const useExpertData = () => {
   
   const { data: userProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: [...CURRENT_USER_KEY],
     queryFn: () => authApi.getCurrentUser(),
   });
 

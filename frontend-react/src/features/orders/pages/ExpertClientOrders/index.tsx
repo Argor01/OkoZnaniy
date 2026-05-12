@@ -11,6 +11,7 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from '../MyWorks/MyWorks.module.css';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -82,15 +83,9 @@ const ExpertClientOrders: React.FC = () => {
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
 
-  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: fetchedSubjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   const { data: clientOrdersData, isLoading: clientOrdersLoading } = useQuery({
     queryKey: ['expert-client-orders-overview'],

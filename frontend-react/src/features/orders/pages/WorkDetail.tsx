@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './WorkDetail.module.css';
 import { logger } from '@/utils/logger';
+import { useCurrentUser } from '@/hooks/queries';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -18,10 +19,7 @@ const WorkDetail: React.FC = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);

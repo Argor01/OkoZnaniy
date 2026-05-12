@@ -41,6 +41,7 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -101,15 +102,9 @@ export const KnowledgeBaseSection: React.FC = () => {
   const [resolveResponse, setResolveResponse] = useState('');
   const [resolveLoading, setResolveLoading] = useState(false);
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
   const { data: articles = [], isLoading } = useQuery<Article[]>({
     queryKey: ['knowledge-articles', searchText, selectedWorkType, selectedSubject],

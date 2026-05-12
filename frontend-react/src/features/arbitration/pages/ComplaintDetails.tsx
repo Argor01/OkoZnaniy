@@ -18,6 +18,7 @@ import { authApi } from '@/features/auth/api/auth';
 import { AppButton, AppCard } from '@/components/ui';
 import { formatCurrency } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
+import { useCurrentUser } from '@/hooks/queries';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -79,10 +80,7 @@ const ComplaintDetails: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   const { data: complaint, isLoading, error, isError } = useQuery<Complaint>({
     queryKey: ['complaint', complaintId],

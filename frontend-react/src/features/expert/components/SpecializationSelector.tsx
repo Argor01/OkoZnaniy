@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { catalogApi } from '@/features/common/api/catalog';
 import { AppSelect } from '@/components/ui';
 import styles from '../modals/MessageModalNew.module.css';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 interface SpecializationSelectorProps {
   value?: number;
@@ -23,15 +23,9 @@ const SpecializationSelector: React.FC<SpecializationSelectorProps> = ({
   isDesktop = true,
   variant = 'default'
 }) => {
-  const { data: subjects = [], isLoading } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = [], isLoading} = useSubjects();
 
-  const { data: workTypes = [], isLoading: workTypesLoading } = useQuery({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = [], isLoading: workTypesLoading} = useWorkTypes();
 
   // Combine subjects and work types for specialization options
   const specializationOptions = [

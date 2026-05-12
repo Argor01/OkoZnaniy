@@ -3,6 +3,7 @@ import { Select, Modal, Input, Button, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { catalogApi } from '@/features/common/api/catalog';
+import { useSubjects } from '@/hooks/queries';
 
 interface SkillsSelectProps {
   value?: string[] | number[];
@@ -34,10 +35,7 @@ const SkillsSelect: React.FC<SkillsSelectProps> = ({
   const [newSubjectModalVisible, setNewSubjectModalVisible] = React.useState(false);
   const [newSubjectName, setNewSubjectName] = React.useState('');
 
-  const { data: subjects = [], isLoading } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = [], isLoading} = useSubjects();
 
   const createSubjectMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createSubject(name),

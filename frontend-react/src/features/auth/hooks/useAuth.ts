@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi, User } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/utils/constants';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
@@ -10,7 +11,7 @@ export const useAuth = () => {
   const hasToken = !!token;
 
   const { data: user, isLoading, isError } = useQuery<User>({
-    queryKey: ['user-profile'],
+    queryKey: [...CURRENT_USER_KEY],
     queryFn: authApi.getCurrentUser,
     enabled: hasToken,
     retry: false,
@@ -19,7 +20,7 @@ export const useAuth = () => {
 
   const logout = () => {
     authApi.logout();
-    queryClient.setQueryData(['user-profile'], null);
+    queryClient.setQueryData([...CURRENT_USER_KEY], null);
     navigate(ROUTES.login);
   };
 

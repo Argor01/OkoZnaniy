@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './ArticlesFeed.module.css';
+import { useCurrentUser, useWorkTypes, useSubjects } from '@/hooks/queries';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -43,20 +44,11 @@ const ArticlesFeed: React.FC = () => {
   const [disputeMessage, setDisputeMessage] = useState('');
   const [disputeLoading, setDisputeLoading] = useState(false);
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
-  const { data: subjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
   const { data: articles = [], isLoading } = useQuery<Article[]>({
     queryKey: ['knowledge-articles', searchText, selectedWorkType, selectedSubject],

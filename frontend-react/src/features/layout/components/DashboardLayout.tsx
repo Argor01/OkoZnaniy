@@ -15,6 +15,7 @@ import RightSidebar from './RightSidebar';
 import styles from './DashboardLayout.module.css';
 import '@/styles/modal-overrides.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 
 
 const ProfileModal = lazy(() => import('@/features/expert/modals/ProfileModal'));
@@ -65,7 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   
   const { data: userProfile, isLoading } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: [...CURRENT_USER_KEY],
     queryFn: () => authApi.getCurrentUser(),
   });
 

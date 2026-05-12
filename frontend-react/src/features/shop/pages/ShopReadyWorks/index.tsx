@@ -11,6 +11,7 @@ import { shopApi } from '@/features/shop/api/shop';
 import { useDashboard } from '@/contexts/DashboardContext';
 import styles from './ShopReadyWorks.module.css';
 import { logger } from '@/utils/logger';
+import { useCurrentUser, useSubjects } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -33,15 +34,9 @@ const ShopReadyWorks: React.FC = () => {
     queryFn: () => shopApi.getPurchases(),
   });
 
-  const { data: _profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: _profile} = useCurrentUser();
 
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],

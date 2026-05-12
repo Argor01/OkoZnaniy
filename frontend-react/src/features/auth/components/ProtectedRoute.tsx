@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Spin } from 'antd';
 import { authApi } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [shouldRedirect, setShouldRedirect] = React.useState(false);
   
   const { isLoading, isError } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: [...CURRENT_USER_KEY],
     queryFn: () => authApi.getCurrentUser(),
     enabled: !!token && !shouldRedirect,
     retry: false,

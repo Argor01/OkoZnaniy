@@ -7,6 +7,7 @@ import { authApi } from '@/features/auth/api/auth';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { ROUTES } from '@/utils/constants';
 import { logger } from '@/utils/logger';
+import { CURRENT_USER_KEY } from '@/hooks/queries';
 
 export function useOrderDetail(orderId?: string) {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export function useOrderDetail(orderId?: string) {
   }, [queryClient]);
 
   const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: [...CURRENT_USER_KEY],
     queryFn: () => authApi.getCurrentUser(),
   });
 

@@ -35,6 +35,7 @@ import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modal-overrides.css';
 import './PartnerDashboard.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
+import { useCurrentUser } from '@/hooks/queries';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -532,10 +533,7 @@ const PartnerDashboard: React.FC = () => {
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['partner-dashboard'],

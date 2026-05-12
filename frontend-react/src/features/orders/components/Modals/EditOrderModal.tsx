@@ -17,6 +17,7 @@ import { useDeviceType } from '@/hooks/useDeviceType';
 
 import styles from './EditOrderModal.module.css';
 import { logger } from '@/utils/logger';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -86,15 +87,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   const canEdit = order && (!order.expert || order.status === 'new');
 
   // Загрузка данных предмета и типа работы
-  const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: subjects = []} = useSubjects();
 
-  const { data: workTypes = [] } = useQuery({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   const sortedSubjects = [...subjects].sort((a, b) =>
     (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })

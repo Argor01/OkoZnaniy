@@ -16,6 +16,7 @@ import BidModal from '../../components/BidModal';
 import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty, OrderCard } from '@/components/ui';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { logger } from '@/utils/logger';
+import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -73,15 +74,9 @@ const OrdersFeed: React.FC = () => {
   const shouldScrollAfterPageChangeRef = React.useRef(false);
 
   
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
-  const { data: fetchedSubjects = [] } = useQuery<Subject[]>({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-  });
+  const {data: fetchedSubjects = []} = useSubjects();
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -161,10 +156,7 @@ const OrdersFeed: React.FC = () => {
   });
 
   
-  const { data: workTypes = [] } = useQuery<WorkType[]>({
-    queryKey: ['workTypes'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const {data: workTypes = []} = useWorkTypes();
 
   
   const orders = React.useMemo(() => {

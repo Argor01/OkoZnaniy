@@ -12,6 +12,7 @@ import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutline
 import { formatCurrency } from '@/utils/formatters';
 import styles from './ComplaintForm.module.css';
 import { logger } from '@/utils/logger';
+import { useCurrentUser } from '@/hooks/queries';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -58,10 +59,7 @@ const ComplaintForm: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: () => authApi.getCurrentUser(),
-  });
+  const {data: userProfile} = useCurrentUser();
 
   const { data: order, isLoading: orderLoading } = useQuery<Order, Error>({
     queryKey: ['order', orderId],

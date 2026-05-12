@@ -8,6 +8,7 @@ import { AppButton, AppInput, AppSelect, AppDatePicker } from '@/components/ui';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import styles from './IndividualOfferModal.module.css';
 import modalStyles from '../../../expert/modals/MessageModalNew.module.css';
+import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Text, Title } = Typography;
 
@@ -58,17 +59,9 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
 
   const isIndividual = variant === 'individual';
 
-  const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => catalogApi.getSubjects(),
-    enabled: open && isIndividual,
-  });
+  const {data: subjects = [], isLoading: subjectsLoading} = useSubjects();
 
-  const { data: workTypes = [], isLoading: workTypesLoading } = useQuery({
-    queryKey: ['work-types'],
-    queryFn: () => catalogApi.getWorkTypes(),
-    enabled: open && isIndividual,
-  });
+  const {data: workTypes = [], isLoading: workTypesLoading} = useWorkTypes();
 
   const normalizeName = (raw: string) =>
     raw
