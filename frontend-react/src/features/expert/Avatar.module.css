@@ -1,0 +1,13 @@
+.ant-avatar.supportAvatar {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.ant-avatar.supportAvatar img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}

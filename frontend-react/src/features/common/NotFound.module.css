@@ -1,0 +1,26 @@
+.notFoundPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.notFoundTitle {
+  color: #fff;
+  font-size: 72px;
+  font-weight: 700;
+}
+.notFoundSubtitle {
+  color: #fff;
+  font-size: 20px;
+}
+.notFoundButton {
+  background: #fff;
+  color: #667eea;
+  border: none;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0 32px;
+}

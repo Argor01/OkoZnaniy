@@ -17,7 +17,7 @@ import { ru } from 'date-fns/locale';
 import { useAdminAuth, useTicketActions, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
-import '../../../styles/arbitration-detail.css';
+import arbStyles from '@/features/admin/ArbitrationDetail.module.css';
 
 const { Text, Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -164,18 +164,18 @@ export const ArbitrationDetailPage: React.FC = () => {
 
   const renderMessage = (msg: any, isAdmin: boolean) => (
     <div key={msg.id} className={`message-bubble ${isAdmin ? 'mine' : ''}`}>
-      <div className="message-avatar">
+      <div className={arbStyles.messageAvatar}>
         {getInitials(msg.sender?.first_name || '', msg.sender?.last_name || '')}
       </div>
-      <div className="message-content">
-        <div className="message-bubble-header">
-          <span className="message-sender-name">
+      <div className={arbStyles.messageContent}>
+        <div className={arbStyles.messageBubbleHeader}>
+          <span className={arbStyles.messageSenderName}>
             {msg.sender?.first_name} {msg.sender?.last_name}
           </span>
-          {isAdmin && <Tag color="blue" className="role-badge admin">Админ</Tag>}
-          <span className="message-time">{formatTime(msg.created_at)}</span>
+          {isAdmin && <Tag color="blue" className={`${arbStyles.roleBadge} ${arbStyles.admin}`}>Админ</Tag>}
+          <span className={arbStyles.messageTime}>{formatTime(msg.created_at)}</span>
         </div>
-        <div className="message-text">{msg.message}</div>
+        <div className={arbStyles.messageText}>{msg.message}</div>
       </div>
     </div>
   );
@@ -183,7 +183,7 @@ export const ArbitrationDetailPage: React.FC = () => {
   if (loading) {
     return (
       <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
-        <div className="arbitration-page">
+        <div className={arbStyles.arbitrationPage}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
             <Spin size="large" tip="Загрузка обращения..." />
           </div>
@@ -195,8 +195,8 @@ export const ArbitrationDetailPage: React.FC = () => {
   if (!ticket) {
     return (
       <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
-        <div className="arbitration-page">
-          <Card className="arbitration-card">
+        <div className={arbStyles.arbitrationPage}>
+          <Card className={arbStyles.arbitrationCard}>
             <Empty description="Обращение не найдено" />
             <Button type="primary" onClick={() => navigate('/admin/dashboard')}>
               Вернуться к списку
@@ -211,9 +211,9 @@ export const ArbitrationDetailPage: React.FC = () => {
 
   return (
     <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
-      <div className="arbitration-page">
+      <div className={arbStyles.arbitrationPage}>
         {/* Header */}
-        <div className="arbitration-header">
+        <div className={arbStyles.arbitrationHeader}>
           <div>
             <Button 
               type="text" 
@@ -226,12 +226,12 @@ export const ArbitrationDetailPage: React.FC = () => {
             <h1>
               <FileTextOutlined style={{ color: '#2b9fe6' }} />
               {ticket.type === 'claim' ? 'Арбитражное обращение' : 'Обращение в поддержку'}
-              <span className="ticket-number">#{ticket.ticket_number}</span>
+              <span className={arbStyles.ticketNumber}>#{ticket.ticket_number}</span>
             </h1>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Tag 
-              className="arbitration-status-badge" 
+              className={arbStyles.arbitrationStatusBadge} 
               style={{ background: statusConfig.color + '15', color: statusConfig.color }}
             >
               {statusConfig.icon} {statusConfig.text}
@@ -244,22 +244,22 @@ export const ArbitrationDetailPage: React.FC = () => {
 
         {/* Основная информация для арбитража */}
         {ticket.type === 'claim' && (
-          <div className="arbitration-details-grid">
+          <div className={arbStyles.arbitrationDetailsGrid}>
             {/* Истец */}
-            <Card className="detail-card">
-              <div className="detail-card-label">Истец</div>
+            <Card className={arbStyles.detailCard}>
+              <div className={arbStyles.detailCardLabel}>Истец</div>
               {ticket.plaintiff ? (
-                <div className="party-card plaintiff">
-                  <div className="party-avatar">
+                <div className={`${arbStyles.partyCard} ${arbStyles.plaintiff}`}>
+                  <div className={arbStyles.partyAvatar}>
                     {getInitials(ticket.plaintiff.first_name, ticket.plaintiff.last_name)}
                   </div>
-                  <div className="party-info">
+                  <div className={arbStyles.partyInfo}>
                     <h4>{ticket.plaintiff.first_name} {ticket.plaintiff.last_name}</h4>
                     <p>{ticket.plaintiff.email}</p>
                   </div>
                 </div>
               ) : (
-                <div className="party-info">
+                <div className={arbStyles.partyInfo}>
                   <Text>{ticket.user.first_name} {ticket.user.last_name}</Text>
                   <br />
                   <Text type="secondary">{ticket.user.email}</Text>
@@ -268,29 +268,29 @@ export const ArbitrationDetailPage: React.FC = () => {
             </Card>
 
             {/* Ответчик */}
-            <Card className="detail-card">
-              <div className="detail-card-label">Ответчик</div>
+            <Card className={arbStyles.detailCard}>
+              <div className={arbStyles.detailCardLabel}>Ответчик</div>
               {ticket.defendant ? (
-                <div className="party-card defendant">
-                  <div className="party-avatar" style={{ background: '#fa8c16' }}>
+                <div className={`${arbStyles.partyCard} ${arbStyles.defendant}`}>
+                  <div className={arbStyles.partyAvatar} style={{ background: '#fa8c16' }}>
                     {getInitials(ticket.defendant.first_name, ticket.defendant.last_name)}
                   </div>
-                  <div className="party-info">
+                  <div className={arbStyles.partyInfo}>
                     <h4>{ticket.defendant.first_name} {ticket.defendant.last_name}</h4>
                     <p>{ticket.defendant.email}</p>
                   </div>
                 </div>
               ) : (
-                <div className="party-info">
+                <div className={arbStyles.partyInfo}>
                   <Text>Не указан</Text>
                 </div>
               )}
             </Card>
 
             {/* Причина */}
-            <Card className="detail-card">
-              <div className="detail-card-label">Причина обращения</div>
-              <div className="detail-card-value">
+            <Card className={arbStyles.detailCard}>
+              <div className={arbStyles.detailCardLabel}>Причина обращения</div>
+              <div className={arbStyles.detailCardValue}>
                 {ticket.reason ? {
                   order_not_completed: 'Заказ не выполнен',
                   poor_quality: 'Низкое качество',
@@ -302,9 +302,9 @@ export const ArbitrationDetailPage: React.FC = () => {
             </Card>
 
             {/* Дата создания */}
-            <Card className="detail-card">
-              <div className="detail-card-label">Дата создания</div>
-              <div className="detail-card-value">
+            <Card className={arbStyles.detailCard}>
+              <div className={arbStyles.detailCardLabel}>Дата создания</div>
+              <div className={arbStyles.detailCardValue}>
                 <ClockCircleOutlined style={{ color: '#8c8c8c' }} />
                 {formatTime(ticket.created_at)}
               </div>
@@ -312,9 +312,9 @@ export const ArbitrationDetailPage: React.FC = () => {
 
             {/* Связанный заказ */}
             {ticket.order && (
-              <Card className="detail-card">
-                <div className="detail-card-label">Связанный заказ</div>
-                <div className="detail-card-value">
+              <Card className={arbStyles.detailCard}>
+                <div className={arbStyles.detailCardLabel}>Связанный заказ</div>
+                <div className={arbStyles.detailCardValue}>
                   <LinkOutlined style={{ color: '#2b9fe6' }} />
                   <a href={`/orders/${ticket.order.id}`} target="_blank" rel="noopener noreferrer">
                     #{ticket.order.id} - {ticket.order.title}
@@ -325,9 +325,9 @@ export const ArbitrationDetailPage: React.FC = () => {
 
             {/* Финансовые требования */}
             {ticket.refund_type && (
-              <Card className="detail-card">
-                <div className="detail-card-label">Финансовые требования</div>
-                <div className="detail-card-value" style={{ color: '#fa8c16' }}>
+              <Card className={arbStyles.detailCard}>
+                <div className={arbStyles.detailCardLabel}>Финансовые требования</div>
+                <div className={arbStyles.detailCardValue} style={{ color: '#fa8c16' }}>
                   <DollarOutlined />
                   {ticket.refund_type === 'full' ? 'Полный возврат' : 
                    ticket.refund_type === 'partial' ? `Частичный (${ticket.refund_percentage}%)` : 
@@ -341,7 +341,7 @@ export const ArbitrationDetailPage: React.FC = () => {
         <Row gutter={[24, 24]}>
           {/* Основная колонка - сообщения */}
           <Col xs={24} lg={ticket.type === 'claim' ? 16 : 18}>
-            <Card className="arbitration-card" title={
+            <Card className={arbStyles.arbitrationCard} title={
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <MessageOutlined style={{ color: '#2b9fe6' }} />
                 Переписка
@@ -359,7 +359,7 @@ export const ArbitrationDetailPage: React.FC = () => {
               )}
 
               {/* Лента сообщений */}
-              <div className="message-timeline">
+              <div className={arbStyles.messageTimeline}>
                 {feedLoading ? (
                   <div style={{ textAlign: 'center', padding: 40 }}>
                     <Spin size="large" />
@@ -382,13 +382,13 @@ export const ArbitrationDetailPage: React.FC = () => {
               </div>
 
               {/* Поле ввода */}
-              <div className="message-input-container">
+              <div className={arbStyles.messageInputContainer}>
                 <TextArea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Введите сообщение... (Ctrl+Enter для отправки)"
                   rows={3}
-                  className="message-input"
+                  className={arbStyles.messageInput}
                   onKeyDown={(e) => { if (e.ctrlKey && e.key === 'Enter') handleSendMessage(); }}
                 />
                 <Button 
@@ -397,7 +397,7 @@ export const ArbitrationDetailPage: React.FC = () => {
                   onClick={handleSendMessage}
                   loading={sending}
                   disabled={!replyText.trim()}
-                  className="message-send-button"
+                  className={arbStyles.messageSendButton}
                 >
                   Отправить
                 </Button>
@@ -409,7 +409,7 @@ export const ArbitrationDetailPage: React.FC = () => {
           <Col xs={24} lg={ticket.type === 'claim' ? 8 : 6}>
             {/* Кнопка открытия чата для арбитража */}
             {ticket.type === 'claim' && ticket.support_chat_id && (
-              <Card className="arbitration-card" style={{ marginBottom: 24, borderLeft: '4px solid #2b9fe6' }}>
+              <Card className={arbStyles.arbitrationCard} style={{ marginBottom: 24, borderLeft: '4px solid #2b9fe6' }}>
                 <div style={{ textAlign: 'center' }}>
                   <MessageOutlined style={{ fontSize: 32, color: '#2b9fe6', marginBottom: 12 }} />
                   <Title level={5} style={{ margin: '0 0 8px 0' }}>История переписки</Title>
@@ -430,7 +430,7 @@ export const ArbitrationDetailPage: React.FC = () => {
             )}
 
             {/* Карточка с информацией */}
-            <Card className="arbitration-card" title="Информация" size="small" style={{ marginBottom: 16 }}>
+            <Card className={arbStyles.arbitrationCard} title="Информация" size="small" style={{ marginBottom: 16 }}>
               <Descriptions column={1} size="small">
                 <Descriptions.Item label="Клиент">
                   <Space>
@@ -446,7 +446,7 @@ export const ArbitrationDetailPage: React.FC = () => {
 
             {/* Карточка администратора */}
             {ticket.admin && (
-              <Card className="arbitration-card" title="Ответственный" size="small" style={{ marginBottom: 16 }}>
+              <Card className={arbStyles.arbitrationCard} title="Ответственный" size="small" style={{ marginBottom: 16 }}>
                 <Space>
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
@@ -458,16 +458,16 @@ export const ArbitrationDetailPage: React.FC = () => {
             )}
 
             {/* Кнопки действий */}
-            <Card className="arbitration-card" title="Действия">
-              <div className="action-buttons-grid">
+            <Card className={arbStyles.arbitrationCard} title="Действия">
+              <div className={arbStyles.actionButtonsGrid}>
                 <Tooltip title={ticket.status === 'in_progress' ? 'Уже в работе' : 'Взять в работу'}>
                   <div 
                     className={`action-button ${ticket.status !== 'in_progress' ? 'primary' : ''}`}
                     onClick={() => ticket.status !== 'in_progress' && handleUpdateStatus('in_progress')}
                     style={{ opacity: ticket.status === 'in_progress' ? 0.5 : 1, cursor: ticket.status === 'in_progress' ? 'not-allowed' : 'pointer' }}
                   >
-                    <TeamOutlined className="action-button-icon" />
-                    <span className="action-button-text">Взять в работу</span>
+                    <TeamOutlined className={arbStyles.actionButtonIcon} />
+                    <span className={arbStyles.actionButtonText}>Взять в работу</span>
                   </div>
                 </Tooltip>
 
@@ -490,9 +490,9 @@ export const ArbitrationDetailPage: React.FC = () => {
                   okButtonProps={{ disabled: !finalText.trim() }}
                   icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
                 >
-                  <div className="action-button danger">
-                    <CheckCircleOutlined className="action-button-icon" />
-                    <span className="action-button-text">Закрыть</span>
+                  <div className={`${arbStyles.actionButton} ${arbStyles.danger}`}>
+                    <CheckCircleOutlined className={arbStyles.actionButtonIcon} />
+                    <span className={arbStyles.actionButtonText}>Закрыть</span>
                   </div>
                 </Popconfirm>
               </div>

@@ -23,9 +23,9 @@ import ClaimsProcessing from '../components/ClaimsProcessing/ClaimsProcessing';
 import InternalCommunication from '../components/InternalCommunication/InternalCommunication';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modal-overrides.css';
-import '@/styles/arbitrator.css';
 import { logger } from '@/utils/logger';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
+import arbStyles from '@/features/arbitration/Arbitrator.module.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -198,22 +198,22 @@ const ArbitratorDashboard: React.FC = () => {
   };
 
   return (
-    <Layout className="arbitratorLayout">
+    <Layout className={arbStyles.arbitratorLayout}>
       <Sider
         width={280}
-        className="arbitratorSider"
+        className={arbStyles.arbitratorSider}
       >
         <div
-          className="arbitratorSiderHeader"
+          className={arbStyles.arbitratorSiderHeader}
         >
           <FileTextOutlined
-            className="arbitratorSiderIcon"
+            className={arbStyles.arbitratorSiderIcon}
           />
-          <Title level={4} className="arbitratorSiderTitle">
+          <Title level={4} className={arbStyles.arbitratorSiderTitle}>
             Личный кабинет арбитра
           </Title>
           {user && (
-            <div className="arbitratorSiderUser">
+            <div className={arbStyles.arbitratorSiderUser}>
               {user.first_name} {user.last_name}
             </div>
           )}
@@ -231,7 +231,7 @@ const ArbitratorDashboard: React.FC = () => {
           openKeys={openKeys}
           onClick={({ key }) => handleMenuClick(key as string)}
           onOpenChange={(keys) => setOpenKeys(keys)}
-          className="arbitratorMenu"
+          className={arbStyles.arbitratorMenu}
           items={[
             {
               key: 'claims',
@@ -245,7 +245,7 @@ const ArbitratorDashboard: React.FC = () => {
                     <span>
                       Новые обращения
                       {newClaimsCount > 0 && (
-                        <span className="arbitratorNavCount">
+                        <span className={arbStyles.arbitratorNavCount}>
                           ({newClaimsCount})
                         </span>
                       )}
@@ -285,9 +285,9 @@ const ArbitratorDashboard: React.FC = () => {
 
       <Layout>
         <Header
-          className="arbitratorHeader"
+          className={arbStyles.arbitratorHeader}
         >
-          <Title level={3} className="arbitratorSectionHeaderTitle">
+          <Title level={3} className={arbStyles.arbitratorSectionHeaderTitle}>
             {getSectionTitle()}
           </Title>
           <Space>
@@ -312,11 +312,11 @@ const ArbitratorDashboard: React.FC = () => {
           </Space>
         </Header>
         <Content
-          className="arbitratorContent"
+          className={arbStyles.arbitratorContent}
         >
           {renderContent()}
         </Content>
-        <Footer className="arbitratorFooter">
+        <Footer className={arbStyles.arbitratorFooter}>
           Личный кабинет арбитра © {new Date().getFullYear()}
         </Footer>
       </Layout>

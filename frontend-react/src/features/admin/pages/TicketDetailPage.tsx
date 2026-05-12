@@ -17,7 +17,6 @@ import apiClient from '@/api/client';
 import { useAdminAuth, useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
-import '@/styles/ticket-detail.css';
 
 const { Text } = Typography;
 const { TextArea } = Input;

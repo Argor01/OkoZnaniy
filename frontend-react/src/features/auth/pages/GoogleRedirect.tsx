@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '@/styles/google-redirect.css';
+import styles from '@/features/auth/GoogleRedirect.module.css';
 
 const GoogleRedirect: React.FC = () => {
   const [redirecting, setRedirecting] = useState(true);
@@ -18,15 +18,15 @@ const GoogleRedirect: React.FC = () => {
   }, [googleUrl]);
 
   return (
-    <div className="googleRedirectPage">
-      <div className="googleRedirectCard">
-        <img src="/assets/google.png" alt="Google" width={48} height={48} className="googleRedirectLogo" />
-        <h2 className="googleRedirectTitle">Вход через Google</h2>
-        <p className="googleRedirectText">
+    <div className={styles.googleRedirectPage}>
+      <div className={styles.googleRedirectCard}>
+        <img src="/assets/google.png" alt="Google" width={48} height={48} className={styles.googleRedirectLogo} />
+        <h2 className={styles.googleRedirectTitle}>Вход через Google</h2>
+        <p className={styles.googleRedirectText}>
           {redirecting ? 'Перенаправляем на Google…' : 'Не удалось автоматически перенаправить. Нажмите кнопку ниже.'}
         </p>
-        <div className="googleRedirectAction">
-          <a href={googleUrl} className="googleRedirectLink">
+        <div className={styles.googleRedirectAction}>
+          <a href={googleUrl} className={styles.googleRedirectLink}>
             Продолжить с Google
           </a>
         </div>

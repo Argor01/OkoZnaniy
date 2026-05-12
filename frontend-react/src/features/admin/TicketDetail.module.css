@@ -1,0 +1,339 @@
+/* Стили для страницы детального просмотра тикета - Pyrus Style */
+
+.ticketDetailPage {
+  padding: 0 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.ticketDetailBreadcrumb {
+  margin-bottom: 20px;
+  padding-top: 16px;
+}
+
+.ticketDetailBreadcrumb :global(.ant-breadcrumb) {
+  font-size: 14px;
+}
+
+.ticketDetailBreadcrumb a {
+  color: #2b9fe6;
+  transition: color 0.2s;
+}
+
+.ticketDetailBreadcrumb a:hover {
+  color: #40a9ff;
+}
+
+/* Заголовок тикета */
+.ticketDetailHeader {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.ticketDetailTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #262626;
+  line-height: 1.4;
+}
+
+/* Карточки */
+.ticketDetailPage :global(.ant-card) {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 16px;
+  transition: box-shadow 0.3s;
+}
+
+.ticketDetailPage :global(.ant-card):hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.ticketDetailPage :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px;
+  min-height: auto;
+}
+
+.ticketDetailPage :global(.ant-card-head-title) {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+  padding: 0;
+}
+
+.ticketDetailPage :global(.ant-card-body) {
+  padding: 20px;
+}
+
+.ticketDetailPage :global(.ant-card-small) > :global(.ant-card-head) {
+  padding: 12px 16px;
+}
+
+.ticketDetailPage :global(.ant-card-small) > :global(.ant-card-body) {
+  padding: 16px;
+}
+
+/* Описание проблемы */
+.ticketDetailDescription {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 16px;
+  line-height: 1.6;
+  color: #595959;
+}
+
+/* История обращения */
+.ticketDetailMessages {
+  max-height: 600px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding-right: 8px;
+}
+
+.ticketDetailMessages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ticketDetailMessages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ticketDetailMessages::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.ticketDetailMessages::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}
+
+.ticketDetailPage :global(.ant-timeline) {
+  margin-top: 16px;
+}
+
+.ticketDetailPage :global(.ant-timeline-item) {
+  padding-bottom: 24px;
+}
+
+.ticketDetailMessageBubble {
+  background: white;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s;
+}
+
+.ticketDetailMessageBubble:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.ticketDetailMessageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ticketDetailMessageSender {
+  font-weight: 600;
+  color: #262626;
+  font-size: 14px;
+}
+
+.ticketDetailMessageTime {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.ticketDetailMessageText {
+  color: #595959;
+  line-height: 1.6;
+  word-wrap: break-word;
+  font-size: 14px;
+}
+
+/* Форма ответа */
+.ticketDetailReplyForm {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 16px;
+}
+
+.ticketDetailReplyInput {
+  flex: 1;
+}
+
+.ticketDetailPage :global(.ant-input-textarea) textarea {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s;
+}
+
+.ticketDetailPage :global(.ant-input-textarea) textarea:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.ticketDetailHint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 8px;
+  display: block;
+}
+
+/* Боковая панель */
+.ticketDetailSidebar :global(.ant-card) {
+  background: white;
+}
+
+.ticketDetailPage :global(.ant-descriptions-item-label) {
+  font-weight: 500;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.ticketDetailPage :global(.ant-descriptions-item-content) {
+  color: #262626;
+  font-size: 14px;
+}
+
+/* Теги */
+.ticketDetailPage :global(.ant-tag) {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 2px 10px;
+  border: none;
+  font-weight: 500;
+}
+
+/* Команда */
+.ticketDetailTeamMember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.ticketDetailTeamMember:hover {
+  background: #f0f0f0;
+}
+
+/* Кнопки */
+.ticketDetailPage :global(.ant-btn) {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.ticketDetailPage :global(.ant-btn-primary) {
+  background: #2b9fe6;
+  border-color: #2b9fe6;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.ticketDetailPage :global(.ant-btn-primary):hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.ticketDetailPage :global(.ant-btn-dashed) {
+  border-color: #d9d9d9;
+  color: #595959;
+}
+
+.ticketDetailPage :global(.ant-btn-dashed):hover {
+  border-color: #40a9ff;
+  color: #40a9ff;
+}
+
+/* Select */
+.ticketDetailPage :global(.ant-select) {
+  border-radius: 6px;
+}
+
+.ticketDetailPage :global(.ant-select-selector) {
+  border-radius: 6px !important;
+  border-color: #d9d9d9 !important;
+}
+
+/* Divider */
+.ticketDetailPage :global(.ant-divider) {
+  margin: 20px 0;
+  border-color: #e8e8e8;
+}
+
+.ticketDetailPage :global(.ant-divider-inner-text) {
+  font-weight: 600;
+  color: #595959;
+  font-size: 14px;
+}
+
+/* Быстрые действия */
+.ticketDetailQuickActions :global(.ant-btn) {
+  justify-content: flex-start;
+  text-align: left;
+  height: auto;
+  padding: 10px 16px;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ticketDetailMessageBubble {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+  .ticketDetailPage {
+    padding: 0 16px;
+  }
+  
+  .ticketDetailMessages {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ticketDetailHeader {
+    padding: 16px;
+  }
+  
+  .ticketDetailTitle {
+    font-size: 18px;
+  }
+  
+  .ticketDetailReplyForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ticketDetailPage :global(.ant-card-body) {
+    padding: 16px;
+  }
+}

@@ -40,8 +40,8 @@ import { ru } from 'date-fns/locale';
 import styles from './SupportChatsSection.module.css';
 import { useSupportChats, useSupportActions } from '@/features/admin/hooks';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
-import '@/styles/support.css';
 import { logger } from '@/utils/logger';
+import supportStyles from '@/features/support/Support.module.css';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -264,8 +264,8 @@ export const SupportChatsSection: React.FC = () => {
         >
           <Card 
             title={
-              <div className="supportChatsCardTitle">
-                <CustomerServiceOutlined className="supportChatsCardTitleIcon" />
+              <div className={supportStyles.supportChatsCardTitle}>
+                <CustomerServiceOutlined className={supportStyles.supportChatsCardTitleIcon} />
                 <span>{isMobile ? "Чаты" : "Чаты поддержки"}</span>
               </div>
             }
@@ -283,19 +283,19 @@ export const SupportChatsSection: React.FC = () => {
             }
           >
             <Input
-              prefix={<SearchOutlined className="supportChatsSearchIcon" />}
+              prefix={<SearchOutlined className={supportStyles.supportChatsSearchIcon} />}
               placeholder="Поиск по чатам..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="supportChatsSearchInput"
+              className={supportStyles.supportChatsSearchInput}
               allowClear
             />
             
-            <div className="supportChatsFiltersRow">
+            <div className={supportStyles.supportChatsFiltersRow}>
               <Select
                 value={statusFilter}
                 onChange={setStatusFilter}
-                className="supportChatsFilterSelect"
+                className={supportStyles.supportChatsFilterSelect}
                 size="small"
               >
                 <Option value="all">Все статусы</Option>
@@ -308,7 +308,7 @@ export const SupportChatsSection: React.FC = () => {
               <Select
                 value={priorityFilter}
                 onChange={setPriorityFilter}
-                className="supportChatsFilterSelect"
+                className={supportStyles.supportChatsFilterSelect}
                 size="small"
               >
                 <Option value="all">Все приоритеты</Option>
@@ -319,12 +319,12 @@ export const SupportChatsSection: React.FC = () => {
               </Select>
             </div>
             
-            <div className="supportChatsStatsRow">
+            <div className={supportStyles.supportChatsStatsRow}>
               <span>Всего: <strong>{chatsData.length}</strong></span>
               <span>•</span>
               <span>Найдено: <strong>{filteredChats.length}</strong></span>
               <span>•</span>
-              <span className="supportChatsStatsUnread">
+              <span className={supportStyles.supportChatsStatsUnread}>
                 Непрочитанных: <strong>{filteredChats.filter(c => c.unread_count > 0).length}</strong>
               </span>
             </div>
@@ -345,26 +345,26 @@ export const SupportChatsSection: React.FC = () => {
                           <Avatar 
                             icon={<UserOutlined />} 
                             size={isMobile ? 40 : 44}
-                            className="supportChatsAvatar"
+                            className={supportStyles.supportChatsAvatar}
                           />
                         </Badge>
                       }
                       title={
-                        <div className="supportChatsListTitleRow">
-                          <span className="supportChatsListTitle">
+                        <div className={supportStyles.supportChatsListTitleRow}>
+                          <span className={supportStyles.supportChatsListTitle}>
                             {chat.client.first_name} {chat.client.last_name}
                           </span>
-                          <div className="supportChatsListTags">
+                          <div className={supportStyles.supportChatsListTags}>
                             <Tag 
                               color={getStatusColor(chat.status)} 
-                              className="supportChatsListTag"
+                              className={supportStyles.supportChatsListTag}
                             >
                               {getStatusText(chat.status)}
                             </Tag>
                             <Tag 
                               color={getPriorityColor(chat.priority)}
                               icon={chat.priority === 'urgent' || chat.priority === 'high' ? <FlagOutlined /> : undefined}
-                              className="supportChatsListTag"
+                              className={supportStyles.supportChatsListTag}
                             >
                               {getPriorityText(chat.priority)}
                             </Tag>
@@ -373,16 +373,16 @@ export const SupportChatsSection: React.FC = () => {
                       }
                       description={
                         <div>
-                          <div className="supportChatsListSubject">
+                          <div className={supportStyles.supportChatsListSubject}>
                             {chat.subject}
                           </div>
                           {chat.last_message && (
-                            <div className="supportChatsListLastMessage">
+                            <div className={supportStyles.supportChatsListLastMessage}>
                               {chat.last_message.text}
                             </div>
                           )}
-                          <div className="supportChatsListMeta">
-                            <MessageOutlined className="supportChatsListMetaIcon" />
+                          <div className={supportStyles.supportChatsListMeta}>
+                            <MessageOutlined className={supportStyles.supportChatsListMetaIcon} />
                             {formatTimestamp(chat.updated_at)}
                           </div>
                         </div>
@@ -400,8 +400,8 @@ export const SupportChatsSection: React.FC = () => {
           {selectedChat ? (
             <Card 
               title={
-                <div className="supportChatsChatHeader">
-                  <div className="supportChatsChatHeaderRow">
+                <div className={supportStyles.supportChatsChatHeader}>
+                  <div className={supportStyles.supportChatsChatHeaderRow}>
                     {isMobile && (
                       <Button 
                         size="small" 
@@ -416,7 +416,7 @@ export const SupportChatsSection: React.FC = () => {
                   </div>
                   
                   
-                  <div className="supportChatsChatMetaRow">
+                  <div className={supportStyles.supportChatsChatMetaRow}>
                     <Tag color={getStatusColor(selectedChat.status)} className={isMobile ? 'supportChatsChatTagMobile' : 'supportChatsChatTag'}>
                       {getStatusText(selectedChat.status)}
                     </Tag>
@@ -449,7 +449,7 @@ export const SupportChatsSection: React.FC = () => {
                       <div 
                         className={`supportChatsMessageBubble ${message.sender.is_admin ? 'supportChatsMessageBubbleAdmin' : 'supportChatsMessageBubbleUser'} ${isMobile ? 'supportChatsMessageBubbleMobile' : 'supportChatsMessageBubbleDesktop'}`}
                       >
-                        <div className="supportChatsMessageText">{message.text}</div>
+                        <div className={supportStyles.supportChatsMessageText}>{message.text}</div>
                         <div 
                           className={`supportChatsMessageTime ${message.sender.is_admin ? 'supportChatsMessageTimeAdmin' : 'supportChatsMessageTimeUser'} ${isMobile ? 'supportChatsMessageTimeMobile' : 'supportChatsMessageTimeDesktop'}`}
                         >
@@ -466,14 +466,14 @@ export const SupportChatsSection: React.FC = () => {
               <div className={isMobile ? 'supportChatsComposerMobile' : 'supportChatsComposer'}>
                 
                 {attachedFiles.length > 0 && (
-                  <div className="supportChatsAttachmentsRow">
+                  <div className={supportStyles.supportChatsAttachmentsRow}>
                     {attachedFiles.map((file, index) => (
                       <Tag 
                         key={index}
                         closable
                         onClose={() => removeAttachedFile(file)}
                         icon={<PaperClipOutlined />}
-                        className="supportChatsAttachmentTag"
+                        className={supportStyles.supportChatsAttachmentTag}
                       >
                         {file.name}
                       </Tag>
@@ -494,7 +494,7 @@ export const SupportChatsSection: React.FC = () => {
                       }
                     }}
                   />
-                  <div className="supportChatsComposerActions">
+                  <div className={supportStyles.supportChatsComposerActions}>
                     {!isMobile && (
                       <Upload
                         beforeUpload={handleFileSelect}
@@ -503,7 +503,7 @@ export const SupportChatsSection: React.FC = () => {
                       >
                         <Button 
                           icon={<PaperClipOutlined />} 
-                          className="supportChatsUploadButton"
+                          className={supportStyles.supportChatsUploadButton}
                         />
                       </Upload>
                     )}
@@ -513,12 +513,12 @@ export const SupportChatsSection: React.FC = () => {
                       onClick={sendMessage}
                       loading={sending}
                       disabled={!messageText.trim() && attachedFiles.length === 0}
-                      className="supportChatsSendButton"
+                      className={supportStyles.supportChatsSendButton}
                     />
                   </div>
                 </div>
                 {!isMobile && (
-                  <div className="supportChatsComposerHint">
+                  <div className={supportStyles.supportChatsComposerHint}>
                     💡 Ctrl+Enter для отправки
                   </div>
                 )}

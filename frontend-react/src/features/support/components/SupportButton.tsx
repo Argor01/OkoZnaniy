@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import { CustomerServiceOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '@/styles/support.css';
+import supportStyles from '@/features/support/Support.module.css';
 
 interface SupportButtonProps {
   type?: 'float' | 'button';
@@ -42,14 +42,14 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
 
   if (type === 'float') {
     return (
-      <div className="supportButtonFloatWrapper">
+      <div className={supportStyles.supportButtonFloatWrapper}>
         <Button
           type="primary"
           shape="circle"
           size="large"
           icon={<CustomerServiceOutlined />}
           onClick={handleSupportClick}
-          className="supportButtonFloat"
+          className={supportStyles.supportButtonFloat}
           title="Техническая поддержка"
         />
       </div>

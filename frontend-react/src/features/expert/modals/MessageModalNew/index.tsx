@@ -51,8 +51,6 @@ import { SupportCenterPanel } from '@/features/support/components/SupportCenterP
 import { supportRequestsApi } from '@/features/support/api/requests';
 import { ROUTES } from '@/utils/constants';
 import styles from '../MessageModalNew.module.css';
-import '../../../../styles/messages.css';
-import '../../../../styles/avatar.css';
 import ChatSidebar from './ChatSidebar';
 import ChatHeader from './ChatHeader';
 import ChatActions from './ChatActions';

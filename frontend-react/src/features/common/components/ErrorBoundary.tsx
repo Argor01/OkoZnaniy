@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button, Result, Typography } from 'antd';
-import '@/styles/error-boundary.css';
+import styles from '@/features/common/ErrorBoundary.module.css';
 
 interface Props {
   children: ReactNode;
@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="errorBoundaryContainer">
+        <div className={styles.errorBoundaryContainer}>
           <Result
             status="error"
             title="Что-то пошло не так"
@@ -44,7 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
             ]}
           />
           {import.meta.env.DEV && (
-            <div className="errorBoundaryDebug">
+            <div className={styles.errorBoundaryDebug}>
               <Typography.Text type="secondary">
                 <pre>{this.state.error?.stack}</pre>
               </Typography.Text>

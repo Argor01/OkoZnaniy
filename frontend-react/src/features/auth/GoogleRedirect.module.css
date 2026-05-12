@@ -1,0 +1,61 @@
+.googleRedirectPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f5f7fb;
+}
+
+.googleRedirectCard {
+  width: min(420px, 100%);
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(24, 39, 75, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.googleRedirectLogo {
+  display: block;
+}
+
+.googleRedirectTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.googleRedirectText {
+  margin: 0;
+  text-align: center;
+  color: #556070;
+}
+
+.googleRedirectAction {
+  margin-top: 8px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.googleRedirectLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #1a73e8;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.googleRedirectLink:hover {
+  background: #1558b0;
+  color: #fff;
+}
