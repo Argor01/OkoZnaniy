@@ -41,7 +41,7 @@ export const WorksModerationSection: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('pending');
 
   const dataSource = works;
-  const filteredData = dataSource.filter(work => 
+  const filteredData = dataSource.filter((work: Work) => 
     (work.title || '').toLowerCase().includes(searchText.toLowerCase()) &&
     (statusFilter === 'all' || work.moderation_status === statusFilter)
   );
@@ -86,9 +86,9 @@ export const WorksModerationSection: React.FC = () => {
 
   const stats = {
     total: filteredData.length,
-    pending: filteredData.filter(w => w.moderation_status === 'pending').length,
-    approved: filteredData.filter(w => w.moderation_status === 'approved').length,
-    rejected: filteredData.filter(w => w.moderation_status === 'rejected').length,
+    pending: filteredData.filter((w: Work) => w.moderation_status === 'pending').length,
+    approved: filteredData.filter((w: Work) => w.moderation_status === 'approved').length,
+    rejected: filteredData.filter((w: Work) => w.moderation_status === 'rejected').length,
   };
 
   const columns = [

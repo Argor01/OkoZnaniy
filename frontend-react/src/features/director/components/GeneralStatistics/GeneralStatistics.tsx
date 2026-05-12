@@ -184,16 +184,18 @@ const GeneralStatistics: React.FC = () => {
         const pdfMakeModule = await import('pdfmake/build/pdfmake');
         const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
         
-        const pdfMake = pdfMakeModule.default || pdfMakeModule;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pdfMake = (pdfMakeModule.default || pdfMakeModule) as any;
+        const fonts = pdfFontsModule as any;
 
-        if (pdfFontsModule.default && pdfFontsModule.default.pdfMake) {
-          pdfMake.vfs = pdfFontsModule.default.pdfMake.vfs;
-        } else if (pdfFontsModule.pdfMake) {
-          pdfMake.vfs = pdfFontsModule.pdfMake.vfs;
-        } else if (pdfFontsModule.default) {
-          pdfMake.vfs = pdfFontsModule.default;
+        if (fonts.default?.pdfMake) {
+          pdfMake.vfs = fonts.default.pdfMake.vfs;
+        } else if (fonts.pdfMake) {
+          pdfMake.vfs = fonts.pdfMake.vfs;
+        } else if (fonts.default) {
+          pdfMake.vfs = fonts.default;
         } else {
-          pdfMake.vfs = pdfFontsModule;
+          pdfMake.vfs = fonts;
         }
 
         const tableBody = [

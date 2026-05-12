@@ -217,7 +217,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
       key: 'actions',
       width: 150,
       fixed: 'right' as const,
-      render: (_, record: CustomerRequest) => (
+      render: (_: unknown, record: CustomerRequest) => (
         <Space>
           <Button
             type="text"

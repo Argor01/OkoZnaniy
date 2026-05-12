@@ -112,11 +112,11 @@ const OrdersFeed: React.FC = () => {
   // Для экспертов - доступные для отклика заказы
   const [available, own] = await Promise.all([
     userProfile?.role === 'client'
-      ? ordersApi.getClientOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
-      : ordersApi.getAvailableOrders().then(normalizeOrders).catch(() => []),
+      ? ordersApi.getClientOrders({ ordering: '-created_at' }).then(normalizeOrders).catch((): OrdersFeedOrder[] => [])
+      : ordersApi.getAvailableOrders().then(normalizeOrders).catch((): OrdersFeedOrder[] => []),
     // Дополнительно для клиентов загружаем все их заказы
     userProfile?.role === 'client'
-      ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch(() => [])
+      ? ordersApi.getMyOrders({ ordering: '-created_at' }).then(normalizeOrders).catch((): OrdersFeedOrder[] => [])
       : Promise.resolve([] as OrdersFeedOrder[]),
   ]);
   

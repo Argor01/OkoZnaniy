@@ -169,7 +169,7 @@ export const AdminChatsTable: React.FC<AdminChatsTableProps> = ({
       key: 'actions',
       width: 150,
       fixed: 'right' as const,
-      render: (_, record: AdminChatGroup) => {
+      render: (_: unknown, record: AdminChatGroup) => {
         const isParticipant = currentUserId && record.participants.some(p => p.id === currentUserId);
         
         return (

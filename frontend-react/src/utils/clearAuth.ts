@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 
 export const clearAuth = () => {
   localStorage.removeItem('access_token');

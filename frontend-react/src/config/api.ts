@@ -1,6 +1,4 @@
-
-
-
+import { logger } from '@/utils/logger';
 
 const getApiBaseUrl = () => {
   const debugEnabled =
