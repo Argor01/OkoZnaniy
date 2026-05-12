@@ -26,6 +26,7 @@ import {
   deleteEmployee,
 } from '@/features/director/api/directorApi';
 import { type Employee } from '@/features/director/api/types';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -90,7 +91,7 @@ const EmployeeArchive: React.FC = () => {
       content: (
         <div>
           <p>Вы уверены, что хотите удалить {employee.first_name} {employee.last_name} навсегда?</p>
-          <p className="employeeArchiveDeleteWarning">
+          <p className={styles.employeeArchiveDeleteWarning}>
             Это действие нельзя отменить!
           </p>
         </div>
@@ -182,7 +183,7 @@ const EmployeeArchive: React.FC = () => {
               type="text"
               icon={<UndoOutlined />}
               onClick={() => handleRestore(record)}
-              className="employeeArchiveRestoreButton"
+              className={styles.employeeArchiveRestoreButton}
             />
           </Tooltip>
           <Tooltip title="Удалить навсегда">
@@ -202,11 +203,11 @@ const EmployeeArchive: React.FC = () => {
     <div>
       <Card>
         <Title level={4}>Архив сотрудников</Title>
-        <Space direction="vertical" className="employeeArchiveFilters" size="large">
+        <Space direction="vertical" className={styles.employeeArchiveFilters} size="large">
           <Search
             placeholder="Поиск по имени, фамилии или email"
             allowClear
-            className="employeeArchiveSearch"
+            className={styles.employeeArchiveSearch}
             onSearch={setSearchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -222,7 +223,7 @@ const EmployeeArchive: React.FC = () => {
               showTotal: (total) => `Всего: ${total}`,
             }}
             scroll={{ x: 800 }}
-            className="employeeArchiveTable"
+            className={styles.employeeArchiveTable}
           />
         </Spin>
       </Card>

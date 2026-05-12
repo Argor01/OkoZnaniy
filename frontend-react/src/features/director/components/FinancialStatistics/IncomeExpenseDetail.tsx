@@ -17,6 +17,7 @@ import { getIncomeDetail, getExpenseDetail, addIncome, addExpense } from '@/feat
 import apiClient from '@/api/client';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
 import { logger } from '@/utils/logger';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -85,7 +86,7 @@ const IncomeExpenseDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="incomeExpenseLoading">
+      <div className={styles.incomeExpenseLoading}>
         <Spin size="large" />
       </div>
     );
@@ -281,7 +282,7 @@ const IncomeExpenseDetail: React.FC = () => {
         </Space>
       </Card>
 
-      <Row gutter={[16, isMobile ? 12 : 16]} className="incomeExpenseStatsRow">
+      <Row gutter={[16, isMobile ? 12 : 16]} className={styles.incomeExpenseStatsRow}>
         <Col xs={24} sm={12} md={8}>
           <Card
             className={[

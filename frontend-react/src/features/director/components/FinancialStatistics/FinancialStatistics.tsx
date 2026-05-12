@@ -3,6 +3,7 @@ import { Card, Tabs } from 'antd';
 import { LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
 import NetProfit from './NetProfit';
 import IncomeExpenseDetail from './IncomeExpenseDetail';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const FinancialStatistics: React.FC = () => {
   const items = [
@@ -10,7 +11,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'profit',
       label: (
         <span>
-          <LineChartOutlined className="financialStatisticsTabIcon" />
+          <LineChartOutlined className={styles.financialStatisticsTabIcon} />
           Чистая прибыль
         </span>
       ),
@@ -20,7 +21,7 @@ const FinancialStatistics: React.FC = () => {
       key: 'detail',
       label: (
         <span>
-          <FileTextOutlined className="financialStatisticsTabIcon" />
+          <FileTextOutlined className={styles.financialStatisticsTabIcon} />
           Доходы и расходы
         </span>
       ),

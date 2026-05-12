@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import { getMonthlyTurnover } from '@/features/director/api/directorApi';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { RangePicker } = DatePicker;
 
@@ -47,7 +48,7 @@ const MonthlyTurnover: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="monthlyTurnoverLoading">
+      <div className={styles.monthlyTurnoverLoading}>
         <Spin size="large" />
       </div>
     );
@@ -156,7 +157,7 @@ const MonthlyTurnover: React.FC = () => {
         )}
       </Card>
 
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className="monthlyTurnoverStatsRow">
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className={styles.monthlyTurnoverStatsRow}>
         <Col xs={24} sm={12}>
           <Card
             className={[

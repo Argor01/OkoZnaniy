@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import EmployeeRegistration from './EmployeeRegistration';
 import ExpertApplications from './ExpertApplications';
 import EmployeeList from './EmployeeList';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { Title } = Typography;
 
@@ -29,7 +30,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'registration',
       label: (
         <span>
-          <UserAddOutlined className="personnelManagementTabIcon" />
+          <UserAddOutlined className={styles.personnelManagementTabIcon} />
           Регистрация сотрудника
         </span>
       ),
@@ -39,7 +40,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'applications',
       label: (
         <span>
-          <FileTextOutlined className="personnelManagementTabIcon" />
+          <FileTextOutlined className={styles.personnelManagementTabIcon} />
           Анкеты экспертов
         </span>
       ),
@@ -49,7 +50,7 @@ const PersonnelManagement: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <TeamOutlined className="personnelManagementTabIcon" />
+          <TeamOutlined className={styles.personnelManagementTabIcon} />
           Список сотрудников
         </span>
       ),

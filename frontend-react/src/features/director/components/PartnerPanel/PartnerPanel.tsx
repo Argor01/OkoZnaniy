@@ -3,6 +3,7 @@ import { Card, Tabs } from 'antd';
 import { UserAddOutlined, DollarOutlined } from '@ant-design/icons';
 import PartnerList from './PartnerList';
 import PartnerTurnover from './PartnerTurnover';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const PartnerPanel: React.FC = () => {
   const isMobile = window.innerWidth <= 840;
@@ -12,7 +13,7 @@ const PartnerPanel: React.FC = () => {
       key: 'list',
       label: (
         <span>
-          <UserAddOutlined className="partnerPanelTabIcon" />
+          <UserAddOutlined className={styles.partnerPanelTabIcon} />
           Список партнёров
         </span>
       ),
@@ -22,7 +23,7 @@ const PartnerPanel: React.FC = () => {
       key: 'turnover',
       label: (
         <span>
-          <DollarOutlined className="partnerPanelTabIcon" />
+          <DollarOutlined className={styles.partnerPanelTabIcon} />
           Оборот по партнёрам
         </span>
       ),

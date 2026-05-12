@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
 import { getIncomeDetail, getExpenseDetail } from '@/features/director/api/directorApi';
 import mobileStyles from '@/features/director/components/shared/MobileDatePicker.module.css';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { RangePicker } = DatePicker;
 
@@ -83,7 +84,7 @@ const NetProfit: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="netProfitLoading">
+      <div className={styles.netProfitLoading}>
         <Spin size="large" />
       </div>
     );
@@ -192,7 +193,7 @@ const NetProfit: React.FC = () => {
         )}
       </Card>
 
-      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className="netProfitStatsRow">
+      <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]} className={styles.netProfitStatsRow}>
         <Col xs={24} sm={12}>
           <Card
             className={[

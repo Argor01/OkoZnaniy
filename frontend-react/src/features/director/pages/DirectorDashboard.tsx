@@ -26,7 +26,7 @@ import DirectorFaqModal from '../modals/DirectorFaqModal';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modals.css';
-import '@/styles/director.css';
+import styles from '@/features/director/DirectorDashboard.module.css';
 
 const { Header, Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -89,7 +89,7 @@ const DirectorDashboard: React.FC = () => {
   // NOW SAFE TO HAVE CONDITIONAL RETURNS
   if (authLoading) {
     return (
-      <div className="directorDashboardLoading">
+      <div className={styles.directorDashboardLoading}>
         <Spin size="large" />
       </div>
     );
@@ -231,7 +231,7 @@ const DirectorDashboard: React.FC = () => {
   );
 
   return (
-    <Layout className="directorDashboardLayout">
+    <Layout className={styles.directorDashboardLayout}>
       <DirectorFaqModal
         visible={faqModalVisible}
         onClose={() => setFaqModalVisible(false)}
@@ -241,7 +241,7 @@ const DirectorDashboard: React.FC = () => {
       {!isMobile && (
         <Sider
           width={isTablet ? 200 : 250}
-          className="directorDashboardSider"
+          className={styles.directorDashboardSider}
           breakpoint="lg"
           collapsedWidth="0"
         >
@@ -276,7 +276,7 @@ const DirectorDashboard: React.FC = () => {
           {drawerVisible && (
             <div
               onClick={() => setDrawerVisible(false)}
-              className="directorDashboardMobileOverlay"
+              className={styles.directorDashboardMobileOverlay}
             />
           )}
           <div
@@ -285,19 +285,19 @@ const DirectorDashboard: React.FC = () => {
               drawerVisible ? 'directorDashboardMobileDrawerOpen' : '',
             ].filter(Boolean).join(' ')}
           >
-            <div className="directorDashboardMobileCloseRow">
+            <div className={styles.directorDashboardMobileCloseRow}>
               <button
                 onClick={() => setDrawerVisible(false)}
-                className="directorDashboardMobileCloseButton"
+                className={styles.directorDashboardMobileCloseButton}
               >
                 ✕
               </button>
             </div>
             <div
-              className="directorDashboardMobileHeader"
+              className={styles.directorDashboardMobileHeader}
             >
-              <BankOutlined className="directorDashboardMobileHeaderIcon" />
-              <Title level={5} className="directorDashboardMobileHeaderTitle">
+              <BankOutlined className={styles.directorDashboardMobileHeaderIcon} />
+              <Title level={5} className={styles.directorDashboardMobileHeaderTitle}>
                 ЛК директора
               </Title>
             </div>
@@ -318,7 +318,7 @@ const DirectorDashboard: React.FC = () => {
               type="primary"
               icon={<MenuOutlined />}
               onClick={() => setDrawerVisible(true)}
-              className="directorDashboardMenuButton"
+              className={styles.directorDashboardMenuButton}
             />
           )}
           <Title 
