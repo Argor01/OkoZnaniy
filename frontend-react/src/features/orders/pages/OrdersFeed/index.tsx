@@ -375,7 +375,7 @@ const OrdersFeed: React.FC = () => {
         className={styles.filterCard}
       >
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={24} md={12} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <AppInput
               size="large"
               placeholder="Поиск по названию или описанию..."
@@ -385,7 +385,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={6} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <AppInput
               size="large"
               placeholder="Номер заказа"
@@ -395,7 +395,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={6} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <AppSelect
               size="large"
               placeholder="Предмет"
@@ -412,7 +412,7 @@ const OrdersFeed: React.FC = () => {
               ))}
             </AppSelect>
           </Col>
-          <Col xs={24} sm={12} md={6} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <AppSelect
               size="large"
               placeholder="Тип работы"
@@ -442,8 +442,8 @@ const OrdersFeed: React.FC = () => {
         </div>
 
         {showFilters && (
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={12} md={8}>
+          <Row gutter={[24, 16]}>
+            <Col xs={24} sm={24} md={8}>
               <div className={styles.filterLabel}>
                 <Text strong>Бюджет</Text>
               </div>
