@@ -44,6 +44,7 @@ const DirectorDashboard: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [isTablet, setIsTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
 
@@ -171,8 +172,6 @@ const DirectorDashboard: React.FC = () => {
   const handleFaqClick = () => {
     setFaqModalVisible(true);
   };
-
-  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
   const handleLogout = () => {
     setLogoutModalVisible(true);
