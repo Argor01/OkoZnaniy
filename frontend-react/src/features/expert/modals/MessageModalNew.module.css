@@ -2682,3 +2682,13 @@
   visibility: visible;
 }
 
+/* Dark theme overrides */
+:global([data-theme="dark"]) .chatHeaderEmpty {
+  background: var(--bg-secondary, #161922);
+  border-bottom-color: var(--border-color, #2d3348);
+}
+
+:global([data-theme="dark"]) .chatHeaderEmptyText {
+  color: var(--text-secondary, #94a3b8);
+}
+
