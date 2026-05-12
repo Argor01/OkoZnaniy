@@ -609,3 +609,44 @@ a {
   border-color: var(--border-color, #2d3348) !important;
   color: var(--text-primary) !important;
 }
+
+/* Dark theme: Ant Design table */
+[data-theme="dark"] .ant-table {
+  background: var(--color-bg-container, #1a1d27) !important;
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+[data-theme="dark"] .ant-table-thead > tr > th {
+  background: var(--color-bg-elevated, #22262f) !important;
+  color: var(--color-text-heading, #e2e8f0) !important;
+  border-color: var(--color-border-base, #2d3348) !important;
+}
+
+[data-theme="dark"] .ant-table-tbody > tr > td {
+  border-color: var(--color-border-base, #2d3348) !important;
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+[data-theme="dark"] .ant-table-tbody > tr:hover > td {
+  background: var(--color-bg-elevated, #22262f) !important;
+}
+
+[data-theme="dark"] .ant-table-cell {
+  color: var(--color-text-base, #cbd5e1) !important;
+}
+
+[data-theme="dark"] .ant-statistic-title {
+  color: var(--color-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] .ant-statistic-content-value {
+  color: var(--color-text-heading, #e2e8f0) !important;
+}
+
+[data-theme="dark"] .ant-descriptions-item-label {
+  color: var(--color-text-secondary, #94a3b8) !important;
+}
+
+[data-theme="dark"] .ant-descriptions-item-content {
+  color: var(--color-text-base, #cbd5e1) !important;
+}

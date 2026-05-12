@@ -84,7 +84,7 @@ const ChatListItem: React.FC<{ id: number; name: string; subtitle: string; time?
     onMouseEnter={e => !active && (e.currentTarget.style.background = 'var(--color-chat-item-hover, #f5f5f5)')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
     <Avatar icon={<TeamOutlined />} style={{ background: '#2b9fe6', flexShrink: 0 }} />
     <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontWeight: 600 }}>{name}</div>
+      <div style={{ fontWeight: 600, color: 'var(--color-text-base, #000)' }}>{name}</div>
       <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
     </div>
     {time && <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #bfbfbf)', flexShrink: 0 }}>{time}</div>}
@@ -97,7 +97,7 @@ const ChatHeader: React.FC<{ name: string; sub: string; icon: React.ReactNode; o
       {onBack && <Button size="small" onClick={onBack}>←</Button>}
       <Avatar icon={icon} style={{ background: '#2b9fe6' }} />
       <div>
-        <div style={{ fontWeight: 600 }}>{name}</div>
+        <div style={{ fontWeight: 600, color: 'var(--color-text-base, #000)' }}>{name}</div>
         <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)' }}>{sub}</div>
       </div>
     </Space>
@@ -276,7 +276,7 @@ export const AdminChatsSection: React.FC = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div style={{ background: "#fff", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: isMobile ? "calc(100vh - 120px)" : "calc(100vh - 160px)", display: "flex", flexDirection: "column" }}>
+    <div style={{ background: "var(--color-bg-container, #fff)", borderRadius: isMobile ? 0 : 12, boxShadow: isMobile ? "none" : "0 2px 12px rgba(0,0,0,0.08)", overflow: "hidden", height: isMobile ? "calc(100vh - 120px)" : "calc(100vh - 160px)", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <RoomsTab uid={uid} />
       </div>

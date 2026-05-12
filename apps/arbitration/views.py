@@ -184,7 +184,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
     
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('order', 'order__client', 'order__expert', 'arbitrator')
+        queryset = super().get_queryset().select_related('order', 'order__client', 'order__expert', 'assigned_admin')
         user = self.request.user
         
         # Администраторы видят все дела

@@ -336,6 +336,31 @@
   }
 }
 
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .allOrdersTitle {
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .allOrdersMetaText {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .allOrdersPersonName {
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .allOrdersPersonHandle {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .allOrdersDeadlineDate {
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .allOrdersDeadlineTime {
+  color: #94a3b8;
+}
+
 /* Улучшения для сенсорных устройств */
 @media (hover: none) and (pointer: coarse) {
   :global(.ant-btn) {
