@@ -1,11 +1,13 @@
 .card {
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all 0.3s;
+  transition: all 0.35s ease, max-height 0.45s ease;
   border: 1px solid var(--border-color);
-  height: 480px;
+  max-height: 480px;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .card :global(.ant-card-body) {
@@ -20,6 +22,9 @@
   box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
   border-color: var(--primary-blue);
+  max-height: 800px;
+  z-index: 10;
+  overflow: visible;
 }
 
 .preview {
@@ -85,14 +90,18 @@
 }
 
 .description {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 12px;
-  min-height: 4.5em;
   line-height: 1.5;
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  transition: max-height 0.45s ease, opacity 0.35s ease, margin-bottom 0.35s ease;
+}
+
+.card:hover .description {
+  max-height: 200px;
+  opacity: 1;
+  margin-bottom: 12px;
 }
 
 .author {
@@ -133,8 +142,14 @@
 
 @media (max-width: 840px) {
   .card {
-    height: auto;
+    max-height: none;
     min-height: 0;
+  }
+
+  .description {
+    max-height: none;
+    opacity: 1;
+    margin-bottom: 12px;
   }
 
   .preview,
@@ -149,7 +164,7 @@
 
 @media (max-width: 480px) {
   .card {
-    height: auto;
+    max-height: none;
   }
 
   .preview,
@@ -162,8 +177,13 @@
   }
 
   .description {
+    max-height: none;
+    opacity: 1;
+    margin-bottom: 12px;
+    display: -webkit-box;
     -webkit-line-clamp: 2;
-    min-height: 3em;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
   }
 
   .currentPrice {
