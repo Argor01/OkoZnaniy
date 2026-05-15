@@ -44,7 +44,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onPurchase, onDownloa
       }
     >
       <div className={styles.header}>
-        <Tag color="blue">{work.category}</Tag>
+        <Tag color="purple">{work.category}</Tag>
         <Space size={4}>
           {allowDelete && onDelete && (
             <Popconfirm

@@ -9,8 +9,8 @@
 }
 
 :global(.ant-modal-wrap) .questionModal :global(.ant-modal-header) {
-  background: linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
-  border-bottom: 1px solid #e6f4ff;
+  background: linear-gradient(135deg, #faf8ff 0%, #f5f0ff 100%);
+  border-bottom: 1px solid #f3e8ff;
   padding: 20px 24px;
 }
 
@@ -63,8 +63,8 @@
 }
 
 .submitButton {
-  background: #2b9fe6;
-  border-color: #2b9fe6;
+  background: #6435a5;
+  border-color: #6435a5;
   border-radius: 8px;
   font-weight: 600;
   height: 40px;

@@ -365,7 +365,7 @@ const PartnerTurnover: React.FC = () => {
                             formatter={(value: number) => formatCurrency(value)}
                           />
                           <Legend />
-                          <Bar dataKey="turnover" fill="#2b9fe6" name="Оборот" />
+                          <Bar dataKey="turnover" fill="#6435a5" name="Оборот" />
                           <Bar dataKey="commission" fill="#52c41a" name="Комиссия" />
                         </BarChart>
                       </ResponsiveContainer>
@@ -403,7 +403,7 @@ const PartnerTurnover: React.FC = () => {
                             dataKey="value"
                           >
                             {topPartners.map((_: any, idx: number) => (
-                              <Cell key={`cell-${idx}`} fill={['#2b9fe6', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96'][idx]} />
+                              <Cell key={`cell-${idx}`} fill={['#6435a5', '#52c41a', '#722ed1', '#fa8c16', '#eb2f96'][idx]} />
                             ))}
                           </Pie>
                           <Tooltip 
@@ -467,7 +467,7 @@ const PartnerTurnover: React.FC = () => {
                                   {partner.firstName || partner.first_name} {partner.lastName || partner.last_name}
                                 </Text>
                               </div>
-                              <Tag color="blue" className={styles.topPartnerPercentTag}>
+                              <Tag color="purple" className={styles.topPartnerPercentTag}>
                                 {percentage.toFixed(1)}%
                               </Tag>
                             </div>
@@ -531,7 +531,7 @@ const PartnerTurnover: React.FC = () => {
                               <Text>Рефералов: {partner.referralsCount || partner.referrals_count || 0}</Text>
                             </Col>
                             <Col span={3}>
-                              <Tag color="blue">{percentage.toFixed(2)}%</Tag>
+                              <Tag color="purple">{percentage.toFixed(2)}%</Tag>
                             </Col>
                           </Row>
                         )}
@@ -572,7 +572,7 @@ const PartnerTurnover: React.FC = () => {
                                   {partner.firstName || partner.first_name || ''} {partner.lastName || partner.last_name || ''}
                                 </Text>
                               </div>
-                              <Tag color="blue" className={styles.allPartnerPercentTag}>
+                              <Tag color="purple" className={styles.allPartnerPercentTag}>
                                 {percentage.toFixed(1)}%
                               </Tag>
                             </div>

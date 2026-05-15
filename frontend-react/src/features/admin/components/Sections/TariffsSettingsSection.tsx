@@ -143,7 +143,7 @@ export const TariffsSettingsSection: React.FC = () => {
   
   const getCategoryColor = (category: string) => {
     const colors = {
-      writing: 'blue',
+      writing: 'purple',
       editing: 'green',
       consultation: 'orange',
       premium: 'purple',

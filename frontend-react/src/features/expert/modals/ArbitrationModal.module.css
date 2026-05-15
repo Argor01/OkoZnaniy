@@ -120,7 +120,7 @@
 
 .arbitrationModalTabActiveAll {
   background: #ffffff;
-  border-bottom: 2px solid #3b82f6;
+  border-bottom: 2px solid #7c3aed;
 }
 
 .arbitrationModalTabActivePending {
@@ -130,7 +130,7 @@
 
 .arbitrationModalTabActiveInReview {
   background: #ffffff;
-  border-bottom: 2px solid #3b82f6;
+  border-bottom: 2px solid #7c3aed;
 }
 
 .arbitrationModalTabActiveResolved {
@@ -152,7 +152,7 @@
 }
 
 .arbitrationModalTabIconAll {
-  color: #3b82f6;
+  color: #7c3aed;
 }
 
 .arbitrationModalTabIconPending {
@@ -160,7 +160,7 @@
 }
 
 .arbitrationModalTabIconInReview {
-  color: #3b82f6;
+  color: #7c3aed;
 }
 
 .arbitrationModalTabIconResolved {
@@ -329,7 +329,7 @@
 }
 
 .arbitrationModalStatusIconInReview {
-  color: #3b82f6;
+  color: #7c3aed;
 }
 
 .arbitrationModalStatusIconResolved {
@@ -361,7 +361,7 @@
 }
 
 .arbitrationModalStatusTextInReview {
-  color: #3b82f6;
+  color: #7c3aed;
 }
 
 .arbitrationModalStatusTextResolved {
@@ -631,7 +631,7 @@
 
 .arbitrationModalTitleIcon {
   font-size: 24px;
-  color: #3b82f6;
+  color: #7c3aed;
 }
 
 .arbitrationModalNotice {
@@ -655,7 +655,7 @@
   background: #dbeafe;
   border-radius: 8px;
   margin-bottom: 12px;
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid #7c3aed;
 }
 
 .arbitrationModalFinancialTitle {

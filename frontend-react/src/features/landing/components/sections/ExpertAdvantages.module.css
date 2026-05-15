@@ -95,7 +95,7 @@
   width: 72px;
   height: 72px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #97d0ff 100%);
+  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, #c4a0ff 100%);
   color: #fff;
   flex-shrink: 0;
 }

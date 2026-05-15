@@ -62,7 +62,7 @@
   }
   
   .ant-table-tbody > tr:hover > td {
-    background: #f0f9ff;
+    background: #f8f0ff;
   }
   
   .ant-table-tbody > tr > td {
@@ -138,7 +138,7 @@
     
     .senderName {
       font-weight: 500;
-      color: #2b9fe6;
+      color: #6435a5;
       margin-right: 4px;
     }
     
@@ -176,12 +176,12 @@
 
 
 .actionButton {
-  color: #2b9fe6;
+  color: #6435a5;
   border-color: transparent;
   
   &:hover {
     color: #40a9ff;
-    background: #f0f9ff;
+    background: #f8f0ff;
   }
 }
 
@@ -423,7 +423,7 @@
 }
 
 .table .ant-table-expand-icon {
-  color: #2b9fe6;
+  color: #6435a5;
   
   &:hover {
     color: #40a9ff;

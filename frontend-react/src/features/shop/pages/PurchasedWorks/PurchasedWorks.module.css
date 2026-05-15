@@ -52,7 +52,7 @@
 .workCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 
@@ -93,7 +93,7 @@
 .statsCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 
@@ -120,13 +120,13 @@
 }
 
 .viewButton {
-  background: #3b82f6;
+  background: #7c3aed;
   border: none;
   color: white;
 }
 
 .viewButton:hover {
-  background: #2563eb;
+  background: #6d28d9;
   color: white;
 }
 

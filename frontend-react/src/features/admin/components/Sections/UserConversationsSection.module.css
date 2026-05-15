@@ -66,8 +66,8 @@
 }
 
 .chatRoomItemActive {
-  background-color: #f0f8ff;
-  border-left: 3px solid #2b9fe6;
+  background-color: #f8f0ff;
+  border-left: 3px solid #6435a5;
 }
 
 .chatRoomAvatar {
@@ -82,7 +82,7 @@
 }
 
 .roomTypeGeneral {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
 }
 
 .roomTypeDepartment {
@@ -257,7 +257,7 @@
 }
 
 .messageAvatarUser {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
 }
 
 .messageContent {
@@ -416,8 +416,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #2b9fe6;
-  border-color: #2b9fe6;
+  background-color: #6435a5;
+  border-color: #6435a5;
   transition: all 0.2s ease;
 }
 

@@ -41,7 +41,7 @@
 
 .commissionRate {
   font-weight: 600;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .referralsInfo {
@@ -89,7 +89,7 @@
 }
 
 .partnersTable :global(.ant-table-tbody > tr:hover > td) {
-  background: var(--color-chat-item-hover, #f0f9ff);
+  background: var(--color-chat-item-hover, #f8f0ff);
 }
 
 .partnersTable :global(.ant-table-tbody > tr > td) {

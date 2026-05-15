@@ -50,7 +50,7 @@ interface ClaimDetailsProps {
 const getTypeColor = (type: string) => {
   switch (type) {
     case 'refund':
-      return 'blue';
+      return 'purple';
     case 'dispute':
       return 'orange';
     case 'conflict':
@@ -209,7 +209,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
               <Tag
                 color={
                   claim.status === 'new'
-                    ? 'blue'
+                    ? 'purple'
                     : claim.status === 'in_progress'
                     ? 'orange'
                     : claim.status === 'completed'
@@ -305,7 +305,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
           {claim.messages && claim.messages.length > 0 ? (
             <Timeline className="arbitratorSectionSpacing">
               {claim.messages.map((message) => (
-                <Timeline.Item key={message.id} color="blue">
+                <Timeline.Item key={message.id} color="purple">
                   <div>
                     <Text strong>{message.sender.username}</Text>
                     <Text type="secondary" className="arbitratorTimelineDate">
@@ -398,7 +398,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
                 <Descriptions.Item label="Тип решения">
                   <Tag color={
                     claim.decision.decision_type === 'full_refund' ? 'green' :
-                    claim.decision.decision_type === 'partial_refund' ? 'blue' :
+                    claim.decision.decision_type === 'partial_refund' ? 'purple' :
                     claim.decision.decision_type === 'no_refund' ? 'red' :
                     claim.decision.decision_type === 'revision' ? 'orange' : 'default'
                   }>

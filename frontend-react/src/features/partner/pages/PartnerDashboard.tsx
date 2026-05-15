@@ -105,15 +105,15 @@ const StatisticsPanel: React.FC<{
         <Col xs={24} sm={12} md={6}>
           <Card 
             style={{ 
-              borderLeft: '4px solid #2b9fe6',
-              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #1a2740 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)'
+              borderLeft: '4px solid #6435a5',
+              background: isDark ? 'linear-gradient(135deg, #1e1a32 0%, #251a40 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f8f0ff 100%)'
             }}
           >
             <Statistic
               title="Всего рефералов"
               value={partnerInfo.total_referrals}
-              prefix={<TeamOutlined style={{ color: '#2b9fe6' }} />}
-              valueStyle={{ color: '#2b9fe6' }}
+              prefix={<TeamOutlined style={{ color: '#6435a5' }} />}
+              valueStyle={{ color: '#6435a5' }}
             />
           </Card>
         </Col>
@@ -121,7 +121,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #52c41a',
-              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #1a2e1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1e1a32 0%, #1a2e1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f6ffed 100%)'
             }}
           >
             <Statistic
@@ -136,7 +136,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #faad14',
-              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #2e2a1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fffbe6 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1e1a32 0%, #2e2a1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fffbe6 100%)'
             }}
           >
             <Statistic
@@ -152,7 +152,7 @@ const StatisticsPanel: React.FC<{
           <Card 
             style={{ 
               borderLeft: '4px solid #722ed1',
-              background: isDark ? 'linear-gradient(135deg, #1a2332 0%, #251a35 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f9f0ff 100%)'
+              background: isDark ? 'linear-gradient(135deg, #1e1a32 0%, #251a35 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f9f0ff 100%)'
             }}
           >
             <Statistic
@@ -202,7 +202,7 @@ const ReferralProgram: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
         <Space direction="vertical" className="partnerDashboardSpaceFull" size="large">
           <div>
             <Text strong>Ваш реферальный код: </Text>
-            <Tag color="blue" className="partnerDashboardReferralCodeTag">
+            <Tag color="purple" className="partnerDashboardReferralCodeTag">
               {partnerInfo.referral_code}
             </Tag>
           </div>
@@ -278,7 +278,7 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
       dataIndex: 'role',
       key: 'role',
       render: (role: string) => (
-        <Tag color={role === 'client' ? 'blue' : 'green'}>
+        <Tag color={role === 'client' ? 'purple' : 'green'}>
           {role === 'client' ? 'Клиент' : 'Эксперт'}
         </Tag>
       ),
@@ -335,7 +335,7 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
       key: 'earning_type',
       render: (type: string) => {
         const typeMap: Record<string, { label: string; color: string }> = {
-          order: { label: 'Заказ', color: 'blue' },
+          order: { label: 'Заказ', color: 'purple' },
           registration: { label: 'Регистрация', color: 'green' },
           bonus: { label: 'Бонус', color: 'purple' },
         };

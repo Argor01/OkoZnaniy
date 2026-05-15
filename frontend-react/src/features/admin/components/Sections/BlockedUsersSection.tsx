@@ -81,7 +81,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
   const getRoleColor = (role: string) => {
     const roleColors: Record<string, string> = {
       admin: 'red',
-      expert: 'blue',
+      expert: 'purple',
       client: 'green',
       partner: 'orange',
     };

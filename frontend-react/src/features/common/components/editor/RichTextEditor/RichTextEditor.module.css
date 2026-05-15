@@ -15,8 +15,8 @@
 }
 
 .editor:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(100, 53, 165, 0.12);
 }
 
 .toolbar {
@@ -41,7 +41,7 @@
 }
 
 .toolbarButton:hover {
-  color: #3b82f6;
+  color: #7c3aed;
   background: #eff6ff;
   transform: scale(1.1);
 }
@@ -116,8 +116,8 @@
 }
 
 :global([data-theme="dark"]) .editor:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(100, 53, 165, 0.12);
 }
 
 :global([data-theme="dark"]) .toolbar {
@@ -130,8 +130,8 @@
 }
 
 :global([data-theme="dark"]) .toolbarButton:hover {
-  color: #60a5fa;
-  background: rgba(59, 130, 246, 0.1);
+  color: #a78bfa;
+  background: rgba(100, 53, 165, 0.1);
 }
 
 :global([data-theme="dark"]) .divider {

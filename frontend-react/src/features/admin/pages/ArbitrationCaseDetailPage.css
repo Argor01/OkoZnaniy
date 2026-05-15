@@ -72,7 +72,7 @@
 }
 
 .message-input-container textarea:focus {
-  border-color: #2b9fe6;
+  border-color: #6435a5;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 

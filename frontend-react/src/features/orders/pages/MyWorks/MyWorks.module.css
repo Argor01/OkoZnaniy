@@ -97,7 +97,7 @@
 
 
 .worksHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   color: white;
   padding: 24px;
   border-radius: 0 0 24px 24px;
@@ -132,7 +132,7 @@
 .statsCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 .workCard {
@@ -152,7 +152,7 @@
 .workCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 .workCardHeader {
@@ -214,16 +214,16 @@
 }
 
 .tabsContainer .ant-tabs-tab:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(100, 53, 165, 0.1);
 }
 
 .tabsContainer .ant-tabs-tab-active {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
+  background: rgba(100, 53, 165, 0.1);
+  border-color: #7c3aed;
 }
 
 .tabsContainer .ant-tabs-ink-bar {
-  background: #3b82f6;
+  background: #7c3aed;
 }
 
 .emptyState {
@@ -241,7 +241,7 @@
   padding: 4px 10px;
   font-weight: 300;
   border: none;
-  background: #2563eb;
+  background: #6d28d9;
   color: #ffffff;
 }
 
@@ -334,7 +334,7 @@
 }
 
 .loadingSpin {
-  color: #667eea;
+  color: #7c3aed;
 }
 
 
@@ -350,13 +350,13 @@
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   border: none;
   color: white;
 }
 
 .primaryButton:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(135deg, #6d28d9 0%, #6b46c1 100%);
   color: white;
 }
 
@@ -370,8 +370,8 @@
 }
 
 .searchInput:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1);
 }
 
 /* Mobile search input */
@@ -399,12 +399,12 @@
 }
 
 .filterSelect:hover .ant-select-selector {
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 .filterSelect.ant-select-focused .ant-select-selector {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1);
 }
 
 .pageHeader {
@@ -506,8 +506,8 @@
 }
 
 .tabActive {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.06);
+  border-color: #7c3aed;
+  background: rgba(100, 53, 165, 0.06);
 }
 
 /* Mobile adaptations */

@@ -266,7 +266,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
   
   const getTypeColor = (type: string) => {
     const colors = {
-      technical_support: 'blue',
+      technical_support: 'purple',
       billing_question: 'green',
       order_help: 'orange',
       account_issue: 'purple',
@@ -323,7 +323,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
 
   const getUserTypeColor = (userType: string) => {
     const colors = {
-      student: 'blue',
+      student: 'purple',
       expert: 'green',
       partner: 'gold',
     };
@@ -455,7 +455,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
             </Tag>
           ))}
           {record.tags.length > 2 && (
-            <Tag color="blue">
+            <Tag color="purple">
               +{record.tags.length - 2}
             </Tag>
           )}
@@ -786,7 +786,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
                 <Text strong>Вложения:</Text>
                 <div className={styles.openRequestsAttachmentsRow}>
                   {selectedRequest.attachments.map((file, index) => (
-                    <Tag key={index} color="blue">📎 {file.name}</Tag>
+                    <Tag key={index} color="purple">📎 {file.name}</Tag>
                   ))}
                 </div>
               </div>

@@ -4,38 +4,38 @@
 .ant-card.unread-message,
 [style*="background: rgb(240, 253, 244)"],
 [style*="background-color: rgb(240, 253, 244)"] {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(100, 53, 165, 0.1);
 }
 
 
 .ant-avatar.unread-avatar,
 .ant-avatar[style*="background-color: rgb(16, 185, 129)"] {
-  background-color: rgba(59, 130, 246, 0.9);
+  background-color: rgba(100, 53, 165, 0.9);
 }
 
 
 .ant-badge-count.unread-badge,
 .ant-badge-count[style*="background-color: rgb(16, 185, 129)"] {
-  background-color: rgba(59, 130, 246, 0.9);
+  background-color: rgba(100, 53, 165, 0.9);
 }
 
 
 .unread-message-text,
 [style*="color: rgb(5, 150, 105)"] {
-  color: rgba(59, 130, 246, 1);
+  color: rgba(100, 53, 165, 1);
   font-weight: 500;
 }
 
 
 .ant-badge-dot.unread-indicator,
 .ant-badge-dot[style*="background"] {
-  background-color: rgba(59, 130, 246, 0.9);
+  background-color: rgba(100, 53, 165, 0.9);
 }
 
 
 .ant-list-item[style*="background"],
 .ant-card[style*="background: rgb(240, 253, 244)"] {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(100, 53, 165, 0.1);
 }
 
 

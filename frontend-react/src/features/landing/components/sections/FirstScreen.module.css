@@ -1,6 +1,6 @@
 .firstScreen {
   position: relative;
-  background: linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%);
+  background: linear-gradient(135deg, var(--color-brand-blue-600) 0%, #d4bbff 100%);
 }
 
 .firstScreen::before {
@@ -187,15 +187,15 @@
 }
 
 .firstScreenContentButtonsExpert {
-  background-color: #a5d5fc;
+  background-color: #c4a0e8;
 }
 
 .firstScreenContentButtonsExpert:hover {
-  background-color: #d6ecfe;
+  background-color: #e3d5f3;
 }
 
 .firstScreenContentButtonsExpert:active {
-  background-color: #8cc9fb;
+  background-color: #b89aff;
 }
 
  .firstScreenFigure {

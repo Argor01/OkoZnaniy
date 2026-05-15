@@ -35,7 +35,7 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({
       dataIndex: 'referral_code',
       key: 'referral_code',
       render: (code: string) => (
-        <Tag color="blue" className={styles.referralCode}>
+        <Tag color="purple" className={styles.referralCode}>
           {code}
         </Tag>
       ),

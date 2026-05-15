@@ -372,7 +372,7 @@
 }
 
 :global([data-theme="dark"]) .specCard:hover {
-  border-color: var(--color-brand-blue-500, #2b9fe6);
+  border-color: var(--color-brand-blue-500, #6435a5);
 }
 
 :global([data-theme="dark"]) .specDescription {

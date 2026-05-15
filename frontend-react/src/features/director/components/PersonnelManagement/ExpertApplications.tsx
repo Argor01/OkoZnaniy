@@ -176,7 +176,7 @@ const ExpertApplications: React.FC = () => {
     }
     
     const statusConfig = {
-      new: { color: 'blue', text: 'Новая' },
+      new: { color: 'purple', text: 'Новая' },
       under_review: { color: 'orange', text: 'На рассмотрении' },
       approved: { color: 'green', text: 'Одобрена' },
       rejected: { color: 'red', text: 'Отклонена' },

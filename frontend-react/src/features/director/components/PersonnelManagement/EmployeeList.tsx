@@ -202,7 +202,7 @@ const EmployeeList: React.FC = () => {
     const roleColors: Record<string, string> = {
       admin: 'red',
       director: 'purple',
-      partner: 'blue',
+      partner: 'purple',
       expert: 'green',
       client: 'default',
     };
@@ -514,7 +514,7 @@ const EmployeeList: React.FC = () => {
             </Descriptions.Item>
             <Descriptions.Item label="Статус анкеты эксперта">
               {selectedExpertApplication?.status === 'approved' && <Tag color="green">Одобрено</Tag>}
-              {selectedExpertApplication?.status === 'under_review' && <Tag color="blue">На рассмотрении</Tag>}
+              {selectedExpertApplication?.status === 'under_review' && <Tag color="purple">На рассмотрении</Tag>}
               {selectedExpertApplication?.status === 'needs_revision' && <Tag color="orange">На доработке</Tag>}
               {selectedExpertApplication?.status === 'rejected' && <Tag color="red">Отклонено</Tag>}
               {selectedExpertApplication?.status === 'deactivated' && <Tag color="volcano">Деактивировано</Tag>}

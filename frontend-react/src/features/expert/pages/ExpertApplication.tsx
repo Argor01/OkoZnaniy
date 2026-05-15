@@ -123,7 +123,7 @@ const ExpertApplication: React.FC = () => {
     <div style={{ 
       position: 'relative',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, var(--color-brand-blue-600) 0%, #b9e0ff 100%)',
+      background: 'linear-gradient(135deg, var(--color-brand-blue-600) 0%, #d4bbff 100%)',
       paddingTop: '150px',
       paddingBottom: '100px'
     }}>
@@ -158,7 +158,7 @@ const ExpertApplication: React.FC = () => {
           overflow: 'hidden'
         }}>
           <div style={{
-            background: 'linear-gradient(146deg, var(--color-brand-blue-500) 0%, #97d0ff 100%)',
+            background: 'linear-gradient(146deg, var(--color-brand-blue-500) 0%, #c4a0ff 100%)',
             padding: '60px 40px 40px',
             textAlign: 'center'
           }}>
@@ -402,7 +402,7 @@ const ExpertApplication: React.FC = () => {
           <div style={{ 
             fontSize: 24, 
             fontWeight: 600, 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #764ba2 50%, #f093fb 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -435,7 +435,7 @@ const ExpertApplication: React.FC = () => {
               height: 44,
               fontSize: 16,
               fontWeight: 500,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #764ba2 100%)',
               border: 'none'
             }}
           >
@@ -481,7 +481,7 @@ const ExpertApplication: React.FC = () => {
             Добро пожаловать на сервис помощи студентам,
           </Paragraph>
           
-          <Paragraph style={{ fontSize: 16, marginBottom: 20, fontWeight: 600, color: '#667eea' }}>
+          <Paragraph style={{ fontSize: 16, marginBottom: 20, fontWeight: 600, color: '#7c3aed' }}>
             {currentUser?.username || currentUser?.email || 'Пользователь'}!
           </Paragraph>
 
@@ -505,7 +505,7 @@ const ExpertApplication: React.FC = () => {
             Для комфортной работы, Вы можете ознакомиться с нашим разделом <strong>FAQ</strong>. По всем вопросам, касающихся работы сервиса, можете обращаться к нашему администратору <strong>Admin</strong>
           </Paragraph>
 
-          <Paragraph style={{ fontSize: 15, marginTop: 20, fontWeight: 600, color: '#667eea', textAlign: 'center' }}>
+          <Paragraph style={{ fontSize: 15, marginTop: 20, fontWeight: 600, color: '#7c3aed', textAlign: 'center' }}>
             Желаем легких заказов и высоких доходов!
           </Paragraph>
         </div>

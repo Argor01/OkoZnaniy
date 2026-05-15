@@ -249,7 +249,7 @@ const ContactBannedUsers: React.FC = () => {
   const getRoleColor = (role: string) => {
     const roleColors: Record<string, string> = {
       admin: 'red',
-      expert: 'blue',
+      expert: 'purple',
       client: 'green',
       partner: 'orange',
       arbitrator: 'purple',
@@ -349,7 +349,7 @@ const ContactBannedUsers: React.FC = () => {
                 Система
               </Tag>
             ) : (
-              <Tag color="blue" icon={<UserOutlined />}>
+              <Tag color="purple" icon={<UserOutlined />}>
                 {bannedBy}
               </Tag>
             )}
@@ -445,7 +445,7 @@ const ContactBannedUsers: React.FC = () => {
               return isSystemBanSource(u.banned_by);
             }).length}
           </Tag>
-          <Tag color="blue">
+          <Tag color="purple">
             Вручную: {filteredData.filter(u => {
               return !isSystemBanSource(u.banned_by);
             }).length}

@@ -54,7 +54,7 @@ const WorkDetail: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      new: 'blue',
+      new: 'purple',
       in_progress: 'orange',
       review: 'purple',
       revision: 'gold',

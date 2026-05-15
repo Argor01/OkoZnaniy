@@ -57,8 +57,8 @@
 }
 
 .navItemActive {
-  color: #2b9fe6 !important;
-  background-color: #e6f7ff !important;
+  color: #6435a5 !important;
+  background-color: #f3e8ff !important;
   font-weight: 600;
 }
 
@@ -155,7 +155,7 @@
   gap: 8px;
   padding: 8px 16px;
   border-radius: 12px;
-  background: #2b9fe6;
+  background: #6435a5;
   color: white;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -163,7 +163,7 @@
 }
 
 .balanceButton:hover {
-  background: #2b9fe6 !important;
+  background: #6435a5 !important;
   color: white !important;
 }
 
@@ -276,7 +276,7 @@
 
 .supportMailIcon {
   font-size: 16px;
-  color: #3b82f6;
+  color: #7c3aed;
   margin-right: 10px;
 }
 
@@ -447,13 +447,13 @@
 
   .mobileNavIconActive {
     background: rgba(255, 255, 255, 0.2) !important;
-    color: #2b9fe6 !important;
+    color: #6435a5 !important;
     font-weight: 600 !important;
   }
 
   .mobileNavIconActive:hover {
     background: rgba(255, 255, 255, 0.25) !important;
-    color: #2b9fe6 !important;
+    color: #6435a5 !important;
   }
 
   /* Mobile dropdown styles */
@@ -542,7 +542,7 @@
 
 /* ===== DARK THEME ===== */
 :global([data-theme="dark"]) .navItemActive {
-  color: #a5d5fc !important;
+  color: #c4a0e8 !important;
   background-color: rgba(43, 159, 230, 0.2) !important;
 }
 

@@ -189,7 +189,7 @@ const QuestionDetail: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'blue',
+      open: 'purple',
       answered: 'green',
       closed: 'default'
     };
@@ -270,7 +270,7 @@ const QuestionDetail: React.FC = () => {
 
         <div className={styles.questionMeta}>
           <Space wrap>
-            <Tag color="blue">{question.category}</Tag>
+            <Tag color="purple">{question.category}</Tag>
             {question.tags.map(tag => (
               <Tag key={tag}>{tag}</Tag>
             ))}

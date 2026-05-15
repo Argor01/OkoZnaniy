@@ -42,18 +42,18 @@
 
 .sidebarMenu :global(.ant-menu-item:hover) {
   background: #f3f4f6;
-  border-left-color: #667eea;
+  border-left-color: #7c3aed;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected) {
   background: #f3f4f6;
-  color: #667eea;
-  border-left-color: #667eea;
+  color: #7c3aed;
+  border-left-color: #7c3aed;
   font-weight: 500;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected .anticon) {
-  color: #667eea;
+  color: #7c3aed;
 }
 
 .sidebarMenu :global(.ant-menu-item .anticon) {
@@ -79,13 +79,13 @@
 
 .sidebarMenu :global(.ant-menu-submenu-title:hover) {
   background: #f3f4f6;
-  border-left-color: #667eea;
+  border-left-color: #7c3aed;
 }
 
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
   background: #f3f4f6;
-  border-left-color: #667eea;
-  color: #667eea;
+  border-left-color: #7c3aed;
+  color: #7c3aed;
   font-weight: 500;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title .anticon) {
-  color: #667eea;
+  color: #7c3aed;
 }
 
 .sidebarMenu :global(.ant-menu-sub) {
@@ -113,13 +113,13 @@
 
 .sidebarMenu :global(.ant-menu-sub .ant-menu-item:hover) {
   background: #f3f4f6;
-  border-left-color: #667eea;
+  border-left-color: #7c3aed;
 }
 
 .sidebarMenu :global(.ant-menu-sub .ant-menu-item-selected) {
   background: #f3f4f6;
-  color: #667eea;
-  border-left-color: #667eea;
+  color: #7c3aed;
+  border-left-color: #7c3aed;
   font-weight: 500;
 }
 

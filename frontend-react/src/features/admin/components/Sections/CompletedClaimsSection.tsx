@@ -189,7 +189,7 @@ export const CompletedClaimsSection: React.FC = () => {
   
   const getCategoryColor = (category: string) => {
     const colors = {
-      technical: 'blue',
+      technical: 'purple',
       billing: 'green',
       order: 'orange',
       account: 'purple',
@@ -610,7 +610,7 @@ export const CompletedClaimsSection: React.FC = () => {
                 <Text strong>Вложения:</Text>
                 <div className={styles.completedClaimsAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
-                    <Tag key={index} color="blue">📎 {file}</Tag>
+                    <Tag key={index} color="purple">📎 {file}</Tag>
                   ))}
                 </div>
               </div>

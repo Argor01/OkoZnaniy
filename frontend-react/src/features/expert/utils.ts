@@ -1,6 +1,6 @@
 export const getStatusColor = (status: string) => {
   switch (status) {
-    case 'new': return 'blue';
+    case 'new': return 'purple';
     case 'in_progress': return 'orange';
     case 'review': return 'purple';
     case 'revision': return 'magenta';

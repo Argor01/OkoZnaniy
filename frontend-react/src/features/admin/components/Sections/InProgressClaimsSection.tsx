@@ -195,7 +195,7 @@ export const InProgressClaimsSection: React.FC = () => {
   
   const getCategoryColor = (category: string) => {
     const colors = {
-      technical: 'blue',
+      technical: 'purple',
       billing: 'green',
       order: 'orange',
       account: 'purple',
@@ -483,7 +483,7 @@ export const InProgressClaimsSection: React.FC = () => {
                 <Tag color={getPriorityColor(selectedClaim.priority)}>
                   {getPriorityText(selectedClaim.priority)}
                 </Tag>
-                <Tag color="blue">В работе</Tag>
+                <Tag color="purple">В работе</Tag>
               </Space>
             </div>
 
@@ -536,7 +536,7 @@ export const InProgressClaimsSection: React.FC = () => {
                 <Text strong>Вложения:</Text>
                 <div className={styles.inProgressClaimsAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
-                    <Tag key={index} color="blue">📎 {file}</Tag>
+                    <Tag key={index} color="purple">📎 {file}</Tag>
                   ))}
                 </div>
               </div>

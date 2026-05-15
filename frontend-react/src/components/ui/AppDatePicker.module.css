@@ -12,7 +12,7 @@
 .datePicker:focus,
 .datePicker:focus-within {
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1);
 }
 
 .filled {

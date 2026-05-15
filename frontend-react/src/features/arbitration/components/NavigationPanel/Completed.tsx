@@ -108,7 +108,7 @@ const Completed: React.FC = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
-        return 'blue';
+        return 'purple';
       case 'dispute':
         return 'orange';
       case 'conflict':
@@ -156,7 +156,7 @@ const Completed: React.FC = () => {
       case 'full_refund':
         return 'green';
       case 'partial_refund':
-        return 'blue';
+        return 'purple';
       case 'no_refund':
         return 'red';
       case 'revision':

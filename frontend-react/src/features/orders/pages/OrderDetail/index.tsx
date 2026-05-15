@@ -114,7 +114,7 @@ const OrderDetail: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      new: 'blue', in_progress: 'orange', review: 'purple',
+      new: 'purple', in_progress: 'orange', review: 'purple',
       revision: 'gold', completed: 'green', cancelled: 'red',
     };
     return colors[status] || 'default';

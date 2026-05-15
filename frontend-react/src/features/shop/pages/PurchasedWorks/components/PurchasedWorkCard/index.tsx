@@ -50,7 +50,7 @@ const PurchasedWorkCard: React.FC<PurchasedWorkCardProps> = ({
     >
       <div className={styles.header}>
         <div className={styles.headerRow}>
-          <Tag color="blue">{work.category}</Tag>
+          <Tag color="purple">{work.category}</Tag>
           {work.isDownloaded && (
             <Badge 
               count={<CheckOutlined className={styles.badgeIcon} />} 

@@ -205,7 +205,7 @@
   text-align: center;
   color: #464646;
   border-radius: 30px;
-  background-color: #edf7ff;
+  background-color: #f0e8ff;
   -webkit-transition-property: color, background-color;
   transition-property: color, background-color;
   -webkit-transition-timing-function: ease-out;
@@ -225,7 +225,7 @@
 }
 
 .faqItemToggler:hover::after {
-  background-color: #bae0ff;
+  background-color: #d4bbff;
 }
 
 .faqItemTogglerQuestion {
@@ -253,7 +253,7 @@
 }
 
 .faqItem.active .faqItemToggler:hover::after {
-  background-color: #0f7fda;
+  background-color: #4e1f9e;
 }
 
 .faqItemPanel {

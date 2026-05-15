@@ -130,14 +130,14 @@
 
 .sidebarMenu :global(.ant-menu-item:hover),
 .sidebarMenu :global(.ant-menu-submenu-title:hover) {
-  background: var(--color-brand-blue-100, #d6ecfe) !important;
-  color: var(--color-brand-blue-700, #0f7fda) !important;
+  background: var(--color-brand-blue-100, #e3d5f3) !important;
+  color: var(--color-brand-blue-700, #4e1f9e) !important;
 }
 
 .sidebarMenu :global(.ant-menu-item-selected),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title) {
-  background: var(--color-brand-blue-500, #2b9fe6) !important;
+  background: var(--color-brand-blue-500, #6435a5) !important;
   color: #ffffff !important;
   border-radius: 999px !important;
   margin-right: 8px !important;
@@ -156,7 +156,7 @@
 .sidebarMenu :global(.ant-menu-item-selected:hover),
 .sidebarMenu :global(.ant-menu-submenu-selected > .ant-menu-submenu-title:hover),
 .sidebarMenu :global(.ant-menu-submenu-open > .ant-menu-submenu-title:hover) {
-  background: var(--color-brand-blue-600, #238ce2) !important;
+  background: var(--color-brand-blue-600, #5629a0) !important;
   color: #ffffff !important;
 }
 
@@ -376,7 +376,7 @@
 :global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-item:hover),
 :global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-submenu-title:hover) {
   background: var(--color-bg-hover, #262a35) !important;
-  color: var(--color-brand-blue-200, #a5d5fc) !important;
+  color: var(--color-brand-blue-200, #c4a0e8) !important;
 }
 
 :global([data-theme="dark"]) .sidebarMenu :global(.ant-menu-sub) :global(.ant-menu-item),

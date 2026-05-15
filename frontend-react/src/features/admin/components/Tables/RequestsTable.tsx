@@ -72,7 +72,7 @@ export const RequestsTable: React.FC<RequestsTableProps> = ({
           <div className={styles.title}>{title}</div>
           <div className={styles.category}>
             <Tag 
-              color={getCategoryLabel(record.category) ? 'blue' : 'default'}
+              color={getCategoryLabel(record.category) ? 'purple' : 'default'}
             >
               {getCategoryLabel(record.category)}
             </Tag>

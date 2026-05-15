@@ -177,7 +177,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
   const getRoleColor = (role: string) => {
     const roleColors = {
       admin: 'red',
-      expert: 'blue',
+      expert: 'purple',
       client: 'green',
       partner: 'orange',
     };
@@ -291,7 +291,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
         <div>
           <div>
             <strong>{record.display_name}</strong>
-            {record.is_system && <Tag color="blue" className={styles.userRolesSystemTag}>Системная</Tag>}
+            {record.is_system && <Tag color="purple" className={styles.userRolesSystemTag}>Системная</Tag>}
           </div>
             <Text type="secondary" className={styles.userRolesMetaText}>
             {record.description}
@@ -305,7 +305,7 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       key: 'users_count',
       width: 120,
       render: (count: number) => (
-        <Tag color="blue">{count}</Tag>
+        <Tag color="purple">{count}</Tag>
       ),
     },
     {

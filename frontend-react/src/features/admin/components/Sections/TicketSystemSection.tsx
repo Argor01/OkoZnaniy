@@ -113,7 +113,7 @@ export const TicketSystemSection: React.FC = () => {
     const colors = {
       open: 'orange',
       new: 'orange',
-      in_progress: 'blue',
+      in_progress: 'purple',
       completed: 'green',
       pending_approval: 'purple',
     };
@@ -220,7 +220,7 @@ export const TicketSystemSection: React.FC = () => {
       render: (text: string, record: TicketRow) => (
         <div>
           <div>{text}</div>
-          {record.auto_created ? <Tag color="blue" style={{ marginTop: 4 }}>Из чата</Tag> : null}
+          {record.auto_created ? <Tag color="purple" style={{ marginTop: 4 }}>Из чата</Tag> : null}
         </div>
       ),
     },
@@ -464,7 +464,7 @@ export const TicketSystemSection: React.FC = () => {
                         <Space direction="vertical" size={4} style={{ width: '100%' }}>
                           <Space wrap>
                             <Text strong>{author}</Text>
-                            {item.is_admin ? <Tag color="blue">Админ</Tag> : <Tag>Клиент</Tag>}
+                            {item.is_admin ? <Tag color="purple">Админ</Tag> : <Tag>Клиент</Tag>}
                             <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
                           </Space>
                           <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{item.message}</Paragraph>

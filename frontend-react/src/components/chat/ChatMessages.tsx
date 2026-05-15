@@ -74,7 +74,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
               </div>
               <div
                 style={{
-                  background: msg.is_mine ? '#2b9fe6' : 'var(--color-bg-spotlight, #f0f0f0)',
+                  background: msg.is_mine ? '#6435a5' : 'var(--color-bg-spotlight, #f0f0f0)',
                   color: msg.is_mine ? '#fff' : 'var(--color-text-base, #000)',
                   padding: '8px 12px',
                   borderRadius: msg.is_mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px',

@@ -18,7 +18,7 @@
 }
 
 .friendProfileHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   padding: 40px 32px;
   position: relative;
 }
@@ -36,7 +36,7 @@
 }
 
 .friendProfileAvatarColor0 {
-  background-color: #3b82f6;
+  background-color: #7c3aed;
 }
 
 .friendProfileAvatarColor1 {
@@ -110,7 +110,7 @@
 
 .friendProfileSectionIcon {
   font-size: 20px;
-  color: #667eea;
+  color: #7c3aed;
 }
 
 .friendProfileSectionTitle {
@@ -137,7 +137,7 @@
   border-radius: 20px;
   border: 1px solid var(--border-color, #e0e7ff);
   background: var(--bg-secondary, #f5f7ff);
-  color: #667eea;
+  color: #7c3aed;
 }
 
 .friendProfileActions {

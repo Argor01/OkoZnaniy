@@ -67,7 +67,7 @@ const DirectorCommunication: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      open: 'blue',
+      open: 'purple',
       in_discussion: 'processing',
       resolved: 'success',
       closed: 'default',
@@ -170,9 +170,9 @@ const DirectorCommunication: React.FC = () => {
                                     key={msg.id}
                                     style={{
                                       padding: '10px',
-                                      background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #e6f7ff)' : 'var(--color-bg-container, #fff)',
+                                      background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #f3e8ff)' : 'var(--color-bg-container, #fff)',
                                       borderRadius: '8px',
-                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : 'var(--color-border-secondary, #d9d9d9)'}`,
+                                      borderLeft: `3px solid ${msg.author.role === 'director' ? '#6435a5' : 'var(--color-border-secondary, #d9d9d9)'}`,
                                     }}
                                   >
                                     <div style={{ marginBottom: 6 }}>
@@ -293,7 +293,7 @@ const DirectorCommunication: React.FC = () => {
                     onClick={() => setSelectedCommunication(comm.id)}
                     style={{
                       cursor: 'pointer',
-                      border: selectedCommunication === comm.id ? '2px solid #2b9fe6' : undefined,
+                      border: selectedCommunication === comm.id ? '2px solid #6435a5' : undefined,
                     }}
                   >
                     <Space direction="vertical" size={4} style={{ width: '100%' }}>
@@ -351,7 +351,7 @@ const DirectorCommunication: React.FC = () => {
                         {getDirectorCommunicationStatusLabel(selectedComm.status)}
                       </Tag>
                       {selectedComm.relatedClaim && (
-                        <Tag color="blue">Обращение #{selectedComm.relatedClaim.id}</Tag>
+                        <Tag color="purple">Обращение #{selectedComm.relatedClaim.id}</Tag>
                       )}
                     </Space>
                   </div>
@@ -376,9 +376,9 @@ const DirectorCommunication: React.FC = () => {
                             key={msg.id}
                             style={{
                               padding: '12px',
-                              background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #e6f7ff)' : 'var(--color-bg-container, #fff)',
+                              background: msg.author.role === 'director' ? 'var(--color-chat-item-active, #f3e8ff)' : 'var(--color-bg-container, #fff)',
                               borderRadius: '8px',
-                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#2b9fe6' : 'var(--color-border-secondary, #d9d9d9)'}`,
+                              borderLeft: `3px solid ${msg.author.role === 'director' ? '#6435a5' : 'var(--color-border-secondary, #d9d9d9)'}`,
                             }}
                           >
                             <div

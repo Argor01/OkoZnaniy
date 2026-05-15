@@ -8,7 +8,7 @@
   margin-bottom: 8px;
   border-radius: 8px;
   border: 1px solid #f0f0f0;
-  border-left: 4px solid #2b9fe6;
+  border-left: 4px solid #6435a5;
 }
 
 .messageItemMobile {
@@ -18,9 +18,9 @@
 }
 
 .messageItemUnread {
-  background-color: #f0f7ff;
-  border: 2px solid #2b9fe6;
-  border-left: 4px solid #2b9fe6;
+  background-color: #f8f0ff;
+  border: 2px solid #6435a5;
+  border-left: 4px solid #6435a5;
 }
 
 .messageItemArbitrator {
@@ -32,7 +32,7 @@
 }
 
 .avatar {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
   flex-shrink: 0;
 }
 

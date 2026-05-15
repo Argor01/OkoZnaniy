@@ -261,7 +261,7 @@ const PartnersMap: React.FC = () => {
               </Option>
             ))}
           </Select>
-          <Tag color="blue">
+          <Tag color="purple">
             Партнеров: {filteredPartners.length}
           </Tag>
         </div>
@@ -281,7 +281,7 @@ const PartnersMap: React.FC = () => {
                       <style>
                         {`
                           .region {
-                            fill: #e8f4f8;
+                            fill: #f0e8f8;
                             stroke: #2c3e50;
                             stroke-width: 0.3;
                             transition: all 0.3s ease;
@@ -409,7 +409,7 @@ const PartnersMap: React.FC = () => {
                           className={styles.partnerCity}
                           style={{
                             color: '#ffffff !important',
-                            background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
+                            background: 'linear-gradient(135deg, #6435a5 0%, #5629a0 100%)',
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontSize: '12px',
@@ -421,7 +421,7 @@ const PartnersMap: React.FC = () => {
                         </div>
                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
                           <div className={styles.partnerStat} style={{ color: '#374151' }}>
-                            <span className={styles.partnerStatIcon} style={{ color: '#2b9fe6' }}>
+                            <span className={styles.partnerStatIcon} style={{ color: '#6435a5' }}>
                               <UserOutlined />
                             </span>
                             <span style={{ color: '#374151' }}>Рефералов: </span>
@@ -433,7 +433,7 @@ const PartnersMap: React.FC = () => {
                             </span>
                           </div>
                           <div className={styles.partnerStat} style={{ color: '#374151' }}>
-                            <span className={styles.partnerStatIcon} style={{ color: '#2b9fe6' }}>
+                            <span className={styles.partnerStatIcon} style={{ color: '#6435a5' }}>
                               <UserOutlined />
                             </span>
                             <span style={{ color: '#374151' }}>Активных: </span>
@@ -448,7 +448,7 @@ const PartnersMap: React.FC = () => {
                             className={styles.partnerEarnings}
                             style={{
                               color: '#ffffff !important',
-                              background: 'linear-gradient(135deg, #2b9fe6 0%, #238ce2 100%)',
+                              background: 'linear-gradient(135deg, #6435a5 0%, #5629a0 100%)',
                               padding: '8px 16px',
                               borderRadius: '4px',
                               textAlign: 'center',

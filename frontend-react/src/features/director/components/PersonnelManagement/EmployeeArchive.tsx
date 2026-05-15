@@ -120,7 +120,7 @@ const EmployeeArchive: React.FC = () => {
     const roleColors: Record<string, string> = {
       admin: 'red',
       arbitrator: 'orange',
-      partner: 'blue',
+      partner: 'purple',
       expert: 'green',
       client: 'default',
     };

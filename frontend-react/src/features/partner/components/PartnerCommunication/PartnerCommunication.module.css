@@ -41,8 +41,8 @@
 }
 
 .directorItemActive {
-  background: #e6f7ff;
-  border-left: 3px solid #2b9fe6;
+  background: #f3e8ff;
+  border-left: 3px solid #6435a5;
 }
 
 .chatArea {
@@ -87,7 +87,7 @@
 }
 
 .messageOwn .messageContent {
-  background: #e6f7ff;
+  background: #f3e8ff;
 }
 
 .messageText {

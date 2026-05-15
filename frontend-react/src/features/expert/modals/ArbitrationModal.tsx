@@ -28,7 +28,7 @@ interface ArbitrationModalProps {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
-  submitted: { color: 'blue', icon: <HourglassOutlined />, label: 'Подано' },
+  submitted: { color: 'purple', icon: <HourglassOutlined />, label: 'Подано' },
   under_review: { color: 'processing', icon: <ClockCircleOutlined />, label: 'На рассмотрении' },
   in_arbitration: { color: 'orange', icon: <ExclamationCircleOutlined />, label: 'В арбитраже' },
   decision_made: { color: 'cyan', icon: <CheckCircleOutlined />, label: 'Решение принято' },

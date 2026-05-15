@@ -87,7 +87,7 @@
 .statsValue {
   font-size: 32px;
   font-weight: 700;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .statsRate {
@@ -225,9 +225,9 @@
 }
 
 .knowledgeStatIconBlue {
-  background: color-mix(in srgb, var(--color-brand-blue-100, #d6ecfe) 70%, #ffffff 30%);
-  color: var(--color-brand-blue-700, #0f7fda);
-  border: 1px solid var(--color-brand-blue-200, #a5d5fc);
+  background: color-mix(in srgb, var(--color-brand-blue-100, #e3d5f3) 70%, #ffffff 30%);
+  color: var(--color-brand-blue-700, #4e1f9e);
+  border: 1px solid var(--color-brand-blue-200, #c4a0e8);
 }
 
 .knowledgeStatIconGreen {

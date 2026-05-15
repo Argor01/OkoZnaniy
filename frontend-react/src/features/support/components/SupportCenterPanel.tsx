@@ -35,11 +35,11 @@ const { Paragraph, Text, Title } = Typography;
 
 const statusMeta: Record<string, { color: string; label: string }> = {
   open: { color: 'orange', label: 'Открыто' },
-  new: { color: 'blue', label: 'Новое' },
+  new: { color: 'purple', label: 'Новое' },
   in_progress: { color: 'processing', label: 'В работе' },
   completed: { color: 'green', label: 'Решено' },
   pending_approval: { color: 'purple', label: 'Ожидает решения' },
-  submitted: { color: 'blue', label: 'Подано' },
+  submitted: { color: 'purple', label: 'Подано' },
   under_review: { color: 'processing', label: 'На рассмотрении' },
   awaiting_response: { color: 'gold', label: 'Ожидает ответа' },
   in_arbitration: { color: 'volcano', label: 'В арбитраже' },
@@ -208,8 +208,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                     width: 'fit-content',
                     maxWidth: compact ? '100%' : '78%',
                     borderRadius: 16,
-                    background: isSupportMessage ? '#eef7ff' : '#fff8e6',
-                    borderColor: isSupportMessage ? '#b7dcff' : '#f5d27a',
+                    background: isSupportMessage ? '#f5f0ff' : '#fff8e6',
+                    borderColor: isSupportMessage ? '#d0b8ff' : '#f5d27a',
                   }}
                   styles={{ body: { padding: '12px 14px' } }}
                 >
@@ -217,9 +217,9 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                     <Space size={8} wrap>
                       <Text strong>{author}</Text>
                       {isOrderChat ? (
-                        <Tag color="geekblue">Чат по заказу</Tag>
+                        <Tag color="purple">Чат по заказу</Tag>
                       ) : isSupportMessage ? (
-                        <Tag color="blue">Поддержка</Tag>
+                        <Tag color="purple">Поддержка</Tag>
                       ) : (
                         <Tag>Вы</Tag>
                       )}
@@ -308,7 +308,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                           <Space style={{ justifyContent: 'space-between', width: '100%' }} wrap>
                             <Space wrap>
                               <Text strong>{item.subject}</Text>
-                              <Tag color={item.type === 'support_request' ? 'blue' : 'volcano'}>
+                              <Tag color={item.type === 'support_request' ? 'purple' : 'volcano'}>
                                 {item.type === 'support_request' ? 'Обращение' : 'Арбитраж'}
                               </Tag>
                             </Space>
@@ -360,7 +360,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
               <Space direction="vertical" size={4}>
                 <Space wrap>
-                  <Tag color={selectedItem.type === 'support_request' ? 'blue' : 'volcano'}>
+                  <Tag color={selectedItem.type === 'support_request' ? 'purple' : 'volcano'}>
                     {selectedItem.type === 'support_request' ? 'Обращение' : 'Арбитраж'}
                   </Tag>
                   <Text type="secondary">#{selectedItem.ticket_number}</Text>

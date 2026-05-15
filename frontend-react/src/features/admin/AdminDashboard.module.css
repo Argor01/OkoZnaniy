@@ -69,7 +69,7 @@
 }
 
 .allOrdersStatNew :global(.ant-statistic-content-value) {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .allOrdersStatInProgress :global(.ant-statistic-content-value) {
@@ -789,7 +789,7 @@
 
 .ticketSystemTitleIcon {
   font-size: 18px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .ticketSystemStatsGrid {
@@ -812,7 +812,7 @@
 }
 
 .ticketSystemStatTotal {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .ticketSystemStatOpen {
@@ -820,7 +820,7 @@
 }
 
 .ticketSystemStatInProgress {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .ticketSystemStatCompleted {
@@ -860,8 +860,8 @@
 }
 
 .ticketSystemTicketCardSelected {
-  border: 2px solid #2b9fe6;
-  background: #e6f7ff;
+  border: 2px solid #6435a5;
+  background: #f3e8ff;
 }
 
 .ticketSystemTicketHeader {
@@ -912,7 +912,7 @@
 }
 
 .ticketSystemMessageBadge :global(.ant-badge-count) {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
 }
 
 .ticketSystemBackButton {
@@ -1097,7 +1097,7 @@
 
 .inProgressClaimsMessageIcon {
   font-size: 16px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .inProgressClaimsActivityCell {
@@ -1546,7 +1546,7 @@
 
 .inProgressRequestsResponseIcon {
   font-size: 16px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .inProgressRequestsResponseTime {
@@ -1678,7 +1678,7 @@
 .inProgressRequestsNextAction {
   margin-top: 8px;
   padding: 12px;
-  background-color: #f0f8ff;
+  background-color: #f8f0ff;
   border-radius: 6px;
 }
 
@@ -1735,7 +1735,7 @@
 
 .newClaimsMessageIcon {
   font-size: 16px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .newClaimsCreatedCell {
@@ -1874,7 +1874,7 @@
 
 .claimsProcessingMessageIcon {
   font-size: 16px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .claimsProcessingHeader {
@@ -1886,7 +1886,7 @@
 }
 
 .claimsProcessingStatNew :global(.ant-statistic-content-value) {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .claimsProcessingStatInvestigating :global(.ant-statistic-content-value) {
@@ -2083,7 +2083,7 @@
 }
 
 .claimResolution {
-  background: #f0f9ff;
+  background: #f8f0ff;
   padding: 12px;
   border-radius: 4px;
 }
@@ -2145,7 +2145,7 @@
   margin-bottom: 16px;
 }
 .directorCommStatIconInfo {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 .directorCommStatIconAlert {
   color: #ff4d4f;

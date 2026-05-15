@@ -128,7 +128,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           }]}
         >
           <Checkbox>
-            Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#2b9fe6' }}>обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#2b9fe6' }}>Политикой обработки персональных данных</a>
+            Я предоставляю своё согласие на <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>обработку персональных данных</a> в соответствии с <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>Политикой обработки персональных данных</a>
           </Checkbox>
         </Form.Item>
         <Form.Item
@@ -141,12 +141,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           }]}
         >
           <Checkbox>
-            Я принимаю <a href={selectedRole === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" style={{ color: '#2b9fe6' }}>пользовательское соглашение</a>
+            Я принимаю <a href={selectedRole === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>пользовательское соглашение</a>
           </Checkbox>
         </Form.Item>
         <Form.Item name="newsletter" valuePropName="checked" style={{ marginBottom: 16 }}>
           <Checkbox>
-            Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#2b9fe6' }}>согласие на получение новостной и рекламной рассылки</a>
+            Я предоставляю своё <a href="/docs/advertising_consent.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>согласие на получение новостной и рекламной рассылки</a>
           </Checkbox>
         </Form.Item>
         <Form.Item>

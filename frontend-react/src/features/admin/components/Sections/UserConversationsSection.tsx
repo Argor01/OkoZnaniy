@@ -173,7 +173,7 @@ export const UserConversationsSection: React.FC = () => {
             <Title level={5} className={styles.chatListTitle}>
               {isMobile ? 'Переписки' : 'Переписки пользователей'}
             </Title>
-            <Tag color="blue">{chats.length}</Tag>
+            <Tag color="purple">{chats.length}</Tag>
           </div>
           
           <Search
@@ -268,7 +268,7 @@ export const UserConversationsSection: React.FC = () => {
             
             <Space size={isMobile ? 4 : 8}>
               {selectedChat.order_id && (
-                <Tag color="blue">Заказ #{selectedChat.order_id}</Tag>
+                <Tag color="purple">Заказ #{selectedChat.order_id}</Tag>
               )}
             </Space>
           </div>
@@ -307,7 +307,7 @@ export const UserConversationsSection: React.FC = () => {
                       {msg.sender.first_name} {msg.sender.last_name}
                     </Text>
                     {!isMobile && (
-                      <Tag color="blue" className={styles.messageRoleTag}>
+                      <Tag color="purple" className={styles.messageRoleTag}>
                         {msg.sender.role}
                       </Tag>
                     )}

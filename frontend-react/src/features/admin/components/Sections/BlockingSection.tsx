@@ -103,7 +103,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
     const roleColors: Record<string, string> = {
       admin: 'red',
       director: 'purple',
-      expert: 'blue',
+      expert: 'purple',
       client: 'green',
       partner: 'orange',
     };
@@ -230,7 +230,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
           <Tag color="red">
             Заблокировано: {filteredData.filter(u => u.is_blocked).length}
           </Tag>
-          <Tag color="blue">
+          <Tag color="purple">
             Всего: {filteredData.length}
           </Tag>
         </div>

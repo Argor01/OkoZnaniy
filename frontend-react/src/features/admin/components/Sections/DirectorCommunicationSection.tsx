@@ -237,7 +237,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
   
   const getMessageTypeColor = (type: string) => {
     const colors = {
-      report: 'blue',
+      report: 'purple',
       request: 'orange',
       proposal: 'green',
       urgent: 'red',
@@ -272,7 +272,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
   const getStatusColor = (status: string) => {
     const colors = {
       draft: 'gray',
-      sent: 'blue',
+      sent: 'purple',
       read: 'orange',
       replied: 'green',
       archived: 'default',
@@ -581,7 +581,7 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
                       pending: 'orange',
                       approved: 'green',
                       rejected: 'red',
-                      scheduled: 'blue',
+                      scheduled: 'purple',
                       completed: 'default',
                     };
                     const texts = {

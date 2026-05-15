@@ -48,7 +48,7 @@
   .friendCard:hover {
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
     transform: translateY(-4px);
-    border-color: #667eea;
+    border-color: #7c3aed;
   }
 }
 
@@ -76,7 +76,7 @@
 }
 
 .friendAvatarColor0 {
-  background-color: #3b82f6;
+  background-color: #7c3aed;
 }
 
 .friendAvatarColor1 {

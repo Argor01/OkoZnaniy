@@ -184,7 +184,7 @@ export const SupportChatsSection: React.FC = () => {
   const getStatusColor = (status: string) => {
     const colors = {
       open: 'orange',
-      in_progress: 'blue',
+      in_progress: 'purple',
       resolved: 'green',
       closed: 'gray',
     };

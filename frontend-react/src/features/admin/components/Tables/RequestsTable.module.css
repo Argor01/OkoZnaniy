@@ -54,7 +54,7 @@
   }
   
   .ant-table-tbody > tr:hover > td {
-    background: #f0f9ff;
+    background: #f8f0ff;
   }
   
   .ant-table-tbody > tr > td {
@@ -66,7 +66,7 @@
 
 .requestId {
   font-weight: 600;
-  color: #2b9fe6;
+  color: #6435a5;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
@@ -139,8 +139,8 @@
     justify-content: center;
     min-width: 24px;
     height: 24px;
-    background: #e6f7ff;
-    color: #2b9fe6;
+    background: #f3e8ff;
+    color: #6435a5;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
@@ -168,12 +168,12 @@
 
 
 .actionButton {
-  color: #2b9fe6;
+  color: #6435a5;
   border-color: transparent;
   
   &:hover {
     color: #40a9ff;
-    background: #f0f9ff;
+    background: #f8f0ff;
   }
 }
 
@@ -317,7 +317,7 @@
 
 .table .ant-table-column-sorter-up.active,
 .table .ant-table-column-sorter-down.active {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 
@@ -326,7 +326,7 @@
 }
 
 .table .ant-table-filter-trigger.active {
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 

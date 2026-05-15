@@ -290,7 +290,7 @@ export const ArbitrationSubmissionForm: React.FC<ArbitrationSubmissionFormProps>
 
           <Card
             size="small"
-            style={{ background: '#e6f7ff', border: '1px solid #91d5ff' }}
+            style={{ background: '#f3e8ff', border: '1px solid #b89aff' }}
           >
             <Space direction="vertical" size="small">
               <Text strong>Важная информация:</Text>

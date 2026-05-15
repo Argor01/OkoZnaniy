@@ -186,9 +186,9 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                   style={{
                     marginTop: 12,
                     padding: 12,
-                    background: '#f0f5ff',
+                    background: '#f5f0ff',
                     borderRadius: 8,
-                    borderLeft: '3px solid #1677ff',
+                    borderLeft: '3px solid #6435a5',
                   }}
                 >
                   <Text strong>Ответ эксперта:</Text>

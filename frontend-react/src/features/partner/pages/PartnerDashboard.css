@@ -167,7 +167,7 @@
 .partnerDashboardReferralCode {
   font-size: 24px;
   font-weight: bold;
-  color: #2b9fe6;
+  color: #6435a5;
   letter-spacing: 2px;
 }
 
@@ -191,7 +191,7 @@
 
 .partnerDashboardIncomeBar {
   flex: 1;
-  background: linear-gradient(180deg, #2b9fe6 0%, #096dd9 100%);
+  background: linear-gradient(180deg, #6435a5 0%, #096dd9 100%);
   border-radius: 4px 4px 0 0;
   position: relative;
 }
@@ -240,7 +240,7 @@
 .partnerDashboardSummaryValue {
   font-size: 24px;
   font-weight: bold;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .partnerDashboardSummaryLabel {
@@ -252,7 +252,7 @@
 .partnerDashboardBonusCard {
   text-align: center;
   padding: 24px;
-  background: linear-gradient(135deg, #2b9fe6 0%, #40a9ff 100%);
+  background: linear-gradient(135deg, #6435a5 0%, #40a9ff 100%);
   color: white;
 }
 
@@ -311,7 +311,7 @@
 
 .partnerDashboardSiderIcon {
   font-size: 24px;
-  color: #2b9fe6;
+  color: #6435a5;
   margin-right: 12px;
 }
 
@@ -407,7 +407,7 @@
 
 .partnerDashboardDrawerIcon {
   font-size: 20px;
-  color: #2b9fe6;
+  color: #6435a5;
   margin-right: 12px;
 }
 

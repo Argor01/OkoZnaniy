@@ -178,7 +178,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                         description={
                           <Space direction="vertical" size={8} className={styles.bidMeta}>
                             <div className={styles.bidChipsRow}>
-                              <Tag color="blue" className={styles.bidAmountTag}>
+                              <Tag color="purple" className={styles.bidAmountTag}>
                                 <DollarOutlined /> {bidAmountText}
                               </Tag>
                               <Tag color="gold" className={styles.bidPrepaymentTag}>

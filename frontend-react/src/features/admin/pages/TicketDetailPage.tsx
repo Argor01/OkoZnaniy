@@ -53,13 +53,13 @@ interface TicketDetail {
 }
 
 const ACTIVITY_ICON: Record<string, React.ReactNode> = {
-  status_change: <SwapOutlined style={{ color: '#2b9fe6' }} />,
+  status_change: <SwapOutlined style={{ color: '#6435a5' }} />,
   priority_change: <StarOutlined style={{ color: '#faad14' }} />,
   tag_added: <TagOutlined style={{ color: '#52c41a' }} />,
   tag_removed: <TagOutlined style={{ color: '#ff4d4f' }} />,
   observer_added: <EyeOutlined style={{ color: '#722ed1' }} />,
   observer_removed: <EyeOutlined style={{ color: '#ff4d4f' }} />,
-  assigned: <UserOutlined style={{ color: '#2b9fe6' }} />,
+  assigned: <UserOutlined style={{ color: '#6435a5' }} />,
   completed: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
 };
 
@@ -68,7 +68,7 @@ const fmt = (iso: string) => {
   catch { return iso; }
 };
 
-const getStatusColor = (s: string) => ({ open: 'orange', new: 'orange', in_progress: 'blue', completed: 'green', pending_approval: 'purple' }[s] ?? 'gray');
+const getStatusColor = (s: string) => ({ open: 'orange', new: 'orange', in_progress: 'purple', completed: 'green', pending_approval: 'purple' }[s] ?? 'gray');
 const getStatusText = (s: string) => ({ open: 'Открыт', new: 'Новый', in_progress: 'В работе', completed: 'Завершен', pending_approval: 'Ожидает одобрения' }[s] ?? s);
 const getPriorityColor = (p: string) => ({ low: 'green', medium: 'orange', high: 'red', urgent: 'purple' }[p] ?? 'gray');
 const getPriorityText = (p: string) => ({ low: 'Низкий', medium: 'Средний', high: 'Высокий', urgent: 'Срочный' }[p] ?? p);
@@ -301,14 +301,14 @@ export const TicketDetailPage: React.FC = () => {
       const fromChat = item.source === 'chat';
       return (
         <div key={item.id} style={{ display: 'flex', flexDirection: isAdmin ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 8, marginBottom: 16, padding: '0 4px' }}>
-          <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#2b9fe6' : '#52c41a', flexShrink: 0 }} />
+          <Avatar size={32} icon={<UserOutlined />} style={{ background: isAdmin ? '#6435a5' : '#52c41a', flexShrink: 0 }} />
           <div style={{ maxWidth: '72%' }}>
             <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 3, textAlign: isAdmin ? 'right' : 'left' }}>
               {name}
               {fromChat && <Tag color="cyan" style={{ marginLeft: 4, fontSize: 10, lineHeight: '16px' }}>из чата</Tag>}
             </div>
             <div style={{
-              background: isAdmin ? '#2b9fe6' : '#f0f0f0',
+              background: isAdmin ? '#6435a5' : '#f0f0f0',
               color: isAdmin ? '#fff' : '#000',
               padding: '8px 14px',
               borderRadius: isAdmin ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
@@ -380,7 +380,7 @@ export const TicketDetailPage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FileTextOutlined />
                   <span>Обращение {ticket.ticket_number}: {ticket.subject}</span>
-                  {ticket.auto_created && <Tag color="blue">Из чата</Tag>}
+                  {ticket.auto_created && <Tag color="purple">Из чата</Tag>}
                 </div>
               }
               extra={
@@ -520,7 +520,7 @@ export const TicketDetailPage: React.FC = () => {
                 {ticket.tags_list && ticket.tags_list.length > 0 && (
                   <Space wrap size="small">
                     {ticket.tags_list.map(tag => (
-                      <Tag key={tag} color={tag.includes('негатив') ? 'red' : tag.includes('срочно') ? 'orange' : 'blue'} closable onClose={() => handleRemoveTag(tag)}>{tag}</Tag>
+                      <Tag key={tag} color={tag.includes('негатив') ? 'red' : tag.includes('срочно') ? 'orange' : 'purple'} closable onClose={() => handleRemoveTag(tag)}>{tag}</Tag>
                     ))}
                   </Space>
                 )}

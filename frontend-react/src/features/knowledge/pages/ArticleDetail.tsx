@@ -174,7 +174,7 @@ const ArticleDetail: React.FC = () => {
         </div>
 
         <div className={styles.tags}>
-          {article.work_type && <Tag color="blue">{article.work_type}</Tag>}
+          {article.work_type && <Tag color="purple">{article.work_type}</Tag>}
           {article.subject && <Tag color="green">{article.subject}</Tag>}
         </div>
 

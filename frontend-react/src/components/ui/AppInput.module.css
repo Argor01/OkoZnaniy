@@ -9,8 +9,8 @@
 .input:focus,
 .input:focus-within,
 .input:global(.ant-input-number-focused) {
-  border-color: var(--primary-blue, #3b82f6);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-blue, #7c3aed);
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1);
 }
 
 .default {

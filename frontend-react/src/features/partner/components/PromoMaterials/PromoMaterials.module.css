@@ -15,12 +15,12 @@
 }
 
 .header h2 {
-  color: var(--primary-blue, #3b82f6);
+  color: var(--primary-blue, #7c3aed);
   margin-bottom: var(--spacing-md, 16px);
   font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
   font-size: 2.5rem;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--primary-blue, #3b82f6) 0%, var(--primary-blue-hover, #2563eb) 100%);
+  background: linear-gradient(135deg, var(--primary-blue, #7c3aed) 0%, var(--primary-blue-hover, #6d28d9) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -60,14 +60,14 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .audienceCard:hover {
-  border-color: var(--primary-blue, #3b82f6);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 130, 246, 0.15));
+  border-color: var(--primary-blue, #7c3aed);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(100, 53, 165, 0.15));
   transform: translateY(-2px);
 }
 
@@ -178,12 +178,12 @@
 }
 
 .bannerPreview:hover {
-  border-color: var(--primary-blue, #3b82f6);
-  background: rgba(59, 130, 246, 0.02);
+  border-color: var(--primary-blue, #7c3aed);
+  background: rgba(100, 53, 165, 0.02);
 }
 
 .bannerPlaceholder {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   border-radius: var(--radius-md, 10px);
   display: flex;
   align-items: center;
@@ -285,14 +285,14 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
 
 .linkBox:hover {
-  background: rgba(59, 130, 246, 0.05);
-  border-color: var(--primary-blue, #3b82f6);
+  background: rgba(100, 53, 165, 0.05);
+  border-color: var(--primary-blue, #7c3aed);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
@@ -441,16 +441,16 @@
 }
 
 .promoTabs .ant-tabs-tab:hover {
-  color: var(--primary-blue, #3b82f6);
+  color: var(--primary-blue, #7c3aed);
 }
 
 .promoTabs .ant-tabs-tab-active {
-  color: var(--primary-blue, #3b82f6) !important;
-  background: rgba(59, 130, 246, 0.05);
+  color: var(--primary-blue, #7c3aed) !important;
+  background: rgba(100, 53, 165, 0.05);
 }
 
 .promoTabs .ant-tabs-ink-bar {
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
   height: 3px;
 }
 
@@ -467,19 +467,19 @@
 .promoTabs .ant-radio-group button:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
-  border-color: var(--primary-blue, #3b82f6);
-  color: var(--primary-blue, #3b82f6);
+  border-color: var(--primary-blue, #7c3aed);
+  color: var(--primary-blue, #7c3aed);
 }
 
 .promoTabs .ant-radio-group button.ant-radio-button-wrapper-checked {
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
-  border-color: var(--primary-blue, #3b82f6);
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
+  border-color: var(--primary-blue, #7c3aed);
   color: white;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
 
 .promoTabs .ant-radio-group button.ant-radio-button-wrapper-checked:hover {
-  background: var(--gradient-hover, linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%));
+  background: var(--gradient-hover, linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%));
 }
 
 /* Стили для обычных радио кнопок */
@@ -490,12 +490,12 @@
 }
 
 .promoTabs .ant-radio-wrapper:hover .ant-radio-inner {
-  border-color: var(--primary-blue, #3b82f6);
+  border-color: var(--primary-blue, #7c3aed);
 }
 
 .promoTabs .ant-radio-checked .ant-radio-inner {
-  border-color: var(--primary-blue, #3b82f6);
-  background-color: var(--primary-blue, #3b82f6);
+  border-color: var(--primary-blue, #7c3aed);
+  background-color: var(--primary-blue, #7c3aed);
 }
 
 .promoTabs .ant-radio-checked .ant-radio-inner::after {
@@ -511,15 +511,15 @@
 }
 
 .promoTabs .ant-btn-primary {
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
   border: none;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
 
 .promoTabs .ant-btn-primary:hover {
-  background: var(--gradient-hover, linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%));
+  background: var(--gradient-hover, linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%));
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(59, 130, 246, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(100, 53, 165, 0.15));
 }
 
 .promoTabs .ant-btn-default {
@@ -528,8 +528,8 @@
 }
 
 .promoTabs .ant-btn-default:hover {
-  border-color: var(--primary-blue, #3b82f6);
-  color: var(--primary-blue, #3b82f6);
+  border-color: var(--primary-blue, #7c3aed);
+  color: var(--primary-blue, #7c3aed);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
@@ -547,7 +547,7 @@
 }
 
 .promoTabs .ant-segmented-item-selected {
-  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%));
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.05));
 }
 
@@ -564,8 +564,8 @@
 
 .promoTabs .ant-input:focus,
 .promoTabs .ant-input:hover {
-  border-color: var(--primary-blue, #3b82f6);
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(59, 130, 246, 0.1));
+  border-color: var(--primary-blue, #7c3aed);
+  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(100, 53, 165, 0.1));
 }
 /*
 Стили для реферальной карточки */
@@ -581,14 +581,14 @@
 }
 
 .infoBox {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(100, 53, 165, 0.05);
+  border: 1px solid rgba(100, 53, 165, 0.2);
   border-radius: var(--radius-md, 10px);
   padding: var(--spacing-lg, 24px);
 }
 
 .infoBox h5 {
-  color: var(--primary-blue, #3b82f6);
+  color: var(--primary-blue, #7c3aed);
   font-family: var(--font-display, 'Jost-SemiBold', sans-serif);
   margin-bottom: var(--spacing-md, 16px);
 }
@@ -615,8 +615,8 @@
 }
 
 .statsBox .ant-card:hover {
-  border-color: var(--primary-blue, #3b82f6);
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(59, 130, 246, 0.15));
+  border-color: var(--primary-blue, #7c3aed);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(100, 53, 165, 0.15));
   transform: translateY(-2px);
 }
 

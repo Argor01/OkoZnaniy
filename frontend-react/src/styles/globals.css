@@ -98,13 +98,13 @@ a {
 .ant-btn.balanceButton:hover,
 .ant-btn.balanceButton:focus,
 .ant-btn.balanceButton:active {
-  background: #2b9fe6;
+  background: #6435a5;
   color: white;
   border: none;
 }
 
 .ant-btn.balanceButton:hover {
-  background: #2b9fe6;
+  background: #6435a5;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
 }
@@ -332,7 +332,7 @@ a {
 [data-theme="dark"] .ant-select-selector:focus,
 [data-theme="dark"] .ant-select-focused .ant-select-selector {
   background: var(--color-bg-input, var(--bg-primary)) !important;
-  border-color: var(--primary-blue, #1890ff) !important;
+  border-color: var(--primary-blue, #6435a5) !important;
   color: var(--text-primary) !important;
 }
 

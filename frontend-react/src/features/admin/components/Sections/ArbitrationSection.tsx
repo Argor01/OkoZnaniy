@@ -133,7 +133,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { color: string; icon: React.ReactNode }> = {
       draft: { color: 'default', icon: <FileTextOutlined /> },
-      submitted: { color: 'blue', icon: <ExclamationCircleOutlined /> },
+      submitted: { color: 'purple', icon: <ExclamationCircleOutlined /> },
       under_review: { color: 'processing', icon: <ClockCircleOutlined /> },
       awaiting_response: { color: 'warning', icon: <ClockCircleOutlined /> },
       in_arbitration: { color: 'orange', icon: <ExclamationCircleOutlined /> },
@@ -240,7 +240,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       fixed: 'left',
       render: (text, record) => (
         <Space direction="vertical" size={0}>
-          <Text strong style={{ color: '#2b9fe6', cursor: 'pointer' }} onClick={() => loadCaseDetails(record)}>
+          <Text strong style={{ color: '#6435a5', cursor: 'pointer' }} onClick={() => loadCaseDetails(record)}>
             {text}
           </Text>
           {record.unread_count > 0 ? <Badge count={record.unread_count} size="small" /> : null}
@@ -253,7 +253,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       width: 200,
       render: (_, record) => (
         <Space>
-          <UserOutlined style={{ color: '#2b9fe6' }} />
+          <UserOutlined style={{ color: '#6435a5' }} />
           <Space direction="vertical" size={0}>
             <Text strong>{record.plaintiff.first_name} {record.plaintiff.last_name}</Text>
             <Text type="secondary" style={{ fontSize: 12 }}>{record.plaintiff.email}</Text>
@@ -347,7 +347,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       {stats ? (
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Всего дел" value={stats.total_cases} prefix={<FileTextOutlined />} /></Card></Col>
-          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Новые" value={stats.new_cases} valueStyle={{ color: '#2b9fe6' }} prefix={<ExclamationCircleOutlined />} /></Card></Col>
+          <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Новые" value={stats.new_cases} valueStyle={{ color: '#6435a5' }} prefix={<ExclamationCircleOutlined />} /></Card></Col>
           <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="В работе" value={stats.in_progress} valueStyle={{ color: '#fa8c16' }} prefix={<ClockCircleOutlined />} /></Card></Col>
           <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Ожидают решения" value={stats.awaiting_decision} valueStyle={{ color: '#722ed1' }} prefix={<ClockCircleOutlined />} /></Card></Col>
           <Col xs={24} sm={12} md={8} lg={4}><Card><Statistic title="Закрыто" value={stats.closed_cases} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
@@ -428,7 +428,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                   <Space direction="vertical" size={16} style={{ width: '100%' }}>
                     <div>
                       <Text strong>Сумма заказа: </Text>
-                      <Text style={{ fontSize: 16, color: '#2b9fe6' }}>
+                      <Text style={{ fontSize: 16, color: '#6435a5' }}>
                         {(detailData.order.amount || 0).toLocaleString()} ₽
                       </Text>
                     </div>
@@ -508,8 +508,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                           <Text strong>{item.sender ? `${item.sender.first_name ?? ''} ${item.sender.last_name ?? ''}`.trim() || 'Участник' : 'Система'}</Text>
                           {item.kind === 'message'
                             ? item.source === 'order_chat'
-                              ? <Tag color="geekblue">Чат по заказу</Tag>
-                              : (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="blue">Сообщение</Tag>)
+                              ? <Tag color="purple">Чат по заказу</Tag>
+                              : (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="purple">Сообщение</Tag>)
                             : <Tag>Событие</Tag>}
                           <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
                         </Space>

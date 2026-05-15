@@ -301,7 +301,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
   
   const getTypeColor = (type: string) => {
     const colors = {
-      technical_support: 'blue',
+      technical_support: 'purple',
       billing_question: 'green',
       order_help: 'orange',
       account_issue: 'purple',
@@ -327,7 +327,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
 
   const getStatusColor = (status: string) => {
     const colors = {
-      assigned: 'blue',
+      assigned: 'purple',
       in_progress: 'orange',
       waiting_response: 'yellow',
       on_hold: 'gray',
@@ -816,7 +816,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
                 {selectedRequest.actions.map((action, index) => (
                   <Timeline.Item 
                     key={action.id}
-                    color={index === 0 ? 'green' : 'blue'}
+                    color={index === 0 ? 'green' : 'purple'}
                   >
                     <div>
                       <Text strong>{action.description}</Text>

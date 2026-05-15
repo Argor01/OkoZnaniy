@@ -82,7 +82,7 @@ export const getPriorityColor = (priority: string): string => {
   const colors = {
     urgent: 'red',
     high: 'orange', 
-    medium: 'blue',
+    medium: 'purple',
     low: 'default'
   };
   return colors[priority as keyof typeof colors] || 'default';
@@ -91,7 +91,7 @@ export const getPriorityColor = (priority: string): string => {
 
 export const getStatusColor = (status: string): string => {
   const colors = {
-    open: 'blue',
+    open: 'purple',
     in_progress: 'orange',
     completed: 'green',
     closed: 'default'
@@ -106,9 +106,9 @@ export const getCategoryColor = (category: string): string => {
     billing: 'cyan',
     account: 'green',
     order: 'orange',
-    general: 'blue'
+    general: 'purple'
   };
-  return colors[category as keyof typeof colors] || 'blue';
+  return colors[category as keyof typeof colors] || 'purple';
 };
 
 
@@ -200,7 +200,7 @@ export const formatTags = (tags: string[]): string => {
 export const getProgressColor = (percent: number): string => {
   if (percent >= 80) return '#52c41a';
   if (percent >= 60) return '#faad14';
-  if (percent >= 40) return '#2b9fe6';
+  if (percent >= 40) return '#6435a5';
   return '#ff4d4f';
 };
 

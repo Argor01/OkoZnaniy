@@ -98,8 +98,8 @@
 }
 
 .chatItem.active {
-  background: var(--color-brand-blue-100, #d6ecfe);
-  border-left: 3px solid var(--color-brand-blue-500, #2b9fe6);
+  background: var(--color-brand-blue-100, #e3d5f3);
+  border-left: 3px solid var(--color-brand-blue-500, #6435a5);
 }
 
 .chatItemContent {
@@ -134,7 +134,7 @@
   color: var(--text-primary, #1f2937);
 }
 .unreadDot :global(.ant-badge-dot) {
-  background-color: var(--color-brand-blue-500, #2b9fe6);
+  background-color: var(--color-brand-blue-500, #6435a5);
 }
 
 .chatWindow {
@@ -195,7 +195,7 @@
 }
 
 .message.mine .messageContent {
-  background: linear-gradient(135deg, var(--color-brand-blue-500, #2b9fe6) 0%, var(--color-brand-blue-700, #0f7fda) 100%);
+  background: linear-gradient(135deg, var(--color-brand-blue-500, #6435a5) 0%, var(--color-brand-blue-700, #4e1f9e) 100%);
   color: #fff;
   border-bottom-right-radius: 4px;
 }

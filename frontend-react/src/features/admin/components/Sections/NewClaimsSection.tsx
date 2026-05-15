@@ -141,7 +141,7 @@ export const NewClaimsSection: React.FC = () => {
   
   const getCategoryColor = (category: string) => {
     const colors = {
-      technical: 'blue',
+      technical: 'purple',
       billing: 'green',
       order: 'orange',
       account: 'purple',
@@ -204,7 +204,7 @@ export const NewClaimsSection: React.FC = () => {
               {getPriorityText(record.priority)}
             </Tag>
             {record.attachments && record.attachments.length > 0 && (
-              <Tag color="blue">📎 {record.attachments.length}</Tag>
+              <Tag color="purple">📎 {record.attachments.length}</Tag>
             )}
           </div>
         </div>
@@ -434,7 +434,7 @@ export const NewClaimsSection: React.FC = () => {
                 <Text strong>Вложения:</Text>
                 <div className={styles.newClaimsAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
-                    <Tag key={index} color="blue">📎 {file}</Tag>
+                    <Tag key={index} color="purple">📎 {file}</Tag>
                   ))}
                 </div>
               </div>

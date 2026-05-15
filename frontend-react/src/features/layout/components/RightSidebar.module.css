@@ -79,7 +79,7 @@
 }
 
 .questionCard:hover {
-  border-color: var(--color-brand-blue-500, #2b9fe6);
+  border-color: var(--color-brand-blue-500, #6435a5);
   box-shadow: 0 4px 12px rgba(43, 159, 230, 0.08);
   transform: translateY(-2px);
 }
@@ -104,7 +104,7 @@
 }
 
 .authorName:hover {
-  color: var(--color-brand-blue-500, #2b9fe6);
+  color: var(--color-brand-blue-500, #6435a5);
 }
 
 .questionText {
@@ -180,7 +180,7 @@
 }
 
 :global([data-theme="dark"]) .questionCard:hover {
-  border-color: var(--color-brand-blue-500, #2b9fe6);
+  border-color: var(--color-brand-blue-500, #6435a5);
   box-shadow: 0 4px 12px rgba(43, 159, 230, 0.15);
 }
 
@@ -189,7 +189,7 @@
 }
 
 :global([data-theme="dark"]) .authorName:hover {
-  color: var(--color-brand-blue-500, #2b9fe6);
+  color: var(--color-brand-blue-500, #6435a5);
 }
 
 :global([data-theme="dark"]) .questionText {

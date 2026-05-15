@@ -60,7 +60,7 @@ export const DisputeModal: React.FC<DisputeModalProps> = ({
 
   if (dispute.arbitrator) {
     timelineItems.push({
-      color: 'blue',
+      color: 'purple',
       dot: <UserOutlined />,
       children: (
         <div>

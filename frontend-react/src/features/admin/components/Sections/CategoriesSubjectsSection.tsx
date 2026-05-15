@@ -268,7 +268,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
       dataIndex: 'subjects_count',
       key: 'subjects_count',
       width: 100,
-      render: (count: number) => <Tag color="blue">{count}</Tag>,
+      render: (count: number) => <Tag color="purple">{count}</Tag>,
     },
     {
       title: 'Работ',
@@ -327,7 +327,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             {record.description}
           </Text>
           <br />
-          <Tag color="blue">{record.category_name}</Tag>
+          <Tag color="purple">{record.category_name}</Tag>
         </div>
       ),
     },
@@ -615,7 +615,7 @@ export const CategoriesSubjectsSection: React.FC<CategoriesSubjectsSectionProps>
             name="color"
             label="Цвет"
           >
-            <Input placeholder="#2b9fe6" />
+            <Input placeholder="#6435a5" />
           </Form.Item>
 
           <Form.Item

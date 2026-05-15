@@ -238,7 +238,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       draft: 'default',
-      submitted: 'blue',
+      submitted: 'purple',
       under_review: 'processing',
       awaiting_response: 'warning',
       in_arbitration: 'orange',
@@ -252,7 +252,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const getPriorityColor = (priority: string) => {
     const colors: Record<string, string> = {
       low: 'green',
-      medium: 'blue',
+      medium: 'purple',
       high: 'orange',
       urgent: 'red',
     };
@@ -307,7 +307,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
               Назад к списку
             </Button>
             <Title level={2} style={{ margin: 0 }}>
-              <FileTextOutlined style={{ color: '#2b9fe6', marginRight: 12 }} />
+              <FileTextOutlined style={{ color: '#6435a5', marginRight: 12 }} />
               Арбитражное дело #{caseData.case_number}
             </Title>
           </div>
@@ -332,7 +332,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                     Истец
                   </Text>
                   <Space>
-                    <Avatar size={40} style={{ background: '#2b9fe6' }}>
+                    <Avatar size={40} style={{ background: '#6435a5' }}>
                       {getInitials(caseData.plaintiff.first_name, caseData.plaintiff.last_name)}
                     </Avatar>
                     <div>
@@ -530,12 +530,12 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                         return (
                           <Timeline.Item
                             key={item.id}
-                            color={isOrderChatMessage ? 'orange' : isAdmin ? 'blue' : 'green'}
+                            color={isOrderChatMessage ? 'orange' : isAdmin ? 'purple' : 'green'}
                             dot={<MessageOutlined />}
                           >
                             <div className="feed-message">
                               <Space>
-                                <Avatar size={32} style={{ background: isOrderChatMessage ? '#fa8c16' : isAdmin ? '#2b9fe6' : '#52c41a' }}>
+                                <Avatar size={32} style={{ background: isOrderChatMessage ? '#fa8c16' : isAdmin ? '#6435a5' : '#52c41a' }}>
                                   {getInitials(
                                     item.sender?.first_name || '',
                                     item.sender?.last_name || ''
@@ -545,7 +545,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                                   <Text strong>
                                     {item.sender?.first_name} {item.sender?.last_name}
                                   </Text>
-                                  {isAdmin && <Tag color="blue" style={{ marginLeft: 8 }}>Админ</Tag>}
+                                  {isAdmin && <Tag color="purple" style={{ marginLeft: 8 }}>Админ</Tag>}
                                   {!isAdmin && item.sender?.role && (
                                     <Tag color={isOrderChatMessage ? 'orange' : 'default'} style={{ marginLeft: 8 }}>
                                       {getRoleLabel(item.sender.role)}

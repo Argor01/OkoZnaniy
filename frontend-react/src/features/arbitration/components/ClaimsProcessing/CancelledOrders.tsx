@@ -140,7 +140,7 @@ const CancelledOrders: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new':
-        return 'blue';
+        return 'purple';
       case 'in_progress':
         return 'orange';
       case 'completed':

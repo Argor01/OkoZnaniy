@@ -198,7 +198,7 @@ export const NotificationsSettingsSection: React.FC<NotificationsSettingsSection
 
   const getTypeColor = (type: string) => {
     const colors = {
-      email: 'blue',
+      email: 'purple',
       sms: 'green',
       push: 'orange',
       in_app: 'purple',

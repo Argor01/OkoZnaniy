@@ -241,7 +241,7 @@ const MonthlyTurnover: React.FC = () => {
                   formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="amount" stroke="#2b9fe6" name="Оборот" strokeWidth={2} />
+                <Line type="monotone" dataKey="amount" stroke="#6435a5" name="Оборот" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>

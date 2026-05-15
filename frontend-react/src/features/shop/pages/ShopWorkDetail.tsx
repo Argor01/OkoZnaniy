@@ -130,7 +130,7 @@ const ShopWorkDetail: React.FC = () => {
             <div>
               <Space align="start" className={`${styles.fullWidth} ${styles.headerRow}`}>
                 <Title level={isMobile ? 3 : 2} className={styles.workTitle}>{work.title}</Title>
-                <Tag color="blue" className={styles.typeTag}>
+                <Tag color="purple" className={styles.typeTag}>
                   {work.work_type_name || work.category || 'Тип работы'}
                 </Tag>
               </Space>

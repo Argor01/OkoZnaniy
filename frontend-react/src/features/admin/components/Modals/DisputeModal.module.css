@@ -61,7 +61,7 @@
   padding: 12px;
   background: var(--color-bg-spotlight, #fafafa);
   border-radius: 6px;
-  border-left: 3px solid #2b9fe6;
+  border-left: 3px solid #6435a5;
 }
 
 .infoItem span:first-child {
@@ -76,9 +76,9 @@
 
 .participantCard {
   padding: 16px;
-  background: var(--color-bg-spotlight, #f0f9ff);
+  background: var(--color-bg-spotlight, #f8f0ff);
   border-radius: 8px;
-  border: 1px solid var(--color-border-secondary, #e6f7ff);
+  border: 1px solid var(--color-border-secondary, #f3e8ff);
 }
 
 .participantHeader {
@@ -89,7 +89,7 @@
 }
 
 .participantIcon {
-  color: #2b9fe6;
+  color: #6435a5;
   font-size: 16px;
 }
 

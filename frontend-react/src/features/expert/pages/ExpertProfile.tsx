@@ -145,7 +145,7 @@ const ExpertProfile: React.FC = () => {
             <AppCard title="Навыки" className={styles.cardSpacing}>
               <div className={styles.skillsWrap}>
                 {expert.skills.split(',').map((skill: string, index: number) => (
-                  <Tag key={index} color="blue">
+                  <Tag key={index} color="purple">
                     {skill.trim()}
                   </Tag>
                 ))}

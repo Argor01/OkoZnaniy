@@ -253,7 +253,7 @@ export const PartnerChatsSection: React.FC = () => {
 
   const getRoomTypeColor = (type: string) => {
     const colors = {
-      general: 'blue',
+      general: 'purple',
       department: 'green',
       project: 'orange',
       private: 'purple',
@@ -444,7 +444,7 @@ export const PartnerChatsSection: React.FC = () => {
                       {msg.sender.first_name} {msg.sender.last_name}
                     </Text>
                     {!isMobile && (
-                      <Tag color="blue" className={styles.messageRoleTag}>
+                      <Tag color="purple" className={styles.messageRoleTag}>
                         {msg.sender.role}
                       </Tag>
                     )}

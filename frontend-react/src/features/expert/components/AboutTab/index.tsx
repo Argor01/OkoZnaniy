@@ -84,7 +84,7 @@ const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobi
           <Title level={4} className={styles.aboutSectionTitle}>Навыки</Title>
           <div className={styles.aboutSkillsList}>
             {skills.map((skill: string, index: number) => (
-              <Tag key={index} color="blue" className={styles.aboutSkillTag}>
+              <Tag key={index} color="purple" className={styles.aboutSkillTag}>
                 {skill}
               </Tag>
             ))}

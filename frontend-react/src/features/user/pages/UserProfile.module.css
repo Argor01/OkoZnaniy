@@ -33,10 +33,10 @@
 }
 
 .headerCard {
-  background: var(--bg-secondary, linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%));
+  background: var(--bg-secondary, linear-gradient(135deg, #faf8ff 0%, #f5f0ff 100%));
   border: 1px solid var(--border-color, var(--color-brand-blue-200));
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 4px 16px rgba(100, 53, 165, 0.12);
   padding: 8px 16px;
 }
 
@@ -60,9 +60,9 @@
 .roleTag {
   font-size: 11px;
   padding: 2px 8px;
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: rgba(100, 53, 165, 0.12);
   color: var(--color-brand-blue-700);
-  border: 1px solid rgba(59, 130, 246, 0.24);
+  border: 1px solid rgba(100, 53, 165, 0.24);
   border-radius: 12px;
 }
 
@@ -84,7 +84,7 @@
 
 .profileIdentityAvatar {
   border: 2px solid var(--color-brand-blue-300);
-  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.16);
+  box-shadow: 0 3px 12px rgba(100, 53, 165, 0.16);
 }
 
 .profileIdentityMeta {
@@ -181,14 +181,14 @@
 .statValuePrimary {
   font-size: 48px;
   font-weight: 600;
-  color: #2b9fe6;
+  color: #6435a5;
   margin-bottom: 8px;
 }
 
 .statNumberLarge {
   font-size: 32px;
   font-weight: 600;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .rateLarge {

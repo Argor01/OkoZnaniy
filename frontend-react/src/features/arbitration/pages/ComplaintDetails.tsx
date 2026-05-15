@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<Complaint['status'], {
   label: string 
 }> = {
   open: { color: 'green', icon: <HourglassOutlined />, label: 'Открыт' },
-  in_progress: { color: 'blue', icon: <HourglassOutlined />, label: 'В работе' },
+  in_progress: { color: 'purple', icon: <HourglassOutlined />, label: 'В работе' },
   resolved: { color: 'cyan', icon: <CheckCircleOutlined />, label: 'Решён' },
   closed: { color: 'default', icon: <CloseCircleOutlined />, label: 'Закрыт' },
 };

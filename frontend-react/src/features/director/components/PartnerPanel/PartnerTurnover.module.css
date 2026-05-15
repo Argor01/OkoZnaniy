@@ -72,7 +72,7 @@
 }
 
 .statisticTurnover :global(.ant-statistic-content-value) {
-  color: #2b9fe6;
+  color: #6435a5;
   font-size: 24px;
   font-weight: 600;
 }
@@ -302,7 +302,7 @@
 }
 
 .topPartnerTurnoverBox {
-  background: #e6f7ff;
+  background: #f3e8ff;
 }
 
 .topPartnerCommissionBox {
@@ -316,7 +316,7 @@
 
 .topPartnerTurnoverValue {
   font-size: 14px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .topPartnerCommissionValue {
@@ -406,7 +406,7 @@
 }
 
 .allPartnerTurnoverBox {
-  background: #e6f7ff;
+  background: #f3e8ff;
 }
 
 .allPartnerCommissionBox {
@@ -424,7 +424,7 @@
 
 .allPartnerTurnoverValue {
   font-size: 12px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .allPartnerCommissionValue {
@@ -440,13 +440,13 @@
 .allPartnersSummaryCard {
   margin-top: 16px;
   border-radius: 8px;
-  border: 2px solid #2b9fe6;
-  background: #f0f9ff;
+  border: 2px solid #6435a5;
+  background: #f8f0ff;
 }
 
 .allPartnersSummaryTitle {
   font-size: 14px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .allPartnersSummaryRow {
@@ -464,7 +464,7 @@
 
 .allPartnersSummaryValueBlue {
   font-size: 14px;
-  color: #2b9fe6;
+  color: #6435a5;
 }
 
 .allPartnersSummaryValueGreen {
@@ -608,9 +608,9 @@
     font-size: 18px;
     font-weight: 700;
     border-radius: 10px;
-    border: 3px solid #2b9fe6;
+    border: 3px solid #6435a5;
     background: #ffffff;
-    color: #2b9fe6;
+    color: #6435a5;
     cursor: pointer;
     margin: 0 6px;
     min-width: 120px;
@@ -622,7 +622,7 @@
   }
   
   .datePickerContainer :global(.ant-picker-header-view *:hover) {
-    background: #2b9fe6;
+    background: #6435a5;
     color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(24,144,255,0.4);
@@ -637,9 +637,9 @@
     font-size: 16px;
     font-weight: 600;
     border-radius: 8px;
-    border: 2px solid #e6f7ff;
+    border: 2px solid #f3e8ff;
     background: #ffffff;
-    color: #2b9fe6;
+    color: #6435a5;
     cursor: pointer;
     margin: 0 6px;
     min-width: 60px;
@@ -652,9 +652,9 @@
   :global(.ant-picker-header-view button:hover),
   :global(.ant-picker-header-view .ant-btn:hover),
   :global(.ant-picker-header-view span[role="button"]:hover) {
-    border-color: #2b9fe6;
+    border-color: #6435a5;
     color: #ffffff;
-    background: #2b9fe6;
+    background: #6435a5;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(24,144,255,0.3);
   }
@@ -677,9 +677,9 @@
     font-size: 16px;
     font-weight: 600;
     border-radius: 8px;
-    border: 2px solid #e6f7ff;
+    border: 2px solid #f3e8ff;
     background: #ffffff;
-    color: #2b9fe6;
+    color: #6435a5;
     cursor: pointer;
     margin: 0 6px;
     min-width: 60px;
@@ -692,9 +692,9 @@
   :global(.ant-picker-month-btn:hover),
   :global(.ant-picker-year-btn:hover),
   :global(.ant-picker-header-view > *:hover) {
-    border-color: #2b9fe6;
+    border-color: #6435a5;
     color: #ffffff;
-    background: #2b9fe6;
+    background: #6435a5;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(24,144,255,0.3);
   }
@@ -719,13 +719,13 @@
   }
   
   .datePickerContainer :global(.ant-picker-header button:hover) {
-    border-color: #2b9fe6;
-    color: #2b9fe6;
-    background: #f0f9ff;
+    border-color: #6435a5;
+    color: #6435a5;
+    background: #f8f0ff;
   }
   
   .datePickerContainer :global(.ant-picker-header button:active) {
-    background: #e6f7ff;
+    background: #f3e8ff;
   }
 }
 

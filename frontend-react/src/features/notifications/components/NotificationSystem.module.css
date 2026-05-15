@@ -116,7 +116,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #7c3aed;
   flex-shrink: 0;
   margin-top: 6px;
 }
@@ -142,7 +142,7 @@
   font-size: 12px;
 }
 .iconOrder {
-  color: #3b82f6;
+  color: #7c3aed;
 }
 .iconClaim {
   color: #f59e0b;

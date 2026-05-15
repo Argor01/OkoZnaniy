@@ -13,7 +13,7 @@
 
 .chatMessagesDragOver {
   background: #eff6ff;
-  outline: 2px dashed #3b82f6;
+  outline: 2px dashed #7c3aed;
   outline-offset: -10px;
 }
 
@@ -27,7 +27,7 @@
   border: 1px solid #93c5fd;
   border-radius: 10px;
   background: #dbeafe;
-  color: #1d4ed8;
+  color: #5b21b6;
   font-weight: 600;
   text-align: center;
   pointer-events: none;

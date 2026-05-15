@@ -17,7 +17,7 @@ export const clearAuth = () => {
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as any).clearAuth = clearAuth;
   if (window.localStorage?.getItem('debug_api') === '1') {
-    logger.log('%c💡 Подсказка для разработки', 'color: #2b9fe6; font-size: 14px; font-weight: bold;');
+    logger.log('%c💡 Подсказка для разработки', 'color: #6435a5; font-size: 14px; font-weight: bold;');
     logger.log(
       '%cЕсли возникают ошибки 401/403, выполните в консоли: %cclearAuth()',
       'color: #666; font-size: 12px;',

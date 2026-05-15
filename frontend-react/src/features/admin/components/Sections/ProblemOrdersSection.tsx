@@ -156,7 +156,7 @@ const ProblemOrdersTable: React.FC<ProblemOrdersTableProps> = ({
       quality_dispute: 'volcano',
       no_expert_assigned: 'orange',
       payment_problem: 'purple',
-      communication_issue: 'blue',
+      communication_issue: 'purple',
       technical_issue: 'cyan',
     };
     return typeColors[type as keyof typeof typeColors] || 'default';
@@ -175,7 +175,7 @@ const ProblemOrdersTable: React.FC<ProblemOrdersTableProps> = ({
   const getSeverityColor = (severity: string) => {
     const severityColors = {
       low: 'green',
-      medium: 'blue',
+      medium: 'purple',
       high: 'orange',
       critical: 'red',
     };

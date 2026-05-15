@@ -43,7 +43,7 @@
 
 
 .infoIcon {
-  color: #2b9fe6;
+  color: #6435a5;
   font-size: 20px;
 }
 
@@ -64,8 +64,8 @@
 
 
 .confirmModal.info :global(.ant-modal-header) {
-  background: var(--color-bg-spotlight, #f0f9ff);
-  border-bottom-color: var(--color-border-secondary, #e6f7ff);
+  background: var(--color-bg-spotlight, #f8f0ff);
+  border-bottom-color: var(--color-border-secondary, #f3e8ff);
 }
 
 .confirmModal.success :global(.ant-modal-header) {

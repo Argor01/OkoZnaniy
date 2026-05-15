@@ -66,8 +66,8 @@
 }
 
 .chatRoomItemActive {
-  background-color: var(--color-chat-item-active, #f0f8ff);
-  border-left: 3px solid #2b9fe6;
+  background-color: var(--color-chat-item-active, #f8f0ff);
+  border-left: 3px solid #6435a5;
 }
 
 .chatRoomAvatar {
@@ -82,7 +82,7 @@
 }
 
 .roomTypeGeneral {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
 }
 
 .roomTypeDepartment {
@@ -257,7 +257,7 @@
 }
 
 .messageAvatarUser {
-  background-color: #2b9fe6;
+  background-color: #6435a5;
 }
 
 .messageContent {
@@ -416,8 +416,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #2b9fe6;
-  border-color: #2b9fe6;
+  background-color: #6435a5;
+  border-color: #6435a5;
   transition: all 0.2s ease;
 }
 
@@ -849,7 +849,7 @@
 }
 
 :global(.ant-input:focus) {
-  border-color: #2b9fe6;
+  border-color: #6435a5;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
   outline: 0;
 }
@@ -882,7 +882,7 @@
 }
 
 :global(.ant-select-focused .ant-select-selector) {
-  border-color: #2b9fe6 !important;
+  border-color: #6435a5 !important;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
 }
 
@@ -1041,7 +1041,7 @@
   }
 
   :global(.ant-modal-footer .ant-btn-primary) {
-    background: #2b9fe6 !important;
+    background: #6435a5 !important;
     color: #fff !important;
   }
 
@@ -1079,7 +1079,7 @@
   }
 
   :global(.ant-input:focus) {
-    border-color: #2b9fe6 !important;
+    border-color: #6435a5 !important;
     box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1) !important;
   }
 
@@ -1110,7 +1110,7 @@
   }
 
   :global(.ant-select-focused .ant-select-selector) {
-    border-color: #2b9fe6 !important;
+    border-color: #6435a5 !important;
     box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1) !important;
   }
 
@@ -1132,13 +1132,13 @@
     padding: 0 10px !important;
     border-radius: 6px !important;
     font-size: 14px !important;
-    background: #f0f8ff !important;
+    background: #f8f0ff !important;
     border: 1px solid #d6e4ff !important;
-    color: #2b9fe6 !important;
+    color: #6435a5 !important;
   }
 
   :global(.ant-select-multiple .ant-select-selection-item-remove) {
-    color: #2b9fe6 !important;
+    color: #6435a5 !important;
     font-size: 12px !important;
     margin-left: 4px !important;
   }

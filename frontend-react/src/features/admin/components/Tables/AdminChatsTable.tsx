@@ -67,7 +67,7 @@ export const AdminChatsTable: React.FC<AdminChatsTableProps> = ({
             <div className={styles.chatType}>
               <Tag 
                 color={
-                  record.type === 'general' ? 'blue' :
+                  record.type === 'general' ? 'purple' :
                   record.type === 'department' ? 'green' : 'orange'
                 }
               >

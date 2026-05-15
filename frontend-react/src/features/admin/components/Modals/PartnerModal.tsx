@@ -117,7 +117,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({
             <Col xs={24} sm={12}>
               <div className={styles.infoItem}>
                 <Text type="secondary">Реферальный код:</Text>
-                <Tag color="blue" className={styles.referralCode}>
+                <Tag color="purple" className={styles.referralCode}>
                   {partner.referral_code}
                 </Tag>
               </div>

@@ -22,7 +22,7 @@
 
 .default :global(.ant-select-focused .ant-select-selector) {
   border-color: var(--primary-blue) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1) !important;
 }
 
 .filled :global(.ant-select-selector) {
@@ -37,7 +37,7 @@
 .filled :global(.ant-select-focused .ant-select-selector) {
   background-color: var(--bg-primary) !important;
   border-color: var(--primary-blue) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.1) !important;
 }
 
 .popup {

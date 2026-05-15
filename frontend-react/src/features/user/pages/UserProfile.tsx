@@ -380,7 +380,7 @@ const UserProfile: FC = () => {
                               },
                               index: number
                             ) => (
-                            <Tag key={index} color="blue">
+                            <Tag key={index} color="purple">
                               {[
                                 spec?.custom_name || spec?.subject?.name || 'Специализация не указана',
                                 spec?.hourly_rate ? `${Number(spec.hourly_rate).toLocaleString('ru-RU')} ₽/час` : null,
@@ -517,7 +517,7 @@ const UserProfile: FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12 }}>
                   <Tooltip title="Количество ответов, которые эксперт дал на вопросы в Базе Знаний">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 12, background: 'rgba(24, 144, 255, 0.06)', cursor: 'help' }}>
-                      <MessageOutlined style={{ fontSize: 20, color: '#1890ff' }} />
+                      <MessageOutlined style={{ fontSize: 20, color: '#6435a5' }} />
                       <div>
                         <div style={{ fontSize: 12, color: '#8c8c8c' }}>Ответов</div>
                         <div style={{ fontSize: 18, fontWeight: 700 }}>{knowledgeStats.answers_count}</div>
@@ -592,7 +592,7 @@ const UserProfile: FC = () => {
                           {(article.files_count ?? 0) > 0 && <span><FileOutlined /> {article.files_count}</span>}
                         </div>
                         <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
-                          {article.work_type && <Tag color="blue">{article.work_type}</Tag>}
+                          {article.work_type && <Tag color="purple">{article.work_type}</Tag>}
                           {article.subject && <Tag color="green">{article.subject}</Tag>}
                         </div>
                         <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 6, marginBottom: 0 }}>

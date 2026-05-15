@@ -101,7 +101,7 @@ export const KnowledgePortal: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      open: 'blue',
+      open: 'purple',
       answered: 'green',
       closed: 'default'
     };
@@ -292,7 +292,7 @@ export const KnowledgePortal: React.FC = () => {
                 {/* Footer */}
                 <div className={styles.questionFooter}>
                   <div className={styles.tagsRow}>
-                    <Tag color="blue" className={styles.categoryTag}>
+                    <Tag color="purple" className={styles.categoryTag}>
                       <BookOutlined /> {question.category}
                     </Tag>
                     {question.tags.map(tag => (

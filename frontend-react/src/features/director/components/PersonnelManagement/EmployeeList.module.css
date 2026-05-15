@@ -9,7 +9,7 @@
 }
 
 .customSearchContainer:focus-within {
-  border-color: #2b9fe6;
+  border-color: #6435a5;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
@@ -48,7 +48,7 @@
 }
 
 .customSearchButton:active {
-  background: #e6f7ff;
+  background: #f3e8ff;
 }
 
 

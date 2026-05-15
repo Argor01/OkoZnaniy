@@ -13,14 +13,14 @@
 }
 
 .primary {
-  background-color: var(--primary-blue, #3b82f6);
-  border-color: var(--primary-blue, #3b82f6);
+  background-color: var(--primary-blue, #7c3aed);
+  border-color: var(--primary-blue, #7c3aed);
   box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .primary:hover {
-  background-color: var(--primary-blue-hover, #2563eb) !important;
-  border-color: var(--primary-blue-hover, #2563eb) !important;
+  background-color: var(--primary-blue-hover, #6d28d9) !important;
+  border-color: var(--primary-blue-hover, #6d28d9) !important;
   box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
 }
 
@@ -31,28 +31,28 @@
 }
 
 .secondary:hover {
-  border-color: var(--primary-blue, #3b82f6) !important;
-  color: var(--primary-blue, #3b82f6) !important;
+  border-color: var(--primary-blue, #7c3aed) !important;
+  color: var(--primary-blue, #7c3aed) !important;
 }
 
 .outline {
   background-color: transparent;
-  border: 1px solid var(--primary-blue, #3b82f6);
-  color: var(--primary-blue, #3b82f6);
+  border: 1px solid var(--primary-blue, #7c3aed);
+  color: var(--primary-blue, #7c3aed);
 }
 
 .outline:hover {
-  background-color: rgba(59, 130, 246, 0.05) !important;
+  background-color: rgba(100, 53, 165, 0.05) !important;
 }
 
 .gradient {
-  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #764ba2 100%));
   border: none;
   box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
 }
 
 .gradient:hover {
-  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%)) !important;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed 0%, #764ba2 100%)) !important;
   filter: brightness(1.1);
   box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
 }

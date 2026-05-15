@@ -54,7 +54,7 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
       key: 'earning_type',
       render: (type: string) => {
         const typeColors = {
-          order: 'blue',
+          order: 'purple',
           registration: 'green',
           bonus: 'purple',
         };

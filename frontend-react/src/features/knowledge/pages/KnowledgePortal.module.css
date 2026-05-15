@@ -63,9 +63,9 @@
 }
 
 .statIconBlue {
-  background: color-mix(in srgb, var(--color-brand-blue-100, #d6ecfe) 70%, #ffffff 30%);
-  color: var(--color-brand-blue-700, #0f7fda);
-  border: 1px solid var(--color-brand-blue-200, #a5d5fc);
+  background: color-mix(in srgb, var(--color-brand-blue-100, #e3d5f3) 70%, #ffffff 30%);
+  color: var(--color-brand-blue-700, #4e1f9e);
+  border: 1px solid var(--color-brand-blue-200, #c4a0e8);
 }
 
 .statIconGreen {
@@ -147,7 +147,7 @@
 }
 
 .questionCard:hover {
-  border-color: color-mix(in srgb, var(--primary-blue, #3b82f6) 32%, var(--border-color, #e5e7eb) 68%) !important;
+  border-color: color-mix(in srgb, var(--primary-blue, #7c3aed) 32%, var(--border-color, #e5e7eb) 68%) !important;
   box-shadow: var(--shadow-md, 0 4px 12px rgba(59,130,246,0.15)) !important;
   transform: translateY(-2px);
 }
@@ -236,12 +236,12 @@
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  background: color-mix(in srgb, var(--color-brand-blue-100, #d6ecfe) 50%, #ffffff 50%);
-  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200, #a5d5fc) 60%, #ffffff 40%);
+  background: color-mix(in srgb, var(--color-brand-blue-100, #e3d5f3) 50%, #ffffff 50%);
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue-200, #c4a0e8) 60%, #ffffff 40%);
   border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-brand-blue-700, #0f7fda);
+  color: var(--color-brand-blue-700, #4e1f9e);
 }
 
 .infoChipIcon {

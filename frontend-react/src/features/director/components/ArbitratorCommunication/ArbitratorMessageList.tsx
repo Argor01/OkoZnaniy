@@ -98,7 +98,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
     }
     switch (status) {
       case 'sent':
-        return 'blue';
+        return 'purple';
       case 'read':
         return 'green';
       case 'replied':
@@ -169,7 +169,7 @@ const ArbitratorMessageList: React.FC<ArbitratorMessageListProps> = ({
                     {message.sender.username}
                   </Text>
                   <Tag
-                    color={message.sender.role === 'arbitrator' ? 'blue' : 'purple'}
+                    color={message.sender.role === 'arbitrator' ? 'purple' : 'purple'}
                     className={styles.metaTag}
                   >
                     {message.sender.role === 'arbitrator' ? 'Арбитр' : 'Дирекция'}

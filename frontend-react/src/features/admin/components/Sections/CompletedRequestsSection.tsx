@@ -201,7 +201,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
   
   const getTypeColor = (type: string) => {
     const colors = {
-      technical: 'blue',
+      technical: 'purple',
       billing: 'green',
       order: 'orange',
       account: 'purple',
@@ -250,7 +250,7 @@ export const CompletedRequestsSection: React.FC<CompletedRequestsSectionProps> =
       resolved: 'green',
       closed_no_action: 'gray',
       escalated: 'orange',
-      duplicate: 'blue',
+      duplicate: 'purple',
       invalid: 'red',
     };
     return colors[type as keyof typeof colors] || 'gray';

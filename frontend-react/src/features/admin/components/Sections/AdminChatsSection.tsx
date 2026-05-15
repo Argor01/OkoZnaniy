@@ -45,10 +45,10 @@ const MsgList: React.FC<{ msgs: any[]; uid: number }> = ({ msgs, uid }) => {
             const text = m.message ?? m.text ?? '';
             return (
               <div key={m.id} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end' }}>
-                <Avatar size={28} icon={<UserOutlined />} style={{ background: mine ? '#2b9fe6' : '#52c41a', flexShrink: 0 }} />
+                <Avatar size={28} icon={<UserOutlined />} style={{ background: mine ? '#6435a5' : '#52c41a', flexShrink: 0 }} />
                 <div style={{ maxWidth: '70%' }}>
                   <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #8c8c8c)', marginBottom: 2, textAlign: mine ? 'right' : 'left' }}>{name}</div>
-                  <div style={{ background: mine ? '#2b9fe6' : 'var(--color-bg-spotlight, #f0f0f0)', color: mine ? '#fff' : 'var(--color-text-base, #000)', padding: '8px 12px', borderRadius: mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px', fontSize: 14, wordBreak: 'break-word' }}>{text}</div>
+                  <div style={{ background: mine ? '#6435a5' : 'var(--color-bg-spotlight, #f0f0f0)', color: mine ? '#fff' : 'var(--color-text-base, #000)', padding: '8px 12px', borderRadius: mine ? '14px 14px 2px 14px' : '14px 14px 14px 2px', fontSize: 14, wordBreak: 'break-word' }}>{text}</div>
                   <div style={{ fontSize: 11, color: 'var(--color-text-tertiary, #bfbfbf)', marginTop: 2, textAlign: mine ? 'right' : 'left' }}>{fmt(m.created_at ?? '')}</div>
                 </div>
               </div>
@@ -80,9 +80,9 @@ const Composer: React.FC<{ onSend: (t: string) => Promise<void> }> = ({ onSend }
 
 const ChatListItem: React.FC<{ id: number; name: string; subtitle: string; time?: string; active: boolean; onClick: () => void }> = ({ name, subtitle, time, active, onClick }) => (
   <div onClick={onClick}
-    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--color-border-secondary, #f5f5f5)', display: 'flex', alignItems: 'center', gap: 12, background: active ? 'var(--color-chat-item-active, #e6f7ff)' : '' }}
+    style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid var(--color-border-secondary, #f5f5f5)', display: 'flex', alignItems: 'center', gap: 12, background: active ? 'var(--color-chat-item-active, #f3e8ff)' : '' }}
     onMouseEnter={e => !active && (e.currentTarget.style.background = 'var(--color-chat-item-hover, #f5f5f5)')} onMouseLeave={e => !active && (e.currentTarget.style.background = '')}>
-    <Avatar icon={<TeamOutlined />} style={{ background: '#2b9fe6', flexShrink: 0 }} />
+    <Avatar icon={<TeamOutlined />} style={{ background: '#6435a5', flexShrink: 0 }} />
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ fontWeight: 600, color: 'var(--color-text-base, #000)' }}>{name}</div>
       <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</div>
@@ -95,7 +95,7 @@ const ChatHeader: React.FC<{ name: string; sub: string; icon: React.ReactNode; o
   <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--color-border-secondary, #f0f0f0)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
     <Space>
       {onBack && <Button size="small" onClick={onBack}>←</Button>}
-      <Avatar icon={icon} style={{ background: '#2b9fe6' }} />
+      <Avatar icon={icon} style={{ background: '#6435a5' }} />
       <div>
         <div style={{ fontWeight: 600, color: 'var(--color-text-base, #000)' }}>{name}</div>
         <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #8c8c8c)' }}>{sub}</div>
@@ -251,7 +251,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
           renderItem={(member: any) => (
             <List.Item>
               <List.Item.Meta
-                avatar={<Avatar icon={<UserOutlined />} style={{ background: member.role === 'admin' ? '#2b9fe6' : member.role === 'director' ? '#722ed1' : '#52c41a' }} />}
+                avatar={<Avatar icon={<UserOutlined />} style={{ background: member.role === 'admin' ? '#6435a5' : member.role === 'director' ? '#722ed1' : '#52c41a' }} />}
                 title={`${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || member.username}
                 description={
                   <Space direction="vertical" size={0}>

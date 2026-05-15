@@ -392,7 +392,7 @@ export const KnowledgeBaseSection: React.FC = () => {
             <span><EyeOutlined /> {articleDetail.views_count}</span>
           </div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            {articleDetail.work_type && <Tag color="blue">{articleDetail.work_type}</Tag>}
+            {articleDetail.work_type && <Tag color="purple">{articleDetail.work_type}</Tag>}
             {articleDetail.subject && <Tag color="green">{articleDetail.subject}</Tag>}
           </div>
           <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: 15 }}>
@@ -487,7 +487,7 @@ export const KnowledgeBaseSection: React.FC = () => {
                   {article.description}
                 </Text>
                 <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
-                  {article.work_type && <Tag color="blue">{article.work_type}</Tag>}
+                  {article.work_type && <Tag color="purple">{article.work_type}</Tag>}
                   {article.subject && <Tag color="green">{article.subject}</Tag>}
                 </div>
               </div>

@@ -96,7 +96,7 @@ const MessageList: React.FC<MessageListProps> = ({
     }
     switch (status) {
       case 'sent':
-        return 'blue';
+        return 'purple';
       case 'read':
         return 'green';
       case 'replied':
@@ -158,7 +158,7 @@ const MessageList: React.FC<MessageListProps> = ({
               title={
                 <Space>
                   <Text strong>{message.sender.username}</Text>
-                  <Tag color={message.sender.role === 'director' ? 'purple' : 'blue'}>
+                  <Tag color={message.sender.role === 'director' ? 'purple' : 'purple'}>
                     {message.sender.role === 'director' ? 'Дирекция' : 'Арбитр'}
                   </Tag>
                   {message.priority && (

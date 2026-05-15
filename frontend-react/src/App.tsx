@@ -38,9 +38,9 @@ const ThemedApp: React.FC = () => {
       theme={{
         algorithm: isDark ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
-          colorPrimary: '#2b9fe6',
-          colorInfo: '#2b9fe6',
-          colorLink: isDark ? '#4db8f0' : '#0f7fda',
+          colorPrimary: '#6435a5',
+          colorInfo: '#6435a5',
+          colorLink: isDark ? '#a78bfa' : '#4e1f9e',
           colorWarning: '#ffa831',
           colorBgLayout: isDark ? '#0f1117' : '#ffffff',
           colorBgContainer: isDark ? '#1a1d27' : '#ffffff',
@@ -84,8 +84,8 @@ const ThemedApp: React.FC = () => {
           Menu: {
             colorItemBg: 'transparent',
             colorSubItemBg: 'transparent',
-            colorItemBgSelected: isDark ? '#1e3a5f' : '#e6f4ff',
-            colorItemTextSelected: '#2b9fe6',
+            colorItemBgSelected: isDark ? '#2d1a5f' : '#f3e8ff',
+            colorItemTextSelected: '#6435a5',
           },
           Dropdown: {
             colorBgElevated: isDark ? '#22262f' : '#ffffff',

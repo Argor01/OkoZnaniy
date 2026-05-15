@@ -9,7 +9,7 @@
 
 .inputField:focus,
 .inputField:hover {
-  border-color: #667eea;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -40,7 +40,7 @@
 
 .textareaField:focus,
 .textareaField:hover {
-  border-color: #667eea;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -54,7 +54,7 @@
 
 /* Shared Button Styles */
 .buttonPrimary {
-  background: #2b9fe6;
+  background: #6435a5;
   border: none;
   border-radius: 12px;
   height: 44px;
@@ -76,7 +76,7 @@
   border: 1px solid rgba(102, 126, 234, 0.2);
   border-radius: 12px;
   height: 44px;
-  color: #667eea;
+  color: #7c3aed;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -275,5 +275,5 @@
   font-size: 15px;
   font-weight: 500;
   border-color: rgba(102, 126, 234, 0.3);
-  color: #667eea;
+  color: #7c3aed;
 }

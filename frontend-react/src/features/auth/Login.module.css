@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ffffff 50%, #107afc 100%);
+  background: linear-gradient(135deg, #ffffff 50%, #6435a5 100%);
   padding: 20px;
 }
 
@@ -105,7 +105,7 @@
   position: relative;
   flex: 1 1 50%;
   min-height: 520px;
-  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+  background: linear-gradient(135deg, #6435a5 0%, #c084fc 100%);
   color: #fff;
   padding: 24px;
   z-index: 1;
@@ -278,7 +278,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #298deb;
+  background: #6435a5;
   opacity: 0.95;
   animation: none; 
 }
@@ -307,7 +307,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #298deb;
+  background: #6435a5;
   opacity: 0.9;
   animation: bubbleBounce 1400ms ease-in-out infinite;
 }
@@ -455,7 +455,7 @@
 }
 
 .authPanel :global(.ant-input:focus) {
-  border-color: #107afc;
+  border-color: #6435a5;
   box-shadow: 0 0 0 3px rgba(16, 122, 252, 0.1);
 }
 
@@ -477,14 +477,14 @@
   font-size: 16px;
   font-weight: 600;
   border-radius: 10px;
-  background: #107afc;
-  border-color: #107afc;
+  background: #6435a5;
+  border-color: #6435a5;
   transition: all 0.2s;
 }
 
 .authPanel :global(.ant-btn-primary:hover) {
-  background: #0a5fd0;
-  border-color: #0a5fd0;
+  background: #4e1f9e;
+  border-color: #4e1f9e;
   transform: translateY(-1px);
 }
 
@@ -494,12 +494,12 @@
 }
 
 .authPanel :global(.ant-checkbox-wrapper a) {
-  color: #107afc;
+  color: #6435a5;
   text-decoration: none;
 }
 
 .authPanel :global(.ant-checkbox-wrapper a:hover) {
-  color: #0a5fd0;
+  color: #4e1f9e;
   text-decoration: underline;
 }
 
@@ -518,7 +518,7 @@
   left: 6px;
   height: calc(100% - 12px);
   width: calc((100% - 12px) / 2);
-  background: #107afc;
+  background: #6435a5;
   border-radius: 999px;
   box-shadow: 0 8px 22px rgba(16, 122, 252, 0.25);
   transform: translateX(0%);
@@ -531,7 +531,7 @@
   flex: 1;
   border: none;
   background: transparent;
-  color: #107afc;
+  color: #6435a5;
   font-weight: 700;
   font-size: 14px;
   padding: 10px 16px;
@@ -542,7 +542,7 @@
   transition: color 160ms ease-in-out;
 }
 .roleOption:hover {
-  color: #0a5fd0;
+  color: #4e1f9e;
 }
 .roleOption.active {
   color: #ffffff;
@@ -572,7 +572,7 @@
   font-weight: 600;
   cursor: default;
 }
-.tabBtn.active { background: #e6f0ff; color: #1e4edc; }
+.tabBtn.active { background: #ede9fe; color: #5b21b6; }
 
 .panelBody { padding: 8px 8px 0; }
 
@@ -628,7 +628,7 @@
 .telegramLoginText {
   font-weight: 600;
   font-size: 14px;
-  color: #298deb;
+  color: #6435a5;
 }
 
 @media (max-width: 768px) {
@@ -784,7 +784,7 @@
 
 /* ===== DARK THEME ===== */
 [data-theme="dark"] .loginPage {
-  background: linear-gradient(135deg, #0f1117 50%, #1a2744 100%);
+  background: linear-gradient(135deg, #0f1117 50%, #241a44 100%);
 }
 
 [data-theme="dark"] .authCard {
@@ -793,7 +793,7 @@
 }
 
 [data-theme="dark"] .authLeft {
-  background: linear-gradient(135deg, #1a3a6b 0%, #0d3a5c 100%);
+  background: linear-gradient(135deg, #2d1a6b 0%, #1a0d5c 100%);
 }
 
 [data-theme="dark"] .bubble {
@@ -849,8 +849,8 @@
 [data-theme="dark"] .authPanel :global(.ant-input-affix-wrapper-focused),
 [data-theme="dark"] .authPanel :global(.ant-input-affix-wrapper:hover) {
   background: #1e2230 !important;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(100, 53, 165, 0.15) !important;
 }
 
 [data-theme="dark"] .authPanel :global(.ant-input::placeholder) {
@@ -873,13 +873,13 @@
 
 [data-theme="dark"] .authPanel :global(.ant-input:focus),
 [data-theme="dark"] .authPanel :global(.ant-input-focused) {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(100, 53, 165, 0.15) !important;
 }
 
 [data-theme="dark"] .authPanel :global(.ant-input-password:focus-within) {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(100, 53, 165, 0.15) !important;
 }
 
 [data-theme="dark"] .authPanel :global(.ant-checkbox-wrapper) {
@@ -887,7 +887,7 @@
 }
 
 [data-theme="dark"] .authPanel :global(.ant-checkbox-wrapper a) {
-  color: #60a5fa;
+  color: #a78bfa;
 }
 
 [data-theme="dark"] .authPanel :global(.ant-tabs-tab) {
@@ -895,7 +895,7 @@
 }
 
 [data-theme="dark"] .authPanel :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
-  color: #3b82f6 !important;
+  color: #7c3aed !important;
 }
 
 [data-theme="dark"] .authPanel :global(.ant-tabs-nav::before) {
@@ -909,7 +909,7 @@
 }
 
 [data-theme="dark"] .roleOption {
-  color: #60a5fa;
+  color: #a78bfa;
 }
 
 [data-theme="dark"] .roleOption.active {
@@ -922,8 +922,8 @@
 }
 
 [data-theme="dark"] .tabBtn.active {
-  background: #1e2a3a;
-  color: #60a5fa;
+  background: #261a3a;
+  color: #a78bfa;
 }
 
 [data-theme="dark"] .panelBody {

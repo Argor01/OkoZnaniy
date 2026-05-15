@@ -20,7 +20,7 @@ interface ChatRoomListProps {
 }
 
 const defaultTypeColors: Record<string, string> = {
-  general: 'blue',
+  general: 'purple',
   department: 'green',
   project: 'orange',
   private: 'purple',
@@ -71,7 +71,7 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 style={{
                   cursor: 'pointer',
                   padding: '12px 16px',
-                  background: selectedRoom?.id === room.id ? 'var(--color-chat-item-active, #e6f7ff)' : undefined,
+                  background: selectedRoom?.id === room.id ? 'var(--color-chat-item-active, #f3e8ff)' : undefined,
                 }}
               >
                 <List.Item.Meta

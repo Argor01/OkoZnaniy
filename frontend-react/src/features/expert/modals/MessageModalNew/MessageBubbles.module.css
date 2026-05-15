@@ -47,7 +47,7 @@
 
 .messageBubbleMine {
   border-radius: 16px 16px 4px 16px;
-  background: #3b82f6;
+  background: #7c3aed;
   color: #ffffff;
   border: none;
 }
@@ -102,7 +102,7 @@
 }
 
 .messageReadStatusRead {
-  color: #60a5fa;
+  color: #a78bfa;
 }
 
 .messageReadStatusUnread {

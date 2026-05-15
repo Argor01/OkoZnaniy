@@ -20,7 +20,7 @@ interface FriendProfileModalProps {
   onOpenChat: () => void;
 }
 
-const avatarColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const avatarColors = ['#7c3aed', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 const avatarColorClasses = [
   styles.friendProfileAvatarColor0,
   styles.friendProfileAvatarColor1,

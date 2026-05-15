@@ -109,7 +109,7 @@ const WorksTab: React.FC<WorksTabProps> = ({ isMobile, userProfile }) => {
                 </Paragraph>
                 <div style={{ marginTop: 'auto' }}>
                   <Space wrap size={[0, 8]}>
-                    <Tag color="blue">{work.subject_name || 'Предмет'}</Tag>
+                    <Tag color="purple">{work.subject_name || 'Предмет'}</Tag>
                     <Tag color="purple">{work.work_type_name || 'Тип'}</Tag>
                   </Space>
                 </div>

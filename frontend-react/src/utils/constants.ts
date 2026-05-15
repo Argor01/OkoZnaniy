@@ -42,7 +42,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   review: 'cyan',
   completed: 'green',
   revision: 'magenta',
-  download: 'geekblue',
+  download: 'purple',
   closed: 'default',
   cancelled: 'red',
   dispute: 'volcano',
@@ -64,7 +64,7 @@ export const ORDER_PRIORITY_LABELS: Record<string, string> = {
 
 export const ORDER_PRIORITY_COLORS: Record<string, string> = {
   low: 'green',
-  medium: 'blue',
+  medium: 'purple',
   high: 'orange',
   urgent: 'red',
 };

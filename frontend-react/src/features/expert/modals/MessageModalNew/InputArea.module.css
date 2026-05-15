@@ -109,7 +109,7 @@
 
 .chatEmojiButton:hover {
   background: #f9fafb;
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 .chatEmojiButtonMobile {
@@ -148,7 +148,7 @@
 
 .chatAttachButton:hover {
   background: #f9fafb;
-  border-color: #3b82f6;
+  border-color: #7c3aed;
 }
 
 .chatAttachButtonMobile {
@@ -160,20 +160,20 @@
 .chatSendButton {
   width: 44px;
   height: 44px;
-  background: #3b82f6;
+  background: #7c3aed;
   border: none;
   border-radius: 12px;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(100, 53, 165, 0.3);
   transition: all 0.2s;
   cursor: pointer;
 }
 
 .chatSendButton:hover {
-  background: #2563eb;
+  background: #6d28d9;
   transform: scale(1.05);
 }
 

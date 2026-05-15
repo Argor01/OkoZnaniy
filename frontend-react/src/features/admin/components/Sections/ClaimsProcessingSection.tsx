@@ -308,7 +308,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       quality_issue: 'red',
       payment_dispute: 'green',
       deadline_violation: 'orange',
-      communication_problem: 'blue',
+      communication_problem: 'purple',
       refund_request: 'purple',
       plagiarism: 'magenta',
       other: 'gray',
@@ -331,7 +331,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
 
   const getStatusColor = (status: string) => {
     const colors = {
-      new: 'blue',
+      new: 'purple',
       investigating: 'orange',
       awaiting_response: 'yellow',
       in_mediation: 'purple',
@@ -813,7 +813,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                 {selectedClaim.actions.map((action, index) => (
                   <Timeline.Item 
                     key={action.id}
-                    color={index === 0 ? 'green' : 'blue'}
+                    color={index === 0 ? 'green' : 'purple'}
                   >
                     <div>
                       <Text strong>{action.description}</Text>
@@ -847,7 +847,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                       title={evidence.title}
                       description={
                         <div>
-                          <Tag color="blue">{evidence.type}</Tag>
+                          <Tag color="purple">{evidence.type}</Tag>
                           <span className={styles.claimsProcessingEvidenceMeta}>
                             Загружено {evidence.uploaded_by === 'admin' ? 'администратором' : 
                                      evidence.uploaded_by === 'user' ? 'клиентом' : 'экспертом'} • 

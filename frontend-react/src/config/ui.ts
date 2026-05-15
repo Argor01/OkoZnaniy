@@ -58,12 +58,12 @@ export const BOX_SHADOW = {
 
 
 export const COLORS = {
-  primary: '#2b9fe6',
+  primary: '#6435a5',
   secondary: '#764ba2',
   success: '#52c41a',
   warning: '#f59e0b',
   error: '#ff4d4f',
-  info: '#2b9fe6',
+  info: '#6435a5',
   text: {
     primary: '#1f2937',
     secondary: '#6b7280',
@@ -86,16 +86,16 @@ export const STATUS_COLORS = {
   WARNING: '#faad14', // Slightly different from COLORS.warning (#f59e0b)
   ERROR: COLORS.error,
   INFO: COLORS.info,
-  PROCESSING: '#2b9fe6',
+  PROCESSING: '#6435a5',
   DEFAULT: '#d9d9d9',
 } as const;
 
 
 export const GRADIENTS = {
-  primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  primary: 'linear-gradient(135deg, #7c3aed 0%, #764ba2 100%)',
   success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
   warning: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
-  info: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+  info: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
 } as const;
 
 

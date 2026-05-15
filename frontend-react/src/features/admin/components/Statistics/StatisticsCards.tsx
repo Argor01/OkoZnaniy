@@ -31,7 +31,7 @@ export const StatisticsCards: React.FC<StatisticsCardsProps> = ({
               value={stats.totalPartners}
               prefix={<TeamOutlined className={styles.icon} />}
               loading={loading}
-              valueStyle={{ color: '#2b9fe6' }}
+              valueStyle={{ color: '#6435a5' }}
             />
           </Card>
         </Col>

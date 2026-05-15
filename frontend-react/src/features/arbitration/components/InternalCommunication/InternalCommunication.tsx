@@ -95,7 +95,7 @@ const InternalCommunication: React.FC = () => {
                             <Tag
                               color={
                                 claim.type === 'refund'
-                                  ? 'blue'
+                                  ? 'purple'
                                   : claim.type === 'dispute'
                                   ? 'orange'
                                   : 'red'

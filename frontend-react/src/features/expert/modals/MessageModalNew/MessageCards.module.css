@@ -30,7 +30,7 @@
 }
 
 .messageCardLink {
-  color: #2b9fe6;
+  color: #6435a5;
   font-size: 14px;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .messageCardInfo {
-  color: #2563eb;
+  color: #6d28d9;
   font-weight: 500;
   margin-bottom: 10px;
 }
@@ -103,7 +103,7 @@
 }
 
 .messageStatusInfo {
-  color: #2563eb;
+  color: #6d28d9;
   font-weight: 500;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .offerCardHeaderIcon {
-  color: #3b82f6;
+  color: #7c3aed;
   font-size: 20px;
 }
 
@@ -213,7 +213,7 @@
 .offerDescription {
   background: var(--bg-primary, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #7c3aed;
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 16px;

@@ -148,7 +148,7 @@
 }
 
 .chatBadge :global(.ant-badge-dot) {
-  background-color: #3b82f6;
+  background-color: #7c3aed;
 }
 
 .chatBadge {
@@ -174,7 +174,7 @@
 }
 
 :global([data-theme="dark"]) .chatListItemUnread {
-  background: rgba(59, 130, 246, 0.08);
+  background: rgba(100, 53, 165, 0.08);
 }
 
 :global([data-theme="dark"]) .chatListItemPinned {

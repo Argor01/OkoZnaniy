@@ -54,7 +54,7 @@
   width: 100%;
   height: 10px;
   border-radius: 90px;
-  background: linear-gradient(147deg, var(--color-brand-blue-500) 0%, #b9e0ff 100%);
+  background: linear-gradient(147deg, var(--color-brand-blue-500) 0%, #d4bbff 100%);
 }
 
 @media (max-width: 1024px) {

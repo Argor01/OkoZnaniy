@@ -137,7 +137,7 @@ const PendingApproval: React.FC = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'refund':
-        return 'blue';
+        return 'purple';
       case 'dispute':
         return 'orange';
       case 'conflict':

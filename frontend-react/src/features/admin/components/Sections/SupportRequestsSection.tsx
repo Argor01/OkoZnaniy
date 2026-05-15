@@ -35,7 +35,7 @@ export const SupportRequestsSection: React.FC<SupportRequestsSectionProps> = ({
     switch (priority) {
       case 'urgent': return 'red';
       case 'high': return 'orange';
-      case 'medium': return 'blue';
+      case 'medium': return 'purple';
       case 'low': return 'green';
       default: return 'default';
     }

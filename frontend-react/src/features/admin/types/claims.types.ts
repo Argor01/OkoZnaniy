@@ -122,7 +122,7 @@ export const getClaimPriorityLabel = (priority: ClaimPriority): string => {
 
 export const getClaimStatusColor = (status: ClaimStatus): string => {
   const colors: Record<ClaimStatus, string> = {
-    [ClaimStatus.NEW]: 'blue',
+    [ClaimStatus.NEW]: 'purple',
     [ClaimStatus.IN_PROGRESS]: 'processing',
     [ClaimStatus.RESOLVED]: 'success',
     [ClaimStatus.PENDING_DIRECTOR]: 'warning',
@@ -134,7 +134,7 @@ export const getClaimStatusColor = (status: ClaimStatus): string => {
 export const getClaimPriorityColor = (priority: ClaimPriority): string => {
   const colors: Record<ClaimPriority, string> = {
     [ClaimPriority.LOW]: 'green',
-    [ClaimPriority.MEDIUM]: 'blue',
+    [ClaimPriority.MEDIUM]: 'purple',
     [ClaimPriority.HIGH]: 'orange',
     [ClaimPriority.URGENT]: 'red'
   };

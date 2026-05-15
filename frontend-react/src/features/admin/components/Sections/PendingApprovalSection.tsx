@@ -164,7 +164,7 @@ export const PendingApprovalSection: React.FC = () => {
   
   const getCategoryColor = (category: string) => {
     const colors = {
-      technical: 'blue',
+      technical: 'purple',
       billing: 'green',
       order: 'orange',
       account: 'purple',
@@ -190,7 +190,7 @@ export const PendingApprovalSection: React.FC = () => {
       refund: 'green',
       dispute_resolution: 'orange',
       account_action: 'purple',
-      policy_exception: 'blue',
+      policy_exception: 'purple',
     };
     return colors[type as keyof typeof colors] || 'gray';
   };
@@ -623,7 +623,7 @@ export const PendingApprovalSection: React.FC = () => {
                 <Text strong>Вложения:</Text>
                 <div className={styles.pendingApprovalAttachmentsRow}>
                   {selectedClaim.attachments.map((file, index) => (
-                    <Tag key={index} color="blue">📎 {file}</Tag>
+                    <Tag key={index} color="purple">📎 {file}</Tag>
                   ))}
                 </div>
               </div>

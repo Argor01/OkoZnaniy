@@ -38,8 +38,8 @@
 }
 
 .chatItem.selected {
-  background-color: #f0f8ff;
-  border-left: 4px solid #667eea;
+  background-color: #f8f0ff;
+  border-left: 4px solid #7c3aed;
 }
 
 .messagesContainer {
@@ -66,13 +66,13 @@
 
 .messagesContainer::-webkit-scrollbar-thumb,
 .chatScrollArea::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   border-radius: 10px;
 }
 
 .messagesContainer::-webkit-scrollbar-thumb:hover,
 .chatScrollArea::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #764ba2 0%, #7c3aed 100%);
 }
 
 .messageItem {
@@ -101,7 +101,7 @@
 }
 
 .messageContent.fromAdmin {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   color: white;
   border-radius: 18px 18px 4px 18px;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -143,7 +143,7 @@
 .chatInfo {
   margin-bottom: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #764ba2 100%);
   border-radius: 12px;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -164,7 +164,7 @@
 }
 
 .messageInput:focus {
-  border-color: #667eea;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -252,7 +252,7 @@
 
 .attachButton:hover {
   transform: scale(1.05);
-  border-color: #667eea;
+  border-color: #7c3aed;
 }
 
 
