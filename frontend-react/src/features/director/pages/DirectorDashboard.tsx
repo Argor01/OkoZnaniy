@@ -26,6 +26,7 @@ import DirectorFaqModal from '../modals/DirectorFaqModal';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modal-overrides.css';
+import '@/styles/director.css';
 import styles from '@/features/director/DirectorDashboard.module.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 
