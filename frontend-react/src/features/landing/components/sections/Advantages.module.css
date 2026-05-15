@@ -1,3 +1,19 @@
+.advantages {
+  padding: 80px 0;
+}
+
+@media (max-width: 1024px) {
+  .advantages {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .advantages {
+    padding: 40px 0;
+  }
+}
+
 .advantagesWrapper {
   display: -webkit-box;
   display: -ms-flexbox;

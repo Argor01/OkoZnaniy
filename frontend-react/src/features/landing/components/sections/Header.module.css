@@ -418,3 +418,82 @@
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.5);
 }
+
+.headerLogoCircle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 12px rgba(255, 255, 255, 0.8),
+    0 0 25px rgba(255, 255, 255, 0.6),
+    0 0 38px rgba(255, 255, 255, 0.4),
+    0 0 50px rgba(255, 255, 255, 0.2);
+  animation: glow 3s ease-in-out infinite;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.headerLogoCircle:hover {
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 1),
+    0 0 40px rgba(255, 255, 255, 0.8),
+    0 0 55px rgba(255, 255, 255, 0.6),
+    0 0 70px rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 15px rgba(255, 255, 255, 0.8),
+      0 0 30px rgba(255, 255, 255, 0.6),
+      0 0 45px rgba(255, 255, 255, 0.4),
+      0 0 60px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 1),
+      0 0 40px rgba(255, 255, 255, 0.8),
+      0 0 55px rgba(255, 255, 255, 0.6),
+      0 0 70px rgba(255, 255, 255, 0.4);
+  }
+}
+
+.headerLogoCircle .headerLogoLinkImage {
+  position: relative;
+  z-index: 1;
+  width: 62px;
+  height: auto;
+  max-width: none;
+}
+
+@media (max-width: 1024px) {
+  .headerLogoCircle {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .headerLogoCircle .headerLogoLinkImage {
+    width: 55px;
+  }
+}
+
+@media (max-width: 576px) {
+  .headerLogoCircle {
+    width: 70px;
+    height: 70px;
+    box-shadow: 
+      0 0 10px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.6),
+      0 0 30px rgba(255, 255, 255, 0.4);
+  }
+  
+  .headerLogoCircle .headerLogoLinkImage {
+    width: 48px;
+  }
+}
