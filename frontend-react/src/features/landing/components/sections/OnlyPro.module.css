@@ -162,11 +162,12 @@
 }
 
 .onlyProTitle {
-  margin: 0 0 10px;
+  margin: 0 0 16px;
   font-family: var(--font-family-display);
   font-weight: 800;
   font-size: 48px;
   color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 1024px) {
@@ -183,7 +184,11 @@
 }
 
 .onlyProDescription {
-  margin: 0 0 20px;
+  margin: 0 0 28px;
+  padding: 12px 24px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
   font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 24px;
@@ -228,13 +233,24 @@
   -webkit-box-flex: 0;
       -ms-flex: 0 0 calc(25% - 7.5px);
           flex: 0 0 calc(25% - 7.5px);
-  padding: 5px 20px;
+  padding: 10px 20px;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
   -webkit-box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
           box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
   background: #fff;
+  -webkit-transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.onlyProLogosItem:hover {
+  -webkit-transform: translateY(-3px);
+          transform: translateY(-3px);
+  -webkit-box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.18);
+          box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.18);
+  border-color: #d5c0f0;
 }
 
 @media (max-width: 768px) {
