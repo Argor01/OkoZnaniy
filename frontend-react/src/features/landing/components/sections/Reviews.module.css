@@ -15,9 +15,9 @@
 }
 
 .reviewsTitle {
-  display: inline-block;
+  display: block;
   max-width: 887px;
-  margin: 0 0 20px;
+  margin: 0 auto 20px;
   padding: 24px 32px;
   border: 1.5px solid #d5c0f0;
   border-radius: 16px;
@@ -26,6 +26,7 @@
   font-weight: 800;
   font-size: 48px;
   color: var(--color-brand-blue-500);
+  text-align: center;
 }
 
 @media (max-width: 1024px) {
@@ -46,6 +47,7 @@
   font-weight: 400;
   font-size: 24px;
   color: var(--color-grey-700);
+  text-align: center;
 }
 
 @media (max-width: 1024px) {
@@ -60,7 +62,25 @@
   }
 }
 
-.reviewsSlider .swiper {
+.reviewsSlider {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 16px;
+}
+
+.reviewsSliderInner {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reviewsSliderInner .swiper {
   overflow: visible;
 }
 
@@ -177,7 +197,7 @@
   opacity: 1;
 }
 
-.reviewsSliderControls {
+.reviewsSliderControlsPrev, .reviewsSliderControlsNext {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -187,23 +207,30 @@
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  gap: 30px;
-  margin: 40px 0 0;
-}
-
-.reviewsSliderControlsPrev, .reviewsSliderControlsNext {
-  display: inline-block;
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
-  width: 30px;
-  aspect-ratio: 1/1;
-  background: url(/assets/icons/arrow-next.svg) center/cover no-repeat;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid #d5c0f0;
+  border-radius: 50%;
+  background-color: #fff;
+  background-image: url(/assets/icons/arrow-next.svg);
+  background-position: center;
+  background-size: 16px;
+  background-repeat: no-repeat;
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   cursor: pointer;
+  -webkit-transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.reviewsSliderControlsPrev:hover, .reviewsSliderControlsNext:hover {
+  background-color: #f3e8ff;
+  border-color: #6435a5;
 }
 
 .reviewsSliderControlsPrev {
@@ -214,6 +241,14 @@
 .reviewsSliderControlsNext {
   -webkit-transform: rotate(0deg);
           transform: rotate(0deg);
+}
+
+@media (max-width: 576px) {
+  .reviewsSliderControlsPrev, .reviewsSliderControlsNext {
+    width: 36px;
+    height: 36px;
+    background-size: 14px;
+  }
 }
 
 .reviewsSliderControlsPagination {

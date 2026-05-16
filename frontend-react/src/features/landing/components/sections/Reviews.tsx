@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import type { Swiper as SwiperInstance } from 'swiper';
 import landingStyles from '@/features/landing/Landing.module.css';
@@ -100,13 +99,11 @@ const ReviewSlide: React.FC<{ review: Review }> = ({ review }) => (
 const Reviews: React.FC = () => {
   const prevRef = useRef<HTMLButtonElement | null>(null);
   const nextRef = useRef<HTMLButtonElement | null>(null);
-  const paginationRef = useRef<HTMLDivElement | null>(null);
   const [swiper, setSwiper] = useState<SwiperInstance | null>(null);
 
   useEffect(() => {
     if (!swiper) return;
 
-    
     if (prevRef.current && nextRef.current) {
       (swiper.params as any).navigation = (swiper.params as any).navigation || {};
       (swiper.params as any).navigation.prevEl = prevRef.current;
@@ -114,18 +111,6 @@ const Reviews: React.FC = () => {
       swiper.navigation.destroy();
       swiper.navigation.init();
       swiper.navigation.update();
-    }
-
-    
-    if (paginationRef.current) {
-      (swiper.params as any).pagination = (swiper.params as any).pagination || {};
-      (swiper.params as any).pagination.el = paginationRef.current;
-      (swiper.params as any).pagination.clickable = true;
-      (swiper.params as any).pagination.bulletClass = 'swiper-pagination-bullet';
-      (swiper.params as any).pagination.bulletActiveClass = 'swiper-pagination-bullet-active';
-      swiper.pagination.destroy();
-      swiper.pagination.init();
-      swiper.pagination.update();
     }
   }, [swiper]);
 
@@ -141,29 +126,29 @@ const Reviews: React.FC = () => {
         </div>
 
         <div className={styles.reviewsSlider}>
-          <Swiper
-            modules={[Pagination, Navigation]}
-            spaceBetween={30}
-            slidesPerView={1}
-            breakpoints={{
-              640: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            onSwiper={setSwiper}
-            className="swiper"
-          >
-            {reviews.map((review) => (
-              <SwiperSlide key={review.id} className="swiper-slide">
-                <ReviewSlide review={review} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <button ref={prevRef} className={styles.reviewsSliderControlsPrev} aria-label="Предыдущий отзыв"></button>
 
-          <div className={styles.reviewsSliderControls}>
-            <button ref={prevRef} className={styles.reviewsSliderControlsPrev} aria-label="Предыдущий отзыв"></button>
-            <div ref={paginationRef} className={styles.reviewsSliderControlsPagination}></div>
-            <button ref={nextRef} className={styles.reviewsSliderControlsNext} aria-label="Следующий отзыв"></button>
+          <div className={styles.reviewsSliderInner}>
+            <Swiper
+              modules={[Navigation]}
+              spaceBetween={30}
+              slidesPerView={1}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+              onSwiper={setSwiper}
+              className="swiper"
+            >
+              {reviews.map((review) => (
+                <SwiperSlide key={review.id} className="swiper-slide">
+                  <ReviewSlide review={review} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
+
+          <button ref={nextRef} className={styles.reviewsSliderControlsNext} aria-label="Следующий отзыв"></button>
         </div>
       </div>
     </section>
