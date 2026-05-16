@@ -87,19 +87,7 @@ html {
 }
 
 
-section {
-  animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  animation-fill-mode: both;
-}
 
-section:nth-child(1) { animation-delay: 0.15s; }
-section:nth-child(2) { animation-delay: 0.2s; }
-section:nth-child(3) { animation-delay: 0.25s; }
-section:nth-child(4) { animation-delay: 0.3s; }
-section:nth-child(5) { animation-delay: 0.35s; }
-section:nth-child(6) { animation-delay: 0.4s; }
-section:nth-child(7) { animation-delay: 0.45s; }
-section:nth-child(8) { animation-delay: 0.5s; }
 
 
 @media (prefers-reduced-motion: reduce) {

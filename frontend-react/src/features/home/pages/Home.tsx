@@ -17,6 +17,7 @@ import {
 } from '@/features/landing';
 import landingStyles from '@/features/landing/Landing.module.css';
 import '@/styles/page-transitions.css';
+import '@/styles/scroll-animations.css';
 
 const Home: React.FC = () => {
   const [searchParams] = useSearchParams();

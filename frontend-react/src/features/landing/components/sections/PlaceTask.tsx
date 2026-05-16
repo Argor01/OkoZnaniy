@@ -1,12 +1,17 @@
 import React from 'react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './PlaceTask.module.css';
 
 
-const PlaceTask: React.FC = () => (
+const PlaceTask: React.FC = () => {
+  const contentRef = useScrollAnimation<HTMLDivElement>('fade-up');
+  const cardsRef = useScrollAnimation<HTMLDivElement>('fade-up-stagger');
+
+  return (
   <section className={styles.placeTask} id="services">
     <div className={landingStyles.mcontainer}>
-      <div className={styles.placeTaskContent}>
+      <div ref={contentRef} className={styles.placeTaskContent}>
         <h2 className={styles.placeTaskContentTitle}>
           Разместите задание - мы сами отправим его лучшим авторам
         </h2>
@@ -16,7 +21,7 @@ const PlaceTask: React.FC = () => (
         </div>
       </div>
 
-      <div className={styles.placeTaskAdvantages}>
+      <div ref={cardsRef} className={styles.placeTaskAdvantages}>
         <div className={styles.placeTaskAdvantagesCard}>
           <figure className={styles.placeTaskAdvantagesCardFigure}>
             <img
@@ -58,7 +63,8 @@ const PlaceTask: React.FC = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default PlaceTask;
 

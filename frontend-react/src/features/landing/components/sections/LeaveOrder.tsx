@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './LeaveOrder.module.css';
 
@@ -20,13 +21,16 @@ const LeaveOrder: React.FC = () => {
     }
   };
   
+  const titleRef = useScrollAnimation<HTMLHeadingElement>('fade-up');
+  const stepsRef = useScrollAnimation<HTMLDivElement>('fade-up-stagger');
+
   return (
     <section className={styles.leaveOrder} id="orders">
       <div className={landingStyles.mcontainer}>
-        <h2 className={styles.leaveOrderTitle}>Закажи работу за три шага 🤝</h2>
+        <h2 ref={titleRef} className={styles.leaveOrderTitle}>Закажи работу за три шага 🤝</h2>
 
         <div className={styles.leaveOrderSteps}>
-          <div className={styles.leaveOrderStepsWrapper}>
+          <div ref={stepsRef} className={styles.leaveOrderStepsWrapper}>
             <div className={styles.leaveOrderStepsItem}>
               <div className={styles.leaveOrderStepsItemTitle}>Оставь заявку</div>
               <figure className={styles.leaveOrderStepsItemIcon}>

@@ -1,15 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './PlaceTaskInfo.module.css';
 
 
 const PlaceTaskInfo: React.FC = () => {
   const navigate = useNavigate();
+  const wrapperRef = useScrollAnimation<HTMLDivElement>('zoom-in');
+
   return (
     <section className={styles.placeTaskInfo}>
       <div className={landingStyles.mcontainer}>
-        <div className={styles.placeTaskInfoWrapper}>
+        <div ref={wrapperRef} className={styles.placeTaskInfoWrapper}>
           <div className={styles.placeTaskInfoClient}>
             <div className={styles.placeTaskInfoClientTitle}>Для заказчика</div>
             <button className={`${styles.placeTaskInfoClientButton} ${landingStyles.button}`} onClick={() => navigate('/create-order')}>Разместить задание</button>

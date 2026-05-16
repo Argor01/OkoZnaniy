@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './FAQ.module.css';
 
@@ -61,15 +62,18 @@ const FAQ: React.FC = () => {
     setActiveItems(newActiveItems);
   };
 
+  const imageRef = useScrollAnimation<HTMLElement>('fade-left');
+  const contentRef = useScrollAnimation<HTMLDivElement>('fade-right');
+
   return (
     <section className={styles.faq} id="faq">
       <div className={landingStyles.mcontainer}>
         <div className={styles.faqWrapper}>
-          <figure className={styles.faqPhoto}>
+          <figure ref={imageRef} className={styles.faqPhoto}>
             <img className={styles.faqPhotoImage} src="/assets/faq/faq-image.png" alt="faq" width={1344} height={600} />
           </figure>
 
-          <div className={styles.faqContent}>
+          <div ref={contentRef} className={styles.faqContent}>
             <h2 className={styles.faqTitle}>Часто спрашивают 🤔</h2>
 
             {faqData.map((item) => (

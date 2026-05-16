@@ -4,6 +4,7 @@ import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import type { Swiper as SwiperInstance } from 'swiper';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './Reviews.module.css';
 
@@ -112,10 +113,13 @@ const Reviews: React.FC = () => {
     }
   }, [swiper]);
 
+  const titleRef = useScrollAnimation<HTMLHeadingElement>('fade-up');
+  const sliderRef = useScrollAnimation<HTMLDivElement>('zoom-in');
+
   return (
     <section className={styles.reviews} id="reviews">
       <div className={landingStyles.mcontainer}>
-        <h2 className={styles.reviewsTitle}>
+        <h2 ref={titleRef} className={styles.reviewsTitle}>
           Око знаний открывает новые горизонты в учёбе. В раздумьях, довериться ли нам?
         </h2>
 
@@ -123,7 +127,7 @@ const Reviews: React.FC = () => {
           Почитай отзывы студентов, которые воспользовались сервисом и решили учится по-новому! 👊🏻
         </div>
 
-        <div className={styles.reviewsSlider}>
+        <div ref={sliderRef} className={styles.reviewsSlider}>
           <button ref={prevRef} className={styles.reviewsSliderControlsPrev} aria-label="Предыдущий отзыв"></button>
 
           <div className={styles.reviewsSliderInner}>

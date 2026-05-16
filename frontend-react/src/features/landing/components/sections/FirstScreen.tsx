@@ -1,15 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './FirstScreen.module.css';
 
 const FirstScreen: React.FC = () => {
   const navigate = useNavigate();
+  const contentRef = useScrollAnimation<HTMLDivElement>('fade-left', { threshold: 0.05 });
+  const figureRef = useScrollAnimation<HTMLElement>('fade-right', { threshold: 0.05 });
+
   return (
     <section className={styles.firstScreen}>
       <div className={landingStyles.mcontainer}>
         <div className={styles.firstScreenWrapper}>
-          <div className={styles.firstScreenContent}>
+          <div ref={contentRef} className={styles.firstScreenContent}>
             <h1 className={styles.firstScreenContentTitle}>
               Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене
             </h1>
@@ -24,7 +28,7 @@ const FirstScreen: React.FC = () => {
             </div>
           </div>
 
-          <figure className={styles.firstScreenFigure}>
+          <figure ref={figureRef} className={styles.firstScreenFigure}>
             <img
               className={styles.firstScreenFigureImage}
               src="/assets/first-screen/first-screen-students.png"

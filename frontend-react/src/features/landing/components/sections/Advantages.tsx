@@ -1,12 +1,16 @@
 import React from 'react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './Advantages.module.css';
 
 
-const Advantages: React.FC = () => (
+const Advantages: React.FC = () => {
+  const wrapperRef = useScrollAnimation<HTMLDivElement>('fade-up-stagger');
+
+  return (
   <section className={styles.advantages} id="experts">
     <div className={landingStyles.mcontainer}>
-      <div className={styles.advantagesWrapper}>
+      <div ref={wrapperRef} className={styles.advantagesWrapper}>
         <div className={styles.advantagesCard}>
           <figure className={styles.advantagesCardIcon}>
             <img className={styles.advantagesCardIconImage} src="/assets/advantages/advantages-icon-1.svg" alt="icon" width={61} height={61} />
@@ -57,7 +61,8 @@ const Advantages: React.FC = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default Advantages;
 

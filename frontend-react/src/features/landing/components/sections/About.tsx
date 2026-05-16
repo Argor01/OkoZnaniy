@@ -1,15 +1,20 @@
 import React from 'react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './About.module.css';
 
 const About: React.FC = () => {
+  const titleRef = useScrollAnimation<HTMLHeadingElement>('fade-up');
+  const missionRef = useScrollAnimation<HTMLDivElement>('fade-left');
+  const teamRef = useScrollAnimation<HTMLDivElement>('fade-right');
+
   return (
     <section className={styles.about} id="about">
       <div className={landingStyles.mcontainer}>
-        <h2 className={styles.aboutTitle}>О нас</h2>
+        <h2 ref={titleRef} className={styles.aboutTitle}>О нас</h2>
         
         <div className={styles.aboutWrapper}>
-          <div className={styles.aboutMission}>
+          <div ref={missionRef} className={styles.aboutMission}>
             <h3 className={styles.aboutMissionTitle}>Наша миссия</h3>
             <p className={styles.aboutMissionText}>
               Мы помогаем студентам успешно преодолевать трудности обучения, 
@@ -57,7 +62,7 @@ const About: React.FC = () => {
             </div>
           </div>
 
-          <div className={styles.aboutTeam}>
+          <div ref={teamRef} className={styles.aboutTeam}>
             <div className={styles.aboutTeamMember}>
               <figure className={styles.aboutTeamPhoto}>
                 <img 

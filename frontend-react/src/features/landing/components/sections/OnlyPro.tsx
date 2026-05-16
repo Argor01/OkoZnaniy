@@ -1,14 +1,18 @@
 import React from 'react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import landingStyles from '@/features/landing/Landing.module.css';
 import styles from './OnlyPro.module.css';
 
 
 const OnlyPro: React.FC = () => {
+  const imageRef = useScrollAnimation<HTMLElement>('fade-left');
+  const contentRef = useScrollAnimation<HTMLDivElement>('fade-right');
+
   return (
     <section className={styles.onlyPro} id="be-expert">
       <div className={landingStyles.mcontainer}>
         <div className={styles.onlyProWrapper}>
-          <figure className={styles.onlyProTeacher}>
+          <figure ref={imageRef} className={styles.onlyProTeacher}>
             <img
               className={styles.onlyProTeacherImage}
               src="/assets/only-pro/only-pro-image.png"
@@ -19,7 +23,7 @@ const OnlyPro: React.FC = () => {
             />
           </figure>
 
-          <div className={styles.onlyProMain}>
+          <div ref={contentRef} className={styles.onlyProMain}>
             <h2 className={styles.onlyProTitle}>Работают только профи</h2>
             <div className={styles.onlyProDescription}>ТОП универы, для нас важен диплом эксперта</div>
 
