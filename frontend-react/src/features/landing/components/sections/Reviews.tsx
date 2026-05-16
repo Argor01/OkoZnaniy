@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
+import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import type { Swiper as SwiperInstance } from 'swiper';
@@ -86,12 +86,10 @@ const ReviewSlide: React.FC<{ review: Review }> = ({ review }) => (
     <div className={styles.reviewsSliderSlideName}>{review.name}</div>
     <div className={styles.reviewsSliderSlideType}>{review.workType}</div>
     <div className={styles.reviewsSliderSlideText}>{review.text}</div>
-    <div className={styles.reviewsSliderSlideBottom}>
-      <div className={styles.reviewsSliderSlideRating}>
-        {[...Array(review.rating)].map((_, index) => (
-          <div key={index} className={styles.reviewsSliderSlideRatingStar}></div>
-        ))}
-      </div>
+    <div className={styles.reviewsSliderSlideRating}>
+      {[...Array(review.rating)].map((_, index) => (
+        <div key={index} className={styles.reviewsSliderSlideRatingStar}></div>
+      ))}
     </div>
   </div>
 );
@@ -130,9 +128,15 @@ const Reviews: React.FC = () => {
 
           <div className={styles.reviewsSliderInner}>
             <Swiper
-              modules={[Navigation]}
+              modules={[Navigation, Autoplay]}
               spaceBetween={30}
               slidesPerView={1}
+              loop={true}
+              autoplay={{
+                delay: 4000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              }}
               breakpoints={{
                 640: { slidesPerView: 2 },
                 1024: { slidesPerView: 3 },

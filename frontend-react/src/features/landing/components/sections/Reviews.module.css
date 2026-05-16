@@ -150,26 +150,6 @@
           flex: 1 1 auto;
 }
 
-.reviewsSliderSlideBottom {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-}
-
-.reviewsSliderSlideBottom::after {
-  content: "";
-  display: inline-block;
-  width: 58px;
-  aspect-ratio: 1;
-  background: url(/assets/icons/quote.svg) center/cover no-repeat;
-  opacity: 0.3;
-  -webkit-transition: opacity ease-out 0.2s;
-  transition: opacity ease-out 0.2s;
-}
-
 .reviewsSliderSlideRating {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -191,10 +171,6 @@
   width: 17px;
   aspect-ratio: 1;
   background: url(/assets/icons/star.svg) center/cover no-repeat;
-}
-
-.reviewsSlider .swiperSlideActive .reviewsSliderSlideBottom::after {
-  opacity: 1;
 }
 
 .reviewsSliderControlsPrev, .reviewsSliderControlsNext {
