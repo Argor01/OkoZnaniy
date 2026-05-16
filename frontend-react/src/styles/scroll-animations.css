@@ -16,30 +16,30 @@
 
 /* Fade up (default) */
 .scroll-fade-up {
-  transform: translateY(60px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(40px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Fade from left */
 .scroll-fade-left {
-  transform: translateX(-80px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(-50px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Fade from right */
 .scroll-fade-right {
-  transform: translateX(80px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(50px);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Zoom in */
 .scroll-zoom-in {
-  transform: scale(0.85);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(0.92);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Staggered children (fade up) — each child animates with a delay */
@@ -50,9 +50,9 @@
 
 .scroll-fade-up-stagger > * {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(30px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scroll-fade-up-stagger.scroll-visible > * {
@@ -61,13 +61,13 @@
 }
 
 .scroll-fade-up-stagger.scroll-visible > *:nth-child(1) { transition-delay: 0s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(2) { transition-delay: 0.1s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(3) { transition-delay: 0.2s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(4) { transition-delay: 0.3s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(5) { transition-delay: 0.4s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(6) { transition-delay: 0.5s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(7) { transition-delay: 0.6s; }
-.scroll-fade-up-stagger.scroll-visible > *:nth-child(8) { transition-delay: 0.7s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(2) { transition-delay: 0.15s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(3) { transition-delay: 0.3s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(4) { transition-delay: 0.45s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(5) { transition-delay: 0.6s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(6) { transition-delay: 0.75s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(7) { transition-delay: 0.9s; }
+.scroll-fade-up-stagger.scroll-visible > *:nth-child(8) { transition-delay: 1.05s; }
 
 /* ── Respect reduced motion preference ──────────────────────── */
 @media (prefers-reduced-motion: reduce) {
