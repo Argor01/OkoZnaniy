@@ -41,7 +41,7 @@
 }
 
 .reviewsDescription {
-  margin: 0 0 30px;
+  margin: 0 0 40px;
   font-family: var(--font-family-sans);
   font-weight: 400;
   font-size: 24px;
@@ -65,14 +65,27 @@
 }
 
 .reviewsSlider .swiperSlide {
-  -webkit-box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
-          box-shadow: 0 8px 19px 0 rgba(0, 0, 0, 0.1);
+  border: 1.5px solid #e8daf5;
+  border-radius: 16px;
+  -webkit-box-shadow: 0 4px 16px 0 rgba(100, 53, 165, 0.08);
+          box-shadow: 0 4px 16px 0 rgba(100, 53, 165, 0.08);
   background-color: #fff;
   height: auto;
+  overflow: hidden;
+  -webkit-transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.reviewsSlider .swiperSlide:hover {
+  border-color: #6435a5;
+  -webkit-box-shadow: 0 8px 24px 0 rgba(100, 53, 165, 0.15);
+          box-shadow: 0 8px 24px 0 rgba(100, 53, 165, 0.15);
+  -webkit-transform: translateY(-4px);
+          transform: translateY(-4px);
 }
 
 .reviewsSliderSlide {
-  padding: 25px 20px;
+  padding: 28px 24px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -86,20 +99,23 @@
 }
 
 .reviewsSliderSlideName {
-  margin: 0 0 5px;
+  margin: 0 0 6px;
   font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 20px;
-  color: var(--color-grey-700);
+  color: #6435a5;
 }
 
 .reviewsSliderSlideType {
-  margin: 0 0 20px;
+  display: inline-block;
+  margin: 0 0 16px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #f3e8ff;
   font-family: var(--font-family-sans);
-  font-weight: 400;
-  font-size: 16px;
-  color: var(--color-grey-700);
-  opacity: 0.5;
+  font-weight: 500;
+  font-size: 14px;
+  color: #6435a5;
 }
 
 .reviewsSliderSlideText {
