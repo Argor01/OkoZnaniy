@@ -98,17 +98,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         </Form.Item>
         <Form.Item label="Роль">
           <div className={styles.roleSwitch} role="group" aria-label="Выбор роли">
-            <div className={`role-indicator ${selectedRole === 'expert' ? 'expert' : 'client'}`} />
+            <div
+              className={`${styles.roleIndicator} ${selectedRole === 'expert' ? styles.expert : ''}`}
+            />
             <button
               type="button"
-              className={`role-option ${selectedRole === 'client' ? 'active' : ''}`}
+              className={`${styles.roleOption} ${selectedRole === 'client' ? styles.active : ''}`}
               onClick={() => { setSelectedRole('client'); form.setFieldsValue({ role: 'client' }); }}
             >
               Клиент
             </button>
             <button
               type="button"
-              className={`role-option ${selectedRole === 'expert' ? 'active' : ''}`}
+              className={`${styles.roleOption} ${selectedRole === 'expert' ? styles.active : ''}`}
               onClick={() => { setSelectedRole('expert'); form.setFieldsValue({ role: 'expert' }); }}
             >
               Исполнитель

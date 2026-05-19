@@ -446,7 +446,7 @@
 }
 
 .authPanel :global(.ant-input) {
-  height: 50px;
+  height: 35px;
   font-size: 16px;
   padding: 12px 16px;
   border-radius: 10px;
@@ -466,9 +466,9 @@
 }
 
 .authPanel :global(.ant-input-password .ant-input) {
-  height: 48px;
+  height: 40px;
   font-size: 16px;
-  padding: 12px 16px;
+  padding: 12px 16px 16px 0px;
   border: none;
 }
 
@@ -557,7 +557,14 @@
   padding: 16px 16px 0;
   max-height: calc(100vh - 96px);
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+
+.authPanel::-webkit-scrollbar {
+  display: none;
+}
+
 .panelHeader {
   display: flex;
   gap: 12px;
@@ -726,7 +733,6 @@
   .authPanel :global(.ant-input),
   .authPanel :global(.ant-input-password),
   .authPanel :global(.ant-btn-primary) {
-    height: 48px;
     font-size: 16px;
   }
   
@@ -764,7 +770,6 @@
   .authPanel :global(.ant-input),
   .authPanel :global(.ant-input-password),
   .authPanel :global(.ant-btn-primary) {
-    height: 46px;
     font-size: 16px;
   }
   
