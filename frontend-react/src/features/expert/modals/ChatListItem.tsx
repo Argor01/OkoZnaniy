@@ -5,6 +5,7 @@ import { ChatListItem as ChatListItemType } from '@/features/support/api/chat';
 import { getMediaUrl } from '@/config/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { getDisplayUsername } from '@/utils/formatters';
 import styles from './MessageModalNew.module.css';
 
 const { Text } = Typography;
@@ -92,7 +93,7 @@ export const ChatListItemComponent: React.FC<ChatListItemProps> = ({
               ellipsis
               className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
             >
-              {chat.other_user?.username || 'Пользователь'}
+              {getDisplayUsername(chat.other_user || {})}
             </Text>
             <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
               {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}

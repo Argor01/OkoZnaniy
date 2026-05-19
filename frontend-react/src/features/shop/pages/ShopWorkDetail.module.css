@@ -153,13 +153,25 @@
   font-size: 20px;
 }
 
+.ratingRow {
+  width: 100%;
+  justify-content: center;
+  row-gap: 4px;
+}
+
 .ratingCount {
   font-size: 14px;
   color: var(--text-tertiary, #8c8c8c);
+  white-space: nowrap;
 }
 
 .rateSmall {
   font-size: 16px;
+  line-height: 1;
+}
+
+.rateSmall :global(.ant-rate-star) {
+  margin-inline-end: 2px;
 }
 
 .createdIcon {
@@ -273,6 +285,18 @@
 
   .centeredStat .statLabel {
     font-size: 11px;
+  }
+
+  .rateSmall {
+    font-size: 14px;
+  }
+
+  .ratingIcon {
+    font-size: 16px;
+  }
+
+  .ratingCount {
+    font-size: 12px;
   }
 }
 

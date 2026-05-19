@@ -77,18 +77,42 @@
 
 
 .priceInput {
-  width: 120px;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  margin-top: -6px;
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  height: 44px;
+  box-sizing: border-box;
 }
 
-.priceInput :global(.ant-input-number-input) {
-  height: 24px;
-  padding: 0 11px;
-  line-height: 24px;
+.priceInputWrap {
+  position: relative;
+  width: 100%;
 }
+
+.priceInput :global(.ant-input-number-input-wrap) {
+  height: 100%;
+  padding: 0;
+}
+
+.priceInput :global(.ant-input-number-input) { 
+  height: 40px;
+  padding: 0 34px 0 11px;
+  line-height: 40px;
+}
+
+.priceSuffix {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+}
+
 
 .actions {
   display: flex;
@@ -129,10 +153,6 @@
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
-}
-
-:global(.ant-input-number-input) {
-  height: 40px;
 }
 
 .saveButton:hover {
@@ -229,6 +249,10 @@
     padding: 20px;
   }
 
+  .card :global(.ant-row > .ant-col:not(:last-child)) {
+    margin-bottom: 16px;
+  }
+
   .label {
     font-size: 13px;
     margin-bottom: 8px;
@@ -244,6 +268,19 @@
 
   .select :global(.ant-select-selector) {
     height: 42px;
+  }
+
+  .priceInput {
+    height: 42px;
+  }
+
+  .priceInput :global(.ant-input-number-input) {
+    height: 38px;
+    line-height: 38px;
+  }
+
+  .priceSuffix {
+    right: 10px;
   }
 
   .actions {

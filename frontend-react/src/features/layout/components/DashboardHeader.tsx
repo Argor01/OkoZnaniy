@@ -25,6 +25,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import styles from './DashboardHeader.module.css';
 import { ROUTES } from '@/utils/constants';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -388,7 +389,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
                   className={styles.profileSection}
                 >
                   <Text className={styles.username}>
-                    {userProfile?.username || 'Пользователь'}
+                    {getDisplayUsername(userProfile || {})}
                   </Text>
                   <DownOutlined style={{ fontSize: 10, color: 'white', marginLeft: 4 }} />
                 </Button>

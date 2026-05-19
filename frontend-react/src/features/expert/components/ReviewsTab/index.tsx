@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';
 import { getMediaUrl } from '../../../../config/api';
 import { useAuth } from '@/features/auth';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const { Text, Paragraph } = Typography;
 
@@ -159,7 +160,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                   />
                   <div className={styles.reviewUserText}>
                     <Text strong className={isMobile ? styles.reviewUserNameMobile : styles.reviewUserName}>
-                      @{review.client?.username || `user${review.client?.id ?? ''}`}
+                      @{getDisplayUsername(review.client || {})}
                     </Text>
                     <Text type="secondary" className={styles.reviewUserMeta}>
                       {review.client?.first_name} {review.client?.last_name}
@@ -224,6 +225,9 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
       <Modal
         open={!!replyModal}
         title="Ответ на отзыв"
+        className={`${styles.reviewModal} ${styles.replyModal}`}
+        wrapClassName={styles.reviewModalWrap}
+        centered
         onCancel={() => {
           setReplyModal(null);
           setReplyText('');
@@ -240,12 +244,16 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
           maxLength={2000}
           showCount
           placeholder="Напишите ваш ответ клиенту..."
+          className={styles.replyTextArea}
         />
       </Modal>
 
       <Modal
         open={!!appealModal}
         title="Обжалование отзыва"
+        className={`${styles.reviewModal} ${styles.appealModal}`}
+        wrapClassName={styles.reviewModalWrap}
+        centered
         onCancel={() => {
           setAppealModal(null);
           setAppealReason('');
@@ -257,7 +265,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
         okText="Обжаловать"
         cancelText="Отмена"
       >
-        <Paragraph type="secondary">
+        <Paragraph type="secondary" className={styles.appealHint}>
           Опишите, почему отзыв должен быть пересмотрен. Администратор рассмотрит обращение и
           примет решение оставить или удалить отзыв.
         </Paragraph>
@@ -269,6 +277,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
           maxLength={2000}
           showCount
           placeholder="Причина обжалования (минимум 10 символов)..."
+          className={styles.appealTextArea}
         />
       </Modal>
     </div>

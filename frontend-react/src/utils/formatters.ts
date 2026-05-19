@@ -49,15 +49,51 @@ export const truncateText = (text: string, maxLength: number): string => {
 };
 
 export const formatUserName = (user: {
+  id?: number | string;
   first_name?: string;
   last_name?: string;
   username?: string;
+  email?: string;
 }): string => {
   if (user.first_name && user.last_name) {
     return `${user.first_name} ${user.last_name}`;
   }
   if (user.first_name) return user.first_name;
-  return user.username || 'Пользователь';
+  return getDisplayUsername(user);
+};
+
+export const isEmailLike = (value?: string | null): boolean => {
+  if (!value) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+};
+
+const getStableAnonymousNumber = (user: {
+  id?: number | string;
+  username?: string | null;
+  email?: string | null;
+}): number => {
+  const seedSource = `${user.id ?? ''}|${user.username ?? ''}|${user.email ?? ''}` || 'user';
+  let hash = 0;
+
+  for (let i = 0; i < seedSource.length; i += 1) {
+    hash = (hash * 31 + seedSource.charCodeAt(i)) >>> 0;
+  }
+
+  // 1000-9999: короткий номер без раскрытия реального ID.
+  return 1000 + (hash % 9000);
+};
+
+export const getDisplayUsername = (user: {
+  id?: number | string;
+  username?: string | null;
+  email?: string | null;
+}): string => {
+  const username = user.username?.trim();
+  if (username && !isEmailLike(username)) {
+    return username;
+  }
+
+  return `User${getStableAnonymousNumber(user)}`;
 };
 
 export const formatFileSize = (bytes: number): string => {

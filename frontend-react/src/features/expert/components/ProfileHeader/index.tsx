@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { UserProfile } from '../../types';
 import type { ExpertStatistics } from '@/features/expert/api/experts';
 import { ordersApi, type Order } from '@/features/orders/api/orders';
-import { formatCurrency } from '../../../../utils/formatters';
+import { formatCurrency, getDisplayUsername } from '../../../../utils/formatters';
 import styles from './ProfileHeader.module.css';
 
 const { Title, Text } = Typography;
@@ -30,7 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
   const displayName =
     (profile?.first_name || profile?.last_name)
       ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
-      : (userProfile?.username || userProfile?.email || 'Эксперт');
+      : getDisplayUsername(userProfile || {});
 
   const { data: ordersData } = useQuery({
     queryKey: ['expert-success-rate-orders', userProfile?.id],

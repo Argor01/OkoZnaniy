@@ -780,6 +780,12 @@
   .authPanel :global(.ant-checkbox-wrapper) {
     font-size: 13px;
   }
+
+  .authPanel :global(.ant-checkbox-wrapper > span:last-child) {
+    margin-inline-start: 0 !important;
+    padding-inline-start: 0 !important;
+  }
+  
   
   .roleOption {
     padding: 10px 12px;

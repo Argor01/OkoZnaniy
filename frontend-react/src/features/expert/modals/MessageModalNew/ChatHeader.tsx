@@ -11,6 +11,7 @@ import {
   MoreOutlined,
 } from '@ant-design/icons';
 import { getMediaUrl } from '../../../../config/api';
+import { getDisplayUsername } from '@/utils/formatters';
 import type { ChatDetail, WorkOfferData } from './types';
 import styles from '../MessageModalNew.module.css';
 
@@ -124,7 +125,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               }
             }}
           >
-            {isSupportChatSelected ? 'Центр обращений' : (selectedChat?.other_user?.username || 'Пользователь')}
+            {isSupportChatSelected ? 'Центр обращений' : getDisplayUsername(selectedChat?.other_user || {})}
           </Text>
           {!isSupportChatSelected ? (
             effectiveOrderId && !isClosedOrder ? (

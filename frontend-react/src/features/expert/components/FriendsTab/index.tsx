@@ -3,6 +3,7 @@ import { Button, Typography, Avatar, Spin, Empty, Input, Segmented, message } fr
 import { MessageOutlined, UserOutlined, UserAddOutlined, UserDeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
+import { getDisplayUsername } from '@/utils/formatters';
 import styles from './FriendsTab.module.css';
 
 const { Text } = Typography;
@@ -125,7 +126,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({ isMobile, onOpenChat, onOpenPro
                 <Text strong className={`${styles.friendName} ${isMobile ? styles.friendNameMobile : styles.friendNameDesktop}`}>
                   {user.first_name && user.last_name
                     ? `${user.first_name} ${user.last_name}`
-                    : user.username || 'Пользователь'}
+                    : getDisplayUsername(user)}
                 </Text>
                 <Text type="secondary" className={`${styles.friendRole} ${isMobile ? styles.friendRoleMobile : styles.friendRoleDesktop}`}>
                   {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}

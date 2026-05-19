@@ -16,6 +16,7 @@ suite locks in the expected backend contract:
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -81,6 +82,31 @@ class ReadyWorkCreationRegressionTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         body = response.json()
         self.assertEqual(body["description"], "Hello world")
+
+    def test_preview_upload_creates_work(self):
+        preview = SimpleUploadedFile(
+            "preview.gif",
+            (
+                b"GIF89a\x01\x00\x01\x00\x80\x00\x00"
+                b"\x00\x00\x00\xff\xff\xff!\xf9\x04\x01\x00\x00\x00\x00,"
+                b"\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+            ),
+            content_type="image/gif",
+        )
+        response = self.api_client.post(
+            "/api/shop/works/",
+            self._payload(preview=preview),
+            format="multipart",
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+            f"unexpected status={response.status_code}, body={response.content[:400]!r}",
+        )
+        body = response.json()
+        work = ReadyWork.objects.get(pk=body["id"])
+        self.assertTrue(bool(work.preview))
+        self.assertIn("ready_works/previews/", work.preview.name)
 
     def test_empty_description_returns_400_with_field_error(self):
         """Blank description must return a structured 400 the frontend can

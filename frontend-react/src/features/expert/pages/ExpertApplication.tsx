@@ -6,6 +6,7 @@ import { authApi } from '@/features/auth/api/auth';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import dayjs from 'dayjs';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -482,7 +483,7 @@ const ExpertApplication: React.FC = () => {
           </Paragraph>
           
           <Paragraph style={{ fontSize: 16, marginBottom: 20, fontWeight: 600, color: '#7c3aed' }}>
-            {currentUser?.username || currentUser?.email || 'Пользователь'}!
+            {getDisplayUsername(currentUser || {})}!
           </Paragraph>
 
           <Paragraph style={{ fontSize: 15, marginBottom: 16 }}>

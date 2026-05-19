@@ -9,22 +9,87 @@
 
 .filters {
   width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.field {
+  flex: 1 1 0;
+  min-width: 220px;
 }
 
 .search {
-  min-width: 300px;
+  width: 100%;
+}
+
+.search:global(.ant-input-affix-wrapper) {
+  height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search:global(.ant-input-affix-wrapper) :global(.ant-input) {
+  height: 100%;
+}
+
+.search:global(.ant-input-affix-wrapper) :global(.ant-input-prefix),
+.search:global(.ant-input-affix-wrapper) :global(.ant-input-suffix) {
+  display: inline-flex;
+  align-items: center;
 }
 
 .select {
-  min-width: 180px;
+  width: 100%;
+}
+
+.field :global(.ant-select) {
+  width: 100%;
+}
+
+.resetSlot {
+  flex: 0 0 40px;
+  width: 40px;
+  display: flex;
+}
+
+.resetIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.resetButton {
+  width: 40px;
+  min-width: 40px;
+  padding: 0 !important;
 }
 
 @media (max-width: 768px) {
+  .filters {
+    gap: 12px;
+  }
+
+  .field {
+    flex-basis: 100%;
+    min-width: 100%;
+  }
+
   .search {
     min-width: 100%;
   }
 
   .select {
     min-width: 100%;
+  }
+
+  .resetSlot,
+  .resetButton {
+    width: 44px;
+    min-width: 44px;
   }
 }

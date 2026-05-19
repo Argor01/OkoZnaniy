@@ -3,6 +3,7 @@ import { Modal, Input, Button, Avatar, Badge, Space, Typography, message as antM
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/features/common';
+import { getDisplayUsername } from '@/utils/formatters';
 import {
   MessageOutlined,
   SearchOutlined,
@@ -2359,7 +2360,7 @@ const handleOverdueComplaint = async () => {
                             ellipsis
                             className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
                           >
-                            {chat.other_user?.username || 'Пользователь'}
+                            {getDisplayUsername(chat.other_user || {})}
                           </Text>
                           <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
                             {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}
@@ -2447,7 +2448,7 @@ const handleOverdueComplaint = async () => {
                         }
                       }}
                     >
-                      {isSupportChatSelected ? 'Центр обращений' : (selectedChat?.other_user?.username || 'Пользователь')}
+                      {isSupportChatSelected ? 'Центр обращений' : getDisplayUsername(selectedChat?.other_user || {})}
                     </Text>
                     {!isSupportChatSelected ? (
                       effectiveOrderId && !isClosedOrder ? (

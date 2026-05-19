@@ -17,6 +17,7 @@ import { SectionHeader, SurfaceCard } from '@/features/common';
 import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -227,7 +228,7 @@ const UserProfile: FC = () => {
                     />
                     <div className={styles.profileIdentityMeta}>
                       <div className={styles.nameRow}>
-                        <Text className={styles.nameText}>@{userData.username || 'user'}</Text>
+                        <Text className={styles.nameText}>@{getDisplayUsername(userData)}</Text>
                         {userData.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
                       </div>
                       {userData.first_name && userData.last_name ? (
@@ -475,7 +476,7 @@ const UserProfile: FC = () => {
                             />
                             <div>
                               <Text strong className={styles.reviewUserName}>
-                                @{review.client.username || `user${review.client.id}`}
+                                @{getDisplayUsername(review.client)}
                               </Text>
                               <br />
                               <Text type="secondary" className={styles.reviewUserMeta}>

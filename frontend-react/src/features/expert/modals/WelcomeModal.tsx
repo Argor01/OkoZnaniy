@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Button, Typography } from 'antd';
+import { getDisplayUsername } from '@/utils/formatters';
 import styles from './WelcomeModal.module.css';
 
 const { Paragraph } = Typography;
@@ -40,7 +41,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ visible, onClose, userProfi
         </Paragraph>
         
         <Paragraph className={styles.welcomeModalName}>
-          {userProfile?.username || userProfile?.email || 'Пользователь'}!
+          {getDisplayUsername(userProfile || {})}!
         </Paragraph>
 
         <Paragraph className={styles.welcomeModalText}>

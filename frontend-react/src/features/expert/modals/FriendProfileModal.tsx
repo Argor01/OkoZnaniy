@@ -9,6 +9,7 @@ import {
   StarFilled
 } from '@ant-design/icons';
 import type { User } from '@/features/auth/api/auth';
+import { getDisplayUsername } from '@/utils/formatters';
 import styles from './FriendProfileModal.module.css';
 
 const { Text } = Typography;
@@ -62,7 +63,7 @@ const FriendProfileModal: React.FC<FriendProfileModalProps> = ({
   const name =
     (friend.first_name || friend.last_name)
       ? [friend.first_name, friend.last_name].filter(Boolean).join(' ')
-      : friend.username || 'Пользователь';
+      : getDisplayUsername(friend);
 
   const skills = typeof friend.skills === 'string'
     ? friend.skills.split(',').map((s) => s.trim()).filter(Boolean)

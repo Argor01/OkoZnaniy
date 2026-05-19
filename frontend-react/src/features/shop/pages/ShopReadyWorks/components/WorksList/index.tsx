@@ -47,7 +47,7 @@ const WorksList: React.FC<WorksListProps> = ({
   return (
     <Row gutter={[16, 16]} className={styles.grid}>
       {works.map((work) => (
-        <Col key={work.id} xs={24} sm={12} md={8} lg={8}>
+        <Col key={work.id} xs={24} sm={12} md={12} lg={12}>
           {(() => {
             const purchase = purchasesByWorkId?.[work.id];
             const isPurchased = !!purchase;

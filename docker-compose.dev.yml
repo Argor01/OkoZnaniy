@@ -44,6 +44,7 @@ services:
       "
     volumes:
       - .:/app
+      - media_files:/app/media
     environment:
       - DEBUG=True
       - DJANGO_ENV=development
@@ -139,3 +140,4 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  media_files:

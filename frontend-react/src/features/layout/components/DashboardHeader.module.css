@@ -446,13 +446,13 @@
   }
 
   .mobileNavIconActive {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: #ffffff !important;
     color: #6435a5 !important;
     font-weight: 600 !important;
   }
 
   .mobileNavIconActive:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: #ffffff !important;
     color: #6435a5 !important;
   }
 

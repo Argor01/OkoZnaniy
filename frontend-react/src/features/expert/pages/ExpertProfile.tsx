@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Tag, Spin, Alert, Rate, Divider, Avatar } from 'antd';
@@ -10,6 +10,7 @@ import { getMediaUrl } from '@/config/api';
 import styles from './ExpertProfile.module.css';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -342,7 +343,7 @@ const ExpertProfile: React.FC = () => {
                     />
                     <div>
                       <Text strong className={styles.reviewAuthorName}>
-                        @{review.client.username || `user${review.client.id}`}
+                        @{getDisplayUsername(review.client)}
                       </Text>
                       <br />
                       <Text type="secondary" className={styles.reviewAuthorMeta}>

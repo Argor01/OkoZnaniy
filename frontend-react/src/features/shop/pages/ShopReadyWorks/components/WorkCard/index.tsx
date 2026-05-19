@@ -5,9 +5,27 @@ import { useNavigate } from 'react-router-dom';
 import { Work } from '@/features/shop/types';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
+import { getDisplayUsername, isEmailLike } from '@/utils/formatters';
 import styles from './WorkCard.module.css';
 
 const { Text, Title } = Typography;
+
+const getAuthorDisplayName = (work: Work): string => {
+  const authorName = work.author?.name?.trim();
+  if (authorName && !isEmailLike(authorName)) {
+    return authorName;
+  }
+
+  const fallbackAuthorName = work.author_name?.trim();
+  if (fallbackAuthorName && !isEmailLike(fallbackAuthorName)) {
+    return fallbackAuthorName;
+  }
+
+  return getDisplayUsername({
+    id: work.author?.id,
+    username: work.author?.username || authorName || fallbackAuthorName,
+  });
+};
 
 interface WorkCardProps {
   work: Work;
@@ -91,7 +109,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onPurchase, onDownloa
                 navigate(`/user/${work.author.username}`);
               }}
             >
-              {work.author.name || work.author.username || work.author_name || 'Неизвестен'}
+              {getAuthorDisplayName(work)}
             </AppButton>
           </Space>
         </div>

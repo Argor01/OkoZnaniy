@@ -111,15 +111,17 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             <Text className={styles.label}>
               Стоимость работы
             </Text>
-            <AppInput.Number
-              placeholder="Введите стоимость работы"
-              value={formData.price}
-              onChange={(value) => setFormData({ ...formData, price: Number(value) || 0 })}
-              className={styles.priceInput}
-              min={0}
-              addonAfter="₽"
-              size="middle"
-            />
+            <div className={styles.priceInputWrap}>
+              <AppInput.Number
+                placeholder="Введите стоимость работы"
+                value={formData.price}
+                onChange={(value) => setFormData({ ...formData, price: Number(value) || 0 })}
+                className={styles.priceInput}
+                min={0}
+                size="middle"
+              />
+              <span className={styles.priceSuffix}>₽</span>
+            </div>
           </Col>
         </Row>
 

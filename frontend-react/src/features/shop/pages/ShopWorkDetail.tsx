@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername, isEmailLike } from '@/utils/formatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin, message, Rate, List, Popconfirm } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined, ShoppingCartOutlined, EyeOutlined, FileOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -82,6 +82,17 @@ const ShopWorkDetail: React.FC = () => {
       </div>
     );
   }
+
+  const authorName = work.author?.name?.trim();
+  const fallbackAuthorName = work.author_name?.trim();
+  const authorDisplayName = authorName && !isEmailLike(authorName)
+    ? authorName
+    : fallbackAuthorName && !isEmailLike(fallbackAuthorName)
+      ? fallbackAuthorName
+      : getDisplayUsername({
+          id: work.author?.id,
+          username: work.author?.username || authorName || fallbackAuthorName,
+        });
 
   const handleDelete = () => {
     deleteMutation.mutate(work.id);
@@ -165,7 +176,7 @@ const ShopWorkDetail: React.FC = () => {
                   />
                   <div>
                     <Text strong className={styles.clientName} style={{ cursor: work.author?.username ? 'pointer' : 'default' }}>
-                      {work.author_name || work.author?.name || work.author?.username || 'Автор'}
+                      {authorDisplayName}
                     </Text>
                     <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
                       Рейтинг: {work.author?.rating || 0}
@@ -233,7 +244,7 @@ const ShopWorkDetail: React.FC = () => {
                     <Text type="secondary" className={styles.infoLabel}>
                       Рейтинг
                     </Text>
-                    <Space align="center">
+                    <Space align="center" wrap className={styles.ratingRow}>
                       <StarOutlined className={styles.ratingIcon} />
                       <Rate disabled value={work.rating} className={styles.rateSmall} />
                       <Text className={styles.ratingCount}>

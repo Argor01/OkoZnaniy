@@ -130,7 +130,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       onCancel={handleClose}
       onOk={() => form.submit()}
       width={isMobile ? '100%' : 600}
-      style={isMobile ? { top: 0, paddingBottom: 0 } : {}}
+      style={isMobile ? { top: 0, paddingBottom: 0 } : { top: 24 }}
       okText={editingSpecialization ? 'Сохранить' : 'Добавить'}
       cancelText="Отмена"
       okButtonProps={{

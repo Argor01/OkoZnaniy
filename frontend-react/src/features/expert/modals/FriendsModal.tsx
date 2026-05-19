@@ -3,6 +3,7 @@ import { Modal, Input, Button, Avatar, Spin, Empty, Typography } from 'antd';
 import { MessageOutlined, UserOutlined, SearchOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
+import { getDisplayUsername } from '@/utils/formatters';
 import styles from './FriendsModal.module.css';
 
 const { Text } = Typography;
@@ -187,7 +188,7 @@ const FriendsModal: React.FC<FriendsModalProps> = ({
                     <Text strong className={styles.friendsModalName}>
                       {user.first_name && user.last_name 
                         ? `${user.first_name} ${user.last_name}`
-                        : user.username || 'Пользователь'}
+                        : getDisplayUsername(user)}
                     </Text>
                     <Text type="secondary" className={styles.friendsModalRole}>
                       {user.role === 'expert' ? 'Эксперт' : user.role === 'client' ? 'Клиент' : user.role}
