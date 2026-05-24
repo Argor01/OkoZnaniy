@@ -2463,7 +2463,6 @@
   /* Search Header Small Mobile */
   .chatSearchHeader {
     padding: 8px;
-    padding-right: 80px;
     display: flex;
     align-items: center;
   }
