@@ -85,14 +85,13 @@ const ShopWorkDetail: React.FC = () => {
 
   const authorName = work.author?.name?.trim();
   const fallbackAuthorName = work.author_name?.trim();
-  const authorDisplayName = authorName && !isEmailLike(authorName)
-    ? authorName
-    : fallbackAuthorName && !isEmailLike(fallbackAuthorName)
-      ? fallbackAuthorName
-      : getDisplayUsername({
-          id: work.author?.id,
-          username: work.author?.username || authorName || fallbackAuthorName,
-        });
+  const authorDisplayName = work.author
+    ? getDisplayUsername(work.author)
+    : authorName && !isEmailLike(authorName)
+      ? authorName
+      : fallbackAuthorName && !isEmailLike(fallbackAuthorName)
+        ? fallbackAuthorName
+        : 'Неизвестен';
 
   const handleDelete = () => {
     deleteMutation.mutate(work.id);

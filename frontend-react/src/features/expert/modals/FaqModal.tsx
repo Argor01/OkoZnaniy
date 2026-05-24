@@ -9,9 +9,11 @@ interface FaqModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
+  isTablet?: boolean;
 }
 
-const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile }) => {
+const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTablet = false }) => {
+  const useFullscreenLayout = isMobile || isTablet;
   const isDesktop = window.innerWidth > 1024;
 
   return (
@@ -22,12 +24,12 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile }) => {
         </div>
       }
       open={visible}
-      centered
+      centered={!useFullscreenLayout}
       onCancel={onClose}
       footer={null}
       destroyOnClose
-      width={isMobile ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
-      wrapClassName={`${styles.faqModalWrap} ${isMobile ? styles.faqModalWrapMobile : styles.faqModalWrapDesktop}`}
+      width={useFullscreenLayout ? '100%' : (isDesktop ? 'calc(100vw - 300px)' : 'calc(100vw - 270px)')}
+      wrapClassName={`${styles.faqModalWrap} ${isMobile ? styles.faqModalWrapMobile : isTablet ? styles.faqModalWrapTablet : styles.faqModalWrapDesktop}`}
     >
       <div className={styles.faqModalContent}>
         <Text className={styles.faqModalIntro}>

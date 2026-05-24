@@ -15,6 +15,7 @@ export interface PartnerEarning {
 export interface Referral {
   id: number;
   username: string;
+  display_username?: string;
   email: string;
   role: string;
   date_joined: string;
@@ -44,6 +45,7 @@ export interface ReferralLinkResponse {
 export interface MapPartner {
   id: number;
   username: string;
+  display_username?: string;
   email: string;
   city: string;
   phone?: string;

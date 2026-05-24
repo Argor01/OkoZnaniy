@@ -78,7 +78,8 @@ const ShopReadyWorks: React.FC = () => {
         } : {
           id: 0,
           name: work.author_name || 'Неизвестен',
-          username: work.author_name || 'Неизвестен',
+          username: undefined,
+          display_username: undefined,
           rating: 0,
           avatar: work.author_avatar,
         },

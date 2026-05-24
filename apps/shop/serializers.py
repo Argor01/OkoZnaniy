@@ -6,6 +6,7 @@ from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 
 class AuthorSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
+    display_username = serializers.CharField(read_only=True)
     rating = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
     
@@ -13,10 +14,10 @@ class AuthorSerializer(serializers.ModelSerializer):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         model = User
-        fields = ['id', 'username', 'name', 'rating', 'avatar']
+        fields = ['id', 'username', 'display_username', 'name', 'rating', 'avatar']
     
     def get_name(self, obj):
-        return obj.get_full_name() or obj.username
+        return obj.display_username
     
     def get_rating(self, obj):
         # TODO: Implement rating calculation

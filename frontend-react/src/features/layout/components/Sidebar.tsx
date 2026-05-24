@@ -38,6 +38,7 @@ interface SidebarProps {
   onMenuSelect: (key: string) => void;
   userProfile?: {
     username: string;
+    display_username?: string;
     avatar?: string;
     role: string;
   };

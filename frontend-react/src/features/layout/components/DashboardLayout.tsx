@@ -302,6 +302,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const sidebarUserProfile = useMemo(() => userProfile ? {
     id: userProfile.id,
     username: userProfile.username,
+    display_username: userProfile.display_username,
     avatar: userProfile.avatar,
     role: userProfile.role
   } : undefined, [userProfile]);
@@ -577,6 +578,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             visible={notificationsModalVisible}
             onClose={handleNotificationsClose}
             isMobile={isChatMobile}
+            isTablet={isChatTablet}
           />
         )}
                 <ArbitrationModal 
@@ -594,7 +596,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <FaqModal 
           visible={faqModalVisible} 
           onClose={() => setFaqModalVisible(false)}
-          isMobile={isMobile}
+          isMobile={isChatMobile}
+          isTablet={isChatTablet}
         />
         <FriendProfileModal
           visible={friendProfileModalVisible}

@@ -31,6 +31,7 @@ import styles from './KnowledgePortal.module.css';
 import { knowledgeApi, Category, Question } from '../api/knowledgeApi';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -250,7 +251,7 @@ export const KnowledgePortal: React.FC = () => {
                       className={styles.authorAvatar}
                     />
                     <div className={styles.authorMeta}>
-                      <span className={styles.authorName}>{question.author.name}</span>
+                      <span className={styles.authorName}>{getDisplayUsername(question.author)}</span>
                       <span className={styles.authorTime}>
                         <ClockCircleOutlined /> {dayjs(question.created_at).fromNow()}
                       </span>

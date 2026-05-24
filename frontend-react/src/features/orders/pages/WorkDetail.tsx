@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Typography, Space, Tag, Avatar, Spin } from 'antd';
@@ -9,6 +9,7 @@ import { authApi } from '@/features/auth/api/auth';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './WorkDetail.module.css';
+import { getDisplayUsername } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
 import { useCurrentUser } from '@/hooks/queries';
 
@@ -127,7 +128,7 @@ const WorkDetail: React.FC = () => {
                         }}
                         className={styles.clientLink}
                       >
-                        {work.client?.username || work.client_name || 'Неизвестен'}
+                        {work.client ? getDisplayUsername(work.client) : work.client_name || 'Неизвестен'}
                       </AppButton>
                       <div className={styles.clientHint}>
                         Нажмите, чтобы посмотреть профиль

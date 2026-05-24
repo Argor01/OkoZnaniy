@@ -14,6 +14,7 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { logger } from '@/utils/logger';
 import { useCurrentUser } from '@/hooks/queries';
+import { getDisplayUsername } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -426,7 +427,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                             className={styles.clientAvatar}
                           />
                           <Text className={styles.clientName}>
-                            {order.client.first_name || order.client.username}
+                            {order.client.first_name || getDisplayUsername(order.client)}
                           </Text>
                         </Space>
                       </div>

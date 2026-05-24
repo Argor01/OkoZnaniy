@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { partnersApi, MapPartner } from '../api/partners';
 import styles from './PartnersMap.module.css';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -349,7 +350,7 @@ const PartnersMap: React.FC = () => {
                             top: `${(partner.svgCoords.y / 600) * 100}%`,
                           }}
                           onClick={() => handleMarkerClick(partner)}
-                          title={`${partner.username} - ${partner.city}`}
+                          title={`${getDisplayUsername(partner)} - ${partner.city}`}
                         >
                           <div className={styles.markerDot} />
                           <div className={styles.markerLabel}>
@@ -403,7 +404,7 @@ const PartnersMap: React.FC = () => {
                             marginBottom: '8px'
                           }}
                         >
-                          {partner.username}
+                          {getDisplayUsername(partner)}
                         </Title>
                         <div
                           className={styles.partnerCity}
@@ -474,7 +475,7 @@ const PartnersMap: React.FC = () => {
 
       {/* Модальное окно с информацией о партнере */}
       <Modal
-        title={selectedPartner?.username}
+        title={selectedPartner ? getDisplayUsername(selectedPartner) : undefined}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={[

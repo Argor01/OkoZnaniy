@@ -12,6 +12,7 @@ import { AppButton, AppCard } from '@/components/ui';
 import { useOrderDetail } from './hooks/useOrderDetail';
 import OrderHeader from './OrderHeader';
 import OrderContent from './OrderContent';
+import { formatUserName } from '@/utils/formatters';
 import OrderBids from './OrderBids';
 import styles from '../OrderDetail.module.css';
 
@@ -100,9 +101,9 @@ const OrderDetail: React.FC = () => {
   })();
 
   const clientDisplayName =
-    order.client?.first_name && order.client?.last_name
-      ? `${order.client.first_name} ${order.client.last_name}`
-      : order.client?.username || order.client_name || 'Неизвестен';
+    order.client
+      ? formatUserName(order.client)
+      : order.client_name || 'Неизвестен';
 
   const getStatusText = (status: string) => {
     const texts: Record<string, string> = {

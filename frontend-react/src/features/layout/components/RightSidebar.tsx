@@ -8,6 +8,7 @@ import 'dayjs/locale/ru';
 import axios from 'axios';
 import styles from './RightSidebar.module.css';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -126,7 +127,7 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
                   <Text
                     className={styles.authorName}
                     onClick={(e) => handleAuthorClick(q.author, e)}
-                  >{q.author.name}</Text>
+                  >{getDisplayUsername(q.author)}</Text>
                 </div>
                 
                 <Text className={styles.questionText}>

@@ -1,6 +1,7 @@
 export interface User {
   id: number;
   username: string;
+  display_username?: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -37,6 +38,7 @@ export interface User {
 export interface UserSummary {
   id: number;
   username: string;
+  display_username?: string;
   first_name?: string;
   last_name?: string;
   email?: string;

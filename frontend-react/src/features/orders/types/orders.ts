@@ -10,7 +10,7 @@ export interface OrderFile {
   filename: string;
   file_type: string;
   file_type_display: string;
-  uploaded_by: { id: number; username: string };
+  uploaded_by: { id: number; username: string; display_username?: string };
   description?: string | null;
   created_at: string;
   expert_viewed_at?: string | null;
@@ -20,6 +20,7 @@ export interface OrderFile {
 export interface OrderClient {
   id: number;
   username: string;
+  display_username?: string;
   first_name?: string;
   last_name?: string;
   avatar?: string;
@@ -30,6 +31,7 @@ export interface OrderClient {
 export interface OrderExpert {
   id: number;
   username: string;
+  display_username?: string;
   first_name?: string;
   last_name?: string;
   avatar?: string;

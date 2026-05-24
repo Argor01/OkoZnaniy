@@ -58,6 +58,8 @@ export interface PurchasedWork {
   author: {
     id: number;
     name: string;
+    username?: string;
+    display_username?: string;
     avatar?: string;
     rating: number;
   };

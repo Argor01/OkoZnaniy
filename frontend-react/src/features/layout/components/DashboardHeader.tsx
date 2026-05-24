@@ -44,6 +44,7 @@ interface DashboardHeaderProps {
   userProfile?: {
     id: string | number;
     username: string;
+    display_username?: string;
     avatar?: string;
     role: string;
     balance?: number;

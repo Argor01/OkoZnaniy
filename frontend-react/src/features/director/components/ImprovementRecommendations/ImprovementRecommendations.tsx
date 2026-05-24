@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { improvementApi, ImprovementSuggestion } from '@/features/improvements/api/improvements';
 import { getMediaUrl } from '@/config/api';
+import { getDisplayUsername } from '@/utils/formatters';
 
 const roleLabelMap: Record<string, string> = {
   client: 'Клиент',
@@ -26,9 +27,9 @@ const ImprovementRecommendations: React.FC = () => {
       key: 'user',
       render: (_: unknown, record: ImprovementSuggestion) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Avatar src={getMediaUrl(record.avatar) || undefined}>{record.username?.[0]?.toUpperCase()}</Avatar>
+          <Avatar src={getMediaUrl(record.avatar) || undefined}>{getDisplayUsername(record)[0]?.toUpperCase()}</Avatar>
           <div>
-            <div>{record.username}</div>
+            <div>{getDisplayUsername(record)}</div>
             <Tag>{roleLabelMap[record.role] || record.role}</Tag>
           </div>
         </div>

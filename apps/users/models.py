@@ -1,4 +1,6 @@
 # apps/users/models.py
+import hashlib
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -22,6 +24,7 @@ class User(AbstractUser):
     )
     # Переопределяем email чтобы сделать необязательным
     email = models.EmailField(blank=True, null=True, verbose_name="Email")
+    has_custom_username = models.BooleanField(default=False, verbose_name="Пользователь задал никнейм вручную")
     
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CLIENT)
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
@@ -76,6 +79,17 @@ class User(AbstractUser):
     block_reason = models.TextField(blank=True, null=True, verbose_name="Причина блокировки")
     unblock_date = models.DateTimeField(blank=True, null=True, verbose_name="Дата разблокировки")
     blocked_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='blocked_users_by_admin', verbose_name="Кто заблокировал")
+
+    @property
+    def display_username(self):
+        raw_username = (self.username or '').strip()
+        if self.has_custom_username and raw_username:
+            return raw_username
+
+        seed_source = f'{self.id or ""}|{raw_username}|{self.email or ""}' or 'user'
+        digest = hashlib.sha256(seed_source.encode('utf-8')).hexdigest()
+        stable_number = 1000 + (int(digest[:8], 16) % 9000)
+        return f'user{stable_number}'
     
     def save(self, *args, **kwargs):
         # Генерируем реферальный код для партнеров

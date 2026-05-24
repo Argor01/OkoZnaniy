@@ -307,6 +307,7 @@ const ExpertDashboard: FC = () => {
             visible={notificationsModalVisible}
             onClose={() => setNotificationsModalVisible(false)}
             isMobile={isMobile}
+            isTablet={isTablet}
           />
         )}
         
@@ -333,6 +334,7 @@ const ExpertDashboard: FC = () => {
             visible={faqModalVisible}
             onClose={() => setFaqModalVisible(false)}
             isMobile={isMobile}
+            isTablet={isTablet}
           />
         )}
         

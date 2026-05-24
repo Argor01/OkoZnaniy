@@ -32,6 +32,7 @@ import styles from './QuestionDetail.module.css';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { knowledgeApi, Question, Answer } from '../api/knowledgeApi';
 import { logger } from '@/utils/logger';
+import { getDisplayUsername } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -228,7 +229,7 @@ const QuestionDetail: React.FC = () => {
                 className={styles.authorName}
                 style={{ cursor: 'pointer' }}
                 onClick={(e) => handleUserClick(question.author.id, question.author.username, (question.author as { role?: string }).role, e)}
-              >{question.author.name}</Text>
+              >{getDisplayUsername(question.author)}</Text>
               <br />
               <Text type="secondary" className={styles.dateText}>
                 <ClockCircleOutlined /> {dayjs(question.created_at).fromNow()}
@@ -324,7 +325,7 @@ const QuestionDetail: React.FC = () => {
                         strong
                         style={{ cursor: 'pointer' }}
                         onClick={(e) => handleUserClick(answer.author.id, answer.author.username, answer.author.role, e)}
-                      >{answer.author.name}</Text>
+                      >{getDisplayUsername(answer.author)}</Text>
                       {answer.author.role && (
                         <Tag color="purple">{answer.author.role}</Tag>
                       )}

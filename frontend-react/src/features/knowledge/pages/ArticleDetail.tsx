@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from './ArticleDetail.module.css';
 import { useCurrentUser } from '@/hooks/queries';
+import { formatUserName } from '@/utils/formatters';
 
 dayjs.locale('ru');
 
@@ -95,10 +96,7 @@ const ArticleDetail: React.FC = () => {
   };
 
   const getAuthorName = (author: Article['author']) => {
-    if (author.first_name || author.last_name) {
-      return `${author.first_name} ${author.last_name}`.trim();
-    }
-    return author.username;
+    return formatUserName(author);
   };
 
   if (isLoading) {

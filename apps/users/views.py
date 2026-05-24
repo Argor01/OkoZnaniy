@@ -685,6 +685,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 {
                     'id': ref.id,
                     'username': ref.username,
+                    'display_username': ref.display_username,
                     'email': ref.email,
                     'role': ref.role,
                     'date_joined': ref.date_joined,
@@ -696,7 +697,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 {
                     'id': earning.id,
                     'amount': earning.amount,
-                    'referral': earning.referral.username,
+                    'referral': earning.referral.display_username,
                     'earning_type': earning.earning_type,
                     'created_at': earning.created_at,
                     'is_paid': earning.is_paid,
@@ -765,6 +766,7 @@ class UserViewSet(viewsets.ModelViewSet):
             partners_data.append({
                 'id': partner.id,
                 'username': partner.username,
+                'display_username': partner.display_username,
                 'email': partner.email,
                 'city': partner.city,
                 'phone': partner.phone,

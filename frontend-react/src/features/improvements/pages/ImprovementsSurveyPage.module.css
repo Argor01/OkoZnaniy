@@ -105,3 +105,13 @@
     margin-top: 0;
   }
 }
+
+@media (max-width: 768px) {
+  .formCard :global(.ant-input-textarea-show-count) {
+    margin-bottom: 12px;
+  }
+
+  .submitRow {
+    margin-top: 16px;
+  }
+}

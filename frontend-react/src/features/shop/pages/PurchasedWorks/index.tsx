@@ -54,7 +54,9 @@ const PurchasedWorks: React.FC = () => {
             purchasesCount: typeof w.purchasesCount === 'number' ? w.purchasesCount : 0,
             author: {
               id: Number(w.author?.id ?? 0),
-              name: String(w.author?.name ?? w.author?.username ?? w.author_name ?? 'Неизвестен'),
+              name: String(w.author?.name ?? w.author?.display_username ?? w.author?.username ?? w.author_name ?? 'Неизвестен'),
+              username: w.author?.username ? String(w.author.username) : undefined,
+              display_username: w.author?.display_username ? String(w.author.display_username) : undefined,
               avatar: w.author?.avatar,
               rating: typeof w.author?.rating === 'number' ? w.author.rating : 0,
             },

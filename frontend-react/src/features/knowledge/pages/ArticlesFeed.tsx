@@ -19,6 +19,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './ArticlesFeed.module.css';
 import { useCurrentUser, useWorkTypes, useSubjects } from '@/hooks/queries';
+import { formatUserName } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -91,10 +92,7 @@ const ArticlesFeed: React.FC = () => {
   };
 
   const getAuthorName = (author: Article['author']) => {
-    if (author.first_name || author.last_name) {
-      return `${author.first_name} ${author.last_name}`.trim();
-    }
-    return author.username;
+    return formatUserName(author);
   };
 
   return (

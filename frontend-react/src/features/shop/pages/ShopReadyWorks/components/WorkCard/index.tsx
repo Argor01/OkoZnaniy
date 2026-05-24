@@ -11,6 +11,10 @@ import styles from './WorkCard.module.css';
 const { Text, Title } = Typography;
 
 const getAuthorDisplayName = (work: Work): string => {
+  if (work.author) {
+    return getDisplayUsername(work.author);
+  }
+
   const authorName = work.author?.name?.trim();
   if (authorName && !isEmailLike(authorName)) {
     return authorName;
@@ -21,10 +25,7 @@ const getAuthorDisplayName = (work: Work): string => {
     return fallbackAuthorName;
   }
 
-  return getDisplayUsername({
-    id: work.author?.id,
-    username: work.author?.username || authorName || fallbackAuthorName,
-  });
+  return 'Неизвестен';
 };
 
 interface WorkCardProps {

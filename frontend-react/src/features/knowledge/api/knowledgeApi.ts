@@ -19,6 +19,7 @@ export interface Question {
     id: number;
     name: string;
     username?: string;
+    display_username?: string;
     avatar?: string;
   };
   created_at: string;
@@ -35,6 +36,7 @@ export interface Answer {
     id: number;
     name: string;
     username?: string;
+    display_username?: string;
     avatar?: string;
     role?: string;
   };
@@ -56,6 +58,7 @@ export interface ArticleFile {
 export interface ArticleAuthor {
   id: number;
   username: string;
+  display_username?: string;
   first_name: string;
   last_name: string;
   role: string;

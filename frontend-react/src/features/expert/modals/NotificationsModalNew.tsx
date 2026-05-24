@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Typography, Spin, Space, Avatar, message as antMessage } from 'antd';
+import { Modal, Typography, Spin, Space, Avatar, Button, message as antMessage } from 'antd';
 import { ErrorBoundary } from '@/features/common';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -8,6 +8,7 @@ import {
   TrophyOutlined, 
   CommentOutlined, 
   QuestionCircleOutlined,
+  CloseOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
   StarFilled,
@@ -27,6 +28,7 @@ interface NotificationsModalProps {
   visible: boolean;
   onClose: () => void;
   isMobile: boolean;
+  isTablet?: boolean;
 }
 
 
@@ -162,8 +164,10 @@ const resolveNotificationTarget = (notification: Notification): string | null =>
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
-  isMobile
+  isMobile,
+  isTablet = false,
 }) => {
+  const useFullscreenLayout = isMobile || isTablet;
   const navigate = useNavigate();
   const [notificationTab, setNotificationTab] = useState<string>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -331,29 +335,39 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     <Modal
       title={null}
       open={visible}
-      centered
+      centered={!useFullscreenLayout}
       onCancel={onClose}
       footer={null}
-      width={isMobile ? '100%' : 'calc(100vw - 300px)'}
-      wrapClassName={`${styles.notificationsModalWrap} ${isMobile ? styles.notificationsModalWrapMobile : styles.notificationsModalWrapDesktop}`}
+      closable={false}
+      width={useFullscreenLayout ? '100%' : 'calc(100vw - 300px)'}
+      wrapClassName={`${styles.notificationsModalWrap} ${isMobile ? styles.notificationsModalWrapMobile : isTablet ? styles.notificationsModalWrapTablet : styles.notificationsModalWrapDesktop}`}
     >
       <ErrorBoundary>
-      <div className={`${styles.notificationsModalContent} ${isMobile ? styles.notificationsModalContentMobile : styles.notificationsModalContentDesktop}`}>
-        <div className={`${styles.notificationsModalHeader} ${isMobile ? styles.notificationsModalHeaderMobile : styles.notificationsModalHeaderDesktop}`}>
-          <Text strong className={`${styles.notificationsModalTitle} ${isMobile ? styles.notificationsModalTitleMobile : styles.notificationsModalTitleDesktop}`}>
+      <div className={`${styles.notificationsModalContent} ${isMobile ? styles.notificationsModalContentMobile : useFullscreenLayout ? styles.notificationsModalContentTablet : styles.notificationsModalContentDesktop}`}>
+        <div className={`${styles.notificationsModalHeader} ${isMobile ? styles.notificationsModalHeaderMobile : useFullscreenLayout ? styles.notificationsModalHeaderTablet : styles.notificationsModalHeaderDesktop}`}>
+          <Text strong className={`${styles.notificationsModalTitle} ${isMobile ? styles.notificationsModalTitleMobile : useFullscreenLayout ? styles.notificationsModalTitleTablet : styles.notificationsModalTitleDesktop}`}>
             Уведомления
           </Text>
-          {notifications.some(n => !n.is_read) && (
-            <Text 
-              onClick={handleMarkAllAsRead}
-              className={`${styles.notificationsModalMarkAll} ${isMobile ? styles.notificationsModalMarkAllMobile : styles.notificationsModalMarkAllDesktop}`}
-            >
-              Отметить все
-            </Text>
-          )}
+          <div className={styles.notificationsModalActions}>
+            {notifications.some(n => !n.is_read) && (
+              <Text 
+                onClick={handleMarkAllAsRead}
+                className={`${styles.notificationsModalMarkAll} ${isMobile ? styles.notificationsModalMarkAllMobile : useFullscreenLayout ? styles.notificationsModalMarkAllTablet : styles.notificationsModalMarkAllDesktop}`}
+              >
+                Отметить все
+              </Text>
+            )}
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={onClose}
+              className={styles.notificationsModalCloseButton}
+              aria-label="Закрыть уведомления"
+            />
+          </div>
         </div>
 
-        <div className={`${styles.notificationsModalTabs} ${isMobile ? styles.notificationsModalTabsMobile : styles.notificationsModalTabsDesktop}`}>
+        <div className={`${styles.notificationsModalTabs} ${isMobile ? styles.notificationsModalTabsMobile : useFullscreenLayout ? styles.notificationsModalTabsTablet : styles.notificationsModalTabsDesktop}`}>
           {[
             { key: 'all', label: 'Все', icon: <BellOutlined /> },
             { key: 'orders', label: 'Заказы', icon: <FileDoneOutlined /> },
@@ -363,21 +377,21 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
             <div
               key={tab.key}
               onClick={() => setNotificationTab(tab.key)}
-              className={`${styles.notificationsModalTab} ${notificationTab === tab.key ? styles.notificationsModalTabActive : styles.notificationsModalTabInactive} ${isMobile ? styles.notificationsModalTabMobile : styles.notificationsModalTabDesktop}`}
+              className={`${styles.notificationsModalTab} ${notificationTab === tab.key ? styles.notificationsModalTabActive : styles.notificationsModalTabInactive} ${isMobile ? styles.notificationsModalTabMobile : useFullscreenLayout ? styles.notificationsModalTabTablet : styles.notificationsModalTabDesktop}`}
             >
               {React.isValidElement(tab.icon)
                 ? React.cloneElement(tab.icon as React.ReactElement<{ className?: string }>, {
-                    className: `${styles.notificationsModalTabIcon} ${notificationTab === tab.key ? styles.notificationsModalTabIconActive : styles.notificationsModalTabIconInactive} ${isMobile ? styles.notificationsModalTabIconMobile : styles.notificationsModalTabIconDesktop}`
+                    className: `${styles.notificationsModalTabIcon} ${notificationTab === tab.key ? styles.notificationsModalTabIconActive : styles.notificationsModalTabIconInactive} ${isMobile ? styles.notificationsModalTabIconMobile : useFullscreenLayout ? styles.notificationsModalTabIconTablet : styles.notificationsModalTabIconDesktop}`
                   })
                 : tab.icon}
-              <Text className={`${styles.notificationsModalTabLabel} ${notificationTab === tab.key ? styles.notificationsModalTabLabelActive : styles.notificationsModalTabLabelInactive} ${isMobile ? styles.notificationsModalTabLabelMobile : styles.notificationsModalTabLabelDesktop}`}>
+              <Text className={`${styles.notificationsModalTabLabel} ${notificationTab === tab.key ? styles.notificationsModalTabLabelActive : styles.notificationsModalTabLabelInactive} ${isMobile ? styles.notificationsModalTabLabelMobile : useFullscreenLayout ? styles.notificationsModalTabLabelTablet : styles.notificationsModalTabLabelDesktop}`}>
                 {tab.label}
               </Text>
             </div>
           ))}
         </div>
 
-        <div className={`${styles.notificationsModalList} ${isMobile ? styles.notificationsModalListMobile : styles.notificationsModalListDesktop}`}>
+        <div className={`${styles.notificationsModalList} ${isMobile ? styles.notificationsModalListMobile : useFullscreenLayout ? styles.notificationsModalListTablet : styles.notificationsModalListDesktop}`}>
           {loading ? (
             <div className={styles.notificationsModalLoading}>
               <Spin size="large" />
@@ -394,27 +408,27 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
               <div
                 key={notification.id}
                 onClick={() => void handleNotificationClick(notification)}
-                className={`${styles.notificationsModalItem} ${notification.is_read ? styles.notificationsModalItemRead : styles.notificationsModalItemUnread} ${isMobile ? styles.notificationsModalItemMobile : styles.notificationsModalItemDesktop}`}
+                className={`${styles.notificationsModalItem} ${notification.is_read ? styles.notificationsModalItemRead : styles.notificationsModalItemUnread} ${isMobile ? styles.notificationsModalItemMobile : useFullscreenLayout ? styles.notificationsModalItemMobile : styles.notificationsModalItemDesktop}`}
               >
                 
-                <div className={`${styles.notificationsModalItemIcon} ${notification.is_read ? styles.notificationsModalItemIconRead : styles.notificationsModalItemIconUnread} ${isMobile ? styles.notificationsModalItemIconMobile : styles.notificationsModalItemIconDesktop}`}>
+                <div className={`${styles.notificationsModalItemIcon} ${notification.is_read ? styles.notificationsModalItemIconRead : styles.notificationsModalItemIconUnread} ${isMobile ? styles.notificationsModalItemIconMobile : useFullscreenLayout ? styles.notificationsModalItemIconMobile : styles.notificationsModalItemIconDesktop}`}>
                   {getNotificationIcon(notification.type)}
                 </div>
 
                 
                 <div className={styles.notificationsModalItemBody}>
                   <div className={styles.notificationsModalItemHeader}>
-                    <Text strong className={`${styles.notificationsModalItemTitle} ${notification.is_read ? styles.notificationsModalItemTitleRead : styles.notificationsModalItemTitleUnread} ${isMobile ? styles.notificationsModalItemTitleMobile : styles.notificationsModalItemTitleDesktop}`}>
+                    <Text strong className={`${styles.notificationsModalItemTitle} ${notification.is_read ? styles.notificationsModalItemTitleRead : styles.notificationsModalItemTitleUnread} ${isMobile ? styles.notificationsModalItemTitleMobile : useFullscreenLayout ? styles.notificationsModalItemTitleMobile : styles.notificationsModalItemTitleDesktop}`}>
                       {notification.title}
                     </Text>
                     {!notification.is_read && (
                       <div className={`${styles.notificationsModalUnreadDot} ${isMobile ? styles.notificationsModalUnreadDotMobile : styles.notificationsModalUnreadDotDesktop}`} />
                     )}
                   </div>
-                  <Text className={`${styles.notificationsModalItemText} ${isMobile ? styles.notificationsModalItemTextMobile : styles.notificationsModalItemTextDesktop}`}>
+                  <Text className={`${styles.notificationsModalItemText} ${isMobile ? styles.notificationsModalItemTextMobile : useFullscreenLayout ? styles.notificationsModalItemTextMobile : styles.notificationsModalItemTextDesktop}`}>
                     {formatNotificationMessage(notification)}
                   </Text>
-                  <Text type="secondary" className={`${styles.notificationsModalItemTime} ${isMobile ? styles.notificationsModalItemTimeMobile : styles.notificationsModalItemTimeDesktop}`}>
+                  <Text type="secondary" className={`${styles.notificationsModalItemTime} ${isMobile ? styles.notificationsModalItemTimeMobile : useFullscreenLayout ? styles.notificationsModalItemTimeMobile : styles.notificationsModalItemTimeDesktop}`}>
                     <ClockCircleOutlined className={styles.notificationsModalItemTimeIcon} />
                     {formatTimestamp(notification.created_at)}
                   </Text>

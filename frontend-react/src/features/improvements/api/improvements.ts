@@ -7,6 +7,7 @@ export interface ImprovementSuggestion {
   id: number;
   user_id: number;
   username: string;
+  display_username?: string;
   role: string;
   avatar: string | null;
   email: string | null;

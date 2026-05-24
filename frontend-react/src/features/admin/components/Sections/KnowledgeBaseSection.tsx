@@ -33,6 +33,7 @@ import {
   type ArticleComplaint,
   type ArticleDeletion,
 } from '@/features/knowledge/api/knowledgeApi';
+import { formatUserName } from '@/utils/formatters';
 import {
   catalogApi,
   type WorkType,
@@ -221,10 +222,7 @@ export const KnowledgeBaseSection: React.FC = () => {
   };
 
   const getAuthorName = (author: Article['author']) => {
-    if (author.first_name || author.last_name) {
-      return `${author.first_name} ${author.last_name}`.trim();
-    }
-    return author.username;
+    return formatUserName(author);
   };
 
   if (view === 'create') {

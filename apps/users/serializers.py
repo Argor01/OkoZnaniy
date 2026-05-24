@@ -56,9 +56,10 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         validated_data.pop('password2', None)  # Удаляем password2, он нам больше не нужен
         role = validated_data.pop('role', 'client')
+        username_provided = bool(validated_data.get('username'))
         
         # Генерируем username если его нет
-        if 'username' not in validated_data or not validated_data.get('username'):
+        if not username_provided:
             email = validated_data.get('email', '')
             if email:
                 # Берем часть до @ и добавляем случайные цифры если нужно
@@ -75,6 +76,8 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 # Если нет email, генерируем случайный username
                 import uuid
                 validated_data['username'] = f"user_{uuid.uuid4().hex[:8]}"
+
+        validated_data['has_custom_username'] = username_provided
         
         # Создаем пользователя
         user = User.objects.create_user(**validated_data)
@@ -133,11 +136,12 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer для модели User"""
     is_blocked = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
+    display_username = serializers.CharField(read_only=True)
     
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name',
+            'id', 'username', 'display_username', 'email', 'first_name', 'last_name',
             'role', 'phone', 'balance', 'frozen_balance',
             'avatar', 'bio', 'experience_years', 'hourly_rate',
             'education', 'skills', 'portfolio_url', 'is_verified',
@@ -181,6 +185,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         password = validated_data.pop('password')
+        validated_data['has_custom_username'] = bool(validated_data.get('username'))
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
@@ -218,6 +223,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Этот никнейм уже занят")
         return value
 
+    def update(self, instance, validated_data):
+        username = validated_data.get('username')
+        if username is not None and username.strip() and username != instance.username:
+            validated_data['has_custom_username'] = True
+        return super().update(instance, validated_data)
+
 
 class PasswordResetSerializer(serializers.Serializer):
     """Serializer для запроса сброса пароля"""
@@ -251,6 +262,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['user'] = {
             'id': self.user.id,
             'username': self.user.username,
+            'display_username': self.user.display_username,
             'email': self.user.email,
             'role': self.user.role,
             'first_name': self.user.first_name,
@@ -272,19 +284,21 @@ class ExpertApplicationSerializer(serializers.Serializer):
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     """Упрощенный serializer для пользователя (без email для приватности)"""
+    display_username = serializers.CharField(read_only=True)
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'role', 'avatar']
+        fields = ['id', 'username', 'display_username', 'role', 'avatar']
 
 
 class PublicUserProfileSerializer(serializers.ModelSerializer):
     """Serializer для публичного профиля пользователя"""
+    display_username = serializers.CharField(read_only=True)
     
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'first_name', 'last_name', 'role',
+            'id', 'username', 'display_username', 'first_name', 'last_name', 'role',
             'avatar', 'bio', 'experience_years', 'hourly_rate',
             'education', 'skills', 'portfolio_url', 'is_verified', 'city'
         ]
@@ -298,6 +312,7 @@ class ImprovementSuggestionCreateSerializer(serializers.ModelSerializer):
 
 class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
+    display_username = serializers.CharField(source='user.display_username', read_only=True)
     role = serializers.CharField(source='user.role', read_only=True)
     avatar = serializers.ImageField(source='user.avatar', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
@@ -309,6 +324,7 @@ class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
             'id',
             'user_id',
             'username',
+            'display_username',
             'role',
             'avatar',
             'area',

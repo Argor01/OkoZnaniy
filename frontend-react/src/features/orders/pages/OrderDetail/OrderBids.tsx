@@ -12,7 +12,7 @@ import {
 import type { Bid, Order } from '@/features/orders/api/orders';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername } from '@/utils/formatters';
 import { AppButton } from '@/components/ui';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { logger } from '@/utils/logger';
@@ -161,7 +161,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                                 }}
                                 className={styles.bidUserLink}
                               >
-                                <Text strong>{bid.expert.username}</Text>
+                                <Text strong>{getDisplayUsername(bid.expert)}</Text>
                               </AppButton>
                               <Space size={4} className={styles.bidRatingRow}>
                                 <StarOutlined className={styles.ratingStar} />
@@ -232,7 +232,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                 }}
                 className={styles.expertLink}
               >
-                <Text strong className={styles.expertName}>{order.expert.username}</Text>
+                <Text strong className={styles.expertName}>{getDisplayUsername(order.expert)}</Text>
               </AppButton>
               <br />
               <Text type="secondary" className={styles.expertRole}>Эксперт</Text>

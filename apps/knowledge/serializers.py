@@ -19,6 +19,7 @@ class ArticleFileSerializer(serializers.ModelSerializer):
 class ArticleAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
+    display_username = serializers.CharField()
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     role = serializers.CharField()
@@ -98,8 +99,9 @@ class QuestionTagSerializer(serializers.ModelSerializer):
 
 class AnswerAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField(source='username')
+    name = serializers.CharField(source='display_username')
     username = serializers.CharField()
+    display_username = serializers.CharField()
     avatar = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     
@@ -137,8 +139,9 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 class QuestionAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField(source='username')
+    name = serializers.CharField(source='display_username')
     username = serializers.CharField()
+    display_username = serializers.CharField()
     avatar = serializers.SerializerMethodField()
     
     def get_avatar(self, obj):

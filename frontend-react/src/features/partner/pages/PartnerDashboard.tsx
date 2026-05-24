@@ -33,6 +33,7 @@ import { AppFooter } from '@/components/layout/AppFooter';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 import '@/styles/modal-overrides.css';
+import { getDisplayUsername } from '@/utils/formatters';
 import './PartnerDashboard.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 import { useCurrentUser } from '@/hooks/queries';
@@ -266,9 +267,9 @@ const ReferralsList: React.FC<{ data: PartnerDashboardData }> = ({ data }) => {
       title: 'Пользователь',
       dataIndex: 'username',
       key: 'username',
-      render: (username: string, record: Referral) => (
+      render: (_username: string, record: Referral) => (
         <div>
-          <div><strong>{username}</strong></div>
+          <div><strong>{getDisplayUsername(record)}</strong></div>
           <div className="partnerDashboardReferralEmail">{record.email}</div>
         </div>
       ),
