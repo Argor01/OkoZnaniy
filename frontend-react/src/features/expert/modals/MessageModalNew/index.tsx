@@ -9,6 +9,7 @@ import {
   SearchOutlined,
   UserOutlined,
   ArrowLeftOutlined,
+  CloseOutlined,
   CustomerServiceOutlined,
   CheckCircleOutlined,
   CheckOutlined,
@@ -141,7 +142,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   // Адаптив: фиксируем модалку при открытии клавиатуры на мобильных
   useEffect(() => {
-    if (!isMobile || !visible) return;
+    if ((!isMobile && !isTablet) || !visible) return;
 
     // Сохраняем позицию скролла и блокируем body
     const scrollY = window.scrollY;
@@ -198,7 +199,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       html.style.overflow = '';
       window.scrollTo(0, scrollY);
     };
-  }, [isMobile, visible]);
+  }, [isMobile, isTablet, visible]);
 
   // WebSocket для real-time обновлений чата
   const handleNewMessage = useCallback((wsMessage: any) => {
@@ -2180,6 +2181,11 @@ const handleOverdueComplaint = async () => {
     setSelectedChat(null);
   }, []);
 
+  const handleBackToChatList = useCallback(() => {
+    setSelectedChat(null);
+    setSupportCenterSelected(false);
+  }, []);
+
     const filteredChats = useMemo(() => safeChatList.filter(chat => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -2241,11 +2247,17 @@ const handleOverdueComplaint = async () => {
     return result;
   }, [selectedChat?.messages]);
   const isChatFrozen = Boolean(selectedChat?.is_frozen || order?.is_frozen);
+  const hasActiveConversation = Boolean(selectedChat || isSupportChatSelected);
+  const useStackedConversationLayout = isMobile || isTablet;
+  const showSidebar = !useStackedConversationLayout || !hasActiveConversation;
+  const showChatPanel = !useStackedConversationLayout || hasActiveConversation;
+  const showTabletBackRail = isTablet && hasActiveConversation;
 
   return (
     <Modal
       open={visible}
-      centered
+      centered={!useStackedConversationLayout}
+      closable={false}
       onCancel={onClose}
       footer={null}
       destroyOnHidden
@@ -2256,34 +2268,8 @@ const handleOverdueComplaint = async () => {
       <div
         className={`${styles.chatModalContainer} ${isMobile ? styles.chatModalContainerMobile : ''}`}
       >
-        {selectedChat && !isSupportChatSelected && (
-          <Dropdown
-            key={`dropdown-${selectedChat.id}`}
-            trigger={['click']}
-            menu={{
-              items: [
-                {
-                  key: 'delete',
-                  label: 'Удалить чат',
-                  danger: true,
-                  disabled: deletingChat || hasActiveOffersInSelectedChat,
-                },
-              ],
-              onClick: ({ key }) => {
-                if (key === 'delete') handleDeleteSelectedChat();
-              },
-            }}
-          >
-            <Button
-              type="text"
-              icon={<MoreOutlined />}
-              className={styles.chatMenuButton}
-            />
-          </Dropdown>
-        )}
-        
         <div
-          className={`${styles.chatSidebar} ${isMobile ? styles.chatSidebarMobile : isTablet ? styles.chatSidebarTablet : styles.chatSidebarDesktop} ${selectedChat && isMobile ? styles.chatSidebarHidden : ''}`}
+          className={`${styles.chatSidebar} ${isMobile ? styles.chatSidebarMobile : isTablet ? styles.chatSidebarTablet : styles.chatSidebarDesktop} ${(isMobile || isTablet) && showSidebar ? styles.chatSidebarStackedFullscreen : ''} ${!showSidebar ? styles.chatSidebarHidden : ''}`}
         >
           
           <div className={`${styles.chatSearchHeader} ${isMobile ? styles.chatSearchHeaderMobile : ''}`}>
@@ -2295,6 +2281,15 @@ const handleOverdueComplaint = async () => {
               className={`${styles.chatSearchInput} ${isMobile ? styles.chatSearchInputMobile : ''}`}
               size={isMobile ? 'small' : 'middle'}
             />
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={onClose}
+                className={styles.chatSearchCloseButton}
+                aria-label="Закрыть список чатов"
+              />
+            )}
           </div>
 
           
@@ -2390,9 +2385,20 @@ const handleOverdueComplaint = async () => {
         </div>
 
         
+        {showTabletBackRail && (
+          <button
+            type="button"
+            className={styles.chatTabletBackRail}
+            onClick={handleBackToChatList}
+            aria-label="Открыть список чатов"
+          >
+            <ArrowLeftOutlined className={styles.chatTabletBackRailIcon} />
+          </button>
+        )}
+
         <div 
           key={selectedChat ? `chat-${selectedChat.id}` : (isSupportChatSelected ? 'support-center' : 'no-chat')}
-          className={`${styles.chatPanel} ${(!selectedChat && !isSupportChatSelected && isMobile) ? styles.chatPanelHidden : ''}`}
+          className={`${styles.chatPanel} ${!showChatPanel ? styles.chatPanelHidden : ''} ${showTabletBackRail ? styles.chatPanelTabletActive : ''}`}
         >
           
           <div
@@ -2404,15 +2410,12 @@ const handleOverdueComplaint = async () => {
           >
             {selectedChat || isSupportChatSelected ? (
               <>
-                <Space>
+                <div className={styles.chatHeaderMain}>
                   {isMobile && (
                     <Button
                       type="text"
                       icon={<ArrowLeftOutlined />}
-                      onClick={() => {
-                        setSelectedChat(null);
-                        setSupportCenterSelected(false);
-                      }}
+                      onClick={handleBackToChatList}
                       size="small"
                     />
                   )}
@@ -2433,9 +2436,10 @@ const handleOverdueComplaint = async () => {
                       }
                     }}
                   />
-                  <div>
+                  <div className={styles.chatHeaderTextBlock}>
                     <Text 
                       className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}
+                      ellipsis
                       style={!isSupportChatSelected ? { cursor: 'pointer' } : undefined}
                       onClick={() => {
                         if (!isSupportChatSelected && selectedChat?.other_user?.username) {
@@ -2452,21 +2456,21 @@ const handleOverdueComplaint = async () => {
                     </Text>
                     {!isSupportChatSelected ? (
                       effectiveOrderId && !isClosedOrder ? (
-                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
+                        <Text ellipsis className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
                           {headerOrder.title || order?.title || `Заказ #${effectiveOrderId}`}
                         </Text>
                       ) : headerContextTitle ? (
-                        <Text className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
+                        <Text ellipsis className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}>
                           {headerContextTitle}
                         </Text>
                       ) : (
-                        <Text className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
+                        <Text ellipsis className={`${styles.chatHeaderSubtitle} ${isMobile ? styles.chatHeaderSubtitleMobile : ''}`}>
                           Без заказа
                         </Text>
                       )
                     ) : null}
                   </div>
-                </Space>
+                </div>
                 <input
                   ref={workOfferFileInputRef}
                   type="file"
@@ -2476,58 +2480,99 @@ const handleOverdueComplaint = async () => {
                     if (f) handleOfferWorkUpload(f);
                   }}
                 />
-                {canUseExpertOfferButtons && !isSupportChatSelected ? (
-                  headerContextTitle ? (
-                    <Button
-                      type="primary"
-                      size={isMobile ? 'small' : 'middle'}
-                      icon={
-                        uploadableWorkOffer
-                          ? <UploadOutlined />
-                          : <FileTextOutlined />
-                      }
-                      loading={workOfferUploading}
-                      onClick={() => {
-                        if (uploadableWorkOffer) {
-                          workOfferFileInputRef.current?.click();
-                        } else {
-                          setWorkOfferModalOpen(true);
+                <div className={styles.chatHeaderActions}>
+                  {canUseExpertOfferButtons && !isSupportChatSelected ? (
+                    headerContextTitle ? (
+                      <Button
+                        type="primary"
+                        size={isMobile ? 'small' : 'middle'}
+                        icon={
+                          uploadableWorkOffer
+                            ? <UploadOutlined />
+                            : <FileTextOutlined />
                         }
+                        loading={workOfferUploading}
+                        onClick={() => {
+                          if (uploadableWorkOffer) {
+                            workOfferFileInputRef.current?.click();
+                          } else {
+                            setWorkOfferModalOpen(true);
+                          }
+                        }}
+                        className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
+                        title={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
+                        aria-label={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
+                      >
+                        {isMobile
+                          ? null
+                          : (() => {
+                              if (uploadableWorkOffer) return 'Отправить работу';
+                              return 'Предложить работу';
+                            })()}
+                      </Button>
+                    ) : !isChatInitiator ? (
+                      <Button
+                        type="primary"
+                        size={isMobile ? 'small' : 'middle'}
+                        icon={<FileTextOutlined />}
+                        className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
+                        onClick={() => setOfferModalOpen(true)}
+                        title="Индивидуальное предложение"
+                        aria-label="Индивидуальное предложение"
+                      >
+                        {isMobile ? null : 'Индивидуальное предложение'}
+                      </Button>
+                    ) : null
+                  ) : null}
+                  {selectedChat && !isSupportChatSelected && (
+                    <Dropdown
+                      key={`dropdown-${selectedChat.id}`}
+                      trigger={['click']}
+                      overlayStyle={{ zIndex: 2101 }}
+                      menu={{
+                        items: [
+                          {
+                            key: 'delete',
+                            label: 'Удалить чат',
+                            danger: true,
+                            disabled: deletingChat || hasActiveOffersInSelectedChat,
+                          },
+                        ],
+                        onClick: ({ key }) => {
+                          if (key === 'delete') handleDeleteSelectedChat();
+                        },
                       }}
-                      className={styles.buttonSuccess}
                     >
-                      {(() => {
-                        if (uploadableWorkOffer) return isMobile ? 'Работа' : 'Отправить работу';
-                        return isMobile ? 'Работа' : 'Предложить работу';
-                      })()}
-                    </Button>
-                  ) : !isChatInitiator ? (
-                    <Button
-                      type="primary"
-                      size={isMobile ? 'small' : 'middle'}
-                      icon={<FileTextOutlined />}
-                      className={styles.buttonSuccess}
-                      onClick={() => setOfferModalOpen(true)}
-                    >
-                      {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
-                    </Button>
-                  ) : null
-                ) : null}
-                {isSupportChatSelected ? (
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        className={styles.chatMenuButton}
+                      />
+                    </Dropdown>
+                  )}
                   <Button
-                    key={`support-claim-${selectedChat?.id || 'none'}`}
                     type="text"
-                    danger
-                    icon={<ExclamationCircleOutlined />}
-                    size={isMobile ? 'middle' : 'large'}
-                    onClick={() => {
-                      onClose();
-                      navigate('/support/claim-form?mode=support');
-                    }}
-                    className={`${styles.chatClaimButton} ${isMobile ? styles.chatClaimButtonMobile : ''}`}
-                    title="Подать претензию"
+                    icon={<CloseOutlined />}
+                    onClick={onClose}
+                    className={styles.chatCloseButton}
+                    aria-label="Закрыть чат"
                   />
-                ) : null}
+                  {isSupportChatSelected ? (
+                    <Button
+                      key={`support-claim-${selectedChat?.id || 'none'}`}
+                      type="text"
+                      danger
+                      icon={<ExclamationCircleOutlined />}
+                      size={isMobile ? 'middle' : 'large'}
+                      onClick={() => {
+                        onClose();
+                        navigate('/support/claim-form?mode=support');
+                      }}
+                      className={`${styles.chatClaimButton} ${isMobile ? styles.chatClaimButtonMobile : ''}`}
+                      title="Подать претензию"
+                    />
+                  ) : null}
+                </div>
               </>
             ) : (
               <Space>

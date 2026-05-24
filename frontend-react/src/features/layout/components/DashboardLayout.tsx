@@ -159,8 +159,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [navigate]);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.TABLET);
-  const [isChatMobile, setIsChatMobile] = useState(window.innerWidth <= 768);
-  const [isChatTablet, setIsChatTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
+  const [isChatMobile, setIsChatMobile] = useState(window.innerWidth <= 840);
+  const [isChatTablet, setIsChatTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
   const [isChatDesktop, setIsChatDesktop] = useState(window.innerWidth > 1024);
   // #18: промежуточный брейкпоинт — на ноутбучных экранах (≈1024-1280px)
   // трёхколоночный layout (sidebar 320 + content 1000 + rightSidebar 320)
@@ -173,8 +173,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       const w = window.innerWidth;
       setIsMobile(w <= BREAKPOINTS.TABLET);
       setIsCompact(w <= 1400);
-      setIsChatMobile(w <= 768);
-      setIsChatTablet(w > 768 && w <= 1024);
+      setIsChatMobile(w <= 840);
+      setIsChatTablet(w > 840 && w <= 1024);
       setIsChatDesktop(w > 1024);
     };
     window.addEventListener('resize', handleResize);
