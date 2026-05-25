@@ -54,6 +54,10 @@
   width: 100%;
 }
 
+.searchField {
+  width: 100%;
+}
+
 .filterToggle {
   display: flex;
   align-items: center;
@@ -120,6 +124,31 @@
   }
 }
 
+@media (max-width: 840px) {
+  .searchField:global(.ant-input-affix-wrapper) {
+    min-height: 44px;
+    height: 44px !important;
+    box-sizing: border-box;
+  }
+
+  .searchField:global(.ant-input-affix-wrapper) :global(.ant-input) {
+    font-size: 16px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchField:global(.ant-input-affix-wrapper) {
+    min-height: 48px;
+    height: 48px !important;
+    border-radius: 12px;
+  }
+
+  .searchField:global(.ant-input-affix-wrapper) :global(.ant-input) {
+    padding-bottom: 5px;
+  }
+}
+
 .ordersCount {
   margin-bottom: 16px;
   font-size: 14px;
@@ -129,6 +158,10 @@
 .loadingBlock {
   text-align: center;
   padding: 40px 0;
+}
+
+.mobileCreateButton {
+  margin-bottom: 16px;
 }
 
 .emptyText {

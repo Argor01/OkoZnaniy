@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons';
 import { Order, OrderFile } from '@/features/orders/types/orders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername, isEmailLike } from '@/utils/formatters';
 import { AppButton, AppCard } from '@/components/ui';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -88,6 +88,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const subjectText = order.custom_subject || order.subject?.name || order.subject_name || 'Не указан';
   const workTypeText = order.custom_work_type || order.work_type?.name || order.work_type_name || 'Не указан';
   const responsesText = `${order.bids?.length || order.responses_count || 0} откликов`;
+  const clientPreviewName = order.client
+    ? getDisplayUsername(order.client)
+    : order.client_name && !isEmailLike(order.client_name)
+    ? order.client_name
+    : order.client_id || order.client_name
+    ? getDisplayUsername({
+        id: order.client_id,
+        username: order.client_name && !isEmailLike(order.client_name) ? order.client_name : undefined,
+        email: order.client_name && isEmailLike(order.client_name) ? order.client_name : undefined,
+      })
+    : 'Заказчик';
 
   const isOrderOwner = (order: OrderCardData) => {
     return order.client?.id === userProfile?.id || 
@@ -215,10 +226,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           />
           <div>
             <Text strong className={styles.clientName}>
-              {order.client?.username || order.client_name || 
-                (order.client?.first_name && order.client?.last_name 
-                  ? `${order.client.first_name} ${order.client.last_name}` 
-                  : 'Заказчик')}
+              {clientPreviewName}
             </Text>
             <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
               Заказов: {order.client_orders_count || 1}
