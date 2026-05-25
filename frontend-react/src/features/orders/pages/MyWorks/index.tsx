@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Typography, Table, Tag, Avatar, Space } from 'antd';
-import { SearchOutlined, StarFilled, UserOutlined, FilterOutlined } from '@ant-design/icons';
+import { Typography, Tag, Avatar, Space } from 'antd';
+import { StarFilled, UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AppInput, AppSelect, AppButton } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
-import { authApi } from '@/features/auth/api/auth';
 import { expertsApi } from '@/features/expert/api/experts';
-import { catalogApi, type Subject, type WorkType } from '@/features/common/api/catalog';
-import { ORDER_STATUS_LABELS } from '@/utils/constants';
+import { BREAKPOINTS, ORDER_STATUS_LABELS } from '@/utils/constants';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from './MyWorks.module.css';
 import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
+import { formatUserName } from '@/utils/formatters';
+import { OrdersTabsBar, type OrdersTabItem } from '@/features/orders/components/OrdersTabsBar';
+import { OrdersFilters } from '@/features/orders/components/OrdersFilters';
+import { OrdersResponsiveList } from '@/features/orders/components/OrdersResponsiveList';
 
 const { Title } = Typography;
 
@@ -84,9 +85,12 @@ const MyWorks: React.FC = () => {
   const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
   const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 100000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const rawInitialTab = searchParams.get('tab');
   const initialTab: WorksTab = isValidTab(rawInitialTab) ? rawInitialTab : 'in_progress';
   const [activeTab, setActiveTab] = useState<WorksTab>(initialTab);
+  const isMobile = viewportWidth <= BREAKPOINTS.MOBILE;
+  const isCompact = viewportWidth <= BREAKPOINTS.TABLET;
 
   const {data: fetchedSubjects = []} = useSubjects();
 
@@ -142,6 +146,12 @@ const MyWorks: React.FC = () => {
   const isLoading = userProfile?.role === 'client'
     ? (clientOrdersLoading || inactiveOrdersLoading)
     : myOrdersLoading;
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -204,6 +214,90 @@ const MyWorks: React.FC = () => {
       all,
     };
   }, [orders, inactiveOrders]);
+
+  const tabs = useMemo<OrdersTabItem<WorksTab>[]>(() => {
+    const items: Array<OrdersTabItem<WorksTab> | null> = [
+      userProfile?.role !== 'expert' ? {
+        key: 'new',
+        label: 'Открытые',
+        shortLabel: 'Открыт.',
+        count: counts.new,
+        countTone: 'green',
+      } : null,
+      {
+        key: 'confirming',
+        label: 'На подтверждении',
+        shortLabel: 'Подтв.',
+        count: counts.confirming,
+        countTone: 'orange',
+      },
+      {
+        key: 'in_progress',
+        label: 'В работе',
+        shortLabel: 'В работе',
+        count: counts.in_progress,
+        countTone: 'green',
+      },
+      {
+        key: 'review',
+        label: 'На проверке',
+        shortLabel: 'Проверка',
+        count: counts.review,
+        countTone: 'orange',
+      },
+      {
+        key: 'revision',
+        label: 'На доработке',
+        shortLabel: 'Дораб.',
+        count: counts.revision,
+        countTone: 'orange',
+      },
+      {
+        key: 'waiting_payment',
+        label: 'Ожидает оплаты',
+        shortLabel: 'Оплата',
+        count: counts.waiting_payment,
+        countTone: 'orange',
+      },
+      {
+        key: 'completed',
+        label: 'Выполнено',
+        shortLabel: 'Готово',
+        count: counts.completed,
+        countTone: 'gray',
+      },
+      userProfile?.role !== 'expert' ? {
+        key: 'download',
+        label: 'Ожидает скачивания',
+        shortLabel: 'Скачать',
+        count: counts.download,
+        countTone: 'gray',
+      } : null,
+      userProfile?.role !== 'expert' ? {
+        key: 'closed',
+        label: 'Закрыт',
+        shortLabel: 'Закрыт',
+        count: counts.closed,
+        countTone: 'gray',
+      } : null,
+      userProfile?.role !== 'expert' ? {
+        key: 'inactive',
+        label: 'Неактивные',
+        shortLabel: 'Архив',
+        count: counts.inactive,
+        countTone: 'gray',
+      } : null,
+      {
+        key: 'all',
+        label: 'Все',
+        shortLabel: 'Все',
+        count: counts.all,
+        countTone: 'gray',
+      },
+    ];
+
+    return items.filter(Boolean) as OrdersTabItem<WorksTab>[];
+  }, [counts, userProfile?.role]);
 
   const filteredOrders = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -324,8 +418,8 @@ const MyWorks: React.FC = () => {
         ? record?.expert?.username
         : record?.client?.username;
       const username = isClient
-        ? (record?.expert?.username ?? 'Не назначен')
-        : (record?.client?.username ?? record?.client_name ?? '—');
+        ? (record?.expert ? formatUserName(record.expert) : 'Не назначен')
+        : (record?.client ? formatUserName(record.client) : record?.client_name ?? '—');
       const avatarSrc = isClient ? record?.expert?.avatar : record?.client?.avatar;
       const handleOpenProfile = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -422,201 +516,54 @@ const MyWorks: React.FC = () => {
       </div>
 
       <div className={styles.controlsRow}>
-        <div className={styles.tabsRow}>
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'new' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('new')}
-            >
-              Открытые <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.new}</span>
-            </button>
-          )}
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'confirming' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('confirming')}
-          >
-            На подтверждении <span className={`${styles.countBadge} ${styles.countOrange}`}>{counts.confirming}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'in_progress' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('in_progress')}
-          >
-            В работе <span className={`${styles.countBadge} ${styles.countGreen}`}>{counts.in_progress}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'review' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('review')}
-          >
-            На проверке <span className={`${styles.countBadge} ${styles.countOrange}`}>{counts.review}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'revision' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('revision')}
-          >
-            На доработке <span className={`${styles.countBadge} ${styles.countOrange}`}>{counts.revision}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'waiting_payment' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('waiting_payment')}
-          >
-            Ожидает оплаты <span className={`${styles.countBadge} ${styles.countOrange}`}>{counts.waiting_payment}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'completed' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('completed')}
-          >
-            Выполнено <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.completed}</span>
-          </button>
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'download' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('download')}
-            >
-              Ожидает скачивания <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.download}</span>
-            </button>
-          )}
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'closed' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('closed')}
-            >
-              Закрыт <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.closed}</span>
-            </button>
-          )}
-          {userProfile?.role !== 'expert' && (
-            <button
-              type="button"
-              className={`${styles.tabButton} ${activeTab === 'inactive' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('inactive')}
-            >
-              Неактивные <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.inactive}</span>
-            </button>
-          )}
-          <button
-            type="button"
-            className={`${styles.tabButton} ${activeTab === 'all' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('all')}
-          >
-            Все <span className={`${styles.countBadge} ${styles.countGray}`}>{counts.all}</span>
-          </button>
-        </div>
+        <OrdersTabsBar
+          tabs={tabs}
+          activeTab={activeTab}
+          isMobile={isMobile}
+          onTabChange={handleTabChange}
+        />
 
-        <div className={styles.filtersBlock}>
-          <div className={styles.filtersRowTop}>
-            <AppInput
-              placeholder="Поиск по названию или описанию..."
-              prefix={<SearchOutlined />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-              className={styles.searchInput}
-            />
-            <AppInput
-              placeholder="Номер заказа"
-              prefix="№"
-              value={orderIdSearch}
-              onChange={(e) => setOrderIdSearch(e.target.value.replace(/[^\d]/g, ''))}
-              allowClear
-              className={styles.orderIdInput}
-            />
-            <AppSelect
-              placeholder="Предмет"
-              className={styles.filterSelect}
-              value={selectedSubject}
-              onChange={setSelectedSubject}
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              suffixIcon={<FilterOutlined />}
-              options={(fetchedSubjects || []).map((subject) => ({
-                value: subject.id,
-                label: subject.name,
-              }))}
-            />
-            <AppSelect
-              placeholder="Тип работы"
-              className={styles.filterSelect}
-              value={selectedWorkType}
-              onChange={setSelectedWorkType}
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              suffixIcon={<FilterOutlined />}
-              options={(workTypes || []).map((wt) => ({
-                value: wt.id,
-                label: wt.name,
-              }))}
-            />
-          </div>
-          <div className={styles.filtersToggleRow}>
-            <AppButton
-              variant="link"
-              onClick={() => setShowFilters((prev) => !prev)}
-              className={styles.filtersToggle}
-            >
-              {showFilters ? 'Скрыть фильтры' : 'Показать больше фильтров'}
-            </AppButton>
-          </div>
-          {showFilters && (
-            <div className={styles.filtersAdvancedRow}>
-              <div className={styles.budgetGroup}>
-                <span className={styles.budgetLabel}>Бюджет:</span>
-                <AppInput.Number
-                  min={0}
-                  max={budgetRange[1]}
-                  value={budgetRange[0]}
-                  onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
-                  placeholder="От"
-                  controls={false}
-                  className={styles.budgetInput}
-                  formatter={(value) => `${value} ₽`}
-                  parser={(value) => {
-                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
-                    return Number.isFinite(num) ? num : 0;
-                  }}
-                />
-                <span>—</span>
-                <AppInput.Number
-                  min={budgetRange[0]}
-                  max={1000000}
-                  value={budgetRange[1]}
-                  onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 100000])}
-                  placeholder="До"
-                  controls={false}
-                  className={styles.budgetInput}
-                  formatter={(value) => `${value} ₽`}
-                  parser={(value) => {
-                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
-                    return Number.isFinite(num) ? num : 0;
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <OrdersFilters
+          searchText={searchText}
+          orderIdSearch={orderIdSearch}
+          selectedSubject={selectedSubject}
+          selectedWorkType={selectedWorkType}
+          budgetRange={budgetRange}
+          showFilters={showFilters}
+          subjects={fetchedSubjects}
+          workTypes={workTypes}
+          isCompact={isCompact}
+          onSearchTextChange={setSearchText}
+          onOrderIdSearchChange={setOrderIdSearch}
+          onSelectedSubjectChange={setSelectedSubject}
+          onSelectedWorkTypeChange={setSelectedWorkType}
+          onBudgetRangeChange={setBudgetRange}
+          onShowFiltersChange={setShowFilters}
+        />
       </div>
 
-      <Table
-        className={styles.table}
-        columns={columns}
-        dataSource={filteredOrders}
-        rowKey={(record) => record.id}
+      <OrdersResponsiveList
+        orders={filteredOrders}
         loading={isLoading}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 'max-content' }}
-        onRow={(record) => ({
-          onClick: () => navigate(`/orders/${record.id}`),
-          style: { cursor: 'pointer' },
-        })}
+        columns={columns}
+        isCompact={isCompact}
+        isMobile={isMobile}
+        onOpenOrder={(record) => navigate(`/orders/${record.id}`)}
+        getCounterparty={(order) => {
+          const isClient = userProfile?.role === 'client';
+          return {
+            label: isClient ? 'Эксперт' : 'Покупатель',
+            name: isClient
+              ? (order?.expert ? formatUserName(order.expert) : 'Не назначен')
+              : (order?.client ? formatUserName(order.client) : order?.client_name ?? '—'),
+            avatar: isClient ? order?.expert?.avatar : order?.client?.avatar,
+          };
+        }}
+        getStatusLabel={getStatusLabel}
+        isOverdueOrder={isOverdueOrder}
+        formatOrderDate={formatOrderDate}
+        formatRemaining={formatRemaining}
+        formatBudget={formatBudget}
       />
     </div>
   );
