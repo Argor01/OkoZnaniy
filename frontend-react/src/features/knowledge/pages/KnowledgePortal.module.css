@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   max-width: min(1200px, 95vw);
   margin: 0 auto;
   padding: 24px;
@@ -224,7 +224,7 @@
   line-height: 1.5;
 }
 
-/* Info grid — metadata row */
+/* Info grid вЂ” metadata row */
 .infoGrid {
   display: flex;
   gap: 8px;
@@ -303,7 +303,7 @@
   text-align: center;
 }
 
-/* Планшетная адаптация */
+/* РџР»Р°РЅС€РµС‚РЅР°СЏ Р°РґР°РїС‚Р°С†РёСЏ */
 @media (max-width: 1024px) and (min-width: 769px) {
   .container {
     padding: 20px;
@@ -314,7 +314,7 @@
   }
 }
 
-/* Мобильная адаптация */
+/* РњРѕР±РёР»СЊРЅР°СЏ Р°РґР°РїС‚Р°С†РёСЏ */
 @media (max-width: 768px) {
   .container {
     padding: 16px;
@@ -393,7 +393,7 @@
   }
 }
 
-/* Очень маленькие экраны */
+/* РћС‡РµРЅСЊ РјР°Р»РµРЅСЊРєРёРµ СЌРєСЂР°РЅС‹ */
 @media (max-width: 480px) {
   .container {
     padding: 12px;
@@ -426,4 +426,27 @@
   .questionCardInner {
     padding: 14px;
   }
+}
+
+/* codex answers search alignment */
+.searchInput:global(.ant-input-search) {
+  width: 100%;
+}
+
+.searchInput :global(.ant-input-affix-wrapper) {
+  min-height: 48px;
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput :global(.ant-input-affix-wrapper > input.ant-input) {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1.4;
+}
+
+.searchInput :global(.ant-input-search-button) {
+  min-height: 48px;
 }

@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   max-width: 900px;
   margin: 0 auto;
   padding-top: 24px;
@@ -123,4 +123,27 @@
   .articleCardBody {
     padding: 14px 12px;
   }
+}
+
+/* codex knowledge search alignment */
+.searchInput:global(.ant-input-search) {
+  width: 100%;
+}
+
+.searchInput :global(.ant-input-affix-wrapper) {
+  min-height: 48px;
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput :global(.ant-input-affix-wrapper > input.ant-input) {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1.4;
+}
+
+.searchInput :global(.ant-input-search-button) {
+  min-height: 48px;
 }

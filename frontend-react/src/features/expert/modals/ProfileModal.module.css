@@ -1,4 +1,4 @@
-
+﻿
 /* Shared Form Styles */
 .inputField {
   border-radius: 12px;
@@ -338,4 +338,61 @@
   background: var(--bg-secondary, #161922);
   border-color: var(--border-color, #2d3348);
   color: var(--text-secondary, #94a3b8);
+}
+/* codex mobile modal polish */
+@media (max-width: 575px) {
+  .profileModalWrapMobile :global(.ant-modal) {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px auto;
+    padding-bottom: 0;
+  }
+  .profileModalWrapMobile :global(.ant-modal-content) {
+    border-radius: 20px;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    max-height: calc(var(--app-vh, 100dvh) - 16px);
+  }
+  .profileModalWrapMobile :global(.ant-modal-header) {
+    padding: 18px 20px 14px;
+  }
+  .profileModalWrapMobile :global(.ant-modal-body) {
+    padding: 16px 16px 20px;
+  }
+  .profileModalWrapMobile :global(.ant-modal-footer) {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    padding: 12px 16px 16px;
+  }
+  .profileModalWrapMobile :global(.ant-modal-footer .ant-btn) {
+    width: 100%;
+    margin: 0 !important;
+  }
+  .profileModalWrapMobile :global(.ant-form-item) {
+    margin-bottom: 18px;
+  }
+  .profileModalWrapMobile :global(.ant-form-item-label > label) {
+    font-size: 16px !important;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  .profileModalWrapMobile :global(.ant-form-item-extra) {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .profileModalWrapMobile :global(.ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select) {
+    width: 136px;
+    height: 136px;
+    margin: 0;
+  }
+  .profileModalWrapMobile .profileModalTextarea :global(textarea.ant-input) {
+    min-height: 140px !important;
+  }
+  .profileModalWrapMobile .inputNumberField {
+    min-height: 44px;
+  }
+  .profileModalWrapMobile .profileModalExpertInfo {
+    padding: 14px;
+  }
 }

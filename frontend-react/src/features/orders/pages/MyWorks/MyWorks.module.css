@@ -803,3 +803,46 @@
 .createOrderButton:active {
   transform: scale(0.97);
 }
+
+/* codex mobile spacing fix */
+@media (max-width: 768px) {
+  .filtersRowTop {
+    gap: 14px;
+  }
+
+  .filterSelect + .filterSelect {
+    margin-top: 4px;
+  }
+}
+
+/* codex mobile budget row fix */
+@media (max-width: 575px) {
+  .filtersAdvancedRow {
+    align-items: flex-start;
+  }
+
+  .budgetGroup {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .budgetLabel {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+
+  .budgetInput {
+    width: calc((100% - 86px) / 2);
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .budgetInput :global(.ant-input-number-input) {
+    font-size: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Upload, message, InputNumber as AntInputNumber } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -90,16 +90,16 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
     <Modal
       title={
         <div className={`${styles.profileModalTitle} ${isMobile ? styles.profileModalTitleMobile : styles.profileModalTitleDesktop}`}>
-          Редактировать профиль
+          Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РїСЂРѕС„РёР»СЊ
         </div>
       }
       open={visible}
       onCancel={onClose}
       onOk={() => form.submit()}
-      width={isMobile ? '100%' : 750}
-      style={{ top: 20 }}
-      okText="Сохранить"
-      cancelText="Отмена"
+      width={isMobile ? 'calc(100vw - 16px)' : 750}
+      style={isMobile ? { top: 8, paddingBottom: 8 } : { top: 20 }}
+      okText="РЎРѕС…СЂР°РЅРёС‚СЊ"
+      cancelText="РћС‚РјРµРЅР°"
       okButtonProps={{
         className: `${styles.buttonPrimary} ${styles.profileModalButton} ${isMobile ? styles.profileModalButtonMobile : styles.profileModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
@@ -151,9 +151,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             }
 
                         const result = await authApi.updateProfile(profileData);
-            message.success('Профиль обновлен');
+            message.success('РџСЂРѕС„РёР»СЊ РѕР±РЅРѕРІР»РµРЅ');
             onClose();
-            // Обновляем данные пользователя во всём приложении
+            // РћР±РЅРѕРІР»СЏРµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІРѕ РІСЃС‘Рј РїСЂРёР»РѕР¶РµРЅРёРё
             updateUserInCache(result);
           } catch (e: unknown) {
             const errorData = (e as { response?: { data?: unknown } })?.response?.data;
@@ -169,12 +169,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             }
             const detail =
               (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-              'Не удалось обновить профиль';
+              'РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ РїСЂРѕС„РёР»СЊ';
             message.error(detail);
           }
         }}
       >
-        <Form.Item label="Аватар" name="avatar">
+        <Form.Item label="РђРІР°С‚Р°СЂ" name="avatar">
           <Upload
             name="avatar"
             listType="picture-card"
@@ -182,12 +182,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/');
               if (!isImage) {
-                message.error('Можно загружать только изображения!');
+                message.error('РњРѕР¶РЅРѕ Р·Р°РіСЂСѓР¶Р°С‚СЊ С‚РѕР»СЊРєРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ!');
                 return false;
               }
               const isLt2M = file.size / 1024 / 1024 < 2;
               if (!isLt2M) {
-                message.error('Размер файла должен быть меньше 2MB!');
+                message.error('Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ 2MB!');
                 return false;
               }
 
@@ -212,16 +212,16 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 if (result) {
                   form.setFieldsValue({ avatar: result.avatar });
                   onSuccess?.(result);
-                  message.success('Аватар обновлен!');
+                  message.success('РђРІР°С‚Р°СЂ РѕР±РЅРѕРІР»РµРЅ!');
 
-                                    // Обновляем данные пользователя во всём приложении
+                                    // РћР±РЅРѕРІР»СЏРµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІРѕ РІСЃС‘Рј РїСЂРёР»РѕР¶РµРЅРёРё
                   updateUserInCache(result);
                 } else {
-                  throw new Error('Ошибка загрузки');
+                  throw new Error('РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё');
                 }
               } catch (error) {
                 onError?.(error as Error);
-                message.error('Не удалось загрузить аватар');
+                message.error('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Р°РІР°С‚Р°СЂ');
               }
             }}
           >
@@ -235,31 +235,31 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             ) : (
               <div>
                 <UserOutlined />
-                <div className={styles.profileModalUploadLabel}>Загрузить</div>
+                <div className={styles.profileModalUploadLabel}>Р—Р°РіСЂСѓР·РёС‚СЊ</div>
               </div>
             )}
           </Upload>
         </Form.Item>
                 <Form.Item 
-          label="Никнейм" 
+          label="РќРёРєРЅРµР№Рј" 
           name="username"
           rules={[
-            { required: true, message: 'Введите никнейм' },
-            { min: 3, message: 'Минимум 3 символа' },
-            { max: 150, message: 'Максимум 150 символов' }
+            { required: true, message: 'Р’РІРµРґРёС‚Рµ РЅРёРєРЅРµР№Рј' },
+            { min: 3, message: 'РњРёРЅРёРјСѓРј 3 СЃРёРјРІРѕР»Р°' },
+            { max: 150, message: 'РњР°РєСЃРёРјСѓРј 150 СЃРёРјРІРѕР»РѕРІ' }
           ]}
-          extra="Можно использовать пробелы и специальные символы"
+          extra="РњРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїСЂРѕР±РµР»С‹ Рё СЃРїРµС†РёР°Р»СЊРЅС‹Рµ СЃРёРјРІРѕР»С‹"
         >
           <Input 
             className={styles.inputField} 
             size="large" 
-            placeholder="Ваш никнейм"
+            placeholder="Р’Р°С€ РЅРёРєРЅРµР№Рј"
           />
         </Form.Item>
-        <Form.Item label="О себе" name="bio">
+        <Form.Item label="Рћ СЃРµР±Рµ" name="bio">
           <Input.TextArea 
             autoSize={{ minRows: 4, maxRows: 10 }}
-            placeholder={isExpert ? "Расскажите о себе, своем опыте и специализации" : "Расскажите немного о себе"} 
+            placeholder={isExpert ? "Р Р°СЃСЃРєР°Р¶РёС‚Рµ Рѕ СЃРµР±Рµ, СЃРІРѕРµРј РѕРїС‹С‚Рµ Рё СЃРїРµС†РёР°Р»РёР·Р°С†РёРё" : "Р Р°СЃСЃРєР°Р¶РёС‚Рµ РЅРµРјРЅРѕРіРѕ Рѕ СЃРµР±Рµ"} 
             className={`${styles.textareaField} ${styles.profileModalTextarea}`} 
           />
         </Form.Item>
@@ -268,18 +268,18 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         {isExpert && (
           <>
             <div className={styles.profileModalExpertInfo}>
-              <h4 className={styles.profileModalExpertTitle}>Профессиональная информация</h4>
+              <h4 className={styles.profileModalExpertTitle}>РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</h4>
               <p className={styles.profileModalExpertText}>
-                Заполните дополнительные поля для экспертов
+                Р—Р°РїРѕР»РЅРёС‚Рµ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ РґР»СЏ СЌРєСЃРїРµСЂС‚РѕРІ
               </p>
             </div>
             <div className={`${styles.profileModalExpertGrid} ${isMobile ? styles.profileModalExpertGridMobile : ''}`}>
               <Form.Item 
-                label="Опыт работы (лет)" 
+                label="РћРїС‹С‚ СЂР°Р±РѕС‚С‹ (Р»РµС‚)" 
                 name="experience_years" 
                 className={styles.profileModalFlexField}
                 rules={[
-                  { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' }
+                  { type: 'number', min: 0, max: 90, message: 'РћРїС‹С‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚ 0 РґРѕ 90 Р»РµС‚' }
                 ]}
               >
                 <AntInputNumber 
@@ -304,11 +304,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 />
               </Form.Item>
               <Form.Item 
-                label="Почасовая ставка (₽)" 
+                label="РџРѕС‡Р°СЃРѕРІР°СЏ СЃС‚Р°РІРєР° (в‚Ѕ)" 
                 name="hourly_rate" 
                 className={styles.profileModalFlexField}
                 rules={[
-                  { type: 'number', min: 0, max: 100000, message: 'Ставка должна быть от 0 до 100000 ₽' }
+                  { type: 'number', min: 0, max: 100000, message: 'РЎС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РѕС‚ 0 РґРѕ 100000 в‚Ѕ' }
                 ]}
               >
                 <AntInputNumber 
@@ -334,21 +334,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                 />
               </Form.Item>
             </div>
-            <Form.Item label="Образование" name="education">
+            <Form.Item label="РћР±СЂР°Р·РѕРІР°РЅРёРµ" name="education">
               <Input.TextArea
                 rows={3}
-                placeholder="Укажите ваше образование и квалификации"
+                placeholder="РЈРєР°Р¶РёС‚Рµ РІР°С€Рµ РѕР±СЂР°Р·РѕРІР°РЅРёРµ Рё РєРІР°Р»РёС„РёРєР°С†РёРё"
                 className={`${styles.textareaField} ${styles.profileModalTextarea}`}
               />
             </Form.Item>
-            <Form.Item label="Навыки" name="skills">
+            <Form.Item label="РќР°РІС‹РєРё" name="skills">
               <SkillsSelect 
-                placeholder="Выберите навыки или добавьте свои" 
+                placeholder="Р’С‹Р±РµСЂРёС‚Рµ РЅР°РІС‹РєРё РёР»Рё РґРѕР±Р°РІСЊС‚Рµ СЃРІРѕРё" 
                 valueType="name"
                 mode="tags"
               />
             </Form.Item>
-            <Form.Item label="Портфолио (ссылка)" name="portfolio_url">
+            <Form.Item label="РџРѕСЂС‚С„РѕР»РёРѕ (СЃСЃС‹Р»РєР°)" name="portfolio_url">
               <Input placeholder="https://example.com/portfolio" className={styles.inputField} size="large" />
             </Form.Item>
           </>
@@ -359,3 +359,4 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 };
 
 export default ProfileModal;
+

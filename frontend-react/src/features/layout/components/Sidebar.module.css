@@ -1,4 +1,4 @@
- .sidebar {
+﻿ .sidebar {
   --sidebar-accent: var(--color-brand-blue-500);
   --sidebar-content-bg: #ffffff;
   background: #ffffff;
@@ -12,7 +12,7 @@
   flex: 1;
   max-width: 320px !important;
   min-width: 300px !important;
-  width: 100% !important; /* Перебиваем inline стили antd */
+  width: 100% !important; /* РџРµСЂРµР±РёРІР°РµРј inline СЃС‚РёР»Рё antd */
   border-radius: 22px;
   border-right: none !important;
   z-index: 999;
@@ -21,7 +21,7 @@
   margin-bottom: 24px;
   flex-shrink: 0;
   
-  /* Скрыть скроллбар */
+  /* РЎРєСЂС‹С‚СЊ СЃРєСЂРѕР»Р»Р±Р°СЂ */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
 }
@@ -174,7 +174,7 @@
   color: #1f2a44;
 }
 
-/* ДОБАВИТЬ: Иконки подпунктов в открытом аккордеоне тоже черные */
+/* Р”РћР‘РђР’РРўР¬: РРєРѕРЅРєРё РїРѕРґРїСѓРЅРєС‚РѕРІ РІ РѕС‚РєСЂС‹С‚РѕРј Р°РєРєРѕСЂРґРµРѕРЅРµ С‚РѕР¶Рµ С‡РµСЂРЅС‹Рµ */
 .sidebarMenu :global(.ant-menu-submenu-open) 
   :global(.ant-menu-sub) 
   :global(.ant-menu-item) 
@@ -182,7 +182,7 @@
   color: #000000 !important;
 }
 
-/* ДОБАВИТЬ: Для выбранного подпункта можно сделать акцентный цвет */
+/* Р”РћР‘РђР’РРўР¬: Р”Р»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РїРѕРґРїСѓРЅРєС‚Р° РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ Р°РєС†РµРЅС‚РЅС‹Р№ С†РІРµС‚ */
 .sidebarMenu :global(.ant-menu-sub) 
   :global(.ant-menu-item-selected) 
   :global(.ant-menu-title-content) {
@@ -239,9 +239,9 @@
   z-index: 9999;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 80px 10px 16px 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 10px 16px 10px;
   
-  /* Скрыть скроллбар */
+  /* РЎРєСЂС‹С‚СЊ СЃРєСЂРѕР»Р»Р±Р°СЂ */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -417,4 +417,5 @@
 .sidebar {
   animation: slideInLeft 0.4s ease-out 0.1s both;
 }
+
 

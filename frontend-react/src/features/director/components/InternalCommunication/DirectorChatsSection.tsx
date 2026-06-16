@@ -30,6 +30,7 @@ import {
 import dayjs from 'dayjs';
 import styles from './DirectorChatsSection.module.css';
 import { logger } from '@/utils/logger';
+import { createChatRoom, getChatRoomMessages, getChatRooms, sendChatRoomMessage } from '@/features/director/api/directorApi';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -100,7 +101,6 @@ export const DirectorChatsSection: React.FC = () => {
   const loadChatRooms = async () => {
     setLoading(true);
     try {
-      const { getChatRooms } = await import('@/features/director/api/directorApi');
       const rooms = await getChatRooms();
       
       // Убедимся, что это массив
@@ -137,7 +137,6 @@ export const DirectorChatsSection: React.FC = () => {
 
   const loadMessages = async (roomId: number) => {
     try {
-      const { getChatRoomMessages } = await import('@/features/director/api/directorApi');
       const msgs = await getChatRoomMessages(roomId);
       setMessages(Array.isArray(msgs) ? msgs : []);
     } catch (error) {
@@ -151,7 +150,6 @@ export const DirectorChatsSection: React.FC = () => {
     if (!messageText.trim() || !selectedRoom) return;
     
     try {
-      const { sendChatRoomMessage } = await import('@/features/director/api/directorApi');
       await sendChatRoomMessage(selectedRoom.id, messageText.trim());
       message.success('Сообщение отправлено');
       setMessageText('');
@@ -166,8 +164,7 @@ export const DirectorChatsSection: React.FC = () => {
   const handleCreateRoom = async () => {
     try {
       const values = await createRoomForm.validateFields();
-      const { createChatRoom } = await import('@/features/director/api/directorApi');
-      const newRoom = await createChatRoom({
+      await createChatRoom({
         name: values.name,
         description: values.description,
         type: values.type,
@@ -563,3 +560,4 @@ export const DirectorChatsSection: React.FC = () => {
     </div>
   );
 };
+

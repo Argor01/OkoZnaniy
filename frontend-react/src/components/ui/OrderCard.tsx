@@ -16,7 +16,8 @@ import {
 import { Order, OrderFile } from '@/features/orders/types/orders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
 import { formatCurrency } from '@/utils/formatters';
-import { AppButton, AppCard } from '@/components/ui';
+import { AppButton } from './AppButton';
+import { AppCard } from './AppCard';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';

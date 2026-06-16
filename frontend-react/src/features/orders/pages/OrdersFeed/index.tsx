@@ -13,8 +13,9 @@ import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
 import { formatCurrency } from '@/utils/formatters';
 import BidModal from '../../components/BidModal';
-import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty, OrderCard } from '@/components/ui';
+import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty } from '@/components/ui';
 import { AppSelect } from '@/components/ui/AppSelect';
+import { OrderCard } from '@/components/ui/OrderCard';
 import { logger } from '@/utils/logger';
 import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 

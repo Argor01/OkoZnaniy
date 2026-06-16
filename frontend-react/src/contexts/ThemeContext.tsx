@@ -20,17 +20,27 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export const useTheme = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
+const safeReadTheme = (): ThemeMode => {
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === 'dark' || saved === 'light') return saved;
-    return 'light';
-  });
+  } catch {
+    // localStorage can throw in restricted browser contexts.
+  }
+  return 'light';
+};
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setThemeState] = useState<ThemeMode>(safeReadTheme);
 
   const isDark = theme === 'dark';
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // Ignore storage write failures in embedded/private browsers.
+    }
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
