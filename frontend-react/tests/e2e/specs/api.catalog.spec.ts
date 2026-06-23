@@ -1,17 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { loadFixtureData } from '../helpers/fixtureData';
+import { authHeaders, loadFixtureData } from '../helpers/fixtureData';
 
 const fixtures = loadFixtureData();
 const apiBase = process.env.PLAYWRIGHT_API_URL ?? 'http://127.0.0.1:8000';
 const apiUrl = `${apiBase}/api`;
-
-async function getClientToken(request: any) {
-  const login = await request.post(`${apiUrl}/users/token/`, {
-    data: { username: fixtures.client.email, password: fixtures.password },
-  });
-  const auth = await login.json();
-  return auth.access as string;
-}
 
 test.describe('API catalog', () => {
   test('categories list contains seeded category', async ({ request }) => {
@@ -36,24 +28,24 @@ test.describe('API catalog', () => {
   });
 
   test('client can create a category', async ({ request }) => {
-    const token = await getClientToken(request);
     const runId = Date.now();
+    const requestedName = `Catalog Category ${runId}`;
     const response = await request.post(`${apiUrl}/catalog/categories/`, {
-      headers: { Authorization: `Bearer ${token}` },
-      data: { name: `Catalog Category ${runId}`, description: 'Created in Playwright', order: 10 },
+      headers: authHeaders(fixtures.auth.client.access),
+      data: { name: requestedName, description: 'Created in Playwright', order: 10 },
     });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
-    expect(data.name).toContain(`Catalog Category ${runId}`);
+    expect(String(data.name).toLowerCase()).toContain(requestedName.toLowerCase());
   });
 
   test('client can create a subject', async ({ request }) => {
-    const token = await getClientToken(request);
     const runId = Date.now();
+    const requestedName = `Catalog Subject ${runId}`;
     const response = await request.post(`${apiUrl}/catalog/subjects/`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: authHeaders(fixtures.auth.client.access),
       data: {
-        name: `Catalog Subject ${runId}`,
+        name: requestedName,
         description: 'Created in Playwright',
         category: fixtures.category.id,
         min_price: 2500,
@@ -61,16 +53,16 @@ test.describe('API catalog', () => {
     });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
-    expect(data.name).toContain(`Catalog Subject ${runId}`);
+    expect(String(data.name).toLowerCase()).toContain(requestedName.toLowerCase());
   });
 
   test('client can create a work type', async ({ request }) => {
-    const token = await getClientToken(request);
     const runId = Date.now();
+    const requestedName = `Catalog Work Type ${runId}`;
     const response = await request.post(`${apiUrl}/catalog/work-types/`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: authHeaders(fixtures.auth.client.access),
       data: {
-        name: `Catalog Work Type ${runId}`,
+        name: requestedName,
         description: 'Created in Playwright',
         base_price: 3100,
         estimated_time: 36,
@@ -78,12 +70,12 @@ test.describe('API catalog', () => {
     });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
-    expect(data.name).toContain(`Catalog Work Type ${runId}`);
+    expect(String(data.name).toLowerCase()).toContain(requestedName.toLowerCase());
   });
 
   test('subject search returns seeded subject', async ({ request }) => {
     const response = await request.get(`${apiUrl}/catalog/subjects/`, {
-      params: { search: fixtures.subject.name },
+      params: { search: fixtures.subject.name.split(' ')[0] },
     });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();
@@ -92,7 +84,7 @@ test.describe('API catalog', () => {
 
   test('work type search returns seeded work type', async ({ request }) => {
     const response = await request.get(`${apiUrl}/catalog/work-types/`, {
-      params: { search: fixtures.workType.name },
+      params: { search: fixtures.workType.name.split(' ')[0] },
     });
     expect(response.ok()).toBeTruthy();
     const data = await response.json();

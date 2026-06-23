@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Upload, message, InputNumber as AntInputNumber } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
@@ -8,6 +8,45 @@ import { UserProfile } from '../types';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import { useUserUpdate } from '@/hooks/useUserUpdate';
 import styles from './ProfileModal.module.css';
+
+const TEXT = {
+  title: '\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u043e\u0444\u0438\u043b\u044c',
+  save: '\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c',
+  cancel: '\u041e\u0442\u043c\u0435\u043d\u0430',
+  avatar: '\u0410\u0432\u0430\u0442\u0430\u0440',
+  upload: '\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c',
+  username: '\u041d\u0438\u043a\u043d\u0435\u0439\u043c',
+  usernameRequired: '\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043d\u0438\u043a\u043d\u0435\u0439\u043c',
+  usernameMin: '\u041c\u0438\u043d\u0438\u043c\u0443\u043c 3 \u0441\u0438\u043c\u0432\u043e\u043b\u0430',
+  usernameMax: '\u041c\u0430\u043a\u0441\u0438\u043c\u0443\u043c 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432',
+  usernameExtra:
+    '\u041c\u043e\u0436\u043d\u043e \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u043f\u0440\u043e\u0431\u0435\u043b\u044b \u0438 \u0441\u043f\u0435\u0446\u0438\u0430\u043b\u044c\u043d\u044b\u0435 \u0441\u0438\u043c\u0432\u043e\u043b\u044b',
+  usernamePlaceholder: '\u0412\u0430\u0448 \u043d\u0438\u043a\u043d\u0435\u0439\u043c',
+  bio: '\u041e \u0441\u0435\u0431\u0435',
+  bioExpert:
+    '\u0420\u0430\u0441\u0441\u043a\u0430\u0436\u0438\u0442\u0435 \u043e \u0441\u0435\u0431\u0435, \u0441\u0432\u043e\u0435\u043c \u043e\u043f\u044b\u0442\u0435 \u0438 \u0441\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u0438',
+  bioDefault: '\u0420\u0430\u0441\u0441\u043a\u0430\u0436\u0438\u0442\u0435 \u043d\u0435\u043c\u043d\u043e\u0433\u043e \u043e \u0441\u0435\u0431\u0435',
+  profileUpdated: '\u041f\u0440\u043e\u0444\u0438\u043b\u044c \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d',
+  profileUpdateError: '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u0440\u043e\u0444\u0438\u043b\u044c',
+  imagesOnly: '\u041c\u043e\u0436\u043d\u043e \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044f!',
+  maxFileSize: '\u0420\u0430\u0437\u043c\u0435\u0440 \u0444\u0430\u0439\u043b\u0430 \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043c\u0435\u043d\u044c\u0448\u0435 2MB!',
+  uploadFailed: '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0430\u0432\u0430\u0442\u0430\u0440',
+  uploadSuccess: '\u0410\u0432\u0430\u0442\u0430\u0440 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d!',
+  expertInfoTitle: '\u041f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u0430\u044f \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044f',
+  expertInfoText:
+    '\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u0435 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u043f\u043e\u043b\u044f \u0434\u043b\u044f \u044d\u043a\u0441\u043f\u0435\u0440\u0442\u043e\u0432',
+  experience: '\u041e\u043f\u044b\u0442 \u0440\u0430\u0431\u043e\u0442\u044b (\u043b\u0435\u0442)',
+  experienceError: '\u041e\u043f\u044b\u0442 \u0434\u043e\u043b\u0436\u0435\u043d \u0431\u044b\u0442\u044c \u043e\u0442 0 \u0434\u043e 90 \u043b\u0435\u0442',
+  hourlyRate: '\u041f\u043e\u0447\u0430\u0441\u043e\u0432\u0430\u044f \u0441\u0442\u0430\u0432\u043a\u0430 (\u20BD)',
+  hourlyRateError: '\u0421\u0442\u0430\u0432\u043a\u0430 \u0434\u043e\u043b\u0436\u043d\u0430 \u0431\u044b\u0442\u044c \u043e\u0442 0 \u0434\u043e 100000 \u20BD',
+  education: '\u041e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435',
+  educationPlaceholder:
+    '\u0423\u043a\u0430\u0436\u0438\u0442\u0435 \u0432\u0430\u0448\u0435 \u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u043a\u0432\u0430\u043b\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438',
+  skills: '\u041d\u0430\u0432\u044b\u043a\u0438',
+  skillsPlaceholder:
+    '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u0438\u043b\u0438 \u0434\u043e\u0431\u0430\u0432\u044c\u0442\u0435 \u0441\u0432\u043e\u0438',
+  portfolio: '\u041f\u043e\u0440\u0442\u0444\u043e\u043b\u0438\u043e (\u0441\u0441\u044b\u043b\u043a\u0430)',
+} as const;
 
 interface ProfileModalProps {
   visible: boolean;
@@ -20,7 +59,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const { updateUserInCache } = useUserUpdate();
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const isExpert = userProfile?.role === 'expert';
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
 
@@ -30,11 +69,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  
   useEffect(() => {
     if (visible) {
       document.body.style.overflow = 'hidden';
-      // Hide scrollbar visually but keep functionality if needed
       const style = document.createElement('style');
       style.id = 'hide-scrollbar-style-profile';
       style.innerHTML = `
@@ -44,17 +81,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       document.head.appendChild(style);
     } else {
       document.body.style.overflow = '';
-      const style = document.getElementById('hide-scrollbar-style-profile');
-      if (style) {
-        style.remove();
-      }
+      document.getElementById('hide-scrollbar-style-profile')?.remove();
     }
+
     return () => {
       document.body.style.overflow = '';
-      const style = document.getElementById('hide-scrollbar-style-profile');
-      if (style) {
-        style.remove();
-      }
+      document.getElementById('hide-scrollbar-style-profile')?.remove();
     };
   }, [visible]);
 
@@ -67,22 +99,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
         return Number.isFinite(num) ? num : undefined;
       };
 
-      
       const formValues: Record<string, unknown> = { ...profile };
       formValues.experience_years = toNumberOrUndefined(profile.experience_years);
       formValues.hourly_rate = toNumberOrUndefined(profile.hourly_rate);
+
       if (profile.skills && typeof profile.skills === 'string') {
-        formValues.skills = profile.skills.split(',').map(s => s.trim()).filter(s => s);
+        formValues.skills = profile.skills.split(',').map((skill) => skill.trim()).filter(Boolean);
       }
+
       form.setFieldsValue(formValues);
     }
-    
+
     if (visible) {
-      if (userProfile?.avatar && userProfile.avatar !== '') {
-        setImageUrl(userProfile.avatar);
-      } else {
-        setImageUrl(null);
-      }
+      setImageUrl(userProfile?.avatar ? userProfile.avatar : null);
     }
   }, [visible, profile, userProfile, form]);
 
@@ -90,7 +119,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
     <Modal
       title={
         <div className={`${styles.profileModalTitle} ${isMobile ? styles.profileModalTitleMobile : styles.profileModalTitleDesktop}`}>
-          Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ РїСЂРѕС„РёР»СЊ
+          {TEXT.title}
         </div>
       }
       open={visible}
@@ -98,8 +127,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       onOk={() => form.submit()}
       width={isMobile ? 'calc(100vw - 16px)' : 750}
       style={isMobile ? { top: 8, paddingBottom: 8 } : { top: 20 }}
-      okText="РЎРѕС…СЂР°РЅРёС‚СЊ"
-      cancelText="РћС‚РјРµРЅР°"
+      okText={TEXT.save}
+      cancelText={TEXT.cancel}
       okButtonProps={{
         className: `${styles.buttonPrimary} ${styles.profileModalButton} ${isMobile ? styles.profileModalButtonMobile : styles.profileModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
@@ -127,7 +156,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               portfolio_url?: string;
               skills?: string;
             };
-            
+
             const profileData: UpdateProfilePayload = {
               username: values.username,
               first_name: values.first_name,
@@ -135,14 +164,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               bio: values.bio,
             };
 
-            
-            if (userProfile?.role === 'expert') {
+            if (isExpert) {
               profileData.experience_years = values.experience_years;
               profileData.education = values.education;
               profileData.hourly_rate = values.hourly_rate;
               profileData.portfolio_url = values.portfolio_url;
-              
-              
+
               if (Array.isArray(values.skills)) {
                 profileData.skills = values.skills.join(', ');
               } else if (values.skills) {
@@ -150,11 +177,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               }
             }
 
-                        const result = await authApi.updateProfile(profileData);
-            message.success('РџСЂРѕС„РёР»СЊ РѕР±РЅРѕРІР»РµРЅ');
+            const result = await authApi.updateProfile(profileData);
+            message.success(TEXT.profileUpdated);
             onClose();
-            // РћР±РЅРѕРІР»СЏРµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІРѕ РІСЃС‘Рј РїСЂРёР»РѕР¶РµРЅРёРё
             updateUserInCache(result);
+            void queryClient.invalidateQueries({ queryKey: ['userProfile'] });
           } catch (e: unknown) {
             const errorData = (e as { response?: { data?: unknown } })?.response?.data;
             if (errorData && typeof errorData === 'object' && !Array.isArray(errorData)) {
@@ -167,14 +194,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               });
               return;
             }
+
             const detail =
               (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-              'РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ РїСЂРѕС„РёР»СЊ';
+              TEXT.profileUpdateError;
             message.error(detail);
           }
         }}
       >
-        <Form.Item label="РђРІР°С‚Р°СЂ" name="avatar">
+        <Form.Item label={TEXT.avatar} name="avatar">
           <Upload
             name="avatar"
             listType="picture-card"
@@ -182,18 +210,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/');
               if (!isImage) {
-                message.error('РњРѕР¶РЅРѕ Р·Р°РіСЂСѓР¶Р°С‚СЊ С‚РѕР»СЊРєРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ!');
+                message.error(TEXT.imagesOnly);
                 return false;
               }
+
               const isLt2M = file.size / 1024 / 1024 < 2;
               if (!isLt2M) {
-                message.error('Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ 2MB!');
+                message.error(TEXT.maxFileSize);
                 return false;
               }
 
               const reader = new FileReader();
-              reader.onload = (e) => {
-                setImageUrl(e.target?.result as string);
+              reader.onload = (event) => {
+                setImageUrl(event.target?.result as string);
               };
               reader.readAsDataURL(file);
               return true;
@@ -209,110 +238,102 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   },
                 });
 
-                if (result) {
-                  form.setFieldsValue({ avatar: result.avatar });
-                  onSuccess?.(result);
-                  message.success('РђРІР°С‚Р°СЂ РѕР±РЅРѕРІР»РµРЅ!');
-
-                                    // РћР±РЅРѕРІР»СЏРµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІРѕ РІСЃС‘Рј РїСЂРёР»РѕР¶РµРЅРёРё
-                  updateUserInCache(result);
-                } else {
-                  throw new Error('РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё');
+                if (!result) {
+                  throw new Error(TEXT.uploadFailed);
                 }
+
+                form.setFieldsValue({ avatar: result.avatar });
+                onSuccess?.(result);
+                message.success(TEXT.uploadSuccess);
+                updateUserInCache(result);
+                void queryClient.invalidateQueries({ queryKey: ['userProfile'] });
               } catch (error) {
                 onError?.(error as Error);
-                message.error('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Р°РІР°С‚Р°СЂ');
+                message.error(TEXT.uploadFailed);
               }
             }}
           >
             {imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt="avatar" 
+              <img
+                src={imageUrl}
+                alt="avatar"
                 className={styles.profileModalAvatarImage}
                 onError={() => setImageUrl(null)}
               />
             ) : (
               <div>
                 <UserOutlined />
-                <div className={styles.profileModalUploadLabel}>Р—Р°РіСЂСѓР·РёС‚СЊ</div>
+                <div className={styles.profileModalUploadLabel}>{TEXT.upload}</div>
               </div>
             )}
           </Upload>
         </Form.Item>
-                <Form.Item 
-          label="РќРёРєРЅРµР№Рј" 
+
+        <Form.Item
+          label={TEXT.username}
           name="username"
           rules={[
-            { required: true, message: 'Р’РІРµРґРёС‚Рµ РЅРёРєРЅРµР№Рј' },
-            { min: 3, message: 'РњРёРЅРёРјСѓРј 3 СЃРёРјРІРѕР»Р°' },
-            { max: 150, message: 'РњР°РєСЃРёРјСѓРј 150 СЃРёРјРІРѕР»РѕРІ' }
+            { required: true, message: TEXT.usernameRequired },
+            { min: 3, message: TEXT.usernameMin },
+            { max: 150, message: TEXT.usernameMax },
           ]}
-          extra="РњРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїСЂРѕР±РµР»С‹ Рё СЃРїРµС†РёР°Р»СЊРЅС‹Рµ СЃРёРјРІРѕР»С‹"
+          extra={TEXT.usernameExtra}
         >
-          <Input 
-            className={styles.inputField} 
-            size="large" 
-            placeholder="Р’Р°С€ РЅРёРєРЅРµР№Рј"
-          />
+          <Input className={styles.inputField} size="large" placeholder={TEXT.usernamePlaceholder} />
         </Form.Item>
-        <Form.Item label="Рћ СЃРµР±Рµ" name="bio">
-          <Input.TextArea 
+
+        <Form.Item label={TEXT.bio} name="bio">
+          <Input.TextArea
             autoSize={{ minRows: 4, maxRows: 10 }}
-            placeholder={isExpert ? "Р Р°СЃСЃРєР°Р¶РёС‚Рµ Рѕ СЃРµР±Рµ, СЃРІРѕРµРј РѕРїС‹С‚Рµ Рё СЃРїРµС†РёР°Р»РёР·Р°С†РёРё" : "Р Р°СЃСЃРєР°Р¶РёС‚Рµ РЅРµРјРЅРѕРіРѕ Рѕ СЃРµР±Рµ"} 
-            className={`${styles.textareaField} ${styles.profileModalTextarea}`} 
+            placeholder={isExpert ? TEXT.bioExpert : TEXT.bioDefault}
+            className={`${styles.textareaField} ${styles.profileModalTextarea}`}
           />
         </Form.Item>
-        
-        
+
         {isExpert && (
           <>
             <div className={styles.profileModalExpertInfo}>
-              <h4 className={styles.profileModalExpertTitle}>РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</h4>
-              <p className={styles.profileModalExpertText}>
-                Р—Р°РїРѕР»РЅРёС‚Рµ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїРѕР»СЏ РґР»СЏ СЌРєСЃРїРµСЂС‚РѕРІ
-              </p>
+              <h4 className={styles.profileModalExpertTitle}>{TEXT.expertInfoTitle}</h4>
+              <p className={styles.profileModalExpertText}>{TEXT.expertInfoText}</p>
             </div>
+
             <div className={`${styles.profileModalExpertGrid} ${isMobile ? styles.profileModalExpertGridMobile : ''}`}>
-              <Form.Item 
-                label="РћРїС‹С‚ СЂР°Р±РѕС‚С‹ (Р»РµС‚)" 
-                name="experience_years" 
+              <Form.Item
+                label={TEXT.experience}
+                name="experience_years"
                 className={styles.profileModalFlexField}
-                rules={[
-                  { type: 'number', min: 0, max: 90, message: 'РћРїС‹С‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚ 0 РґРѕ 90 Р»РµС‚' }
-                ]}
+                rules={[{ type: 'number', min: 0, max: 90, message: TEXT.experienceError }]}
               >
-                <AntInputNumber 
-                  min={0} 
-                  max={90} 
+                <AntInputNumber
+                  min={0}
+                  max={90}
                   precision={0}
                   parser={(value) => {
                     if (!value) return 0;
                     const parsed = value.replace(/\D/g, '');
                     return parsed ? Number(parsed) : 0;
                   }}
-                  formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+                  formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
                   controls={false}
-                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`} 
+                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`}
                   size="large"
                   placeholder="0"
-                  onKeyPress={(e) => {
-                    if (!/[0-9]/.test(e.key)) {
-                      e.preventDefault();
+                  onKeyPress={(event) => {
+                    if (!/[0-9]/.test(event.key)) {
+                      event.preventDefault();
                     }
                   }}
                 />
               </Form.Item>
-              <Form.Item 
-                label="РџРѕС‡Р°СЃРѕРІР°СЏ СЃС‚Р°РІРєР° (в‚Ѕ)" 
-                name="hourly_rate" 
+
+              <Form.Item
+                label={TEXT.hourlyRate}
+                name="hourly_rate"
                 className={styles.profileModalFlexField}
-                rules={[
-                  { type: 'number', min: 0, max: 100000, message: 'РЎС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РѕС‚ 0 РґРѕ 100000 в‚Ѕ' }
-                ]}
+                rules={[{ type: 'number', min: 0, max: 100000, message: TEXT.hourlyRateError }]}
               >
-                <AntInputNumber 
-                  min={0} 
+                <AntInputNumber
+                  min={0}
                   max={100000}
                   step={100}
                   precision={0}
@@ -321,34 +342,33 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                     const parsed = value.replace(/\D/g, '');
                     return parsed ? Number(parsed) : 0;
                   }}
-                  formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+                  formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
                   controls={false}
-                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`} 
+                  className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`}
                   size="large"
                   placeholder="0"
-                  onKeyPress={(e) => {
-                    if (!/[0-9]/.test(e.key)) {
-                      e.preventDefault();
+                  onKeyPress={(event) => {
+                    if (!/[0-9]/.test(event.key)) {
+                      event.preventDefault();
                     }
                   }}
                 />
               </Form.Item>
             </div>
-            <Form.Item label="РћР±СЂР°Р·РѕРІР°РЅРёРµ" name="education">
+
+            <Form.Item label={TEXT.education} name="education">
               <Input.TextArea
                 rows={3}
-                placeholder="РЈРєР°Р¶РёС‚Рµ РІР°С€Рµ РѕР±СЂР°Р·РѕРІР°РЅРёРµ Рё РєРІР°Р»РёС„РёРєР°С†РёРё"
+                placeholder={TEXT.educationPlaceholder}
                 className={`${styles.textareaField} ${styles.profileModalTextarea}`}
               />
             </Form.Item>
-            <Form.Item label="РќР°РІС‹РєРё" name="skills">
-              <SkillsSelect 
-                placeholder="Р’С‹Р±РµСЂРёС‚Рµ РЅР°РІС‹РєРё РёР»Рё РґРѕР±Р°РІСЊС‚Рµ СЃРІРѕРё" 
-                valueType="name"
-                mode="tags"
-              />
+
+            <Form.Item label={TEXT.skills} name="skills">
+              <SkillsSelect placeholder={TEXT.skillsPlaceholder} valueType="name" mode="tags" />
             </Form.Item>
-            <Form.Item label="РџРѕСЂС‚С„РѕР»РёРѕ (СЃСЃС‹Р»РєР°)" name="portfolio_url">
+
+            <Form.Item label={TEXT.portfolio} name="portfolio_url">
               <Input placeholder="https://example.com/portfolio" className={styles.inputField} size="large" />
             </Form.Item>
           </>
@@ -359,4 +379,3 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 };
 
 export default ProfileModal;
-

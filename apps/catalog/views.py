@@ -69,7 +69,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
     pagination_class = None  # Отключаем пагинацию для выпадающих списков
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'is_active']
-    search_fields = ['name', 'description', 'keywords']
+    search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'min_price']
     ordering = ['name']
 
@@ -485,3 +485,4 @@ class DiscountViewSet(viewsets.ModelViewSet):
                 }
             }
         })
+

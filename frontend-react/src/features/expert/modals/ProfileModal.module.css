@@ -1,4 +1,4 @@
-﻿
+
 /* Shared Form Styles */
 .inputField {
   border-radius: 12px;
@@ -196,11 +196,11 @@
   font-size: 24px;
   font-weight: 600;
   color: var(--text-primary, #1f2937);
-  font-family: 'Jost-SemiBold', sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
 
 .profileModalExpertTitle {
-  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
   font-size: 12px;
   margin: 0 0 8px 0;
   color: #0369a1;
@@ -277,19 +277,19 @@
 }
 
 .profileModalWrap :global(.ant-modal-title) {
-  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
   font-size: 16px !important;
 }
 
 .profileModalWrap :global(.ant-form-item-label > label) {
-  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
   font-size: 18px !important;
 }
 
 /* Tabs */
 .profileModalWrap :global(.ant-tabs-tab),
 .profileModalWrap :global(.ant-tabs-tab-btn) {
-  font-family: 'Jost-SemiBold', sans-serif !important;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
 }
 
 /* Dark theme overrides for profile modal */
@@ -396,3 +396,4 @@
     padding: 14px;
   }
 }
+

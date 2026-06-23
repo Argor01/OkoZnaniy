@@ -28,6 +28,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 960 },
   },
   globalSetup: path.resolve(__dirname, 'tests/e2e/global.setup.ts'),
+  globalTeardown: path.resolve(__dirname, 'tests/e2e/global.teardown.ts'),
   webServer: [
     {
       command: 'python manage.py migrate && python manage.py runserver 127.0.0.1:8000',

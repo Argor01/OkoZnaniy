@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { request, type FullConfig } from '@playwright/test';
+import { cleanupE2EData } from './helpers/cleanup';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,10 +19,22 @@ interface LoginPayload {
   };
 }
 
+interface E2EFixtureUser {
+  email: string;
+  username: string;
+  id: number;
+}
+
 interface E2EFixtureData {
   password: string;
-  client: { email: string; username: string; id: number };
-  expert: { email: string; username: string; id: number };
+  client: E2EFixtureUser;
+  expert: E2EFixtureUser;
+  partner: E2EFixtureUser;
+  auth: {
+    client: LoginPayload;
+    expert: LoginPayload;
+    partner: LoginPayload;
+  };
   category: { id: number; name: string };
   subject: { id: number; name: string };
   workType: { id: number; name: string };
@@ -101,11 +114,14 @@ User = get_user_model()
 
 client_email = f'client.{run_id}@e2e.local'
 expert_email = f'expert.{run_id}@e2e.local'
+partner_email = f'partner.{run_id}@e2e.local'
 client_username = f'client_{run_id}'
 expert_username = f'expert_{run_id}'
+partner_username = f'partner_{run_id}'
 
 client = User.objects.create_user(username=client_username, email=client_email, password=password, role='client')
 expert = User.objects.create_user(username=expert_username, email=expert_email, password=password, role='expert')
+partner = User.objects.create_user(username=partner_username, email=partner_email, password=password, role='partner')
 
 category = SubjectCategory.objects.create(name=f'E2E Category {run_id}', description='Seed category for Playwright tests', order=1)
 subject = Subject.objects.create(name=f'E2E Subject {run_id}', description='Seed subject for Playwright tests', category=category, min_price=Decimal('1000.00'))
@@ -161,6 +177,7 @@ print(json.dumps({
     'password': password,
     'client': {'email': client.email, 'username': client.username, 'id': client.id},
     'expert': {'email': expert.email, 'username': expert.username, 'id': expert.id},
+    'partner': {'email': partner.email, 'username': partner.username, 'id': partner.id},
     'category': {'id': category.id, 'name': category.name},
     'subject': {'id': subject.id, 'name': subject.name},
     'workType': {'id': work_type.id, 'name': work_type.name},
@@ -172,7 +189,7 @@ print(json.dumps({
 `.trim();
 }
 
-function seedViaOrm(runId: string, password: string): E2EFixtureData {
+function seedViaOrm(runId: string, password: string): Omit<E2EFixtureData, 'auth'> {
   const pythonScript = buildSeedScript();
   const baseEnv = {
     ...process.env,
@@ -187,7 +204,7 @@ function seedViaOrm(runId: string, password: string): E2EFixtureData {
     if (!jsonLine) {
       throw new Error(`Could not find JSON payload in output: ${raw}`);
     }
-    return JSON.parse(jsonLine) as E2EFixtureData;
+    return JSON.parse(jsonLine) as Omit<E2EFixtureData, 'auth'>;
   };
 
   try {
@@ -197,7 +214,7 @@ function seedViaOrm(runId: string, password: string): E2EFixtureData {
       env: baseEnv,
     });
     return parseLastJsonLine(stdout);
-  } catch (error) {
+  } catch {
     const dockerStdout = execFileSync('docker', [
       'exec',
       '-e', `E2E_RUN_ID=${runId}`,
@@ -218,14 +235,25 @@ function seedViaOrm(runId: string, password: string): E2EFixtureData {
 
 export default async function globalSetup(_config: FullConfig) {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
+  cleanupE2EData();
 
   const bootstrapApi = await request.newContext();
   const runId = `${Date.now()}`;
   const password = 'E2Epass123!';
-  const fixtureData = seedViaOrm(runId, password);
+  const seededData = seedViaOrm(runId, password);
 
-  const clientLogin = await loginUser(bootstrapApi, fixtureData.client.email, password);
-  const expertLogin = await loginUser(bootstrapApi, fixtureData.expert.email, password);
+  const clientLogin = await loginUser(bootstrapApi, seededData.client.email, password);
+  const expertLogin = await loginUser(bootstrapApi, seededData.expert.email, password);
+  const partnerLogin = await loginUser(bootstrapApi, seededData.partner.email, password);
+
+  const fixtureData: E2EFixtureData = {
+    ...seededData,
+    auth: {
+      client: clientLogin,
+      expert: expertLogin,
+      partner: partnerLogin,
+    },
+  };
 
   writeStorageState(CLIENT_STATE_PATH, clientLogin);
   writeStorageState(EXPERT_STATE_PATH, expertLogin);
@@ -233,5 +261,3 @@ export default async function globalSetup(_config: FullConfig) {
 
   await bootstrapApi.dispose();
 }
-
-
