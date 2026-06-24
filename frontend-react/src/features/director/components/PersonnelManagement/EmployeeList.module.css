@@ -4,8 +4,8 @@
   height: 40px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #d9d9d9;
-  background: #fff;
+  border: 1px solid var(--color-border, #d9d9d9);
+  background: var(--color-bg-container, #fff);
 }
 
 .customSearchContainer:focus-within {
@@ -25,7 +25,7 @@
 }
 
 .customSearchInput::placeholder {
-  color: #bfbfbf;
+  color: var(--color-text-placeholder, #bfbfbf);
   font-size: 15px;
 }
 
@@ -33,18 +33,18 @@
   width: 40px;
   height: 40px;
   border: none;
-  background: #fafafa;
+  background: var(--color-bg-elevated, #fafafa);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-secondary, #666);
   font-size: 16px;
   transition: background-color 0.2s;
 }
 
 .customSearchButton:hover {
-  background: #f0f0f0;
+  background: var(--color-fill-secondary, #f0f0f0);
 }
 
 .customSearchButton:active {
@@ -101,7 +101,7 @@
 .employeeCard {
   border-radius: 12px;
   border: none;
-  background: #fff;
+  background: var(--color-bg-container, #fff);
 }
 
 .employeeCardMobile {
@@ -111,7 +111,7 @@
 .pageTitle {
   margin-bottom: 24px;
   font-size: 20px;
-  color: #1f2937;
+  color: var(--color-text, #1f2937);
 }
 
 .pageTitleMobile {
@@ -125,9 +125,9 @@
   gap: 16px;
   margin-bottom: 24px;
   padding: 16px;
-  background: #fff;
+  background: var(--color-bg-container, #fff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border, #e5e7eb);
 }
 
 .filtersContainerMobile {
@@ -168,9 +168,9 @@
 .tableWrapper {
   overflow-x: auto;
   width: 100%;
-  background: #fff;
+  background: var(--color-bg-container, #fff);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border, #e5e7eb);
 }
 
 .employeeTable {
@@ -178,8 +178,8 @@
 }
 
 .employeeTable :global(.ant-table-thead > tr > th) {
-  border-right: 2px solid #e5e7eb;
-  background: #fafafa;
+  border-right: 2px solid var(--color-border, #e5e7eb);
+  background: var(--color-table-header-bg, #fafafa);
 }
 
 .employeeTable :global(.ant-table-thead > tr > th:last-child) {
@@ -187,7 +187,7 @@
 }
 
 .employeeTable :global(.ant-table-tbody > tr > td) {
-  border-right: 2px solid #f0f0f0;
+  border-right: 2px solid var(--color-border-secondary, #f0f0f0);
 }
 
 .employeeTable :global(.ant-table-tbody > tr > td:last-child) {
@@ -195,7 +195,7 @@
 }
 
 .employeeTable :global(.ant-table-tbody > tr:hover > td) {
-  border-right-color: #e5e7eb;
+  border-right-color: var(--color-border, #e5e7eb);
 }
 
 .tablePagination {

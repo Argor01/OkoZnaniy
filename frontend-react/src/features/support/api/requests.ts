@@ -133,13 +133,20 @@ export const supportRequestsApi = {
   },
 
   async createClaim(payload: CreateClaimPayload) {
+    const requestedRefundPercentage =
+      payload.refund_type === 'full'
+        ? 100
+        : payload.refund_type === 'partial'
+          ? payload.refund_percentage ?? 0
+          : 0;
+
     const response = await apiClient.post('/arbitration/cases/submit-claim/', {
       order_id: payload.order_id,
       subject: payload.subject,
       description: payload.description,
       reason: payload.reason ?? 'other',
       refund_type: payload.refund_type ?? 'none',
-      requested_refund_percentage: payload.refund_type === 'partial' ? payload.refund_percentage ?? 0 : 0,
+      requested_refund_percentage: requestedRefundPercentage,
       requested_refund_amount: null,
       deadline_relevant: false,
       evidence_files: [],

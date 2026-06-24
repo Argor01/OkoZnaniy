@@ -23,17 +23,19 @@
 
 .directorDashboardLayout {
   min-height: 100vh;
+  background: var(--color-bg-layout, #f5f5f5);
 }
 
 .directorDashboardSider {
-  background: #fff;
+  background: var(--color-bg-container, #fff);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .directorDashboardSiderHeader {
   padding: 24px;
   text-align: center;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  background: var(--color-bg-container, #fff);
 }
 
 .directorDashboardSiderHeaderTablet {
@@ -76,7 +78,7 @@
   left: 0;
   bottom: 0;
   width: 100vw;
-  background: #fff;
+  background: var(--color-bg-container, #fff);
   z-index: 9999;
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
@@ -91,7 +93,8 @@
 .directorDashboardMobileCloseRow {
   padding: 16px;
   text-align: right;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  background: var(--color-bg-container, #fff);
 }
 
 .directorDashboardMobileCloseButton {
@@ -100,13 +103,14 @@
   font-size: 24px;
   cursor: pointer;
   padding: 8px;
-  color: #666;
+  color: var(--color-text, #666);
 }
 
 .directorDashboardMobileHeader {
   padding: 16px;
   text-align: center;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  background: var(--color-bg-container, #fff);
 }
 
 .directorDashboardMobileHeaderIcon {
@@ -120,7 +124,7 @@
 }
 
 .directorDashboardHeader {
-  background: #fff;
+  background: var(--color-header-bg, #fff);
   padding: 0 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -166,7 +170,7 @@
 }
 
 .directorDashboardContent {
-  background: #fff;
+  background: var(--color-bg-layout, #fff);
   min-height: calc(100vh - 112px);
 }
 
@@ -182,7 +186,7 @@
 
 .directorDashboardFooter {
   text-align: center;
-  background: #fff;
+  background: var(--color-bg-layout, #fff);
   padding: 24px;
 }
 

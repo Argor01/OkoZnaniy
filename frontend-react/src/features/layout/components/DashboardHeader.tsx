@@ -23,6 +23,7 @@ import {
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ThemeToggle } from '@/components/ui';
 import styles from './DashboardHeader.module.css';
 import { ROUTES } from '@/utils/constants';
 import { getDisplayUsername } from '@/utils/formatters';
@@ -399,13 +400,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           )}
           
           {isMobile && (
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={onLogout}
-              className={`${styles.iconButton} ${styles.logoutButton}`}
-              danger
-            />
+            <>
+              <ThemeToggle
+                size="middle"
+                className={`${styles.iconButton} ${styles.themeToggle} ${styles.mobileThemeToggle}`}
+              />
+              <Button
+                type="text"
+                icon={<LogoutOutlined />}
+                onClick={onLogout}
+                className={`${styles.iconButton} ${styles.logoutButton}`}
+                danger
+              />
+            </>
           )}
         </Space>
       </div>

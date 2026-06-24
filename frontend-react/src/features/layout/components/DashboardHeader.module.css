@@ -379,6 +379,10 @@
   transform: scale(1.1);
 }
 
+.mobileThemeToggle {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
 @media (max-width: 1024px) {
   .dashboardHeader {
     padding: 0 12px;
@@ -476,6 +480,12 @@
     height: 40px;
     font-size: 20px;
   }
+
+  .mobileThemeToggle {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+  }
   
   .logoutButton {
     width: 40px !important;
@@ -530,6 +540,12 @@
     width: 36px;
     height: 36px;
     font-size: 18px;
+  }
+
+  .mobileThemeToggle {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
   }
   
   .logoutButton {

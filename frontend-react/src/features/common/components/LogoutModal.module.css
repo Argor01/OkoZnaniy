@@ -91,6 +91,8 @@
     width: calc(100vw - 24px) !important;
     max-width: 360px !important;
     margin: 0 auto;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     padding-bottom: 0;
   }
 

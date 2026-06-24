@@ -101,26 +101,53 @@ export function useOrderDetail(orderId?: string) {
       setReviewSubmitting(true);
       setReviewActionLoading('approve');
 
-      if (order?.status === 'review') {
-        await ordersApi.approveOrder(Number(orderId));
-      } else if (order?.status !== 'completed') {
+      const numericOrderId = Number(orderId);
+      const freshOrder = await ordersApi.getById(numericOrderId);
+      const freshOrderClientId = Number(freshOrder?.client?.id ?? (freshOrder as any)?.client_id ?? 0);
+      const currentUserId = Number(userProfile?.id ?? 0);
+
+      if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
+        message.error('Оставить отзыв может только заказчик этого заказа');
+        return;
+      }
+
+      let latestStatus = String(freshOrder?.status ?? '');
+      if (latestStatus === 'review') {
+        try {
+          await ordersApi.approveOrder(numericOrderId);
+          latestStatus = 'completed';
+        } catch (e: any) {
+          const refreshedOrder = await ordersApi.getById(numericOrderId);
+          const refreshedStatus = String(refreshedOrder?.status ?? '');
+          if (refreshedStatus !== 'completed') {
+            throw e;
+          }
+          latestStatus = refreshedStatus;
+        }
+      }
+
+      if (latestStatus !== 'completed') {
         message.error('Оставить отзыв можно только после проверки или завершения заказа');
         return;
       }
 
-      await ordersApi.createReview(Number(orderId), reviewRating, reviewComment.trim());
+      await ordersApi.createReview(numericOrderId, reviewRating, reviewComment.trim());
       await refreshOrderWithLists();
       setReviewModalOpen(false);
       setReviewRating(5);
       setReviewComment('');
-      message.success(order?.status === 'review' ? 'Работа принята, отзыв оставлен' : 'Отзыв сохранён');
+      message.success(
+        String(freshOrder?.status ?? '') === 'review'
+          ? 'Работа принята, отзыв оставлен'
+          : 'Отзыв сохранён'
+      );
     } catch (e: any) {
       message.error(e?.response?.data?.detail || e?.response?.data?.error || 'Не удалось сохранить отзыв');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [order?.status, orderId, refreshOrderWithLists, reviewRating, reviewComment]);
+  }, [orderId, refreshOrderWithLists, reviewRating, reviewComment, userProfile?.id]);
 
   const handleApproveWithoutReview = useCallback(async () => {
     if (!orderId) return;
@@ -128,9 +155,32 @@ export function useOrderDetail(orderId?: string) {
       setReviewSubmitting(true);
       setReviewActionLoading('approve');
 
-      if (order?.status === 'review') {
-        await ordersApi.approveOrder(Number(orderId));
-      } else if (order?.status !== 'completed') {
+      const numericOrderId = Number(orderId);
+      const freshOrder = await ordersApi.getById(numericOrderId);
+      const freshOrderClientId = Number(freshOrder?.client?.id ?? (freshOrder as any)?.client_id ?? 0);
+      const currentUserId = Number(userProfile?.id ?? 0);
+
+      if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
+        message.error('Принять работу может только заказчик этого заказа');
+        return;
+      }
+
+      let latestStatus = String(freshOrder?.status ?? '');
+      if (latestStatus === 'review') {
+        try {
+          await ordersApi.approveOrder(numericOrderId);
+          latestStatus = 'completed';
+        } catch (e: any) {
+          const refreshedOrder = await ordersApi.getById(numericOrderId);
+          const refreshedStatus = String(refreshedOrder?.status ?? '');
+          if (refreshedStatus !== 'completed') {
+            throw e;
+          }
+          latestStatus = refreshedStatus;
+        }
+      }
+
+      if (latestStatus !== 'completed') {
         message.error('Принять работу можно только из статуса проверки');
         return;
       }
@@ -140,7 +190,7 @@ export function useOrderDetail(orderId?: string) {
       setReviewRating(5);
       setReviewComment('');
       message.success(
-        order?.status === 'review'
+        String(freshOrder?.status ?? '') === 'review'
           ? 'Работа принята. Вы сможете оставить отзыв позже.'
           : 'Заказ уже завершён. Отзыв можно оставить позже.'
       );
@@ -150,7 +200,7 @@ export function useOrderDetail(orderId?: string) {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [order?.status, orderId, refreshOrderWithLists]);
+  }, [orderId, refreshOrderWithLists, userProfile?.id]);
 
   const handleConfirmRevisionFromCard = useCallback(async () => {
     if (!orderId) return;

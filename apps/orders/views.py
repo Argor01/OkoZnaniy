@@ -490,7 +490,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Клиент отклоняет ставку."""
         order = self.get_object()
         user = request.user
-        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+        if order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         bid_id = request.data.get('bid_id')
         if not bid_id:
@@ -526,7 +526,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Клиент принимает работу: review -> completed."""
         order = self.get_object()
         user = request.user
-        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+        if order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'Принять можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -564,7 +564,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 revision_comment = str((parsed or {}).get('comment') or '').strip()
             except Exception:
                 revision_comment = ''
-        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+        if order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'На доработку можно отправить только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -599,7 +599,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Клиент отклоняет работу: review -> cancelled."""
         order = self.get_object()
         user = request.user
-        if getattr(user, 'role', None) != 'client' or order.client_id != user.id:
+        if order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'Отклонить можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -670,7 +670,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         user = request.user
         
         # Проверяем права
-        if user.role != 'client' or order.client != user:
+        if order.client_id != user.id:
             return Response(
                 {'error': 'Только клиент может создать спор по своему заказу'},
                 status=status.HTTP_403_FORBIDDEN
@@ -722,8 +722,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
         user = request.user
         
-        # Проверяем права - только клиент может оставить отзыв
-        if user.role != 'client' or order.client_id != user.id:
+        # Проверяем права: отзыв может оставить только владелец заказа
+        if order.client_id != user.id:
             return Response(
                 {'error': 'Только клиент может оставить отзыв'},
                 status=status.HTTP_403_FORBIDDEN

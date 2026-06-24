@@ -56,7 +56,7 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
               ? (payload as { results: unknown[] }).results
               : [];
 
-        const recentQuestions = (allQuestions as Question[]).slice(-5);
+        const recentQuestions = (allQuestions as Question[]).slice(0, 5);
         setQuestions(Array.isArray(recentQuestions) ? recentQuestions : []);
       } catch (error) {
         logger.error('Failed to load questions:', error);

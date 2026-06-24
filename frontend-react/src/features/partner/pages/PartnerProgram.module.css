@@ -221,3 +221,56 @@
 .promotionMethod:hover {
   transform: translateY(-4px);
 }
+
+/* ===== DARK THEME ===== */
+:global([data-theme="dark"]) .partnerProgramCard {
+  background: #1d2230 !important;
+  border-color: #2f3750 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+}
+
+:global([data-theme="dark"]) .partnerProgramTitle,
+:global([data-theme="dark"]) .partnerProgramCard :global(.ant-typography),
+:global([data-theme="dark"]) .promotionText,
+:global([data-theme="dark"]) .paymentTableCell,
+:global([data-theme="dark"]) .paymentTableCellCenter {
+  color: #edf2ff !important;
+}
+
+:global([data-theme="dark"]) .partnerProgramDescription {
+  color: #b7c0d4 !important;
+}
+
+:global([data-theme="dark"]) .referralLinkBox {
+  background: #23293a;
+  border: 1px solid #3a4360;
+  color: #edf2ff;
+}
+
+:global([data-theme="dark"]) .paymentTableHeader {
+  border-bottom-color: #36405a;
+}
+
+:global([data-theme="dark"]) .paymentTableHeaderCell,
+:global([data-theme="dark"]) .paymentTableHeaderCellCenter {
+  background: #23293a;
+  color: #d9e0ee;
+}
+
+:global([data-theme="dark"]) .paymentTableRow {
+  border-bottom-color: #30384f;
+}
+
+:global([data-theme="dark"]) .infoBoxGreen {
+  background: rgba(96, 168, 74, 0.14);
+  border-color: rgba(130, 211, 108, 0.45);
+}
+
+:global([data-theme="dark"]) .infoBoxOrange {
+  background: rgba(201, 129, 36, 0.14);
+  border-color: rgba(255, 187, 94, 0.42);
+}
+
+:global([data-theme="dark"]) .infoBox :global(.ant-typography) {
+  color: #edf2ff !important;
+}

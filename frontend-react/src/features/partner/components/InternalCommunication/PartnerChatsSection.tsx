@@ -30,6 +30,14 @@ import {
 import dayjs from 'dayjs';
 import styles from './PartnerChatsSection.module.css';
 import { logger } from '@/utils/logger';
+import {
+  createChatRoom,
+  getChatRoomMessages,
+  getChatRooms,
+  inviteToChatRoom,
+  sendChatRoomMessage,
+  uploadChatRoomFile,
+} from '@/features/partner/api/partnerChats';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -100,37 +108,14 @@ export const PartnerChatsSection: React.FC = () => {
   const loadChatRooms = async () => {
     setLoading(true);
     try {
-      // Загружаем список директоров
-      const { default: apiClient } = await import('@/api/client');
-      const response = await apiClient.get('/users/directors/');
-      const directors = response.data;
-      
-      // Создаем чаты с каждым директором
-      const directorChats: ChatRoom[] = directors.map((director: any) => ({
-        id: director.id,
-        name: `${director.first_name} ${director.last_name}`,
-        description: 'Директор',
-        type: 'private' as const,
-        unread_count: 0,
-        is_muted: false,
-        participants: [
-          {
-            id: director.id,
-            first_name: director.first_name,
-            last_name: director.last_name,
-            role: 'director',
-            online: director.online || false,
-          }
-        ],
-      }));
-      
-      setChatRooms(directorChats);
-      if (directorChats.length > 0 && !selectedRoom) {
-        setSelectedRoom(directorChats[0]);
+      const rooms = await getChatRooms();
+      setChatRooms(Array.isArray(rooms) ? rooms : []);
+      if (rooms.length > 0 && !selectedRoom) {
+        setSelectedRoom(rooms[0]);
       }
     } catch (error) {
-      logger.error('Error loading directors:', error);
-      message.error('Ошибка загрузки списка директоров');
+      logger.error('Error loading partner chat rooms:', error);
+      message.error('Ошибка загрузки чатов');
       setChatRooms([]);
     } finally {
       setLoading(false);
@@ -164,9 +149,8 @@ export const PartnerChatsSection: React.FC = () => {
 
   const loadMessages = async (directorId: number) => {
     try {
-      const { default: apiClient } = await import('@/api/client');
-      const response = await apiClient.get(`/chat/partner-director/${directorId}/`);
-      setMessages(response.data || []);
+      const roomMessages = await getChatRoomMessages(directorId);
+      setMessages(roomMessages || []);
     } catch (error) {
       logger.error('Error loading messages:', error);
       setMessages([]);
@@ -177,10 +161,7 @@ export const PartnerChatsSection: React.FC = () => {
     if (!messageText.trim() || !selectedRoom) return;
     
     try {
-      const { default: apiClient } = await import('@/api/client');
-      await apiClient.post(`/chat/partner-director/${selectedRoom.id}/`, {
-        text: messageText.trim()
-      });
+      await sendChatRoomMessage(selectedRoom.id, messageText.trim());
       message.success('Сообщение отправлено');
       setMessageText('');
       await loadMessages(selectedRoom.id);
@@ -193,7 +174,6 @@ export const PartnerChatsSection: React.FC = () => {
   const handleCreateRoom = async () => {
     try {
       const values = await createRoomForm.validateFields();
-      const { createChatRoom } = await import('@/features/partner/api/partnerChats');
       const newRoom = await createChatRoom({
         name: values.name,
         description: values.description,
@@ -213,7 +193,6 @@ export const PartnerChatsSection: React.FC = () => {
   const handleInviteUser = async () => {
     try {
       const values = await inviteUserForm.validateFields();
-      const { inviteToChatRoom } = await import('@/features/partner/api/partnerChats');
       await inviteToChatRoom(selectedRoom!.id, values.userId);
       message.success('Пользователь приглашен');
       setInviteUserModalVisible(false);
@@ -227,7 +206,6 @@ export const PartnerChatsSection: React.FC = () => {
   const handleFileUpload = async (file: File) => {
     if (selectedRoom) {
       try {
-        const { uploadChatRoomFile } = await import('@/features/partner/api/partnerChats');
         await uploadChatRoomFile(selectedRoom.id, file);
         message.success('Файл загружен');
       } catch (error) {

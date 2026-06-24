@@ -698,3 +698,169 @@
 .partnerDashboardCardSpacing {
   animation: fadeInUp 0.4s ease-out 0.1s both;
 }
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .partnerDashboardLayout {
+  background: #12141c;
+}
+
+[data-theme="dark"] .partnerDashboardSider {
+  background: #1b1f2a !important;
+  border-right: 1px solid #2c3242;
+}
+
+[data-theme="dark"] .partnerDashboardSiderHeader {
+  background: #1b1f2a;
+  border-bottom: 1px solid #2c3242;
+}
+
+[data-theme="dark"] .partnerDashboardSiderTitle,
+[data-theme="dark"] .partnerDashboardDrawerTitle,
+[data-theme="dark"] .partnerDashboardHeaderTitle,
+[data-theme="dark"] .partnerDashboardTitleReset,
+[data-theme="dark"] .partnerDashboardPanelHeader .ant-typography,
+[data-theme="dark"] .partnerDashboardReferralEmail {
+  color: #e8ebf3 !important;
+}
+
+[data-theme="dark"] .partnerDashboardMainLayout {
+  background: #12141c;
+}
+
+[data-theme="dark"] .partnerDashboardHeader {
+  background: #1b1f2a !important;
+  border-bottom: 1px solid #2c3242;
+}
+
+[data-theme="dark"] .partnerDashboardHeader .ant-btn {
+  color: #e8ebf3;
+  border-color: #394155;
+  background: transparent;
+}
+
+[data-theme="dark"] .partnerDashboardHeader .ant-btn:hover {
+  color: #ffffff;
+  border-color: #6435a5;
+  background: rgba(100, 53, 165, 0.14);
+}
+
+[data-theme="dark"] .partnerDashboardContent,
+[data-theme="dark"] .partnerDashboardContentMobile {
+  background: #12141c;
+}
+
+[data-theme="dark"] .partnerDashboardDrawer .ant-drawer-content,
+[data-theme="dark"] .partnerDashboardDrawer .ant-drawer-header,
+[data-theme="dark"] .partnerDashboardDrawer .ant-drawer-body {
+  background: #1b1f2a !important;
+}
+
+[data-theme="dark"] .partnerDashboardDrawerHeader {
+  border-bottom: 1px solid #2c3242;
+}
+
+[data-theme="dark"] .partnerDashboardMenu {
+  background: transparent !important;
+  color: #c7cfde;
+}
+
+[data-theme="dark"] .partnerDashboardMenu .ant-menu-item {
+  color: #c7cfde !important;
+}
+
+[data-theme="dark"] .partnerDashboardMenu .ant-menu-item:hover {
+  color: #ffffff !important;
+  background: rgba(100, 53, 165, 0.12) !important;
+}
+
+[data-theme="dark"] .partnerDashboardMenu .ant-menu-item-selected {
+  color: #ffffff !important;
+  background: #3b2570 !important;
+}
+
+[data-theme="dark"] .partnerDashboardCardSpacing.ant-card,
+[data-theme="dark"] .partnerDashboardCardReset.ant-card,
+[data-theme="dark"] .partnerDashboardSection .ant-card,
+[data-theme="dark"] .partnerDashboardOrdersStatsRow .partnerDashboardCompactCard.ant-card {
+  background: #1d2230 !important;
+  border-color: #2f3750 !important;
+}
+
+[data-theme="dark"] .partnerDashboardCardSpacing .ant-card-head,
+[data-theme="dark"] .partnerDashboardCardReset .ant-card-head,
+[data-theme="dark"] .partnerDashboardSection .ant-card-head {
+  background: #1d2230 !important;
+  border-bottom-color: #2f3750 !important;
+}
+
+[data-theme="dark"] .partnerDashboardCardSpacing .ant-card-head-title,
+[data-theme="dark"] .partnerDashboardCardReset .ant-card-head-title,
+[data-theme="dark"] .partnerDashboardSection .ant-card-head-title,
+[data-theme="dark"] .partnerDashboardSection .ant-typography,
+[data-theme="dark"] .partnerDashboardSection .ant-typography-secondary,
+[data-theme="dark"] .partnerDashboardReferralLabel,
+[data-theme="dark"] .partnerDashboardIncomeLabel,
+[data-theme="dark"] .partnerDashboardIncomeValue,
+[data-theme="dark"] .partnerDashboardSummaryLabel {
+  color: #e8ebf3 !important;
+}
+
+[data-theme="dark"] .partnerDashboardStatsRow .ant-statistic-title,
+[data-theme="dark"] .partnerDashboardOrdersStatsRow .ant-statistic-title {
+  color: #b8c0d4 !important;
+}
+
+[data-theme="dark"] .partnerDashboardReferralsTable .ant-table,
+[data-theme="dark"] .partnerDashboardEarningsTable .ant-table,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table {
+  background: #1d2230 !important;
+  color: #e8ebf3 !important;
+}
+
+[data-theme="dark"] .partnerDashboardReferralsTable .ant-table-thead > tr > th,
+[data-theme="dark"] .partnerDashboardEarningsTable .ant-table-thead > tr > th,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-thead > tr > th {
+  background: #23293a !important;
+  color: #d8deeb !important;
+  border-bottom-color: #36405a !important;
+  border-right-color: #36405a !important;
+}
+
+[data-theme="dark"] .partnerDashboardReferralsTable .ant-table-tbody > tr > td,
+[data-theme="dark"] .partnerDashboardEarningsTable .ant-table-tbody > tr > td,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
+  background: #1d2230 !important;
+  color: #e8ebf3 !important;
+  border-bottom-color: #30384f !important;
+  border-right-color: #30384f !important;
+}
+
+[data-theme="dark"] .partnerDashboardReferralsTable .ant-table-tbody > tr:hover > td,
+[data-theme="dark"] .partnerDashboardEarningsTable .ant-table-tbody > tr:hover > td,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-tbody > tr:hover > td {
+  background: #252c3d !important;
+}
+
+[data-theme="dark"] .partnerDashboardReferralsTable .ant-table-placeholder > td,
+[data-theme="dark"] .partnerDashboardEarningsTable .ant-table-placeholder > td,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-placeholder > td {
+  background: #1d2230 !important;
+  color: #aab4c8 !important;
+}
+
+[data-theme="dark"] .partnerDashboardRangePicker.ant-picker,
+[data-theme="dark"] .partnerDashboardMonospaceInput,
+[data-theme="dark"] .partnerDashboardMonospaceInput.ant-input,
+[data-theme="dark"] .partnerDashboardMonospaceInput textarea,
+[data-theme="dark"] .partnerDashboardSection .ant-input,
+[data-theme="dark"] .partnerDashboardSection .ant-input-affix-wrapper {
+  background: #23293a !important;
+  color: #edf2ff !important;
+  border-color: #3a4360 !important;
+}
+
+[data-theme="dark"] .partnerDashboardRangePicker .ant-picker-input > input,
+[data-theme="dark"] .partnerDashboardSection .ant-input::placeholder,
+[data-theme="dark"] .partnerDashboardMonospaceInput textarea::placeholder {
+  color: #98a3bb !important;
+}

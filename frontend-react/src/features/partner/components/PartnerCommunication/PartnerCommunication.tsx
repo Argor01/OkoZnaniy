@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  List, 
-  Button, 
-  Space, 
-  Typography, 
-  Input,
-  message,
-  Badge,
+import React, { useEffect, useState } from 'react';
+import {
   Avatar,
-  Empty
+  Badge,
+  Button,
+  Card,
+  Empty,
+  Input,
+  List,
+  Space,
+  Typography,
+  message,
 } from 'antd';
-import { 
-  SendOutlined,
-  TeamOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+import { SendOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import apiClient from '@/api/client';
 import styles from './PartnerCommunication.module.css';
 import { logger } from '@/utils/logger';
+import {
+  getChatRoomMessages,
+  getChatRooms,
+  sendChatRoomMessage,
+} from '@/features/partner/api/partnerChats';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -34,77 +34,96 @@ interface ChatMessage {
     role: string;
   };
   sent_at: string;
-  is_read: boolean;
+  is_read?: boolean;
 }
 
-interface Director {
+interface DirectorChat {
   id: number;
+  roomId: number;
   first_name: string;
   last_name: string;
-  email: string;
+  email?: string;
   online: boolean;
 }
 
 export const PartnerCommunication: React.FC = () => {
-  const [directors, setDirectors] = useState<Director[]>([]);
-  const [selectedDirector, setSelectedDirector] = useState<Director | null>(null);
+  const [directors, setDirectors] = useState<DirectorChat[]>([]);
+  const [selectedDirector, setSelectedDirector] = useState<DirectorChat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
-  // Загрузка списка директоров
   useEffect(() => {
     loadDirectors();
   }, []);
 
-  // Загрузка сообщений при выборе директора
   useEffect(() => {
-    if (selectedDirector) {
-      loadMessages(selectedDirector.id);
-      // Обновляем сообщения каждые 5 секунд
-      const interval = setInterval(() => {
-        loadMessages(selectedDirector.id);
-      }, 5000);
-      return () => clearInterval(interval);
+    if (!selectedDirector) {
+      return;
     }
+
+    loadMessages(selectedDirector.roomId);
+    const interval = setInterval(() => {
+      loadMessages(selectedDirector.roomId);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [selectedDirector]);
 
   const loadDirectors = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/users/directors/');
-      setDirectors(response.data);
-      if (response.data.length > 0 && !selectedDirector) {
-        setSelectedDirector(response.data[0]);
+      const rooms = await getChatRooms();
+      const mappedDirectors: DirectorChat[] = (Array.isArray(rooms) ? rooms : [])
+        .map((room: any) => {
+          const director = (room.participants || []).find(
+            (participant: any) => participant.role === 'director',
+          );
+
+          return {
+            id: director?.id ?? room.id,
+            roomId: room.id,
+            first_name: director?.first_name ?? room.name ?? 'Директор',
+            last_name: director?.last_name ?? '',
+            email: director?.username ?? '',
+            online: director?.online ?? false,
+          };
+        })
+        .filter((room: DirectorChat) => Boolean(room.roomId));
+
+      setDirectors(mappedDirectors);
+      if (mappedDirectors.length > 0) {
+        setSelectedDirector((current) => current ?? mappedDirectors[0]);
       }
     } catch (error) {
-      logger.error('Ошибка загрузки директоров:', error);
-      message.error('Не удалось загрузить список директоров');
+      logger.error('Ошибка загрузки чатов директоров:', error);
+      message.error('Не удалось загрузить список чатов');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadMessages = async (directorId: number) => {
+  const loadMessages = async (roomId: number) => {
     try {
-      const response = await apiClient.get(`/chat/partner-director/${directorId}/`);
-      setMessages(response.data);
+      const roomMessages = await getChatRoomMessages(roomId);
+      setMessages(Array.isArray(roomMessages) ? roomMessages : []);
     } catch (error) {
       logger.error('Ошибка загрузки сообщений:', error);
+      setMessages([]);
     }
   };
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !selectedDirector) return;
+    if (!messageText.trim() || !selectedDirector) {
+      return;
+    }
 
     setSending(true);
     try {
-      await apiClient.post(`/chat/partner-director/${selectedDirector.id}/`, {
-        text: messageText.trim()
-      });
+      await sendChatRoomMessage(selectedDirector.roomId, messageText.trim());
       setMessageText('');
-      await loadMessages(selectedDirector.id);
+      await loadMessages(selectedDirector.roomId);
       message.success('Сообщение отправлено');
     } catch (error) {
       logger.error('Ошибка отправки сообщения:', error);
@@ -125,7 +144,6 @@ export const PartnerCommunication: React.FC = () => {
     <div className={styles.container}>
       <Card className={styles.mainCard}>
         <div className={styles.chatLayout}>
-          {/* Список директоров */}
           <div className={styles.directorsList}>
             <div className={styles.directorsHeader}>
               <Title level={5}>
@@ -137,25 +155,24 @@ export const PartnerCommunication: React.FC = () => {
               dataSource={directors}
               renderItem={(director) => (
                 <List.Item
-                  className={`${styles.directorItem} ${selectedDirector?.id === director.id ? styles.directorItemActive : ''}`}
+                  className={`${styles.directorItem} ${selectedDirector?.roomId === director.roomId ? styles.directorItemActive : ''}`}
                   onClick={() => setSelectedDirector(director)}
                 >
                   <List.Item.Meta
-                    avatar={
+                    avatar={(
                       <Badge dot={director.online} color="green">
                         <Avatar icon={<UserOutlined />} />
                       </Badge>
-                    }
-                    title={`${director.first_name} ${director.last_name}`}
-                    description={director.email}
+                    )}
+                    title={`${director.first_name} ${director.last_name}`.trim()}
+                    description={director.email || 'Чат с директором'}
                   />
                 </List.Item>
               )}
-              locale={{ emptyText: 'Нет доступных директоров' }}
+              locale={{ emptyText: 'Нет доступных чатов с директорами' }}
             />
           </div>
 
-          {/* Чат */}
           <div className={styles.chatArea}>
             {selectedDirector ? (
               <>
@@ -164,7 +181,7 @@ export const PartnerCommunication: React.FC = () => {
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <Text strong>
-                        {selectedDirector.first_name} {selectedDirector.last_name}
+                        {[selectedDirector.first_name, selectedDirector.last_name].filter(Boolean).join(' ')}
                       </Text>
                       <br />
                       <Text type="secondary" style={{ fontSize: 12 }}>
@@ -176,10 +193,7 @@ export const PartnerCommunication: React.FC = () => {
 
                 <div className={styles.messagesContainer}>
                   {messages.length === 0 ? (
-                    <Empty 
-                      description="Нет сообщений"
-                      style={{ marginTop: 50 }}
-                    />
+                    <Empty description="Нет сообщений" style={{ marginTop: 50 }} />
                   ) : (
                     <List
                       dataSource={messages}
@@ -190,7 +204,7 @@ export const PartnerCommunication: React.FC = () => {
                         >
                           <div className={styles.messageContent}>
                             <Text strong style={{ fontSize: 12 }}>
-                              {msg.sender.first_name} {msg.sender.last_name}
+                              {[msg.sender.first_name, msg.sender.last_name].filter(Boolean).join(' ')}
                             </Text>
                             <div className={styles.messageText}>{msg.text}</div>
                             <Text type="secondary" style={{ fontSize: 11 }}>
@@ -207,7 +221,7 @@ export const PartnerCommunication: React.FC = () => {
                   <TextArea
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     placeholder="Введите сообщение..."
                     autoSize={{ minRows: 2, maxRows: 4 }}
                     disabled={sending}
@@ -224,10 +238,7 @@ export const PartnerCommunication: React.FC = () => {
                 </div>
               </>
             ) : (
-              <Empty 
-                description="Выберите директора для начала общения"
-                style={{ marginTop: 100 }}
-              />
+              <Empty description="Выберите чат для начала общения" style={{ marginTop: 100 }} />
             )}
           </div>
         </div>
